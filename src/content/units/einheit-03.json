@@ -1,0 +1,27 @@
+{
+  "einheit": 3,
+  "titel": "السَّكَن – Das Wohnen (angerissen)",
+  "kulturnotiz": "Die Wurzel س-ك-ن trägt die Idee von „Ruhe/Sich-Niederlassen“: مَسْكَن (Wohnung), سُكّان (Bewohner), سَكينة (innere Ruhe), سُكون (das Sukūn-Zeichen). Ein sprachlich-spirituell reiches Wortfeld.",
+  "vokabeln": [
+    {
+      "id": "v-maskan",
+      "ar": "مَسْكَن",
+      "tr": "maskan",
+      "de": "Wohnung, Wohnsitz",
+      "wurzel": "س-ك-ن",
+      "wazn": "مَفْعَل",
+      "plural": "مَساكِن",
+      "einheit": 3
+    },
+    {
+      "id": "v-sakin",
+      "ar": "ساكِن",
+      "tr": "sākin",
+      "de": "Bewohner; (Buchstabe) mit Sukūn",
+      "wurzel": "س-ك-ن",
+      "plural": "سُكّان",
+      "einheit": 3
+    }
+  ],
+  "dialoge": []
+}

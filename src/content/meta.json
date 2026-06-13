@@ -1,0 +1,150 @@
+{
+  "meta": {
+    "lehrwerk": "العربية بين يديك – Buch 1",
+    "register": "MSA/فصحى",
+    "ui": "de",
+    "contentVersion": 1
+  },
+  "quellen": [
+    {
+      "typ": "youtube_playlist",
+      "titel": "Buch 1 – komplette Playlist",
+      "url": "https://www.youtube.com/playlist?list=PL67C39551FF78271B"
+    },
+    {
+      "typ": "youtube_video",
+      "titel": "Einheit 1, Dialog 1 (التحية والتعارف)",
+      "url": "https://www.youtube.com/watch?v=Up3i2gIXT9Y",
+      "einheit": 1,
+      "dialog": 1
+    },
+    {
+      "typ": "verlag_audio",
+      "titel": "Offizielle Tondateien Stufe 1 (arabicforall.net)",
+      "url": "https://www.arabicforall.net/sounds/audio/1"
+    },
+    {
+      "typ": "archive_audio",
+      "titel": "العربية بين يديك صوتي (Internet Archive)",
+      "url": "https://archive.org/details/alfirdwsiy1433MMMMMMMMMMMMMMMMMMMMMMMMM346"
+    }
+  ],
+  "nisba": [
+    {
+      "id": "nisba-misr",
+      "land": "مِصْر",
+      "m": "مِصْرِيّ",
+      "f": "مِصْرِيَّة",
+      "pl": "مِصْرِيّون",
+      "de": "Ägypten / Ägypter(in)"
+    },
+    {
+      "id": "nisba-suriya",
+      "land": "سوريا",
+      "m": "سورِيّ",
+      "f": "سورِيَّة",
+      "pl": "سورِيّون",
+      "de": "Syrien / Syrer(in)"
+    },
+    {
+      "id": "nisba-turkiya",
+      "land": "تُرْكِيا",
+      "m": "تُرْكِيّ",
+      "f": "تُرْكِيَّة",
+      "pl": "أَتْراك",
+      "de": "Türkei / Türke (Türkin) – Plural gebrochen!"
+    },
+    {
+      "id": "nisba-pakistan",
+      "land": "باكِسْتان",
+      "m": "باكِسْتانِيّ",
+      "f": "باكِسْتانِيَّة",
+      "pl": "باكِسْتانِيّون",
+      "de": "Pakistan / Pakistaner(in)"
+    }
+  ],
+  "verben": [
+    {
+      "id": "verb-sakana",
+      "lemma": "سَكَنَ",
+      "wurzel": "س-ك-ن",
+      "de": "wohnen, ansässig sein; still/ruhig werden",
+      "wazn": "فَعَلَ يَفْعُلُ",
+      "hinweis": "Wurzelfamilie: مَسْكَن، سُكّان، سَكينة، سُكون، مِسكين، ساكِن",
+      "madi": {
+        "ana": "سَكَنْتُ",
+        "nahnu": "سَكَنّا",
+        "anta": "سَكَنْتَ",
+        "anti": "سَكَنْتِ",
+        "antuma": "سَكَنْتُما",
+        "antum": "سَكَنْتُم",
+        "antunna": "سَكَنْتُنَّ",
+        "huwa": "سَكَنَ",
+        "hiya": "سَكَنَتْ",
+        "huma_m": "سَكَنا",
+        "huma_f": "سَكَنَتا",
+        "hum": "سَكَنوا",
+        "hunna": "سَكَنَّ"
+      },
+      "mudari": {
+        "ana": "أَسْكُنُ",
+        "nahnu": "نَسْكُنُ",
+        "anta": "تَسْكُنُ",
+        "anti": "تَسْكُنينَ",
+        "antuma": "تَسْكُنانِ",
+        "antum": "تَسْكُنونَ",
+        "antunna": "تَسْكُنَّ",
+        "huwa": "يَسْكُنُ",
+        "hiya": "تَسْكُنُ",
+        "huma_m": "يَسْكُنانِ",
+        "huma_f": "تَسْكُنانِ",
+        "hum": "يَسْكُنونَ",
+        "hunna": "يَسْكُنَّ"
+      },
+      "amr": {
+        "m_sg": "اُسْكُنْ",
+        "f_sg": "اُسْكُني",
+        "dual": "اُسْكُنا",
+        "m_pl": "اُسْكُنوا",
+        "f_pl": "اُسْكُنَّ"
+      }
+    }
+  ],
+  "phonologie_minimalpaare": [
+    {
+      "id": "mp-sin-sad",
+      "a": "سَيْف",
+      "b": "صَيْف",
+      "kontrast": "س vs ص",
+      "de": "Schwert / Sommer"
+    },
+    {
+      "id": "mp-ta-tha",
+      "a": "تين",
+      "b": "طين",
+      "kontrast": "ت vs ط",
+      "de": "Feigen / Lehm"
+    },
+    {
+      "id": "mp-ayn-hamza",
+      "a": "عَين",
+      "b": "أَيْن",
+      "kontrast": "ع vs ء",
+      "de": "Auge/Quelle / wo"
+    },
+    {
+      "id": "mp-kaf-qaf",
+      "a": "كَلْب",
+      "b": "قَلْب",
+      "kontrast": "ك vs ق",
+      "de": "Hund / Herz"
+    },
+    {
+      "id": "mp-ha-kha",
+      "a": "حال",
+      "b": "خال",
+      "kontrast": "ح vs خ",
+      "de": "Zustand / Onkel"
+    }
+  ]
+}

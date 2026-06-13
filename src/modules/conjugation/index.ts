@@ -1,0 +1,1 @@
+export { Conjugation } from './Conjugation';

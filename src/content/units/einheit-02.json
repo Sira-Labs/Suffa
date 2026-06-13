@@ -1,0 +1,63 @@
+{
+  "einheit": 2,
+  "titel": "الجنسية – Die Nationalität",
+  "kulturnotiz": "Saudi-Arabien ist stark multinational geprägt; nach Herkunft und „جنسية“ (Nationalität) zu fragen ist alltäglich. Die Nisba-Endung ـِيّ bildet das Herkunftsadjektiv.",
+  "vokabeln": [
+    {
+      "id": "v-jinsiyya",
+      "ar": "جِنْسِيَّة",
+      "tr": "ǧinsiyya",
+      "de": "Nationalität",
+      "wurzel": "ج-ن-س",
+      "plural": "جِنْسِيّات",
+      "einheit": 2,
+      "hinweis": "جِنْس = Gattung; urverwandt mit griech. génos / dt. Genus"
+    },
+    {
+      "id": "v-balad",
+      "ar": "بَلَد",
+      "tr": "balad",
+      "de": "Land, Ort",
+      "wurzel": "ب-ل-د",
+      "plural": "بِلاد / بُلْدان",
+      "einheit": 2
+    },
+    {
+      "id": "v-dawla",
+      "ar": "دَوْلَة",
+      "tr": "dawla",
+      "de": "Staat",
+      "wurzel": "د-و-ل",
+      "plural": "دُوَل",
+      "einheit": 2
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-2-1",
+      "einheit": 2,
+      "dialog": 1,
+      "titel": "الجنسية",
+      "zeilen": [
+        { "sp": "مُحَمَّد", "ar": "مِنْ أيْنَ أنتَ؟", "de": "Woher bist du?" },
+        { "sp": "شَريف", "ar": "أنا مِنْ باكِسْتان.", "de": "Ich bin aus Pakistan." },
+        {
+          "sp": "مُحَمَّد",
+          "ar": "هَلْ أنتَ باكِسْتانِيّ؟",
+          "de": "Bist du Pakistaner?"
+        },
+        {
+          "sp": "شَريف",
+          "ar": "نَعَمْ، أنا باكِسْتانِيّ. وما جِنْسِيَّتُكَ أنتَ؟",
+          "de": "Ja. Und was ist deine Nationalität?"
+        },
+        {
+          "sp": "مُحَمَّد",
+          "ar": "أنا تُرْكِيّ. أنا مِنْ تُرْكِيا.",
+          "de": "Ich bin Türke, aus der Türkei."
+        },
+        { "sp": "شَريف", "ar": "أهْلاً وَسَهْلاً.", "de": "Herzlich willkommen." }
+      ]
+    }
+  ]
+}

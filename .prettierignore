@@ -1,0 +1,6 @@
+dist
+dev-dist
+coverage
+node_modules
+public/fonts
+package-lock.json

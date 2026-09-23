@@ -67,6 +67,9 @@ export default defineConfig({
     },
   },
   build: {
+    // Never inline fonts as data: URIs: the CSP allows fonts from 'self' only, and small
+    // @fontsource subsets fall under Vite's 4 kB inline limit.
+    assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/i.test(file) ? false : undefined),
     rollupOptions: {
       output: {
         // Heavyweight libraries in their own chunks (better caching).

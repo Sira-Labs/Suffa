@@ -16,6 +16,7 @@ const STATION_ICONS: Record<StationKind, IconName> = {
   review: 'conjugate',
   vocab: 'cards',
   test: 'exam',
+  video: 'play',
 };
 
 /** One unit as a learning path: stations in order, the next one highlighted. */
@@ -143,7 +144,10 @@ function PathStation({ station, last }: { station: Station; last: boolean }) {
           {stateLabel && <span className="visually-hidden"> ({stateLabel})</span>}
         </span>
         <span className="muted path-card-detail">{station.detail}</span>
-        {station.kind !== 'test' && station.kind !== 'vocab' && (
+        {station.state === 'optional' && (
+          <span className="muted path-card-detail">Optional · im Buch mitlesen</span>
+        )}
+        {station.total > 0 && station.kind !== 'test' && station.kind !== 'vocab' && (
           <span className="muted path-card-detail">
             {station.done}/{station.total} gehört
           </span>

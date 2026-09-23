@@ -75,5 +75,8 @@ Each step ships on its own, tested, so learners never see a half-migrated app.
 - **Celebration toast** (`CelebrationToast`): "+5 XP · Dialog gehört" with a medal and a small
   particle burst in saffron and teal; a bigger burst for milestones (whole lesson). Announced via
   `role="status"`; particles are decorative and disappear under reduced motion.
+- **Page videos** (`BookVideos`): a chip per book page ("S. 28"), a poster with a play button;
+  the YouTube player (no-cookie domain) loads only on play. In a unit's path the videos are an
+  _optional_ station (dashed marker) that never blocks "current" or counts toward progress.
 - **Listening progress:** a check badge per heard track, "2/3 gehört" per lesson, a progress bar
   along the bottom of each unit chip, and the whole book's progress on top of the library.

@@ -62,15 +62,26 @@ function isHeard(progress: Record<string, MediaProgress>, id: string): boolean {
  */
 export function PublisherAudio({
   initialUnit = 1,
+  unit: controlledUnit,
   focusLesson,
+  onUnitChange,
 }: {
   initialUnit?: number;
+  /** Selected unit when the page owns the choice (shared with the videos). */
+  unit?: number;
   /** Lesson to scroll to and highlight (from a unit's learning path). */
   focusLesson?: number;
+  /** Called when the learner picks another unit (the page shows that unit's videos too). */
+  onUnitChange?: (unit: number) => void;
 }) {
   const [index, setIndex] = useState<PublisherAudioIndex | null>(null);
   const [failed, setFailed] = useState(false);
-  const [unitNo, setUnitNo] = useState(initialUnit);
+  const [ownUnit, setOwnUnit] = useState(initialUnit);
+  const unitNo = controlledUnit ?? ownUnit;
+  const chooseUnit = (unit: number) => {
+    setOwnUnit(unit);
+    onUnitChange?.(unit);
+  };
   const [filter, setFilter] = useState<Filter>('all');
   const progress = useListenStore((s) => s.progress);
 
@@ -157,7 +168,7 @@ export function PublisherAudio({
               style={
                 { '--p': `${(s.heard / Math.max(1, s.total)) * 100}%` } as CSSProperties
               }
-              onClick={() => setUnitNo(u.unit)}
+              onClick={() => chooseUnit(u.unit)}
             >
               {done && <Icon name="check" size={14} strokeWidth={2.6} />}
               {u.kind === 'unit' ? u.unit : unitLabel(u)}

@@ -1074,6 +1074,11 @@ textarea.input {
 .path-station-upcoming .path-card {
   opacity: 0.75;
 }
+/* Optional stations (page videos): dashed marker, never "done" or "current". */
+.path-station-optional .path-marker {
+  border-style: dashed;
+  color: var(--info);
+}
 .path-card:hover .path-card-title {
   color: var(--accent);
 }
@@ -1101,4 +1106,64 @@ textarea.input {
   font-size: clamp(1.9rem, 1.4rem + 2vw, 2.6rem);
   font-weight: 600;
   text-align: left;
+}
+
+/* Page videos: a chip per book page, a 16:9 frame with a poster until the learner presses play. */
+.icon-btn {
+  min-width: var(--tap);
+  padding: 0;
+  justify-content: center;
+}
+.page-chips {
+  gap: 0.4rem;
+}
+.page-chip {
+  font-variant-numeric: tabular-nums;
+  padding: 0.35rem 0.7rem;
+  min-height: 36px;
+}
+.video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+}
+.video-frame iframe,
+.video-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.video-poster {
+  padding: 0;
+  cursor: pointer;
+  background: #000;
+}
+.video-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+.video-poster:hover img,
+.video-poster:focus-visible img {
+  opacity: 1;
+}
+.video-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  border-radius: 50%;
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 40%);
 }

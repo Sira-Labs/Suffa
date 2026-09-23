@@ -57,8 +57,17 @@ describe('Units (integration)', () => {
     renderAt('/units/1');
     const path = await screen.findByRole('list', { name: 'Lernpfad Einheit 1' });
     const stations = within(path).getAllByRole('link');
-    expect(stations[0]).toHaveAccessibleName(/Dialog 1 \(erledigt\)/);
-    expect(stations[1]).toHaveAccessibleName(/Dialog 2 \(als Nächstes\)/);
+    // Page videos load lazily and come first as an optional station.
+    expect(
+      await within(path).findByRole('link', { name: /Buchseiten-Videos/ })
+    ).toHaveAttribute('href', '/library?unit=1&section=videos');
+    expect(
+      within(path).getByRole('link', { name: /Dialog 1 \(erledigt\)/ })
+    ).toBeTruthy();
+    expect(
+      within(path).getByRole('link', { name: /Dialog 2 \(als Nächstes\)/ })
+    ).toBeTruthy();
+    expect(stations.length).toBeGreaterThan(5);
     expect(within(path).getByRole('link', { name: /Vokabeln lernen/ })).toHaveAttribute(
       'href',
       '/review?unit=1'

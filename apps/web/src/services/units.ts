@@ -12,9 +12,11 @@ export type StationKind =
   | 'sounds'
   | 'review'
   | 'vocab'
-  | 'test';
+  | 'test'
+  | 'video';
 
-export type StationState = 'done' | 'current' | 'upcoming';
+/** Optional stations (page videos) are offered but never block or count toward progress. */
+export type StationState = 'done' | 'current' | 'upcoming' | 'optional';
 
 export interface Station {
   id: string;
@@ -43,6 +45,8 @@ export interface UnitPathInput {
   isHeard: (url: string) => boolean;
   vocab: VocabStats;
   testPassed: boolean;
+  /** The publisher's page videos for this unit, if any. */
+  videos?: { count: number; from: number; to: number } | null;
 }
 
 function has(lesson: AudioLesson, ...kinds: AudioTrackKind[]): boolean {
@@ -88,6 +92,19 @@ export function unitStations(input: UnitPathInput): Station[] {
   let dialogueNo = 0;
   let vocabInserted = false;
 
+  // Page videos first: they walk through the book pages the unit covers.
+  if (input.videos && input.videos.count > 0) {
+    stations.push({
+      id: `u${unit.unit}-video`,
+      kind: 'video',
+      label: 'Buchseiten-Videos',
+      detail: `${input.videos.count} Videos · Buch S. ${input.videos.from}–${input.videos.to}`,
+      to: `/library?unit=${unit.unit}&section=videos`,
+      done: 0,
+      total: 0,
+    });
+  }
+
   const vocabStation = (): Omit<Station, 'state'> => ({
     id: `u${unit.unit}-vocab`,
     kind: 'vocab',
@@ -132,7 +149,8 @@ export function unitStations(input: UnitPathInput): Station[] {
   let currentAssigned = false;
   return stations.map((s) => {
     let state: StationState = 'upcoming';
-    if (s.total > 0 && s.done >= s.total) state = 'done';
+    if (s.kind === 'video') state = 'optional';
+    else if (s.total > 0 && s.done >= s.total) state = 'done';
     else if (!currentAssigned) {
       state = 'current';
       currentAssigned = true;
@@ -147,11 +165,12 @@ export function unitProgress(stations: Station[]): {
   stations: number;
   percent: number;
 } {
-  const done = stations.reduce((n, s) => n + Math.min(s.done, s.total), 0);
-  const total = stations.reduce((n, s) => n + s.total, 0);
+  const counted = stations.filter((s) => s.state !== 'optional');
+  const done = counted.reduce((n, s) => n + Math.min(s.done, s.total), 0);
+  const total = counted.reduce((n, s) => n + s.total, 0);
   return {
-    doneStations: stations.filter((s) => s.state === 'done').length,
-    stations: stations.length,
+    doneStations: counted.filter((s) => s.state === 'done').length,
+    stations: counted.length,
     percent: total === 0 ? 0 : Math.round((done / total) * 100),
   };
 }

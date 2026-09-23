@@ -1,110 +1,91 @@
-import { useMemo, useState } from 'react';
-import type { Quelle } from '@/types';
-import { content } from '@/content';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { Icon } from '@/components/Icon';
+import { BookVideos } from './BookVideos';
 import { PublisherAudio } from './PublisherAudio';
 
-function youtubeEmbed(url: string): string | null {
-  const watch = url.match(/[?&]v=([\w-]+)/);
-  if (watch?.[1]) return `https://www.youtube.com/embed/${watch[1]}`;
-  const list = url.match(/[?&]list=([\w-]+)/);
-  if (list?.[1]) return `https://www.youtube.com/embed/videoseries?list=${list[1]}`;
-  return null;
-}
+const UNITS = 16;
 
 /**
- * Source library: embedded YouTube players + external audio links.
- * Note: embedded streams need a network; the app itself stays usable offline.
+ * "Hören": the publisher's page videos and official audio for Book 1, for one unit at a time.
+ * Both stream from the publisher (YouTube / their server); the app itself stays usable offline.
+ * `?unit=4&lesson=24` or `?unit=4&section=videos` come from a unit's learning path.
  */
 export function Library() {
-  // ?unit=4&lesson=24 comes from a unit's learning path.
   const [params] = useSearchParams();
-  const unit = Number(params.get('unit')) || 1;
+  const initialUnit = Number(params.get('unit')) || 1;
   const lesson = Number(params.get('lesson')) || undefined;
-  const quellen = content.quellen;
-  const videos = useMemo(
-    () =>
-      quellen.filter((q) => q.typ === 'youtube_video' || q.typ === 'youtube_playlist'),
-    [quellen]
-  );
-  const audios = useMemo(
-    () => quellen.filter((q) => q.typ === 'verlag_audio'),
-    [quellen]
-  );
-  const [active, setActive] = useState<Quelle | undefined>(videos[0]);
-  const embed = active ? youtubeEmbed(active.url) : null;
+  const showVideos = params.get('section') === 'videos';
+  const [unit, setUnit] = useState(initialUnit);
+  const videosRef = useRef<HTMLElement>(null);
+
+  useEffect(() => setUnit(initialUnit), [initialUnit]);
+  useEffect(() => {
+    if (showVideos) videosRef.current?.scrollIntoView?.({ block: 'start' });
+  }, [showVideos]);
 
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Quellenbibliothek</h1>
-      <p className="muted">
-        „Hören & Mitlesen“ zu den Einheiten. Externe Streams erfordern eine
-        Internetverbindung; alle Lernfunktionen funktionieren auch offline.
+      <h1 style={{ margin: 0 }}>Hören & Sehen</h1>
+      <p className="muted" style={{ margin: 0 }}>
+        Die Videos und Audios des Verlags zu Buch 1. Du liest im gedruckten Buch mit.
+        Streams brauchen Internet; alle anderen Lernfunktionen gehen auch offline.
       </p>
 
-      <div className="card stack">
-        <strong>Videos</strong>
-        <div className="row">
-          {videos.map((q) => (
+      <section
+        ref={videosRef}
+        className="card stack"
+        aria-labelledby="videos-heading"
+        style={{ scrollMarginTop: '1rem' }}
+      >
+        <div
+          className="row"
+          style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}
+        >
+          <h2 id="videos-heading" style={{ margin: 0 }}>
+            Buchseiten-Videos · {unit <= UNITS ? `Einheit ${unit}` : 'Tests'}
+          </h2>
+          <div className="row" style={{ gap: '0.4rem', flexShrink: 0 }}>
             <button
-              key={q.url}
-              className={`btn ${q.url === active?.url ? 'btn-accent' : ''}`}
-              onClick={() => setActive(q)}
+              className="btn icon-btn"
+              aria-label="Vorherige Einheit"
+              disabled={unit <= 1}
+              hidden={unit > UNITS}
+              onClick={() => setUnit(unit - 1)}
             >
-              {q.titel}
+              <Icon name="arrowLeft" size={18} />
             </button>
-          ))}
-        </div>
-        {embed && (
-          <div style={{ position: 'relative', paddingTop: '56.25%' }}>
-            <iframe
-              title={active?.titel}
-              src={embed}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                border: 0,
-                borderRadius: 8,
-              }}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            <button
+              className="btn icon-btn"
+              aria-label="Nächste Einheit"
+              disabled={unit >= UNITS}
+              hidden={unit > UNITS}
+              onClick={() => setUnit(unit + 1)}
+            >
+              <Icon name="arrowRight" size={18} />
+            </button>
           </div>
+        </div>
+        {unit <= UNITS ? (
+          <BookVideos unit={unit} />
+        ) : (
+          <p className="muted" style={{ margin: 0 }}>
+            Zu den Tests gibt es keine Seitenvideos.
+          </p>
         )}
-        {active && !embed && (
-          <a className="btn" href={active.url} target="_blank" rel="noreferrer">
-            In neuem Tab öffnen
-          </a>
-        )}
-      </div>
+      </section>
 
-      <div className="card stack">
-        <strong>Offizielle Audios – Buch 1</strong>
+      <section className="card stack" aria-labelledby="audio-heading">
+        <h2 id="audio-heading" style={{ margin: 0 }}>
+          Offizielle Audios
+        </h2>
         <PublisherAudio
-          key={`${unit}-${lesson ?? ''}`}
-          initialUnit={unit}
+          key={lesson ?? ''}
+          unit={unit}
+          onUnitChange={setUnit}
           focusLesson={lesson}
         />
-      </div>
-
-      <div className="card stack">
-        <strong>Audio-Quellen</strong>
-        {audios.map((q) => (
-          <a
-            key={q.url}
-            className="row"
-            href={q.url}
-            target="_blank"
-            rel="noreferrer"
-            style={{ justifyContent: 'space-between' }}
-          >
-            <span>{q.titel}</span>
-            <span className="badge">Verlag</span>
-          </a>
-        ))}
-      </div>
+      </section>
     </div>
   );
 }

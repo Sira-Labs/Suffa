@@ -4,6 +4,11 @@ import { content, unitInfos } from '@/content';
 import { loadPublisherIndex, trackId } from '@/services/audio/publisherIndex';
 import { examRepo } from '@/services/storage';
 import {
+  loadBookVideos,
+  videosForUnit,
+  type BookVideoData,
+} from '@/services/video/bookVideos';
+import {
   unitProgress,
   unitStations,
   type Station,
@@ -33,6 +38,7 @@ export function useBookProgress(): {
 } {
   const [index, setIndex] = useState<PublisherAudioIndex | null>(null);
   const [exams, setExams] = useState<ExamResult[]>([]);
+  const [videoData, setVideoData] = useState<BookVideoData | null>(null);
   const listening = useListenStore((s) => s.progress);
   const cards = useSrsStore((s) => s.cards);
   const userVocab = useContentStore((s) => s.userVocab);
@@ -41,6 +47,10 @@ export function useBookProgress(): {
     let cancelled = false;
     void loadPublisherIndex().then((i) => !cancelled && setIndex(i));
     void examRepo.all().then((e) => !cancelled && setExams(e));
+    // Videos are an extra: without their index the path simply has no video station.
+    void loadBookVideos()
+      .then((v) => !cancelled && setVideoData(v))
+      .catch(() => undefined);
     return () => {
       cancelled = true;
     };
@@ -76,6 +86,7 @@ export function useBookProgress(): {
           isHeard: (url) => Boolean(listening[trackId(index.book, url)]?.completedAt),
           vocab,
           testPassed,
+          videos: videoStation(videoData, unit.unit),
         });
         return {
           unit,
@@ -84,7 +95,16 @@ export function useBookProgress(): {
           progress: unitProgress(stations),
         };
       });
-  }, [index, cards, userVocab, listening, exams]);
+  }, [index, cards, userVocab, listening, exams, videoData]);
 
   return { index, units };
+}
+
+function videoStation(
+  data: BookVideoData | null,
+  unit: number
+): { count: number; from: number; to: number } | null {
+  const unitVideos = data ? videosForUnit(data, unit) : null;
+  if (!unitVideos) return null;
+  return { count: unitVideos.videos.length, from: unitVideos.from, to: unitVideos.to };
 }

@@ -33,6 +33,28 @@ describe('unitStations', () => {
     expect(stations.at(-1)).toMatchObject({ kind: 'test', to: '/exam?unit=1' });
   });
 
+  it('offers page videos first as an optional station that never blocks progress', () => {
+    const stations = unitStations({
+      unit: unit1,
+      isHeard: () => true,
+      vocab: none,
+      testPassed: true,
+      videos: { count: 14, from: 1, to: 25 },
+    });
+    expect(stations[0]).toMatchObject({
+      kind: 'video',
+      state: 'optional',
+      detail: '14 Videos · Buch S. 1–25',
+      to: '/library?unit=1&section=videos',
+    });
+    expect(stations.slice(1).every((s) => s.state === 'done')).toBe(true);
+    expect(unitProgress(stations)).toMatchObject({
+      percent: 100,
+      doneStations: stations.length - 1,
+      stations: stations.length - 1,
+    });
+  });
+
   it('marks heard lessons done and moves "current" on', () => {
     const firstLesson = unit1.lessons[0]!.tracks.map((t) => t.url);
     const stations = unitStations({

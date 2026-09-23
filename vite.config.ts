@@ -10,10 +10,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'icons/*.png', 'fonts/*.woff2'],
+      includeAssets: ['favicon.svg', 'icons/*.png', 'brand/*.svg', 'fonts/*.woff2'],
       manifest: {
-        name: 'Al-Arabiyya bayna Yadayk – Lerntrainer',
-        short_name: 'Bayna Yadayk',
+        name: 'Suffa – Arabisch lernen',
+        short_name: 'Suffa',
         description:
           'Offline-first Lerntrainer für MSA-Arabisch nach „العربية بين يديك“ Buch 1.',
         lang: 'de',

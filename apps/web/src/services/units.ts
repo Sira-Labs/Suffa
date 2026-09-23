@@ -3,7 +3,7 @@
  * structure (dialogues, vocabulary, exercises, sounds and listening, review), plus the
  * learner's own vocabulary cards and the unit test. Pure, so pages stay thin views.
  */
-import type { AudioLesson, AudioUnit, AudioTrackKind } from '@/types';
+import type { AudioLesson, AudioUnit, AudioTrackKind, PracticeSkill } from '@/types';
 
 export type StationKind =
   | 'dialogue'
@@ -13,7 +13,8 @@ export type StationKind =
   | 'review'
   | 'vocab'
   | 'test'
-  | 'video';
+  | 'video'
+  | PracticeSkill;
 
 /** Optional stations (page videos) are offered but never block or count toward progress. */
 export type StationState = 'done' | 'current' | 'upcoming' | 'optional';
@@ -47,7 +48,16 @@ export interface UnitPathInput {
   testPassed: boolean;
   /** The publisher's page videos for this unit, if any. */
   videos?: { count: number; from: number; to: number } | null;
+  /** Items done / offered per practice skill; skills without items get no station. */
+  practice?: Partial<Record<PracticeSkill, { done: number; total: number }>>;
 }
+
+const PRACTICE_STATIONS: { skill: PracticeSkill; label: string; unit: string }[] = [
+  { skill: 'read', label: 'Lesen', unit: 'Dialoge gelesen' },
+  { skill: 'write', label: 'Schreiben', unit: 'Wörter geschrieben' },
+  { skill: 'speak', label: 'Sprechen', unit: 'Sätze gesprochen' },
+  { skill: 'verbs', label: 'Konjugation', unit: 'Verben geübt' },
+];
 
 function has(lesson: AudioLesson, ...kinds: AudioTrackKind[]): boolean {
   return lesson.tracks.some((t) => kinds.includes(t.kind));
@@ -99,11 +109,29 @@ export function unitStations(input: UnitPathInput): Station[] {
       kind: 'video',
       label: 'Buchseiten-Videos',
       detail: `${input.videos.count} Videos · Buch S. ${input.videos.from}–${input.videos.to}`,
-      to: `/library?unit=${unit.unit}&section=videos`,
+      to: `/units/${unit.unit}/listen`,
       done: 0,
       total: 0,
     });
   }
+
+  // Reading, writing, speaking and verbs follow the vocabulary cards, where the words are known.
+  const practiceStations = (): Omit<Station, 'state'>[] =>
+    PRACTICE_STATIONS.flatMap(({ skill, label, unit: noun }) => {
+      const p = input.practice?.[skill];
+      if (!p || p.total === 0) return [];
+      return [
+        {
+          id: `u${unit.unit}-${skill}`,
+          kind: skill,
+          label,
+          detail: `${p.done} von ${p.total} ${noun}`,
+          to: `/units/${unit.unit}/${skill}`,
+          done: p.done,
+          total: p.total,
+        },
+      ];
+    });
 
   const vocabStation = (): Omit<Station, 'state'> => ({
     id: `u${unit.unit}-vocab`,
@@ -118,8 +146,9 @@ export function unitStations(input: UnitPathInput): Station[] {
   for (const lesson of unit.lessons) {
     const isDialogue = has(lesson, 'dialogue');
     // Own vocabulary cards right after the dialogues, where the words were introduced.
-    if (!isDialogue && dialogueNo > 0 && !vocabInserted && input.vocab.total > 0) {
-      stations.push(vocabStation());
+    if (!isDialogue && dialogueNo > 0 && !vocabInserted) {
+      if (input.vocab.total > 0) stations.push(vocabStation());
+      stations.push(...practiceStations());
       vocabInserted = true;
     }
     if (isDialogue) dialogueNo += 1;
@@ -129,12 +158,15 @@ export function unitStations(input: UnitPathInput): Station[] {
       kind,
       label,
       detail,
-      to: `/library?unit=${unit.unit}&lesson=${lesson.lesson}`,
+      to: `/units/${unit.unit}/listen?lesson=${lesson.lesson}`,
       done: lesson.tracks.filter((t) => input.isHeard(t.url)).length,
       total: lesson.tracks.length,
     });
   }
-  if (!vocabInserted && input.vocab.total > 0) stations.push(vocabStation());
+  if (!vocabInserted) {
+    if (input.vocab.total > 0) stations.push(vocabStation());
+    stations.push(...practiceStations());
+  }
 
   stations.push({
     id: `u${unit.unit}-test`,

@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Icon, type IconName } from '@/components/Icon';
 import {
@@ -6,7 +7,7 @@ import {
   type Station,
   type StationKind,
 } from '@/services/units';
-import { useBookProgress } from './useBookProgress';
+import { useBookProgress, type SkillProgress } from './useBookProgress';
 
 const STATION_ICONS: Record<StationKind, IconName> = {
   dialogue: 'listen',
@@ -17,7 +18,25 @@ const STATION_ICONS: Record<StationKind, IconName> = {
   vocab: 'cards',
   test: 'exam',
   video: 'play',
+  read: 'read',
+  write: 'write',
+  speak: 'speak',
+  verbs: 'conjugate',
 };
+
+const SKILL_RINGS: Record<SkillProgress['key'], { label: string; icon: IconName }> = {
+  listen: { label: 'Hören', icon: 'listen' },
+  words: { label: 'Wörter', icon: 'cards' },
+  read: { label: 'Lesen', icon: 'read' },
+  write: { label: 'Schreiben', icon: 'write' },
+  speak: { label: 'Sprechen', icon: 'speak' },
+  verbs: { label: 'Verben', icon: 'conjugate' },
+};
+
+function skillLink(unit: number, key: SkillProgress['key']): string {
+  if (key === 'words') return `/review?unit=${unit}`;
+  return `/units/${unit}/${key}`;
+}
 
 /** One unit as a learning path: stations in order, the next one highlighted. */
 export function UnitPath() {
@@ -36,7 +55,7 @@ export function UnitPath() {
       </div>
     );
   }
-  const { unit, title, stations, progress } = entry;
+  const { unit, title, stations, progress, skills } = entry;
   const prev = units.find((u) => u.unit.unit === number - 1);
   const next = units.find((u) => u.unit.unit === number + 1);
 
@@ -70,6 +89,29 @@ export function UnitPath() {
             {progress.doneStations} von {progress.stations} Stationen
           </span>
         </div>
+        {skills.length > 0 && (
+          <ul className="skill-rings" aria-label="Fertigkeiten in dieser Einheit">
+            {skills.map((skill) => {
+              const meta = SKILL_RINGS[skill.key];
+              const percent = Math.round((skill.done / skill.total) * 100);
+              return (
+                <li key={skill.key}>
+                  <Link
+                    to={skillLink(unit.unit, skill.key)}
+                    className="skill-ring"
+                    aria-label={`${meta.label}: ${skill.done} von ${skill.total}`}
+                    style={{ '--p': `${percent}%` } as CSSProperties}
+                  >
+                    <span className="skill-ring-dial" aria-hidden>
+                      <Icon name={meta.icon} size={16} />
+                    </span>
+                    <span className="skill-ring-label">{meta.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </header>
 
       <ol className="path" aria-label={`Lernpfad Einheit ${unit.unit}`}>
@@ -119,6 +161,15 @@ function UnitTitle({ title, unit }: { title: string | null; unit: number }) {
   );
 }
 
+/** Stations measured in heard tracks (the others carry their count in the detail line). */
+const LISTENING_KINDS = new Set<StationKind>([
+  'dialogue',
+  'words',
+  'practice',
+  'sounds',
+  'review',
+]);
+
 function PathStation({ station, last }: { station: Station; last: boolean }) {
   const stateLabel =
     station.state === 'done'
@@ -147,7 +198,7 @@ function PathStation({ station, last }: { station: Station; last: boolean }) {
         {station.state === 'optional' && (
           <span className="muted path-card-detail">Optional · im Buch mitlesen</span>
         )}
-        {station.total > 0 && station.kind !== 'test' && station.kind !== 'vocab' && (
+        {station.total > 0 && LISTENING_KINDS.has(station.kind) && (
           <span className="muted path-card-detail">
             {station.done}/{station.total} gehört
           </span>

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { ConjugationTable, MadiPerson, Verb } from '@/types';
+import type { ConjugationTable, MadiPerson, UnitPracticeScope, Verb } from '@/types';
 import { PERSON_LABELS, AMR_LABELS } from '@/types';
 import { ArabicText, Feedback, RecallInput } from '@/components';
 import { content } from '@/content';
@@ -30,22 +30,38 @@ const PERSON_ORDER: MadiPerson[] = [
   'hunna',
 ];
 
-export function Conjugation() {
-  const verbs = content.verben;
-  const [verb, setVerb] = useState<Verb>(verbs[0]!);
+/** Correct forms in the drill after which a verb counts as practised in its unit. */
+export const FORMS_PER_VERB = 5;
+
+/**
+ * Conjugation tables and drill. With a `scope` (inside a unit) only the verbs the unit
+ * introduces; a verb counts once FORMS_PER_VERB forms were written correctly.
+ */
+export function Conjugation({ scope }: { scope?: UnitPracticeScope } = {}) {
+  const verbs = useMemo(
+    () =>
+      scope ? content.verben.filter((v) => v.einheit === scope.unit) : content.verben,
+    [scope]
+  );
+  const [verbId, setVerbId] = useState<string | undefined>(verbs[0]?.id);
   const [tense, setTense] = useState<Tense>('madi');
-  const [mode, setMode] = useState<'table' | 'drill'>('table');
+  const [mode, setMode] = useState<'table' | 'drill'>(scope ? 'drill' : 'table');
+  const verb = verbs.find((v) => v.id === verbId) ?? verbs[0];
+
+  if (!verb) {
+    return <p className="muted">Diese Einheit führt noch keine Verben ein.</p>;
+  }
 
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Konjugationstrainer</h1>
+      {!scope && <h1 style={{ margin: 0 }}>Konjugationstrainer</h1>}
       <div className="row">
         {verbs.map((v) => (
           <button
             key={v.id}
             className={`btn arabic-inline ${v.id === verb.id ? 'btn-accent' : ''}`}
             style={{ fontSize: '1.2rem' }}
-            onClick={() => setVerb(v)}
+            onClick={() => setVerbId(v.id)}
           >
             {v.lemma}
           </button>
@@ -95,7 +111,12 @@ export function Conjugation() {
       {mode === 'table' ? (
         <ConjugationGrid verb={verb} tense={tense} />
       ) : (
-        <ConjugationDrill verb={verb} tense={tense} />
+        <ConjugationDrill
+          key={verb.id}
+          verb={verb}
+          tense={tense}
+          onVerbPractised={() => scope?.onPractised(verb.id)}
+        />
       )}
     </div>
   );
@@ -140,7 +161,15 @@ function ConjugationGrid({ verb, tense }: { verb: Verb; tense: Tense }) {
   );
 }
 
-function ConjugationDrill({ verb, tense }: { verb: Verb; tense: Tense }) {
+function ConjugationDrill({
+  verb,
+  tense,
+  onVerbPractised,
+}: {
+  verb: Verb;
+  tense: Tense;
+  onVerbPractised(): void;
+}) {
   const persons = useMemo(
     () =>
       tense === 'amr'
@@ -151,6 +180,7 @@ function ConjugationDrill({ verb, tense }: { verb: Verb; tense: Tense }) {
   const [pi, setPi] = useState(0);
   const [value, setValue] = useState('');
   const [verdict, setVerdict] = useState<AnswerVerdict | null>(null);
+  const [correctForms, setCorrectForms] = useState(0);
 
   const person = persons[pi % persons.length]!;
   const expected =
@@ -161,6 +191,16 @@ function ConjugationDrill({ verb, tense }: { verb: Verb; tense: Tense }) {
     tense === 'amr'
       ? AMR_LABELS[person as keyof typeof AMR_LABELS]
       : PERSON_LABELS[person as MadiPerson];
+
+  const check = () => {
+    if (verdict && verdict !== 'wrong') return; // a form counts once
+    const graded = gradeAnswer(value, expected);
+    setVerdict(graded);
+    if (graded === 'wrong') return;
+    const count = correctForms + 1;
+    setCorrectForms(count);
+    if (count === FORMS_PER_VERB) onVerbPractised();
+  };
 
   const next = () => {
     setPi((x) => (x + 1) % persons.length);
@@ -177,18 +217,10 @@ function ConjugationDrill({ verb, tense }: { verb: Verb; tense: Tense }) {
         </strong>
       </p>
       <div style={{ width: '100%' }}>
-        <RecallInput
-          value={value}
-          onChange={setValue}
-          onSubmit={() => setVerdict(gradeAnswer(value, expected))}
-          autoFocus
-        />
+        <RecallInput value={value} onChange={setValue} onSubmit={check} autoFocus />
       </div>
       <div className="row">
-        <button
-          className="btn btn-primary"
-          onClick={() => setVerdict(gradeAnswer(value, expected))}
-        >
+        <button className="btn btn-primary" onClick={check}>
           Prüfen
         </button>
         <button className="btn" onClick={next}>

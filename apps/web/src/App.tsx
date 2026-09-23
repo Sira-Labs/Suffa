@@ -7,6 +7,7 @@ import { logger } from './services/logger';
 import {
   useContentStore,
   useListenStore,
+  usePracticeStore,
   useSettingsStore,
   useSrsStore,
   useSyncStore,
@@ -24,6 +25,7 @@ export function App() {
   const loadSrs = useSrsStore((s) => s.load);
   const initSync = useSyncStore((s) => s.init);
   const loadListening = useListenStore((s) => s.load);
+  const loadPractice = usePracticeStore((s) => s.load);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,6 +35,7 @@ export function App() {
       await loadContent();
       await loadSrs();
       await loadListening();
+      await loadPractice();
       initSync();
       if (!cancelled) setReady(true);
     })().catch((error) => {
@@ -45,7 +48,7 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [loadSettings, loadContent, loadSrs, loadListening, initSync]);
+  }, [loadSettings, loadContent, loadSrs, loadListening, loadPractice, initSync]);
 
   if (!ready) {
     return (

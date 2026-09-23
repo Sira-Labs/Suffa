@@ -65,6 +65,7 @@ export function PublisherAudio({
   unit: controlledUnit,
   focusLesson,
   onUnitChange,
+  hideUnitPicker = false,
 }: {
   initialUnit?: number;
   /** Selected unit when the page owns the choice (shared with the videos). */
@@ -73,6 +74,8 @@ export function PublisherAudio({
   focusLesson?: number;
   /** Called when the learner picks another unit (the page shows that unit's videos too). */
   onUnitChange?: (unit: number) => void;
+  /** Inside a unit: no book progress bar and no unit chips, only this unit's lessons. */
+  hideUnitPicker?: boolean;
 }) {
   const [index, setIndex] = useState<PublisherAudioIndex | null>(null);
   const [failed, setFailed] = useState(false);
@@ -143,39 +146,49 @@ export function PublisherAudio({
 
   return (
     <div className="stack">
-      <div className="stack" style={{ gap: '0.4rem' }}>
-        <div className="row" style={{ justifyContent: 'space-between' }}>
-          <span style={{ fontWeight: 600 }}>
-            {stats.heard} von {stats.total} Aufnahmen gehört
-          </span>
-          <span className="muted">
-            {Math.round((stats.heard / Math.max(1, stats.total)) * 100)} %
-          </span>
-        </div>
-        <ProgressBar value={stats.heard} max={stats.total} label="Fortschritt Buch 1" />
-      </div>
+      {!hideUnitPicker && (
+        <>
+          <div className="stack" style={{ gap: '0.4rem' }}>
+            <div className="row" style={{ justifyContent: 'space-between' }}>
+              <span style={{ fontWeight: 600 }}>
+                {stats.heard} von {stats.total} Aufnahmen gehört
+              </span>
+              <span className="muted">
+                {Math.round((stats.heard / Math.max(1, stats.total)) * 100)} %
+              </span>
+            </div>
+            <ProgressBar
+              value={stats.heard}
+              max={stats.total}
+              label="Fortschritt Buch 1"
+            />
+          </div>
 
-      <div className="row" role="group" aria-label="Einheit wählen">
-        {index.units.map((u) => {
-          const s = stats.perUnit.get(u.unit)!;
-          const done = s.total > 0 && s.heard === s.total;
-          return (
-            <button
-              key={u.unit}
-              className={`btn unit-chip${u.unit === unit.unit ? ' btn-accent' : ''}${done ? ' unit-chip-done' : ''}`}
-              aria-pressed={u.unit === unit.unit}
-              aria-label={`${unitLabel(u)}, ${s.heard} von ${s.total} gehört`}
-              style={
-                { '--p': `${(s.heard / Math.max(1, s.total)) * 100}%` } as CSSProperties
-              }
-              onClick={() => chooseUnit(u.unit)}
-            >
-              {done && <Icon name="check" size={14} strokeWidth={2.6} />}
-              {u.kind === 'unit' ? u.unit : unitLabel(u)}
-            </button>
-          );
-        })}
-      </div>
+          <div className="row" role="group" aria-label="Einheit wählen">
+            {index.units.map((u) => {
+              const s = stats.perUnit.get(u.unit)!;
+              const done = s.total > 0 && s.heard === s.total;
+              return (
+                <button
+                  key={u.unit}
+                  className={`btn unit-chip${u.unit === unit.unit ? ' btn-accent' : ''}${done ? ' unit-chip-done' : ''}`}
+                  aria-pressed={u.unit === unit.unit}
+                  aria-label={`${unitLabel(u)}, ${s.heard} von ${s.total} gehört`}
+                  style={
+                    {
+                      '--p': `${(s.heard / Math.max(1, s.total)) * 100}%`,
+                    } as CSSProperties
+                  }
+                  onClick={() => chooseUnit(u.unit)}
+                >
+                  {done && <Icon name="check" size={14} strokeWidth={2.6} />}
+                  {u.kind === 'unit' ? u.unit : unitLabel(u)}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
       <div className="row" role="group" aria-label="Art der Aufnahme">
         {FILTERS.map((f) => (
           <button
@@ -189,7 +202,7 @@ export function PublisherAudio({
         ))}
       </div>
 
-      <h2 style={{ margin: 0 }}>{unitLabel(unit)}</h2>
+      {!hideUnitPicker && <h2 style={{ margin: 0 }}>{unitLabel(unit)}</h2>}
       {unit.lessons.map((lesson) => (
         <LessonBlock
           key={lesson.lesson}

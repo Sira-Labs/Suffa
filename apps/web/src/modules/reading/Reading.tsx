@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { Dialog } from '@/types';
+import type { Dialog, UnitPracticeScope } from '@/types';
 import { TashkilToggle } from '@/components';
 import { applyTashkilLevel } from '@/components/ArabicText';
 import { content } from '@/content';
@@ -13,14 +13,26 @@ for (const v of content.vokabeln) {
   glossar.set(normalizeArabic(v.ar), { de: v.de, tr: v.tr, wurzel: v.wurzel });
 }
 
-export function Reading() {
-  const dialoge = content.dialoge;
+/**
+ * Reading with tap-a-word glosses. With a `scope` (inside a unit) only that unit's dialogues;
+ * a dialogue counts as read once its comprehension question is answered correctly.
+ */
+export function Reading({ scope }: { scope?: UnitPracticeScope } = {}) {
+  const dialoge = useMemo(
+    () =>
+      scope ? content.dialoge.filter((d) => d.einheit === scope.unit) : content.dialoge,
+    [scope]
+  );
   const [selected, setSelected] = useState<Dialog | undefined>(dialoge[0]);
   const [showTranslation, setShowTranslation] = useState(true);
 
+  if (dialoge.length === 0) {
+    return <p className="muted">Für diese Einheit gibt es noch keinen Lesetext.</p>;
+  }
+
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Lesen</h1>
+      {!scope && <h1 style={{ margin: 0 }}>Lesen</h1>}
       <p className="muted">
         Vokalisierte Texte mit Tap-a-Word-Glosse. Tippe ein Wort an, um Bedeutung und
         Wurzel zu sehen (Comprehensible Input, i+1).
@@ -62,7 +74,13 @@ export function Reading() {
         </div>
       )}
 
-      {selected && <Comprehension dialog={selected} />}
+      {selected && (
+        <Comprehension
+          key={selected.id}
+          dialog={selected}
+          onCorrect={() => scope?.onPractised(selected.id)}
+        />
+      )}
     </div>
   );
 }
@@ -134,7 +152,7 @@ function GlossLine({
 }
 
 /** Simple reading comprehension after the text. */
-function Comprehension({ dialog }: { dialog: Dialog }) {
+function Comprehension({ dialog, onCorrect }: { dialog: Dialog; onCorrect(): void }) {
   const firstLine = dialog.zeilen[0];
   const correct = firstLine?.de ?? '';
   const [answer, setAnswer] = useState<string | null>(null);
@@ -159,7 +177,10 @@ function Comprehension({ dialog }: { dialog: Dialog }) {
         <button
           key={opt}
           className={`btn ${answer ? (opt === correct ? 'btn-accent' : '') : ''}`}
-          onClick={() => setAnswer(opt)}
+          onClick={() => {
+            setAnswer(opt);
+            if (opt === correct) onCorrect();
+          }}
         >
           {opt}
         </button>

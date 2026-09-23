@@ -1167,3 +1167,38 @@ textarea.input {
   color: var(--on-accent);
   box-shadow: 0 6px 24px rgb(0 0 0 / 40%);
 }
+
+/* Skill rings in the unit header: one dial per skill, filled by progress (--p). */
+.skill-rings {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.skill-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: var(--tap);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+.skill-ring:hover {
+  color: var(--accent);
+}
+.skill-ring-dial {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--text);
+  background:
+    radial-gradient(closest-side, var(--bg-elev) 78%, transparent 80%),
+    conic-gradient(var(--accent-2) var(--p, 0%), var(--bg-elev-2) 0);
+}

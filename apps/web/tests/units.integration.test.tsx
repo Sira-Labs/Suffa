@@ -1,10 +1,18 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { UnitPath, Units } from '@/modules/units';
+import { UnitPath, UnitStation, Units } from '@/modules/units';
 import { FocusReview } from '@/modules/review';
 import { db } from '@/services/storage';
-import { useContentStore, useListenStore, useSettingsStore, useSrsStore } from '@/state';
+import {
+  useContentStore,
+  useListenStore,
+  usePracticeStore,
+  useSettingsStore,
+  useSrsStore,
+} from '@/state';
+import { content } from '@/content';
+import userEvent from '@testing-library/user-event';
 import index from '@/content/sources/book1-audio.json';
 import { lessonKey, trackId } from '@/services/audio/publisherIndex';
 import type { AudioUnit } from '@/types';
@@ -14,6 +22,7 @@ function renderAt(path: string) {
     [
       { path: '/units', element: <Units /> },
       { path: '/units/:unit', element: <UnitPath /> },
+      { path: '/units/:unit/:station', element: <UnitStation /> },
       { path: '/review', element: <FocusReview /> },
     ],
     { initialEntries: [path] }
@@ -24,6 +33,8 @@ function renderAt(path: string) {
 describe('Units (integration)', () => {
   beforeEach(async () => {
     await db.media_progress.clear();
+    await db.practice_progress.clear();
+    await usePracticeStore.getState().load();
     await useSettingsStore.getState().load();
     await useContentStore.getState().load();
     await useSrsStore.getState().load();
@@ -60,7 +71,7 @@ describe('Units (integration)', () => {
     // Page videos load lazily and come first as an optional station.
     expect(
       await within(path).findByRole('link', { name: /Buchseiten-Videos/ })
-    ).toHaveAttribute('href', '/library?unit=1&section=videos');
+    ).toHaveAttribute('href', '/units/1/listen');
     expect(
       within(path).getByRole('link', { name: /Dialog 1 \(erledigt\)/ })
     ).toBeTruthy();
@@ -89,6 +100,41 @@ describe('Units (integration)', () => {
     expect(screen.getByRole('link', { name: 'Sitzung beenden' })).toHaveAttribute(
       'href',
       '/units/2'
+    );
+  });
+
+  it('practises writing inside the unit and counts it on the path', async () => {
+    const user = userEvent.setup();
+    const words = content.vokabeln.filter((v) => v.einheit === 1);
+    renderAt('/units/1/write');
+    expect(await screen.findByRole('heading', { name: 'Schreiben' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Einheit 1' })).toHaveAttribute(
+      'href',
+      '/units/1'
+    );
+    await user.click(screen.getByRole('button', { name: 'Transliteration → Schrift' }));
+    await user.type(screen.getByRole('textbox'), words[0]!.ar);
+    await user.click(screen.getByRole('button', { name: 'Prüfen' }));
+    const progress = await screen.findByRole('progressbar', {
+      name: 'Fortschritt Schreiben',
+    });
+    await waitFor(() => expect(progress).toHaveAttribute('aria-valuenow', '1'));
+    expect(progress).toHaveAttribute('aria-valuemax', String(words.length));
+  });
+
+  it('shows skill rings and the practice stations of the unit', async () => {
+    await usePracticeStore.getState().practise(1, 'read', 'd-1-1', ['d-1-1']);
+    renderAt('/units/1');
+    const rings = await screen.findByRole('list', {
+      name: 'Fertigkeiten in dieser Einheit',
+    });
+    expect(
+      within(rings).getByRole('link', { name: /^Schreiben: 0 von \d+$/ })
+    ).toHaveAttribute('href', '/units/1/write');
+    const path = screen.getByRole('list', { name: 'Lernpfad Einheit 1' });
+    expect(within(path).getByRole('link', { name: /Sprechen/ })).toHaveAttribute(
+      'href',
+      '/units/1/speak'
     );
   });
 });

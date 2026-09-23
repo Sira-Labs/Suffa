@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import type { DialogZeile, UnitPracticeScope, Vokabel } from '@/types';
 import { ArabicText, Feedback, RecallInput } from '@/components';
 import { content } from '@/content';
 import { diffArabic, gradeAnswer, type AnswerVerdict } from '@/services/srs';
@@ -6,11 +7,34 @@ import { speakArabic, isTtsSupported } from '@/services/speech';
 
 type Tab = 'diktat' | 'translit' | 'satzbau' | 'uebersetzung';
 
-export function Writing() {
+/**
+ * Writing practice. With a `scope` (inside a unit) it uses only that unit's words and
+ * sentences and reports each correctly written word to the unit's writing station.
+ */
+export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
   const [tab, setTab] = useState<Tab>('diktat');
+  const words = useMemo(
+    () =>
+      scope ? content.vokabeln.filter((v) => v.einheit === scope.unit) : content.vokabeln,
+    [scope]
+  );
+  const lines = useMemo(
+    () =>
+      (scope
+        ? content.dialoge.filter((d) => d.einheit === scope.unit)
+        : content.dialoge
+      ).flatMap((d) => d.zeilen),
+    [scope]
+  );
+  const onCorrect = (word: Vokabel) => scope?.onPractised(word.id);
+  if (words.length === 0) {
+    return (
+      <p className="muted">Für diese Einheit gibt es noch keine Wörter zum Schreiben.</p>
+    );
+  }
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Schreiben</h1>
+      {!scope && <h1 style={{ margin: 0 }}>Schreiben</h1>}
       <div className="row">
         <TabButton active={tab === 'diktat'} onClick={() => setTab('diktat')}>
           Diktat
@@ -18,17 +42,24 @@ export function Writing() {
         <TabButton active={tab === 'translit'} onClick={() => setTab('translit')}>
           Transliteration → Schrift
         </TabButton>
-        <TabButton active={tab === 'satzbau'} onClick={() => setTab('satzbau')}>
-          Satzbau
-        </TabButton>
-        <TabButton active={tab === 'uebersetzung'} onClick={() => setTab('uebersetzung')}>
-          Übersetzung DE→AR
-        </TabButton>
+        {lines.length > 0 && (
+          <>
+            <TabButton active={tab === 'satzbau'} onClick={() => setTab('satzbau')}>
+              Satzbau
+            </TabButton>
+            <TabButton
+              active={tab === 'uebersetzung'}
+              onClick={() => setTab('uebersetzung')}
+            >
+              Übersetzung DE→AR
+            </TabButton>
+          </>
+        )}
       </div>
-      {tab === 'diktat' && <Dictation />}
-      {tab === 'translit' && <Transliteration />}
-      {tab === 'satzbau' && <SentenceBuilder />}
-      {tab === 'uebersetzung' && <Translation />}
+      {tab === 'diktat' && <Dictation items={words} onCorrect={onCorrect} />}
+      {tab === 'translit' && <Transliteration items={words} onCorrect={onCorrect} />}
+      {tab === 'satzbau' && <SentenceBuilder lines={lines} />}
+      {tab === 'uebersetzung' && <Translation items={lines} />}
     </div>
   );
 }
@@ -50,14 +81,23 @@ function TabButton({
 }
 
 /** Dictation: audio (TTS) → typing. Tashkīl-tolerant correction with diff. */
-function Dictation() {
-  const items = content.vokabeln;
+function Dictation({
+  items,
+  onCorrect,
+}: {
+  items: Vokabel[];
+  onCorrect(word: Vokabel): void;
+}) {
   const [i, setI] = useState(0);
   const [value, setValue] = useState('');
   const [verdict, setVerdict] = useState<AnswerVerdict | null>(null);
-  const target = items[i]!;
+  const target = items[i % items.length]!;
 
-  const check = () => setVerdict(gradeAnswer(value, target.ar));
+  const check = () => {
+    const graded = gradeAnswer(value, target.ar);
+    setVerdict(graded);
+    if (graded !== 'wrong') onCorrect(target);
+  };
   const next = () => {
     setI((x) => (x + 1) % items.length);
     setValue('');
@@ -108,29 +148,32 @@ function Dictation() {
 }
 
 /** Transliteration → script. */
-function Transliteration() {
-  const items = content.vokabeln;
+function Transliteration({
+  items,
+  onCorrect,
+}: {
+  items: Vokabel[];
+  onCorrect(word: Vokabel): void;
+}) {
   const [i, setI] = useState(0);
   const [value, setValue] = useState('');
   const [verdict, setVerdict] = useState<AnswerVerdict | null>(null);
-  const target = items[i]!;
+  const target = items[i % items.length]!;
+  const check = () => {
+    const graded = gradeAnswer(value, target.ar);
+    setVerdict(graded);
+    if (graded !== 'wrong') onCorrect(target);
+  };
   return (
     <div className="card stack" style={{ alignItems: 'center' }}>
       <p className="muted">Schreibe das Wort in arabischer Schrift:</p>
       <strong style={{ fontSize: '1.6rem' }}>{target.tr}</strong>
       <span className="muted">({target.de})</span>
       <div style={{ width: '100%' }}>
-        <RecallInput
-          value={value}
-          onChange={setValue}
-          onSubmit={() => setVerdict(gradeAnswer(value, target.ar))}
-        />
+        <RecallInput value={value} onChange={setValue} onSubmit={check} />
       </div>
       <div className="row">
-        <button
-          className="btn btn-primary"
-          onClick={() => setVerdict(gradeAnswer(value, target.ar))}
-        >
+        <button className="btn btn-primary" onClick={check}>
           Prüfen
         </button>
         <button
@@ -156,23 +199,20 @@ function Transliteration() {
 }
 
 /** Sentence building via drag & drop (here via click order, mobile-friendly). */
-function SentenceBuilder() {
+function SentenceBuilder({ lines }: { lines: DialogZeile[] }) {
   const sentences = useMemo(
-    () =>
-      content.dialoge
-        .flatMap((d) => d.zeilen)
-        .filter((z) => z.ar.split(/\s+/).length >= 3),
-    []
+    () => lines.filter((z) => z.ar.split(/\s+/).length >= 3),
+    [lines]
   );
   const [idx, setIdx] = useState(0);
-  const target = sentences[idx]!;
+  const target = sentences[idx % Math.max(1, sentences.length)] ?? lines[0]!;
   const correctWords = useMemo(() => target.ar.split(/\s+/), [target]);
   const [pool, setPool] = useState<string[]>(() => shuffle(correctWords));
   const [built, setBuilt] = useState<string[]>([]);
   const [checked, setChecked] = useState(false);
 
   const reset = (nextIdx = idx) => {
-    const t = sentences[nextIdx]!;
+    const t = sentences[nextIdx] ?? target;
     setPool(shuffle(t.ar.split(/\s+/)));
     setBuilt([]);
     setChecked(false);
@@ -225,7 +265,10 @@ function SentenceBuilder() {
         >
           Prüfen
         </button>
-        <button className="btn" onClick={() => reset((idx + 1) % sentences.length)}>
+        <button
+          className="btn"
+          onClick={() => reset((idx + 1) % Math.max(1, sentences.length))}
+        >
           Nächster Satz
         </button>
         <button className="btn" onClick={() => reset()}>
@@ -242,12 +285,11 @@ function SentenceBuilder() {
 }
 
 /** Translation DE → AR (tashkīl-tolerant). */
-function Translation() {
-  const items = content.dialoge.flatMap((d) => d.zeilen);
+function Translation({ items }: { items: DialogZeile[] }) {
   const [i, setI] = useState(0);
   const [value, setValue] = useState('');
   const [verdict, setVerdict] = useState<AnswerVerdict | null>(null);
-  const target = items[i]!;
+  const target = items[i % items.length]!;
   return (
     <div className="card stack" style={{ alignItems: 'center' }}>
       <p className="muted">Übersetze ins Arabische:</p>

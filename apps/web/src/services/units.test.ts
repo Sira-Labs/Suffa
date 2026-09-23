@@ -27,7 +27,7 @@ describe('unitStations', () => {
     ]);
     expect(stations[0]).toMatchObject({
       state: 'current',
-      to: '/library?unit=1&lesson=1',
+      to: '/units/1/listen?lesson=1',
     });
     expect(stations[3]).toMatchObject({ kind: 'vocab', to: '/review?unit=1', total: 5 });
     expect(stations.at(-1)).toMatchObject({ kind: 'test', to: '/exam?unit=1' });
@@ -45,7 +45,7 @@ describe('unitStations', () => {
       kind: 'video',
       state: 'optional',
       detail: '14 Videos · Buch S. 1–25',
-      to: '/library?unit=1&section=videos',
+      to: '/units/1/listen',
     });
     expect(stations.slice(1).every((s) => s.state === 'done')).toBe(true);
     expect(unitProgress(stations)).toMatchObject({
@@ -53,6 +53,36 @@ describe('unitStations', () => {
       doneStations: stations.length - 1,
       stations: stations.length - 1,
     });
+  });
+
+  it('adds reading, writing, speaking and verb stations after the vocabulary cards', () => {
+    const stations = unitStations({
+      unit: unit1,
+      isHeard: () => false,
+      vocab: { total: 5, started: 0, mature: 0 },
+      testPassed: false,
+      practice: {
+        read: { done: 1, total: 1 },
+        write: { done: 2, total: 5 },
+        speak: { done: 0, total: 4 },
+        verbs: { done: 0, total: 0 },
+      },
+    });
+    const labels = stations.map((s) => s.label);
+    const vocab = labels.indexOf('Vokabeln lernen');
+    expect(labels.slice(vocab, vocab + 4)).toEqual([
+      'Vokabeln lernen',
+      'Lesen',
+      'Schreiben',
+      'Sprechen',
+    ]);
+    expect(labels).not.toContain('Konjugation');
+    expect(stations.find((s) => s.kind === 'write')).toMatchObject({
+      detail: '2 von 5 Wörter geschrieben',
+      to: '/units/1/write',
+      state: 'upcoming',
+    });
+    expect(stations.find((s) => s.kind === 'read')!.state).toBe('done');
   });
 
   it('marks heard lessons done and moves "current" on', () => {

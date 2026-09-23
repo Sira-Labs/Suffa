@@ -88,6 +88,8 @@ export interface Verb {
   de: string;
   wazn: string;
   hinweis?: string;
+  /** Unit that introduces the verb (for the unit's conjugation station). */
+  einheit?: number;
   madi: ConjugationTable;
   mudari: ConjugationTable;
   amr: ImperativeTable;

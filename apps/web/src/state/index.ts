@@ -4,3 +4,4 @@ export * from './syncStore';
 export * from './contentStore';
 export * from './listenStore';
 export * from './celebrationStore';
+export * from './practiceStore';

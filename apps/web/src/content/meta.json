@@ -61,6 +61,7 @@
   "verben": [
     {
       "id": "verb-sakana",
+      "einheit": 3,
       "lemma": "سَكَنَ",
       "wurzel": "س-ك-ن",
       "de": "wohnen, ansässig sein; still/ruhig werden",

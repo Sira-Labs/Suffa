@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { UnitPracticeScope } from '@/types';
+import { lineId } from '@/services/practice';
 import { ArabicText } from '@/components';
 import { content } from '@/content';
 import { speakArabic, isTtsSupported } from '@/services/speech';
@@ -19,11 +21,23 @@ import { recognitionHelp, recorderHelp, type HelpContext } from './speechHelp';
 
 type Tab = 'shadowing' | 'phonologie';
 
-export function Speaking() {
+/**
+ * Speaking practice. With a `scope` (inside a unit) shadowing uses only that unit's dialogue
+ * lines; a line counts once the learner recorded it or had it scored.
+ */
+export function Speaking({ scope }: { scope?: UnitPracticeScope } = {}) {
   const [tab, setTab] = useState<Tab>('shadowing');
+  const lines = useMemo(
+    () =>
+      (scope
+        ? content.dialoge.filter((d) => d.einheit === scope.unit)
+        : content.dialoge
+      ).flatMap((d) => d.zeilen.map((z, i) => ({ ...z, id: lineId(d.id, i) }))),
+    [scope]
+  );
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Sprechen (Pushed Output)</h1>
+      {!scope && <h1 style={{ margin: 0 }}>Sprechen (Pushed Output)</h1>}
       <div className="row">
         <button
           className={`btn ${tab === 'shadowing' ? 'btn-accent' : ''}`}
@@ -38,13 +52,34 @@ export function Speaking() {
           Phonologie-Drills
         </button>
       </div>
-      {tab === 'shadowing' ? <Shadowing /> : <MinimalPairDrill />}
+      {tab === 'shadowing' ? (
+        lines.length > 0 ? (
+          <Shadowing lines={lines} onPractised={(id) => scope?.onPractised(id)} />
+        ) : (
+          <p className="muted">
+            Für diese Einheit gibt es noch keine Sätze zum Nachsprechen.
+          </p>
+        )
+      ) : (
+        <MinimalPairDrill />
+      )}
     </div>
   );
 }
 
-function Shadowing() {
-  const lines = content.dialoge.flatMap((d) => d.zeilen);
+interface ShadowLine {
+  id: string;
+  ar: string;
+  de: string;
+}
+
+function Shadowing({
+  lines,
+  onPractised,
+}: {
+  lines: ShadowLine[];
+  onPractised(lineId: string): void;
+}) {
   const [i, setI] = useState(0);
   const [rate, setRate] = useState(0.9);
   const [recording, setRecording] = useState<ActiveRecorder | null>(null);
@@ -53,7 +88,7 @@ function Shadowing() {
   const [scoring, setScoring] = useState(false);
   const [recordHint, setRecordHint] = useState<string | null>(null);
   const [scoreHint, setScoreHint] = useState<string | null>(null);
-  const target = lines[i]!;
+  const target = lines[i % lines.length]!;
   const help: HelpContext = { ios: isIOS(), standalone: isStandalonePwa() };
 
   const startRecording = async () => {
@@ -71,6 +106,7 @@ function Shadowing() {
     try {
       const { blob } = await recording.stop();
       setRecordedUrl(URL.createObjectURL(blob));
+      onPractised(target.id);
     } catch (error) {
       if (!(error instanceof EmptyRecordingError)) throw error;
       setRecordHint(recorderHelp('empty', help));
@@ -85,8 +121,10 @@ function Shadowing() {
     setScoreHint(null);
     // Called directly from the tap: iOS only allows recognition inside the user gesture.
     const outcome = await recognizeOnce({ target: target.ar });
-    if (outcome.ok) setScore(outcome.result);
-    else setScoreHint(recognitionHelp(outcome.reason, help));
+    if (outcome.ok) {
+      setScore(outcome.result);
+      onPractised(target.id);
+    } else setScoreHint(recognitionHelp(outcome.reason, help));
     setScoring(false);
   };
 

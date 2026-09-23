@@ -11,6 +11,7 @@ import { v4 as uuid } from 'uuid';
 import type {
   ExamResult,
   MediaProgress,
+  PracticeRecord,
   ReviewLog,
   SettingsRecord,
   SrsCard,
@@ -189,6 +190,21 @@ export const mediaProgressRepo = {
   async put(record: MediaProgress, database: AppDatabase = db): Promise<MediaProgress> {
     const stamped = stamp(record);
     await database.media_progress.put(stamped);
+    return stamped;
+  },
+};
+
+/* ------------------------------- Unit practice -------------------------------- */
+
+/** Local-only like mediaProgressRepo; joins sync with it. */
+// TODO(2026-12-13): sync practice_progress with the engagement sprint (S5, ADR-0016).
+export const practiceRepo = {
+  async all(database: AppDatabase = db): Promise<PracticeRecord[]> {
+    return database.practice_progress.filter((p) => !p.deleted).toArray();
+  },
+  async put(record: PracticeRecord, database: AppDatabase = db): Promise<PracticeRecord> {
+    const stamped = stamp(record);
+    await database.practice_progress.put(stamped);
     return stamped;
   },
 };

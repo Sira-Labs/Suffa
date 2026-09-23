@@ -3,7 +3,7 @@
  * already store, so the same rules can later run on the server as the authoritative copy.
  * XP rewards effortful recall and finished listening, not raw volume.
  */
-import type { MediaProgress, ReviewLog, ReviewRating } from '@/types';
+import type { MediaProgress, PracticeRecord, ReviewLog, ReviewRating } from '@/types';
 import { localDay } from '@/services/today';
 
 export const XP_RULES = {
@@ -16,6 +16,8 @@ export const XP_RULES = {
   trackHeard: 5,
   /** Bonus when every track of a lesson is heard. */
   lessonComplete: 15,
+  /** First success with an item of a unit skill (read, write, speak, verbs). */
+  itemPractised: 2,
 } as const;
 
 /** Share of a track that must actually be played to count as heard. */
@@ -24,7 +26,7 @@ export const HEARD_THRESHOLD = 0.85;
 export interface XpEvent {
   at: string;
   points: number;
-  kind: 'review' | 'new-card' | 'track' | 'lesson';
+  kind: 'review' | 'new-card' | 'track' | 'lesson' | 'practice';
   ref: string;
 }
 
@@ -87,6 +89,18 @@ export function listeningXpEvents(
     events.push({ at, points: XP_RULES.lessonComplete, kind: 'lesson', ref: lessonKey });
   }
   return events;
+}
+
+/** XP events from unit practice: one per item first practised successfully. */
+export function practiceXpEvents(records: PracticeRecord[]): XpEvent[] {
+  return records
+    .filter((r) => !r.deleted)
+    .map((r) => ({
+      at: r.practisedAt,
+      points: XP_RULES.itemPractised,
+      kind: 'practice' as const,
+      ref: r.id,
+    }));
 }
 
 /** Sum of XP within [from, now]. */

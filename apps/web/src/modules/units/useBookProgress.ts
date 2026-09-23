@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { AudioUnit, ExamResult, PublisherAudioIndex } from '@/types';
+import type { AudioUnit, ExamResult, PracticeSkill, PublisherAudioIndex } from '@/types';
 import { content, unitInfos } from '@/content';
 import { loadPublisherIndex, trackId } from '@/services/audio/publisherIndex';
 import { examRepo } from '@/services/storage';
@@ -14,18 +14,27 @@ import {
   type Station,
   type VocabStats,
 } from '@/services/units';
-import { useContentStore, useListenStore, useSrsStore } from '@/state';
+import { useContentStore, useListenStore, usePracticeStore, useSrsStore } from '@/state';
+import { PRACTICE_SKILLS, practiceCount, unitPracticeItems } from '@/services/practice';
 
 /** Share of a unit test that counts as passed. */
 const PASS_RATIO = 0.8;
 /** A card is "sure" once its interval reaches three weeks (same rule as mastery). */
 const MATURE_DAYS = 21;
 
+/** One ring in the unit header: how far a skill is in this unit. */
+export interface SkillProgress {
+  key: 'listen' | 'words' | PracticeSkill;
+  done: number;
+  total: number;
+}
+
 export interface UnitOverview {
   unit: AudioUnit;
   title: string | null;
   stations: Station[];
   progress: ReturnType<typeof unitProgress>;
+  skills: SkillProgress[];
 }
 
 /**
@@ -42,6 +51,7 @@ export function useBookProgress(): {
   const listening = useListenStore((s) => s.progress);
   const cards = useSrsStore((s) => s.cards);
   const userVocab = useContentStore((s) => s.userVocab);
+  const practiced = usePracticeStore((s) => s.records);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,21 +91,46 @@ export function useBookProgress(): {
             e.total > 0 &&
             e.score / e.total >= PASS_RATIO
         );
+        const items = unitPracticeItems(content, unit.unit);
+        const practice = Object.fromEntries(
+          PRACTICE_SKILLS.map((skill) => [
+            skill,
+            {
+              done: practiceCount(practiced, unit.unit, skill, items[skill]),
+              total: items[skill].length,
+            },
+          ])
+        ) as Record<PracticeSkill, { done: number; total: number }>;
+        const isHeard = (url: string) =>
+          Boolean(listening[trackId(index.book, url)]?.completedAt);
+        const tracks = unit.lessons.flatMap((l) => l.tracks);
+        const allSkills: SkillProgress[] = [
+          {
+            key: 'listen',
+            done: tracks.filter((t) => isHeard(t.url)).length,
+            total: tracks.length,
+          },
+          { key: 'words', done: vocab.started, total: vocab.total },
+          ...PRACTICE_SKILLS.map((skill) => ({ key: skill, ...practice[skill] })),
+        ];
+        const skills = allSkills.filter((sk) => sk.total > 0);
         const stations = unitStations({
           unit,
-          isHeard: (url) => Boolean(listening[trackId(index.book, url)]?.completedAt),
+          isHeard,
           vocab,
           testPassed,
           videos: videoStation(videoData, unit.unit),
+          practice,
         });
         return {
           unit,
           title: titles.get(unit.unit) ?? null,
           stations,
           progress: unitProgress(stations),
+          skills,
         };
       });
-  }, [index, cards, userVocab, listening, exams, videoData]);
+  }, [index, cards, userVocab, listening, exams, videoData, practiced]);
 
   return { index, units };
 }

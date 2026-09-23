@@ -11,6 +11,7 @@ import Dexie, { type Table } from 'dexie';
 import type {
   ExamResult,
   MediaProgress,
+  PracticeRecord,
   ReviewLog,
   SettingsRecord,
   SrsCard,
@@ -43,6 +44,8 @@ export class AppDatabase extends Dexie {
   sync_meta!: Table<SyncMeta, string>;
   /** Local-only until the server has the table (not part of syncableTables yet). */
   media_progress!: Table<MediaProgress, string>;
+  /** Local-only like media_progress: practised items of the unit skills. */
+  practice_progress!: Table<PracticeRecord, string>;
 
   constructor(name = 'bayna-yadayk') {
     super(name);
@@ -59,6 +62,10 @@ export class AppDatabase extends Dexie {
     // v2: listening progress (ADR-0018); existing tables are unchanged.
     this.version(2).stores({
       media_progress: 'id, lessonKey, completedAt, updated_at, deleted',
+    });
+    // v3: unit skill practice (reading, writing, speaking, verbs); existing tables unchanged.
+    this.version(3).stores({
+      practice_progress: 'id, unit, skill, updated_at, deleted',
     });
   }
 }

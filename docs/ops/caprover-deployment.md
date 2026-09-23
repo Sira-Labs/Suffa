@@ -14,25 +14,25 @@ Internet ─▶ CapRover nginx (TLS) ─▶ suffa-web (Caddy :80) ─/api──�
                                                   suffa-worker (api image, ROLE=worker)┘
 ```
 
-> **Status:** the api/worker images arrive in Sprints 1–2 (`docs/plan/sprint-plan.md`). Until
-> then only `suffa-web` (the current offline PWA, static) can be deployed. The steps below are
-> the target setup.
+> **Status:** `suffa-web` serves the full offline app; `suffa-api` is a skeleton (health,
+> migrations, worker heartbeat) that grows sprint by sprint (`docs/plan/sprint-plan.md`).
 
 ## Quick start: one-click templates (YAML)
 
 Two templates live in `infra/caprover/one-click/`. In CapRover: **Apps → One-Click
 Apps/Databases → `>> TEMPLATE <<`**, paste the file, enter the app name **`suffa`**, deploy.
 
-| Template         | Creates                                              | Use when                                             |
-| ---------------- | ---------------------------------------------------- | ---------------------------------------------------- |
-| `suffa.yml`      | `suffa-web`, `suffa-db`                              | **Now** — offline PWA + database (api not built yet) |
-| `suffa-full.yml` | `suffa-db`, `suffa-api`, `suffa-worker`, `suffa-web` | From Sprint 2, once the `suffa-api` image exists     |
+| Template         | Creates                                              | Use when                                                                               |
+| ---------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `suffa.yml`      | `suffa-web`, `suffa-db`                              | Just the offline app + database                                                        |
+| `suffa-full.yml` | `suffa-db`, `suffa-api`, `suffa-worker`, `suffa-web` | **Recommended** — full stack (api is a skeleton: health, migrations, worker heartbeat) |
 
-Before the first deploy: the repository is **private**, so its GHCR images are private too.
-Either add `ghcr.io` under **Cluster → Docker Registries** (GitHub user + token with
-`read:packages`) or make the packages public. The `suffa-web` image is built by
-`.github/workflows/release.yml` on every push to `main`. For deploying without GHCR, the
-root `captain-definition` builds the same image on the server (method 3 in Tabayyun's guide).
+The images are built by `.github/workflows/release.yml` on every push to `main` and
+published **publicly** on GHCR (`ghcr.io/thedatadudech/suffa-web`, `suffa-api`), so CapRover
+needs no registry credentials. If a pull ever fails with `unauthorized`, open the package on
+GitHub (Packages → suffa-web / suffa-api → Package settings) and set its visibility to public.
+For deploying without GHCR, the root `captain-definition` builds the same image on the server
+(method 3 in Tabayyun's guide).
 
 ## What to create
 

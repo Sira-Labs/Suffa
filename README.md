@@ -135,7 +135,8 @@ push them to GHCR, and CapRover runs them.
    or [`suffa-full.yml`](infra/caprover/one-click/suffa-full.yml) (db, api, worker, web).
 3. Enter the app name **`suffa`**, then deploy.
 
-The repository is private, so add `ghcr.io` under **Cluster → Docker Registries** first.
+The images are public on GHCR (`ghcr.io/thedatadudech/suffa-web`, `suffa-api`), so CapRover
+needs no registry credentials.
 Step-by-step guide, env vars and troubleshooting: [docs/ops/caprover-deployment.md](docs/ops/caprover-deployment.md).
 
 ## Device sync with Supabase (current)

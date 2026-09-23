@@ -1,19 +1,13 @@
-# CapRover one-click template for Suffa.
-# Use: CapRover → Apps → One-Click Apps/Databases → scroll to ">> TEMPLATE <<" →
-#      paste this file → enter an app name (e.g. "suffa") → Deploy.
-# Creates:  <name>-web  (Caddy + offline PWA, public)   <name>-db  (Postgres 17 + pgvector)
-# The api and worker services are added to this template when their images exist (Sprint 2).
-# Mirrors the Tabayyun CapRover layout; runbook: docs/ops/caprover-deployment.md
+# Suffa — CapRover one-click template: web + db.
+#
+# Use: CapRover → Apps → One-Click Apps/Databases → ">> TEMPLATE <<" → paste this file →
+#      app name "suffa" → Deploy.
+# Creates: suffa-web (Caddy serving the offline PWA; public domain) and
+#          suffa-db  (Postgres 17 + pgvector; internal only).
+# Images are built by .github/workflows/release.yml and published publicly on GHCR.
+# For api + worker as well, use suffa-full.yml instead. Runbook: docs/ops/caprover-deployment.md
 captainVersion: 4
 services:
-  $$cap_appname-web:
-    image: $$cap_web_image:$$cap_web_tag
-    restart: always
-    environment:
-      SUFFA_API_UPSTREAM: srv-captain--$$cap_appname-api:8000
-      SUFFA_MEDIA_UPSTREAM: srv-captain--$$cap_rustfs_app:9000
-    caproverExtra:
-      containerHttpPort: '80'
   $$cap_appname-db:
     image: pgvector/pgvector:$$cap_pg_tag
     restart: always
@@ -25,17 +19,23 @@ services:
       POSTGRES_PASSWORD: $$cap_db_password
     caproverExtra:
       notExposeAsWebApp: 'true'
+
+  $$cap_appname-web:
+    image: ghcr.io/thedatadudech/suffa-web:$$cap_tag
+    restart: always
+    environment:
+      # Until suffa-api exists, /api answers 502; the offline app is unaffected.
+      SUFFA_API_UPSTREAM: srv-captain--$$cap_appname-api:8000
+      SUFFA_MEDIA_UPSTREAM: srv-captain--$$cap_rustfs_app:9000
+    caproverExtra:
+      containerHttpPort: '80'
+
 caproverOneClickApp:
   variables:
-    - id: $$cap_web_image
-      label: Web image
-      defaultValue: ghcr.io/thedatadudech/suffa-web
-      description: Built by .github/workflows/release.yml. The repository is private, so add ghcr.io under Cluster → Docker Registries first (GitHub user + token with read:packages).
-      validRegex: /^[a-z0-9./_-]+$/
-    - id: $$cap_web_tag
-      label: Web image tag
+    - id: $$cap_tag
+      label: Image tag
       defaultValue: latest
-      description: Use an immutable sha-<short> tag in production; CI redeploys with it on every push to main.
+      description: latest follows main. For production use an immutable sha-<short> tag; CI redeploys with those.
       validRegex: /^[A-Za-z0-9._-]+$/
     - id: $$cap_pg_tag
       label: pgvector/Postgres image tag
@@ -45,7 +45,7 @@ caproverOneClickApp:
     - id: $$cap_db_password
       label: Database password
       defaultValue: $$cap_gen_random_hex(24)
-      description: Hex is safe inside the database URL. Stored as POSTGRES_PASSWORD on the db app.
+      description: Generated. Hex is safe inside a database URL.
       validRegex: /^[A-Za-z0-9]{16,}$/
     - id: $$cap_rustfs_app
       label: Existing RustFS app name
@@ -54,18 +54,17 @@ caproverOneClickApp:
       validRegex: /^[a-z0-9-]+$/
   instructions:
     start: >-
-      Deploys the Suffa web app (offline-first Arabic learning PWA served by Caddy) and its
-      Postgres 17 + pgvector database, following the same layout as Tabayyun.
-      Before you start: if the GHCR package is private, add ghcr.io under
-      Cluster → Docker Registries.
+      Deploys Suffa (offline-first Arabic learning platform): the web app (Caddy + PWA) and
+      its database (Postgres 17 + pgvector), in the same layout as Tabayyun. Use the app name
+      "suffa" so the apps are called suffa-web and suffa-db.
     end: >-
-      Done. Next steps: (1) open the $$cap_appname-web app → HTTP Settings → connect your
-      domain, Enable HTTPS, Force HTTPS. (2) Deployment tab → Enable App Token and store it
-      as the GitHub secret CAPROVER_APP_TOKEN_WEB; set the repository variable
-      CAPROVER_SERVER=https://captain.<root-domain>. (3) The database is internal only at
-      srv-captain--$$cap_appname-db:5432 (user and db "suffa"; the password is in the db
-      app's environment variables). /api and /media answer 502 until suffa-api ships.
+      Done. Next: (1) $$cap_appname-web → HTTP Settings → connect your domain, Enable HTTPS,
+      Force HTTPS. (2) Deployment tab → Enable App Token → store it as the GitHub secret
+      CAPROVER_APP_TOKEN_WEB and set the repository variable
+      CAPROVER_SERVER=https://captain.<root-domain>, so every push to main redeploys.
+      (3) The database is internal at srv-captain--$$cap_appname-db:5432 (user and db
+      "suffa"; the password is in the db app's environment variables).
   displayName: Suffa (web + db)
   isOfficial: false
-  description: Offline-first Arabic learning platform (Al-Arabiyya bayna Yadayk) — web app and database.
-  documentation: See docs/ops/caprover-deployment.md in the suffa repository (github.com/thedatadudech/suffa).
+  description: Offline-first Arabic learning platform (الصُّفَّة) — web app and database.
+  documentation: https://github.com/thedatadudech/suffa/blob/main/docs/ops/caprover-deployment.md

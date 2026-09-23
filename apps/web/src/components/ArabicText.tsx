@@ -7,7 +7,7 @@ interface ArabicTextProps {
   children: string;
   /** Overrides the global tashkīl level for this one spot. */
   level?: TashkilLevel;
-  size?: 'normal' | 'lg';
+  size?: 'normal' | 'lg' | 'hero';
   className?: string;
   style?: CSSProperties;
   /** Read aloud on click (TTS) – enabled in interactive modules. */
@@ -45,9 +45,8 @@ export function ArabicText({
   const globalLevel = useSettingsStore((s) => s.settings.tashkilLevel);
   const effective = level ?? globalLevel;
   const rendered = applyTashkilLevel(children, effective);
-  const cls = ['arabic', size === 'lg' ? 'arabic-lg' : '', className]
-    .filter(Boolean)
-    .join(' ');
+  const sizeClass = size === 'lg' ? 'arabic-lg' : size === 'hero' ? 'arabic-hero' : '';
+  const cls = ['arabic', sizeClass, className].filter(Boolean).join(' ');
   return (
     <span
       lang="ar"

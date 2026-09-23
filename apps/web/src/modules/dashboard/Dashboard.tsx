@@ -10,19 +10,32 @@ import {
   CartesianGrid,
 } from 'recharts';
 import type { ReviewLog } from '@/types';
+import { content } from '@/content';
+import { ArabicText } from '@/components';
+import { Icon } from '@/components/Icon';
 import { reviewLogRepo } from '@/services/storage';
+import { isTtsSupported, speakArabic } from '@/services/speech';
 import {
   computeStreak,
   forgettingCurve,
   masteryBuckets,
-  nextRecommendation,
   reviewHeatmap,
 } from '@/services/stats';
-import { useSrsStore } from '@/state';
+import { buildTodayPlan, reviewsToday, wordOfTheDay } from '@/services/today';
+import type { TodayStep } from '@/services/today';
+import { useSettingsStore, useSrsStore } from '@/state';
 
+const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+});
+
+/** "Heute": today's path with one clear next step, the word of the day, then progress. */
 export function Dashboard() {
   const cards = useSrsStore((s) => s.cards);
   const summary = useSrsStore((s) => s.summary)();
+  const dailyGoal = useSettingsStore((s) => s.settings.dailyGoal);
   const [logs, setLogs] = useState<ReviewLog[]>([]);
 
   useEffect(() => {
@@ -33,100 +46,232 @@ export function Dashboard() {
   const streak = computeStreak(logs);
   const curve = forgettingCurve(cards);
   const heat = reviewHeatmap(logs);
-  const rec = nextRecommendation(summary.dueCount, summary.newCount, summary.leechCount);
   const maxHeat = Math.max(1, ...heat.map((h) => h.count));
+  const today = reviewsToday(logs);
+  const plan = buildTodayPlan({
+    dueCount: summary.dueCount,
+    newCount: summary.newCount,
+    leechCount: summary.leechCount,
+    dailyGoal,
+    reviewedToday: today.reviewed,
+    newLearnedToday: today.newLearned,
+  });
+  const current = plan.steps.find((s) => s.state === 'current');
+  const word = wordOfTheDay(content.vokabeln);
 
   return (
-    <div className="stack">
-      <h1 style={{ margin: 0 }}>Übersicht</h1>
-
-      <div
-        className="grid"
-        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}
+    <div className="stack" style={{ gap: '1.5rem' }}>
+      <header
+        className="row"
+        style={{ justifyContent: 'space-between', alignItems: 'flex-end' }}
       >
-        <Stat label="Fällig heute" value={summary.dueCount} accent="var(--info)" />
-        <Stat label="Neu verfügbar" value={summary.newCount} accent="var(--accent)" />
-        <Stat label="Streak" value={`${streak} 🔥`} accent="var(--warn)" />
-        <Stat label="Reif" value={mastery.reif} accent="var(--good)" />
-        <Stat label="Schwierig" value={summary.leechCount} accent="var(--bad)" />
-      </div>
-
-      <div className="card stack">
-        <strong>Was als Nächstes?</strong>
-        <div className="row" style={{ justifyContent: 'space-between' }}>
-          <span>{rec.text}</span>
-          <Link className="btn btn-accent" to={rec.to}>
-            Los geht’s
-          </Link>
+        <div className="stack" style={{ gap: '0.25rem' }}>
+          <span className="muted">{DATE_FORMAT.format(new Date())}</span>
+          <h1>Ahlan wa sahlan</h1>
         </div>
+        <span
+          className="badge"
+          style={{ fontSize: '0.9rem', padding: '0.35rem 0.75rem' }}
+        >
+          <span style={{ color: 'var(--accent)', display: 'inline-flex' }}>
+            <Icon name="flame" size={16} />
+          </span>
+          {streak === 0 ? (
+            'Heute starten'
+          ) : (
+            <>
+              {streak === 1 ? '1 Tag' : `${streak} Tage`}
+              <span className="visually-hidden"> in Folge gelernt</span>
+            </>
+          )}
+        </span>
+      </header>
+
+      <div className="today-grid">
+        <section
+          className="card stack"
+          aria-labelledby="today-path"
+          style={{ gap: '1.25rem' }}
+        >
+          <div className="row" style={{ justifyContent: 'space-between' }}>
+            <h2 id="today-path" className="eyebrow">
+              Dein Weg heute
+            </h2>
+            <span className="muted" style={{ fontSize: '0.9rem' }}>
+              ≈ {plan.minutes} Min.
+            </span>
+          </div>
+          <ol className="today-steps">
+            {plan.steps.map((step, i) => (
+              <TodayStepItem key={step.id} step={step} index={i + 1} />
+            ))}
+          </ol>
+          {current ? (
+            <Link className="btn btn-primary btn-lg" to={current.to}>
+              Weiterlernen
+              <Icon name="arrowRight" size={20} />
+            </Link>
+          ) : (
+            <p className="feedback-good" style={{ margin: 0, fontWeight: 600 }}>
+              Alles erledigt für heute. Masha’Allah!
+            </p>
+          )}
+        </section>
+
+        {word && (
+          <section
+            className="paper stack"
+            aria-labelledby="word-of-day"
+            style={{ gap: '0.5rem' }}
+          >
+            <div className="row" style={{ justifyContent: 'space-between' }}>
+              <h2
+                id="word-of-day"
+                className="eyebrow"
+                style={{ color: 'var(--on-paper-muted)' }}
+              >
+                Wort des Tages
+              </h2>
+              {isTtsSupported() && (
+                <button
+                  type="button"
+                  className="icon-button icon-button-paper"
+                  onClick={() => speakArabic(word.ar)}
+                  aria-label={`${word.de} anhören`}
+                >
+                  <Icon name="volume" size={20} />
+                </button>
+              )}
+            </div>
+            <ArabicText size="hero" style={{ textAlign: 'right' }}>
+              {word.ar}
+            </ArabicText>
+            <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>{word.de}</p>
+            <p className="muted" style={{ margin: 0 }}>
+              Wurzel <span className="arabic-inline">{word.wurzel}</span>
+              {word.plural ? (
+                <>
+                  {' · Plural '}
+                  <span className="arabic-inline">{word.plural}</span>
+                </>
+              ) : null}
+            </p>
+          </section>
+        )}
       </div>
 
-      <div className="card stack">
-        <strong>Beherrschung</strong>
-        <MasteryBar mastery={mastery} />
-      </div>
-
-      <div className="card stack">
-        <strong>Vergessenskurve (geschätzte Retention ohne Wiederholung)</strong>
-        <div style={{ width: '100%', height: 220 }}>
-          <ResponsiveContainer>
-            <LineChart data={curve} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="day"
-                stroke="var(--text-muted)"
-                tickLine={false}
-                label={{
-                  value: 'Tage',
-                  position: 'insideBottom',
-                  offset: -2,
-                  fill: 'var(--text-muted)',
-                }}
-              />
-              <YAxis domain={[0, 1]} stroke="var(--text-muted)" tickLine={false} />
-              <Tooltip
-                contentStyle={{
-                  background: 'var(--bg-elev-2)',
-                  border: '1px solid var(--border)',
-                }}
-                formatter={(v: number) => [`${Math.round(v * 100)} %`, 'Retention']}
-              />
-              <Line
-                type="monotone"
-                dataKey="retention"
-                stroke="var(--accent)"
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+      <section className="stack" aria-labelledby="progress" style={{ gap: '1rem' }}>
+        <h2 id="progress" className="eyebrow">
+          Fortschritt
+        </h2>
+        <div
+          className="grid"
+          style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}
+        >
+          <Stat label="Fällig heute" value={summary.dueCount} accent="var(--info)" />
+          <Stat label="Neu verfügbar" value={summary.newCount} accent="var(--accent)" />
+          <Stat label="Reif" value={mastery.reif} accent="var(--good)" />
+          <Stat label="Schwierig" value={summary.leechCount} accent="var(--bad)" />
         </div>
-      </div>
 
-      <div className="card stack">
-        <strong>Aktivität (letzte 28 Tage)</strong>
-        <div className="row" style={{ gap: 4 }} aria-label="Wiederholungs-Heatmap">
-          {heat.map((cell) => {
-            const intensity = cell.count / maxHeat;
-            return (
-              <span
-                key={cell.date}
-                title={`${cell.date}: ${cell.count} Wiederholungen`}
-                style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: 3,
-                  background:
-                    cell.count === 0
-                      ? 'var(--bg-elev-2)'
-                      : `color-mix(in srgb, var(--accent) ${20 + intensity * 80}%, transparent)`,
-                }}
-              />
-            );
-          })}
+        <div className="card stack">
+          <strong>Beherrschung</strong>
+          <MasteryBar mastery={mastery} />
         </div>
-      </div>
+        <div className="card stack">
+          <strong>Vergessenskurve (geschätzte Retention ohne Wiederholung)</strong>
+          <div style={{ width: '100%', height: 220 }}>
+            <ResponsiveContainer>
+              <LineChart
+                data={curve}
+                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              >
+                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="day"
+                  stroke="var(--text-muted)"
+                  tickLine={false}
+                  label={{
+                    value: 'Tage',
+                    position: 'insideBottom',
+                    offset: -2,
+                    fill: 'var(--text-muted)',
+                  }}
+                />
+                <YAxis domain={[0, 1]} stroke="var(--text-muted)" tickLine={false} />
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--bg-elev-2)',
+                    border: '1px solid var(--border)',
+                  }}
+                  formatter={(v: number) => [`${Math.round(v * 100)} %`, 'Retention']}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="retention"
+                  stroke="var(--accent)"
+                  strokeWidth={2}
+                  dot={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="card stack">
+          <strong>Aktivität (letzte 28 Tage)</strong>
+          <div className="row" style={{ gap: 4 }} aria-label="Wiederholungs-Heatmap">
+            {heat.map((cell) => {
+              const intensity = cell.count / maxHeat;
+              return (
+                <span
+                  key={cell.date}
+                  title={`${cell.date}: ${cell.count} Wiederholungen`}
+                  style={{
+                    width: 16,
+                    height: 16,
+                    borderRadius: 3,
+                    background:
+                      cell.count === 0
+                        ? 'var(--bg-elev-2)'
+                        : `color-mix(in srgb, var(--accent) ${20 + intensity * 80}%, transparent)`,
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      </section>
     </div>
+  );
+}
+
+function TodayStepItem({ step, index }: { step: TodayStep; index: number }) {
+  const stateLabel =
+    step.state === 'done'
+      ? 'erledigt'
+      : step.state === 'current'
+        ? 'als Nächstes'
+        : 'danach';
+  return (
+    <li className={`today-step today-step-${step.state}`}>
+      <span className="today-step-marker" aria-hidden>
+        {step.state === 'done' ? (
+          <Icon name="check" size={18} strokeWidth={2.5} />
+        ) : (
+          index
+        )}
+      </span>
+      <Link to={step.to} className="today-step-body">
+        <span className="today-step-label">
+          {step.label}
+          <span className="visually-hidden"> ({stateLabel})</span>
+        </span>
+        <span className="muted" style={{ fontSize: '0.9rem' }}>
+          {step.detail}
+        </span>
+      </Link>
+    </li>
   );
 }
 

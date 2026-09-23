@@ -18,6 +18,11 @@ export interface QueueOptions {
   maxCards?: number;
   /** Restrict to certain card kinds (for mode-specific queues). */
   kinds?: CardKind[];
+  /**
+   * Kinds new cards may come from (default: all in `kinds`). Due reviews are unaffected, so a
+   * daily session can review everything but introduce words through vocabulary cards first.
+   */
+  newKinds?: CardKind[];
 }
 
 export interface DueSummary {
@@ -78,7 +83,10 @@ export function buildQueue(cards: SrsCard[], options: QueueOptions = {}): SrsCar
       return new Date(a.due).getTime() - new Date(b.due).getTime();
     });
 
-  const newCards = pool.filter(isNew).slice(0, newLimit);
+  const newKindFilter = options.newKinds ? new Set(options.newKinds) : null;
+  const newCards = pool
+    .filter((c) => isNew(c) && (!newKindFilter || newKindFilter.has(c.kind)))
+    .slice(0, newLimit);
 
   const interleavedReviews = interleaveByKind(dueReviews);
   const interleavedNew = interleaveByKind(newCards);

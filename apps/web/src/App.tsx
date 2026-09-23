@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { SyncBadge } from './components';
 import { Icon } from './components/Icon';
-import { isUnderMore, MORE_PATH, NAV_ITEMS } from './navigation';
+import { FOCUS_PATHS, isUnderMore, MORE_PATH, NAV_ITEMS } from './navigation';
 import { logger } from './services/logger';
 import { useContentStore, useSettingsStore, useSrsStore, useSyncStore } from './state';
 import './styles/global.css';
@@ -69,6 +69,13 @@ function Brand() {
 function Shell() {
   const { pathname } = useLocation();
   const moreActive = isUnderMore(pathname);
+  if (FOCUS_PATHS.includes(pathname)) {
+    return (
+      <main className="focus-main">
+        <Outlet />
+      </main>
+    );
+  }
   return (
     <div className="app-shell">
       <nav className="app-nav" aria-label="Hauptnavigation">

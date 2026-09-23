@@ -1,6 +1,6 @@
 # Suffa — Design system
 
-- Date: 2026-09-23 · Status: in progress (step 1 of 5 shipped) · Mockups: the "Suffa Redesign"
+- Date: 2026-09-23 · Status: in progress (steps 1–2 of 5 shipped) · Mockups: the "Suffa Redesign"
   canvas (7 screens) · Code: `apps/web/src/styles/global.css`, `components/Icon.tsx`,
   `navigation.ts`
 
@@ -63,7 +63,7 @@ precached for offline use (≈ 370 kB); other scripts load on demand.
 | Step | Scope                                                         | Status |
 | ---- | ------------------------------------------------------------- | ------ |
 | 1    | Tokens, fonts, icons, app shell and navigation, "Mehr" page   | ✅     |
-| 2    | "Heute" (today's path, word of the day) and review focus mode | ☐      |
+| 2    | "Heute" (today's path, word of the day) and review focus mode | ✅     |
 | 3    | Unit as a learning path                                       | ☐      |
 | 4    | Listen & read along (player with transcript)                  | ☐      |
 | 5    | Root family and pattern trainer                               | ☐      |

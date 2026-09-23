@@ -201,3 +201,24 @@ describe('Tashkīl tolerance', () => {
     expect(segs.map((s) => s.text).join('')).toContain('ا');
   });
 });
+
+describe('SRS queue: newKinds', () => {
+  it('reviews every kind but takes new cards only from newKinds', () => {
+    const dueNisba: SrsCard = {
+      ...newCard('nisba:egypt', 'nisba'),
+      reps: 2,
+      lastReviewed: '2026-09-01T00:00:00.000Z',
+      due: '2026-09-01T00:00:00.000Z',
+    };
+    const cards = [
+      dueNisba,
+      newCard('plural:x', 'plural'),
+      newCard('vocab:y', 'vocab_ar_de'),
+    ];
+    const queue = buildQueue(cards, {
+      now: new Date('2026-09-23T00:00:00Z'),
+      newKinds: ['vocab_ar_de'],
+    });
+    expect(queue.map((c) => c.id)).toEqual(['nisba:egypt', 'vocab:y']);
+  });
+});

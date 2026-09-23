@@ -22,6 +22,7 @@ const PATHS = {
   arrowRight: 'M5 12h14M13 6l6 6-6 6',
   flame: 'M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-3 2-4 2-7 1 1 2 2 3 4 0-3 0-5 0-8z',
   check: 'M5 12l5 5 9-10',
+  close: 'M6 6l12 12M18 6L6 18',
   play: 'M8 5v14l11-7z',
   volume: 'M4 9v6h4l5 4V5L8 9zM16 9a4 4 0 0 1 0 6M19 6a8 8 0 0 1 0 12',
 } as const;

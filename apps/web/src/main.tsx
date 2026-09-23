@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { registerSW } from 'virtual:pwa-register';
 import { router } from './router';
+import { initErrorTracking } from './services/errorTracking';
 import { logger } from './services/logger';
 
 const log = logger.child('pwa');
@@ -28,3 +29,6 @@ createRoot(rootEl).render(
     <RouterProvider router={router} />
   </StrictMode>
 );
+
+// Nach dem ersten Render, damit der Start nie auf das Netzwerk wartet.
+void initErrorTracking();

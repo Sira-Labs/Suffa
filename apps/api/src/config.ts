@@ -23,6 +23,23 @@ export class ConfigError extends Error {
   }
 }
 
+const DSN = /^https?:\/\/[^@/\s]+@[^/\s]+\/\d+$/;
+
+/** An optional Sentry-style DSN; blank counts as unset (CapRover keeps empty variables). */
+function optionalDsn(name: string) {
+  return z
+    .string()
+    .trim()
+    .transform((value) => value || undefined)
+    .pipe(
+      z
+        .string()
+        .regex(DSN, `${name} must look like https://<key>@<host>/<project id>`)
+        .optional()
+    )
+    .optional();
+}
+
 const RawEnvSchema = z.object({
   SUFFA_ENV: z.enum(['dev', 'test', 'prod']).default('dev'),
   SUFFA_ROLE: z.enum(['api', 'worker']).default('api'),
@@ -38,6 +55,10 @@ const RawEnvSchema = z.object({
   SUFFA_VERSION: z.string().default('dev'),
   SUFFA_WORKER_HEARTBEAT_MS: z.coerce.number().int().min(1000).default(30_000),
   SUFFA_SYNC_DEV_TOKENS: z.string().optional(),
+  /** GlitchTip/Sentry DSN of the suffa-api project; error reporting is off when unset. */
+  SUFFA_ERROR_DSN: optionalDsn('SUFFA_ERROR_DSN'),
+  /** DSN of the suffa-web project, handed to the PWA and used by the /api/errors tunnel. */
+  SUFFA_WEB_ERROR_DSN: optionalDsn('SUFFA_WEB_ERROR_DSN'),
 });
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -85,6 +106,10 @@ export interface Config {
   workerHeartbeatMs: number;
   /** Static bearer tokens → user ids; only outside prod, until Better Auth (ADR-0008). */
   syncDevTokens: Map<string, string>;
+  /** Error reporting (GlitchTip) DSN; undefined disables it. */
+  errorDsn: string | undefined;
+  /** Public DSN of the web project; undefined disables browser error reporting. */
+  webErrorDsn: string | undefined;
 }
 
 function isPlaceholder(value: string): boolean {
@@ -150,6 +175,8 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     version: raw.SUFFA_VERSION,
     workerHeartbeatMs: raw.SUFFA_WORKER_HEARTBEAT_MS,
     syncDevTokens,
+    errorDsn: raw.SUFFA_ERROR_DSN,
+    webErrorDsn: raw.SUFFA_WEB_ERROR_DSN,
   };
 }
 

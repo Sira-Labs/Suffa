@@ -137,6 +137,9 @@ push them to GHCR, and CapRover runs them.
 
 The images are public on GHCR (`ghcr.io/thedatadudech/suffa-web`, `suffa-api`), so CapRover
 needs no registry credentials.
+Optional: [`suffa-backup.yml`](infra/caprover/one-click/suffa-backup.yml) (nightly verified
+backups to RustFS) and [`glitchtip.yml`](infra/caprover/one-click/glitchtip.yml) (error tracking
+and uptime checks, no Redis).
 Step-by-step guide, env vars and troubleshooting: [docs/ops/caprover-deployment.md](docs/ops/caprover-deployment.md).
 
 ## Device sync with Supabase (current)

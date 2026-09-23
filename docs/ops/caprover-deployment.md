@@ -19,13 +19,16 @@ Internet ─▶ CapRover nginx (TLS) ─▶ suffa-web (Caddy :80) ─/api──�
 
 ## Quick start: one-click templates (YAML)
 
-Two templates live in `infra/caprover/one-click/`. In CapRover: **Apps → One-Click
-Apps/Databases → `>> TEMPLATE <<`**, paste the file, enter the app name **`suffa`**, deploy.
+The templates live in `infra/caprover/one-click/`. In CapRover: **Apps → One-Click
+Apps/Databases → `>> TEMPLATE <<`**, paste the file, enter the app name (**`suffa`**, or
+**`glitchtip`** for the error tracker), deploy.
 
-| Template         | Creates                                              | Use when                                                                               |
-| ---------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `suffa.yml`      | `suffa-web`, `suffa-db`                              | Just the offline app + database                                                        |
-| `suffa-full.yml` | `suffa-db`, `suffa-api`, `suffa-worker`, `suffa-web` | **Recommended** — full stack (api is a skeleton: health, migrations, worker heartbeat) |
+| Template           | Creates                                              | Use when                                                                     |
+| ------------------ | ---------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `suffa.yml`        | `suffa-web`, `suffa-db`                              | Just the offline app + database                                              |
+| `suffa-full.yml`   | `suffa-db`, `suffa-api`, `suffa-worker`, `suffa-web` | **Recommended** — full stack (health, migrations, sync endpoints, job queue) |
+| `suffa-backup.yml` | `suffa-backup`                                       | Nightly verified backups into RustFS (§8)                                    |
+| `glitchtip.yml`    | `glitchtip`, `glitchtip-db`                          | Error tracking and uptime checks (§9)                                        |
 
 The images are built by `.github/workflows/release.yml` on every push to `main` and
 published **publicly** on GHCR (`ghcr.io/thedatadudech/suffa-web`, `suffa-api`), so CapRover
@@ -107,6 +110,8 @@ Env (App Configs → Environment variables):
 | `SUFFA_PUBLIC_URL`                                                          | `https://suffa.<domain>`                                                                                | S1          |
 | `SUFFA_DATABASE_URL`                                                        | `postgres://suffa:<password>@srv-captain--suffa-db:5432/suffa`                                          | S1          |
 | `SUFFA_AUTH_SECRET`                                                         | `openssl rand -base64 48`                                                                               | S3          |
+| `SUFFA_ERROR_DSN`                                                           | DSN of the GlitchTip project `suffa-api` (§9); unset = no error reporting                               | S2          |
+| `SUFFA_WEB_ERROR_DSN`                                                       | DSN of the GlitchTip project `suffa-web` (§9), handed to the PWA via `/api/client-config`               | S2          |
 | `SUFFA_SYNC_DEV_TOKENS`                                                     | **never in prod** (the api refuses to start): `token=userUuid;…` for local/test sync before Better Auth | dev only    |
 | `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                              | S7          |
 | `SUFFA_SMTP_URL`                                                            | `smtps://user:pass@smtp.provider:465`                                                                   | S3          |
@@ -298,12 +303,75 @@ against losing the server. Add a second, off-site target (e.g. Hetzner Storage B
 Storage, Backblaze B2) as soon as real learner data exists; recordings in `suffa-media` join
 the backup when the recordings feature ships (ADR-0017).
 
-## 9. Capacity with Tabayyun on the same server
+## 9. Error tracking and uptime (GlitchTip)
+
+GlitchTip is Sentry-compatible and runs on the same CapRover: one container (web + background
+worker) plus its own Postgres, **no Redis**. Suffa sends errors only, never personal data:
+no user info, cookies, headers, query strings or request bodies, and no session pings.
+
+```
+browser ──/api/errors──▶ suffa-api (tunnel: checks DSN, 256 KB cap, rate limit) ──▶ GlitchTip
+suffa-api / suffa-worker ─────────────────────────────────────────────────────────▶ GlitchTip
+```
+
+The browser never talks to GlitchTip directly: ad blockers cannot drop the reports, the CSP
+stays `connect-src 'self'`, and GlitchTip does not see learners' IP addresses.
+
+### 9.1 Deploy GlitchTip
+
+1. One-click → `>> TEMPLATE <<` → paste [`infra/caprover/one-click/glitchtip.yml`](../../infra/caprover/one-click/glitchtip.yml)
+   → app name **`glitchtip`** → Deploy (creates `glitchtip` and `glitchtip-db`).
+2. `glitchtip` → HTTP Settings → **Enable HTTPS** (and Force HTTPS).
+3. Open `https://glitchtip.<root domain>` and **register right away**: registration is closed,
+   only the very first account is allowed. Create the organization **Suffa**.
+4. Check the app log: it must not mention `redis:6379`. If it does, CapRover dropped the empty
+   variable: add `VALKEY_URL` with an empty value under App Configs and **Save & Update**.
+
+### 9.2 Connect Suffa
+
+1. In GlitchTip create two projects: **`suffa-api`** (platform Node.js) and **`suffa-web`**
+   (platform Browser JavaScript). Each shows its DSN under Settings → Client Keys.
+2. `suffa-api` → env: `SUFFA_ERROR_DSN=<DSN suffa-api>` and `SUFFA_WEB_ERROR_DSN=<DSN suffa-web>`.
+3. `suffa-worker` → env: `SUFFA_ERROR_DSN=<DSN suffa-api>` (the `role` tag tells api and
+   worker apart).
+4. **Save & Update** both apps. The start log shows `"errorTracking":true`.
+
+### 9.3 Verify (acceptance of story 2.4)
+
+```bash
+# a test error from the server, tagged with the deployed release (sha-…)
+docker exec $(docker ps -q -f name=srv-captain--suffa-api) node dist/error-test.js
+```
+
+In GlitchTip → suffa-api: _"Suffa error tracking test (sha-…)"_ with release `sha-…`,
+environment `prod` and tag `role: api`. For the browser, open the app, then in the browser
+console run `setTimeout(() => { throw new Error('browser test') })`; it appears in
+suffa-web with the same release.
+
+### 9.4 Uptime checks and alerts
+
+GlitchTip → Uptime Monitors → **New**:
+
+| Name        | URL                                           | Interval | Expect |
+| ----------- | --------------------------------------------- | -------- | ------ |
+| Suffa       | `https://suffa-web.<root domain>/healthz`     | 60 s     | 200    |
+| Suffa (PWA) | `https://suffa-web.<root domain>/healthz-web` | 5 min    | 200    |
+
+`/healthz` answers 503 when the database is unreachable, the schema is behind or the job queue
+is missing, so one monitor covers api, database and queue. Alerts: Project → Alerts → e-mail
+(needs a real `EMAIL_URL`, e.g. `smtp+tls://user:password@smtp.example.com:587`) or a webhook
+(Discord, Slack, ntfy …). Retention: 90 days by default (`GLITCHTIP_RETENTION_DAYS`).
+
+GlitchTip's own database is **not** covered by `suffa-backup`; losing it only loses the error
+history. Back it up the same way if you want to keep that.
+
+## 10. Capacity with Tabayyun on the same server
 
 Tabayyun's guidance is 2 vCPU / 4 GB for its api + web. Suffa adds roughly 1–1.5 GB RAM
 (api, worker, Postgres). Transcoding is CPU-heavy: keep `SUFFA_TRANSCODE_CONCURRENCY=1`, and
 if you choose `faster-whisper` in the worker, run transcription at night. Recommended: **8 GB
 RAM / 4 vCPU** for both apps together; watch disk (RustFS holds recordings for both).
+GlitchTip adds about 300–500 MB RAM (app + its Postgres) and a little disk for 90 days of events.
 
 ## Troubleshooting
 
@@ -313,4 +381,7 @@ RAM / 4 vCPU** for both apps together; watch disk (RustFS holds recordings for b
 | Media URLs return `SignatureDoesNotMatch`             | Host header not rewritten or endpoint differs between API and Caddy | Same value for `SUFFA_S3_ENDPOINT` host and `SUFFA_MEDIA_UPSTREAM`; keep `header_up Host` |
 | Media `AccessDenied`                                  | key policy misses a bucket or `ListBucket`                          | Re-check policy in §2                                                                     |
 | Worker exits code 3 repeatedly                        | api not yet migrated / version mismatch                             | Deploy api first; never run two api versions against one DB                               |
+| No events in GlitchTip                                | DSN missing/wrong, or HTTPS not enabled on `glitchtip`              | Start log shows `"errorTracking":true`; run `node dist/error-test.js`; check the DSN      |
+| Browser errors missing, server errors arrive          | `SUFFA_WEB_ERROR_DSN` unset or the DSN of the wrong project         | `https://<suffa>/api/client-config` must show the suffa-web DSN                           |
+| GlitchTip log `redis:6379` connection refused         | empty `VALKEY_URL` was dropped                                      | Add `VALKEY_URL` with an empty value, **Save & Update**                                   |
 | API refuses to start in prod                          | placeholder or short secret                                         | Generate secrets as above, **Save & Update**                                              |

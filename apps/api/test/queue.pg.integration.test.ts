@@ -7,13 +7,19 @@ import { join } from 'node:path';
 import pg from 'pg';
 import type { PgBoss } from 'pg-boss';
 import { pino } from 'pino';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { MAINTENANCE_QUEUE, registerMaintenance } from '../src/jobs/maintenance.js';
 import { DEAD_LETTER_QUEUE, QUEUES, queueDepth, startBoss } from '../src/jobs/queue.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
+import type { ErrorReporter } from '../src/observability/errors.js';
 
 const url = process.env.SUFFA_TEST_DATABASE_URL;
 const log = pino({ level: 'silent' });
+const errors = {
+  enabled: true,
+  capture: vi.fn(),
+  flush: async () => undefined,
+} satisfies ErrorReporter;
 
 async function until(check: () => Promise<boolean>, timeoutMs = 15_000): Promise<void> {
   const deadline = Date.now() + timeoutMs;
@@ -81,7 +87,7 @@ describe.skipIf(!url)('job queue (Postgres)', () => {
          ('worker', 'live-container', 'sha-new', now())`
     );
     worker = await startBoss({ databaseUrl: url!, role: 'worker', log });
-    await registerMaintenance(worker, pool, log);
+    await registerMaintenance(worker, pool, log, errors);
 
     const schedules = await worker.getSchedules(MAINTENANCE_QUEUE);
     expect(schedules.map((s) => s.key)).toContain('prune-heartbeats');
@@ -95,7 +101,7 @@ describe.skipIf(!url)('job queue (Postgres)', () => {
     expect(rows).toEqual([{ instance: 'live-container' }]);
   });
 
-  it('rejects unknown maintenance payloads instead of silently completing them', async () => {
+  it('fails and reports unknown maintenance payloads instead of completing them', async () => {
     const id = await api.send(
       MAINTENANCE_QUEUE,
       { task: 'drop-everything' },
@@ -105,5 +111,9 @@ describe.skipIf(!url)('job queue (Postgres)', () => {
       const [job] = await api.findJobs(MAINTENANCE_QUEUE, { id: id! });
       return job?.state === 'failed';
     });
+    expect(errors.capture).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'ZodError' }),
+      { queue: MAINTENANCE_QUEUE, jobId: id }
+    );
   });
 });

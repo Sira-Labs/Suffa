@@ -19,7 +19,10 @@ COPY apps/web/package.json apps/web/
 COPY apps/api/package.json apps/api/
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 COPY apps/web apps/web
-RUN npm run build -w @suffa/web
+# Release tag (sha-…) attached to browser error reports, matching the api's SUFFA_VERSION.
+# Declared this late because it changes on every commit and would bust the npm ci cache.
+ARG SUFFA_VERSION="dev"
+RUN VITE_SUFFA_VERSION=$SUFFA_VERSION npm run build -w @suffa/web
 
 FROM caddy:2-alpine AS web
 COPY infra/caddy/Caddyfile /etc/caddy/Caddyfile

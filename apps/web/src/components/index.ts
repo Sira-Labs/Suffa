@@ -5,3 +5,4 @@ export * from './Feedback';
 export * from './RatingButtons';
 export * from './SyncBadge';
 export * from './RecallInput';
+export * from './RouteError';

@@ -8,6 +8,7 @@ import type { PgBoss, Job } from 'pg-boss';
 import type { Logger } from 'pino';
 import { z } from 'zod';
 import type { SqlPool } from '../migrate.js';
+import type { ErrorReporter } from '../observability/errors.js';
 import type { QueueName } from './queue.js';
 
 export const MAINTENANCE_QUEUE: QueueName = 'maintenance';
@@ -58,12 +59,21 @@ export async function runMaintenance(
 export async function registerMaintenance(
   boss: PgBoss,
   pool: SqlPool,
-  log: Pick<Logger, 'info'>
+  log: Pick<Logger, 'info'>,
+  errors: ErrorReporter
 ): Promise<void> {
   for (const { cron, job } of MAINTENANCE_SCHEDULES) {
     await boss.schedule(MAINTENANCE_QUEUE, cron, job, { key: job.task, tz: 'UTC' });
   }
   await boss.work(MAINTENANCE_QUEUE, async (jobs: Job<unknown>[]) => {
-    for (const job of jobs) await runMaintenance(pool, job.data, log);
+    for (const job of jobs) {
+      try {
+        await runMaintenance(pool, job.data, log);
+      } catch (error) {
+        // Reported on every attempt; pg-boss still retries and finally dead-letters it.
+        errors.capture(error, { queue: MAINTENANCE_QUEUE, jobId: job.id });
+        throw error;
+      }
+    }
   });
 }

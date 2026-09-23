@@ -20,6 +20,27 @@ describe('loadConfig', () => {
     expect(config.role).toBe('worker');
   });
 
+  it('accepts an optional error-tracking DSN and treats blank as unset', () => {
+    const dsn = 'https://0123abcd@glitchtip.apps.example.com/1';
+    expect(
+      loadConfig({ SUFFA_DATABASE_URL: GOOD_DB, SUFFA_ERROR_DSN: dsn }).errorDsn
+    ).toBe(dsn);
+    expect(
+      loadConfig({ SUFFA_DATABASE_URL: GOOD_DB, SUFFA_ERROR_DSN: '  ' }).errorDsn
+    ).toBeUndefined();
+    expect(loadConfig({ SUFFA_DATABASE_URL: GOOD_DB }).errorDsn).toBeUndefined();
+  });
+
+  it.each([
+    'glitchtip.example.com',
+    'https://glitchtip.example.com/1',
+    'https://k@h/abc',
+  ])('rejects a malformed error-tracking DSN (%s)', (dsn) => {
+    expect(() =>
+      loadConfig({ SUFFA_DATABASE_URL: GOOD_DB, SUFFA_ERROR_DSN: dsn })
+    ).toThrow(/SUFFA_ERROR_DSN/);
+  });
+
   it('requires a database url', () => {
     expect(() => loadConfig({})).toThrow(ConfigError);
   });

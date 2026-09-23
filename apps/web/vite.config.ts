@@ -39,6 +39,8 @@ export default defineConfig({
       workbox: {
         // App-Shell + statische Assets vollständig vorab cachen → offline lauffähig.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
+        // Fehler-Tracking wird nur online und nur bei gesetztem DSN geladen: nicht vorab cachen.
+        globIgnores: ['**/sentry-*.js'],
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
@@ -67,6 +69,12 @@ export default defineConfig({
           charts: ['recharts'],
           supabase: ['@supabase/supabase-js'],
           db: ['dexie'],
+          // Der Wrapper muss mit in den Chunk, sonst landet er im Haupt-Bundle und zieht
+          // Sentry statisch nach (modulepreload für alle, auch ohne Fehler-Tracking).
+          sentry: [
+            '@sentry/browser',
+            fileURLToPath(new URL('./src/services/sentryClient.ts', import.meta.url)),
+          ],
         },
       },
     },

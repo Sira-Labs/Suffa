@@ -34,6 +34,8 @@ export interface BossOptions {
   databaseUrl: string;
   role: 'api' | 'worker';
   log: Pick<Logger, 'error' | 'warn'>;
+  /** Reports internal pg-boss errors (e.g. lost connections) to error tracking. */
+  onError?: (error: Error) => void;
 }
 
 /** Starts pg-boss for a role and makes sure every queue exists (idempotent). */
@@ -48,7 +50,10 @@ export async function startBoss(opts: BossOptions): Promise<PgBoss> {
     supervise: isWorker,
     schedule: isWorker,
   });
-  boss.on('error', (error: Error) => opts.log.error({ err: error }, 'queue.error'));
+  boss.on('error', (error: Error) => {
+    opts.log.error({ err: error }, 'queue.error');
+    opts.onError?.(error);
+  });
   await boss.start();
   await boss.createQueue(DEAD_LETTER_QUEUE);
   for (const name of QUEUES) {

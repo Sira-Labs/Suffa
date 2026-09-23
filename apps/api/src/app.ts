@@ -4,6 +4,7 @@
  */
 import { Hono } from 'hono';
 import type { QueueDepth } from './jobs/queue.js';
+import { createErrorTunnel, type ErrorTunnelDeps } from './observability/tunnel.js';
 import { createSyncRoutes, type SyncRouteDeps } from './sync/routes.js';
 
 export interface HealthProbe {
@@ -20,6 +21,8 @@ export interface AppDeps {
   onProbeError?: (error: unknown) => void;
   /** Sync endpoints; omitted in tests that only exercise health/version. */
   sync?: SyncRouteDeps;
+  /** Browser error reporting: /api/client-config and the /api/errors tunnel. */
+  errorTunnel?: ErrorTunnelDeps;
   /** Called for unhandled errors; the client only sees a generic 500. */
   onUnhandledError?: (error: unknown, path: string) => void;
 }
@@ -67,6 +70,7 @@ export function createApp(deps: AppDeps): Hono {
     })
   );
   if (deps.sync) app.route('/api/v1/sync', createSyncRoutes(deps.sync));
+  if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));
   app.onError((error, c) => {
     deps.onUnhandledError?.(error, c.req.path);

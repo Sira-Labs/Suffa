@@ -95,6 +95,8 @@ jobs:
           curl -fsS http://127.0.0.1:8000/healthz | grep -q '"status":"ok"'
           # The job queue (pg-boss) is installed and its depth reported (ADR-0020).
           curl -fsS http://127.0.0.1:8000/healthz | grep -q '"queue":{"waiting":0'
+          # Error tracking is off without a DSN, and the PWA is told so.
+          curl -fsS http://127.0.0.1:8000/api/client-config | grep -q '"errorDsn":null'
           # Sync stays closed in prod until real authentication exists (ADR-0008).
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/v1/sync/srs_cards/pull)" = 401
           run -d --name worker -e SUFFA_ROLE=worker smoke/suffa-api:test

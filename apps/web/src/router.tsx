@@ -1,5 +1,6 @@
 import { createHashRouter } from 'react-router-dom';
 import { App } from './App';
+import { RouteError } from './components';
 import { Dashboard } from './modules/dashboard';
 import { VocabTrainer } from './modules/vocab';
 import { RootExplorer } from './modules/roots';
@@ -19,6 +20,7 @@ export const router = createHashRouter([
   {
     path: '/',
     element: <App />,
+    errorElement: <RouteError />,
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'vocab', element: <VocabTrainer /> },

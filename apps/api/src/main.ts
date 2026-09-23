@@ -10,6 +10,11 @@ import { pino } from 'pino';
 import { createApp } from './app.js';
 import { registerMaintenance } from './jobs/maintenance.js';
 import { queueDepth, startBoss } from './jobs/queue.js';
+import {
+  createErrorReporter,
+  disabledReporter,
+  type ErrorReporter,
+} from './observability/errors.js';
 import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/resolver.js';
 import { PgSyncRepository } from './sync/repository.js';
 import { ConfigError, loadConfig, redactDatabaseUrl } from './config.js';
@@ -25,6 +30,9 @@ import { runWorker } from './worker.js';
 const MIGRATIONS_DIR = fileURLToPath(new URL('../migrations', import.meta.url));
 /** Running jobs get this long to finish on shutdown; Docker/CapRover sends SIGKILL after 10 s. */
 const JOB_DRAIN_TIMEOUT_MS = 8_000;
+
+/** Module-level so the crash handler below can still report after main() failed. */
+let errors: ErrorReporter = disabledReporter;
 
 async function main(): Promise<void> {
   let config;
@@ -45,13 +53,23 @@ async function main(): Promise<void> {
     level: config.logLevel,
     base: { service: 'suffa', role: config.role },
   });
+  errors = createErrorReporter({
+    dsn: config.errorDsn,
+    release: config.version,
+    environment: config.env,
+    role: config.role,
+  });
   const pool = new pg.Pool({
     connectionString: config.databaseUrl,
     max: config.dbPoolMax,
   });
   pool.on('error', (error) => log.error({ err: error }, 'db.pool_error'));
   log.info(
-    { version: config.version, db: redactDatabaseUrl(config.databaseUrl) },
+    {
+      version: config.version,
+      db: redactDatabaseUrl(config.databaseUrl),
+      errorTracking: errors.enabled,
+    },
     'service.starting'
   );
 
@@ -74,8 +92,9 @@ async function main(): Promise<void> {
             databaseUrl: config.databaseUrl,
             role: 'worker',
             log,
+            onError: (error) => errors.capture(error, { source: 'pg-boss' }),
           });
-          await registerMaintenance(boss, pool, log);
+          await registerMaintenance(boss, pool, log, errors);
           return () => boss.stop({ graceful: true, timeout: JOB_DRAIN_TIMEOUT_MS });
         },
         expectedRevision: expected,
@@ -91,6 +110,7 @@ async function main(): Promise<void> {
           'db.schema_mismatch'
         );
         await pool.end();
+        // Expected during a deploy (worker before api); not reported as an error.
         process.exit(3);
       }
       throw error;
@@ -101,7 +121,12 @@ async function main(): Promise<void> {
 
   await migrate(pool, migrations, log);
   // The api only installs the queue schema and sends jobs; the worker processes them.
-  const boss = await startBoss({ databaseUrl: config.databaseUrl, role: 'api', log });
+  const boss = await startBoss({
+    databaseUrl: config.databaseUrl,
+    role: 'api',
+    log,
+    onError: (error) => errors.capture(error, { source: 'pg-boss' }),
+  });
 
   // Until Better Auth (Sprint 3) sync is closed, except for dev tokens outside prod.
   let auth: AuthResolver = new DenyAllResolver();
@@ -124,8 +149,11 @@ async function main(): Promise<void> {
     },
     onProbeError: (error) => log.warn({ err: error }, 'health.db_unreachable'),
     sync: { repo: new PgSyncRepository(pool), auth, log },
-    onUnhandledError: (error, path) =>
-      log.error({ err: error, path }, 'http.unhandled_error'),
+    errorTunnel: { webDsn: config.webErrorDsn, log },
+    onUnhandledError: (error, path) => {
+      log.error({ err: error, path }, 'http.unhandled_error');
+      errors.capture(error, { path });
+    },
   });
   const server = serve(
     { fetch: app.fetch, port: config.port, hostname: '0.0.0.0' },
@@ -141,9 +169,11 @@ async function main(): Promise<void> {
   });
 }
 
-main().catch((error: unknown) => {
+main().catch(async (error: unknown) => {
   console.error(
     JSON.stringify({ level: 'fatal', msg: 'service.crashed', err: String(error) })
   );
+  errors.capture(error, { fatal: true });
+  await errors.flush();
   process.exit(1);
 });

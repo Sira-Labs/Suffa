@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { SyncBadge } from './components';
+import { logger } from './services/logger';
 import { useContentStore, useSettingsStore, useSrsStore, useSyncStore } from './state';
 import './styles/global.css';
 
@@ -38,8 +39,10 @@ export function App() {
       initSync();
       if (!cancelled) setReady(true);
     })().catch((error) => {
-      // Spezifische Fehlermeldung statt stiller Blockade.
-      console.error('App-Initialisierung fehlgeschlagen', error);
+      // Spezifische Fehlermeldung statt stiller Blockade; `error` geht ans Fehler-Tracking.
+      logger.error('App-Initialisierung fehlgeschlagen', {
+        message: error instanceof Error ? error.message : String(error),
+      });
       if (!cancelled) setReady(true);
     });
     return () => {

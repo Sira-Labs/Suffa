@@ -15,6 +15,19 @@ const LEVEL_ORDER: Record<LogLevel, number> = {
 };
 
 const isProd = import.meta.env?.PROD ?? false;
+
+/** Empfängt alle `error`-Einträge (z. B. Fehler-Tracking); unabhängig vom Log-Level. */
+export type ErrorSink = (
+  scope: string,
+  message: string,
+  context?: Record<string, unknown>
+) => void;
+
+let errorSink: ErrorSink | null = null;
+
+export function setErrorSink(sink: ErrorSink | null): void {
+  errorSink = sink;
+}
 const minLevel: LogLevel = isProd ? 'warn' : 'debug';
 
 export interface Logger {
@@ -31,6 +44,7 @@ function emit(
   message: string,
   context?: Record<string, unknown>
 ): void {
+  if (level === 'error') errorSink?.(scope, message, context);
   if (LEVEL_ORDER[level] < LEVEL_ORDER[minLevel]) return;
   const entry = {
     ts: new Date().toISOString(),

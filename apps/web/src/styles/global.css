@@ -1202,3 +1202,9 @@ textarea.input {
     radial-gradient(closest-side, var(--bg-elev) 78%, transparent 80%),
     conic-gradient(var(--accent-2) var(--p, 0%), var(--bg-elev-2) 0);
 }
+
+/* Forgetting reminder: only after a break, so it may stand out. */
+.forgetting-reminder {
+  border-color: color-mix(in srgb, var(--warn) 55%, var(--border));
+  background: color-mix(in srgb, var(--warn) 7%, var(--bg-elev));
+}

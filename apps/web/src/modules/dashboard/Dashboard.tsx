@@ -1,26 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from 'recharts';
 import type { ReviewLog } from '@/types';
 import { content } from '@/content';
 import { ArabicText } from '@/components';
 import { Icon } from '@/components/Icon';
 import { reviewLogRepo } from '@/services/storage';
 import { isTtsSupported, speakArabic } from '@/services/speech';
-import {
-  computeStreak,
-  forgettingCurve,
-  masteryBuckets,
-  reviewHeatmap,
-} from '@/services/stats';
+import { computeStreak, masteryBuckets, reviewHeatmap } from '@/services/stats';
 import { buildTodayPlan, localDay, reviewsToday, wordOfTheDay } from '@/services/today';
 import {
   listeningXpEvents,
@@ -31,6 +17,7 @@ import {
 } from '@/services/engagement/xp';
 import { lessonSizes, loadPublisherIndex } from '@/services/audio/publisherIndex';
 import type { TodayStep } from '@/services/today';
+import { ForgettingReminder } from './ForgettingReminder';
 import { useListenStore, usePracticeStore, useSettingsStore, useSrsStore } from '@/state';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
@@ -66,7 +53,6 @@ export function Dashboard() {
 
   const mastery = masteryBuckets(cards);
   const streak = computeStreak(logs);
-  const curve = forgettingCurve(cards);
   const heat = reviewHeatmap(logs);
   const maxHeat = Math.max(1, ...heat.map((h) => h.count));
   const today = reviewsToday(logs);
@@ -125,6 +111,8 @@ export function Dashboard() {
           </span>
         </div>
       </header>
+
+      <ForgettingReminder cards={cards} logs={logs} />
 
       <div className="today-grid">
         <section
@@ -217,46 +205,6 @@ export function Dashboard() {
           <strong>Beherrschung</strong>
           <MasteryBar mastery={mastery} />
         </div>
-        <div className="card stack">
-          <strong>Vergessenskurve (geschätzte Retention ohne Wiederholung)</strong>
-          <div style={{ width: '100%', height: 220 }}>
-            <ResponsiveContainer>
-              <LineChart
-                data={curve}
-                margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-              >
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="day"
-                  stroke="var(--text-muted)"
-                  tickLine={false}
-                  label={{
-                    value: 'Tage',
-                    position: 'insideBottom',
-                    offset: -2,
-                    fill: 'var(--text-muted)',
-                  }}
-                />
-                <YAxis domain={[0, 1]} stroke="var(--text-muted)" tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    background: 'var(--bg-elev-2)',
-                    border: '1px solid var(--border)',
-                  }}
-                  formatter={(v: number) => [`${Math.round(v * 100)} %`, 'Retention']}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="retention"
-                  stroke="var(--accent)"
-                  strokeWidth={2}
-                  dot={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
         <div className="card stack">
           <strong>Aktivität (letzte 28 Tage)</strong>
           <div className="row" style={{ gap: 4 }} aria-label="Wiederholungs-Heatmap">

@@ -3,6 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { fileURLToPath, URL } from 'node:url';
+import { NETWORK_ONLY_PATTERN } from './src/pwa/runtimeCaching';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -48,9 +49,9 @@ export default defineConfig({
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
-            // YouTube/external audio streams: online only, never treat as app shell.
-            urlPattern:
-              /^https:\/\/(www\.youtube\.com|i\.ytimg\.com|old\.arabicforall\.net)\/.*/i,
+            // YouTube: online only, never treat as app shell. The publisher's audio is
+            // intentionally not routed through the worker (see src/pwa/runtimeCaching.ts).
+            urlPattern: NETWORK_ONLY_PATTERN,
             handler: 'NetworkOnly',
           },
         ],

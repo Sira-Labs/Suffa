@@ -70,11 +70,15 @@ export function forgettingCurve(cards: SrsCard[], points = 14): ForgettingPoint[
 }
 
 /** Whole local calendar days since the last review, or null when there was none yet. */
-export function daysSinceLastReview(logs: ReviewLog[], now: Date = new Date()): number | null {
+export function daysSinceLastReview(
+  logs: ReviewLog[],
+  now: Date = new Date()
+): number | null {
   const times = logs.filter((l) => !l.deleted).map((l) => Date.parse(l.reviewedAt));
   if (times.length === 0) return null;
   const last = new Date(Math.max(...times));
-  const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const startOf = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   return Math.round((startOf(now) - startOf(last)) / 86_400_000);
 }
 

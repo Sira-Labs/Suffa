@@ -11,6 +11,34 @@ demoed · no secrets in code · structured logs on new paths.
 
 ## Progress (as of 2026-09-23)
 
+Sprints 1–2 (P0) were planned for Oct 5 – Nov 1 and shipped early, except 2.6. Gate G0 is met
+(one-command deploy, restore drill passed). Dates of later sprints are kept as buffer.
+
+```mermaid
+gantt
+  dateFormat YYYY-MM-DD
+  axisFormat %d %b
+  todayMarker on
+  section P0 Foundation
+  S1 New home, same app (6/6)        :done, s1, 2026-10-05, 14d
+  S2 Operable (5/6, 2.6 open)        :active, s2, after s1, 14d
+  G0 met                             :milestone, done, g0, 2026-09-23, 0d
+  section P1 Identity
+  S3 Who are you?                    :s3, after s2, 14d
+  S4 Classes & admin                 :s4, after s3, 14d
+  section P2 Engagement
+  S5 Every day counts               :s5, after s4, 14d
+  S6 Class spirit                    :s6, after s5, 14d
+  Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
+```
+
+```mermaid
+pie showData
+  title Sprint 1–2 story points
+  "Done" : 38
+  "Open" : 2
+```
+
 | Story                   | Status | Notes                                                                                                                                          |
 | ----------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                          |
@@ -22,7 +50,7 @@ demoed · no secrets in code · structured logs on new paths.
 | 2.1 release workflow    | ✅     |                                                                                                                                                |
 | 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                   |
 | 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open |
-| 2.4 error tracking      | ☐      |                                                                                                                                                |
+| 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                 |
 | 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                            |
 | 2.6 browser router      | ☐      |                                                                                                                                                |
 
@@ -208,6 +236,10 @@ demoed · no secrets in code · structured logs on new paths.
   optional parts, articles, umlaut spellings and small typos; the other meanings are shown after
   answering; German answers are typed left-to-right (was: Arabic input style). Pilot data from
   January also feeds the pronunciation evaluation (ADR-0022).
+- **2026-09-23 — iPhone recording and pronunciation rating:** format detection (`audio/mp4`),
+  timeouts and concrete German help texts instead of silent failures.
+- **2026-09-23 — security updates:** React Router 7, uuid 11.1; `npm audit` clean for
+  production dependencies.
 
 ## Backlog (unscheduled)
 

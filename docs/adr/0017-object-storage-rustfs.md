@@ -15,9 +15,9 @@ community builds ended in 2025.
 
 - **Reuse the existing `rustfs` CapRover app**; do not run a second object store.
 - Isolation by **bucket + dedicated access key** (same approach as Tabayyun's `tabayyun-cache`):
-  `arabictutor-media` (recordings: originals, transcodes, transcripts), `arabictutor-uploads` (learner
-  audio, teacher attachments), `arabictutor-content` (published content bundles, exports).
-  One key `arabictutor-app` with object actions on those three buckets only.
+  `suffa-media` (recordings: originals, transcodes, transcripts), `suffa-uploads` (learner
+  audio, teacher attachments), `suffa-content` (published content bundles, exports).
+  One key `suffa-app` with object actions on those three buckets only.
 - Access from code through an **`ObjectStorage` interface** (`put`, `get`, `head`, `delete`,
   `presignGet`, `presignPut`, `createMultipartUpload`) implemented with
   `@aws-sdk/client-s3` (`forcePathStyle: true`, endpoint from env). Any S3-compatible store is a
@@ -31,8 +31,8 @@ community builds ended in 2025.
   proxy body-size limits.
 - **Retention in our worker**, not bucket lifecycle rules (portable across stores):
   learner audio 30 days, orphaned uploads 7 days; transcodes are re-creatable.
-- **Backups:** Postgres dumps are not enough — nightly `rclone sync` of `arabictutor-media/originals`
-  and `arabictutor-uploads` to off-box storage; transcodes and bundles are regenerated.
+- **Backups:** Postgres dumps are not enough — nightly `rclone sync` of `suffa-media/originals`
+  and `suffa-uploads` to off-box storage; transcodes and bundles are regenerated.
 
 ## Alternatives
 

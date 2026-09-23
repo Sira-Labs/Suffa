@@ -15,7 +15,7 @@ CapRover with our Postgres. The PWA must keep working offline with a cached iden
   Plugins: `magicLink`, `passkey`, `admin` (ban, impersonate, set role), optional `twoFactor`
   for admins (mandatory for `admin` role).
 - **Sessions:** httpOnly, `Secure`, `SameSite=Lax` cookies. Web and API are **same-origin**:
-  `arabictutor-web`'s Caddy proxies `/api` to the API (Tabayyun pattern), so no CORS and no
+  `suffa-web`'s Caddy proxies `/api` to the API (Tabayyun pattern), so no CORS and no
   third-party cookies. No tokens in `localStorage`. Native apps (ADR-0019) use Better Auth's
   bearer mode with the token in Keychain/Keystore.
 - **Offline:** the PWA caches the last `/me` response (id, role, name) in IndexedDB to render

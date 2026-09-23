@@ -1,9 +1,8 @@
-# arabictutor-web edge. CapRover's nginx terminates TLS; Caddy serves the PWA on plain HTTP :80.
+# suffa-web edge. CapRover's nginx terminates TLS; Caddy serves the PWA on plain HTTP :80.
 # Upstreams are CapRover service names on the captain overlay network, e.g.
-#   SUFFA_API_UPSTREAM=srv-captain--arabictutor-api:8000
+#   SUFFA_API_UPSTREAM=srv-captain--suffa-api:8000
 #   SUFFA_MEDIA_UPSTREAM=srv-captain--rustfs:9000
-# Unset upstreams fall back to a closed local port (502), so this container never proxies
-# to another app by accident (e.g. an unrelated app that happens to share a name).
+# Until the API exists (Sprint 2), /api answers 502; the offline app is unaffected.
 {
 	admin off
 }
@@ -13,7 +12,7 @@
 
 	header {
 		# style-src needs 'unsafe-inline' for React style attributes. Supabase stays allowed
-		# until the migration to arabictutor-api (ADR-0007) is complete.
+		# until the migration to suffa-api (ADR-0007) is complete.
 		Content-Security-Policy "default-src 'self'; script-src 'self' https://www.youtube.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com; font-src 'self'; media-src 'self' blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://docs.google.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
@@ -27,7 +26,7 @@
 
 	@api path /api/* /healthz
 	handle @api {
-		reverse_proxy {$SUFFA_API_UPSTREAM:127.0.0.1:9}
+		reverse_proxy {$SUFFA_API_UPSTREAM:srv-captain--suffa-api:8000}
 	}
 
 	# Presigned S3 URLs signed by the API for the internal RustFS host (ADR-0017).
@@ -37,8 +36,8 @@
 	}
 	handle @media {
 		uri strip_prefix /media
-		reverse_proxy {$SUFFA_MEDIA_UPSTREAM:127.0.0.1:9} {
-			header_up Host {$SUFFA_MEDIA_UPSTREAM:127.0.0.1:9}
+		reverse_proxy {$SUFFA_MEDIA_UPSTREAM:srv-captain--rustfs:9000} {
+			header_up Host {$SUFFA_MEDIA_UPSTREAM:srv-captain--rustfs:9000}
 		}
 	}
 

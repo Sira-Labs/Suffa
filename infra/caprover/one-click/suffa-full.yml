@@ -1,7 +1,7 @@
 # CapRover one-click template: full Suffa stack (same layout as Tabayyun).
-# Use: CapRover → Apps → One-Click Apps/Databases → ">> TEMPLATE <<" → paste → app name "arabictutor" → Deploy.
-# Creates: arabictutor-db, arabictutor-api, arabictutor-worker, arabictutor-web. Reuses the existing RustFS app.
-# NOTE: needs the arabictutor-api image (built from Sprint 2). Until then use arabictutor.yml (web + db).
+# Use: CapRover → Apps → One-Click Apps/Databases → ">> TEMPLATE <<" → paste → app name "suffa" → Deploy.
+# Creates: suffa-db, suffa-api, suffa-worker, suffa-web. Reuses the existing RustFS app.
+# NOTE: needs the suffa-api image (built from Sprint 2). Until then use suffa.yml (web + db).
 captainVersion: 4
 services:
   $$cap_appname-db:
@@ -10,8 +10,8 @@ services:
     volumes:
       - $$cap_appname-pgdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_USER: arabictutor
-      POSTGRES_DB: arabictutor
+      POSTGRES_USER: suffa
+      POSTGRES_DB: suffa
       POSTGRES_PASSWORD: $$cap_db_password
     caproverExtra:
       notExposeAsWebApp: 'true'
@@ -24,7 +24,7 @@ services:
     environment:
       SUFFA_ENV: prod
       SUFFA_PUBLIC_URL: https://$$cap_domain
-      SUFFA_DATABASE_URL: postgres://arabictutor:$$cap_db_password@srv-captain--$$cap_appname-db:5432/arabictutor
+      SUFFA_DATABASE_URL: postgres://suffa:$$cap_db_password@srv-captain--$$cap_appname-db:5432/suffa
       SUFFA_AUTH_SECRET: $$cap_auth_secret
       SUFFA_ENCRYPTION_KEY: $$cap_encryption_key
       SUFFA_SMTP_URL: $$cap_smtp_url
@@ -33,9 +33,9 @@ services:
       SUFFA_S3_ALLOW_HTTP: 'true'
       SUFFA_S3_ACCESS_KEY_ID: $$cap_s3_key_id
       SUFFA_S3_SECRET_ACCESS_KEY: $$cap_s3_secret
-      SUFFA_S3_BUCKET_MEDIA: arabictutor-media
-      SUFFA_S3_BUCKET_UPLOADS: arabictutor-uploads
-      SUFFA_S3_BUCKET_CONTENT: arabictutor-content
+      SUFFA_S3_BUCKET_MEDIA: suffa-media
+      SUFFA_S3_BUCKET_UPLOADS: suffa-uploads
+      SUFFA_S3_BUCKET_CONTENT: suffa-content
       SUFFA_MEDIA_PUBLIC_PREFIX: /media
     caproverExtra:
       containerHttpPort: '8000'
@@ -54,7 +54,7 @@ services:
       SUFFA_TRANSCODE_CONCURRENCY: '1'
       SUFFA_ENV: prod
       SUFFA_PUBLIC_URL: https://$$cap_domain
-      SUFFA_DATABASE_URL: postgres://arabictutor:$$cap_db_password@srv-captain--$$cap_appname-db:5432/arabictutor
+      SUFFA_DATABASE_URL: postgres://suffa:$$cap_db_password@srv-captain--$$cap_appname-db:5432/suffa
       SUFFA_AUTH_SECRET: $$cap_auth_secret
       SUFFA_ENCRYPTION_KEY: $$cap_encryption_key
       SUFFA_SMTP_URL: $$cap_smtp_url
@@ -63,9 +63,9 @@ services:
       SUFFA_S3_ALLOW_HTTP: 'true'
       SUFFA_S3_ACCESS_KEY_ID: $$cap_s3_key_id
       SUFFA_S3_SECRET_ACCESS_KEY: $$cap_s3_secret
-      SUFFA_S3_BUCKET_MEDIA: arabictutor-media
-      SUFFA_S3_BUCKET_UPLOADS: arabictutor-uploads
-      SUFFA_S3_BUCKET_CONTENT: arabictutor-content
+      SUFFA_S3_BUCKET_MEDIA: suffa-media
+      SUFFA_S3_BUCKET_UPLOADS: suffa-uploads
+      SUFFA_S3_BUCKET_CONTENT: suffa-content
     caproverExtra:
       notExposeAsWebApp: 'true'
 
@@ -84,16 +84,16 @@ caproverOneClickApp:
   variables:
     - id: $$cap_domain
       label: Public domain
-      defaultValue: arabictutor.example.com
+      defaultValue: suffa.example.com
       description: Domain you will connect to the web app (used for magic links and cookies).
       validRegex: /^[a-z0-9.-]+$/
     - id: $$cap_api_image
       label: API/worker image
-      defaultValue: ghcr.io/thedatadudech/arabictutor-api
+      defaultValue: ghcr.io/thedatadudech/suffa-api
       validRegex: /^[a-z0-9./_-]+$/
     - id: $$cap_web_image
       label: Web image
-      defaultValue: ghcr.io/thedatadudech/arabictutor-web
+      defaultValue: ghcr.io/thedatadudech/suffa-web
       validRegex: /^[a-z0-9./_-]+$/
     - id: $$cap_tag
       label: Image tag
@@ -132,9 +132,9 @@ caproverOneClickApp:
       defaultValue: rustfs
       validRegex: /^[a-z0-9-]+$/
     - id: $$cap_s3_key_id
-      label: RustFS access key (arabictutor-app)
+      label: RustFS access key (suffa-app)
       defaultValue: change-me
-      description: Limited key for buckets arabictutor-media, arabictutor-uploads, arabictutor-content (policy in docs/ops/caprover-deployment.md §2).
+      description: Limited key for buckets suffa-media, suffa-uploads, suffa-content (policy in docs/ops/caprover-deployment.md §2).
       validRegex: /.+/
     - id: $$cap_s3_secret
       label: RustFS secret key
@@ -145,7 +145,7 @@ caproverOneClickApp:
       Full Suffa stack: Postgres 17 + pgvector, API, worker and web (Caddy + PWA), reusing
       your existing RustFS. Before deploying: (1) if the GHCR packages are private, add
       ghcr.io under Cluster → Docker Registries; (2) in RustFS create the buckets
-      arabictutor-media, arabictutor-uploads, arabictutor-content and a limited access key.
+      suffa-media, suffa-uploads, suffa-content and a limited access key.
     end: >-
       Done. Now: (1) $$cap_appname-web → HTTP Settings → connect $$cap_domain, Enable HTTPS,
       Force HTTPS. (2) Enable App Tokens on api, web and worker and store them as GitHub

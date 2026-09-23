@@ -19,7 +19,7 @@ interactivity planned for YouTube lessons (checkpoints, transcript, add-to-SRS, 
   only access the files he picks. This avoids restricted scopes (`drive.readonly`) that
   require Google's security assessment.
 - The worker downloads each picked file via the Drive API (streamed), stores the original in
-  RustFS `arabictutor-media/originals/<classId>/<mediaId>` (ADR-0017), then enqueues processing.
+  RustFS `suffa-media/originals/<classId>/<mediaId>` (ADR-0017), then enqueues processing.
 - **Direct upload** (presigned multipart) is the second entry path into the same pipeline, for
   recordings not in Drive (phone, Zoom export).
 - OAuth refresh tokens are encrypted at rest (AES-256-GCM, key `SUFFA_ENCRYPTION_KEY`); the

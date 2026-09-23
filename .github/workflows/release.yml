@@ -1,6 +1,6 @@
 name: release
 
-# Builds the arabictutor-web image on every push to main, publishes it to GHCR and (optionally)
+# Builds the suffa-web image on every push to main, publishes it to GHCR and (optionally)
 # deploys it to CapRover. Mirrors Tabayyun's release workflow.
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/arabictutor
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/suffa
 
 jobs:
   images:
@@ -59,6 +59,6 @@ jobs:
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
-          app: ${{ vars.CAPROVER_APP_WEB || 'arabictutor-web' }}
+          app: ${{ vars.CAPROVER_APP_WEB || 'suffa-web' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_WEB }}
           image: ${{ env.IMAGE_PREFIX }}-web:${{ needs.images.outputs.tag }}

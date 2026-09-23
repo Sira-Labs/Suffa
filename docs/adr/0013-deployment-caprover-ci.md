@@ -11,8 +11,8 @@ initially, with room to add nodes.
 ## Decision
 
 - **Mirror the Tabayyun deployment** on the same CapRover (`Tabayyun/deploy/caprover.md`):
-  `arabictutor-web` (Caddy serving the PWA, proxying `/api` and `/media`), `arabictutor-api`,
-  `arabictutor-worker` (api image, `SUFFA_ROLE=worker`), `arabictutor-db` (plain app,
+  `suffa-web` (Caddy serving the PWA, proxying `/api` and `/media`), `suffa-api`,
+  `suffa-worker` (api image, `SUFFA_ROLE=worker`), `suffa-db` (plain app,
   `pgvector/pgvector` pg17, pinned), and the **existing shared `rustfs`** (ADR-0017).
   No Redis (ADR-0020). Runbook: `docs/ops/caprover-deployment.md`.
 - **Images built in CI**, not on the CapRover host: GitHub Actions → GHCR →
@@ -21,7 +21,7 @@ initially, with room to add nodes.
   build-on-server alternative.
 - **Environments:** `staging` and `production` as separate CapRover apps (`-stg` suffix), same
   images promoted by tag.
-- **DB migrations** run as a pre-start step of `arabictutor-api` (drizzle migrate, idempotent,
+- **DB migrations** run as a pre-start step of `suffa-api` (drizzle migrate, idempotent,
   guarded by an advisory lock); the worker exits with code 3 until the schema matches.
 - **Secrets** only as CapRover env vars with `SUFFA_` prefix (`SUFFA_DATABASE_URL`,
   `SUFFA_AUTH_SECRET`, `SUFFA_S3_*`, `SUFFA_GOOGLE_*`, …) plus provider keys

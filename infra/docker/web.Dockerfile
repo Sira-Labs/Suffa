@@ -25,6 +25,9 @@ ARG SUFFA_VERSION="dev"
 RUN VITE_SUFFA_VERSION=$SUFFA_VERSION npm run build -w @suffa/web
 
 FROM caddy:2-alpine AS web
+# Reported by /healthz-web, so deploy checks can see which web image is live.
+ARG SUFFA_VERSION="dev"
+ENV SUFFA_VERSION=$SUFFA_VERSION
 COPY infra/caddy/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /app/apps/web/dist /srv
 EXPOSE 80

@@ -21,8 +21,14 @@
 		-Server
 	}
 
-	# Liveness for Docker/CapRover, independent of the API.
-	respond /healthz-web 200
+	# Liveness and deployed version of the web image, independent of the API. It needs its
+	# own `handle`: a bare `respond` sorts after `handle` blocks, so the SPA fallback below
+	# used to answer it with index.html (still 200, but it proved nothing).
+	handle /healthz-web {
+		header Content-Type application/json
+		header Cache-Control no-store
+		respond `{"status":"ok","role":"web","version":"{$SUFFA_VERSION:dev}"}` 200
+	}
 
 	@api path /api/* /healthz
 	handle @api {

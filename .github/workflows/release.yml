@@ -77,6 +77,8 @@ jobs:
         run: |
           docker run -d --name web -p 8080:80 smoke/suffa-web:test
           for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8080/healthz-web && break; sleep 1; done
+          # The health endpoint must answer itself (not the SPA fallback) and name the image.
+          curl -fsS http://127.0.0.1:8080/healthz-web | grep -q '"role":"web","version":"${{ steps.tag.outputs.tag }}"'
           curl -fsS http://127.0.0.1:8080/ | grep -q '<title>Suffa'
           curl -fsS -o /dev/null http://127.0.0.1:8080/brand/suffa-mark.svg
           curl -fsS http://127.0.0.1:8080/some/deep/link | grep -q '<div id="root">'

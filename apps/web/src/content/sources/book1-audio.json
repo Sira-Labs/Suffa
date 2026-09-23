@@ -1,0 +1,3473 @@
+{
+  "source": {
+    "publisher": "Arabic for All (العربية للجميع)",
+    "index": "https://old.arabicforall.net/ar/sounds/audio/1",
+    "rights": "All rights reserved by the publisher. Streamed from the publisher's server, never copied (ADR-0023).",
+    "retrieved": "2026-09-23"
+  },
+  "book": 1,
+  "units": [
+    {
+      "unit": 1,
+      "title": "الوحدة 01",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 1,
+          "title": "الدرس 01",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول (أ)",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson01/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "الحوار الأول (ب)",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson01/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson01/03.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 2,
+          "title": "الدرس 02",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني (أ)",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson02/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "الحوار الثاني (ب)",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson02/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson02/03.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 3,
+          "title": "الدرس 03",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث (أ)",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson03/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "الحوار الثالث (ب)",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson03/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson03/03.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 4,
+          "title": "الدرس 04",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب الأول",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson04/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "التدريب الثاني",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson04/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "مفردات أضافية (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson04/03.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 5,
+          "title": "الدرس 05",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson05/10.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 6,
+          "title": "الدرس 06",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson06/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson06/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson06/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson06/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson06/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson06/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson06/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 7,
+          "title": "الدرس 08",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson08/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(6)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit01/lesson08/02.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 2,
+      "title": "الوحدة 02",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 8,
+          "title": "الدرس 10",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson10/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson10/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 9,
+          "title": "الدرس 11",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson11/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 10,
+          "title": "الدرس 12",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson12/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson12/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 11,
+          "title": "الدرس 13",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson13/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson13/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "مفردات إضافية (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson13/03.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 12,
+          "title": "الدرس 14",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson14/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson14/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson14/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson14/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson14/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson14/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson14/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson14/08.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 13,
+          "title": "الدرس 15",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson15/01.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson15/02.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson15/03.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson15/04.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson15/05.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson15/06.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 14,
+          "title": "الدرس 17",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit02/lesson17/01.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 3,
+      "title": "الوحدة 03",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 15,
+          "title": "الدرس 19",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson19/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson19/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 16,
+          "title": "الدرس 20",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson20/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson20/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 17,
+          "title": "الدرس 21",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson21/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson21/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 18,
+          "title": "الدرس 22",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson22/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 19,
+          "title": "الدرس 23",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/10.mp3"
+            },
+            {
+              "n": 11,
+              "title": "التدريب (6) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/11.mp3"
+            },
+            {
+              "n": 12,
+              "title": "(6)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson23/12.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 20,
+          "title": "الدرس 24",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson24/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson24/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson24/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson24/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson24/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson24/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson24/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 21,
+          "title": "الدرس 26",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson26/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(5) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson26/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(6) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit03/lesson26/03.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 4,
+      "title": "الوحدة 04",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 22,
+          "title": "الدرس 28",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson28/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson28/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 23,
+          "title": "الدرس 29",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson29/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson29/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 24,
+          "title": "الدرس 30",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson30/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson30/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 25,
+          "title": "الدرس 31",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson31/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 26,
+          "title": "الدرس 32",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson32/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson32/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson32/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson32/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson32/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson32/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson32/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson32/08.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 27,
+          "title": "الدرس 33",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson33/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson33/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson33/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson33/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson33/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson33/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson33/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 28,
+          "title": "الدرس 35",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(5) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson35/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(6) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit04/lesson35/02.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 5,
+      "title": "الوحدة 05",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 29,
+          "title": "الدرس 37",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson37/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson37/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 30,
+          "title": "الدرس 38",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson38/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson38/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 31,
+          "title": "الدرس 39",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson39/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson39/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 32,
+          "title": "الدرس 40",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson40/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 33,
+          "title": "الدرس 41",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson41/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson41/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson41/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson41/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson41/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson41/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson41/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson41/08.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 34,
+          "title": "الدرس 42",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson42/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson42/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson42/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson42/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson42/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson42/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson42/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 35,
+          "title": "الدرس 44",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(5) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson44/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(6) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit05/lesson44/02.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 6,
+      "title": "الوحدة 06",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 36,
+          "title": "الدرس 46",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson46/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson46/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 37,
+          "title": "الدرس 47",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson47/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson47/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 38,
+          "title": "الدرس 48",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson48/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson48/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 39,
+          "title": "الدرس 49",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson49/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 40,
+          "title": "الدرس 50",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson50/10.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 41,
+          "title": "الدرس 51",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson51/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson51/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson51/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson51/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson51/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson51/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson51/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 42,
+          "title": "الدرس 53",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(5) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson53/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(6) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit06/lesson53/02.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 7,
+      "title": "الوحدة 07",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 43,
+          "title": "الدرس 55",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson55/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson55/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 44,
+          "title": "الدرس 56",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson56/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson56/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 45,
+          "title": "الدرس 57",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson57/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson57/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 46,
+          "title": "الدرس 58",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson58/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 47,
+          "title": "الدرس 59",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/10.mp3"
+            },
+            {
+              "n": 11,
+              "title": "التدريب (6) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/11.mp3"
+            },
+            {
+              "n": 12,
+              "title": "(6)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson59/12.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 48,
+          "title": "الدرس 60",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson60/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson60/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson60/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson60/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson60/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson60/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson60/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 49,
+          "title": "الدرس 62",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(5) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson62/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(6) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit07/lesson62/02.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 8,
+      "title": "الوحدة 08",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 50,
+          "title": "الدرس 64",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson64/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson64/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 51,
+          "title": "الدرس 65",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson65/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson65/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 52,
+          "title": "الدرس 66",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson66/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson66/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 53,
+          "title": "الدرس 67",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson67/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 54,
+          "title": "الدرس 68",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson68/10.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 55,
+          "title": "الدرس 69",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson69/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson69/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson69/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson69/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson69/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson69/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson69/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 56,
+          "title": "الدرس 71",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(5) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson71/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(6) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit08/lesson71/02.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 9,
+      "title": "الوحدة 09",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 57,
+          "title": "الدرس 73",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson73/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson73/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 58,
+          "title": "الدرس 74",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson74/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson74/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 59,
+          "title": "الدرس 75",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson75/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson75/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 60,
+          "title": "الدرس 76",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson76/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 61,
+          "title": "الدرس 77",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/10.mp3"
+            },
+            {
+              "n": 11,
+              "title": "التدريب (6) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/11.mp3"
+            },
+            {
+              "n": 12,
+              "title": "(6)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson77/12.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 62,
+          "title": "الدرس 78",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson78/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson78/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson78/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson78/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson78/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson78/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson78/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 63,
+          "title": "الدرس 80",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson80/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson80/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson80/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(4) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit09/lesson80/04.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 10,
+      "title": "الوحدة 10",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 64,
+          "title": "الدرس 82",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson82/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson82/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 65,
+          "title": "الدرس 83",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson83/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson83/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 66,
+          "title": "الدرس 84",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson84/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson84/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 67,
+          "title": "الدرس 85",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson85/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 68,
+          "title": "الدرس 86",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/10.mp3"
+            },
+            {
+              "n": 11,
+              "title": "التدريب (6) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/11.mp3"
+            },
+            {
+              "n": 12,
+              "title": "(6)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson86/12.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 69,
+          "title": "الدرس 87",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson87/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson87/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson87/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson87/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson87/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson87/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit10/lesson87/07.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 11,
+      "title": "الوحدة 11",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 70,
+          "title": "الدرس 91",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson91/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson91/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 71,
+          "title": "الدرس 92",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson92/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson92/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 72,
+          "title": "الدرس 93",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson93/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson93/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 73,
+          "title": "الدرس 94",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson94/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 74,
+          "title": "الدرس 95",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson95/10.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 75,
+          "title": "الدرس 96",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson96/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson96/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson96/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson96/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson96/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson96/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson96/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(5)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson96/08.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 76,
+          "title": "الدرس 98",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson98/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(3) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson98/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(4) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit11/lesson98/03.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 12,
+      "title": "الوحدة 12",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 77,
+          "title": "الدرس 100",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson100/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson100/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 78,
+          "title": "الدرس 101",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson101/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson101/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 79,
+          "title": "الدرس 102",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson102/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson102/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 80,
+          "title": "الدرس 103",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson103/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 81,
+          "title": "الدرس 104",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/10.mp3"
+            },
+            {
+              "n": 11,
+              "title": "التدريب (6) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/11.mp3"
+            },
+            {
+              "n": 12,
+              "title": "(6)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson104/12.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 82,
+          "title": "الدرس 105",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson105/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson105/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson105/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson105/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson105/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson105/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson105/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 83,
+          "title": "الدرس 107",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson107/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(3) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson107/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(4) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit12/lesson107/03.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 13,
+      "title": "الوحدة 13",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 84,
+          "title": "الدرس 109",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson109/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson109/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 85,
+          "title": "الدرس 110",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson110/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson110/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 86,
+          "title": "الدرس 111",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson111/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson111/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 87,
+          "title": "الدرس 112",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson112/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 88,
+          "title": "الدرس 113",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson113/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson113/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson113/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson113/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson113/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson113/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson113/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson113/08.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 89,
+          "title": "الدرس 114",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson114/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson114/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson114/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson114/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson114/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson114/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson114/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 90,
+          "title": "الدرس 116",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson116/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(4) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit13/lesson116/02.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 14,
+      "title": "الوحدة 14",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 91,
+          "title": "الدرس 118",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson118/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson118/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 92,
+          "title": "الدرس 119",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson119/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson119/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 93,
+          "title": "الدرس 120",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson120/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson120/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 94,
+          "title": "الدرس 121",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson121/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 95,
+          "title": "الدرس 122",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/10.mp3"
+            },
+            {
+              "n": 11,
+              "title": "التدريب (6) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/11.mp3"
+            },
+            {
+              "n": 12,
+              "title": "(6)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson122/12.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 96,
+          "title": "الدرس 123",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson123/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson123/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson123/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson123/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson123/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson123/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson123/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 97,
+          "title": "الدرس 125",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson125/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(3) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson125/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(4) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit14/lesson125/03.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 15,
+      "title": "الوحدة 15",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 98,
+          "title": "الدرس 127",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson127/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson127/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 99,
+          "title": "الدرس 128",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson128/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson128/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 100,
+          "title": "الدرس 129",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson129/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson129/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 101,
+          "title": "الدرس 130",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson130/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 102,
+          "title": "الدرس 131",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/10.mp3"
+            },
+            {
+              "n": 11,
+              "title": "التدريب (6) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/11.mp3"
+            },
+            {
+              "n": 12,
+              "title": "(6)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson131/12.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 103,
+          "title": "الدرس 132",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson132/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(2)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson132/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(3)الأصوات - التدريب",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson132/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson132/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson132/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson132/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson132/07.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 104,
+          "title": "الدرس 134",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(1) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson134/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(4) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit15/lesson134/02.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 16,
+      "title": "الوحدة 16",
+      "kind": "unit",
+      "lessons": [
+        {
+          "lesson": 105,
+          "title": "الدرس 136",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الأول",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson136/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson136/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 106,
+          "title": "الدرس 137",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثاني",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson137/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson137/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 107,
+          "title": "الدرس 138",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الحوار الثالث",
+              "kind": "dialogue",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson138/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "المفردات (العرض)",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson138/02.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 108,
+          "title": "الدرس 139",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "مفردات إضافية",
+              "kind": "vocabulary",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson139/01.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 109,
+          "title": "الدرس 140",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "التدريب (1) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "التدريب (2) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(2)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "التدريب (3) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "(3)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/06.mp3"
+            },
+            {
+              "n": 7,
+              "title": "التدريب (4) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/07.mp3"
+            },
+            {
+              "n": 8,
+              "title": "(4)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/08.mp3"
+            },
+            {
+              "n": 9,
+              "title": "التدريب (5) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/09.mp3"
+            },
+            {
+              "n": 10,
+              "title": "(5)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/10.mp3"
+            },
+            {
+              "n": 11,
+              "title": "التدريب (6) المثال",
+              "kind": "exercise-example",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/11.mp3"
+            },
+            {
+              "n": 12,
+              "title": "(6)التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson140/12.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 110,
+          "title": "الدرس 141",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "الأصوات",
+              "kind": "sounds",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson141/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(1)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson141/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "(2)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson141/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "(3)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson141/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "(4)فهم المسموع - التدريب",
+              "kind": "listening",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson141/05.mp3"
+            }
+          ]
+        },
+        {
+          "lesson": 111,
+          "title": "الدرس 143",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "(2) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson143/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "(3) التدريب",
+              "kind": "exercise",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/unit16/lesson143/02.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 17,
+      "title": "الاختبار النصفي",
+      "kind": "exam",
+      "lessons": [
+        {
+          "lesson": 112,
+          "title": "الاختبار النصفي",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "السؤال (أ)",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_mid/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "السؤال (ب)",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_mid/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "السؤال (ج)",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_mid/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "السؤال (د)",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_mid/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "السؤال (هـ)",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_mid/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "السؤال (و)",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_mid/06.mp3"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 18,
+      "title": "الاختبار النهائي",
+      "kind": "exam",
+      "lessons": [
+        {
+          "lesson": 113,
+          "title": "الاختبار النهائي",
+          "tracks": [
+            {
+              "n": 1,
+              "title": "أولا",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_final/01.mp3"
+            },
+            {
+              "n": 2,
+              "title": "ثانيا",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_final/02.mp3"
+            },
+            {
+              "n": 3,
+              "title": "ثالثا",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_final/03.mp3"
+            },
+            {
+              "n": 4,
+              "title": "رابعا",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_final/04.mp3"
+            },
+            {
+              "n": 5,
+              "title": "خامسا",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_final/05.mp3"
+            },
+            {
+              "n": 6,
+              "title": "سادسا",
+              "kind": "exam",
+              "url": "https://old.arabicforall.net/sounds/1st_Audio_Book/exam_final/06.mp3"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

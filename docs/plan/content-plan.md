@@ -32,17 +32,17 @@ not. Numbers for Book 1 are estimates; the teacher confirms them in the inventor
 
 ## 3. Sources and licensing (ADR-0023)
 
-| Source                                     | Use                                          | Tier          |
-| ------------------------------------------ | -------------------------------------------- | ------------- |
-| Our own word lists in the book's order     | vocab with meanings, root, pattern, plural   | open          |
-| Our own example sentences (teacher + AI)   | cloze, listening, word order                 | open          |
-| Tatoeba (CC BY 2.0 FR)                     | extra sentences with translations            | open + credit |
-| Wiktionary (CC BY-SA)                      | cross-checking plurals, patterns             | reference     |
-| Teacher-written dialogues per unit topic   | reading, listening, role play                | class         |
-| Teacher's session recordings (ADR-0018)    | listening, checkpoints, sentence mining      | class         |
-| Publisher audio (arabicforall.net)         | linked, never copied                         | link          |
-| Muhammad al-Andalusi videos (ADR-0012)     | embedded, with our checkpoints               | link          |
-| Neural TTS (Azure / Google, Arabic voices) | audio for words and sentences until recorded | generated     |
+| Source                                     | Use                                                                                                                    | Tier          |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ------------- |
+| Our own word lists in the book's order     | vocab with meanings, root, pattern, plural                                                                             | open          |
+| Our own example sentences (teacher + AI)   | cloze, listening, word order                                                                                           | open          |
+| Tatoeba (CC BY 2.0 FR)                     | extra sentences with translations                                                                                      | open + credit |
+| Wiktionary (CC BY-SA)                      | cross-checking plurals, patterns                                                                                       | reference     |
+| Teacher-written dialogues per unit topic   | reading, listening, role play                                                                                          | class         |
+| Teacher's session recordings (ADR-0018)    | listening, checkpoints, sentence mining                                                                                | class         |
+| Publisher audio (arabicforall.net)         | all 443 tracks of Book 1 indexed and streamed in the library (`tools/content/publisher-audio-index.mjs`), never copied | link          |
+| Muhammad al-Andalusi videos (ADR-0012)     | embedded, with our checkpoints                                                                                         | link          |
+| Neural TTS (Azure / Google, Arabic voices) | audio for words and sentences until recorded                                                                           | generated     |
 
 Open actions before the pilot: ask the teacher what his school has licensed; write to the
 publisher about a classroom licence (a licence would let class packs use book texts directly).

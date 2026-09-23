@@ -16,8 +16,9 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm test --workspaces --if-present",
-    "test:coverage": "npm run test:coverage -w @suffa/web"
+    "test": "npm test --workspaces --if-present && npm run test:tools",
+    "test:coverage": "npm run test:coverage -w @suffa/web",
+    "test:tools": "node --test \"tools/**/*.test.mjs\""
   },
   "devDependencies": {
     "@eslint/js": "^9.10.0",

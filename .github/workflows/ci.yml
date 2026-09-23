@@ -25,6 +25,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck -w @suffa/web
       - run: npm test -w @suffa/web
+      - run: npm run test:tools
       - run: npm run build -w @suffa/web
 
   api:

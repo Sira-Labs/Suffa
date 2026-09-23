@@ -36,6 +36,11 @@ export default tseslint.config(
     },
   },
   {
+    // Node scripts for maintainers (content tooling).
+    files: ['tools/**/*.mjs'],
+    languageOptions: { ecmaVersion: 2023, globals: globals.node },
+  },
+  {
     files: ['**/*.test.{ts,tsx}', '**/tests/**/*.{ts,tsx}', '**/vitest.setup.ts'],
     languageOptions: {
       globals: { ...globals.node },

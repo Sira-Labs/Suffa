@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Quelle } from '@/types';
 import { content } from '@/content';
+import { PublisherAudio } from './PublisherAudio';
 
 function youtubeEmbed(url: string): string | null {
   const watch = url.match(/[?&]v=([\w-]+)/);
@@ -72,6 +73,11 @@ export function Library() {
             In neuem Tab öffnen
           </a>
         )}
+      </div>
+
+      <div className="card stack">
+        <strong>Offizielle Audios – Buch 1</strong>
+        <PublisherAudio />
       </div>
 
       <div className="card stack">

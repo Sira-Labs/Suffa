@@ -6,66 +6,66 @@
 # Mirrors the Tabayyun CapRover layout; runbook: docs/ops/caprover-deployment.md
 captainVersion: 4
 services:
-    $$cap_appname-web:
-        image: $$cap_web_image:$$cap_web_tag
-        restart: always
-        environment:
-            SUFFA_API_UPSTREAM: srv-captain--$$cap_appname-api:8000
-            SUFFA_MEDIA_UPSTREAM: srv-captain--$$cap_rustfs_app:9000
-        caproverExtra:
-            containerHttpPort: '80'
-    $$cap_appname-db:
-        image: pgvector/pgvector:$$cap_pg_tag
-        restart: always
-        volumes:
-            - $$cap_appname-pgdata:/var/lib/postgresql/data
-        environment:
-            POSTGRES_USER: suffa
-            POSTGRES_DB: suffa
-            POSTGRES_PASSWORD: $$cap_db_password
-        caproverExtra:
-            notExposeAsWebApp: 'true'
+  $$cap_appname-web:
+    image: $$cap_web_image:$$cap_web_tag
+    restart: always
+    environment:
+      SUFFA_API_UPSTREAM: srv-captain--$$cap_appname-api:8000
+      SUFFA_MEDIA_UPSTREAM: srv-captain--$$cap_rustfs_app:9000
+    caproverExtra:
+      containerHttpPort: '80'
+  $$cap_appname-db:
+    image: pgvector/pgvector:$$cap_pg_tag
+    restart: always
+    volumes:
+      - $$cap_appname-pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: suffa
+      POSTGRES_DB: suffa
+      POSTGRES_PASSWORD: $$cap_db_password
+    caproverExtra:
+      notExposeAsWebApp: 'true'
 caproverOneClickApp:
-    variables:
-        - id: $$cap_web_image
-          label: Web image
-          defaultValue: ghcr.io/thedatadudech/suffa-web
-          description: Built by .github/workflows/release.yml. The repository is private, so add ghcr.io under Cluster → Docker Registries first (GitHub user + token with read:packages).
-          validRegex: /^[a-z0-9./_-]+$/
-        - id: $$cap_web_tag
-          label: Web image tag
-          defaultValue: latest
-          description: Use an immutable sha-<short> tag in production; CI redeploys with it on every push to main.
-          validRegex: /^[A-Za-z0-9._-]+$/
-        - id: $$cap_pg_tag
-          label: pgvector/Postgres image tag
-          defaultValue: 0.8.0-pg17
-          description: Pin exactly and upgrade deliberately (take a pg_dump first).
-          validRegex: /^[A-Za-z0-9._-]+$/
-        - id: $$cap_db_password
-          label: Database password
-          defaultValue: $$cap_gen_random_hex(24)
-          description: Hex is safe inside the database URL. Stored as POSTGRES_PASSWORD on the db app.
-          validRegex: /^[A-Za-z0-9]{16,}$/
-        - id: $$cap_rustfs_app
-          label: Existing RustFS app name
-          defaultValue: rustfs
-          description: The shared RustFS app (also used by Tabayyun). Only used for /media once recordings ship.
-          validRegex: /^[a-z0-9-]+$/
-    instructions:
-        start: >-
-            Deploys the Suffa web app (offline-first Arabic learning PWA served by Caddy) and its
-            Postgres 17 + pgvector database, following the same layout as Tabayyun.
-            Before you start: if the GHCR package is private, add ghcr.io under
-            Cluster → Docker Registries.
-        end: >-
-            Done. Next steps: (1) open the $$cap_appname-web app → HTTP Settings → connect your
-            domain, Enable HTTPS, Force HTTPS. (2) Deployment tab → Enable App Token and store it
-            as the GitHub secret CAPROVER_APP_TOKEN_WEB; set the repository variable
-            CAPROVER_SERVER=https://captain.<root-domain>. (3) The database is internal only at
-            srv-captain--$$cap_appname-db:5432 (user and db "suffa"; the password is in the db
-            app's environment variables). /api and /media answer 502 until suffa-api ships.
-    displayName: Suffa (web + db)
-    isOfficial: false
-    description: Offline-first Arabic learning platform (Al-Arabiyya bayna Yadayk) — web app and database.
-    documentation: See docs/ops/caprover-deployment.md in the arabictutor repository.
+  variables:
+    - id: $$cap_web_image
+      label: Web image
+      defaultValue: ghcr.io/thedatadudech/suffa-web
+      description: Built by .github/workflows/release.yml. The repository is private, so add ghcr.io under Cluster → Docker Registries first (GitHub user + token with read:packages).
+      validRegex: /^[a-z0-9./_-]+$/
+    - id: $$cap_web_tag
+      label: Web image tag
+      defaultValue: latest
+      description: Use an immutable sha-<short> tag in production; CI redeploys with it on every push to main.
+      validRegex: /^[A-Za-z0-9._-]+$/
+    - id: $$cap_pg_tag
+      label: pgvector/Postgres image tag
+      defaultValue: 0.8.0-pg17
+      description: Pin exactly and upgrade deliberately (take a pg_dump first).
+      validRegex: /^[A-Za-z0-9._-]+$/
+    - id: $$cap_db_password
+      label: Database password
+      defaultValue: $$cap_gen_random_hex(24)
+      description: Hex is safe inside the database URL. Stored as POSTGRES_PASSWORD on the db app.
+      validRegex: /^[A-Za-z0-9]{16,}$/
+    - id: $$cap_rustfs_app
+      label: Existing RustFS app name
+      defaultValue: rustfs
+      description: The shared RustFS app (also used by Tabayyun). Only used for /media once recordings ship.
+      validRegex: /^[a-z0-9-]+$/
+  instructions:
+    start: >-
+      Deploys the Suffa web app (offline-first Arabic learning PWA served by Caddy) and its
+      Postgres 17 + pgvector database, following the same layout as Tabayyun.
+      Before you start: if the GHCR package is private, add ghcr.io under
+      Cluster → Docker Registries.
+    end: >-
+      Done. Next steps: (1) open the $$cap_appname-web app → HTTP Settings → connect your
+      domain, Enable HTTPS, Force HTTPS. (2) Deployment tab → Enable App Token and store it
+      as the GitHub secret CAPROVER_APP_TOKEN_WEB; set the repository variable
+      CAPROVER_SERVER=https://captain.<root-domain>. (3) The database is internal only at
+      srv-captain--$$cap_appname-db:5432 (user and db "suffa"; the password is in the db
+      app's environment variables). /api and /media answer 502 until suffa-api ships.
+  displayName: Suffa (web + db)
+  isOfficial: false
+  description: Offline-first Arabic learning platform (Al-Arabiyya bayna Yadayk) — web app and database.
+  documentation: See docs/ops/caprover-deployment.md in the arabictutor repository.

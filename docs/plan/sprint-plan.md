@@ -19,19 +19,19 @@ demoed · no secrets in code · structured logs on new paths.
 | 1.2 | CI workflow: lint, typecheck, test, build on PR + main                                                          | 3   | PR blocked on failure.                                  |
 | 1.3 | `apps/api` skeleton: Hono, pino, zod env (refuse placeholder secrets in prod), `/healthz`                       | 3   | Fails fast with clear message on bad env.               |
 | 1.4 | Drizzle + Postgres 17/pgvector: migrations for the 5 sync tables + `users`; migrate-on-start with advisory lock | 3   | Idempotent; Testcontainers integration test.            |
-| 1.5 | Dockerfiles: `suffa-web` (Caddy, CSP, `/api` + `/media` proxy), `suffa-api` (with ffmpeg)                       | 3   | Images run locally with `compose.dev.yaml`.             |
-| 1.6 | First CapRover deploy of `suffa-web` (static PWA) next to Tabayyun                                              | 3   | `https://suffa.<domain>` serves the app.                |
+| 1.5 | Dockerfiles: `arabictutor-web` (Caddy, CSP, `/api` + `/media` proxy), `arabictutor-api` (with ffmpeg)           | 3   | Images run locally with `compose.dev.yaml`.             |
+| 1.6 | First CapRover deploy of `arabictutor-web` (static PWA) next to Tabayyun                                        | 3   | `https://arabictutor.<domain>` serves the app.          |
 
 ### Sprint 2 (Oct 19 – Nov 1) — _"Operable"_
 
-| #   | Story                                                                                               | Pts | Acceptance                                                 |
-| --- | --------------------------------------------------------------------------------------------------- | --- | ---------------------------------------------------------- |
-| 2.1 | Release workflow: GHCR images + `caprover/deploy-from-github` for api/web/worker (Tabayyun pattern) | 5   | Push to main deploys in < 10 min; skipped when vars unset. |
-| 2.2 | `suffa-db`, `suffa-api`, `suffa-worker` apps; pg-boss queue + worker role (ADR-0020)                | 3   | `/healthz` shows schema revision + queue depth.            |
-| 2.3 | Backups: nightly `pg_dump` → off-box; restore drill                                                 | 3   | Restore documented and tested.                             |
-| 2.4 | Error tracking + uptime check                                                                       | 2   | Test error visible with release tag.                       |
-| 2.5 | Sync endpoints `push`/`pull` (contract = `SyncProvider`)                                            | 5   | Existing sync engine suite passes against the server.      |
-| 2.6 | `createBrowserRouter` behind Caddy SPA fallback                                                     | 2   | Deep links + offline navigation work.                      |
+| #   | Story                                                                                                  | Pts | Acceptance                                                 |
+| --- | ------------------------------------------------------------------------------------------------------ | --- | ---------------------------------------------------------- |
+| 2.1 | Release workflow: GHCR images + `caprover/deploy-from-github` for api/web/worker (Tabayyun pattern)    | 5   | Push to main deploys in < 10 min; skipped when vars unset. |
+| 2.2 | `arabictutor-db`, `arabictutor-api`, `arabictutor-worker` apps; pg-boss queue + worker role (ADR-0020) | 3   | `/healthz` shows schema revision + queue depth.            |
+| 2.3 | Backups: nightly `pg_dump` → off-box; restore drill                                                    | 3   | Restore documented and tested.                             |
+| 2.4 | Error tracking + uptime check                                                                          | 2   | Test error visible with release tag.                       |
+| 2.5 | Sync endpoints `push`/`pull` (contract = `SyncProvider`)                                               | 5   | Existing sync engine suite passes against the server.      |
+| 2.6 | `createBrowserRouter` behind Caddy SPA fallback                                                        | 2   | Deep links + offline navigation work.                      |
 
 **Gate G0.**
 

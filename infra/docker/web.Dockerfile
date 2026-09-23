@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-# suffa-web: builds the offline-first PWA and serves it with Caddy.
+# arabictutor-web: builds the offline-first PWA and serves it with Caddy.
 # Build context is the repository root (same convention as Tabayyun's Dockerfiles).
 FROM node:22-bookworm-slim AS build
 WORKDIR /app

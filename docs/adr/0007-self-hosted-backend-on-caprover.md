@@ -20,7 +20,7 @@ Options for CapRover:
 
 ## Decision
 
-Option 3. Components as CapRover apps: `suffa-api`, `suffa-worker`, `suffa-web`, a Postgres 17
+Option 3. Components as CapRover apps: `arabictutor-api`, `arabictutor-worker`, `arabictutor-web`, a Postgres 17
 (pgvector) app, and the shared RustFS — the same layout as Tabayyun (details in ADR-0013,
 ADR-0017, ADR-0020 and `docs/ops/caprover-deployment.md`).
 

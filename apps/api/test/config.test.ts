@@ -51,3 +51,39 @@ describe('loadConfig', () => {
     expect(redactDatabaseUrl(GOOD_DB)).toContain('***');
   });
 });
+
+describe('SUFFA_SYNC_DEV_TOKENS', () => {
+  const UUID = '11111111-1111-4111-8111-111111111111';
+
+  it('maps tokens to user ids outside prod', () => {
+    const config = loadConfig({
+      SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db',
+      SUFFA_SYNC_DEV_TOKENS: `${'t'.repeat(40)}=${UUID}`,
+    });
+    expect(config.syncDevTokens.get('t'.repeat(40))).toBe(UUID);
+  });
+
+  it('refuses dev tokens in prod', () => {
+    expect(() =>
+      loadConfig({
+        SUFFA_ENV: 'prod',
+        SUFFA_DATABASE_URL: GOOD_DB,
+        SUFFA_AUTH_SECRET: GOOD_SECRET,
+        SUFFA_SYNC_DEV_TOKENS: `${'t'.repeat(40)}=${UUID}`,
+      })
+    ).toThrow(/must not be set in prod/);
+  });
+
+  it.each([
+    ['short token', `short=${UUID}`],
+    ['missing uuid', `${'t'.repeat(40)}=`],
+    ['bad uuid', `${'t'.repeat(40)}=not-a-uuid`],
+  ])('rejects %s', (_label, spec) => {
+    expect(() =>
+      loadConfig({
+        SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db',
+        SUFFA_SYNC_DEV_TOKENS: spec,
+      })
+    ).toThrow(ConfigError);
+  });
+});

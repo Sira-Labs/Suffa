@@ -28,8 +28,22 @@ jobs:
       - run: npm run build -w @suffa/web
 
   api:
-    name: api (typecheck, test, build)
+    name: api (typecheck, unit + Postgres integration tests, build)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: suffa
+          POSTGRES_PASSWORD: ci0123456789abcdef
+          POSTGRES_DB: suffa_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U suffa" --health-interval 2s --health-timeout 5s
+          --health-retries 20
+    env:
+      # Throwaway database: the integration tests wipe it.
+      SUFFA_TEST_DATABASE_URL: postgres://suffa:ci0123456789abcdef@127.0.0.1:5432/suffa_test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

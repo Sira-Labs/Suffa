@@ -91,6 +91,8 @@ jobs:
           run -d --name api smoke/suffa-api:test
           for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/healthz && break; sleep 1; done
           curl -fsS http://127.0.0.1:8000/healthz | grep -q '"status":"ok"'
+          # Sync stays closed in prod until real authentication exists (ADR-0008).
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/v1/sync/srs_cards/pull)" = 401
           run -d --name worker -e SUFFA_ROLE=worker smoke/suffa-api:test
           sleep 3
           docker logs worker 2>&1 | grep -q 'worker.start' || { docker logs worker; exit 1; }

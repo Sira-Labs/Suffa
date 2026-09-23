@@ -37,7 +37,41 @@ const RawEnvSchema = z.object({
     .default('info'),
   SUFFA_VERSION: z.string().default('dev'),
   SUFFA_WORKER_HEARTBEAT_MS: z.coerce.number().int().min(1000).default(30_000),
+  SUFFA_SYNC_DEV_TOKENS: z.string().optional(),
 });
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const MIN_DEV_TOKEN_LENGTH = 32;
+
+/**
+ * Parses `token=userUuid;token2=userUuid2` (development/test sync auth before Better Auth).
+ * Returns the mapping and any problems found.
+ */
+export function parseDevTokens(spec: string): {
+  tokens: Map<string, string>;
+  issues: string[];
+} {
+  const tokens = new Map<string, string>();
+  const issues: string[] = [];
+  for (const entry of spec
+    .split(';')
+    .map((e) => e.trim())
+    .filter(Boolean)) {
+    const [token, userId] = entry.split('=').map((p) => p.trim());
+    if (!token || token.length < MIN_DEV_TOKEN_LENGTH) {
+      issues.push(
+        `SUFFA_SYNC_DEV_TOKENS: tokens must be at least ${MIN_DEV_TOKEN_LENGTH} characters`
+      );
+    } else if (!userId || !UUID.test(userId)) {
+      issues.push(
+        'SUFFA_SYNC_DEV_TOKENS: each token must map to a user UUID (token=uuid)'
+      );
+    } else {
+      tokens.set(token, userId.toLowerCase());
+    }
+  }
+  return { tokens, issues };
+}
 
 export interface Config {
   env: 'dev' | 'test' | 'prod';
@@ -49,6 +83,8 @@ export interface Config {
   logLevel: string;
   version: string;
   workerHeartbeatMs: number;
+  /** Static bearer tokens → user ids; only outside prod, until Better Auth (ADR-0008). */
+  syncDevTokens: Map<string, string>;
 }
 
 function isPlaceholder(value: string): boolean {
@@ -91,6 +127,16 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       );
     }
   }
+  let syncDevTokens = new Map<string, string>();
+  if (raw.SUFFA_SYNC_DEV_TOKENS) {
+    if (raw.SUFFA_ENV === 'prod') {
+      issues.push('SUFFA_SYNC_DEV_TOKENS must not be set in prod');
+    } else {
+      const parsed = parseDevTokens(raw.SUFFA_SYNC_DEV_TOKENS);
+      issues.push(...parsed.issues);
+      syncDevTokens = parsed.tokens;
+    }
+  }
   if (issues.length > 0) throw new ConfigError(issues);
 
   return {
@@ -103,6 +149,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     logLevel: raw.SUFFA_LOG_LEVEL,
     version: raw.SUFFA_VERSION,
     workerHeartbeatMs: raw.SUFFA_WORKER_HEARTBEAT_MS,
+    syncDevTokens,
   };
 }
 

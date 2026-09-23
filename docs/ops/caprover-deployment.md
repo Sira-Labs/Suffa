@@ -101,25 +101,26 @@ In the RustFS console (open port 9001 temporarily or via SSH tunnel, as for Taba
 
 Env (App Configs → Environment variables):
 
-| Name                                                                        | Value                                                             | From sprint |
-| --------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------- |
-| `SUFFA_ENV`                                                                 | `prod`                                                            | S1          |
-| `SUFFA_PUBLIC_URL`                                                          | `https://suffa.<domain>`                                          | S1          |
-| `SUFFA_DATABASE_URL`                                                        | `postgres://suffa:<password>@srv-captain--suffa-db:5432/suffa`    | S1          |
-| `SUFFA_AUTH_SECRET`                                                         | `openssl rand -base64 48`                                         | S3          |
-| `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)        | S7          |
-| `SUFFA_SMTP_URL`                                                            | `smtps://user:pass@smtp.provider:465`                             | S3          |
-| `SUFFA_MAIL_FROM`                                                           | `Suffa <noreply@<domain>>`                                        | S3          |
-| `SUFFA_S3_ENDPOINT`                                                         | `http://srv-captain--rustfs:9000`                                 | S7          |
-| `SUFFA_S3_ALLOW_HTTP`                                                       | `true` (internal endpoint only)                                   | S7          |
-| `SUFFA_S3_ACCESS_KEY_ID` / `SUFFA_S3_SECRET_ACCESS_KEY`                     | the `suffa-app` key                                               | S7          |
-| `SUFFA_S3_BUCKET_MEDIA` / `_UPLOADS` / `_CONTENT`                           | `suffa-media` / `suffa-uploads` / `suffa-content`                 | S7          |
-| `SUFFA_MEDIA_PUBLIC_PREFIX`                                                 | `/media` (presigned URLs are rewritten to this same-origin path)  | S7          |
-| `SUFFA_VAPID_PUBLIC_KEY` / `_PRIVATE_KEY` / `_SUBJECT`                      | `npx web-push generate-vapid-keys`; subject `mailto:you@<domain>` | S6          |
-| `SUFFA_GOOGLE_CLIENT_ID` / `_CLIENT_SECRET` / `SUFFA_GOOGLE_PICKER_API_KEY` | Google Cloud project (Drive API + Picker)                         | S7          |
-| `SUFFA_YOUTUBE_API_KEY`                                                     | Google Cloud project (YouTube Data API v3)                        | S12         |
-| `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`                       | provider keys                                                     | S9          |
-| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | Firebase service-account JSON (base64)                            | S13         |
+| Name                                                                        | Value                                                                                                   | From sprint |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------- |
+| `SUFFA_ENV`                                                                 | `prod`                                                                                                  | S1          |
+| `SUFFA_PUBLIC_URL`                                                          | `https://suffa.<domain>`                                                                                | S1          |
+| `SUFFA_DATABASE_URL`                                                        | `postgres://suffa:<password>@srv-captain--suffa-db:5432/suffa`                                          | S1          |
+| `SUFFA_AUTH_SECRET`                                                         | `openssl rand -base64 48`                                                                               | S3          |
+| `SUFFA_SYNC_DEV_TOKENS`                                                     | **never in prod** (the api refuses to start): `token=userUuid;…` for local/test sync before Better Auth | dev only    |
+| `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                              | S7          |
+| `SUFFA_SMTP_URL`                                                            | `smtps://user:pass@smtp.provider:465`                                                                   | S3          |
+| `SUFFA_MAIL_FROM`                                                           | `Suffa <noreply@<domain>>`                                                                              | S3          |
+| `SUFFA_S3_ENDPOINT`                                                         | `http://srv-captain--rustfs:9000`                                                                       | S7          |
+| `SUFFA_S3_ALLOW_HTTP`                                                       | `true` (internal endpoint only)                                                                         | S7          |
+| `SUFFA_S3_ACCESS_KEY_ID` / `SUFFA_S3_SECRET_ACCESS_KEY`                     | the `suffa-app` key                                                                                     | S7          |
+| `SUFFA_S3_BUCKET_MEDIA` / `_UPLOADS` / `_CONTENT`                           | `suffa-media` / `suffa-uploads` / `suffa-content`                                                       | S7          |
+| `SUFFA_MEDIA_PUBLIC_PREFIX`                                                 | `/media` (presigned URLs are rewritten to this same-origin path)                                        | S7          |
+| `SUFFA_VAPID_PUBLIC_KEY` / `_PRIVATE_KEY` / `_SUBJECT`                      | `npx web-push generate-vapid-keys`; subject `mailto:you@<domain>`                                       | S6          |
+| `SUFFA_GOOGLE_CLIENT_ID` / `_CLIENT_SECRET` / `SUFFA_GOOGLE_PICKER_API_KEY` | Google Cloud project (Drive API + Picker)                                                               | S7          |
+| `SUFFA_YOUTUBE_API_KEY`                                                     | Google Cloud project (YouTube Data API v3)                                                              | S12         |
+| `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`                       | provider keys                                                                                           | S9          |
+| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | Firebase service-account JSON (base64)                                                                  | S13         |
 
 - Container HTTP port `8000`. HTTP settings: no public domain needed.
 - Deployment tab → **Enable App Token** → GitHub secret `CAPROVER_APP_TOKEN_API`.

@@ -8,6 +8,8 @@ import { serve } from '@hono/node-server';
 import pg from 'pg';
 import { pino } from 'pino';
 import { createApp } from './app.js';
+import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/resolver.js';
+import { PgSyncRepository } from './sync/repository.js';
 import { ConfigError, loadConfig, redactDatabaseUrl } from './config.js';
 import {
   currentRevision,
@@ -85,11 +87,27 @@ async function main(): Promise<void> {
   }
 
   await migrate(pool, migrations, log);
+
+  // Until Better Auth (Sprint 3) sync is closed, except for dev tokens outside prod.
+  let auth: AuthResolver = new DenyAllResolver();
+  if (config.syncDevTokens.size > 0) {
+    const userIds = [...new Set(config.syncDevTokens.values())];
+    await pool.query(
+      'insert into users (id) select unnest($1::uuid[]) on conflict (id) do nothing',
+      [userIds]
+    );
+    auth = new DevTokenResolver(config.syncDevTokens);
+    log.warn({ users: userIds.length }, 'sync.dev_tokens_enabled');
+  }
+
   const app = createApp({
     version: config.version,
     expectedRevision: expected,
     health: { schemaRevision: () => currentRevision(pool) },
     onProbeError: (error) => log.warn({ err: error }, 'health.db_unreachable'),
+    sync: { repo: new PgSyncRepository(pool), auth, log },
+    onUnhandledError: (error, path) =>
+      log.error({ err: error, path }, 'http.unhandled_error'),
   });
   const server = serve(
     { fetch: app.fetch, port: config.port, hostname: '0.0.0.0' },

@@ -18,6 +18,22 @@ Internet ─▶ CapRover nginx (TLS) ─▶ suffa-web (Caddy :80) ─/api──�
 > then only `suffa-web` (the current offline PWA, static) can be deployed. The steps below are
 > the target setup.
 
+## Quick start: one-click templates (YAML)
+
+Two templates live in `infra/caprover/one-click/`. In CapRover: **Apps → One-Click
+Apps/Databases → `>> TEMPLATE <<`**, paste the file, enter the app name **`suffa`**, deploy.
+
+| Template         | Creates                                              | Use when                                             |
+| ---------------- | ---------------------------------------------------- | ---------------------------------------------------- |
+| `suffa.yml`      | `suffa-web`, `suffa-db`                              | **Now** — offline PWA + database (api not built yet) |
+| `suffa-full.yml` | `suffa-db`, `suffa-api`, `suffa-worker`, `suffa-web` | From Sprint 2, once the `suffa-api` image exists     |
+
+Before the first deploy: the repository is **private**, so its GHCR images are private too.
+Either add `ghcr.io` under **Cluster → Docker Registries** (GitHub user + token with
+`read:packages`) or make the packages public. The `suffa-web` image is built by
+`.github/workflows/release.yml` on every push to `main`. For deploying without GHCR, the
+root `captain-definition` builds the same image on the server (method 3 in Tabayyun's guide).
+
 ## What to create
 
 | #   | CapRover app          | Image                                          | Persistent data                                   | Public domain                   | Notes                                                                                |

@@ -7,7 +7,10 @@ import { useBookProgress } from './useBookProgress';
 export function Units() {
   const { units } = useBookProgress();
   if (units.length === 0) return <p className="muted">Lade Einheiten …</p>;
-  const current = units.find((u) => u.progress.percent < 100) ?? units[units.length - 1]!;
+  // The unit to continue: the first open one whose test is not passed yet.
+  const current =
+    units.find((u) => u.unlocked && u.status.state !== 'completed') ??
+    units[units.length - 1]!;
 
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>
@@ -38,20 +41,21 @@ export function Units() {
       </Link>
 
       <ol className="unit-grid" aria-label="Alle Einheiten">
-        {units.map(({ unit, title, progress }) => (
+        {units.map(({ unit, title, progress, unlocked, status }) => (
           <li key={unit.unit}>
             <Link
               to={`/units/${unit.unit}`}
-              className={`unit-tile${unit.unit === current.unit.unit ? ' unit-tile-current' : ''}${progress.percent === 100 ? ' unit-tile-done' : ''}`}
-              aria-label={`Einheit ${unit.unit}${title ? `, ${title}` : ''}, ${progress.percent} % erledigt`}
+              className={`unit-tile${unit.unit === current.unit.unit ? ' unit-tile-current' : ''}${status.state === 'completed' ? ' unit-tile-done' : ''}${unlocked ? '' : ' unit-tile-locked'}`}
+              aria-label={`Einheit ${unit.unit}${title ? `, ${title}` : ''}, ${unlocked ? `${progress.percent} % erledigt` : 'gesperrt'}`}
             >
               <span className="unit-tile-number arabic-display" aria-hidden>
                 {arabicNumber(unit.unit)}
               </span>
               <span className="unit-tile-label">
-                {progress.percent === 100 && (
+                {status.state === 'completed' && (
                   <Icon name="check" size={16} strokeWidth={2.6} />
                 )}
+                {!unlocked && <Icon name="lock" size={14} />}
                 Einheit {unit.unit}
               </span>
               <span className="unit-tile-bar" aria-hidden>

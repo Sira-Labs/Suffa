@@ -11,6 +11,7 @@ import { buildTodayPlan, localDay, reviewsToday, wordOfTheDay } from '@/services
 import {
   listeningXpEvents,
   practiceXpEvents,
+  unitOnTimeXpEvents,
   reviewXpEvents,
   startOfWeek,
   sumXp,
@@ -18,7 +19,14 @@ import {
 import { lessonSizes, loadPublisherIndex } from '@/services/audio/publisherIndex';
 import type { TodayStep } from '@/services/today';
 import { ForgettingReminder } from './ForgettingReminder';
-import { useListenStore, usePracticeStore, useSettingsStore, useSrsStore } from '@/state';
+import {
+  useEnrollmentStore,
+  useListenStore,
+  usePracticeStore,
+  useSettingsStore,
+  useSrsStore,
+} from '@/state';
+import { CurrentUnitCard } from './CurrentUnitCard';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
   weekday: 'long',
@@ -34,6 +42,8 @@ export function Dashboard() {
   const [logs, setLogs] = useState<ReviewLog[]>([]);
   const listening = useListenStore((s) => s.progress);
   const practised = usePracticeStore((s) => s.records);
+  const enrollments = useEnrollmentStore((s) => s.enrollments);
+  const exams = useEnrollmentStore((s) => s.exams);
   const [sizes, setSizes] = useState<ReadonlyMap<string, number>>(new Map());
 
   useEffect(() => {
@@ -66,6 +76,7 @@ export function Dashboard() {
       ...reviewXpEvents(logs),
       ...listeningXpEvents(heard, sizes),
       ...practiceXpEvents(Object.values(practised)),
+      ...unitOnTimeXpEvents(Object.values(enrollments), exams),
     ],
     startOfWeek()
   );
@@ -113,6 +124,7 @@ export function Dashboard() {
       </header>
 
       <ForgettingReminder cards={cards} logs={logs} />
+      <CurrentUnitCard />
 
       <div className="today-grid">
         <section

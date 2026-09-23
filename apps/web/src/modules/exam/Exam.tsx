@@ -7,7 +7,14 @@ import { speakArabic } from '@/services/speech';
 import { examRepo, cardRepo } from '@/services/storage';
 import { cardId, createCard } from '@/services/srs';
 import { unitInfos } from '@/content';
-import { useSrsStore, useSyncStore } from '@/state';
+import {
+  useCelebrationStore,
+  useEnrollmentStore,
+  useSrsStore,
+  useSyncStore,
+} from '@/state';
+import { PASS_RATIO, enrollmentStatus } from '@/services/enrollment';
+import { XP_RULES } from '@/services/engagement/xp';
 import { generateExam, type ExamQuestion } from './examEngine';
 
 const FORMAT_LABELS: Record<ExamFormat, string> = {
@@ -389,6 +396,22 @@ function ExamResultView({
       startedAt: now,
       finishedAt: now,
     });
+    // A passed unit test opens the next unit (redesign v2, step 2).
+    await useEnrollmentStore.getState().reloadExams();
+    const unit = units.length === 1 ? units[0]! : null;
+    if (unit !== null && items.length > 0 && score / items.length >= PASS_RATIO) {
+      const { enrollments, exams } = useEnrollmentStore.getState();
+      const status = enrollmentStatus(enrollments[unit], exams, unit);
+      const onTime = status.state === 'completed' && status.onTime;
+      useCelebrationStore.getState().show({
+        title:
+          unit < 16
+            ? `Einheit ${unit} bestanden · Einheit ${unit + 1} ist offen`
+            : `Einheit ${unit} bestanden`,
+        xp: onTime ? XP_RULES.unitOnTime : 0,
+        big: true,
+      });
+    }
     // Difficult items → SRS: make the matching card due immediately and mark it as a leech.
     for (const item of wrong) {
       const kind =

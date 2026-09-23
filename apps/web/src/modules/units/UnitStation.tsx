@@ -4,7 +4,9 @@ import type { PracticeSkill, UnitPracticeScope } from '@/types';
 import { Icon } from '@/components/Icon';
 import { content } from '@/content';
 import { practiceCount, unitPracticeItems } from '@/services/practice';
-import { useCelebrationStore, usePracticeStore } from '@/state';
+import { useCelebrationStore, useEnrollmentStore, usePracticeStore } from '@/state';
+import { isUnlocked } from '@/services/enrollment';
+import { LockedPanel } from './UnitGate';
 import { BookVideos } from '@/modules/library/BookVideos';
 import { PublisherAudio } from '@/modules/library/PublisherAudio';
 import { Reading } from '@/modules/reading';
@@ -28,6 +30,7 @@ export function UnitStation() {
   const practise = usePracticeStore((s) => s.practise);
   const celebrate = useCelebrationStore((s) => s.show);
   const items = useMemo(() => unitPracticeItems(content, unit), [unit]);
+  const exams = useEnrollmentStore((s) => s.exams);
 
   const skill = station !== 'listen' ? (station as PracticeSkill) : null;
   const scope = useMemo<UnitPracticeScope | null>(() => {
@@ -55,6 +58,18 @@ export function UnitStation() {
         <Link to="/units" className="btn">
           Zu allen Einheiten
         </Link>
+      </div>
+    );
+  }
+
+  if (!isUnlocked(unit, exams)) {
+    return (
+      <div className="stack" style={{ gap: '1.25rem' }}>
+        <Link to={`/units/${unit}`} className="back-link">
+          <Icon name="arrowLeft" size={18} />
+          Einheit {unit}
+        </Link>
+        <LockedPanel unit={unit} />
       </div>
     );
   }

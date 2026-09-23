@@ -8,6 +8,7 @@ import {
   useContentStore,
   useListenStore,
   usePracticeStore,
+  useEnrollmentStore,
   useSettingsStore,
   useSrsStore,
   useSyncStore,
@@ -26,6 +27,7 @@ export function App() {
   const initSync = useSyncStore((s) => s.init);
   const loadListening = useListenStore((s) => s.load);
   const loadPractice = usePracticeStore((s) => s.load);
+  const loadEnrollments = useEnrollmentStore((s) => s.load);
 
   useEffect(() => {
     let cancelled = false;
@@ -36,6 +38,7 @@ export function App() {
       await loadSrs();
       await loadListening();
       await loadPractice();
+      await loadEnrollments();
       initSync();
       if (!cancelled) setReady(true);
     })().catch((error) => {
@@ -48,7 +51,15 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [loadSettings, loadContent, loadSrs, loadListening, loadPractice, initSync]);
+  }, [
+    loadSettings,
+    loadContent,
+    loadSrs,
+    loadListening,
+    loadPractice,
+    loadEnrollments,
+    initSync,
+  ]);
 
   if (!ready) {
     return (

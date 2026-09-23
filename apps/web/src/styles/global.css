@@ -1208,3 +1208,61 @@ textarea.input {
   border-color: color-mix(in srgb, var(--warn) 55%, var(--border));
   background: color-mix(in srgb, var(--warn) 7%, var(--bg-elev));
 }
+
+/* Unit gate: locked notice and the start panel with the pace choice. */
+.unit-gate {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.pace-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--tap);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  cursor: pointer;
+}
+.pace-option input {
+  accent-color: var(--accent-fill);
+  width: 18px;
+  height: 18px;
+}
+.pace-option-on {
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent-fill) 12%, var(--bg-elev));
+}
+.pace-weeks {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.pace-option-on .pace-weeks {
+  color: var(--accent);
+}
+.deadline-chip {
+  align-self: flex-start;
+  gap: 0.4rem;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.deadline-chip-over {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+.unit-tile-locked {
+  opacity: 0.55;
+}
+.unit-tile-locked .unit-tile-label svg {
+  color: var(--text-muted);
+}
+.current-unit-card {
+  color: var(--text);
+  text-decoration: none;
+  flex-wrap: nowrap;
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.current-unit-card:hover strong {
+  color: var(--accent);
+}

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { AudioUnit, ExamResult, PracticeSkill, PublisherAudioIndex } from '@/types';
+import type { AudioUnit, PracticeSkill, PublisherAudioIndex } from '@/types';
 import { content, unitInfos } from '@/content';
 import { loadPublisherIndex, trackId } from '@/services/audio/publisherIndex';
-import { examRepo } from '@/services/storage';
 import {
   loadBookVideos,
   videosForUnit,
@@ -14,11 +13,21 @@ import {
   type Station,
   type VocabStats,
 } from '@/services/units';
-import { useContentStore, useListenStore, usePracticeStore, useSrsStore } from '@/state';
+import {
+  useContentStore,
+  useEnrollmentStore,
+  useListenStore,
+  usePracticeStore,
+  useSrsStore,
+} from '@/state';
+import {
+  enrollmentStatus,
+  isUnlocked,
+  passedTest,
+  type EnrollmentStatus,
+} from '@/services/enrollment';
 import { PRACTICE_SKILLS, practiceCount, unitPracticeItems } from '@/services/practice';
 
-/** Share of a unit test that counts as passed. */
-const PASS_RATIO = 0.8;
 /** A card is "sure" once its interval reaches three weeks (same rule as mastery). */
 const MATURE_DAYS = 21;
 
@@ -35,6 +44,9 @@ export interface UnitOverview {
   stations: Station[];
   progress: ReturnType<typeof unitProgress>;
   skills: SkillProgress[];
+  /** Opens with the previous unit's test (unit 1 is always open). */
+  unlocked: boolean;
+  status: EnrollmentStatus;
 }
 
 /**
@@ -46,7 +58,8 @@ export function useBookProgress(): {
   units: UnitOverview[];
 } {
   const [index, setIndex] = useState<PublisherAudioIndex | null>(null);
-  const [exams, setExams] = useState<ExamResult[]>([]);
+  const exams = useEnrollmentStore((s) => s.exams);
+  const enrollments = useEnrollmentStore((s) => s.enrollments);
   const [videoData, setVideoData] = useState<BookVideoData | null>(null);
   const listening = useListenStore((s) => s.progress);
   const cards = useSrsStore((s) => s.cards);
@@ -56,7 +69,6 @@ export function useBookProgress(): {
   useEffect(() => {
     let cancelled = false;
     void loadPublisherIndex().then((i) => !cancelled && setIndex(i));
-    void examRepo.all().then((e) => !cancelled && setExams(e));
     // Videos are an extra: without their index the path simply has no video station.
     void loadBookVideos()
       .then((v) => !cancelled && setVideoData(v))
@@ -84,13 +96,7 @@ export function useBookProgress(): {
           if (card && (card.reps > 0 || card.lastReviewed)) vocab.started += 1;
           if (card && card.interval >= MATURE_DAYS) vocab.mature += 1;
         }
-        const testPassed = exams.some(
-          (e) =>
-            e.units.length === 1 &&
-            e.units[0] === unit.unit &&
-            e.total > 0 &&
-            e.score / e.total >= PASS_RATIO
-        );
+        const testPassed = passedTest(exams, unit.unit) !== null;
         const items = unitPracticeItems(content, unit.unit);
         const practice = Object.fromEntries(
           PRACTICE_SKILLS.map((skill) => [
@@ -128,9 +134,11 @@ export function useBookProgress(): {
           stations,
           progress: unitProgress(stations),
           skills,
+          unlocked: isUnlocked(unit.unit, exams),
+          status: enrollmentStatus(enrollments[unit.unit], exams, unit.unit),
         };
       });
-  }, [index, cards, userVocab, listening, exams, videoData, practiced]);
+  }, [index, cards, userVocab, listening, exams, enrollments, videoData, practiced]);
 
   return { index, units };
 }

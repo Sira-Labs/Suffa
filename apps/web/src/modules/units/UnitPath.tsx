@@ -8,6 +8,7 @@ import {
   type StationKind,
 } from '@/services/units';
 import { useBookProgress, type SkillProgress } from './useBookProgress';
+import { DeadlineChip, LockedPanel, StartPanel } from './UnitGate';
 
 const STATION_ICONS: Record<StationKind, IconName> = {
   dialogue: 'listen',
@@ -55,7 +56,7 @@ export function UnitPath() {
       </div>
     );
   }
-  const { unit, title, stations, progress, skills } = entry;
+  const { unit, title, stations, progress, skills, unlocked, status } = entry;
   const prev = units.find((u) => u.unit.unit === number - 1);
   const next = units.find((u) => u.unit.unit === number + 1);
 
@@ -74,6 +75,7 @@ export function UnitPath() {
           Einheit {unit.unit}
         </span>
         <UnitTitle title={title} unit={unit.unit} />
+        {unlocked && <DeadlineChip unit={unit.unit} status={status} />}
         <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
           <div
             className="review-progress"
@@ -114,15 +116,19 @@ export function UnitPath() {
         )}
       </header>
 
-      <ol className="path" aria-label={`Lernpfad Einheit ${unit.unit}`}>
-        {stations.map((station, i) => (
-          <PathStation
-            key={station.id}
-            station={station}
-            last={i === stations.length - 1}
-          />
-        ))}
-      </ol>
+      {!unlocked && <LockedPanel unit={unit.unit} />}
+      {unlocked && status.state === 'not-started' && <StartPanel unit={unit.unit} />}
+      {unlocked && (
+        <ol className="path" aria-label={`Lernpfad Einheit ${unit.unit}`}>
+          {stations.map((station, i) => (
+            <PathStation
+              key={station.id}
+              station={station}
+              last={i === stations.length - 1}
+            />
+          ))}
+        </ol>
+      )}
 
       <nav
         className="row"

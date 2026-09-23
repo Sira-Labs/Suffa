@@ -12,6 +12,7 @@ import type {
   ExamResult,
   MediaProgress,
   PracticeRecord,
+  UnitEnrollment,
   ReviewLog,
   SettingsRecord,
   SrsCard,
@@ -205,6 +206,21 @@ export const practiceRepo = {
   async put(record: PracticeRecord, database: AppDatabase = db): Promise<PracticeRecord> {
     const stamped = stamp(record);
     await database.practice_progress.put(stamped);
+    return stamped;
+  },
+};
+
+/* ------------------------------ Unit enrollments ------------------------------ */
+
+/** Local-only like the other engagement tables; joins sync with them. */
+// TODO(2026-12-13): sync unit_enrollments with the engagement sprint (S5, ADR-0016).
+export const enrollmentRepo = {
+  async all(database: AppDatabase = db): Promise<UnitEnrollment[]> {
+    return database.unit_enrollments.filter((e) => !e.deleted).toArray();
+  },
+  async put(record: UnitEnrollment, database: AppDatabase = db): Promise<UnitEnrollment> {
+    const stamped = stamp(record);
+    await database.unit_enrollments.put(stamped);
     return stamped;
   },
 };

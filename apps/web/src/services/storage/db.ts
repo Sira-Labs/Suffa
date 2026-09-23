@@ -12,6 +12,7 @@ import type {
   ExamResult,
   MediaProgress,
   PracticeRecord,
+  UnitEnrollment,
   ReviewLog,
   SettingsRecord,
   SrsCard,
@@ -46,6 +47,8 @@ export class AppDatabase extends Dexie {
   media_progress!: Table<MediaProgress, string>;
   /** Local-only like media_progress: practised items of the unit skills. */
   practice_progress!: Table<PracticeRecord, string>;
+  /** Local-only for now: started units with pace and target date. */
+  unit_enrollments!: Table<UnitEnrollment, string>;
 
   constructor(name = 'bayna-yadayk') {
     super(name);
@@ -66,6 +69,10 @@ export class AppDatabase extends Dexie {
     // v3: unit skill practice (reading, writing, speaking, verbs); existing tables unchanged.
     this.version(3).stores({
       practice_progress: 'id, unit, skill, updated_at, deleted',
+    });
+    // v4: started units with pace and target date (step 2 of the unit room).
+    this.version(4).stores({
+      unit_enrollments: 'id, unit, updated_at, deleted',
     });
   }
 }

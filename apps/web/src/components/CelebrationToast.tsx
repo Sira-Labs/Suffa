@@ -50,7 +50,9 @@ export function CelebrationToast() {
             </span>
           </span>
           <span className="celebration-text">
-            <strong className="celebration-xp">+{current.xp} XP</strong>
+            {current.xp > 0 && (
+              <strong className="celebration-xp">+{current.xp} XP</strong>
+            )}
             <span>{current.title}</span>
           </span>
         </div>

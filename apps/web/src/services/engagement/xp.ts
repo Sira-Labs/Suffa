@@ -3,7 +3,15 @@
  * already store, so the same rules can later run on the server as the authoritative copy.
  * XP rewards effortful recall and finished listening, not raw volume.
  */
-import type { MediaProgress, PracticeRecord, ReviewLog, ReviewRating } from '@/types';
+import type {
+  ExamResult,
+  MediaProgress,
+  PracticeRecord,
+  ReviewLog,
+  ReviewRating,
+  UnitEnrollment,
+} from '@/types';
+import { enrollmentStatus } from '@/services/enrollment';
 import { localDay } from '@/services/today';
 
 export const XP_RULES = {
@@ -18,6 +26,8 @@ export const XP_RULES = {
   lessonComplete: 15,
   /** First success with an item of a unit skill (read, write, speak, verbs). */
   itemPractised: 2,
+  /** Unit test passed by the unit's target date (soft deadline: late only loses this). */
+  unitOnTime: 50,
 } as const;
 
 /** Share of a track that must actually be played to count as heard. */
@@ -26,7 +36,7 @@ export const HEARD_THRESHOLD = 0.85;
 export interface XpEvent {
   at: string;
   points: number;
-  kind: 'review' | 'new-card' | 'track' | 'lesson' | 'practice';
+  kind: 'review' | 'new-card' | 'track' | 'lesson' | 'practice' | 'unit-on-time';
   ref: string;
 }
 
@@ -101,6 +111,25 @@ export function practiceXpEvents(records: PracticeRecord[]): XpEvent[] {
       kind: 'practice' as const,
       ref: r.id,
     }));
+}
+
+/** On-time bonus per started unit whose test was passed by its target date. */
+export function unitOnTimeXpEvents(
+  enrollments: UnitEnrollment[],
+  exams: ExamResult[]
+): XpEvent[] {
+  return enrollments.flatMap((e) => {
+    const status = enrollmentStatus(e, exams, e.unit);
+    if (status.state !== 'completed' || !status.onTime) return [];
+    return [
+      {
+        at: status.passedAt.toISOString(),
+        points: XP_RULES.unitOnTime,
+        kind: 'unit-on-time' as const,
+        ref: e.id,
+      },
+    ];
+  });
 }
 
 /** Sum of XP within [from, now]. */

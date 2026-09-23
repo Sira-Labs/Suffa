@@ -78,7 +78,7 @@ a station of its path and opens at `/units/:unit/:station` with only that unit's
 | Step | Scope                                                                                                                                                                                    | Status |
 | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
 | 1    | Unit room: stations for listening (page video + audio), reading, writing, speaking, verbs; skill rings; first success per item counted (`practice_progress`, +2 XP), station celebration | ✅     |
-| 2    | Start a unit with a pace (3/2/1 weeks), countdown, one extension; next unit unlocks with the unit test (≥ 80 %)                                                                          | ☐      |
+| 2    | Start a unit with a pace (3/2/1 weeks), countdown, one extension; next unit unlocks with the unit test (≥ 80 %)                                                                          | ✅     |
 | 3    | Levels (= books) and stages (units 1–8 + mid-term test, 9–16 + final test), milestone screen                                                                                             | ☐      |
 | 4    | "Entdecken": curated media library (Arabic language, Quran, stories, podcasts); navigation Heute · Einheit · Entdecken · Training · Mehr                                                 | ☐      |
 

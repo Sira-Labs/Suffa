@@ -49,13 +49,19 @@ Teacher assignments with a due date appear as an extra **class quest** (XP set b
 | Checkpoint correct in a lesson/recording                           | 3                                                      |
 | Audio track heard (≥ 85 % actually played, seeking does not count) | 5 — shipped 2026-09-23                                 |
 | All tracks of a lesson heard                                       | +15 bonus — shipped 2026-09-23                         |
+| Unit practice item, first success (read, write, speak, verbs)      | 2 — shipped 2026-09-23                                 |
+| Unit test passed by the unit's target date                         | +50 — shipped 2026-09-23 (late only loses this bonus)  |
 | Writing/speaking task submitted                                    | 10 (+5 if AI/teacher grade ≥ 80 %)                     |
 | Daily quest completed                                              | per table above                                        |
 
 Shipped so far (2026-09-23): review and listening XP computed on the device
 (`apps/web/src/services/engagement/xp.ts`), weekly XP on "Heute", a "+XP" celebration for heard
 tracks and lessons. Listening progress is stored locally (`media_progress`) and joins sync with
-the engagement sprint.
+the engagement sprint, as do unit practice (`practice_progress`) and started units with pace and
+target date (`unit_enrollments`). Deadlines are soft: an overdue unit stays open, can be
+extended once by 7 days, and only loses the on-time bonus; the next unit opens with the unit
+test (≥ 80 %). The forgetting curve appears only after a break (streak broken), not as a
+permanent panel.
 
 **Levels** follow a gentle curve (`level n` needs `50·n^1.5` XP total). Separately, a
 **mastery ring per unit** shows the percentage of the unit's items with mature cards (≥ 21 d);

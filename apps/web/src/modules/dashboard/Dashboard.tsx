@@ -24,13 +24,14 @@ import {
 import { buildTodayPlan, localDay, reviewsToday, wordOfTheDay } from '@/services/today';
 import {
   listeningXpEvents,
+  practiceXpEvents,
   reviewXpEvents,
   startOfWeek,
   sumXp,
 } from '@/services/engagement/xp';
 import { lessonSizes, loadPublisherIndex } from '@/services/audio/publisherIndex';
 import type { TodayStep } from '@/services/today';
-import { useListenStore, useSettingsStore, useSrsStore } from '@/state';
+import { useListenStore, usePracticeStore, useSettingsStore, useSrsStore } from '@/state';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
   weekday: 'long',
@@ -45,6 +46,7 @@ export function Dashboard() {
   const dailyGoal = useSettingsStore((s) => s.settings.dailyGoal);
   const [logs, setLogs] = useState<ReviewLog[]>([]);
   const listening = useListenStore((s) => s.progress);
+  const practised = usePracticeStore((s) => s.records);
   const [sizes, setSizes] = useState<ReadonlyMap<string, number>>(new Map());
 
   useEffect(() => {
@@ -74,7 +76,11 @@ export function Dashboard() {
     (p) => localDay(new Date(p.completedAt!)) === todayKey
   ).length;
   const weekXp = sumXp(
-    [...reviewXpEvents(logs), ...listeningXpEvents(heard, sizes)],
+    [
+      ...reviewXpEvents(logs),
+      ...listeningXpEvents(heard, sizes),
+      ...practiceXpEvents(Object.values(practised)),
+    ],
     startOfWeek()
   );
   const plan = buildTodayPlan({

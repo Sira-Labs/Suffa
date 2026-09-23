@@ -32,6 +32,10 @@ describe('Book page videos (integration)', () => {
     expect(first).toHaveAccessibleName('Video zu Buchseite 28');
     expect(first).toHaveAttribute('aria-pressed', 'true');
     expect(section.querySelector('iframe')).toBeNull();
+    // Dialogue 1 has no publisher video: the section points to the official audio instead.
+    expect(
+      within(section).getByRole('link', { name: 'die offiziellen Audios' })
+    ).toBeTruthy();
 
     await user.click(
       within(chips).getByRole('button', { name: 'Video zu Buchseite 31' })

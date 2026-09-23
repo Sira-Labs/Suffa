@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import type { BookVideo } from '@/types';
 import { Icon } from '@/components/Icon';
 import { logger } from '@/services/logger';
@@ -62,6 +62,11 @@ export function BookVideos({ unit }: { unit: number }) {
   }
 
   const { videos } = unitVideos;
+  // HashRouter owns the URL hash, so jump to the audio section by scrolling instead.
+  const toAudio = (event: MouseEvent) => {
+    event.preventDefault();
+    document.getElementById('audio-heading')?.scrollIntoView?.({ behavior: 'smooth' });
+  };
   const selected = videos.find((v) => v.id === selectedId) ?? videos[0]!;
   const choose = (video: BookVideo) => {
     setSelectedId(video.id);
@@ -73,7 +78,12 @@ export function BookVideos({ unit }: { unit: number }) {
       <p className="muted" style={{ margin: 0 }}>
         {videos.length} Videos zu Buchseite {unitVideos.from}–{unitVideos.to}
         {unitVideos.estimated && ' (Seitenbereich geschätzt)'}. Schlag die Seite im Buch
-        auf und lies mit.
+        auf und lies mit. Nicht jede Seite hat ein Video
+        {unit === 1 && ' (zu Dialog 1 gibt es keins)'} –{' '}
+        <a href="#audio-heading" onClick={toAudio}>
+          die offiziellen Audios
+        </a>{' '}
+        decken alle Dialoge ab.
       </p>
       <div className="row page-chips" role="group" aria-label="Buchseite wählen">
         {videos.map((video) => (

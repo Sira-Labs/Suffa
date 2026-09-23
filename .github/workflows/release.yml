@@ -1,7 +1,8 @@
 name: release
 
-# Builds the suffa-web and suffa-api images, publishes them to GHCR and (optionally) deploys
-# them to CapRover. Mirrors Tabayyun's release workflow.
+# Runs the CI checks, builds the suffa-web and suffa-api images, smoke-tests each image in a
+# real container, publishes them to GHCR and (optionally) deploys them to CapRover.
+# Nothing is pushed or deployed unless the checks and the smoke tests pass.
 # The feature branch is included until it is merged, so images exist for the first deploy.
 # TODO(2026-10-05): remove the feature branch trigger once it is merged into main.
 on:
@@ -16,8 +17,13 @@ env:
   IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/suffa
 
 jobs:
+  checks:
+    name: ci checks
+    uses: ./.github/workflows/ci.yml
+
   images:
-    name: build and publish ${{ matrix.name }}
+    name: build, smoke-test and publish ${{ matrix.name }}
+    needs: checks
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,24 +37,30 @@ jobs:
             dockerfile: infra/docker/web.Dockerfile
           - name: api
             dockerfile: infra/docker/api.Dockerfile
+    # Real database for the api smoke test (unused by the web job).
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: suffa
+          POSTGRES_PASSWORD: smoke0123456789abcdef
+          POSTGRES_DB: suffa
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U suffa" --health-interval 2s --health-timeout 5s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - id: tag
         run: echo "tag=sha-$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - name: build image (local, for the smoke test)
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ${{ matrix.dockerfile }}
-          push: true
-          tags: |
-            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:${{ steps.tag.outputs.tag }}
-            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:latest
+          load: true
+          tags: smoke/suffa-${{ matrix.name }}:test
           # web: public values compiled into the PWA (anon key is protected by RLS); empty = offline build.
           # api: version string reported by /api/version.
           build-args: |
@@ -58,6 +70,51 @@ jobs:
             SUFFA_VERSION=${{ steps.tag.outputs.tag }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+      - name: smoke test web
+        if: matrix.name == 'web'
+        run: |
+          docker run -d --name web -p 8080:80 smoke/suffa-web:test
+          for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8080/healthz-web && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8080/ | grep -q '<title>Suffa'
+          curl -fsS -o /dev/null http://127.0.0.1:8080/brand/suffa-mark.svg
+          curl -fsS http://127.0.0.1:8080/some/deep/link | grep -q '<div id="root">'
+      - name: smoke test api + worker
+        if: matrix.name == 'api'
+        env:
+          DB: postgres://suffa:smoke0123456789abcdef@127.0.0.1:5432/suffa
+        run: |
+          SECRET=$(openssl rand -hex 32)
+          run() { docker run --network host -e SUFFA_ENV=prod -e SUFFA_DATABASE_URL="$DB" -e SUFFA_AUTH_SECRET="$SECRET" "$@"; }
+          # A worker started before the api has migrated must exit with code 3.
+          set +e; run --rm -e SUFFA_ROLE=worker smoke/suffa-api:test; code=$?; set -e
+          test "$code" = 3 || { echo "expected worker exit 3, got $code"; exit 1; }
+          run -d --name api smoke/suffa-api:test
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/healthz && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8000/healthz | grep -q '"status":"ok"'
+          run -d --name worker -e SUFFA_ROLE=worker smoke/suffa-api:test
+          sleep 3
+          docker logs worker 2>&1 | grep -q 'worker.start' || { docker logs worker; exit 1; }
+          docker logs api | tail -5
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: publish image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:${{ steps.tag.outputs.tag }}
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:latest
+          build-args: |
+            VITE_SUPABASE_URL=${{ vars.VITE_SUPABASE_URL }}
+            VITE_SUPABASE_ANON_KEY=${{ vars.VITE_SUPABASE_ANON_KEY }}
+            VITE_SYNC_ENABLED=${{ vars.VITE_SYNC_ENABLED || 'true' }}
+            SUFFA_VERSION=${{ steps.tag.outputs.tag }}
+          cache-from: type=gha,scope=${{ matrix.name }}
 
   deploy-caprover:
     name: deploy to CapRover

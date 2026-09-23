@@ -11,6 +11,7 @@ import { Conjugation } from './modules/conjugation';
 import { Exam } from './modules/exam';
 import { Library } from './modules/library';
 import { Settings } from './modules/settings';
+import { More } from './modules/more';
 
 /**
  * HashRouter: robust for static PWA hosting (no server rewrite needed),
@@ -32,6 +33,7 @@ export const router = createHashRouter([
       { path: 'exam', element: <Exam /> },
       { path: 'library', element: <Library /> },
       { path: 'settings', element: <Settings /> },
+      { path: 'more', element: <More /> },
     ],
   },
 ]);

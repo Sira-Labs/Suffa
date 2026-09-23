@@ -166,10 +166,11 @@ docs/           specs, ADRs, roadmap, sprint/engagement/cost plans, ops runbook
 apps/web/public/brand/   logo (SVG)
 ```
 
-## Arabic fonts (offline)
+## Fonts
 
-For the best typography, put `amiri.woff2` and `scheherazade.woff2` into
-`apps/web/public/fonts/` (OFL licence, see its `README.md`). Without them the app falls back to a system font.
+All fonts ship with the app (offline, no CDN): Manrope (UI), Fraunces (headings), Amiri
+(Arabic text with full tashkīl) and Reem Kufi (Arabic display), all under the SIL Open Font
+License, bundled via `@fontsource`. See `apps/web/src/styles/fonts.css`.
 
 ## Contributing
 

@@ -1,22 +1,11 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { SyncBadge } from './components';
+import { Icon } from './components/Icon';
+import { isUnderMore, MORE_PATH, NAV_ITEMS } from './navigation';
 import { logger } from './services/logger';
 import { useContentStore, useSettingsStore, useSrsStore, useSyncStore } from './state';
 import './styles/global.css';
-
-const NAV = [
-  { to: '/', label: 'Übersicht', icon: '📊', end: true },
-  { to: '/vocab', label: 'Vokabeln', icon: '🗂️' },
-  { to: '/roots', label: 'Wurzeln', icon: '🌳' },
-  { to: '/reading', label: 'Lesen', icon: '📖' },
-  { to: '/writing', label: 'Schreiben', icon: '✍️' },
-  { to: '/speaking', label: 'Sprechen', icon: '🎤' },
-  { to: '/conjugation', label: 'Konjugation', icon: '🔄' },
-  { to: '/exam', label: 'Prüfung', icon: '🎯' },
-  { to: '/library', label: 'Quellen', icon: '🎬' },
-  { to: '/settings', label: 'Einstellungen', icon: '⚙️' },
-];
 
 /**
  * App shell: loads all local stores (offline-first) and initialises sync.
@@ -62,41 +51,65 @@ export function App() {
     );
   }
 
+  return <Shell />;
+}
+
+function Brand() {
+  return (
+    <Link to="/" className="brand" aria-label="Suffa – zur Übersicht">
+      <span className="brand-latin">Suffa</span>
+      <span className="brand-arabic" lang="ar">
+        الصُّفَّة
+      </span>
+    </Link>
+  );
+}
+
+/** Layout: bottom bar on phones, sidebar on wide screens (one nav, restyled by CSS). */
+function Shell() {
+  const { pathname } = useLocation();
+  const moreActive = isUnderMore(pathname);
   return (
     <div className="app-shell">
-      <header
-        className="row"
-        style={{ justifyContent: 'space-between', marginBottom: '1rem' }}
-      >
-        <span className="row" style={{ gap: '0.5rem', alignItems: 'center' }}>
-          <img src="/brand/suffa-mark.svg" alt="" width={32} height={32} />
-          <strong style={{ fontSize: '1.2rem' }}>Suffa</strong>
-          <span className="arabic-inline muted" style={{ fontSize: '1.1rem' }}>
-            الصُّفَّة
-          </span>
-        </span>
-        <SyncBadge />
-      </header>
-
-      <main>
-        <Outlet />
-      </main>
-
       <nav className="app-nav" aria-label="Hauptnavigation">
-        {NAV.map((item) => (
+        <div className="nav-brand">
+          <Brand />
+        </div>
+        {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
-            className={({ isActive }) => `nav-link${isActive ? ' nav-link-active' : ''}`}
+            className={({ isActive }) =>
+              `nav-link${item.tier === 'secondary' ? ' nav-link-secondary' : ''}${isActive ? ' nav-link-active' : ''}`
+            }
           >
-            <span aria-hidden style={{ fontSize: '1.2rem' }}>
-              {item.icon}
-            </span>
+            <Icon name={item.icon} />
             <span className="nav-label">{item.label}</span>
           </NavLink>
         ))}
+        <Link
+          to={MORE_PATH}
+          className={`nav-link nav-link-more${moreActive ? ' nav-link-active' : ''}`}
+          aria-current={moreActive ? 'page' : undefined}
+        >
+          <Icon name="more" />
+          <span className="nav-label">Mehr</span>
+        </Link>
+        <div className="nav-footer">
+          <SyncBadge />
+        </div>
       </nav>
+
+      <div className="app-content">
+        <header className="app-topbar">
+          <Brand />
+          <SyncBadge />
+        </header>
+        <main className="app-main">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

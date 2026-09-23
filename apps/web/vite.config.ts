@@ -40,7 +40,11 @@ export default defineConfig({
         // Fully precache the app shell + static assets → works offline.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
         // Error tracking is only loaded online and only with a DSN set: do not precache.
-        globIgnores: ['**/sentry-*.js'],
+        // Font subsets for scripts the app does not use; browsers fetch them only on demand.
+        globIgnores: [
+          '**/sentry-*.js',
+          '**/*-{cyrillic,cyrillic-ext,greek,vietnamese}-*.woff2',
+        ],
         navigateFallback: 'index.html',
         runtimeCaching: [
           {

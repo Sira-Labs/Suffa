@@ -1,11 +1,11 @@
-node_modules
-dist
+**/node_modules
+**/dist
 dev-dist
 coverage
 .git
 .github
-.env
-.env.*
+**/.env
+**/.env.*
 !.env.example
 *.log
 *.tsbuildinfo

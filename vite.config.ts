@@ -73,6 +73,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
+    // apps/* have their own vitest configs and dependencies.
+    exclude: ['**/node_modules/**', '**/dist/**', 'apps/**'],
     css: false,
     coverage: {
       provider: 'v8',

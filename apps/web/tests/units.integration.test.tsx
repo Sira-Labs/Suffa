@@ -112,8 +112,13 @@ describe('Units (integration)', () => {
       'href',
       '/units/1'
     );
-    await user.click(screen.getByRole('button', { name: 'Transliteration → Schrift' }));
-    await user.type(screen.getByRole('textbox'), words[0]!.ar);
+    // Copying is the first exercise; harakāt are optional, so the bare skeleton counts.
+    expect(screen.getByRole('button', { name: 'Abschreiben' })).toHaveAttribute(
+      'class',
+      expect.stringContaining('btn-accent')
+    );
+    const bare = words[0]!.ar.replace(/[\u064B-\u0652\u0670]/g, '');
+    await user.type(screen.getByRole('textbox'), bare);
     await user.click(screen.getByRole('button', { name: 'Prüfen' }));
     const progress = await screen.findByRole('progressbar', {
       name: 'Fortschritt Schreiben',

@@ -5,14 +5,15 @@ import { content } from '@/content';
 import { diffArabic, gradeAnswer, type AnswerVerdict } from '@/services/srs';
 import { speakArabic, isTtsSupported } from '@/services/speech';
 
-type Tab = 'diktat' | 'translit' | 'satzbau' | 'uebersetzung';
+type Tab = 'abschreiben' | 'diktat' | 'translit' | 'satzbau' | 'uebersetzung';
 
 /**
  * Writing practice. With a `scope` (inside a unit) it uses only that unit's words and
  * sentences and reports each correctly written word to the unit's writing station.
  */
 export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
-  const [tab, setTab] = useState<Tab>('diktat');
+  // Copying comes first: learners start by typing the words they see.
+  const [tab, setTab] = useState<Tab>('abschreiben');
   const words = useMemo(
     () =>
       scope ? content.vokabeln.filter((v) => v.einheit === scope.unit) : content.vokabeln,
@@ -36,6 +37,9 @@ export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
     <div className="stack">
       {!scope && <h1 style={{ margin: 0 }}>Schreiben</h1>}
       <div className="row">
+        <TabButton active={tab === 'abschreiben'} onClick={() => setTab('abschreiben')}>
+          Abschreiben
+        </TabButton>
         <TabButton active={tab === 'diktat'} onClick={() => setTab('diktat')}>
           Diktat
         </TabButton>
@@ -56,6 +60,7 @@ export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
           </>
         )}
       </div>
+      {tab === 'abschreiben' && <CopyWords items={words} onCorrect={onCorrect} />}
       {tab === 'diktat' && <Dictation items={words} onCorrect={onCorrect} />}
       {tab === 'translit' && <Transliteration items={words} onCorrect={onCorrect} />}
       {tab === 'satzbau' && <SentenceBuilder lines={lines} />}
@@ -77,6 +82,72 @@ function TabButton({
     <button className={`btn ${active ? 'btn-accent' : ''}`} onClick={onClick}>
       {children}
     </button>
+  );
+}
+
+/**
+ * Copying: the word is shown with tashkīl, transliteration and meaning, and the learner types
+ * it (phone Arabic keyboard or the on-screen keyboard). Harakāt are optional here.
+ */
+function CopyWords({
+  items,
+  onCorrect,
+}: {
+  items: Vokabel[];
+  onCorrect(word: Vokabel): void;
+}) {
+  const [i, setI] = useState(0);
+  const [value, setValue] = useState('');
+  const [verdict, setVerdict] = useState<AnswerVerdict | null>(null);
+  const target = items[i % items.length]!;
+
+  const check = () => {
+    const graded = gradeAnswer(value, target.ar);
+    setVerdict(graded);
+    if (graded !== 'wrong') onCorrect(target);
+  };
+  const next = () => {
+    setI((x) => (x + 1) % items.length);
+    setValue('');
+    setVerdict(null);
+  };
+
+  return (
+    <div className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
+      <p className="muted" style={{ margin: 0 }}>
+        Wort {(i % items.length) + 1} von {items.length} · Schreib es ab. Vokalzeichen
+        sind freiwillig.
+      </p>
+      <ArabicText size="hero" onClick={() => speakArabic(target.ar)}>
+        {target.ar}
+      </ArabicText>
+      <span>
+        <strong>{target.tr}</strong> <span className="muted">· {target.de}</span>
+      </span>
+      <div style={{ width: '100%' }}>
+        <RecallInput
+          value={value}
+          onChange={setValue}
+          onSubmit={verdict && verdict !== 'wrong' ? next : check}
+          placeholder="Hier abtippen…"
+        />
+      </div>
+      <div className="row">
+        <button className="btn btn-primary" onClick={check}>
+          Prüfen
+        </button>
+        <button className="btn" onClick={next}>
+          Nächstes Wort
+        </button>
+      </div>
+      {verdict && (
+        <Feedback
+          verdict={verdict}
+          expected={target.ar}
+          diff={diffArabic(value, target.ar)}
+        />
+      )}
+    </div>
   );
 }
 

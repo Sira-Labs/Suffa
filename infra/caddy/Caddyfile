@@ -1,0 +1,57 @@
+# suffa-web edge. CapRover's nginx terminates TLS; Caddy serves the PWA on plain HTTP :80.
+# Upstreams are CapRover service names on the captain overlay network, e.g.
+#   SUFFA_API_UPSTREAM=srv-captain--suffa-api:8000
+#   SUFFA_MEDIA_UPSTREAM=srv-captain--rustfs:9000
+# Until the API exists (Sprint 2), /api answers 502; the offline app is unaffected.
+{
+	admin off
+}
+
+:80 {
+	encode zstd gzip
+
+	header {
+		# style-src needs 'unsafe-inline' for React style attributes. Supabase stays allowed
+		# until the migration to suffa-api (ADR-0007) is complete.
+		Content-Security-Policy "default-src 'self'; script-src 'self' https://www.youtube.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com; font-src 'self'; media-src 'self' blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://docs.google.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(self), geolocation=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		-Server
+	}
+
+	# Liveness for Docker/CapRover, independent of the API.
+	respond /healthz-web 200
+
+	@api path /api/* /healthz
+	handle @api {
+		reverse_proxy {$SUFFA_API_UPSTREAM:srv-captain--suffa-api:8000}
+	}
+
+	# Presigned S3 URLs signed by the API for the internal RustFS host (ADR-0017).
+	@media {
+		path /media/*
+		method GET HEAD PUT
+	}
+	handle @media {
+		uri strip_prefix /media
+		reverse_proxy {$SUFFA_MEDIA_UPSTREAM:srv-captain--rustfs:9000} {
+			header_up Host {$SUFFA_MEDIA_UPSTREAM:srv-captain--rustfs:9000}
+		}
+	}
+
+	handle {
+		root * /srv
+
+		# Service worker, manifest and shell must revalidate so updates roll out immediately.
+		@revalidate path / /index.html /sw.js /registerSW.js /manifest.webmanifest /workbox-*.js
+		header @revalidate Cache-Control "no-cache"
+		# Vite emits content-hashed assets.
+		@hashed path /assets/*
+		header @hashed Cache-Control "public, max-age=31536000, immutable"
+
+		try_files {path} /index.html
+		file_server
+	}
+}

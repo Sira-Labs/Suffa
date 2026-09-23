@@ -1,0 +1,159 @@
+# CapRover one-click template: full Suffa stack (same layout as Tabayyun).
+# Use: CapRover → Apps → One-Click Apps/Databases → ">> TEMPLATE <<" → paste → app name "suffa" → Deploy.
+# Creates: suffa-db, suffa-api, suffa-worker, suffa-web. Reuses the existing RustFS app.
+# NOTE: needs the suffa-api image (built from Sprint 2). Until then use suffa.yml (web + db).
+captainVersion: 4
+services:
+  $$cap_appname-db:
+    image: pgvector/pgvector:$$cap_pg_tag
+    restart: always
+    volumes:
+      - $$cap_appname-pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: suffa
+      POSTGRES_DB: suffa
+      POSTGRES_PASSWORD: $$cap_db_password
+    caproverExtra:
+      notExposeAsWebApp: 'true'
+
+  $$cap_appname-api:
+    image: $$cap_api_image:$$cap_tag
+    restart: always
+    depends_on:
+      - $$cap_appname-db
+    environment:
+      SUFFA_ENV: prod
+      SUFFA_PUBLIC_URL: https://$$cap_domain
+      SUFFA_DATABASE_URL: postgres://suffa:$$cap_db_password@srv-captain--$$cap_appname-db:5432/suffa
+      SUFFA_AUTH_SECRET: $$cap_auth_secret
+      SUFFA_ENCRYPTION_KEY: $$cap_encryption_key
+      SUFFA_SMTP_URL: $$cap_smtp_url
+      SUFFA_MAIL_FROM: $$cap_mail_from
+      SUFFA_S3_ENDPOINT: http://srv-captain--$$cap_rustfs_app:9000
+      SUFFA_S3_ALLOW_HTTP: 'true'
+      SUFFA_S3_ACCESS_KEY_ID: $$cap_s3_key_id
+      SUFFA_S3_SECRET_ACCESS_KEY: $$cap_s3_secret
+      SUFFA_S3_BUCKET_MEDIA: suffa-media
+      SUFFA_S3_BUCKET_UPLOADS: suffa-uploads
+      SUFFA_S3_BUCKET_CONTENT: suffa-content
+      SUFFA_MEDIA_PUBLIC_PREFIX: /media
+    caproverExtra:
+      containerHttpPort: '8000'
+      notExposeAsWebApp: 'true'
+
+  $$cap_appname-worker:
+    image: $$cap_api_image:$$cap_tag
+    restart: always
+    depends_on:
+      - $$cap_appname-api
+    volumes:
+      - $$cap_appname-worker-tmp:/data/tmp
+    environment:
+      SUFFA_ROLE: worker
+      SUFFA_WORKER_CONCURRENCY: '2'
+      SUFFA_TRANSCODE_CONCURRENCY: '1'
+      SUFFA_ENV: prod
+      SUFFA_PUBLIC_URL: https://$$cap_domain
+      SUFFA_DATABASE_URL: postgres://suffa:$$cap_db_password@srv-captain--$$cap_appname-db:5432/suffa
+      SUFFA_AUTH_SECRET: $$cap_auth_secret
+      SUFFA_ENCRYPTION_KEY: $$cap_encryption_key
+      SUFFA_SMTP_URL: $$cap_smtp_url
+      SUFFA_MAIL_FROM: $$cap_mail_from
+      SUFFA_S3_ENDPOINT: http://srv-captain--$$cap_rustfs_app:9000
+      SUFFA_S3_ALLOW_HTTP: 'true'
+      SUFFA_S3_ACCESS_KEY_ID: $$cap_s3_key_id
+      SUFFA_S3_SECRET_ACCESS_KEY: $$cap_s3_secret
+      SUFFA_S3_BUCKET_MEDIA: suffa-media
+      SUFFA_S3_BUCKET_UPLOADS: suffa-uploads
+      SUFFA_S3_BUCKET_CONTENT: suffa-content
+    caproverExtra:
+      notExposeAsWebApp: 'true'
+
+  $$cap_appname-web:
+    image: $$cap_web_image:$$cap_tag
+    restart: always
+    depends_on:
+      - $$cap_appname-api
+    environment:
+      SUFFA_API_UPSTREAM: srv-captain--$$cap_appname-api:8000
+      SUFFA_MEDIA_UPSTREAM: srv-captain--$$cap_rustfs_app:9000
+    caproverExtra:
+      containerHttpPort: '80'
+
+caproverOneClickApp:
+  variables:
+    - id: $$cap_domain
+      label: Public domain
+      defaultValue: suffa.example.com
+      description: Domain you will connect to the web app (used for magic links and cookies).
+      validRegex: /^[a-z0-9.-]+$/
+    - id: $$cap_api_image
+      label: API/worker image
+      defaultValue: ghcr.io/thedatadudech/suffa-api
+      validRegex: /^[a-z0-9./_-]+$/
+    - id: $$cap_web_image
+      label: Web image
+      defaultValue: ghcr.io/thedatadudech/suffa-web
+      validRegex: /^[a-z0-9./_-]+$/
+    - id: $$cap_tag
+      label: Image tag
+      defaultValue: latest
+      description: CI redeploys with immutable sha-<short> tags afterwards.
+      validRegex: /^[A-Za-z0-9._-]+$/
+    - id: $$cap_pg_tag
+      label: pgvector/Postgres image tag
+      defaultValue: pg17
+      description: Postgres 17 with pgvector. For production pin a release tag such as 0.8.0-pg17 and upgrade deliberately after a pg_dump.
+      validRegex: /^[A-Za-z0-9._-]+$/
+    - id: $$cap_db_password
+      label: Database password
+      defaultValue: $$cap_gen_random_hex(24)
+      validRegex: /^[A-Za-z0-9]{16,}$/
+    - id: $$cap_auth_secret
+      label: Auth secret
+      defaultValue: $$cap_gen_random_hex(48)
+      validRegex: /^[A-Za-z0-9]{32,}$/
+    - id: $$cap_encryption_key
+      label: Encryption key (Google tokens)
+      defaultValue: $$cap_gen_random_hex(64)
+      description: 32 bytes as hex.
+      validRegex: /^[a-f0-9]{64}$/
+    - id: $$cap_smtp_url
+      label: SMTP URL
+      defaultValue: smtps://user:password@smtp.example.com:465
+      description: For magic links. Can be changed later in the api and worker env vars.
+      validRegex: /^smtps?:\/\/.+$/
+    - id: $$cap_mail_from
+      label: Mail sender
+      defaultValue: Suffa <noreply@example.com>
+      validRegex: /.+/
+    - id: $$cap_rustfs_app
+      label: Existing RustFS app name
+      defaultValue: rustfs
+      validRegex: /^[a-z0-9-]+$/
+    - id: $$cap_s3_key_id
+      label: RustFS access key (suffa-app)
+      defaultValue: change-me
+      description: Limited key for buckets suffa-media, suffa-uploads, suffa-content (policy in docs/ops/caprover-deployment.md §2).
+      validRegex: /.+/
+    - id: $$cap_s3_secret
+      label: RustFS secret key
+      defaultValue: change-me
+      validRegex: /.+/
+  instructions:
+    start: >-
+      Full Suffa stack: Postgres 17 + pgvector, API, worker and web (Caddy + PWA), reusing
+      your existing RustFS. Before deploying: (1) if the GHCR packages are private, add
+      ghcr.io under Cluster → Docker Registries; (2) in RustFS create the buckets
+      suffa-media, suffa-uploads, suffa-content and a limited access key.
+    end: >-
+      Done. Now: (1) $$cap_appname-web → HTTP Settings → connect $$cap_domain, Enable HTTPS,
+      Force HTTPS. (2) Enable App Tokens on api, web and worker and store them as GitHub
+      secrets CAPROVER_APP_TOKEN_API / _WEB / _WORKER; set variable
+      CAPROVER_SERVER=https://captain.<root-domain>. (3) Replace placeholder SMTP and
+      RustFS values in the api and worker env vars (the api refuses placeholders in prod).
+      (4) Check https://$$cap_domain/healthz.
+  displayName: Suffa (full stack)
+  isOfficial: false
+  description: Offline-first Arabic learning platform — db, api, worker and web on CapRover.
+  documentation: See docs/ops/caprover-deployment.md in the suffa repository (github.com/thedatadudech/suffa).

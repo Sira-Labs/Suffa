@@ -50,8 +50,9 @@ export function App() {
   if (!ready) {
     return (
       <div className="app-shell" style={{ textAlign: 'center', paddingTop: '4rem' }}>
-        <p className="arabic-inline" style={{ fontSize: '2rem' }}>
-          العربية بين يديك
+        <img src="/brand/suffa-mark.svg" alt="" width={96} height={96} />
+        <p className="arabic-inline" style={{ fontSize: '2rem', margin: '0.5rem 0 0' }}>
+          الصُّفَّة
         </p>
         <p className="muted">Lade Lernstand…</p>
       </div>
@@ -64,9 +65,13 @@ export function App() {
         className="row"
         style={{ justifyContent: 'space-between', marginBottom: '1rem' }}
       >
-        <strong className="arabic-inline" style={{ fontSize: '1.3rem' }}>
-          العربية بين يديك
-        </strong>
+        <span className="row" style={{ gap: '0.5rem', alignItems: 'center' }}>
+          <img src="/brand/suffa-mark.svg" alt="" width={32} height={32} />
+          <strong style={{ fontSize: '1.2rem' }}>Suffa</strong>
+          <span className="arabic-inline muted" style={{ fontSize: '1.1rem' }}>
+            الصُّفَّة
+          </span>
+        </span>
         <SyncBadge />
       </header>
 

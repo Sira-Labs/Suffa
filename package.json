@@ -1,8 +1,8 @@
 {
-  "name": "arabiyya-bayna-yadayk",
+  "name": "suffa",
   "version": "1.0.0",
   "private": true,
-  "description": "Offline-first PWA zum Erlernen von MSA-Arabisch nach „العربية بين يديك“ (Buch 1) mit SRS und Multi-Device-Sync.",
+  "description": "Suffa (الصُّفَّة) – offline-first Arabic learning platform (MSA, Al-Arabiyya bayna Yadayk) with SRS, classes and multi-device sync.",
   "type": "module",
   "scripts": {
     "dev": "vite",

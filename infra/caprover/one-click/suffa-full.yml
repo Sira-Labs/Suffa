@@ -102,8 +102,8 @@ caproverOneClickApp:
       validRegex: /^[A-Za-z0-9._-]+$/
     - id: $$cap_pg_tag
       label: pgvector/Postgres image tag
-      defaultValue: 0.8.0-pg17
-      description: Pin exactly; upgrade deliberately after a pg_dump.
+      defaultValue: pg17
+      description: Postgres 17 with pgvector. For production pin a release tag such as 0.8.0-pg17 and upgrade deliberately after a pg_dump.
       validRegex: /^[A-Za-z0-9._-]+$/
     - id: $$cap_db_password
       label: Database password
@@ -156,4 +156,4 @@ caproverOneClickApp:
   displayName: Suffa (full stack)
   isOfficial: false
   description: Offline-first Arabic learning platform — db, api, worker and web on CapRover.
-  documentation: See docs/ops/caprover-deployment.md in the arabictutor repository.
+  documentation: See docs/ops/caprover-deployment.md in the suffa repository (github.com/thedatadudech/suffa).

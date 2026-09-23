@@ -37,6 +37,8 @@ jobs:
             dockerfile: infra/docker/web.Dockerfile
           - name: api
             dockerfile: infra/docker/api.Dockerfile
+          - name: backup
+            dockerfile: infra/docker/backup.Dockerfile
     # Real database for the api smoke test (unused by the web job).
     services:
       postgres:
@@ -97,6 +99,24 @@ jobs:
           sleep 3
           docker logs worker 2>&1 | grep -q 'worker.start' || { docker logs worker; exit 1; }
           docker logs api | tail -5
+      - name: smoke test backup (dump, verify, upload, restore)
+        if: matrix.name == 'backup'
+        env:
+          DB: postgres://suffa:smoke0123456789abcdef@127.0.0.1:5432/suffa
+        run: |
+          mkdir -p /tmp/backups && chmod 777 /tmp/backups
+          psql "$DB" -qc "create table smoke (id int primary key, word text); insert into smoke values (1, 'بَلَد')"
+          psql "$DB" -qc "create database restore_smoke"
+          run() { docker run --rm --network host -v /tmp/backups:/backups -e SUFFA_BACKUP_LOCAL_DIR=/backups "$@"; }
+          run -e SUFFA_BACKUP_MODE=once -e SUFFA_BACKUP_DATABASE_URL="$DB" smoke/suffa-backup:test
+          find /tmp/backups -name 'suffa-*.dump' | grep -q dump
+          # Restoring into the production URL must be refused (exit 2).
+          set +e; run --entrypoint /opt/suffa-backup/restore.sh -e SUFFA_BACKUP_DATABASE_URL="$DB" \
+            -e SUFFA_RESTORE_DATABASE_URL="$DB" smoke/suffa-backup:test latest; code=$?; set -e
+          test "$code" = 2
+          run --entrypoint /opt/suffa-backup/restore.sh -e SUFFA_BACKUP_DATABASE_URL="$DB" \
+            -e SUFFA_RESTORE_DATABASE_URL="${DB%/suffa}/restore_smoke" smoke/suffa-backup:test latest
+          test "$(psql "${DB%/suffa}/restore_smoke" -tAc 'select word from smoke where id = 1')" = 'بَلَد'
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -130,9 +150,11 @@ jobs:
         env:
           API_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_API }}
           WORKER_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
+          BACKUP_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
         run: |
           echo "api=$([ -n "$API_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "worker=$([ -n "$WORKER_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "backup=$([ -n "$BACKUP_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
       # Order matters: the api migrates the schema; the worker waits for it (exit code 3).
       - name: deploy api
         if: steps.gate.outputs.api == 'true'
@@ -150,6 +172,14 @@ jobs:
           app: ${{ vars.CAPROVER_APP_WORKER || 'suffa-worker' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
           image: ${{ env.IMAGE_PREFIX }}-api:${{ needs.images.outputs.tag }}
+      - name: deploy backup
+        if: steps.gate.outputs.backup == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER }}
+          app: ${{ vars.CAPROVER_APP_BACKUP || 'suffa-backup' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
+          image: ${{ env.IMAGE_PREFIX }}-backup:${{ needs.images.outputs.tag }}
       - name: deploy web
         uses: caprover/deploy-from-github@v2
         with:

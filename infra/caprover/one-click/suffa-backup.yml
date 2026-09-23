@@ -1,0 +1,73 @@
+# Suffa — CapRover one-click template: nightly database backup into RustFS.
+#
+# Use: CapRover → Apps → One-Click Apps/Databases → ">> TEMPLATE <<" → paste this file →
+#      app name "suffa" (creates the app "suffa-backup") → Deploy.
+# Prerequisites (docs/ops/caprover-deployment.md, "Backups"): a RustFS bucket with versioning
+# and object lock, and an access key that can write but not delete.
+captainVersion: 4
+services:
+  $$cap_appname-backup:
+    image: ghcr.io/thedatadudech/suffa-backup:$$cap_tag
+    restart: always
+    environment:
+      SUFFA_BACKUP_DATABASE_URL: postgres://suffa:$$cap_db_password@srv-captain--$$cap_appname-db:5432/suffa
+      SUFFA_BACKUP_S3_ENDPOINT: http://srv-captain--$$cap_rustfs_app:9000
+      SUFFA_BACKUP_S3_BUCKET: $$cap_bucket
+      SUFFA_BACKUP_S3_ACCESS_KEY_ID: $$cap_key_id
+      SUFFA_BACKUP_S3_SECRET_ACCESS_KEY: $$cap_key_secret
+      SUFFA_BACKUP_TIME_UTC: $$cap_time
+      SUFFA_BACKUP_RUN_ON_START: 'true'
+      SUFFA_BACKUP_PING_URL: $$cap_ping_url
+    caproverExtra:
+      notExposeAsWebApp: 'true'
+
+caproverOneClickApp:
+  variables:
+    - id: $$cap_tag
+      label: Image tag
+      defaultValue: latest
+      validRegex: /^[A-Za-z0-9._-]+$/
+    - id: $$cap_db_password
+      label: Password of suffa-db
+      defaultValue: ''
+      description: Copy POSTGRES_PASSWORD from the suffa-db app (App Configs → Environment Variables).
+      validRegex: /^[A-Za-z0-9]{16,}$/
+    - id: $$cap_rustfs_app
+      label: RustFS app name
+      defaultValue: rustfs
+      validRegex: /^[a-z0-9-]+$/
+    - id: $$cap_bucket
+      label: Bucket
+      defaultValue: suffa
+      description: Bucket with versioning and object lock.
+      validRegex: /^[a-z0-9.-]{3,63}$/
+    - id: $$cap_key_id
+      label: Access key (suffa-backup)
+      defaultValue: suffa-backup
+      description: Write-only key limited to the bucket (policy in the runbook).
+      validRegex: /.+/
+    - id: $$cap_key_secret
+      label: Secret key
+      defaultValue: ''
+      validRegex: /.{8,}/
+    - id: $$cap_time
+      label: Backup time (UTC, HH:MM)
+      defaultValue: '02:30'
+      validRegex: /^[0-2][0-9]:[0-5][0-9]$/
+    - id: $$cap_ping_url
+      label: Monitoring push URL (optional)
+      defaultValue: ''
+      description: e.g. an Uptime Kuma push monitor; pinged with status=up/down after every run.
+      validRegex: /^(https?:\/\/.*)?$/
+  instructions:
+    start: >-
+      Adds a nightly, verified backup of suffa-db to your RustFS bucket. The first backup runs
+      right after deploy. Needs the suffa-db password and a write-only RustFS key.
+    end: >-
+      Done. Open $$cap_appname-backup → App Logs: you should see "backup.done" within a minute.
+      For automatic updates enable the App Token and store it as the GitHub secret
+      CAPROVER_APP_TOKEN_BACKUP. Run a restore drill once a month (see the runbook).
+  displayName: Suffa backup (Postgres → RustFS)
+  isOfficial: false
+  description: Nightly verified pg_dump of the Suffa database into an object-locked bucket.
+  documentation: https://github.com/thedatadudech/suffa/blob/main/docs/ops/caprover-deployment.md

@@ -197,12 +197,106 @@ to GHCR, and deploys with `caprover/deploy-from-github@v2`. Every step is skippe
    variables/secrets → 7. push to `main` and confirm the three deploy steps.
 2. Open `https://suffa.<domain>/healthz` → `{ "status": "ok", "db": "ok", "schemaRevision": "0001_service_heartbeats", ... }` (queue depth is added with pg-boss). `/api/version` shows the deployed image tag.
 
-## 8. Backups
+## 8. Backups (`suffa-backup`)
 
-- Nightly `pg_dump` of `suffa-db` (one-off container on the captain network, or a small
-  `suffa-backup` app with a cron image) → off-box storage.
-- Nightly `rclone sync` of `suffa-media/originals` and `suffa-uploads` → off-box storage.
-- Monthly restore drill into a staging DB.
+Every night a small app takes a `pg_dump` of `suffa-db`, checks that it can be read back
+(`pg_restore --list`), uploads it to the RustFS bucket `suffa` and checks the uploaded size.
+Image: `ghcr.io/thedatadudech/suffa-backup` (scripts in `infra/backup/`).
+
+```
+suffa/postgres/daily/YYYY/MM/suffa-<timestamp>.dump     every night
+suffa/postgres/monthly/YYYY/suffa-<timestamp>.dump      additionally on the 1st
+```
+
+### 8.1 RustFS: bucket and write-only key
+
+1. Bucket `suffa` with **versioning** and **object lock** (done).
+2. Default retention (bucket → Object Lock): **Governance, 35 days** is a good start. Compliance
+   mode is stricter (nobody can shorten it, not even the root user) but also cannot be undone.
+3. If your RustFS version supports lifecycle rules: expire `postgres/daily/` after 35 days and
+   `postgres/monthly/` after 400 days, and noncurrent versions after 35 days. Until then the
+   bucket simply grows (a Suffa dump is small: kilobytes to a few MB).
+4. Access key **`suffa-backup`** with this policy — it can write and read (for restores) but
+   **cannot delete**, so a compromised server cannot wipe the backups:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": ["arn:aws:s3:::suffa/postgres/*"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:ListBucketMultipartUploads"
+      ],
+      "Resource": ["arn:aws:s3:::suffa"]
+    }
+  ]
+}
+```
+
+### 8.2 Deploy
+
+1. CapRover → One-Click Apps → `>> TEMPLATE <<` → paste
+   `infra/caprover/one-click/suffa-backup.yml` → app name **`suffa`** → fill in the suffa-db
+   password and the key's secret → Deploy. This creates the app `suffa-backup`.
+2. `suffa-backup` → App Logs: within a minute `backup.done` with size, table count and SHA-256,
+   then `backup.scheduled` with the next run (default 02:30 UTC).
+3. Optional alerting: create an Uptime Kuma **push** monitor (interval 25 h) and put its URL
+   into `SUFFA_BACKUP_PING_URL`; a missing or failed backup then raises an alert.
+4. Automatic updates: Deployment → Enable App Token → GitHub secret `CAPROVER_APP_TOKEN_BACKUP`.
+
+| Variable                                               | Default                      | Meaning                                                  |
+| ------------------------------------------------------ | ---------------------------- | -------------------------------------------------------- |
+| `SUFFA_BACKUP_DATABASE_URL`                            | —                            | `postgres://suffa:<pw>@srv-captain--suffa-db:5432/suffa` |
+| `SUFFA_BACKUP_S3_ENDPOINT` / `_BUCKET`                 | —                            | `http://srv-captain--rustfs:9000` / `suffa`              |
+| `SUFFA_BACKUP_S3_ACCESS_KEY_ID` / `_SECRET_ACCESS_KEY` | —                            | the `suffa-backup` key                                   |
+| `SUFFA_BACKUP_S3_REGION`, `_PROVIDER`, `_PATH_STYLE`   | `us-east-1`, `Other`, `true` | for other S3 providers                                   |
+| `SUFFA_BACKUP_PREFIX`                                  | `postgres`                   | folder inside the bucket                                 |
+| `SUFFA_BACKUP_TIME_UTC`                                | `02:30`                      | daily run time                                           |
+| `SUFFA_BACKUP_RUN_ON_START`                            | `false` (template: `true`)   | back up right after each start                           |
+| `SUFFA_BACKUP_PING_URL`                                | —                            | monitoring push URL                                      |
+
+Uploads carry `Content-MD5` on every request/part (required by object-lock buckets) and use
+only PUT/GET/HEAD/list calls — verified against RustFS with object lock.
+
+### 8.3 Restore drill (monthly)
+
+Never restore into the live database; the script refuses when the target equals
+`SUFFA_BACKUP_DATABASE_URL`.
+
+```bash
+# 1. scratch database
+docker exec -it $(docker ps -q -f name=srv-captain--suffa-db) \
+  psql -U suffa -c 'create database restore_drill'
+# 2. restore the newest daily backup into it
+docker exec -it $(docker ps -q -f name=srv-captain--suffa-backup) sh -c \
+  'SUFFA_RESTORE_DATABASE_URL=${SUFFA_BACKUP_DATABASE_URL%/suffa}/restore_drill /opt/suffa-backup/restore.sh latest'
+# 3. check, then drop the scratch database
+docker exec -it $(docker ps -q -f name=srv-captain--suffa-db) \
+  psql -U suffa -d restore_drill -c 'select count(*) from users; select count(*) from srs_cards'
+docker exec -it $(docker ps -q -f name=srv-captain--suffa-db) psql -U suffa -c 'drop database restore_drill'
+```
+
+A specific backup: `restore.sh postgres/daily/2026/09/suffa-20260923T023000Z.dump`.
+
+### 8.4 Off-site copy (recommended next)
+
+RustFS on the same server protects against deletion and ransomware (object lock), but not
+against losing the server. Add a second, off-site target (e.g. Hetzner Storage Box / Object
+Storage, Backblaze B2) as soon as real learner data exists; recordings in `suffa-media` join
+the backup when the recordings feature ships (ADR-0017).
 
 ## 9. Capacity with Tabayyun on the same server
 

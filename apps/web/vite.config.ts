@@ -6,6 +6,8 @@ import { fileURLToPath, URL } from 'node:url';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // `.env` stays at the repository root (see .env.example), next to the other apps.
+  envDir: fileURLToPath(new URL('../..', import.meta.url)),
   plugins: [
     react(),
     VitePWA({
@@ -73,8 +75,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
-    // apps/* have their own vitest configs and dependencies.
-    exclude: ['**/node_modules/**', '**/dist/**', 'apps/**'],
+    exclude: ['**/node_modules/**', '**/dist/**'],
     css: false,
     coverage: {
       provider: 'v8',

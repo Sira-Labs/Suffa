@@ -6,7 +6,13 @@ import prettier from 'eslint-config-prettier';
 
 export default tseslint.config(
   {
-    ignores: ['**/dist', 'dev-dist', 'coverage', '**/node_modules', 'public/fonts'],
+    ignores: [
+      '**/dist',
+      '**/dev-dist',
+      '**/coverage',
+      '**/node_modules',
+      'apps/web/public/fonts',
+    ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
@@ -30,7 +36,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.test.{ts,tsx}', 'tests/**/*.{ts,tsx}', 'vitest.setup.ts'],
+    files: ['**/*.test.{ts,tsx}', '**/tests/**/*.{ts,tsx}', '**/vitest.setup.ts'],
     languageOptions: {
       globals: { ...globals.node },
     },

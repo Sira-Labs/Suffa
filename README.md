@@ -100,29 +100,29 @@ shared content and AI. Full design: [technical spec](docs/spec/02-technical-spec
 ## Quick start
 
 ```bash
-npm install
+npm install          # installs both workspaces (apps/web, apps/api) from one lockfile
 npm run dev          # http://localhost:5173
 ```
 
-The app works immediately without any backend (offline mode). Useful scripts:
+The app works immediately without any backend (offline mode). Scripts at the repository root
+run across both workspaces:
 
 | Command             | Purpose                                  |
 | ------------------- | ---------------------------------------- |
 | `npm run dev`       | Dev server                               |
-| `npm run build`     | Typecheck + production build (incl. PWA) |
+| `npm run build`     | Typecheck + production build (PWA + api) |
 | `npm run preview`   | Serve the build locally (test the PWA)   |
 | `npm run lint`      | ESLint                                   |
 | `npm run typecheck` | TypeScript                               |
-| `npm test`          | Vitest                                   |
+| `npm test`          | Vitest (web + api)                       |
 | `npm run format`    | Prettier                                 |
 
 API (skeleton: health, migrations, worker heartbeat):
 
 ```bash
-cd apps/api && npm install
-npm test
-npm run build
-SUFFA_DATABASE_URL=postgres://user:pass@localhost:5432/suffa npm start
+npm test -w @suffa/api
+npm run build -w @suffa/api
+SUFFA_DATABASE_URL=postgres://user:pass@localhost:5432/suffa npm start -w @suffa/api
 ```
 
 ## Deploy on CapRover
@@ -153,25 +153,25 @@ No secrets live in the code. The anon key is public by design; row-level securit
 ## Project structure
 
 ```
-src/            PWA: modules (dashboard, vocab, roots, reading, writing, speaking,
-                conjugation, exam, library, settings), services (srs, storage, sync,
-                speech, audio), state, content (JSON per unit), types
-apps/api/       suffa-api / suffa-worker (Hono, Postgres, migrations)
+apps/web/       PWA (@suffa/web): src/modules (dashboard, vocab, roots, reading, writing,
+                speaking, conjugation, exam, library, settings), src/services (srs,
+                storage, sync, speech, audio), state, content (JSON per unit), tests
+apps/api/       suffa-api / suffa-worker (@suffa/api: Hono, Postgres, migrations)
 infra/          Dockerfiles, Caddyfile, CapRover templates
 supabase/       schema + row-level security (current sync backend)
 docs/           specs, ADRs, roadmap, sprint/engagement/cost plans, ops runbook
-public/brand/   logo (SVG)
+apps/web/public/brand/   logo (SVG)
 ```
 
 ## Arabic fonts (offline)
 
-For the best typography, put `amiri.woff2` and `scheherazade.woff2` into `public/fonts/`
-(OFL licence, see `public/fonts/README.md`). Without them the app falls back to a system font.
+For the best typography, put `amiri.woff2` and `scheherazade.woff2` into
+`apps/web/public/fonts/` (OFL licence, see its `README.md`). Without them the app falls back to a system font.
 
 ## Contributing
 
 - Conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `test:`).
-- Before committing: `npm run lint && npm run typecheck && npm test` (and `npm test` in `apps/api`).
+- Before committing: `npm run format:check && npm run lint && npm run typecheck && npm test`.
 - Hard-to-reverse decisions get an ADR in `docs/adr/`.
 
 ## Licence

@@ -1,6 +1,6 @@
 dist
-dev-dist
-coverage
+**/dev-dist
+**/coverage
 node_modules
-public/fonts
+apps/web/public/fonts
 package-lock.json

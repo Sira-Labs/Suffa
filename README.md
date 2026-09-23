@@ -117,7 +117,7 @@ run across both workspaces:
 | `npm test`          | Vitest (web + api)                       |
 | `npm run format`    | Prettier                                 |
 
-API (skeleton: health, migrations, worker heartbeat):
+API (health, migrations, sync endpoints, job queue on pg-boss):
 
 ```bash
 npm test -w @suffa/api

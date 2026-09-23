@@ -11,20 +11,20 @@ demoed · no secrets in code · structured logs on new paths.
 
 ## Progress (as of 2026-09-23)
 
-| Story                   | Status | Notes                                                                                                                                            |
-| ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                            |
-| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                          |
-| 1.3 api skeleton        | ✅     |                                                                                                                                                  |
-| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                 |
-| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                               |
-| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                      |
-| 2.1 release workflow    | ✅     |                                                                                                                                                  |
-| 2.2 apps + queue        | ◐      | apps and worker role live; pg-boss queue pending                                                                                                 |
-| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill script; off-site copy still open |
-| 2.4 error tracking      | ☐      |                                                                                                                                                  |
-| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                              |
-| 2.6 browser router      | ☐      |                                                                                                                                                  |
+| Story                   | Status | Notes                                                                                                                                          |
+| ----------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                          |
+| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                        |
+| 1.3 api skeleton        | ✅     |                                                                                                                                                |
+| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                               |
+| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                             |
+| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                    |
+| 2.1 release workflow    | ✅     |                                                                                                                                                |
+| 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                   |
+| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open |
+| 2.4 error tracking      | ☐      |                                                                                                                                                |
+| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                            |
+| 2.6 browser router      | ☐      |                                                                                                                                                |
 
 ## P0 — Foundation
 

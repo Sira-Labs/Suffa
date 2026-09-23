@@ -1,14 +1,19 @@
 /**
- * Worker role (skeleton). Until the pg-boss queues arrive (ADR-0020), the worker verifies
- * the schema revision and writes a heartbeat so operators can see it is alive.
+ * Worker role: verifies the schema revision, starts the job queue (pg-boss, ADR-0020) and
+ * writes a heartbeat so operators can see it is alive. On shutdown the queue drains first.
  */
 import { hostname } from 'node:os';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { Logger } from 'pino';
 import { currentRevision, SchemaMismatchError, type SqlPool } from './migrate.js';
 
+/** Stops the job queue; resolves once running jobs have finished or timed out. */
+export type StopJobs = () => Promise<void>;
+
 export interface WorkerOptions {
   pool: SqlPool;
+  /** Starts processing jobs; injected so the loop is testable without pg-boss. */
+  startJobs: () => Promise<StopJobs>;
   expectedRevision: string | null;
   version: string;
   heartbeatMs: number;
@@ -22,8 +27,18 @@ export async function runWorker(opts: WorkerOptions): Promise<void> {
     throw new SchemaMismatchError(opts.expectedRevision, actual);
   }
   const instance = hostname();
+  const stopJobs = await opts.startJobs();
   opts.log.info({ revision: actual, instance }, 'worker.start');
 
+  try {
+    await heartbeatLoop(opts, instance);
+  } finally {
+    await stopJobs();
+  }
+  opts.log.info({ instance }, 'worker.stop');
+}
+
+async function heartbeatLoop(opts: WorkerOptions, instance: string): Promise<void> {
   while (!opts.signal.aborted) {
     const client = await opts.pool.connect();
     try {
@@ -43,5 +58,4 @@ export async function runWorker(opts: WorkerOptions): Promise<void> {
       throw error;
     }
   }
-  opts.log.info({ instance }, 'worker.stop');
 }

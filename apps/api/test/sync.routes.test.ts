@@ -45,7 +45,10 @@ function setup(
   const app = createApp({
     version: 'test',
     expectedRevision: null,
-    health: { schemaRevision: async () => null },
+    health: {
+      schemaRevision: async () => null,
+      queueDepth: async () => ({ waiting: 0, active: 0, failed: 0, deadLetter: 0 }),
+    },
     sync: { repo, auth, log: { info: () => {}, warn: () => {}, error: () => {} } },
   });
   const call = (path: string, init: RequestInit & { token?: string } = {}) =>

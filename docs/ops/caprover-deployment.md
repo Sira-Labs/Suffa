@@ -195,7 +195,7 @@ to GHCR, and deploys with `caprover/deploy-from-github@v2`. Every step is skippe
 1. `suffa-db` → 2. RustFS buckets + key → 3. `suffa-api` (first deploy by ImageName; watch log
    for `migrate.done`) → 4. `suffa-worker` → 5. `suffa-web` + domain + HTTPS → 6. GitHub
    variables/secrets → 7. push to `main` and confirm the three deploy steps.
-2. Open `https://suffa.<domain>/healthz` → `{ "status": "ok", "db": "ok", "schemaRevision": "0001_service_heartbeats", ... }` (queue depth is added with pg-boss). `/api/version` shows the deployed image tag.
+2. Open `https://suffa.<domain>/healthz` → `{ "status": "ok", "db": "ok", "schemaRevision": "0002_users_and_sync_tables", "queue": { "waiting": 0, "active": 0, "failed": 0, "deadLetter": 0 } }`. A growing `waiting` count means the worker is down; `deadLetter` counts jobs that failed all retries. `/api/version` shows the deployed image tag.
 
 ## 8. Backups (`suffa-backup`)
 

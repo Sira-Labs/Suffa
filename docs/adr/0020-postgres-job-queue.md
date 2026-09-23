@@ -1,6 +1,6 @@
 # ADR-0020: Postgres-backed job queue (pg-boss) instead of Redis/BullMQ
 
-- Status: proposed
+- Status: accepted (implemented 2026-09-23)
 - Date: 2026-09-24
 - Amends: `02-technical-spec.md` §3, ADR-0010 (quota counters), ADR-0013 (no Redis app)
 

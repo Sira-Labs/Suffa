@@ -8,6 +8,8 @@ import { serve } from '@hono/node-server';
 import pg from 'pg';
 import { pino } from 'pino';
 import { createApp } from './app.js';
+import { registerMaintenance } from './jobs/maintenance.js';
+import { queueDepth, startBoss } from './jobs/queue.js';
 import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/resolver.js';
 import { PgSyncRepository } from './sync/repository.js';
 import { ConfigError, loadConfig, redactDatabaseUrl } from './config.js';
@@ -21,6 +23,8 @@ import {
 import { runWorker } from './worker.js';
 
 const MIGRATIONS_DIR = fileURLToPath(new URL('../migrations', import.meta.url));
+/** Running jobs get this long to finish on shutdown; Docker/CapRover sends SIGKILL after 10 s. */
+const JOB_DRAIN_TIMEOUT_MS = 8_000;
 
 async function main(): Promise<void> {
   let config;
@@ -65,6 +69,15 @@ async function main(): Promise<void> {
     try {
       await runWorker({
         pool,
+        startJobs: async () => {
+          const boss = await startBoss({
+            databaseUrl: config.databaseUrl,
+            role: 'worker',
+            log,
+          });
+          await registerMaintenance(boss, pool, log);
+          return () => boss.stop({ graceful: true, timeout: JOB_DRAIN_TIMEOUT_MS });
+        },
         expectedRevision: expected,
         version: config.version,
         heartbeatMs: config.workerHeartbeatMs,
@@ -87,6 +100,8 @@ async function main(): Promise<void> {
   }
 
   await migrate(pool, migrations, log);
+  // The api only installs the queue schema and sends jobs; the worker processes them.
+  const boss = await startBoss({ databaseUrl: config.databaseUrl, role: 'api', log });
 
   // Until Better Auth (Sprint 3) sync is closed, except for dev tokens outside prod.
   let auth: AuthResolver = new DenyAllResolver();
@@ -103,7 +118,10 @@ async function main(): Promise<void> {
   const app = createApp({
     version: config.version,
     expectedRevision: expected,
-    health: { schemaRevision: () => currentRevision(pool) },
+    health: {
+      schemaRevision: () => currentRevision(pool),
+      queueDepth: () => queueDepth(pool),
+    },
     onProbeError: (error) => log.warn({ err: error }, 'health.db_unreachable'),
     sync: { repo: new PgSyncRepository(pool), auth, log },
     onUnhandledError: (error, path) =>
@@ -115,7 +133,10 @@ async function main(): Promise<void> {
   );
   shutdown.signal.addEventListener('abort', () => {
     server.close(() => {
-      void pool.end().then(() => log.info('service.stopped'));
+      void boss
+        .stop({ graceful: false })
+        .then(() => pool.end())
+        .then(() => log.info('service.stopped'));
     });
   });
 }

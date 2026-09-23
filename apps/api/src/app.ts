@@ -3,11 +3,14 @@
  * database. Routes live under /api (proxied by suffa-web's Caddy) plus /healthz.
  */
 import { Hono } from 'hono';
+import type { QueueDepth } from './jobs/queue.js';
 import { createSyncRoutes, type SyncRouteDeps } from './sync/routes.js';
 
 export interface HealthProbe {
   /** Resolves with the current schema revision; rejects when the database is unreachable. */
   schemaRevision(): Promise<string | null>;
+  /** Job counts of the queue; rejects when the queue schema is missing. */
+  queueDepth(): Promise<QueueDepth>;
 }
 
 export interface AppDeps {
@@ -28,15 +31,22 @@ export function createApp(deps: AppDeps): Hono {
     try {
       const revision = await deps.health.schemaRevision();
       const schemaOk = revision === deps.expectedRevision;
+      // The database answered, so a failing queue probe means pg-boss is not installed.
+      const queue = await deps.health.queueDepth().catch((error: unknown) => {
+        deps.onProbeError?.(error);
+        return 'unavailable' as const;
+      });
+      const ok = schemaOk && queue !== 'unavailable';
       return Response.json(
         {
-          status: schemaOk ? 'ok' : 'degraded',
+          status: ok ? 'ok' : 'degraded',
           version: deps.version,
           db: 'ok',
           schemaRevision: revision,
           expectedRevision: deps.expectedRevision,
+          queue,
         },
-        { status: schemaOk ? 200 : 503 }
+        { status: ok ? 200 : 503 }
       );
     } catch (error) {
       deps.onProbeError?.(error);

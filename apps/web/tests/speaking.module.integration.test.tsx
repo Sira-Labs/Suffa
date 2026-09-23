@@ -4,15 +4,15 @@ import userEvent from '@testing-library/user-event';
 import { Speaking } from '@/modules/speaking';
 
 /**
- * iPhone-Szenario Ende-zu-Ende in der echten Sprechen-Seite: Die iOS-Spracherkennung
- * lehnt ab → statt Stille erscheint eine konkrete Anleitung.
+ * iPhone scenario end to end on the real speaking page: iOS speech recognition
+ * refuses → instead of silence, specific instructions appear.
  */
 afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('Sprechen (Integration, iPhone)', () => {
-  it('zeigt eine Anleitung, wenn iOS die Spracherkennung verweigert', async () => {
+describe('Speaking (integration, iPhone)', () => {
+  it('shows instructions when iOS denies speech recognition', async () => {
     vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(
       'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15'
     );
@@ -41,7 +41,7 @@ describe('Sprechen (Integration, iPhone)', () => {
     expect(screen.getByRole('button', { name: /Aussprache bewerten/ })).toBeEnabled();
   });
 
-  it('zeigt eine Anleitung, wenn das Mikrofon verweigert wird', async () => {
+  it('shows instructions when microphone access is denied', async () => {
     vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(
       'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15'
     );

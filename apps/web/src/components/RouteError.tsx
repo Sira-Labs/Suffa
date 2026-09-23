@@ -3,8 +3,8 @@ import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 import { reportError } from '@/services/errorTracking';
 
 /**
- * Fehlerseite des Routers: fängt Render-Fehler aller Seiten ab, meldet sie an das
- * Fehler-Tracking und bietet einen Neustart an, statt der englischen Standardseite.
+ * Router error page: catches render errors from all pages, reports them to
+ * error tracking and offers a restart instead of the default English page.
  */
 export function RouteError() {
   const error = useRouteError();

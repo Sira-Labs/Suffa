@@ -34,7 +34,7 @@ teaches Book 1 of _Al-Arabiyya bayna Yadayk_.
 1. **Clean seams.** `SyncProvider` is injected into `SyncEngine`; swapping Supabase for our
    own API is a new class, not a rewrite. This is the key enabler for the CapRover migration.
 2. **Offline-first is real.** IndexedDB-first reads/writes, persistent outbox, tombstones.
-3. **Pedagogy is explicit** (`docs/didaktik.md`): active recall, interleaving, root/pattern
+3. **Pedagogy is explicit** (`docs/didactics.md`): active recall, interleaving, root/pattern
    backbone, tashkīl levels. The AI teacher must _reuse_ these, not replace them.
 4. **Typed error paths** (`Result<T>`) and a structured logger (`services/logger.ts`).
 5. **Deterministic card IDs** (`kind:contentRef`) make multi-device merges trivial.

@@ -18,8 +18,8 @@ function newCard(id = 'c1', kind: SrsCard['kind'] = 'vocab_ar_de'): SrsCard {
   return createCard({ id, contentRef: 'v-ism', kind, now: NOW });
 }
 
-describe('SRS-Engine: createCard', () => {
-  it('erzeugt eine sofort fällige Karte mit Defaults', () => {
+describe('SRS engine: createCard', () => {
+  it('creates an immediately due card with defaults', () => {
     const card = newCard();
     expect(card.reps).toBe(0);
     expect(card.ease).toBe(DEFAULT_EASE);
@@ -30,28 +30,28 @@ describe('SRS-Engine: createCard', () => {
   });
 });
 
-describe('SRS-Engine: schedule – Lernphase', () => {
-  it('erste „good“-Wiederholung → 1 Tag Intervall', () => {
+describe('SRS engine: schedule – learning phase', () => {
+  it('first "good" review → 1-day interval', () => {
     const card = schedule(newCard(), 'good', { now: NOW });
     expect(card.reps).toBe(1);
     expect(card.interval).toBe(1);
     expect(isDue(card, NOW)).toBe(false);
   });
 
-  it('zweite „good“-Wiederholung → 6 Tage', () => {
+  it('second "good" review → 6 days', () => {
     let card = schedule(newCard(), 'good', { now: NOW });
     card = schedule(card, 'good', { now: NOW });
     expect(card.reps).toBe(2);
     expect(card.interval).toBe(6);
   });
 
-  it('„easy“ in Lernphase springt schneller', () => {
+  it('"easy" in the learning phase jumps ahead faster', () => {
     const card = schedule(newCard(), 'easy', { now: NOW });
     expect(card.interval).toBe(4);
     expect(card.ease).toBeGreaterThan(DEFAULT_EASE);
   });
 
-  it('dritte „good“-Wiederholung multipliziert mit Ease', () => {
+  it('third "good" review multiplies by ease', () => {
     let card = schedule(newCard(), 'good', { now: NOW }); // 1
     card = schedule(card, 'good', { now: NOW }); // 6
     const before = card.interval;
@@ -61,8 +61,8 @@ describe('SRS-Engine: schedule – Lernphase', () => {
   });
 });
 
-describe('SRS-Engine: schedule – Lapse & Ease', () => {
-  it('„again“ setzt reps zurück, erhöht lapses, Intervall 0', () => {
+describe('SRS engine: schedule – lapse & ease', () => {
+  it('"again" resets reps, increments lapses, interval 0', () => {
     let card = schedule(newCard(), 'good', { now: NOW });
     card = schedule(card, 'good', { now: NOW });
     card = schedule(card, 'again', { now: NOW });
@@ -72,7 +72,7 @@ describe('SRS-Engine: schedule – Lapse & Ease', () => {
     expect(isDue(card, NOW)).toBe(true);
   });
 
-  it('Ease sinkt nie unter das Minimum', () => {
+  it('ease never drops below the minimum', () => {
     let card = newCard();
     for (let i = 0; i < 20; i++) {
       card = schedule(card, 'again', { now: NOW });
@@ -80,7 +80,7 @@ describe('SRS-Engine: schedule – Lapse & Ease', () => {
     expect(card.ease).toBe(MIN_EASE);
   });
 
-  it('markiert Karte nach genug Lapses als Leech', () => {
+  it('marks a card as leech after enough lapses', () => {
     let card = newCard();
     for (let i = 0; i < LEECH_LAPSE_THRESHOLD; i++) {
       card = schedule(card, 'good', { now: NOW });
@@ -91,8 +91,8 @@ describe('SRS-Engine: schedule – Lapse & Ease', () => {
   });
 });
 
-describe('SRS-Engine: previewIntervals', () => {
-  it('liefert für alle 4 Bewertungen monoton sinnvolle Intervalle', () => {
+describe('SRS engine: previewIntervals', () => {
+  it('returns monotonic intervals for all 4 ratings', () => {
     let card = schedule(newCard(), 'good', { now: NOW });
     card = schedule(card, 'good', { now: NOW }); // reps=2, interval=6
     const p = previewIntervals(card, NOW);
@@ -102,14 +102,14 @@ describe('SRS-Engine: previewIntervals', () => {
   });
 });
 
-describe('SRS-Queue: buildQueue', () => {
-  it('respektiert das Neu-Limit', () => {
+describe('SRS queue: buildQueue', () => {
+  it('respects the new-card limit', () => {
     const cards = Array.from({ length: 30 }, (_, i) => newCard(`n${i}`));
     const q = buildQueue(cards, { now: NOW, newLimit: 5 });
     expect(q.length).toBe(5);
   });
 
-  it('priorisiert Leeches vor regulären Wiederholungen', () => {
+  it('prioritises leeches over regular reviews', () => {
     const due: SrsCard = {
       ...newCard('due'),
       reps: 3,
@@ -121,7 +121,7 @@ describe('SRS-Queue: buildQueue', () => {
     expect(q[0]!.id).toBe('leech');
   });
 
-  it('mischt neue Karten zwischen die Wiederholungen (Alt+Neu)', () => {
+  it('mixes new cards between the reviews (old+new)', () => {
     const reviews = Array.from({ length: 6 }, (_, i) => ({
       ...newCard(`r${i}`),
       reps: 3,
@@ -133,22 +133,22 @@ describe('SRS-Queue: buildQueue', () => {
     const newPositions = q
       .map((c, idx) => (c.reps === 0 ? idx : -1))
       .filter((x) => x >= 0);
-    // Nicht beide neuen Karten ganz am Anfang oder ganz am Ende geklumpt.
+    // Both new cards not clumped at the very start or very end.
     expect(newPositions.length).toBe(2);
     expect(newPositions[0]).toBeGreaterThan(0);
   });
 
-  it('interleavt verschiedene Kartentypen', () => {
+  it('interleaves different card kinds', () => {
     const a = Array.from({ length: 4 }, (_, i) => newCard(`a${i}`, 'vocab_ar_de'));
     const b = Array.from({ length: 4 }, (_, i) => newCard(`b${i}`, 'plural'));
     const q = buildQueue([...a, ...b], { now: NOW, newLimit: 20 });
-    // Erste zwei Karten sollten unterschiedliche Kinds sein (Round-Robin).
+    // The first two cards should be of different kinds (round-robin).
     expect(q[0]!.kind).not.toBe(q[1]!.kind);
   });
 });
 
-describe('SRS-Queue: summarizeDue', () => {
-  it('zählt neue, fällige und Leech-Karten korrekt', () => {
+describe('SRS queue: summarizeDue', () => {
+  it('counts new, due and leech cards correctly', () => {
     const fresh = newCard('fresh');
     const dueCard: SrsCard = {
       ...newCard('due'),
@@ -168,34 +168,34 @@ describe('SRS-Queue: summarizeDue', () => {
   });
 });
 
-describe('Tashkīl-Toleranz', () => {
-  it('stripTashkil entfernt Harakāt', () => {
+describe('Tashkīl tolerance', () => {
+  it('stripTashkil removes harakāt', () => {
     expect(stripTashkil('سَكَنَ')).toBe('سكن');
     expect(stripTashkil('الحَمْدُ')).toBe('الحمد');
   });
 
-  it('normalizeArabic vereinheitlicht Alif- und Yāʾ-Varianten', () => {
+  it('normalizeArabic unifies alif and yāʾ variants', () => {
     expect(normalizeArabic('أحوال')).toBe(normalizeArabic('احوال'));
     expect(normalizeArabic('مصرى')).toBe(normalizeArabic('مصري'));
   });
 
-  it('akzeptiert Eingabe ohne Tashkīl als tashkil-tolerant', () => {
+  it('accepts input without tashkīl as tashkil-tolerant', () => {
     expect(gradeAnswer('سكن', 'سَكَنَ')).toBe('tashkil-tolerant');
   });
 
-  it('erkennt exakte Eingabe inkl. Tashkīl', () => {
+  it('recognises exact input including tashkīl', () => {
     expect(gradeAnswer('سَكَنَ', 'سَكَنَ')).toBe('exact');
   });
 
-  it('weist inhaltlich falsche Eingabe ab', () => {
+  it('rejects incorrect input', () => {
     expect(gradeAnswer('كتب', 'سَكَنَ')).toBe('wrong');
   });
 
-  it('leere Eingabe ist nicht tolerant-korrekt', () => {
+  it('empty input is not tolerantly correct', () => {
     expect(gradeAnswer('', 'سَكَنَ')).toBe('wrong');
   });
 
-  it('diffArabic markiert fehlende und überzählige Zeichen', () => {
+  it('diffArabic marks missing and extra characters', () => {
     const segs = diffArabic('سكن', 'سكان');
     expect(segs.some((s) => s.status === 'removed')).toBe(true);
     expect(segs.map((s) => s.text).join('')).toContain('ا');

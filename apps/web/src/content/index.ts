@@ -1,9 +1,9 @@
 /**
- * Content-Loader: führt `meta.json` und alle `units/einheit-*.json` zusammen.
+ * Content loader: merges `meta.json` and all `units/einheit-*.json`.
  *
- * Neue Einheiten kommen allein durch Ablegen einer weiteren `units/einheit-NN.json`
- * dazu – `import.meta.glob` registriert sie automatisch, ohne Code-Änderung.
- * (Siehe ADR-0003.)
+ * New units are added simply by dropping in another `units/einheit-NN.json` –
+ * `import.meta.glob` registers them automatically, without code changes.
+ * (See ADR-0003.)
  */
 import type {
   ContentBundle,
@@ -41,7 +41,7 @@ export interface UnitInfo {
 
 const metaTyped = metaRaw as MetaFile;
 
-// Eager glob: alle Unit-Dateien werden zur Build-Zeit eingebunden (offline verfügbar).
+// Eager glob: all unit files are bundled at build time (available offline).
 const unitModules = import.meta.glob<UnitFile>('./units/*.json', {
   eager: true,
   import: 'default',
@@ -70,10 +70,10 @@ export const unitInfos: UnitInfo[] = units.map((u) => ({
   kulturnotiz: u.kulturnotiz,
 }));
 
-/** Schneller Lookup einer Vokabel nach ID. */
+/** Fast lookup of a vocabulary word by ID. */
 export const vokabelById = new Map(vokabeln.map((v) => [v.id, v]));
 
-/** Wurzelfamilien: Wurzel → alle vernetzten Inhalte (Vokabeln + Verben). */
+/** Root families: root → all linked content (vocabulary + verbs). */
 export interface WurzelFamilie {
   wurzel: string;
   vokabeln: Vokabel[];

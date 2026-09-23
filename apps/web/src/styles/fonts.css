@@ -1,7 +1,7 @@
 /*
- * Arabische Schriften – lokal eingebettet (offline-first).
- * Liegen die WOFF2-Dateien nicht in public/fonts/, fällt die Kaskade auf eine
- * System-Serifenschrift zurück (siehe public/fonts/README.md). Kein Build-Fehler.
+ * Arabic fonts – embedded locally (offline-first).
+ * If the WOFF2 files are not in public/fonts/, the cascade falls back to a
+ * system serif font (see public/fonts/README.md). No build error.
  */
 @font-face {
   font-family: 'Amiri';

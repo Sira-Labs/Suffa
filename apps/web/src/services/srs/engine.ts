@@ -1,12 +1,12 @@
 /**
- * SRS-Scheduling-Engine (SM-2-Stil mit FSRS-nahen Anpassungen).
+ * SRS scheduling engine (SM-2 style with FSRS-like adjustments).
  *
- * Designentscheidungen (siehe ADR-0001):
- *  - SM-2 als Basis: robust, offline berechenbar, gut verstanden.
- *  - 4-stufige Bewertung (again/hard/good/easy) statt 0–5, näher an Anki/FSRS.
- *  - „again“ ist ein Lapse: Intervall-Reset + Ease-Strafe; Karte wird ggf. Leech.
- *  - Erste beiden erfolgreichen Reps: feste Lernintervalle (1 Tag, dann 6 Tage).
- *  - Alle Zeitrechnungen in UTC; `due` ist ein ISO-Datum (Tagesauflösung).
+ * Design decisions (see ADR-0001):
+ *  - SM-2 as the basis: robust, computable offline, well understood.
+ *  - 4-level rating (again/hard/good/easy) instead of 0–5, closer to Anki/FSRS.
+ *  - "again" is a lapse: interval reset + ease penalty; the card may become a leech.
+ *  - First two successful reps: fixed learning intervals (1 day, then 6 days).
+ *  - All date math in UTC; `due` is an ISO date (day resolution).
  */
 import type { ReviewRating, SrsCard } from '@/types';
 
@@ -23,7 +23,7 @@ export interface NewCardInput {
   now?: Date;
 }
 
-/** Erzeugt eine frische, sofort fällige Karte. */
+/** Creates a fresh card that is due immediately. */
 export function createCard(input: NewCardInput): SrsCard {
   const now = input.now ?? new Date();
   const iso = now.toISOString();
@@ -43,7 +43,7 @@ export function createCard(input: NewCardInput): SrsCard {
   };
 }
 
-/** Ease-Anpassung pro Bewertung (SM-2-inspiriert). */
+/** Ease adjustment per rating (SM-2 inspired). */
 function nextEase(ease: number, rating: ReviewRating): number {
   let delta = 0;
   switch (rating) {
@@ -65,13 +65,13 @@ function nextEase(ease: number, rating: ReviewRating): number {
 
 export interface ScheduleOptions {
   now?: Date;
-  /** Zufalls-Streuung (±%) gegen „Karten-Stau“ am selben Tag. 0 = deterministisch. */
+  /** Random spread (±%) against cards piling up on the same day. 0 = deterministic. */
   fuzz?: number;
 }
 
 /**
- * Berechnet den neuen Kartenzustand nach einer Bewertung.
- * Reine Funktion (kein Seiteneffekt) – dadurch leicht testbar.
+ * Computes the new card state after a rating.
+ * Pure function (no side effects), hence easy to test.
  */
 export function schedule(
   card: SrsCard,
@@ -87,10 +87,10 @@ export function schedule(
   let lapses = card.lapses;
 
   if (rating === 'again') {
-    // Lapse: zurück in die Lernphase.
+    // Lapse: back to the learning phase.
     reps = 0;
     lapses += 1;
-    interval = 0; // erneut heute fällig (Lernschritt)
+    interval = 0; // due again today (learning step)
   } else if (card.reps === 0) {
     reps = 1;
     interval = rating === 'easy' ? 4 : 1;
@@ -134,7 +134,7 @@ export function schedule(
   };
 }
 
-/** Normiert ein Datum auf Tagesbeginn (UTC) als ISO-String. */
+/** Normalises a date to start of day (UTC) as an ISO string. */
 export function startOfDayIso(date: Date): string {
   const d = new Date(
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
@@ -142,14 +142,14 @@ export function startOfDayIso(date: Date): string {
   return d.toISOString();
 }
 
-/** Ist die Karte zum Stichtag fällig? */
+/** Is the card due at the given date? */
 export function isDue(card: SrsCard, now: Date = new Date()): boolean {
   if (card.deleted) return false;
   return new Date(card.due).getTime() <= now.getTime();
 }
 
 /**
- * Vorschau der nächsten Intervalle für die 4 Buttons (UI-Hinweis „in X Tagen“).
+ * Preview of the next intervals for the 4 buttons (UI hint "in X days").
  */
 export function previewIntervals(
   card: SrsCard,

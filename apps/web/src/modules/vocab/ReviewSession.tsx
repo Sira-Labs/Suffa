@@ -8,16 +8,16 @@ import { useContentStore, useSettingsStore, useSrsStore, useSyncStore } from '@/
 interface ReviewSessionProps {
   kinds?: CardKind[];
   title: string;
-  /** Multiple-Choice als markiertes „Stützrad“ erlauben (Standard: aus). */
+  /** Allow multiple choice as a labelled "training wheel" (default: off). */
   allowRecognitionAid?: boolean;
 }
 
 type Phase = 'prompt' | 'graded';
 
 /**
- * Wiederverwendbare Lernsitzung nach „Active Recall vor Recognition“:
- * Standard ist die Produktion aus dem Gedächtnis. Multiple-Choice ist nur als
- * explizit markiertes Stützrad zuschaltbar.
+ * Reusable study session following "active recall before recognition":
+ * the default is producing the answer from memory. Multiple choice can only be
+ * enabled as an explicitly labelled training wheel.
  */
 export function ReviewSession({ kinds, title, allowRecognitionAid }: ReviewSessionProps) {
   const userVocab = useContentStore((s) => s.userVocab);
@@ -82,7 +82,7 @@ export function ReviewSession({ kinds, title, allowRecognitionAid }: ReviewSessi
     await review(card, rating, duration);
     await refreshPending();
     setDone((d) => d + 1);
-    // Bei „again“ Karte ans Ende der Sitzung hängen (erneut üben).
+    // On "again", append the card to the end of the session (practise again).
     setQueue((q) => {
       const next = q.filter((_, i) => i !== index);
       if (rating === 'again') next.push(card);

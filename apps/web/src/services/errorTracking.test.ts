@@ -112,9 +112,9 @@ describe('initErrorTracking', () => {
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const log = logger.child('sync');
-    log.warn('langsam');
-    log.error('Sync-Fehler', { table: 'srs_cards' });
+    log.warn('slow');
+    log.error('Sync error', { table: 'srs_cards' });
     expect(sdk.captureMessage).toHaveBeenCalledTimes(1);
-    expect(sdk.captureMessage).toHaveBeenCalledWith('app:sync: Sync-Fehler', 'error');
+    expect(sdk.captureMessage).toHaveBeenCalledWith('app:sync: Sync error', 'error');
   });
 });

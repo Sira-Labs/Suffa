@@ -1,9 +1,9 @@
 /**
- * Schlankes strukturiertes Logging.
+ * Lean structured logging.
  *
- * - Einheitliches JSON-ähnliches Format mit Scope, Level, Zeit und Kontext.
- * - In Produktion werden `debug`/`info` unterdrückt; `warn`/`error` bleiben.
- * - Keine externen Abhängigkeiten; testbar und tree-shakebar.
+ * - Uniform JSON-like format with scope, level, time and context.
+ * - In production `debug`/`info` are suppressed; `warn`/`error` remain.
+ * - No external dependencies; testable and tree-shakable.
  */
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
@@ -16,7 +16,7 @@ const LEVEL_ORDER: Record<LogLevel, number> = {
 
 const isProd = import.meta.env?.PROD ?? false;
 
-/** Empfängt alle `error`-Einträge (z. B. Fehler-Tracking); unabhängig vom Log-Level. */
+/** Receives all `error` entries (e.g. error tracking), regardless of log level. */
 export type ErrorSink = (
   scope: string,
   message: string,

@@ -1,12 +1,12 @@
 /**
- * Fehler-Tracking im Browser (GlitchTip, Sentry-Protokoll; Sprint-Story 2.4).
+ * Error tracking in the browser (GlitchTip, Sentry protocol; sprint story 2.4).
  *
- * - Aus, solange der Server keinen DSN liefert (`/api/client-config`); offline oder ohne
- *   Backend passiert nichts. `@sentry/browser` wird erst dann nachgeladen, das Start-Bundle
- *   bleibt unverändert.
- * - Meldungen laufen über den eigenen Server (`/api/errors`): kein Adblocker-Problem, CSP
- *   bleibt `connect-src 'self'`, GlitchTip sieht keine IP der Lernenden.
- * - Es werden keine Personendaten gesammelt (keine Nutzerdaten, Cookies, Header, Query-Parameter).
+ * - Off as long as the server provides no DSN (`/api/client-config`); offline or without a
+ *   backend nothing happens. `@sentry/browser` is only lazy-loaded then; the initial bundle
+ *   stays unchanged.
+ * - Reports go through our own server (`/api/errors`): no ad-blocker problem, CSP
+ *   stays `connect-src 'self'`, GlitchTip never sees a learner's IP.
+ * - No personal data is collected (no user data, cookies, headers, query parameters).
  */
 import { logger, setErrorSink } from './logger';
 
@@ -21,12 +21,12 @@ type Reporter = (error: unknown, context?: Context) => void;
 
 let reporter: Reporter | null = null;
 
-/** Meldet einen Fehler, falls Tracking aktiv ist; sonst No-op. Wirft nie. */
+/** Reports an error if tracking is active; otherwise a no-op. Never throws. */
 export function reportError(error: unknown, context?: Context): void {
   try {
     reporter?.(error, context);
   } catch {
-    // Fehler-Tracking darf die App nie stören.
+    // Error tracking must never disrupt the app.
   }
 }
 
@@ -48,15 +48,15 @@ async function defaultFetchConfig(): Promise<{ errorDsn: string | null }> {
 }
 
 /**
- * Startet das Tracking, wenn der Server einen DSN meldet.
- * @returns true, wenn Tracking aktiv ist.
+ * Starts tracking if the server reports a DSN.
+ * @returns true if tracking is active.
  */
 export async function initErrorTracking(deps: ErrorTrackingDeps = {}): Promise<boolean> {
   let errorDsn: string | null;
   try {
     ({ errorDsn } = await (deps.fetchConfig ?? defaultFetchConfig)());
   } catch {
-    return false; // offline oder kein Backend: normaler Zustand einer Offline-first-App
+    return false; // offline or no backend: the normal state of an offline-first app
   }
   if (!errorDsn) return false;
 
@@ -74,7 +74,7 @@ export async function initErrorTracking(deps: ErrorTrackingDeps = {}): Promise<b
       urlQueryParams: false,
     },
     sendClientReports: false,
-    // Nur Fehler: keine Sitzungs-Pings (Release Health), die jeden Besuch zählen würden.
+    // Errors only: no session pings (release health) that would count every visit.
     integrations: (defaults) => defaults.filter((i) => i.name !== 'BrowserSession'),
   });
   reporter = (error, context) => {
@@ -84,13 +84,13 @@ export async function initErrorTracking(deps: ErrorTrackingDeps = {}): Promise<b
       else Sentry.captureMessage(String(error), 'error');
     });
   };
-  // Alles, was die App selbst als Fehler protokolliert, wird ebenfalls gemeldet.
+  // Everything the app itself logs as an error is reported as well.
   setErrorSink((scope, message, context) => reportError(`${scope}: ${message}`, context));
-  log.info('Fehler-Tracking aktiv');
+  log.info('Error tracking active');
   return true;
 }
 
-/** Nur für Tests: setzt den Modulzustand zurück. */
+/** Tests only: resets the module state. */
 export function resetErrorTrackingForTests(): void {
   reporter = null;
   setErrorSink(null);

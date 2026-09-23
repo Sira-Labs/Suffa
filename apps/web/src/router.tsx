@@ -13,8 +13,8 @@ import { Library } from './modules/library';
 import { Settings } from './modules/settings';
 
 /**
- * HashRouter: robust für statisches PWA-Hosting (kein Server-Rewrite nötig),
- * funktioniert auch offline aus dem Cache.
+ * HashRouter: robust for static PWA hosting (no server rewrite needed),
+ * also works offline from the cache.
  */
 export const router = createHashRouter([
   {

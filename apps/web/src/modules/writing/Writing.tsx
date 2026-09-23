@@ -49,7 +49,7 @@ function TabButton({
   );
 }
 
-/** Diktat: Audio (TTS) → tippen. Tashkīl-tolerante Korrektur mit Diff. */
+/** Dictation: audio (TTS) → typing. Tashkīl-tolerant correction with diff. */
 function Dictation() {
   const items = content.vokabeln;
   const [i, setI] = useState(0);
@@ -107,7 +107,7 @@ function Dictation() {
   );
 }
 
-/** Transliteration → Schrift. */
+/** Transliteration → script. */
 function Transliteration() {
   const items = content.vokabeln;
   const [i, setI] = useState(0);
@@ -155,7 +155,7 @@ function Transliteration() {
   );
 }
 
-/** Satzbau per Drag-&-Drop (hier per Klick-Reihenfolge, mobil-tauglich). */
+/** Sentence building via drag & drop (here via click order, mobile-friendly). */
 function SentenceBuilder() {
   const sentences = useMemo(
     () =>
@@ -241,7 +241,7 @@ function SentenceBuilder() {
   );
 }
 
-/** Übersetzung DE → AR (tashkīl-tolerant). */
+/** Translation DE → AR (tashkīl-tolerant). */
 function Translation() {
   const items = content.dialoge.flatMap((d) => d.zeilen);
   const [i, setI] = useState(0);

@@ -1,44 +1,40 @@
-# ADR-0002: Offline-first Sync mit Last-Write-Wins
+# ADR-0002: Offline-first sync with last-write-wins
 
-- Status: akzeptiert
-- Datum: 2026-06-13
+- Status: accepted
+- Date: 2026-06-13
 
-## Kontext
+## Context
 
-Der Lernstand muss über mehrere Geräte (Handy + Desktop) eines Nutzers
-abgleichbar sein, während die App **offline** voll funktioniert. Echte
-gleichzeitige Bearbeitung desselben Datensatzes auf zwei Geräten ist selten.
+A user's learning progress must be syncable across several devices (phone + desktop) while the
+app works fully **offline**. Truly concurrent editing of the same record on two devices is rare.
 
-## Entscheidung
+## Decision
 
-- **IndexedDB (Dexie) ist die Single Source of Truth** auf dem Gerät. Die UI
-  liest/schreibt ausschließlich lokal.
-- Jeder synchronisierbare Datensatz trägt `id` (UUID bzw. deterministische ID),
-  `updated_at` (ISO) und `deleted` (Soft-Delete-Tombstone).
-- **Persistente Mutation-Queue (Outbox)**: jede lokale Schreiboperation legt
-  einen Outbox-Eintrag an. Ein Sync-Zyklus macht **push → pull → reconcile**.
-- **Konfliktlösung: Last-Write-Wins pro Datensatz** über `updated_at`
-  (`src/services/sync/reconcile.ts`). Ganzer Datensatz gewinnt, kein Feld-Merge.
-- Soft-Deletes nehmen als normaler Datensatz am LWW teil (eine neuere Bearbeitung
-  kann eine ältere Löschung überstimmen und umgekehrt).
-- Schlägt push/pull fehl, bleibt die Outbox erhalten → kein Datenverlust, der
-  nächste Zyklus versucht es erneut.
+- **IndexedDB (Dexie) is the single source of truth** on the device. The UI reads and writes
+  locally only.
+- Every syncable record carries `id` (UUID or deterministic ID), `updated_at` (ISO) and
+  `deleted` (soft-delete tombstone).
+- **Persistent mutation queue (outbox)**: every local write creates an outbox entry. A sync
+  cycle runs **push → pull → reconcile**.
+- **Conflict resolution: last-write-wins per record** via `updated_at`
+  (`src/services/sync/reconcile.ts`). The whole record wins; no field-level merge.
+- Soft deletes take part in LWW like any other record (a newer edit can override an older
+  deletion and vice versa).
+- If push/pull fails, the outbox is kept → no data loss; the next cycle retries.
 
-## Begründung der deterministischen Karten-IDs
+## Rationale for deterministic card IDs
 
-SRS-Karten erhalten die ID `kind:contentRef` (z. B. `vocab_ar_de:v-ism`). Legen
-zwei Geräte vor dem ersten Sync dieselbe logische Karte an, teilen sie sich die
-ID und werden per LWW zusammengeführt statt dupliziert. Da diese IDs nur **pro
-Nutzer** eindeutig sind, ist der Primärschlüssel im Backend `(user_id, id)` und
-der Upsert nutzt `onConflict='user_id,id'`.
+SRS cards get the ID `kind:contentRef` (e.g. `vocab_ar_de:v-ism`). If two devices create the
+same logical card before the first sync, they share the ID and are merged via LWW instead of
+being duplicated. Since these IDs are only unique **per user**, the backend primary key is
+`(user_id, id)` and the upsert uses `onConflict='user_id,id'`.
 
-## Alternativen
+## Alternatives
 
-- **CRDTs / operationales Merge**: robuster bei echter Nebenläufigkeit, aber
-  deutlich komplexer. Für persönliche Lerndaten überdimensioniert.
+- **CRDTs / operational merge**: more robust under true concurrency, but considerably more
+  complex. Overkill for personal learning data.
 
-## Konsequenzen
+## Consequences
 
-Einfache, vorhersagbare Semantik. Theoretischer Nachteil: bei echter
-gleichzeitiger Bearbeitung kann eine Änderung verloren gehen (die ältere). Für
-Einzelnutzer-Lerndaten akzeptabel.
+Simple, predictable semantics. Theoretical drawback: with truly concurrent editing one change
+(the older one) can be lost. Acceptable for single-user learning data.

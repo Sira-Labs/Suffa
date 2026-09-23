@@ -4,15 +4,15 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { RouteError } from '@/components';
 import * as tracking from '@/services/errorTracking';
 
-/** Ein Render-Fehler einer Seite zeigt eine deutsche Fehlerseite und wird gemeldet. */
+/** A page render error shows a German error page and is reported. */
 afterEach(() => vi.restoreAllMocks());
 
 function Broken(): never {
-  throw new Error('Seite kaputt');
+  throw new Error('Page broken');
 }
 
 describe('RouteError (Integration)', () => {
-  it('fängt Render-Fehler ab, meldet sie und bietet Neuladen an', async () => {
+  it('catches render errors, reports them and offers a reload', async () => {
     const report = vi.spyOn(tracking, 'reportError').mockImplementation(() => undefined);
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const router = createMemoryRouter(
@@ -26,16 +26,16 @@ describe('RouteError (Integration)', () => {
     );
     expect(screen.getByRole('button', { name: 'Neu laden' })).toBeInTheDocument();
     expect(report).toHaveBeenCalledWith(
-      expect.objectContaining({ message: 'Seite kaputt' }),
+      expect.objectContaining({ message: 'Page broken' }),
       { source: 'router' }
     );
   });
 
-  it('meldet unbekannte Adressen nicht als Fehler', async () => {
+  it('does not report unknown addresses as errors', async () => {
     const report = vi.spyOn(tracking, 'reportError').mockImplementation(() => undefined);
     const router = createMemoryRouter(
       [{ path: '/', element: <p>Start</p>, errorElement: <RouteError /> }],
-      { initialEntries: ['/gibt-es-nicht'] }
+      { initialEntries: ['/does-not-exist'] }
     );
     render(<RouterProvider router={router} />);
 

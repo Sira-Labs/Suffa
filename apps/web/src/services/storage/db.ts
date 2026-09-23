@@ -1,11 +1,11 @@
 /**
- * IndexedDB-Schema (Dexie) – die Single Source of Truth auf dem Gerät.
+ * IndexedDB schema (Dexie) – the single source of truth on the device.
  *
- * Alle Lerndaten leben hier; die UI liest/schreibt ausschließlich gegen diese DB.
- * Der Sync gleicht sie später mit dem Backend ab (Offline-first, siehe ADR-0002).
+ * All learning data lives here; the UI reads/writes exclusively against this DB.
+ * Sync later reconciles it with the backend (offline-first, see ADR-0002).
  *
- * Zusätzlich: eine persistente Mutation-Queue (`outbox`), die jede lokale
- * Änderung an synchronisierbaren Tabellen festhält, bis sie gepusht wurde.
+ * Additionally: a persistent mutation queue (`outbox`) that records every local
+ * change to syncable tables until it has been pushed.
  */
 import Dexie, { type Table } from 'dexie';
 import type {
@@ -18,15 +18,15 @@ import type {
 } from '@/types';
 
 export interface OutboxEntry {
-  /** Auto-Increment-Schlüssel (nur lokal, nicht synchronisiert). */
+  /** Auto-increment key (local only, not synced). */
   seq?: number;
   table: SyncTable;
   recordId: string;
-  /** Zeitpunkt der lokalen Mutation. */
+  /** Time of the local mutation. */
   queuedAt: string;
 }
 
-/** Lokale Sync-Metadaten (z. B. letzter Pull-Zeitpunkt pro Tabelle). */
+/** Local sync metadata (e.g. last pull time per table). */
 export interface SyncMeta {
   key: string;
   value: string;
@@ -44,7 +44,7 @@ export class AppDatabase extends Dexie {
   constructor(name = 'bayna-yadayk') {
     super(name);
     this.version(1).stores({
-      // Primärschlüssel + Indizes. `updated_at` & `deleted` für Sync-Abfragen.
+      // Primary key + indexes. `updated_at` & `deleted` for sync queries.
       srs_cards: 'id, contentRef, kind, due, updated_at, deleted, leech',
       review_logs: 'id, cardId, reviewedAt, updated_at, deleted',
       exam_results: 'id, format, finishedAt, updated_at, deleted',
@@ -58,7 +58,7 @@ export class AppDatabase extends Dexie {
 
 export const db = new AppDatabase();
 
-/** Liste der synchronisierbaren Tabellen-Handles (für generische Sync-Routinen). */
+/** Syncable table handles (for generic sync routines). */
 export function syncableTables(
   database: AppDatabase
 ): Record<

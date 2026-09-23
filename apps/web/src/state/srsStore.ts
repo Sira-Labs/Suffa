@@ -1,6 +1,6 @@
 /**
- * SRS-Store: hält die Karten reaktiv, sorgt für deren Existenz (Seeding aus
- * Content) und kapselt den Review-Flow (Bewertung → Reschedule → Log → Persist).
+ * SRS store: holds the cards reactively, ensures they exist (seeding from
+ * content) and encapsulates the review flow (rating → reschedule → log → persist).
  */
 import { create } from 'zustand';
 import type { CardKind, ReviewRating, SrsCard } from '@/types';

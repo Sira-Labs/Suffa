@@ -12,9 +12,9 @@ import type { SyncTable } from '@/types';
 import { createCard } from '@/services/srs';
 
 /**
- * In-Memory-Provider, der ein zweites „Gerät“/Backend simuliert. So lässt sich
- * der komplette Offline-first-Zyklus (Outbox → push → pull → reconcile) ohne
- * Netzwerk integrativ testen.
+ * In-memory provider that simulates a second "device"/backend. This lets us
+ * integration-test the full offline-first cycle (outbox → push → pull → reconcile)
+ * without a network.
  */
 class FakeProvider implements SyncProvider {
   readonly name = 'fake';
@@ -47,7 +47,7 @@ class FakeProvider implements SyncProvider {
     return { ok: true, value: filtered };
   }
 
-  /** Test-Helfer: ein Datensatz direkt im Backend (anderes Gerät). */
+  /** Test helper: a record directly in the backend (another device). */
   seed(table: SyncTable, record: SyncableRecord) {
     (this.store[table] ??= new Map()).set(record.id, record);
   }
@@ -64,8 +64,8 @@ beforeEach(async () => {
   engine = new SyncEngine(provider, dbA);
 });
 
-describe('SyncEngine Integration: Offline-Queue → push → pull → reconcile', () => {
-  it('pusht lokale Outbox-Datensätze ans Backend und leert die Queue', async () => {
+describe('SyncEngine integration: offline queue → push → pull → reconcile', () => {
+  it('pushes local outbox records to the backend and empties the queue', async () => {
     const card = createCard({ id: 'srs1', contentRef: 'v-ism', kind: 'vocab_ar_de' });
     await dbA.srs_cards.put(card);
     await dbA.outbox.add({
@@ -81,7 +81,7 @@ describe('SyncEngine Integration: Offline-Queue → push → pull → reconcile'
     expect(await dbA.outbox.count()).toBe(0);
   });
 
-  it('zieht Remote-Datensätze eines anderen Geräts und schreibt sie lokal', async () => {
+  it('pulls remote records from another device and writes them locally', async () => {
     provider.seed('user_vocab', {
       id: 'uv1',
       ar: 'كِتاب',
@@ -100,7 +100,7 @@ describe('SyncEngine Integration: Offline-Queue → push → pull → reconcile'
     expect(local?.de).toBe('Buch');
   });
 
-  it('löst Konflikte per Last-Write-Wins (neuerer Remote gewinnt)', async () => {
+  it('resolves conflicts via last-write-wins (newer remote wins)', async () => {
     const older = createCard({
       id: 'srs2',
       contentRef: 'v-hal',
@@ -114,7 +114,7 @@ describe('SyncEngine Integration: Offline-Queue → push → pull → reconcile'
       queuedAt: older.updated_at,
     });
 
-    // Anderes Gerät hat dieselbe Karte später mit reps=9 aktualisiert.
+    // Another device later updated the same card with reps=9.
     provider.seed('srs_cards', {
       ...older,
       reps: 9,
@@ -127,7 +127,7 @@ describe('SyncEngine Integration: Offline-Queue → push → pull → reconcile'
     expect(local?.reps).toBe(9);
   });
 
-  it('ist idempotent: ein zweiter Sync ohne Änderungen tut nichts', async () => {
+  it('is idempotent: a second sync without changes does nothing', async () => {
     const card = createCard({ id: 'srs3', contentRef: 'v-ism', kind: 'plural' });
     await dbA.srs_cards.put(card);
     await dbA.outbox.add({
@@ -143,7 +143,7 @@ describe('SyncEngine Integration: Offline-Queue → push → pull → reconcile'
     expect(second.pulled).toBe(0);
   });
 
-  it('behält die Outbox, wenn der Push fehlschlägt (kein Datenverlust)', async () => {
+  it('keeps the outbox when the push fails (no data loss)', async () => {
     provider.push = async () => ({
       ok: false,
       error: { code: 'network', message: 'offline' },

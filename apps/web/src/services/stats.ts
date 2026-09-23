@@ -1,13 +1,13 @@
 /**
- * Lern-Metriken für Dashboard/Metakognition: Beherrschung, Streak,
- * Vergessenskurve und Heatmap. Reine Funktionen über Karten + Review-Logs.
+ * Learning metrics for dashboard/metacognition: mastery, streak,
+ * forgetting curve and heatmap. Pure functions over cards + review logs.
  */
 import type { ReviewLog, SrsCard } from '@/types';
 
 export interface MasteryBuckets {
   neu: number;
   lernend: number;
-  reif: number; // Intervall >= 21 Tage
+  reif: number; // interval >= 21 days
   schwierig: number; // Leech
   total: number;
 }
@@ -25,7 +25,7 @@ export function masteryBuckets(cards: SrsCard[]): MasteryBuckets {
   return result;
 }
 
-/** Tagesgenaue Streak (aufeinanderfolgende Tage mit mindestens einer Review). */
+/** Day-based streak (consecutive days with at least one review). */
 export function computeStreak(logs: ReviewLog[], now: Date = new Date()): number {
   if (logs.length === 0) return 0;
   const days = new Set(logs.map((l) => l.reviewedAt.slice(0, 10)));
@@ -33,7 +33,7 @@ export function computeStreak(logs: ReviewLog[], now: Date = new Date()): number
   const cursor = new Date(
     Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
   );
-  // Heute zählt nur, wenn schon gelernt wurde; sonst ab gestern weiterzählen.
+  // Today only counts once studied; otherwise count from yesterday.
   if (!days.has(cursor.toISOString().slice(0, 10))) {
     cursor.setUTCDate(cursor.getUTCDate() - 1);
   }
@@ -45,16 +45,16 @@ export function computeStreak(logs: ReviewLog[], now: Date = new Date()): number
 }
 
 export interface ForgettingPoint {
-  /** Tage seit letzter Wiederholung. */
+  /** Days since the last review. */
   day: number;
-  /** Modellierte Behaltenswahrscheinlichkeit 0..1. */
+  /** Modelled retention probability 0..1. */
   retention: number;
 }
 
 /**
- * Vergessenskurve nach Ebbinghaus: R = e^(-t/S), wobei die Stabilität S aus dem
- * durchschnittlichen aktuellen Intervall der reifen Karten geschätzt wird.
- * So zeigt die Kurve, wie schnell der aktuelle Stoff ohne Wiederholung verblasst.
+ * Ebbinghaus forgetting curve: R = e^(-t/S), where stability S is estimated from
+ * the average current interval of the mature cards.
+ * The curve thus shows how fast the current material fades without review.
  */
 export function forgettingCurve(cards: SrsCard[], points = 14): ForgettingPoint[] {
   const active = cards.filter((c) => !c.deleted && c.reps > 0 && c.interval > 0);
@@ -74,7 +74,7 @@ export interface HeatCell {
   count: number;
 }
 
-/** Review-Anzahl pro Tag über die letzten `days` Tage (für Heatmap). */
+/** Review count per day over the last `days` days (for the heatmap). */
 export function reviewHeatmap(
   logs: ReviewLog[],
   days = 28,
@@ -103,7 +103,7 @@ export interface NextRecommendation {
   to: string;
 }
 
-/** „Was als Nächstes?“-Empfehlung aus dem aktuellen Zustand. */
+/** "What next?" recommendation from the current state. */
 export function nextRecommendation(
   dueCount: number,
   newCount: number,

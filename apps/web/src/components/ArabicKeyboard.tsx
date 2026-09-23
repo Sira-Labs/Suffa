@@ -12,7 +12,7 @@ const LETTER_ROWS: string[][] = [
   ['ئ', 'ء', 'ؤ', 'ر', 'ى', 'ة', 'و', 'ز', 'ظ', 'د', 'ذ'],
 ];
 
-// Harakāt + Hamza-Varianten als eigene Reihe.
+// Harakāt + hamza variants as a separate row.
 const HARAKAT: { char: string; label: string }[] = [
   { char: 'َ', label: 'Fatḥa' },
   { char: 'ُ', label: 'Ḍamma' },
@@ -27,8 +27,8 @@ const HARAKAT: { char: string; label: string }[] = [
 const HAMZA: string[] = ['أ', 'إ', 'آ', 'ؤ', 'ئ', 'ء'];
 
 /**
- * Arabische Bildschirm-Tastatur inkl. Harakāt und Hamza-Varianten.
- * Voll per Tastatur/Screenreader bedienbar (jede Taste ein <button>).
+ * Arabic on-screen keyboard including harakāt and hamza variants.
+ * Fully operable via keyboard/screen reader (each key is a <button>).
  */
 export function ArabicKeyboard({ onInsert, onBackspace, onSpace }: ArabicKeyboardProps) {
   const [showHarakat, setShowHarakat] = useState(true);

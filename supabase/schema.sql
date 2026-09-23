@@ -1,21 +1,21 @@
 -- ============================================================================
---  Al-Arabiyya bayna Yadayk – Supabase-Schema (Sync-Backend)
+--  Al-Arabiyya bayna Yadayk – Supabase schema (sync backend)
 -- ----------------------------------------------------------------------------
---  Einspielen: Supabase-Dashboard → SQL Editor → dieses Skript ausführen,
---  danach supabase/policies.sql.
+--  Setup: Supabase dashboard → SQL Editor → run this script,
+--  then supabase/policies.sql.
 --
---  Designhinweise:
---   * Spaltennamen sind absichtlich camelCase und in DOPPELTEN ANFÜHRUNGS-
---     ZEICHEN definiert, weil der Client die Datensätze 1:1 (mit ihren
---     JS-Feldnamen wie "contentRef", "updated_at") via PostgREST upsertet.
---   * Primärschlüssel ist (user_id, id): Karten-IDs sind PRO NUTZER
---     deterministisch (z. B. 'vocab_ar_de:v-ism') und nur zusammen mit user_id
---     global eindeutig. Der Client upsertet mit onConflict='user_id,id'.
---   * "deleted" ist ein Soft-Delete-Tombstone; Last-Write-Wins läuft über
---     "updated_at" (siehe docs/adr/0002-sync-last-write-wins.md).
+--  Design notes:
+--   * Column names are deliberately camelCase and defined in DOUBLE QUOTES,
+--     because the client upserts records 1:1 (with their JS field names such
+--     as "contentRef", "updated_at") via PostgREST.
+--   * The primary key is (user_id, id): card IDs are deterministic PER USER
+--     (e.g. 'vocab_ar_de:v-ism') and only globally unique together with
+--     user_id. The client upserts with onConflict='user_id,id'.
+--   * "deleted" is a soft-delete tombstone; last-write-wins is based on
+--     "updated_at" (see docs/adr/0002-sync-last-write-wins.md).
 -- ============================================================================
 
--- SRS-Kartenzustand -----------------------------------------------------------
+-- SRS card state --------------------------------------------------------------
 create table if not exists public.srs_cards (
   user_id        uuid not null default auth.uid() references auth.users (id) on delete cascade,
   id             text not null,
@@ -34,7 +34,7 @@ create table if not exists public.srs_cards (
 );
 create index if not exists srs_cards_updated_at_idx on public.srs_cards (user_id, updated_at);
 
--- Review-Logs (append-only Ereignisse) ---------------------------------------
+-- Review logs (append-only events) -------------------------------------------
 create table if not exists public.review_logs (
   user_id             uuid not null default auth.uid() references auth.users (id) on delete cascade,
   id                  text not null,
@@ -51,7 +51,7 @@ create table if not exists public.review_logs (
 );
 create index if not exists review_logs_updated_at_idx on public.review_logs (user_id, updated_at);
 
--- Prüfungsergebnisse ----------------------------------------------------------
+-- Exam results ----------------------------------------------------------------
 create table if not exists public.exam_results (
   user_id      uuid not null default auth.uid() references auth.users (id) on delete cascade,
   id           text not null,
@@ -68,7 +68,7 @@ create table if not exists public.exam_results (
 );
 create index if not exists exam_results_updated_at_idx on public.exam_results (user_id, updated_at);
 
--- Einstellungen (ein Singleton-Datensatz pro Nutzer) -------------------------
+-- Settings (one singleton record per user) -----------------------------------
 create table if not exists public.settings (
   user_id              uuid not null default auth.uid() references auth.users (id) on delete cascade,
   id                   text not null,
@@ -84,7 +84,7 @@ create table if not exists public.settings (
   primary key (user_id, id)
 );
 
--- Eigene Vokabeln (nutzererstellte Inhalte) ----------------------------------
+-- Custom vocabulary (user-created content) -----------------------------------
 create table if not exists public.user_vocab (
   user_id    uuid not null default auth.uid() references auth.users (id) on delete cascade,
   id         text not null,

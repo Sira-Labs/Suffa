@@ -1,9 +1,9 @@
 /**
- * Prüfungs-Generator: erzeugt interleaved Fragen über viele Formate hinweg.
+ * Exam generator: produces interleaved questions across many formats.
  *
- * Lernprinzipien: Interleaving (Formate gemischt), gemischte Kapitelprüfung
- * (mehrere Einheiten in einer Prüfung, bildet die echte Klassenprüfung nach),
- * Speed-Round (Zeitdruck) und adaptiver Modus (schwierige Items häufiger).
+ * Learning principles: interleaving (mixed formats), mixed chapter exam
+ * (several units in one exam, mirroring the real class exam),
+ * speed round (time pressure) and adaptive mode (difficult items more often).
  */
 import type { ExamFormat } from '@/types';
 import { content } from '@/content';
@@ -14,10 +14,10 @@ export interface ExamQuestion {
   contentRef: string;
   prompt: string;
   promptIsArabic: boolean;
-  /** Erwartete (Frei-)Antwort. */
+  /** Expected (free-text) answer. */
   expected: string;
   expectedIsArabic: boolean;
-  /** Bei Auswahlformaten: Optionen (inkl. korrekter Antwort). */
+  /** For choice formats: options (including the correct answer). */
   options?: string[];
   hint?: string;
 }
@@ -26,7 +26,7 @@ export interface ExamConfig {
   formats: ExamFormat[];
   units: number[];
   count: number;
-  /** Speed-Round: Sekunden pro Frage (0 = unbegrenzt). */
+  /** Speed round: seconds per question (0 = unlimited). */
   secondsPerQuestion?: number;
 }
 
@@ -213,12 +213,12 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         hint: `Kontrast ${mp.kontrast}`,
       };
     },
-    mixed_chapter: () => null, // wird über die anderen Formate realisiert
+    mixed_chapter: () => null, // realised via the other formats
     speed: () => null,
     adaptive: () => null,
   };
 
-  // „mixed_chapter“, „speed“ und „adaptive“ greifen auf das gesamte Format-Set zurück.
+  // "mixed_chapter", "speed" and "adaptive" draw on the full format set.
   const baseFormats = config.formats.filter(
     (f) => f !== 'mixed_chapter' && f !== 'speed' && f !== 'adaptive'
   );
@@ -231,7 +231,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
   let guard = 0;
   while (questions.length < config.count && guard < config.count * 10) {
     guard++;
-    // Interleaving: pro Frage ein anderes Format reihum.
+    // Interleaving: rotate to a different format for each question.
     const format = effectiveFormats[questions.length % effectiveFormats.length]!;
     const q = generators[format]();
     if (q) questions.push(q);

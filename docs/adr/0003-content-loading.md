@@ -1,29 +1,26 @@
-# ADR-0003: Statische Lehrinhalte als versioniertes JSON mit Glob-Loader
+# ADR-0003: Static course content as versioned JSON with a glob loader
 
-- Status: akzeptiert
-- Datum: 2026-06-13
+- Status: accepted
+- Date: 2026-06-13
 
-## Kontext
+## Context
 
-Die Lehrinhalte (Vokabeln, Dialoge, Verben …) stammen aus „العربية بين يديك“
-Buch 1 und sind je Einheit organisiert. Sie sollen **nicht** synchronisiert
-werden (sie sind für alle Nutzer gleich, nur referenziert) und neue Einheiten
-sollen **ohne Code-Änderung** hinzukommen.
+The course content (vocabulary, dialogues, verbs …) comes from "العربية بين يديك" Book 1 and is
+organised by unit. It should **not** be synced (it is the same for all users and only
+referenced), and new units should be addable **without code changes**.
 
-## Entscheidung
+## Decision
 
-- Globale Inhalte (Meta, Quellen, Nisba, Verben, Minimalpaare) liegen in
-  `src/content/meta.json`.
-- Pro Einheit eine Datei `src/content/units/einheit-NN.json` (Vokabeln + Dialoge).
-- `src/content/index.ts` lädt alle Unit-Dateien per `import.meta.glob(..., { eager })`
-  und führt sie zusammen. Eine neue Datei wird beim Build automatisch erfasst.
-- `contentVersion` in der Meta versioniert den Stand.
-- Jede Vokabel/Verb/… hat eine stabile fachliche `id`, auf die SRS-Karten per
-  `contentRef` zeigen.
+- Global content (meta, sources, nisba, verbs, minimal pairs) lives in `src/content/meta.json`.
+- One file per unit: `src/content/units/einheit-NN.json` (vocabulary + dialogues).
+- `src/content/index.ts` loads all unit files via `import.meta.glob(..., { eager })` and merges
+  them. A new file is picked up automatically at build time.
+- `contentVersion` in the meta file versions the content.
+- Every vocabulary item, verb, … has a stable domain `id` that SRS cards point to via
+  `contentRef`.
 
-## Konsequenzen
+## Consequences
 
-Redakteure ergänzen Inhalte rein durch JSON. Die App bündelt alle Inhalte zur
-Build-Zeit → vollständig offline verfügbar. Nachteil: Inhaltsänderungen erfordern
-ein Re-Deploy (akzeptabel; das „Inhalt hinzufügen“-Formular deckt nutzereigene
-Vokabeln zur Laufzeit ab und synct diese).
+Editors add content purely through JSON. The app bundles all content at build time → fully
+available offline. Drawback: content changes require a redeploy (acceptable; the "Inhalt
+hinzufügen" (add content) form covers user-created vocabulary at runtime and syncs it).

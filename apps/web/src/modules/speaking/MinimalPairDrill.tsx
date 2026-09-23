@@ -4,8 +4,8 @@ import { content } from '@/content';
 import { speakArabic, isTtsSupported } from '@/services/speech';
 
 /**
- * Phonologie-Drill mit Minimalpaaren (ء ع ح خ غ ق ص ض ط ظ ث ذ …):
- * Hör-Diskriminierung – welches der beiden Wörter wurde gesprochen?
+ * Phonology drill with minimal pairs (ء ع ح خ غ ق ص ض ط ظ ث ذ …):
+ * listening discrimination – which of the two words was spoken?
  */
 export function MinimalPairDrill() {
   const pairs = content.phonologie_minimalpaare;

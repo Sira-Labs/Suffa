@@ -11,8 +11,8 @@ function youtubeEmbed(url: string): string | null {
 }
 
 /**
- * Quellenbibliothek: eingebettete YouTube-Player + externe Audio-Links.
- * Hinweis: Eingebettete Streams brauchen Netz; die App selbst bleibt offline nutzbar.
+ * Source library: embedded YouTube players + external audio links.
+ * Note: embedded streams need a network; the app itself stays usable offline.
  */
 export function Library() {
   const quellen = content.quellen;

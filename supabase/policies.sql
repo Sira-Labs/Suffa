@@ -1,9 +1,9 @@
 -- ============================================================================
 --  Row-Level-Security (RLS) Policies
 -- ----------------------------------------------------------------------------
---  Jede Zeile gehört genau einem Nutzer. Niemand darf fremde Lerndaten sehen
---  oder verändern. Durchgesetzt über `user_id = auth.uid()` auf allen Tabellen.
---  Nach supabase/schema.sql ausführen.
+--  Every row belongs to exactly one user. Nobody may see or modify another
+--  user's learning data. Enforced via `user_id = auth.uid()` on all tables.
+--  Run after supabase/schema.sql.
 -- ============================================================================
 
 alter table public.srs_cards    enable row level security;
@@ -12,8 +12,8 @@ alter table public.exam_results enable row level security;
 alter table public.settings     enable row level security;
 alter table public.user_vocab   enable row level security;
 
--- Hilfsmakro-Ersatz: pro Tabelle vier Policies (select/insert/update/delete).
--- INSERT erzwingt user_id = auth.uid() (auch wenn DEFAULT auth.uid() greift).
+-- In place of a helper macro: four policies per table (select/insert/update/delete).
+-- INSERT enforces user_id = auth.uid() (even though DEFAULT auth.uid() applies).
 
 -- srs_cards -------------------------------------------------------------------
 drop policy if exists srs_cards_select on public.srs_cards;

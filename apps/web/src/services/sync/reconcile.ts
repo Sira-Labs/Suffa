@@ -1,13 +1,13 @@
 /**
- * Sync-Reconciliation: Konfliktlösung per Last-Write-Wins (LWW) je Datensatz.
+ * Sync reconciliation: conflict resolution via last-write-wins (LWW) per record.
  *
- * ADR-0002: Wir vergleichen `updated_at` (ISO-Zeitstempel). Der jüngere Datensatz
- * gewinnt – ganzer Datensatz, kein Feld-Merge. Begründung: einfache, vorhersagbare
- * Semantik; Lerndaten sind kleinteilig und selten echt gleichzeitig auf zwei
- * Geräten editiert. Soft-Deletes (`deleted: true`) nehmen als normaler Datensatz
- * am LWW teil – eine spätere Bearbeitung kann eine ältere Löschung also überstimmen.
+ * ADR-0002: We compare `updated_at` (ISO timestamp). The newer record wins –
+ * whole record, no field merge. Rationale: simple, predictable semantics;
+ * learning data is fine-grained and rarely edited truly concurrently on two
+ * devices. Soft deletes (`deleted: true`) take part in LWW as a normal record –
+ * so a later edit can override an older deletion.
  *
- * Diese Funktionen sind rein (kein I/O), damit sie deterministisch testbar sind.
+ * These functions are pure (no I/O) so they are deterministically testable.
  */
 
 export interface Reconcilable {
@@ -18,7 +18,7 @@ export interface Reconcilable {
 
 export type ReconcileDecision = 'keep-local' | 'take-remote' | 'equal';
 
-/** Vergleicht zwei Versionen desselben Datensatzes. */
+/** Compares two versions of the same record. */
 export function decide<T extends Reconcilable>(
   local: T | undefined,
   remote: T | undefined
@@ -42,19 +42,19 @@ export function decide<T extends Reconcilable>(
 }
 
 export interface MergeResult<T> {
-  /** Vollständig gemergte Menge (für Persistenz). */
+  /** Fully merged set (for persistence). */
   merged: T[];
-  /** Datensätze, die lokal aktualisiert/übernommen werden müssen. */
+  /** Records that must be updated/adopted locally. */
   toWriteLocal: T[];
-  /** Lokale Datensätze, die (noch) ans Backend müssen, weil sie neuer sind. */
+  /** Local records that (still) need to go to the backend because they are newer. */
   toPushRemote: T[];
 }
 
 /**
- * Führt lokale und entfernte Datensätze per LWW zusammen.
+ * Merges local and remote records via LWW.
  *
- * @param locals  aktueller lokaler Stand
- * @param remotes vom Backend gezogene Datensätze
+ * @param locals  current local state
+ * @param remotes records pulled from the backend
  */
 export function mergeRecords<T extends Reconcilable>(
   locals: T[],
@@ -77,7 +77,7 @@ export function mergeRecords<T extends Reconcilable>(
       case 'keep-local': {
         const winner = local as T;
         merged.push(winner);
-        // Lokal neuer als (oder ohne) Remote → muss noch gepusht werden.
+        // Local is newer than (or has no) remote → still needs to be pushed.
         toPushRemote.push(winner);
         break;
       }

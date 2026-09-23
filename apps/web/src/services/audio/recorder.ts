@@ -1,17 +1,17 @@
 /**
- * Audio-Aufnahme via MediaRecorder für „Aufnahme & Vergleich“ (Shadowing).
+ * Audio recording via MediaRecorder for "record & compare" (shadowing).
  *
- * - Wählt ein Format, das der Browser wirklich kann: iPhone/Safari nimmt `audio/mp4` auf,
- *   Chrome/Firefox `audio/webm;codecs=opus`. Ohne passende Angabe liefern manche Geräte
- *   leere oder nicht abspielbare Aufnahmen.
- * - Liefert bei Problemen einen typisierten Grund (verweigert, kein Mikrofon, unsichere
- *   Verbindung …), damit die UI eine konkrete Hilfe anzeigen kann statt still zu scheitern.
+ * - Picks a format the browser actually supports: iPhone/Safari records `audio/mp4`,
+ *   Chrome/Firefox `audio/webm;codecs=opus`. Without a matching type some devices
+ *   produce empty or unplayable recordings.
+ * - On problems returns a typed reason (denied, no microphone, insecure
+ *   connection …) so the UI can show specific help instead of failing silently.
  */
 import { logger } from '@/services/logger';
 
 const log = logger.child('audio:recorder');
 
-/** Bevorzugte Formate in Reihenfolge; das erste unterstützte gewinnt. */
+/** Preferred formats in order; the first supported one wins. */
 export const PREFERRED_MIME_TYPES = [
   'audio/webm;codecs=opus',
   'audio/mp4',
@@ -20,7 +20,7 @@ export const PREFERRED_MIME_TYPES = [
   'audio/ogg;codecs=opus',
 ] as const;
 
-/** Chunks in kurzen Abständen einsammeln (robuster auf iOS als nur beim Stoppen). */
+/** Collect chunks at short intervals (more robust on iOS than only on stop). */
 const TIMESLICE_MS = 250;
 
 export type RecorderFailure =
@@ -37,7 +37,7 @@ export interface Recording {
 }
 
 export interface ActiveRecorder {
-  /** Stoppt die Aufnahme; lehnt mit 'empty' ab, wenn nichts aufgenommen wurde. */
+  /** Stops the recording; rejects with EmptyRecordingError if nothing was recorded. */
   stop(): Promise<Recording>;
 }
 
@@ -53,7 +53,7 @@ export function isRecordingSupported(): boolean {
   );
 }
 
-/** Erstes unterstütztes Format, oder undefined (dann entscheidet der Browser). */
+/** First supported format, or undefined (the browser then decides). */
 export function pickMimeType(
   isSupported: (type: string) => boolean = (t) =>
     typeof MediaRecorder !== 'undefined' &&
@@ -63,7 +63,7 @@ export function pickMimeType(
   return PREFERRED_MIME_TYPES.find((type) => isSupported(type));
 }
 
-/** Übersetzt getUserMedia-Fehler (DOMException-Namen) in einen Grund für die UI. */
+/** Maps getUserMedia errors (DOMException names) to a reason for the UI. */
 export function classifyMediaError(cause: unknown): RecorderFailure {
   const name = cause instanceof Error || cause instanceof DOMException ? cause.name : '';
   switch (name) {
@@ -87,7 +87,7 @@ export function classifyMediaError(cause: unknown): RecorderFailure {
 
 export class EmptyRecordingError extends Error {
   constructor() {
-    super('Die Aufnahme ist leer.');
+    super('The recording is empty.');
     this.name = 'EmptyRecordingError';
   }
 }
@@ -97,7 +97,7 @@ export async function createRecorder(): Promise<RecorderStart> {
     return { ok: false, reason: 'insecure' };
   }
   if (!isRecordingSupported()) {
-    log.warn('Aufnahme nicht unterstützt');
+    log.warn('Recording not supported');
     return { ok: false, reason: 'unsupported' };
   }
 
@@ -106,9 +106,9 @@ export async function createRecorder(): Promise<RecorderStart> {
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   } catch (cause) {
     const reason = classifyMediaError(cause);
-    log.warn('Mikrofonzugriff fehlgeschlagen', {
+    log.warn('Microphone access failed', {
       reason,
-      name: cause instanceof Error ? cause.name : 'unbekannt',
+      name: cause instanceof Error ? cause.name : 'unknown',
     });
     return { ok: false, reason };
   }
@@ -121,7 +121,7 @@ export async function createRecorder(): Promise<RecorderStart> {
       : new MediaRecorder(stream);
   } catch (cause) {
     stream.getTracks().forEach((t) => t.stop());
-    log.warn('MediaRecorder konnte nicht erstellt werden', {
+    log.warn('MediaRecorder could not be created', {
       mimeType,
       cause: String(cause),
     });
@@ -144,7 +144,7 @@ export async function createRecorder(): Promise<RecorderStart> {
             const type = recorder.mimeType || mimeType || 'audio/webm';
             const blob = new Blob(chunks, { type });
             if (blob.size === 0) {
-              log.warn('Leere Aufnahme', { type });
+              log.warn('Empty recording', { type });
               reject(new EmptyRecordingError());
               return;
             }

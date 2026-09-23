@@ -1,13 +1,13 @@
 /**
- * Verständliche Hilfetexte, wenn Aufnahme oder Aussprache-Bewertung nicht klappen –
- * auf dem iPhone mit den konkreten Einstellungen, die meist die Ursache sind.
+ * Plain-language help texts for when recording or pronunciation scoring fails –
+ * on iPhone with the specific settings that are usually the cause.
  */
 import type { RecorderFailure } from '@/services/audio';
 import type { RecognitionFailure } from '@/services/speech';
 
 export interface HelpContext {
   ios: boolean;
-  /** Als Home-Bildschirm-App (PWA) gestartet statt im Browser-Tab. */
+  /** Launched as a Home Screen app (PWA) instead of in a browser tab. */
   standalone: boolean;
 }
 

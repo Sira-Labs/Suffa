@@ -1,11 +1,11 @@
 /**
- * Deck-Builder: leitet aus den statischen Lehrinhalten die zu lernenden
- * SRS-Karten ab. Eine Karte = (contentRef, kind).
+ * Deck builder: derives the SRS cards to study from the static course content.
+ * One card = (contentRef, kind).
  *
- * Die Karten-ID ist DETERMINISTISCH (`kind:contentRef`), nicht zufällig.
- * Grund: Legen zwei Geräte vor dem ersten Sync dieselbe logische Karte an,
- * teilen sie sich dieselbe ID und werden beim Sync per Last-Write-Wins
- * zusammengeführt statt dupliziert (siehe ADR-0002).
+ * The card ID is DETERMINISTIC (`kind:contentRef`), not random.
+ * Reason: if two devices create the same logical card before the first sync,
+ * they share the same ID and are merged via last-write-wins during sync
+ * instead of being duplicated (see ADR-0002).
  */
 import type { CardKind, UserVocab } from '@/types';
 import { content } from '@/content';
@@ -24,7 +24,7 @@ function seed(kind: CardKind, contentRef: string): CardSeed {
   return { id: cardId(kind, contentRef), contentRef, kind };
 }
 
-/** Alle aus dem statischen Content + eigenen Vokabeln ableitbaren Kartenkeime. */
+/** All card seeds derivable from the static content + the user's own vocabulary. */
 export function buildCardSeeds(userVocab: UserVocab[] = []): CardSeed[] {
   const seeds: CardSeed[] = [];
 

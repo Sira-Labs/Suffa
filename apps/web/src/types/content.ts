@@ -1,7 +1,7 @@
 /**
- * Typen für die statischen Lehrinhalte (versioniert im Repo unter src/content/).
- * Diese Inhalte werden NICHT gesynct – sie sind unveränderlich pro contentVersion
- * und werden von synchronisierbaren Lerndaten nur per `id`/`ref` referenziert.
+ * Types for the static teaching content (versioned in the repo under src/content/).
+ * This content is NOT synced – it is immutable per contentVersion and is only
+ * referenced by syncable learning data via `id`/`ref`.
  */
 
 export type Register = 'MSA/فصحى' | 'Golf-Dialekt';
@@ -28,14 +28,14 @@ export interface Quelle {
 }
 
 export interface Vokabel {
-  /** Stabile fachliche ID, abgeleitet aus Wurzel+Lemma (für SRS-Referenz). */
+  /** Stable domain ID, derived from root + lemma (for SRS references). */
   id: string;
   ar: string;
   tr: string;
   de: string;
   wurzel: string;
   wazn?: string;
-  /** Bei nicht zählbaren/abstrakten Begriffen kann der Plural null sein. */
+  /** For uncountable/abstract terms the plural can be null. */
   plural?: string | null;
   einheit: number;
   hinweis?: string;
@@ -64,7 +64,7 @@ export interface Dialog {
   zeilen: DialogZeile[];
 }
 
-/** Personen-Schlüssel für die Verbkonjugation. */
+/** Person keys for verb conjugation. */
 export type MadiPerson =
   | 'ana'
   | 'nahnu'
@@ -115,7 +115,7 @@ export interface ContentBundle {
   phonologie_minimalpaare: Minimalpaar[];
 }
 
-/** Person-Label für die UI (Deutsch + arabisches Pronomen). */
+/** Person labels for the UI (German + Arabic pronoun). */
 export const PERSON_LABELS: Record<MadiPerson, { ar: string; de: string }> = {
   ana: { ar: 'أنا', de: 'ich' },
   nahnu: { ar: 'نَحْنُ', de: 'wir' },

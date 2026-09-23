@@ -27,7 +27,7 @@ const MODES: Mode[] = [
 export function VocabTrainer() {
   const [mode, setMode] = useState<Mode>(MODES[0]!);
   const [showAdd, setShowAdd] = useState(false);
-  // key erzwingt Remount der Session bei Moduswechsel (frische Queue).
+  // key forces a remount of the session on mode change (fresh queue).
   const [sessionKey, setSessionKey] = useState(0);
 
   const pick = (m: Mode) => {

@@ -1,22 +1,22 @@
-# Arabische Schriften (offline einbetten)
+# Arabic fonts (embedded for offline use)
 
-Damit die App auch ohne Internet eine hochwertige, voll vokalisierbare arabische
-Typografie zeigt, werden die Schriften **lokal** ausgeliefert (nicht von einem CDN).
+So that the app shows high-quality, fully vocalisable Arabic typography even
+without internet, the fonts are served **locally** (not from a CDN).
 
-## Benötigte Dateien
+## Required files
 
-Lege hier zwei WOFF2-Dateien ab (Namen exakt so):
+Place two WOFF2 files here (names exactly as shown):
 
-- `amiri.woff2` — [Amiri](https://github.com/aliftype/amiri) (OFL-Lizenz)
-- `scheherazade.woff2` — [Scheherazade New](https://software.sil.org/scheherazade/) (OFL-Lizenz)
+- `amiri.woff2` — [Amiri](https://github.com/aliftype/amiri) (OFL license)
+- `scheherazade.woff2` — [Scheherazade New](https://software.sil.org/scheherazade/) (OFL license)
 
-Beide Schriften stehen unter der **SIL Open Font License** und dürfen
-mitausgeliefert werden. Lade die TTF/WOFF2 von den offiziellen Quellen und
-konvertiere sie ggf. mit `woff2_compress` oder einem Online-Tool zu WOFF2.
+Both fonts are licensed under the **SIL Open Font License** and may be
+redistributed with the app. Download the TTF/WOFF2 from the official sources and
+convert them to WOFF2 if needed, using `woff2_compress` or an online tool.
 
-## Verhalten ohne diese Dateien
+## Behaviour without these files
 
-Die `@font-face`-Regeln in `src/styles/fonts.css` referenzieren diese Dateien.
-Fehlen sie, fällt die App automatisch auf eine System-Serifenschrift zurück
-(`font-family: ... , 'Times New Roman', serif`). Die App bleibt voll funktionsfähig,
-nur die Typografie ist dann weniger fein. Der Build schlägt **nicht** fehl.
+The `@font-face` rules in `src/styles/fonts.css` reference these files.
+If they are missing, the app automatically falls back to a system serif font
+(`font-family: ... , 'Times New Roman', serif`). The app stays fully functional;
+only the typography is less refined. The build does **not** fail.

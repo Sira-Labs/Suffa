@@ -176,6 +176,9 @@ For the best typography, put `amiri.woff2` and `scheherazade.woff2` into
 - Conventional commits (`feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `test:`).
 - Before committing: `npm run format:check && npm run lint && npm run typecheck && npm test`.
 - Hard-to-reverse decisions get an ADR in `docs/adr/`.
+- **Language:** everything in the repository is English (code, comments, logs, tests, docs,
+  commits). Text that learners see in the app is German, and learning content keeps its German
+  meanings; UI texts move into an i18n catalog with ADR-0021.
 
 ## Licence
 

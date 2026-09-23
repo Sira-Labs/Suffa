@@ -1,15 +1,15 @@
 /**
- * Sync-Engine: orchestriert die persistente Mutation-Queue (Outbox) mit
- * push → pull → reconcile gegen einen beliebigen SyncProvider.
+ * Sync engine: orchestrates the persistent mutation queue (outbox) with
+ * push → pull → reconcile against any SyncProvider.
  *
- * Ablauf eines Sync-Zyklus pro Tabelle:
- *   1. PUSH: alle in der Outbox vermerkten lokalen Datensätze hochladen.
- *   2. PULL: seit dem letzten Sync geänderte Remote-Datensätze holen.
- *   3. RECONCILE: per Last-Write-Wins zusammenführen (siehe reconcile.ts/ADR-0002).
- *   4. WRITE: Gewinner lokal schreiben; nur erfolgreich gepushte Outbox-Einträge löschen.
+ * Flow of a sync cycle per table:
+ *   1. PUSH: upload all local records noted in the outbox.
+ *   2. PULL: fetch remote records changed since the last sync.
+ *   3. RECONCILE: merge via last-write-wins (see reconcile.ts/ADR-0002).
+ *   4. WRITE: write winners locally; delete only successfully pushed outbox entries.
  *
- * Offline-Sicherheit: schlägt push/pull fehl, bleibt die Outbox erhalten und der
- * nächste Zyklus versucht es erneut. Kein Datenverlust.
+ * Offline safety: if push/pull fails, the outbox is kept and the next cycle
+ * retries. No data loss.
  */
 import type { SyncTable } from '@/types';
 import {
@@ -64,17 +64,17 @@ export class SyncEngine {
     return this.provider;
   }
 
-  /** Führt einen vollständigen Sync-Zyklus über alle Tabellen aus. */
+  /** Runs a full sync cycle over all tables. */
   async sync(): Promise<SyncResult> {
     if (this.running) {
-      log.debug('Sync bereits aktiv – übersprungen');
+      log.debug('Sync already running – skipped');
       return { pushed: 0, pulled: 0, conflictsResolved: 0 };
     }
     if (!this.provider.isConfigured()) {
       return { pushed: 0, pulled: 0, conflictsResolved: 0 };
     }
     if (this.provider.getAuthState().status !== 'signed-in') {
-      log.debug('Nicht angemeldet – Sync übersprungen');
+      log.debug('Not signed in – sync skipped');
       return { pushed: 0, pulled: 0, conflictsResolved: 0 };
     }
 
@@ -91,7 +91,7 @@ export class SyncEngine {
         key: 'lastSyncAt',
         value: new Date().toISOString(),
       });
-      log.info('Sync abgeschlossen', { ...totals });
+      log.info('Sync completed', { ...totals });
       return totals;
     } finally {
       this.running = false;
@@ -102,7 +102,7 @@ export class SyncEngine {
     const tables = syncableTables(this.database);
     const handle = tables[table];
 
-    // Outbox-Einträge dieser Tabelle einsammeln (lokal geänderte Datensätze).
+    // Collect this table's outbox entries (locally changed records).
     const outboxEntries = await this.database.outbox
       .where('table')
       .equals(table)
@@ -112,20 +112,20 @@ export class SyncEngine {
       (r): r is Reconcilable & SyncableRecord => Boolean(r)
     );
 
-    // 1. PULL seit letztem Sync. Bewusst VOR dem Push: nur so verhindert
-    //    Last-Write-Wins, dass ein älterer lokaler Datensatz einen neueren
-    //    Remote-Stand überschreibt (push würde sonst blind upserten).
+    // 1. PULL since the last sync. Deliberately BEFORE the push: only this way
+    //    does last-write-wins prevent an older local record from overwriting a
+    //    newer remote state (push would otherwise upsert blindly).
     const sinceMeta = await this.database.sync_meta.get(lastPullKey(table));
     const since = sinceMeta?.value ?? null;
     const pullResult = await this.provider.pull(table, since);
     if (!pullResult.ok) {
-      log.warn('pull fehlgeschlagen', { table, error: pullResult.error.message });
+      log.warn('pull failed', { table, error: pullResult.error.message });
       return { pushed: 0, pulled: 0, conflictsResolved: 0 };
     }
     const remotes = pullResult.value as (Reconcilable & SyncableRecord)[];
 
-    // 2. RECONCILE: lokale Eingabemenge = dirty (Outbox) ∪ aktuelle lokale
-    //    Versionen der gepullten IDs. So werden Konflikte korrekt per LWW gelöst.
+    // 2. RECONCILE: local input set = dirty (outbox) ∪ current local versions
+    //    of the pulled IDs. This way conflicts are resolved correctly via LWW.
     const localMap = new Map<string, Reconcilable & SyncableRecord>();
     for (const r of dirtyRecords) localMap.set(r.id, r);
     const remoteOnlyIds = remotes.map((r) => r.id).filter((id) => !localMap.has(id));
@@ -136,18 +136,18 @@ export class SyncEngine {
 
     const { toWriteLocal, toPushRemote } = mergeRecords([...localMap.values()], remotes);
 
-    // 3. WRITE: Remote-Gewinner lokal persistieren (ohne neuen Outbox-Eintrag).
+    // 3. WRITE: persist remote winners locally (without a new outbox entry).
     if (toWriteLocal.length > 0) {
       await handle.bulkPut(toWriteLocal);
     }
 
-    // 4. PUSH: nur die lokalen Gewinner (neuer als bzw. unbekannt im Backend).
+    // 4. PUSH: only the local winners (newer than, or unknown to, the backend).
     let pushed = 0;
     if (toPushRemote.length > 0) {
       const pushResult = await this.provider.push(table, toPushRemote);
       if (!pushResult.ok) {
-        // Outbox bleibt erhalten → nächster Zyklus versucht es erneut.
-        log.warn('push fehlgeschlagen, Outbox behalten', {
+        // Outbox is kept → the next cycle retries.
+        log.warn('push failed, outbox kept', {
           table,
           error: pushResult.error.message,
         });
@@ -160,11 +160,11 @@ export class SyncEngine {
       pushed = toPushRemote.length;
     }
 
-    // Outbox-Einträge sind erledigt, sobald ihr Datensatz entweder gepusht oder
-    // durch einen neueren Remote-Stand ersetzt wurde. Beides ist hier der Fall.
+    // Outbox entries are done once their record has either been pushed or
+    // replaced by a newer remote state. Both are the case here.
     await this.clearOutbox(outboxEntries);
 
-    // Pull-Wasserzeichen vorrücken.
+    // Advance the pull watermark.
     const newest = remotes.reduce<string>(
       (acc, r) => (r.updated_at > acc ? r.updated_at : acc),
       since ?? ''

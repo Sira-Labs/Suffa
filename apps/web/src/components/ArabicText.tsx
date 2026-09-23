@@ -5,22 +5,22 @@ import { useSettingsStore } from '@/state';
 
 interface ArabicTextProps {
   children: string;
-  /** Überschreibt die globale Tashkīl-Stufe für diese eine Stelle. */
+  /** Overrides the global tashkīl level for this one spot. */
   level?: TashkilLevel;
   size?: 'normal' | 'lg';
   className?: string;
   style?: CSSProperties;
-  /** Vorlesen per Klick (TTS) – aktiviert in interaktiven Modulen. */
+  /** Read aloud on click (TTS) – enabled in interactive modules. */
   onClick?: () => void;
 }
 
-const PARTIAL_KEEP = new Set(['ّ']); // Shadda bleibt bei „teilweise“ erhalten.
+const PARTIAL_KEEP = new Set(['ّ']); // Shadda is kept at "partial".
 
 /**
- * Reduziert Tashkīl gemäß Stufe:
- *  - full: unverändert
- *  - partial: nur Shadda behalten, übrige Harakāt entfernen
- *  - none: alle Harakāt entfernen
+ * Reduces tashkīl according to the level:
+ *  - full: unchanged
+ *  - partial: keep only shadda, remove the other harakāt
+ *  - none: remove all harakāt
  */
 export function applyTashkilLevel(text: string, level: TashkilLevel): string {
   if (level === 'full') return text;

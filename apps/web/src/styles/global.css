@@ -166,7 +166,7 @@ h3 {
   background: var(--bg-elev-2);
 }
 
-/* Arabische Typografie: großzügig, mit deutlichem Tashkīl. */
+/* Arabic typography: generous, with clearly visible tashkīl. */
 .arabic {
   font-family: var(--font-arabic);
   direction: rtl;
@@ -202,7 +202,7 @@ h3 {
   background: color-mix(in srgb, var(--good) 18%, transparent);
 }
 
-/* Untere Navigationsleiste (mobile-first), klebt am Bildschirmrand. */
+/* Bottom navigation bar (mobile-first), sticks to the screen edge. */
 .app-nav {
   position: fixed;
   bottom: 0;

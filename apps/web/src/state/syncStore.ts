@@ -1,6 +1,6 @@
 /**
- * Sync-Store: hält Provider, Auth-Zustand, Sync-Status und Pending-Count.
- * Triggert Sync bei Login, manuell und bei Wiederverbindung (online-Event).
+ * Sync store: holds provider, auth state, sync status and pending count.
+ * Triggers a sync on login, manually and on reconnect (online event).
  */
 import { create } from 'zustand';
 import {
@@ -94,7 +94,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       set({ status: 'idle', lastSyncAt });
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'Sync fehlgeschlagen';
-      log.error('Sync-Fehler', { message });
+      log.error('Sync error', { message });
       set({ status: 'error', errorMessage: message });
     }
   },

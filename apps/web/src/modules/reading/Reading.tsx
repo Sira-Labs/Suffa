@@ -7,7 +7,7 @@ import { normalizeArabic } from '@/services/srs';
 import { speakArabic } from '@/services/speech';
 import { useSettingsStore } from '@/state';
 
-// Glossar aus allen Vokabeln: normalisierte Form → Bedeutung.
+// Glossary from all vocabulary: normalised form → meaning.
 const glossar = new Map<string, { de: string; tr: string; wurzel: string }>();
 for (const v of content.vokabeln) {
   glossar.set(normalizeArabic(v.ar), { de: v.de, tr: v.tr, wurzel: v.wurzel });
@@ -133,7 +133,7 @@ function GlossLine({
   );
 }
 
-/** Einfaches Leseverständnis nach dem Text. */
+/** Simple reading comprehension after the text. */
 function Comprehension({ dialog }: { dialog: Dialog }) {
   const firstLine = dialog.zeilen[0];
   const correct = firstLine?.de ?? '';

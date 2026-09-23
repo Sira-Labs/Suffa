@@ -1,22 +1,22 @@
 /**
- * Aufbau der täglichen Fälligkeits-Queue mit Interleaving und Alt+Neu-Mischung.
+ * Builds the daily due queue with interleaving and an old+new mix.
  *
- * Lernprinzipien:
- *  - Spaced Retrieval mit Alt+Neu: fällige (alte) Karten und neue Karten werden
- *    in einem konfigurierbaren Verhältnis gemischt statt blockweise.
- *  - Interleaving: verschiedene CardKinds werden durchmischt, nicht gebündelt.
- *  - Leech-/schwierige Karten werden leicht bevorzugt (Deliberate Practice).
+ * Learning principles:
+ *  - Spaced retrieval with old+new: due (old) cards and new cards are mixed
+ *    in a configurable ratio instead of in blocks.
+ *  - Interleaving: different CardKinds are mixed, not grouped.
+ *  - Leeches/difficult cards get slight priority (deliberate practice).
  */
 import type { CardKind, SrsCard } from '@/types';
 import { isDue } from './engine';
 
 export interface QueueOptions {
   now?: Date;
-  /** Maximale Anzahl neuer (nie gelernter) Karten pro Sitzung. */
+  /** Maximum number of new (never studied) cards per session. */
   newLimit?: number;
-  /** Maximale Gesamtzahl der Karten in der Queue. */
+  /** Maximum total number of cards in the queue. */
   maxCards?: number;
-  /** Auf bestimmte Kartentypen einschränken (für Modus-spezifische Queues). */
+  /** Restrict to certain card kinds (for mode-specific queues). */
   kinds?: CardKind[];
 }
 
@@ -32,9 +32,9 @@ function isNew(card: SrsCard): boolean {
 }
 
 /**
- * Deterministisches Interleaving: gruppiert nach Kind und entnimmt
- * reihum je ein Element (Round-Robin), sodass keine zwei gleichen Kinds
- * unnötig aufeinanderfolgen.
+ * Deterministic interleaving: groups by kind and takes one element from
+ * each group in turn (round-robin), so that no two cards of the same kind
+ * follow each other unnecessarily.
  */
 function interleaveByKind(cards: SrsCard[]): SrsCard[] {
   const groups = new Map<CardKind, SrsCard[]>();
@@ -59,8 +59,8 @@ function interleaveByKind(cards: SrsCard[]): SrsCard[] {
 }
 
 /**
- * Baut die Lern-Queue: fällige Wiederholungen + begrenzt neue Karten,
- * interleaved und mit Alt-vor-Neu-Tendenz (fällige zuerst eingestreut).
+ * Builds the study queue: due reviews + a limited number of new cards,
+ * interleaved and biased old-before-new (due cards interspersed first).
  */
 export function buildQueue(cards: SrsCard[], options: QueueOptions = {}): SrsCard[] {
   const now = options.now ?? new Date();
@@ -72,7 +72,7 @@ export function buildQueue(cards: SrsCard[], options: QueueOptions = {}): SrsCar
 
   const dueReviews = pool
     .filter((c) => !isNew(c) && isDue(c, now))
-    // Leeches und am stärksten überfällige zuerst.
+    // Leeches and the most overdue first.
     .sort((a, b) => {
       if (a.leech !== b.leech) return a.leech ? -1 : 1;
       return new Date(a.due).getTime() - new Date(b.due).getTime();
@@ -83,7 +83,7 @@ export function buildQueue(cards: SrsCard[], options: QueueOptions = {}): SrsCar
   const interleavedReviews = interleaveByKind(dueReviews);
   const interleavedNew = interleaveByKind(newCards);
 
-  // Alt+Neu mischen: neue Karten gleichmäßig zwischen die Wiederholungen streuen.
+  // Mix old+new: spread new cards evenly between the reviews.
   const merged: SrsCard[] = [];
   const total = interleavedReviews.length + interleavedNew.length;
   const ratio = interleavedNew.length > 0 ? total / interleavedNew.length : Infinity;

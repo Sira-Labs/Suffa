@@ -8,7 +8,7 @@ const STATUS_META: Record<string, { label: string; color: string }> = {
   disabled: { label: 'Nur lokal', color: 'var(--text-muted)' },
 };
 
-/** Sichtbarer Sync-Status inkl. Anzahl ausstehender Änderungen. */
+/** Visible sync status including the number of pending changes. */
 export function SyncBadge() {
   const status = useSyncStore((s) => s.status);
   const pending = useSyncStore((s) => s.pending);

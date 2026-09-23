@@ -1,16 +1,16 @@
 /**
- * Spracherkennung (SpeechRecognition, ar-SA) für Aussprache-Scoring.
+ * Speech recognition (SpeechRecognition, ar-SA) for pronunciation scoring.
  *
- * Die Web Speech Recognition API ist nicht überall verfügbar (v. a. Firefox).
- * Daher: Feature-Detection + Graceful Fallback. Das Scoring vergleicht das
- * Erkannte tashkil-tolerant mit dem Ziel und gibt eine grobe Ähnlichkeit zurück.
+ * The Web Speech Recognition API is not available everywhere (notably Firefox).
+ * Hence: feature detection + graceful fallback. Scoring compares the recognised
+ * text tashkil-tolerantly with the target and returns a rough similarity.
  */
 import { logger } from '@/services/logger';
 import { normalizeArabic } from '@/services/srs/tashkil';
 
 const log = logger.child('speech:recognition');
 
-// Minimaltyp für die (nicht-standardisierte) SpeechRecognition-API.
+// Minimal type for the (non-standard) SpeechRecognition API.
 interface SpeechRecognitionLike {
   lang: string;
   interimResults: boolean;
@@ -41,13 +41,13 @@ export function isRecognitionSupported(): boolean {
 export interface RecognitionResult {
   transcript: string;
   confidence: number;
-  /** 0..1 Ähnlichkeit zum Zielwort (tashkil-tolerant). */
+  /** 0..1 similarity to the target word (tashkil-tolerant). */
   similarity: number;
 }
 
 /**
- * Levenshtein-basierte Ähnlichkeit auf normalisierten arabischen Strings.
- * Exportiert, damit das Scoring auch ohne Mikrofon (z. B. in Tests) prüfbar ist.
+ * Levenshtein-based similarity on normalised Arabic strings.
+ * Exported so scoring can be checked without a microphone (e.g. in tests).
  */
 export function pronunciationSimilarity(spoken: string, target: string): number {
   const a = normalizeArabic(spoken);
@@ -120,15 +120,15 @@ export interface RecognizeOptions {
 }
 
 /**
- * Startet eine einmalige Erkennung. Resolved immer – mit dem Ergebnis oder mit dem
- * Grund, warum es keins gibt (nie hängend: Timeout als Sicherheitsnetz).
- * Muss direkt aus einem Tipp/Klick heraus aufgerufen werden (iOS verlangt die Geste).
+ * Starts a one-shot recognition. Always resolves, with the result or with the
+ * reason there is none (never hangs: timeout as a safety net).
+ * Must be called directly from a tap/click (iOS requires the gesture).
  */
 export function recognizeOnce(options: RecognizeOptions): Promise<RecognitionOutcome> {
   const w = typeof window === 'undefined' ? undefined : (window as RecognitionWindow);
   const Ctor = w?.SpeechRecognition ?? w?.webkitSpeechRecognition;
   if (!Ctor) {
-    log.warn('SpeechRecognition nicht unterstützt');
+    log.warn('SpeechRecognition not supported');
     return Promise.resolve({ ok: false, reason: 'unsupported' });
   }
 
@@ -147,7 +147,7 @@ export function recognizeOnce(options: RecognizeOptions): Promise<RecognitionOut
     try {
       recognition = new Ctor();
     } catch (cause) {
-      log.warn('SpeechRecognition konnte nicht erstellt werden', {
+      log.warn('SpeechRecognition could not be created', {
         cause: String(cause),
       });
       settle({ ok: false, reason: 'unsupported' });
@@ -175,13 +175,13 @@ export function recognizeOnce(options: RecognizeOptions): Promise<RecognitionOut
     };
     recognition.onerror = (event) => {
       const reason = classifyRecognitionError(event.error);
-      log.warn('Recognition-Fehler', { code: event.error, reason });
+      log.warn('Recognition error', { code: event.error, reason });
       settle({ ok: false, reason });
     };
     recognition.onend = () => settle({ ok: false, reason: 'no-speech' });
 
     timeout.id = setTimeout(() => {
-      log.warn('Recognition-Timeout');
+      log.warn('Recognition timeout');
       try {
         recognition.stop();
       } catch {
@@ -194,7 +194,7 @@ export function recognizeOnce(options: RecognizeOptions): Promise<RecognitionOut
       recognition.start();
     } catch (cause) {
       // e.g. InvalidStateError when a previous session is still running.
-      log.warn('Recognition-Start fehlgeschlagen', { cause: String(cause) });
+      log.warn('Recognition start failed', { cause: String(cause) });
       settle({ ok: false, reason: 'error' });
     }
   });

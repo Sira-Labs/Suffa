@@ -1,7 +1,7 @@
 /**
- * Einstellungs-Store. Lerndaten (auch Settings) leben in IndexedDB; dieser
- * Store hält den reaktiven Spiegel für die UI und persistiert Änderungen über
- * das Repo (das wiederum die Outbox füllt → Sync).
+ * Settings store. Learning data (settings included) lives in IndexedDB; this
+ * store holds the reactive mirror for the UI and persists changes via the
+ * repo (which in turn fills the outbox → sync).
  */
 import { create } from 'zustand';
 import type { SettingsRecord, TashkilLevel } from '@/types';
@@ -40,7 +40,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
 }));
 
-/** Spiegelt Theme & Schriftgröße ins <html>-Element (für CSS-Variablen). */
+/** Mirrors theme & font size onto the <html> element (for CSS variables). */
 export function applyDocumentSettings(settings: SettingsRecord): void {
   if (typeof document === 'undefined') return;
   document.documentElement.dataset.theme = settings.theme;

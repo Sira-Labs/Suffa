@@ -1,7 +1,7 @@
 /**
- * Store für nutzererstellte Inhalte (eigene Vokabeln). Diese werden – anders als
- * die statischen Lehrinhalte – synchronisiert. Nach dem Hinzufügen werden auch
- * die zugehörigen SRS-Karten erzeugt (über srsStore.ensureSeedCards).
+ * Store for user-created content (own vocabulary). Unlike the static teaching
+ * content, it is synced. After adding, the corresponding SRS cards are
+ * created as well (via srsStore.ensureSeedCards).
  */
 import { create } from 'zustand';
 import type { UserVocab } from '@/types';

@@ -1,13 +1,13 @@
 /**
- * SyncProvider-Interface (Dependency Injection).
+ * SyncProvider interface (dependency injection).
  *
- * Das Backend ist hinter dieser Schnittstelle gekapselt, damit es austauschbar
- * bleibt (Supabase heute, z. B. PocketBase/Self-Hosting für Datenhoheit später).
- * Konkrete Implementierungen: SupabaseSyncProvider, NoopSyncProvider.
+ * The backend is encapsulated behind this interface so it stays replaceable
+ * (Supabase today, e.g. PocketBase/self-hosting for data sovereignty later).
+ * Concrete implementations: SupabaseSyncProvider, NoopSyncProvider.
  */
 import type { SyncTable } from '@/types';
 
-/** Minimaler Datensatz, wie ihn der Provider transportiert. */
+/** Minimal record as transported by the provider. */
 export interface SyncableRecord {
   id: string;
   updated_at: string;
@@ -31,26 +31,26 @@ export interface SyncProviderError {
   message: string;
 }
 
-/** Ergebnis-Typ ohne Exceptions für erwartbare Fehlerpfade. */
+/** Result type without exceptions for expected error paths. */
 export type Result<T> = { ok: true; value: T } | { ok: false; error: SyncProviderError };
 
 export interface SyncProvider {
-  /** Eindeutiger Name (für UI/Logging). */
+  /** Unique name (for UI/logging). */
   readonly name: string;
 
-  /** Ist überhaupt ein echtes Backend konfiguriert? */
+  /** Is a real backend configured at all? */
   isConfigured(): boolean;
 
   getAuthState(): AuthState;
   onAuthChange(listener: AuthListener): () => void;
 
-  /** Magic-Link-Login per E-Mail anstoßen. */
+  /** Trigger a magic-link login via email. */
   signInWithEmail(email: string): Promise<Result<void>>;
   signOut(): Promise<Result<void>>;
 
-  /** Geänderte Datensätze einer Tabelle hochladen (Upsert). */
+  /** Upload a table's changed records (upsert). */
   push(table: SyncTable, records: SyncableRecord[]): Promise<Result<void>>;
 
-  /** Datensätze abrufen, die nach `since` (ISO) geändert wurden. */
+  /** Fetch records changed after `since` (ISO). */
   pull(table: SyncTable, since: string | null): Promise<Result<SyncableRecord[]>>;
 }

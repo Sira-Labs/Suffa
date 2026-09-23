@@ -1,7 +1,7 @@
 /**
- * Auflösung einer SRS-Karte auf ihren statischen (oder nutzererstellten) Inhalt.
- * Liefert ein einheitliches „Prompt/Answer“-Paar je nach CardKind – die Basis
- * für alle Recall-Module und Prüfungsformate.
+ * Resolves an SRS card to its static (or user-created) content.
+ * Returns a uniform prompt/answer pair per CardKind, the basis for all
+ * recall modules and exam formats.
  */
 import type {
   CardKind,
@@ -16,16 +16,16 @@ import { content } from '@/content';
 export interface ResolvedCard {
   contentRef: string;
   kind: CardKind;
-  /** Was dem Lerner gezeigt wird. */
+  /** What the learner is shown. */
   prompt: string;
   promptIsArabic: boolean;
-  /** Was produziert/erinnert werden soll. */
+  /** What should be produced/recalled. */
   answer: string;
   answerIsArabic: boolean;
-  /** Zusätzliche Lernhilfe (Wurzel, Wazn, Hinweis, Begründung). */
+  /** Additional learning aid (root, wazn, hint, explanation). */
   hint?: string;
   transliteration?: string;
-  /** Volltext-Arabisch zum Vorlesen (TTS), falls vorhanden. */
+  /** Full Arabic text to read aloud (TTS), if available. */
   speakable?: string;
 }
 

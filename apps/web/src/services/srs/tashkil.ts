@@ -1,30 +1,30 @@
 /**
- * Tashkīl-tolerante Verarbeitung arabischer Eingaben.
+ * Tashkīl-tolerant processing of Arabic input.
  *
- * Beim Active Recall soll der Lerner nicht an fehlenden Harakāt scheitern:
- * „سكن“ wird als korrekt akzeptiert, auch wenn das Ziel „سَكَنَ“ voll vokalisiert ist.
- * Gleichzeitig liefern wir ein Diff für spezifisches Feedback.
+ * In active recall the learner should not fail because of missing harakāt:
+ * "سكن" is accepted as correct even if the target "سَكَنَ" is fully vocalised.
+ * We also provide a diff for specific feedback.
  */
 
-// Arabische diakritische Zeichen (Harakāt, Shadda, Sukūn, Tanwīn, Dagger-Alif …)
+// Arabic diacritics (harakāt, shadda, sukūn, tanwīn, dagger alif …)
 const TASHKIL = /[ؐ-ًؚ-ٰٟۖ-ۭ]/g;
 const TATWEEL = /ـ/g;
 
-/** Entfernt alle Tashkīl-Zeichen und Tatwīl. */
+/** Removes all tashkīl marks and tatwīl. */
 export function stripTashkil(input: string): string {
   return input.replace(TASHKIL, '').replace(TATWEEL, '');
 }
 
 /**
- * Normalisiert arabischen Text für den toleranten Vergleich:
- * - entfernt Tashkīl & Tatwīl
- * - vereinheitlicht Alif-Varianten (أ إ آ ٱ → ا)
- * - vereinheitlicht Yāʾ/Alif-maqsūra (ى → ي) und Tāʾ marbūṭa (ة → ه)
- * - kollabiert Whitespace
+ * Normalises Arabic text for tolerant comparison:
+ * - removes tashkīl & tatwīl
+ * - unifies alif variants (أ إ آ ٱ → ا)
+ * - unifies yāʾ/alif maqsūra (ى → ي) and tāʾ marbūṭa (ة → ه)
+ * - collapses whitespace
  */
 export function normalizeArabic(input: string): string {
   return stripTashkil(input)
-    .replace(/[أإآٱ]/g, 'ا') // Hamza-Alif-Varianten → ا
+    .replace(/[أإآٱ]/g, 'ا') // hamza alif variants → ا
     .replace(/ى/g, 'ي') // ى → ي
     .replace(/ة/g, 'ه') // ة → ه
     .replace(/‌|‍|‎|‏/g, '') // Zero-width/Direction marks
@@ -35,10 +35,10 @@ export function normalizeArabic(input: string): string {
 export type AnswerVerdict = 'exact' | 'tashkil-tolerant' | 'wrong';
 
 /**
- * Vergleicht eine Lerner-Eingabe mit dem Ziel.
- * - 'exact': identisch inkl. Tashkīl
- * - 'tashkil-tolerant': gleicher Konsonant-Skelett, aber Harakāt weichen ab
- * - 'wrong': inhaltlich falsch
+ * Compares a learner's input with the target.
+ * - 'exact': identical including tashkīl
+ * - 'tashkil-tolerant': same consonant skeleton, but harakāt differ
+ * - 'wrong': incorrect
  */
 export function gradeAnswer(input: string, target: string): AnswerVerdict {
   if (input.normalize('NFC').trim() === target.normalize('NFC').trim()) {
@@ -59,8 +59,8 @@ export interface DiffSegment {
 }
 
 /**
- * Einfaches zeichenweises Diff (LCS) für spezifisches Schreib-Feedback.
- * `removed` = im Ziel, aber nicht eingegeben; `added` = eingegeben, aber falsch.
+ * Simple character-level diff (LCS) for specific spelling feedback.
+ * `removed` = in the target but not typed; `added` = typed but wrong.
  */
 export function diffArabic(input: string, target: string): DiffSegment[] {
   const a = Array.from(input);

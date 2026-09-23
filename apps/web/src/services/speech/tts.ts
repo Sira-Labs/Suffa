@@ -1,9 +1,9 @@
 /**
- * Text-to-Speech über die Web Speech API (SpeechSynthesis).
+ * Text-to-speech via the Web Speech API (SpeechSynthesis).
  *
- * Graceful Fallback: ist keine Synthese oder keine arabische Stimme verfügbar,
- * melden die Funktionen das, statt zu werfen. Die UI kann dann z. B. den
- * Sprechen-Button deaktivieren oder einen Hinweis zeigen.
+ * Graceful fallback: if no synthesis or no Arabic voice is available, the
+ * functions report that instead of throwing. The UI can then e.g. disable
+ * the speak button or show a hint.
  */
 import { logger } from '@/services/logger';
 
@@ -28,7 +28,7 @@ export interface SpeakOptions {
 
 export function speakArabic(text: string, options: SpeakOptions = {}): boolean {
   if (!isTtsSupported()) {
-    log.warn('TTS nicht unterstützt');
+    log.warn('TTS not supported');
     return false;
   }
   const synth = window.speechSynthesis;

@@ -8,20 +8,20 @@ import { logger } from './services/logger';
 
 const log = logger.child('pwa');
 
-// Service Worker registrieren (offline-first). Auto-Update bei neuer Version.
+// Register the service worker (offline-first). Auto-update on a new version.
 registerSW({
   immediate: true,
   onOfflineReady() {
-    log.info('App ist offline einsatzbereit');
+    log.info('App is ready for offline use');
   },
   onNeedRefresh() {
-    log.info('Neue Version verfügbar – beim nächsten Start aktiv');
+    log.info('New version available – active on next launch');
   },
 });
 
 const rootEl = document.getElementById('root');
 if (!rootEl) {
-  throw new Error('Root-Element #root nicht gefunden.');
+  throw new Error('Root element #root not found.');
 }
 
 createRoot(rootEl).render(
@@ -30,5 +30,5 @@ createRoot(rootEl).render(
   </StrictMode>
 );
 
-// Nach dem ersten Render, damit der Start nie auf das Netzwerk wartet.
+// After the first render, so startup never waits for the network.
 void initErrorTracking();

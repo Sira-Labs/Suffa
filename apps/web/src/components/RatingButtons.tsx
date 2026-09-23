@@ -24,7 +24,7 @@ function intervalLabel(days: number): string {
   return months <= 1 ? '~1 Monat' : `~${months} Monate`;
 }
 
-/** SM-2-Bewertung mit Intervall-Vorschau pro Button. */
+/** SM-2 rating with an interval preview per button. */
 export function RatingButtons({ card, onRate, disabled }: RatingButtonsProps) {
   const preview = previewIntervals(card);
   return (

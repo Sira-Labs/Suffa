@@ -9,7 +9,7 @@ const LABELS: Record<TashkilLevel, string> = {
 
 const ORDER: TashkilLevel[] = ['full', 'partial', 'none'];
 
-/** Schalter für die Tashkīl-Stufe (voll → teilweise → ohne). */
+/** Toggle for the tashkīl level (full → partial → none). */
 export function TashkilToggle() {
   const level = useSettingsStore((s) => s.settings.tashkilLevel);
   const setLevel = useSettingsStore((s) => s.setTashkilLevel);

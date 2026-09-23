@@ -37,14 +37,14 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // App-Shell + statische Assets vollständig vorab cachen → offline lauffähig.
+        // Fully precache the app shell + static assets → works offline.
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
-        // Fehler-Tracking wird nur online und nur bei gesetztem DSN geladen: nicht vorab cachen.
+        // Error tracking is only loaded online and only with a DSN set: do not precache.
         globIgnores: ['**/sentry-*.js'],
         navigateFallback: 'index.html',
         runtimeCaching: [
           {
-            // YouTube/externe Audio-Streams: nur online, niemals als App-Shell behandeln.
+            // YouTube/external audio streams: online only, never treat as app shell.
             urlPattern: /^https:\/\/(www\.youtube\.com|i\.ytimg\.com|archive\.org)\/.*/i,
             handler: 'NetworkOnly',
           },
@@ -63,14 +63,14 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Schwergewichtige Bibliotheken in eigene Chunks (besseres Caching).
+        // Heavyweight libraries in their own chunks (better caching).
         manualChunks: {
           react: ['react', 'react-dom', 'react-router-dom'],
           charts: ['recharts'],
           supabase: ['@supabase/supabase-js'],
           db: ['dexie'],
-          // Der Wrapper muss mit in den Chunk, sonst landet er im Haupt-Bundle und zieht
-          // Sentry statisch nach (modulepreload für alle, auch ohne Fehler-Tracking).
+          // The wrapper must go into the chunk too, otherwise it lands in the main bundle and
+          // pulls Sentry in statically (modulepreload for everyone, even without error tracking).
           sentry: [
             '@sentry/browser',
             fileURLToPath(new URL('./src/services/sentryClient.ts', import.meta.url)),

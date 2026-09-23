@@ -9,7 +9,7 @@ interface FeedbackProps {
   /** Translations: further correct meanings the learner did not type. */
   alsoCorrect?: string[];
   diff?: DiffSegment[];
-  /** Didaktische Begründung / Hinweis (sofortiges, spezifisches Feedback). */
+  /** Didactic explanation / hint (immediate, specific feedback). */
   explanation?: string;
 }
 
@@ -24,7 +24,7 @@ const VERDICT_TEXT: Record<RecallVerdict, { label: string; cls: string }> = {
   wrong: { label: '✗ Noch nicht richtig', cls: 'feedback-bad' },
 };
 
-/** Sofortiges, spezifisches Feedback mit optionalem Zeichen-Diff und Begründung. */
+/** Immediate, specific feedback with optional character diff and explanation. */
 export function Feedback({
   verdict,
   expected,

@@ -1,11 +1,11 @@
 /**
- * Repository-Schicht über Dexie. Jeder Schreibzugriff:
- *   1. setzt `updated_at` (für Last-Write-Wins),
- *   2. schreibt den Datensatz lokal,
- *   3. legt einen Outbox-Eintrag an (persistente Mutation-Queue für den Sync).
+ * Repository layer on top of Dexie. Every write:
+ *   1. sets `updated_at` (for last-write-wins),
+ *   2. writes the record locally,
+ *   3. creates an outbox entry (persistent mutation queue for sync).
  *
- * Dadurch ist die UI offline voll funktionsfähig und jede Änderung wird
- * garantiert irgendwann synchronisiert.
+ * This keeps the UI fully functional offline, and every change is
+ * guaranteed to be synced eventually.
  */
 import { v4 as uuid } from 'uuid';
 import type {
@@ -34,7 +34,7 @@ function stamp<T extends { updated_at: string }>(record: T): T {
   return { ...record, updated_at: new Date().toISOString() };
 }
 
-/* ----------------------------- SRS-Karten ----------------------------- */
+/* ----------------------------- SRS cards ----------------------------- */
 
 export const cardRepo = {
   async all(database: AppDatabase = db): Promise<SrsCard[]> {
@@ -61,7 +61,7 @@ export const cardRepo = {
   },
 };
 
-/* ----------------------------- Review-Logs ----------------------------- */
+/* ----------------------------- Review logs ----------------------------- */
 
 export const reviewLogRepo = {
   async all(database: AppDatabase = db): Promise<ReviewLog[]> {
@@ -85,7 +85,7 @@ export const reviewLogRepo = {
   },
 };
 
-/* ----------------------------- Prüfungsergebnisse ----------------------------- */
+/* ----------------------------- Exam results ----------------------------- */
 
 export const examRepo = {
   async all(database: AppDatabase = db): Promise<ExamResult[]> {
@@ -109,7 +109,7 @@ export const examRepo = {
   },
 };
 
-/* ----------------------------- Einstellungen ----------------------------- */
+/* ----------------------------- Settings ----------------------------- */
 
 export const SETTINGS_ID = 'user-settings';
 
@@ -144,7 +144,7 @@ export const settingsRepo = {
   },
 };
 
-/* ----------------------------- Eigene Vokabeln ----------------------------- */
+/* ----------------------------- User vocabulary ----------------------------- */
 
 export const userVocabRepo = {
   async all(database: AppDatabase = db): Promise<UserVocab[]> {

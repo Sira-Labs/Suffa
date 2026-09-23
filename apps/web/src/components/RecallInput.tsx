@@ -7,14 +7,14 @@ interface RecallInputProps {
   onSubmit(): void;
   placeholder?: string;
   disabled?: boolean;
-  /** Eingabe als arabischer Text (RTL + Bildschirmtastatur anbieten). */
+  /** Input is Arabic text (RTL + offer the on-screen keyboard). */
   arabic?: boolean;
   autoFocus?: boolean;
 }
 
 /**
- * Eingabefeld für Active Recall. Bei `arabic` wird RTL gesetzt und eine
- * einblendbare arabische Bildschirmtastatur (inkl. Harakāt) angeboten.
+ * Input field for active recall. With `arabic`, RTL is set and a toggleable
+ * Arabic on-screen keyboard (including harakāt) is offered.
  */
 export function RecallInput({
   value,

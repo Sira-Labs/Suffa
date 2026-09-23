@@ -383,7 +383,7 @@ function ExamResultView({
       startedAt: now,
       finishedAt: now,
     });
-    // Schwierige Items → SRS: zugehörige Karte sofort fällig + als Leech markieren.
+    // Difficult items → SRS: make the matching card due immediately and mark it as a leech.
     for (const item of wrong) {
       const kind =
         item.format === 'plural'

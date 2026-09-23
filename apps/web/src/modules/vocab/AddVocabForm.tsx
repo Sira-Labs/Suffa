@@ -28,8 +28,8 @@ const EMPTY: FormState = {
 };
 
 /**
- * „Inhalt hinzufügen“-Formular für eigene Vokabeln. Validiert die Pflichtfelder
- * und legt nach dem Speichern automatisch die SRS-Karten an.
+ * "Add content" form for custom vocabulary. Validates the required fields
+ * and automatically creates the SRS cards after saving.
  */
 export function AddVocabForm({ onDone }: AddVocabFormProps) {
   const add = useContentStore((s) => s.add);

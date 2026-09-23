@@ -19,8 +19,8 @@ const NAV = [
 ];
 
 /**
- * App-Shell: lädt alle lokalen Stores (offline-first) und initialisiert den Sync.
- * Erst nach dem Laden wird die Oberfläche gerendert.
+ * App shell: loads all local stores (offline-first) and initialises sync.
+ * The UI is rendered only after loading.
  */
 export function App() {
   const [ready, setReady] = useState(false);
@@ -32,15 +32,15 @@ export function App() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      // Reihenfolge: eigene Inhalte vor SRS (Karten-Seeding braucht User-Vokabeln).
+      // Order: custom content before SRS (card seeding needs the user's vocabulary).
       await loadSettings();
       await loadContent();
       await loadSrs();
       initSync();
       if (!cancelled) setReady(true);
     })().catch((error) => {
-      // Spezifische Fehlermeldung statt stiller Blockade; `error` geht ans Fehler-Tracking.
-      logger.error('App-Initialisierung fehlgeschlagen', {
+      // Specific error message instead of a silent hang; `error` goes to error tracking.
+      logger.error('App initialisation failed', {
         message: error instanceof Error ? error.message : String(error),
       });
       if (!cancelled) setReady(true);

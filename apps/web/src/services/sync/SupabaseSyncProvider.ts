@@ -1,14 +1,14 @@
 /**
- * SupabaseSyncProvider – konkrete Sync-Implementierung gegen Supabase.
+ * SupabaseSyncProvider – concrete sync implementation against Supabase.
  *
- * - Auth: Magic-Link (OTP per E-Mail), kein Passwort.
- * - Datenzugriff: pro Tabelle Upsert (push) und „updated_at > since“-Pull.
- * - Sicherheit: Row-Level-Security im Backend (user_id = auth.uid()); der Client
- *   sendet absichtlich KEIN user_id-Feld in den Lerndaten – Supabase setzt es per
- *   DEFAULT auth.uid() bzw. die RLS-Policy erzwingt es (siehe supabase/policies.sql).
+ * - Auth: magic link (OTP via email), no password.
+ * - Data access: per-table upsert (push) and "updated_at > since" pull.
+ * - Security: row-level security in the backend (user_id = auth.uid()); the client
+ *   deliberately sends NO user_id field in the learning data – Supabase sets it via
+ *   DEFAULT auth.uid() and the RLS policy enforces it (see supabase/policies.sql).
  *
- * Fehler werden spezifisch als Result zurückgegeben (kein blindes catch-all);
- * unerwartete Ausnahmen werden geloggt und in einen typisierten Fehler übersetzt.
+ * Errors are returned specifically as a Result (no blind catch-all);
+ * unexpected exceptions are logged and translated into a typed error.
  */
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js';
 import type { SyncTable } from '@/types';
@@ -31,7 +31,7 @@ function toAuthState(user: User | null): AuthState {
 export interface SupabaseConfig {
   url: string;
   anonKey: string;
-  /** Wohin der Magic-Link zurückführt (Standard: aktuelle Origin). */
+  /** Where the magic link leads back to (default: current origin). */
   redirectTo?: string;
 }
 
@@ -42,7 +42,7 @@ export class SupabaseSyncProvider implements SyncProvider {
 
   constructor(config: SupabaseConfig) {
     if (!config.url || !config.anonKey) {
-      throw new Error('SupabaseSyncProvider benötigt url und anonKey.');
+      throw new Error('SupabaseSyncProvider requires url and anonKey.');
     }
     this.client = createClient(config.url, config.anonKey, {
       auth: { persistSession: true, autoRefreshToken: true },
@@ -57,7 +57,7 @@ export class SupabaseSyncProvider implements SyncProvider {
   private lastKnownUser: User | null = null;
 
   getAuthState(): AuthState {
-    // Synchroner Zugriff auf den zuletzt bekannten User (aus onAuthChange/getSession).
+    // Synchronous access to the last known user (from onAuthChange/getSession).
     return toAuthState(this.lastKnownUser);
   }
 
@@ -66,7 +66,7 @@ export class SupabaseSyncProvider implements SyncProvider {
       this.lastKnownUser = session?.user ?? null;
       listener(toAuthState(this.lastKnownUser));
     });
-    // Initialen Zustand nachreichen.
+    // Deliver the initial state as well.
     void this.client.auth.getSession().then(({ data: sessionData }) => {
       this.lastKnownUser = sessionData.session?.user ?? null;
       listener(toAuthState(this.lastKnownUser));
@@ -87,7 +87,7 @@ export class SupabaseSyncProvider implements SyncProvider {
       options: this.redirectTo ? { emailRedirectTo: this.redirectTo } : undefined,
     });
     if (error) {
-      log.warn('signInWithOtp fehlgeschlagen', { message: error.message });
+      log.warn('signInWithOtp failed', { message: error.message });
       return { ok: false, error: { code: 'auth-failed', message: error.message } };
     }
     return { ok: true, value: undefined };
@@ -110,20 +110,20 @@ export class SupabaseSyncProvider implements SyncProvider {
         ok: false,
         error: {
           code: 'not-authenticated',
-          message: 'Kein angemeldeter Nutzer für Push.',
+          message: 'No signed-in user for push.',
         },
       };
     }
-    // user_id mitsenden: Karten-IDs sind pro Nutzer deterministisch (z. B.
-    // "vocab_ar_de:v-ism") und damit nur in Kombination mit user_id eindeutig.
-    // Der Conflict-Key ist deshalb (user_id, id). RLS prüft zusätzlich user_id.
+    // Send user_id along: card IDs are deterministic per user (e.g.
+    // "vocab_ar_de:v-ism") and thus only unique in combination with user_id.
+    // The conflict key is therefore (user_id, id). RLS additionally checks user_id.
     const stamped = records.map((r) => ({ ...r, user_id: userId }));
     try {
       const { error } = await this.client.from(table).upsert(stamped, {
         onConflict: 'user_id,id',
       });
       if (error) {
-        log.warn('push fehlgeschlagen', {
+        log.warn('push failed', {
           table,
           code: error.code,
           message: error.message,
@@ -135,8 +135,8 @@ export class SupabaseSyncProvider implements SyncProvider {
       }
       return { ok: true, value: undefined };
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'Unbekannter Push-Fehler';
-      log.error('push-Ausnahme', { table, message });
+      const message = cause instanceof Error ? cause.message : 'Unknown push error';
+      log.error('push exception', { table, message });
       return { ok: false, error: { code: 'push-exception', message } };
     }
   }
@@ -149,7 +149,7 @@ export class SupabaseSyncProvider implements SyncProvider {
       }
       const { data, error } = await query;
       if (error) {
-        log.warn('pull fehlgeschlagen', {
+        log.warn('pull failed', {
           table,
           code: error.code,
           message: error.message,
@@ -161,8 +161,8 @@ export class SupabaseSyncProvider implements SyncProvider {
       }
       return { ok: true, value: (data ?? []) as SyncableRecord[] };
     } catch (cause) {
-      const message = cause instanceof Error ? cause.message : 'Unbekannter Pull-Fehler';
-      log.error('pull-Ausnahme', { table, message });
+      const message = cause instanceof Error ? cause.message : 'Unknown pull error';
+      log.error('pull exception', { table, message });
       return { ok: false, error: { code: 'pull-exception', message } };
     }
   }

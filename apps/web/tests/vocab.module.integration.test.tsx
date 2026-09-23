@@ -7,8 +7,8 @@ import { db } from '@/services/storage';
 import { resolveCard } from '@/services/srs';
 
 /**
- * Integrationstest eines Lernmoduls: lädt die echten Stores (gegen fake-indexeddb)
- * und durchläuft den Active-Recall-Flow im Vokabeltrainer Ende-zu-Ende.
+ * Integration test of a learning module: loads the real stores (against fake-indexeddb)
+ * and runs the active recall flow in the vocabulary trainer end to end.
  */
 async function bootStores() {
   await useSettingsStore.getState().load();
@@ -21,8 +21,8 @@ beforeEach(async () => {
   await db.open();
 });
 
-describe('Vokabeltrainer (Integration)', () => {
-  it('seedet Karten aus dem Content und stellt eine Recall-Frage', async () => {
+describe('Vocabulary trainer (integration)', () => {
+  it('seeds cards from the content and asks a recall question', async () => {
     await bootStores();
     const cards = await db.srs_cards.toArray();
     expect(cards.length).toBeGreaterThan(0);
@@ -31,11 +31,11 @@ describe('Vokabeltrainer (Integration)', () => {
     expect(
       await screen.findByRole('heading', { name: 'Test AR→DE' })
     ).toBeInTheDocument();
-    // Es gibt ein Eingabefeld für die produktive Antwort (Active Recall).
+    // There is an input field for the productive answer (active recall).
     expect(screen.getByLabelText('Antwort eingeben')).toBeInTheDocument();
   });
 
-  it('akzeptiert die korrekte Antwort und zeigt Bewertungsknöpfe', async () => {
+  it('accepts the correct answer and shows rating buttons', async () => {
     await bootStores();
     const user = userEvent.setup();
 
@@ -50,12 +50,12 @@ describe('Vokabeltrainer (Integration)', () => {
     await user.type(input, resolved.answer);
     await user.click(screen.getByRole('button', { name: 'Prüfen' }));
 
-    // Sofortiges Feedback erscheint und Karte kann bewertet werden.
+    // Immediate feedback appears and the card can be rated.
     await waitFor(() => expect(screen.getByText(/Richtig/)).toBeInTheDocument());
     expect(screen.getByRole('button', { name: /Gut/ })).toBeInTheDocument();
   });
 
-  it('schreibt nach der Bewertung ein Review-Log und füllt die Outbox', async () => {
+  it('writes a review log after rating and fills the outbox', async () => {
     await bootStores();
     const user = userEvent.setup();
 
@@ -72,11 +72,11 @@ describe('Vokabeltrainer (Integration)', () => {
     await waitFor(async () => {
       expect(await db.review_logs.count()).toBeGreaterThan(0);
     });
-    // Outbox enthält mindestens die Kartenaktualisierung + das Log.
+    // The outbox contains at least the card update + the log.
     expect(await db.outbox.count()).toBeGreaterThan(0);
   });
 
-  it('akzeptiert eine von mehreren Bedeutungen (بَلَد → „Ort“) und zeigt die übrigen', async () => {
+  it('accepts one of several meanings (بَلَد → "Ort") and shows the others', async () => {
     await bootStores();
     const user = userEvent.setup();
     const balad = useSrsStore

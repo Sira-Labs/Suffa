@@ -1,16 +1,18 @@
 # Documentation — Suffa (الصُّفَّة)
 
-| Document                                                     | Purpose                                                                |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| [spec/00-codebase-analysis.md](spec/00-codebase-analysis.md) | Baseline: what exists, strengths, gaps                                 |
-| [spec/01-product-spec.md](spec/01-product-spec.md)           | Name, vision, roles, features, NFRs                                    |
-| [spec/02-technical-spec.md](spec/02-technical-spec.md)       | Architecture, data model, API, LLM gateway, CapRover                   |
-| [plan/roadmap.md](plan/roadmap.md)                           | Phases, milestones, risks                                              |
-| [plan/sprint-plan.md](plan/sprint-plan.md)                   | Sprints S1–S16 with stories and acceptance criteria                    |
-| [plan/cost-plan.md](plan/cost-plan.md)                       | Infra + AI costs, scenarios, cost controls, build effort               |
-| [plan/engagement-plan.md](plan/engagement-plan.md)           | Daily/weekly achievements, notifications, teacher playbook, pilot plan |
-| [ops/caprover-deployment.md](ops/caprover-deployment.md)     | What to deploy on CapRover (same pattern as Tabayyun)                  |
-| [didaktik.md](didaktik.md)                                   | Pedagogical principles (existing)                                      |
+| Document                                                           | Purpose                                                                |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| [spec/00-codebase-analysis.md](spec/00-codebase-analysis.md)       | Baseline: what exists, strengths, gaps                                 |
+| [spec/01-product-spec.md](spec/01-product-spec.md)                 | Name, vision, roles, features, NFRs                                    |
+| [spec/02-technical-spec.md](spec/02-technical-spec.md)             | Architecture, data model, API, LLM gateway, CapRover                   |
+| [spec/03-learning-space-ideas.md](spec/03-learning-space-ideas.md) | Ideas for better learning and the learner space, prioritised           |
+| [plan/roadmap.md](plan/roadmap.md)                                 | Phases, milestones, risks                                              |
+| [plan/sprint-plan.md](plan/sprint-plan.md)                         | Sprints S1–S16 with stories and acceptance criteria                    |
+| [plan/cost-plan.md](plan/cost-plan.md)                             | Infra + AI costs, scenarios, cost controls, build effort               |
+| [plan/engagement-plan.md](plan/engagement-plan.md)                 | Daily/weekly achievements, notifications, teacher playbook, pilot plan |
+| [plan/content-plan.md](plan/content-plan.md)                       | Learning material: sources, licensing, model, pipeline, schedule       |
+| [ops/caprover-deployment.md](ops/caprover-deployment.md)           | What to deploy on CapRover (same pattern as Tabayyun)                  |
+| [didactics.md](didactics.md)                                       | Pedagogical principles (existing)                                      |
 
 ## Architecture Decision Records
 
@@ -38,3 +40,4 @@
 | [0020](adr/0020-postgres-job-queue.md)                            | Postgres job queue (pg-boss), no Redis                        | proposed                                   |
 | [0021](adr/0021-languages-ui-tutoring-meanings.md)                | Learner languages: UI, tutoring and meaning language          | proposed                                   |
 | [0022](adr/0022-pronunciation-assessment-arabic-speech-models.md) | Pronunciation assessment with Arabic speech models            | proposed                                   |
+| [0023](adr/0023-content-sources-licensing-and-packs.md)           | Content sources, licensing and content packs                  | proposed                                   |

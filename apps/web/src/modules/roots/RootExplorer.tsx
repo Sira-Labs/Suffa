@@ -4,9 +4,9 @@ import { wurzelFamilien } from '@/content';
 import { speakArabic } from '@/services/speech';
 
 /**
- * Wurzel-/Morphologie-Explorer – das Rückgrat der Retention.
- * Zeigt zu jeder Wurzel die vernetzten Ableitungen (Vokabeln + Verben)
- * und bietet die Übung „Gleiche Wurzel?“.
+ * Root/morphology explorer – the backbone of retention.
+ * Shows the linked derivations (vocabulary + verbs) for each root
+ * and offers the "Gleiche Wurzel?" (same root?) exercise.
  */
 export function RootExplorer() {
   const families = useMemo(
@@ -94,7 +94,7 @@ export function RootExplorer() {
   );
 }
 
-/** Übung „Gleiche Wurzel?“ – zwei Wörter, gleiche Wurzel oder nicht. */
+/** "Gleiche Wurzel?" exercise – two words, same root or not. */
 function SameRootDrill() {
   const allVocab = useMemo(
     () => [...wurzelFamilien.values()].flatMap((f) => f.vokabeln),
@@ -150,7 +150,7 @@ function SameRootDrill() {
 
 function makePair<T extends { wurzel: string }>(items: T[]): { a: T; b: T } {
   const a = items[Math.floor(Math.random() * items.length)]!;
-  // 50% gleiche Wurzel, falls möglich.
+  // 50% same root, if possible.
   const sameRoot = items.filter((i) => i.wurzel === a.wurzel && i !== a);
   const useSame = Math.random() < 0.5 && sameRoot.length > 0;
   const pool = useSame ? sameRoot : items.filter((i) => i.wurzel !== a.wurzel);

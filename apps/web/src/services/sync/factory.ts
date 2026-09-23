@@ -1,7 +1,7 @@
 /**
- * Provider-Factory: liest die Konfiguration aus den Vite-Env-Variablen und
- * entscheidet, ob ein echter Supabase-Provider oder der NoopSyncProvider
- * (reiner Offline-Betrieb) erstellt wird. Keine Secrets im Code – nur `.env`.
+ * Provider factory: reads the configuration from the Vite env variables and
+ * decides whether a real Supabase provider or the NoopSyncProvider
+ * (pure offline mode) is created. No secrets in code – only `.env`.
  */
 import { logger } from '@/services/logger';
 import { NoopSyncProvider } from './NoopSyncProvider';
@@ -16,12 +16,12 @@ export function createSyncProvider(): SyncProvider {
   const enabled = import.meta.env.VITE_SYNC_ENABLED !== 'false';
 
   if (!enabled) {
-    log.info('Sync per VITE_SYNC_ENABLED=false deaktiviert → Offline-Modus');
+    log.info('Sync disabled via VITE_SYNC_ENABLED=false → offline mode');
     return new NoopSyncProvider();
   }
 
   if (!url || !anonKey) {
-    log.info('Keine Supabase-Konfiguration gefunden → Offline-Modus (Noop)');
+    log.info('No Supabase configuration found → offline mode (noop)');
     return new NoopSyncProvider();
   }
 
@@ -32,8 +32,8 @@ export function createSyncProvider(): SyncProvider {
       redirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
     });
   } catch (cause) {
-    const message = cause instanceof Error ? cause.message : 'unbekannt';
-    log.error('Supabase-Provider-Initialisierung fehlgeschlagen → Offline-Modus', {
+    const message = cause instanceof Error ? cause.message : 'unknown';
+    log.error('Supabase provider initialization failed → offline mode', {
       message,
     });
     return new NoopSyncProvider();

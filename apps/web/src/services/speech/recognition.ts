@@ -77,64 +77,125 @@ function levenshtein(a: string, b: string): number {
   return dp[m]![n]!;
 }
 
+/** Why a recognition attempt produced no result (maps the Web Speech error codes). */
+export type RecognitionFailure =
+  | 'unsupported'
+  | 'not-allowed'
+  | 'service-not-allowed'
+  | 'language-not-supported'
+  | 'no-speech'
+  | 'audio-capture'
+  | 'network'
+  | 'timeout'
+  | 'error';
+
+export type RecognitionOutcome =
+  | { ok: true; result: RecognitionResult }
+  | { ok: false; reason: RecognitionFailure };
+
+/** Maps a Web Speech `error` code to a failure the UI can explain. */
+export function classifyRecognitionError(code: string): RecognitionFailure {
+  switch (code) {
+    case 'not-allowed':
+    case 'service-not-allowed':
+    case 'language-not-supported':
+    case 'no-speech':
+    case 'audio-capture':
+    case 'network':
+      return code;
+    case 'aborted':
+      return 'no-speech';
+    default:
+      return 'error';
+  }
+}
+
+/** Safety net: some mobile engines (notably iOS) never fire `end`. */
+export const RECOGNITION_TIMEOUT_MS = 10_000;
+
 export interface RecognizeOptions {
   target: string;
   lang?: string;
-  onError?: (code: string) => void;
+  timeoutMs?: number;
 }
 
 /**
- * Startet eine einmalige Erkennung. Resolved mit dem Ergebnis oder `null`,
- * wenn nicht unterstützt / kein Treffer.
+ * Startet eine einmalige Erkennung. Resolved immer – mit dem Ergebnis oder mit dem
+ * Grund, warum es keins gibt (nie hängend: Timeout als Sicherheitsnetz).
+ * Muss direkt aus einem Tipp/Klick heraus aufgerufen werden (iOS verlangt die Geste).
  */
-export function recognizeOnce(
-  options: RecognizeOptions
-): Promise<RecognitionResult | null> {
-  if (!isRecognitionSupported()) {
+export function recognizeOnce(options: RecognizeOptions): Promise<RecognitionOutcome> {
+  const w = typeof window === 'undefined' ? undefined : (window as RecognitionWindow);
+  const Ctor = w?.SpeechRecognition ?? w?.webkitSpeechRecognition;
+  if (!Ctor) {
     log.warn('SpeechRecognition nicht unterstützt');
-    options.onError?.('unsupported');
-    return Promise.resolve(null);
+    return Promise.resolve({ ok: false, reason: 'unsupported' });
   }
-  const w = window as RecognitionWindow;
-  const Ctor = w.SpeechRecognition ?? w.webkitSpeechRecognition;
-  if (!Ctor) return Promise.resolve(null);
 
   return new Promise((resolve) => {
-    const recognition = new Ctor();
+    let settled = false;
+    // Holder, because settle() may run before the timeout is scheduled.
+    const timeout: { id?: ReturnType<typeof setTimeout> } = {};
+    const settle = (outcome: RecognitionOutcome) => {
+      if (settled) return;
+      settled = true;
+      if (timeout.id) clearTimeout(timeout.id);
+      resolve(outcome);
+    };
+
+    let recognition: SpeechRecognitionLike;
+    try {
+      recognition = new Ctor();
+    } catch (cause) {
+      log.warn('SpeechRecognition konnte nicht erstellt werden', {
+        cause: String(cause),
+      });
+      settle({ ok: false, reason: 'unsupported' });
+      return;
+    }
     recognition.lang = options.lang ?? 'ar-SA';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognition.continuous = false;
 
-    let settled = false;
     recognition.onresult = (event) => {
       const first = event.results[0]?.[0];
-      if (!first) {
-        settled = true;
-        resolve(null);
+      if (!first || !first.transcript.trim()) {
+        settle({ ok: false, reason: 'no-speech' });
         return;
       }
-      settled = true;
-      resolve({
-        transcript: first.transcript,
-        confidence: first.confidence,
-        similarity: pronunciationSimilarity(first.transcript, options.target),
+      settle({
+        ok: true,
+        result: {
+          transcript: first.transcript,
+          confidence: first.confidence,
+          similarity: pronunciationSimilarity(first.transcript, options.target),
+        },
       });
     };
     recognition.onerror = (event) => {
-      log.warn('Recognition-Fehler', { code: event.error });
-      options.onError?.(event.error);
-      if (!settled) {
-        settled = true;
-        resolve(null);
-      }
+      const reason = classifyRecognitionError(event.error);
+      log.warn('Recognition-Fehler', { code: event.error, reason });
+      settle({ ok: false, reason });
     };
-    recognition.onend = () => {
-      if (!settled) {
-        settled = true;
-        resolve(null);
+    recognition.onend = () => settle({ ok: false, reason: 'no-speech' });
+
+    timeout.id = setTimeout(() => {
+      log.warn('Recognition-Timeout');
+      try {
+        recognition.stop();
+      } catch {
+        // Already stopped: nothing to clean up.
       }
-    };
-    recognition.start();
+      settle({ ok: false, reason: 'timeout' });
+    }, options.timeoutMs ?? RECOGNITION_TIMEOUT_MS);
+
+    try {
+      recognition.start();
+    } catch (cause) {
+      // e.g. InvalidStateError when a previous session is still running.
+      log.warn('Recognition-Start fehlgeschlagen', { cause: String(cause) });
+      settle({ ok: false, reason: 'error' });
+    }
   });
 }

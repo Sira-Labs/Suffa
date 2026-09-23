@@ -9,10 +9,13 @@ import {
 } from '@/services/speech';
 import {
   createRecorder,
+  EmptyRecordingError,
   isRecordingSupported,
   type ActiveRecorder,
 } from '@/services/audio';
+import { isIOS, isStandalonePwa } from '@/services/platform';
 import { MinimalPairDrill } from './MinimalPairDrill';
+import { recognitionHelp, recorderHelp, type HelpContext } from './speechHelp';
 
 type Tab = 'shadowing' | 'phonologie';
 
@@ -48,26 +51,42 @@ function Shadowing() {
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
   const [score, setScore] = useState<RecognitionResult | null>(null);
   const [scoring, setScoring] = useState(false);
+  const [recordHint, setRecordHint] = useState<string | null>(null);
+  const [scoreHint, setScoreHint] = useState<string | null>(null);
   const target = lines[i]!;
+  const help: HelpContext = { ios: isIOS(), standalone: isStandalonePwa() };
 
   const startRecording = async () => {
-    const rec = await createRecorder();
-    if (!rec) return;
-    setRecording(rec);
+    setRecordHint(null);
+    const started = await createRecorder();
+    if (!started.ok) {
+      setRecordHint(recorderHelp(started.reason, help));
+      return;
+    }
+    setRecording(started.recorder);
     setRecordedUrl(null);
   };
   const stopRecording = async () => {
     if (!recording) return;
-    const blob = await recording.stop();
-    setRecording(null);
-    setRecordedUrl(URL.createObjectURL(blob));
+    try {
+      const { blob } = await recording.stop();
+      setRecordedUrl(URL.createObjectURL(blob));
+    } catch (error) {
+      if (!(error instanceof EmptyRecordingError)) throw error;
+      setRecordHint(recorderHelp('empty', help));
+    } finally {
+      setRecording(null);
+    }
   };
 
   const scorePronunciation = async () => {
     setScoring(true);
     setScore(null);
-    const result = await recognizeOnce({ target: target.ar });
-    setScore(result);
+    setScoreHint(null);
+    // Called directly from the tap: iOS only allows recognition inside the user gesture.
+    const outcome = await recognizeOnce({ target: target.ar });
+    if (outcome.ok) setScore(outcome.result);
+    else setScoreHint(recognitionHelp(outcome.reason, help));
     setScoring(false);
   };
 
@@ -109,10 +128,15 @@ function Shadowing() {
             </button>
           )
         ) : (
-          <span className="muted">Aufnahme nicht verfügbar (kein Mikrofon-Zugriff).</span>
+          <span className="muted">{recorderHelp('unsupported', help)}</span>
         )}
         {recordedUrl && <audio controls src={recordedUrl} />}
       </div>
+      {recordHint && (
+        <p className="feedback-warn" role="alert" style={{ margin: 0 }}>
+          {recordHint}
+        </p>
+      )}
 
       <div className="row" style={{ justifyContent: 'center' }}>
         {isRecognitionSupported() ? (
@@ -124,11 +148,14 @@ function Shadowing() {
             {scoring ? 'Höre zu…' : '🎤 Aussprache bewerten'}
           </button>
         ) : (
-          <span className="muted">
-            Aussprache-Scoring nicht verfügbar – nutze Aufnahme & Vergleich.
-          </span>
+          <span className="muted">{recognitionHelp('unsupported', help)}</span>
         )}
       </div>
+      {scoreHint && (
+        <p className="feedback-warn" role="alert" style={{ margin: 0 }}>
+          {scoreHint}
+        </p>
+      )}
 
       {score && (
         <div className="stack" style={{ alignItems: 'center' }}>
@@ -147,6 +174,8 @@ function Shadowing() {
           setI((x) => (x + 1) % lines.length);
           setScore(null);
           setRecordedUrl(null);
+          setRecordHint(null);
+          setScoreHint(null);
         }}
       >
         Nächste Zeile

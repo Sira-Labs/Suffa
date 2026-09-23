@@ -6,16 +6,16 @@
 
 ## 1. Where we are
 
-| Item                     | Today                            | Book 1 needs (estimate)      |
-| ------------------------ | -------------------------------- | ---------------------------- |
-| Units                    | 3 (demo)                         | 16                           |
-| Vocabulary               | 10 words                         | ≈ 800–1,000 words            |
-| Dialogues                | 2                                | ≈ 3 per unit (≈ 48)          |
-| Verbs with full tables   | a few                            | ≈ 60–80                      |
-| Grammar points           | none as learnable items          | ≈ 3–4 per unit               |
-| Example sentences        | none                             | 1–2 per word                 |
-| Audio                    | links to publisher/archive audio | per word + per dialogue line |
-| Alphabet / pronunciation | minimal pairs only               | a short course for beginners |
+| Item                     | Today                    | Book 1 needs (estimate)      |
+| ------------------------ | ------------------------ | ---------------------------- |
+| Units                    | 3 (demo)                 | 16                           |
+| Vocabulary               | 10 words                 | ≈ 800–1,000 words            |
+| Dialogues                | 2                        | ≈ 3 per unit (≈ 48)          |
+| Verbs with full tables   | a few                    | ≈ 60–80                      |
+| Grammar points           | none as learnable items  | ≈ 3–4 per unit               |
+| Example sentences        | none                     | 1–2 per word                 |
+| Audio                    | links to publisher audio | per word + per dialogue line |
+| Alphabet / pronunciation | minimal pairs only       | a short course for beginners |
 
 Content lives as JSON in the public repo (ADR-0003) and can only be changed by developers.
 **Content is the bottleneck for the pilot** — the platform is ahead of plan, the material is

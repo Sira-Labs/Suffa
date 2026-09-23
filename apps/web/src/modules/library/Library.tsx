@@ -23,7 +23,7 @@ export function Library() {
     [quellen]
   );
   const audios = useMemo(
-    () => quellen.filter((q) => q.typ === 'verlag_audio' || q.typ === 'archive_audio'),
+    () => quellen.filter((q) => q.typ === 'verlag_audio'),
     [quellen]
   );
   const [active, setActive] = useState<Quelle | undefined>(videos[0]);
@@ -92,9 +92,7 @@ export function Library() {
             style={{ justifyContent: 'space-between' }}
           >
             <span>{q.titel}</span>
-            <span className="badge">
-              {q.typ === 'verlag_audio' ? 'Verlag' : 'Archive'}
-            </span>
+            <span className="badge">Verlag</span>
           </a>
         ))}
       </div>

@@ -45,7 +45,8 @@ export default defineConfig({
         runtimeCaching: [
           {
             // YouTube/external audio streams: online only, never treat as app shell.
-            urlPattern: /^https:\/\/(www\.youtube\.com|i\.ytimg\.com|archive\.org)\/.*/i,
+            urlPattern:
+              /^https:\/\/(www\.youtube\.com|i\.ytimg\.com|old\.arabicforall\.net)\/.*/i,
             handler: 'NetworkOnly',
           },
         ],

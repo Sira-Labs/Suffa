@@ -13,11 +13,7 @@ export interface ContentMeta {
   contentVersion: number;
 }
 
-export type QuelleTyp =
-  | 'youtube_playlist'
-  | 'youtube_video'
-  | 'verlag_audio'
-  | 'archive_audio';
+export type QuelleTyp = 'youtube_playlist' | 'youtube_video' | 'verlag_audio';
 
 export interface Quelle {
   typ: QuelleTyp;

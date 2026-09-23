@@ -1,6 +1,6 @@
 # ADR-0015: Server-side speech recognition for pronunciation feedback
 
-- Status: proposed
+- Status: proposed (extended by ADR-0022)
 - Date: 2026-09-23
 
 ## Context

@@ -122,7 +122,7 @@ demoed · no secrets in code · structured logs on new paths.
 
 | #    | Story                                                                                      | Pts | Acceptance                                 |
 | ---- | ------------------------------------------------------------------------------------------ | --- | ------------------------------------------ |
-| 10.1 | Tutor API (SSE), curriculum pack + learner snapshot                                        | 5   | First token p50 < 1.5 s.                   |
+| 10.1 | Tutor API (SSE), curriculum pack + learner snapshot; tutoring language de/en (ADR-0021)    | 5   | First token p50 < 1.5 s.                   |
 | 10.2 | Tools: lookup_vocab, get_root_family, get_learner_state, get_media_segment (authz-checked) | 5   | No cross-user access (test).               |
 | 10.3 | Tutor UI module; "ask about this minute" in recordings                                     | 5   | RTL + tashkīl level correct; 👍/👎 stored. |
 | 10.4 | Validators + repair retry; tutor produce-quests                                            | 5   | Fixture-tested.                            |
@@ -175,12 +175,22 @@ demoed · no secrets in code · structured logs on new paths.
 
 ## P7 — Next level
 
-- **Sprint 15 (Apr 19 – May 2):** server STT pronunciation scoring (ADR-0015); FSRS behind
+- **Sprint 15 (Apr 19 – May 2):** pronunciation assessment (ADR-0022): G2P for vocalised
+  MSA, evaluation harness on consented pilot recordings, ASR assessor as default and phoneme
+  assessor if it wins the evaluation; FSRS behind
   `schedule()` with migration flag.
-- **Sprint 16 (May 3 – May 16):** content CMS + offline bundles (ADR-0014); English UI;
+- **Sprint 16 (May 3 – May 16):** content CMS + offline bundles (ADR-0014); English UI,
+  per-language glosses and meaning-language setting (ADR-0021);
   WCAG 2.2 AA audit; `v2.2`.
 
 ---
+
+## Shipped outside the plan
+
+- **2026-09-23 — tolerant answer checking:** translations accept any one of several meanings,
+  optional parts, articles, umlaut spellings and small typos; the other meanings are shown after
+  answering; German answers are typed left-to-right (was: Arabic input style). Pilot data from
+  January also feeds the pronunciation evaluation (ADR-0022).
 
 ## Backlog (unscheduled)
 

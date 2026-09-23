@@ -46,18 +46,18 @@ platform, and the eight-pointed star of Islamic geometry.
 
 ## What you can do today
 
-| Module                      | What it does                                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| 📊 **Dashboard**            | Due cards, streak, mastery, forgetting curve, heat-map and "what next".                                     |
-| 🗂️ **Vocabulary (SRS)**     | Active recall AR→DE / DE→AR, plurals, root→word, nisba. SM-2 scheduling with leech detection (ADR-0001).    |
-| 🌳 **Roots (الجذر والوزن)** | Every word linked to its root and pattern; "same root?" drills.                                             |
-| 📖 **Reading**              | Vocalised dialogues with tap-a-word glosses; translation on demand.                                         |
-| ✍️ **Writing**              | Dictation and translation with character-level feedback, tolerant of missing tashkīl.                       |
-| 🎤 **Speaking**             | Shadowing, recording and minimal-pair drills (ع/ء, ح/ه, ق/ك …).                                             |
-| 🔄 **Conjugation**          | Past, present and imperative tables across all persons.                                                     |
-| 🎯 **Exams**                | Interleaved, mixed-chapter, speed and adaptive formats; wrong answers become due cards.                     |
-| 🎬 **Library**              | Embedded video lessons and the official audio.                                                              |
-| 🔁 **Sync**                 | Offline-first on each device (IndexedDB), with an outbox and last-write-wins sync across phone and desktop. |
+| Module                      | What it does                                                                                                                                            |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 📊 **Dashboard**            | Due cards, streak, mastery, forgetting curve, heat-map and "what next".                                                                                 |
+| 🗂️ **Vocabulary (SRS)**     | Active recall AR→DE / DE→AR, plurals, root→word, nisba. Tolerant checking: any one meaning, small typos, umlauts. SM-2 scheduling with leech detection. |
+| 🌳 **Roots (الجذر والوزن)** | Every word linked to its root and pattern; "same root?" drills.                                                                                         |
+| 📖 **Reading**              | Vocalised dialogues with tap-a-word glosses; translation on demand.                                                                                     |
+| ✍️ **Writing**              | Dictation and translation with character-level feedback, tolerant of missing tashkīl.                                                                   |
+| 🎤 **Speaking**             | Shadowing, recording and minimal-pair drills (ع/ء, ح/ه, ق/ك …).                                                                                         |
+| 🔄 **Conjugation**          | Past, present and imperative tables across all persons.                                                                                                 |
+| 🎯 **Exams**                | Interleaved, mixed-chapter, speed and adaptive formats; wrong answers become due cards.                                                                 |
+| 🎬 **Library**              | Embedded video lessons and the official audio.                                                                                                          |
+| 🔁 **Sync**                 | Offline-first on each device (IndexedDB), with an outbox and last-write-wins sync across phone and desktop.                                             |
 
 The interface is in **German**; learning content is MSA with full vocalisation.
 

@@ -1,9 +1,11 @@
 # GlitchTip — CapRover one-click template: error tracking and uptime checks (Sentry-compatible).
+# One instance serves all your projects (Suffa, Tabayyun, …): one GlitchTip project per app,
+# each app uses its own DSN with the official Sentry SDK of its language.
 #
 # Use: CapRover → Apps → One-Click Apps/Databases → ">> TEMPLATE <<" → paste this file →
 #      app name "glitchtip" → Deploy. Creates "glitchtip" (web + background worker in one
 #      container) and "glitchtip-db" (Postgres 17). No Redis/Valkey: GlitchTip 6 keeps its task
-#      queue and cache in Postgres, which is enough for Suffa's volume.
+#      queue and cache in Postgres, which is plenty for a handful of small apps.
 # Afterwards: enable HTTPS on "glitchtip", register the first account (only the first sign-up
 # is allowed), then follow docs/ops/caprover-deployment.md, section 9 "Error tracking".
 captainVersion: 4
@@ -74,15 +76,16 @@ caproverOneClickApp:
       validRegex: /^[0-9]{1,4}$/
   instructions:
     start: >-
-      Self-hosted GlitchTip for Suffa's error tracking and uptime checks: one app container plus
-      its own Postgres, no Redis. Use the app name "glitchtip".
+      Self-hosted GlitchTip: error tracking and uptime checks for all your apps (Sentry SDKs
+      work unchanged). One app container plus its own Postgres, no Redis. Use the app name
+      "glitchtip".
     end: >-
       Done. 1) Enable HTTPS for $$cap_appname (HTTP Settings). 2) Open
       https://$$cap_appname.$$cap_root_domain and register right away: only the first account
       may sign up. 3) Create the organization "Suffa" and the projects suffa-api and suffa-web,
       then set their DSNs as SUFFA_ERROR_DSN and SUFFA_WEB_ERROR_DSN on suffa-api (and
       SUFFA_ERROR_DSN on suffa-worker). Details: docs/ops/caprover-deployment.md, section 9.
-  displayName: GlitchTip (error tracking for Suffa)
+  displayName: GlitchTip (error tracking and uptime)
   isOfficial: false
   description: Sentry-compatible error tracking and uptime monitoring, Postgres only.
   documentation: https://github.com/thedatadudech/suffa/blob/main/docs/ops/caprover-deployment.md

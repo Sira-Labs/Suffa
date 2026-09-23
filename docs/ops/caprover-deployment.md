@@ -365,6 +365,27 @@ is missing, so one monitor covers api, database and queue. Alerts: Project → A
 GlitchTip's own database is **not** covered by `suffa-backup`; losing it only loses the error
 history. Back it up the same way if you want to keep that.
 
+### 9.5 Other projects (Tabayyun, …)
+
+One GlitchTip serves all your apps. Per app: create a project in GlitchTip (Settings → Projects;
+a second organization only if you want separate member lists), copy its DSN and add the
+official Sentry SDK of the app's language. Nothing else changes on the server.
+
+| App stack        | SDK                                  | Minimal setup                                                                    |
+| ---------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
+| Python / FastAPI | `sentry-sdk`                         | `sentry_sdk.init(dsn=os.environ["SENTRY_DSN"], release=os.environ["VERSION"])`   |
+| Node (plain)     | `@sentry/node`                       | `Sentry.init({ dsn: process.env.SENTRY_DSN, release })`                          |
+| Browser / React  | `@sentry/browser` or `@sentry/react` | `Sentry.init({ dsn, release })`; a tunnel like Suffa's `/api/errors` is optional |
+
+- Keep the DSN in the app's environment variables (never in the repo).
+- Send `release` (the image tag) and `environment` so every error names the deployed version.
+- Turn off personal data: Python `send_default_pii=False` (default); JavaScript v11
+  `dataCollection` as in `apps/web/src/services/errorTracking.ts`.
+- Add an uptime monitor per app (§9.4).
+- Registration stays closed: invite other people from GlitchTip (Organization → Members).
+  A second organization needs `ENABLE_ORGANIZATION_CREATION=True` for a moment (App Configs),
+  then set it back to `False`.
+
 ## 10. Capacity with Tabayyun on the same server
 
 Tabayyun's guidance is 2 vCPU / 4 GB for its api + web. Suffa adds roughly 1–1.5 GB RAM

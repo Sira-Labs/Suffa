@@ -75,4 +75,26 @@ describe('Vokabeltrainer (Integration)', () => {
     // Outbox enthält mindestens die Kartenaktualisierung + das Log.
     expect(await db.outbox.count()).toBeGreaterThan(0);
   });
+
+  it('akzeptiert eine von mehreren Bedeutungen (بَلَد → „Ort“) und zeigt die übrigen', async () => {
+    await bootStores();
+    const user = userEvent.setup();
+    const balad = useSrsStore
+      .getState()
+      .cards.find((c) => c.kind === 'vocab_ar_de' && c.contentRef === 'v-balad')!;
+    useSrsStore.setState({ cards: [balad] });
+
+    render(<ReviewSession kinds={['vocab_ar_de']} title="Test" />);
+    const input = await screen.findByLabelText('Antwort eingeben');
+    // German answers are typed left-to-right, not in the Arabic input style.
+    expect(input).toHaveAttribute('dir', 'ltr');
+    expect(input).not.toHaveClass('arabic-inline');
+
+    await user.type(input, 'ort');
+    await user.click(screen.getByRole('button', { name: 'Prüfen' }));
+
+    expect(await screen.findByText('✓ Richtig')).toBeInTheDocument();
+    expect(screen.getByText('Auch richtig:')).toBeInTheDocument();
+    expect(screen.getByText('Land')).toBeInTheDocument();
+  });
 });

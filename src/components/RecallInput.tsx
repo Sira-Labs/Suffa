@@ -38,9 +38,15 @@ export function RecallInput({
       <div className="row">
         <input
           ref={inputRef}
-          className="input arabic-inline"
+          className={`input ${arabic ? 'arabic-inline' : ''}`}
           dir={arabic ? 'rtl' : 'ltr'}
           lang={arabic ? 'ar' : 'de'}
+          // Translations: no OS autocorrect/capitalisation interfering with recall.
+          autoCapitalize="off"
+          autoCorrect="off"
+          autoComplete="off"
+          spellCheck={false}
+          enterKeyHint="done"
           value={value}
           placeholder={placeholder}
           disabled={disabled}

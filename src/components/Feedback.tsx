@@ -1,15 +1,22 @@
-import type { AnswerVerdict, DiffSegment } from '@/services/srs/tashkil';
+import type { DiffSegment } from '@/services/srs/tashkil';
+import type { RecallVerdict } from '@/services/srs/recall';
 
 interface FeedbackProps {
-  verdict: AnswerVerdict;
+  verdict: RecallVerdict;
   expected: string;
+  /** Whether `expected` is Arabic (RTL, Arabic font). Default: true. */
+  expectedIsArabic?: boolean;
+  /** Translations: further correct meanings the learner did not type. */
+  alsoCorrect?: string[];
   diff?: DiffSegment[];
   /** Didaktische Begründung / Hinweis (sofortiges, spezifisches Feedback). */
   explanation?: string;
 }
 
-const VERDICT_TEXT: Record<AnswerVerdict, { label: string; cls: string }> = {
-  exact: { label: '✓ Richtig (inkl. Tashkīl)', cls: 'feedback-good' },
+const VERDICT_TEXT: Record<RecallVerdict, { label: string; cls: string }> = {
+  exact: { label: '✓ Richtig', cls: 'feedback-good' },
+  accepted: { label: '✓ Richtig', cls: 'feedback-good' },
+  typo: { label: '✓ Richtig – kleiner Tippfehler', cls: 'feedback-warn' },
   'tashkil-tolerant': {
     label: '✓ Richtig – Tashkīl unvollständig, aber akzeptiert',
     cls: 'feedback-warn',
@@ -18,17 +25,35 @@ const VERDICT_TEXT: Record<AnswerVerdict, { label: string; cls: string }> = {
 };
 
 /** Sofortiges, spezifisches Feedback mit optionalem Zeichen-Diff und Begründung. */
-export function Feedback({ verdict, expected, diff, explanation }: FeedbackProps) {
+export function Feedback({
+  verdict,
+  expected,
+  expectedIsArabic = true,
+  alsoCorrect = [],
+  diff,
+  explanation,
+}: FeedbackProps) {
   const v = VERDICT_TEXT[verdict];
+  const showExpected =
+    verdict === 'wrong' || verdict === 'typo' || verdict === 'tashkil-tolerant';
+  const expectedStyle = expectedIsArabic
+    ? { className: 'arabic-inline', style: { fontSize: '1.4rem' } }
+    : { style: { fontSize: '1.1rem', fontWeight: 600 } };
   return (
     <div className="stack" style={{ gap: '0.5rem' }} role="status" aria-live="polite">
       <strong className={v.cls}>{v.label}</strong>
-      {verdict !== 'exact' && (
+      {showExpected && (
         <div>
-          <span className="muted">Erwartet: </span>
-          <span className="arabic-inline" style={{ fontSize: '1.4rem' }}>
-            {expected}
+          <span className="muted">
+            {verdict === 'wrong' ? 'Erwartet: ' : 'Richtig: '}
           </span>
+          <span {...expectedStyle}>{expected}</span>
+        </div>
+      )}
+      {!showExpected && alsoCorrect.length > 0 && (
+        <div>
+          <span className="muted">Auch richtig: </span>
+          <span style={{ fontWeight: 600 }}>{alsoCorrect.join(', ')}</span>
         </div>
       )}
       {diff && verdict === 'wrong' && (

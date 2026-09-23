@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ExamFormat, ExamItemResult } from '@/types';
 import { ArabicText, RecallInput } from '@/components';
-import { gradeAnswer } from '@/services/srs';
+import { gradeRecall, isCorrect } from '@/services/srs';
 import { speakArabic } from '@/services/speech';
 import { examRepo, cardRepo } from '@/services/storage';
 import { cardId, createCard } from '@/services/srs';
@@ -234,9 +234,11 @@ function ExamRunner({
   const q = questions[idx]!;
 
   const submit = (given: string) => {
-    const correct = q.expectedIsArabic
-      ? gradeAnswer(given, q.expected) !== 'wrong'
-      : normalizeDe(given) === normalizeDe(q.expected);
+    // Multiple choice: the chosen option must be the expected one; typed answers are graded
+    // tolerantly (tashkīl for Arabic, meanings/typos for translations).
+    const correct = q.options
+      ? given === q.expected
+      : isCorrect(gradeRecall(given, q.expected, q.expectedIsArabic).verdict);
     const item: ExamItemResult = {
       contentRef: q.contentRef,
       format: q.format,
@@ -494,8 +496,4 @@ function ExamResultView({
       </div>
     </div>
   );
-}
-
-function normalizeDe(s: string): string {
-  return s.trim().toLowerCase().replace(/\s+/g, ' ');
 }

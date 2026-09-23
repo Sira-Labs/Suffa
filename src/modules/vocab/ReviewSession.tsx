@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { CardKind, ReviewRating, SrsCard } from '@/types';
 import { ArabicText, Feedback, RatingButtons, RecallInput } from '@/components';
-import { diffArabic, gradeAnswer, resolveCard, type AnswerVerdict } from '@/services/srs';
+import { diffArabic, gradeRecall, resolveCard, type RecallGrade } from '@/services/srs';
 import { speakArabic, isTtsSupported } from '@/services/speech';
 import { useContentStore, useSettingsStore, useSrsStore, useSyncStore } from '@/state';
 
@@ -32,7 +32,7 @@ export function ReviewSession({ kinds, title, allowRecognitionAid }: ReviewSessi
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState('');
   const [phase, setPhase] = useState<Phase>('prompt');
-  const [verdict, setVerdict] = useState<AnswerVerdict>('wrong');
+  const [grade, setGrade] = useState<RecallGrade | null>(null);
   const [startedAt, setStartedAt] = useState(() => Date.now());
   const [done, setDone] = useState(0);
   const [useAid, setUseAid] = useState(false);
@@ -71,9 +71,9 @@ export function ReviewSession({ kinds, title, allowRecognitionAid }: ReviewSessi
     );
   }
 
-  const grade = (raw: string) => {
-    const v = gradeAnswer(raw, resolved.answer);
-    setVerdict(v);
+  const check = (raw: string) => {
+    setAnswer(raw);
+    setGrade(gradeRecall(raw, resolved.answer, resolved.answerIsArabic));
     setPhase('graded');
   };
 
@@ -126,7 +126,7 @@ export function ReviewSession({ kinds, title, allowRecognitionAid }: ReviewSessi
             <RecallInput
               value={answer}
               onChange={setAnswer}
-              onSubmit={() => grade(answer)}
+              onSubmit={() => check(answer)}
               arabic={resolved.answerIsArabic}
               placeholder={resolved.answerIsArabic ? 'Antwort auf Arabisch…' : 'Antwort…'}
               autoFocus
@@ -135,7 +135,7 @@ export function ReviewSession({ kinds, title, allowRecognitionAid }: ReviewSessi
               className="row"
               style={{ marginTop: '0.75rem', justifyContent: 'center' }}
             >
-              <button className="btn btn-primary" onClick={() => grade(answer)}>
+              <button className="btn btn-primary" onClick={() => check(answer)}>
                 Prüfen
               </button>
               {isTtsSupported() && resolved.speakable && (
@@ -160,9 +160,9 @@ export function ReviewSession({ kinds, title, allowRecognitionAid }: ReviewSessi
             {choices.map((choice) => (
               <button
                 key={choice}
-                className="btn arabic-inline"
+                className={`btn ${resolved.answerIsArabic ? 'arabic-inline' : ''}`}
                 style={{ fontSize: '1.3rem' }}
-                onClick={() => grade(choice)}
+                onClick={() => check(choice)}
               >
                 {choice}
               </button>
@@ -170,11 +170,13 @@ export function ReviewSession({ kinds, title, allowRecognitionAid }: ReviewSessi
           </div>
         )}
 
-        {phase === 'graded' && (
+        {phase === 'graded' && grade && (
           <div className="stack" style={{ width: '100%' }}>
             <Feedback
-              verdict={verdict}
+              verdict={grade.verdict}
               expected={resolved.answer}
+              expectedIsArabic={resolved.answerIsArabic}
+              alsoCorrect={grade.alsoCorrect}
               diff={
                 resolved.answerIsArabic ? diffArabic(answer, resolved.answer) : undefined
               }

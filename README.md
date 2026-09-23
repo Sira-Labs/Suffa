@@ -9,6 +9,10 @@ Desktop) per Benutzerkonto.
 > UI auf Deutsch · Lerninhalte arabisch mit Tashkīl · respektvoll & kultursensibel
 > (saudischer Kontext, MSA).
 
+> **Roadmap „Suffa“ (الصُّفَّة):** Spezifikation, ADRs 0005–0015, Roadmap, Sprint- und
+> Kostenplan für die Weiterentwicklung zur Lernplattform (KI-Lehrer, Rollen, Admin-Panel,
+> interaktive Videos, CapRover) liegen unter [`docs/`](docs/README.md).
+
 ## Highlights
 
 - **Offline-first**: vollständig ohne Netz lernbar; installierbar als PWA

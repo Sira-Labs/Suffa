@@ -17,7 +17,7 @@ unavailable in Firefox and some mobile browsers, returns text only, no scoring.
   text using the existing `tashkil.ts` utilities + phoneme-pair heuristics for known minimal
   pairs (ع/ء, ح/ه, ق/ك …).
 - Audio is processed transiently and **not stored** unless the learner submits it for teacher
-  review (then MinIO, 30-day retention).
+  review (then RustFS bucket `suffa-uploads`, 30-day retention, ADR-0017).
 - Browser STT remains the offline/zero-cost default; server STT is a per-class setting.
 
 ## Alternatives

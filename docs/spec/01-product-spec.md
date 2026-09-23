@@ -1,7 +1,8 @@
 # 01 — Product Specification: **Suffa** (الصُّفَّة)
 
-- Status: draft v1 · Date: 2026-09-23 · Owner: Markus
-- Related: `00-codebase-analysis.md`, `02-technical-spec.md`, ADR-0005 … ADR-0015
+- Status: draft v2 · Date: 2026-09-24 · Owner: Markus
+- Related: `00-codebase-analysis.md`, `02-technical-spec.md`, ADR-0005 … ADR-0020,
+  `plan/engagement-plan.md`, `ops/caprover-deployment.md`
 
 ## 1. Name
 
@@ -28,27 +29,33 @@ where students, teachers and an AI assistant-teacher sit together around one cur
 
 ### Goals (12 months)
 
-| Goal                           | Metric                                             | Target                         |
-| ------------------------------ | -------------------------------------------------- | ------------------------------ |
-| Learners practise daily        | D7 retention / median streak                       | ≥ 40 % / ≥ 5 days              |
-| AI teacher is genuinely useful | 👍 rate on tutor turns; teacher-audited accuracy   | ≥ 85 % / ≥ 95 % correct Arabic |
-| Teachers save time             | Assignments created per teacher/week; grading time | ≥ 2 / −50 % vs manual          |
-| Sustainable cost               | AI cost per active learner/month                   | ≤ €3 (see `plan/cost-plan.md`) |
-| Sovereign & reliable           | Uptime on CapRover; data self-hosted               | ≥ 99.5 %; 100 %                |
+| Goal                           | Metric                                             | Target                               |
+| ------------------------------ | -------------------------------------------------- | ------------------------------------ |
+| Learners practise daily        | D7 retention / median streak                       | ≥ 40 % / ≥ 5 days                    |
+| Pilot class is engaged         | Weekly active / enrolled; daily quest completion   | ≥ 70 % / ≥ 60 % (engagement plan §8) |
+| AI teacher is genuinely useful | 👍 rate on tutor turns; teacher-audited accuracy   | ≥ 85 % / ≥ 95 % correct Arabic       |
+| Teachers save time             | Assignments created per teacher/week; grading time | ≥ 2 / −50 % vs manual                |
+| Sustainable cost               | AI cost per active learner/month                   | ≤ €3 (see `plan/cost-plan.md`)       |
+| Sovereign & reliable           | Uptime on CapRover; data self-hosted               | ≥ 99.5 %; 100 %                      |
 
 ### Non-goals (v1)
 
-Native iOS/Android apps (the PWA stays), payments/subscriptions, public marketplace for
-third-party courses, dialect curricula beyond optional Gulf notes, issuing religious rulings.
+Separate native codebases (Swift/Kotlin) — the app-store apps wrap the PWA with Capacitor (F10),
+payments/subscriptions, public marketplace for third-party courses, dialect curricula beyond
+optional Gulf notes, issuing religious rulings.
 
 ## 3. Personas and roles
 
-| Role                      | Who                          | Can do                                                                                                                                                             |
-| ------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Student** (`student`)   | Self-learner or class member | Learn offline, chat with al-Muʿallim, watch interactive lessons, do assignments, see own progress.                                                                 |
-| **Teacher** (`teacher`)   | Runs one or more classes     | Create classes & invite codes, assign units/videos/exams, see class progress & leech words, review AI-graded work, author content drafts, set AI limits per class. |
-| **Admin** (`admin`) — you | Platform owner               | Everything: users & roles, content publishing, video catalog, AI provider/model routing, quotas & budgets, audit log, system health.                               |
-| **Guest**                 | Not signed in                | Full offline app with bundled content (today's behaviour). No AI, no sync.                                                                                         |
+**First real users:** a teacher Markus knows will run Suffa with his class (pilot from
+2027-01-04, see `plan/engagement-plan.md` §7). His needs — classes, daily/weekly achievements,
+reminders and his Google Drive session recordings — drive the order of the roadmap.
+
+| Role                      | Who                          | Can do                                                                                                                                                                                                                                                        |
+| ------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Student** (`student`)   | Self-learner or class member | Learn offline, chat with al-Muʿallim, watch interactive lessons, do assignments, see own progress.                                                                                                                                                            |
+| **Teacher** (`teacher`)   | Runs one or more classes     | Create classes & invite codes, import session recordings from Google Drive, set weekly class challenges and award badges, assign units/videos/exams, see class progress & leech words, review AI-graded work, author content drafts, set AI limits per class. |
+| **Admin** (`admin`) — you | Platform owner               | Everything: users & roles, content publishing, video catalog, AI provider/model routing, quotas & budgets, audit log, system health.                                                                                                                          |
+| **Guest**                 | Not signed in                | Full offline app with bundled content (today's behaviour). No AI, no sync.                                                                                                                                                                                    |
 
 A user has exactly one **platform role** plus **class memberships** (a teacher in class A can be
 a student in class B — modelled as class-level role, see ADR-0009).
@@ -72,7 +79,7 @@ Route `/admin` (role-gated, server-enforced). Sections:
 2. **Classes** — list, transfer ownership, archive.
 3. **Content** — units, vocab, dialogues, verbs; draft → review → publish workflow; publish
    bumps `contentVersion` and rebuilds the offline bundle.
-4. **Video catalog** — channels, playlists, videos, segments, checkpoints (F5).
+4. **Media catalog** — YouTube channels/playlists and teacher recordings, segments, checkpoints, storage usage (F5, F8).
 5. **AI** — providers (Anthropic / OpenRouter / Hugging Face), model per task, prompt versions,
    global and per-role quotas, spend dashboard, flagged conversations.
 6. **Audit log** — who changed what (roles, content, AI config).
@@ -128,9 +135,47 @@ tashkīl validator; tutor cannot read another user's data (tool-level authorisat
 - Content growth: all 16 units of Book 1, then Book 2; audio per vocab item.
 - UI languages: German (existing) → English → Arabic UI (RTL chrome).
 
-### F7 — Motivation _(Could)_
+### F7 — Engagement: daily & weekly achievements _(Must — pilot)_
 
-Streaks already exist; add class leaderboards (opt-in), weekly goals, certificates per unit.
+Full design in `plan/engagement-plan.md`, decision in ADR-0016.
+
+- **Daily:** 3 personalised quests (review · learn · produce) + bonus; XP; daily streak in the
+  learner's time zone with earnable streak shields; "Today" card; reminder at a chosen time.
+- **Weekly:** personal weekly goal (3/5/7 days) and weekly streak; **class weekly challenge**
+  (cooperative) set by the teacher; weekly recap; opt-in league ranked by % of goal (S14).
+- **Achievements:** ~30 badges in tiers (consistency, vocabulary, roots, grammar, writing,
+  speaking, listening, exams, class spirit, seasonal), teacher-created custom badges, unit
+  certificates. Badges are never lost.
+- **Teacher tools:** class dashboard, challenge templates, shout-outs, announcements.
+- **Guardrails:** no chance-based rewards, nothing purchasable, leaderboards off for minors by
+  default, max 1 reminder/day, learning-quality guardrail metric.
+- **Acceptance:** quests/XP update instantly offline; server values reconcile after sync; a
+  missed day with a shield keeps the streak; teacher sees class quest completion by next sync.
+
+### F8 — Teacher session recordings from Google Drive _(Must — pilot)_
+
+Decision in ADR-0018; storage in ADR-0017.
+
+- Teacher connects Google Drive (`drive.file` + Picker) and picks recordings; or uploads
+  directly (resumable). Files are copied into Suffa's storage (shared **RustFS**).
+- Automatic processing: audio-only + 720p versions, transcript (Whisper), AI suggestions for
+  chapters/vocab/checkpoints — **published only after teacher review** and consent confirmation.
+- Students watch/listen in the interactive player (same as F5): checkpoints, transcript
+  tap-to-gloss, add-to-SRS, "ask al-Muʿallim about this minute", **offline audio download**.
+- Recording lessons generate daily quests ("Listen to Tuesday's session and pass 3 checkpoints").
+- **Acceptance:** a 1-hour recording is playable (audio) within 30 min of import; non-members get
+  403; teacher can delete a recording and all derived data.
+
+### F9 — Assignments _(Must)_
+
+Units, exam formats, recordings, videos and (later) tutor scenarios with due dates; appear as
+class quests; submissions with AI grade + teacher override (grading from S11).
+
+### F10 — iOS & Android apps _(Should)_
+
+Decision in ADR-0019. Capacitor wrapper of the same build; on-device daily reminders
+(offline), push for teacher announcements and recaps, offline audio with background playback,
+join-class deep links. Store release target: April 2027.
 
 ## 5. Non-functional requirements
 

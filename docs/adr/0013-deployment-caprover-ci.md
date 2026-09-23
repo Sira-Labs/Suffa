@@ -1,7 +1,7 @@
 # ADR-0013: Deployment, CI/CD and operations on CapRover
 
 - Status: proposed
-- Date: 2026-09-23
+- Date: 2026-09-23 (revised 2026-09-24: Tabayyun pattern, RustFS, no Redis)
 
 ## Context
 
@@ -10,23 +10,29 @@ initially, with room to add nodes.
 
 ## Decision
 
-- **Apps:** `suffa-web` (nginx serving the built PWA), `suffa-api`, `suffa-worker`,
-  one-click `postgres:16` and `redis:7`, optional `minio` and `glitchtip`.
-- **Images built in CI**, not on the CapRover host: GitHub Actions → GHCR → `caprover deploy
---imageName` with a per-app deploy token (GitHub secret). `captain-definition` files in
-  `infra/caprover/` for manual deploys.
+- **Mirror the Tabayyun deployment** on the same CapRover (`Tabayyun/deploy/caprover.md`):
+  `suffa-web` (Caddy serving the PWA, proxying `/api` and `/media`), `suffa-api`,
+  `suffa-worker` (api image, `SUFFA_ROLE=worker`), `suffa-db` (plain app,
+  `pgvector/pgvector` pg17, pinned), and the **existing shared `rustfs`** (ADR-0017).
+  No Redis (ADR-0020). Runbook: `docs/ops/caprover-deployment.md`.
+- **Images built in CI**, not on the CapRover host: GitHub Actions → GHCR →
+  `caprover/deploy-from-github@v2` with per-app tokens (`CAPROVER_APP_TOKEN_API|WEB|WORKER`),
+  immutable `sha-<short>` tags. `captain-definition` files in `infra/caprover/` for the
+  build-on-server alternative.
 - **Environments:** `staging` and `production` as separate CapRover apps (`-stg` suffix), same
   images promoted by tag.
-- **DB migrations** run as a pre-start step of `suffa-api` (drizzle-kit migrate, idempotent,
-  guarded by an advisory lock).
-- **Secrets** only as CapRover env vars (`DATABASE_URL`, `REDIS_URL`, `BETTER_AUTH_SECRET`,
-  `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`, `YOUTUBE_API_KEY`, `SMTP_*`).
+- **DB migrations** run as a pre-start step of `suffa-api` (drizzle migrate, idempotent,
+  guarded by an advisory lock); the worker exits with code 3 until the schema matches.
+- **Secrets** only as CapRover env vars with `SUFFA_` prefix (`SUFFA_DATABASE_URL`,
+  `SUFFA_AUTH_SECRET`, `SUFFA_S3_*`, `SUFFA_GOOGLE_*`, …) plus provider keys
+  (`ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`). The API refuses to start in prod
+  with placeholder or short secrets (as Tabayyun does).
 - **Backups:** nightly `pg_dump` sidecar → off-box S3-compatible storage (e.g. Hetzner Storage
   Box / Backblaze B2), 30 daily + 12 monthly; monthly restore drill into staging.
-- **Security:** Postgres/Redis not exposed; CapRover dashboard behind strong password + 2FA;
+- **Security:** Postgres and RustFS not exposed; CapRover dashboard behind strong password + 2FA;
   firewall 80/443/22 (+ Swarm ports only between nodes); unattended OS security updates.
 - **Observability:** pino JSON logs, `/healthz` + `/readyz`, GlitchTip for errors, uptime check
-  (e.g. Uptime Kuma one-click app), AI spend dashboard in admin panel.
+  (e.g. Uptime Kuma), AI spend dashboard in admin panel.
 - **Web hosting change:** served by our nginx, so the app can switch from `createHashRouter` to
   `createBrowserRouter` with SPA fallback.
 

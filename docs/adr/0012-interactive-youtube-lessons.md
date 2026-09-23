@@ -36,3 +36,7 @@ The user wants Muhammad al-Andalusi's YouTube lessons integrated **interactively
 
 Video requires connectivity; everything around it (checkpoints, transcripts, progress) works
 offline. YouTube quota (10k units/day default) is ample for catalog imports.
+
+Amended by ADR-0018: the catalog is generalised to `media_items` (`source = youtube | hosted`)
+so the teacher's own recordings use the same player, checkpoints and transcripts. Delivery
+moved to Sprint 12, after the recordings pipeline (Sprints 7–8) that builds the shared player.

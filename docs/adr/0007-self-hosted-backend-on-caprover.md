@@ -16,12 +16,13 @@ Options for CapRover:
    (not a single app), upgrades are painful.
 2. **PocketBase** — single binary, great for small apps, but Go/JS-hooks split, weaker fit for
    complex RBAC, LLM streaming and job queues.
-3. **Own TypeScript API (Hono) + Postgres + Redis** — full control, shares code with the PWA.
+3. **Own TypeScript API (Hono) + Postgres** — full control, shares code with the PWA.
 
 ## Decision
 
-Option 3. Components as CapRover apps: `suffa-api`, `suffa-worker`, `suffa-web`, one-click
-Postgres 16 and Redis 7 (details in ADR-0013).
+Option 3. Components as CapRover apps: `suffa-api`, `suffa-worker`, `suffa-web`, a Postgres 17
+(pgvector) app, and the shared RustFS — the same layout as Tabayyun (details in ADR-0013,
+ADR-0017, ADR-0020 and `docs/ops/caprover-deployment.md`).
 
 - New **`ApiSyncProvider`** implements the existing `SyncProvider` interface; the wire
   contract (`push`/`pull`, camelCase fields, `(user_id, id)` PK, LWW) is unchanged.

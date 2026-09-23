@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Quelle } from '@/types';
 import { content } from '@/content';
+import { useSearchParams } from 'react-router-dom';
 import { PublisherAudio } from './PublisherAudio';
 
 function youtubeEmbed(url: string): string | null {
@@ -16,6 +17,10 @@ function youtubeEmbed(url: string): string | null {
  * Note: embedded streams need a network; the app itself stays usable offline.
  */
 export function Library() {
+  // ?unit=4&lesson=24 comes from a unit's learning path.
+  const [params] = useSearchParams();
+  const unit = Number(params.get('unit')) || 1;
+  const lesson = Number(params.get('lesson')) || undefined;
   const quellen = content.quellen;
   const videos = useMemo(
     () =>
@@ -77,7 +82,11 @@ export function Library() {
 
       <div className="card stack">
         <strong>Offizielle Audios – Buch 1</strong>
-        <PublisherAudio />
+        <PublisherAudio
+          key={`${unit}-${lesson ?? ''}`}
+          initialUnit={unit}
+          focusLesson={lesson}
+        />
       </div>
 
       <div className="card stack">

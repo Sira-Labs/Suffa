@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import type { ExamFormat, ExamItemResult } from '@/types';
 import { ArabicText, RecallInput } from '@/components';
 import { gradeRecall, isCorrect } from '@/services/srs';
@@ -47,8 +48,13 @@ export function Exam() {
     'plural',
     'root',
   ]);
-  const [selectedUnits, setSelectedUnits] = useState<number[]>(
-    unitInfos.map((u) => u.einheit)
+  // ?unit=n (unit test from a learning path) preselects that unit if it has content.
+  const [params] = useSearchParams();
+  const requestedUnit = Number(params.get('unit'));
+  const [selectedUnits, setSelectedUnits] = useState<number[]>(() =>
+    unitInfos.some((u) => u.einheit === requestedUnit)
+      ? [requestedUnit]
+      : unitInfos.map((u) => u.einheit)
   );
   const [count, setCount] = useState(10);
   const [speed, setSpeed] = useState(false);

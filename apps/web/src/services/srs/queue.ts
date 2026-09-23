@@ -23,6 +23,8 @@ export interface QueueOptions {
    * daily session can review everything but introduce words through vocabulary cards first.
    */
   newKinds?: CardKind[];
+  /** Restrict to cards about these content items (e.g. the words of one unit). */
+  contentRefs?: string[];
 }
 
 export interface DueSummary {
@@ -73,7 +75,13 @@ export function buildQueue(cards: SrsCard[], options: QueueOptions = {}): SrsCar
   const maxCards = options.maxCards ?? 60;
   const kindFilter = options.kinds ? new Set(options.kinds) : null;
 
-  const pool = cards.filter((c) => !c.deleted && (!kindFilter || kindFilter.has(c.kind)));
+  const refFilter = options.contentRefs ? new Set(options.contentRefs) : null;
+  const pool = cards.filter(
+    (c) =>
+      !c.deleted &&
+      (!kindFilter || kindFilter.has(c.kind)) &&
+      (!refFilter || refFilter.has(c.contentRef))
+  );
 
   const dueReviews = pool
     .filter((c) => !isNew(c) && isDue(c, now))

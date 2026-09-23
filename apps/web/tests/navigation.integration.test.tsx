@@ -7,8 +7,8 @@ import { isUnderMore, NAV_ITEMS } from '@/navigation';
 describe('navigation', () => {
   it('puts exactly four destinations into the phone bar, the rest under "Mehr"', () => {
     const primary = NAV_ITEMS.filter((i) => i.tier === 'primary').map((i) => i.label);
-    expect(primary).toEqual(['Heute', 'Lernen', 'Hören', 'Wurzeln']);
-    expect(NAV_ITEMS.filter((i) => i.tier === 'secondary')).toHaveLength(6);
+    expect(primary).toEqual(['Heute', 'Einheiten', 'Hören', 'Wurzeln']);
+    expect(NAV_ITEMS.filter((i) => i.tier === 'secondary')).toHaveLength(7);
   });
 
   it('marks "Mehr" active on secondary pages only', () => {
@@ -16,7 +16,8 @@ describe('navigation', () => {
     expect(isUnderMore('/speaking')).toBe(true);
     expect(isUnderMore('/settings')).toBe(true);
     expect(isUnderMore('/')).toBe(false);
-    expect(isUnderMore('/vocab')).toBe(false);
+    expect(isUnderMore('/vocab')).toBe(true);
+    expect(isUnderMore('/units/4')).toBe(false);
     expect(isUnderMore('/speakingx')).toBe(false);
   });
 
@@ -26,6 +27,7 @@ describe('navigation', () => {
     const list = screen.getByRole('list', { name: 'Weitere Bereiche' });
     const links = within(list).getAllByRole('link');
     expect(links.map((a) => a.getAttribute('href'))).toEqual([
+      '/vocab',
       '/reading',
       '/writing',
       '/speaking',

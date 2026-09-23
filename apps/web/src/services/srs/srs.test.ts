@@ -222,3 +222,15 @@ describe('SRS queue: newKinds', () => {
     expect(queue.map((c) => c.id)).toEqual(['nisba:egypt', 'vocab:y']);
   });
 });
+
+describe('SRS queue: contentRefs', () => {
+  it('limits the queue to the given content items', () => {
+    const cards = [newCard('vocab_ar_de:a'), newCard('vocab_ar_de:b')].map((c, i) => ({
+      ...c,
+      contentRef: i === 0 ? 'a' : 'b',
+    }));
+    expect(buildQueue(cards, { contentRefs: ['b'] }).map((c) => c.contentRef)).toEqual([
+      'b',
+    ]);
+  });
+});

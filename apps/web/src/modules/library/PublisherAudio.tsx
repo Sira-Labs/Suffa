@@ -60,7 +60,14 @@ function isHeard(progress: Record<string, MediaProgress>, id: string): boolean {
  * a track counts as heard after 85 % of it was actually played; heard tracks and lessons give
  * XP (engagement rules) and a short celebration. Audio streams from the publisher's server.
  */
-export function PublisherAudio({ initialUnit = 1 }: { initialUnit?: number }) {
+export function PublisherAudio({
+  initialUnit = 1,
+  focusLesson,
+}: {
+  initialUnit?: number;
+  /** Lesson to scroll to and highlight (from a unit's learning path). */
+  focusLesson?: number;
+}) {
   const [index, setIndex] = useState<PublisherAudioIndex | null>(null);
   const [failed, setFailed] = useState(false);
   const [unitNo, setUnitNo] = useState(initialUnit);
@@ -83,6 +90,13 @@ export function PublisherAudio({ initialUnit = 1 }: { initialUnit?: number }) {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!index || focusLesson === undefined) return;
+    document
+      .getElementById(`lesson-${focusLesson}`)
+      ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, [index, focusLesson]);
 
   const stats = useMemo(() => {
     if (!index) return null;
@@ -173,6 +187,7 @@ export function PublisherAudio({ initialUnit = 1 }: { initialUnit?: number }) {
           lesson={lesson}
           visible={visible}
           progress={progress}
+          focused={lesson.lesson === focusLesson}
         />
       ))}
       {filter === 'open' &&
@@ -218,12 +233,14 @@ function LessonBlock({
   lesson,
   visible,
   progress,
+  focused,
 }: {
   book: number;
   unit: AudioUnit;
   lesson: AudioLesson;
   visible: (track: AudioTrack) => boolean;
   progress: Record<string, MediaProgress>;
+  focused: boolean;
 }) {
   const tracks = lesson.tracks.filter(visible);
   if (tracks.length === 0) return null;
@@ -233,7 +250,11 @@ function LessonBlock({
   ).length;
   const complete = heard === lesson.tracks.length;
   return (
-    <section className="lesson-block stack" aria-label={lesson.title}>
+    <section
+      id={`lesson-${lesson.lesson}`}
+      className={`lesson-block stack${focused ? ' lesson-block-focus' : ''}`}
+      aria-label={lesson.title}
+    >
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <strong lang="ar" dir="rtl">
           {lesson.title}

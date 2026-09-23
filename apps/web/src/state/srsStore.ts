@@ -20,7 +20,12 @@ interface SrsState {
   load(): Promise<void>;
   ensureSeedCards(): Promise<void>;
   review(card: SrsCard, rating: ReviewRating, durationMs: number): Promise<SrsCard>;
-  getQueue(kinds?: CardKind[], newLimit?: number, newKinds?: CardKind[]): SrsCard[];
+  getQueue(
+    kinds?: CardKind[],
+    newLimit?: number,
+    newKinds?: CardKind[],
+    contentRefs?: string[]
+  ): SrsCard[];
   summary(): DueSummary;
 }
 
@@ -65,8 +70,8 @@ export const useSrsStore = create<SrsState>((set, get) => ({
     return updated;
   },
 
-  getQueue(kinds, newLimit, newKinds) {
-    return buildQueue(get().cards, { kinds, newLimit, newKinds });
+  getQueue(kinds, newLimit, newKinds, contentRefs) {
+    return buildQueue(get().cards, { kinds, newLimit, newKinds, contentRefs });
   },
 
   summary() {

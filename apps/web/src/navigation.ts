@@ -22,10 +22,10 @@ export const NAV_ITEMS: readonly NavItem[] = [
     end: true,
   },
   {
-    to: '/vocab',
-    label: 'Lernen',
-    icon: 'cards',
-    description: 'Vokabeln wiederholen und neue lernen',
+    to: '/units',
+    label: 'Einheiten',
+    icon: 'path',
+    description: 'Buch 1 als Lernpfad',
     tier: 'primary',
   },
   {
@@ -41,6 +41,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: 'roots',
     description: 'Wurzeln, Muster und Wortfamilien',
     tier: 'primary',
+  },
+  {
+    to: '/vocab',
+    label: 'Vokabeln',
+    icon: 'cards',
+    description: 'Vokabeltrainer mit allen Übungsarten',
+    tier: 'secondary',
   },
   {
     to: '/reading',

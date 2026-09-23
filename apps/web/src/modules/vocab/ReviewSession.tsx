@@ -18,6 +18,8 @@ interface ReviewSessionProps {
   newLimit?: number;
   /** Kinds new cards may come from (default: all of `kinds`). */
   newKinds?: CardKind[];
+  /** Only cards about these content items (e.g. one unit's words). */
+  contentRefs?: string[];
 }
 
 type Phase = 'prompt' | 'graded';
@@ -34,6 +36,7 @@ export function ReviewSession({
   variant = 'inline',
   newLimit,
   newKinds,
+  contentRefs,
 }: ReviewSessionProps) {
   const focus = variant === 'focus';
   const userVocab = useContentStore((s) => s.userVocab);
@@ -43,7 +46,7 @@ export function ReviewSession({
   const dailyGoal = useSettingsStore((s) => s.settings.dailyGoal);
 
   const [queue, setQueue] = useState<SrsCard[]>(() =>
-    useSrsStore.getState().getQueue(kinds, newLimit ?? dailyGoal, newKinds)
+    useSrsStore.getState().getQueue(kinds, newLimit ?? dailyGoal, newKinds, contentRefs)
   );
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState('');

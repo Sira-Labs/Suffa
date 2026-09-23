@@ -1,6 +1,6 @@
 # Suffa — Design system
 
-- Date: 2026-09-23 · Status: in progress (steps 1–2 of 5 shipped) · Mockups: the "Suffa Redesign"
+- Date: 2026-09-23 · Status: in progress (steps 1–3 of 5 shipped) · Mockups: the "Suffa Redesign"
   canvas (7 screens) · Code: `apps/web/src/styles/global.css`, `components/Icon.tsx`,
   `navigation.ts`
 
@@ -46,8 +46,8 @@ precached for offline use (≈ 370 kB); other scripts load on demand.
 
 ## Layout and navigation
 
-- **Phone:** floating bottom bar with five destinations — Heute, Lernen, Hören, Wurzeln, Mehr.
-  "Mehr" lists the rest (Lesen, Schreiben, Sprechen, Konjugation, Prüfung, Einstellungen).
+- **Phone:** floating bottom bar with five destinations — Heute, Einheiten, Hören, Wurzeln, Mehr.
+  "Mehr" lists the rest (Vokabeln, Lesen, Schreiben, Sprechen, Konjugation, Prüfung, Einstellungen).
 - **Desktop (≥ 960 px):** sidebar with every destination, brand on top, sync status at the
   bottom.
 - One navigation definition (`navigation.ts`) drives both layouts.
@@ -64,7 +64,7 @@ precached for offline use (≈ 370 kB); other scripts load on demand.
 | ---- | ------------------------------------------------------------- | ------ |
 | 1    | Tokens, fonts, icons, app shell and navigation, "Mehr" page   | ✅     |
 | 2    | "Heute" (today's path, word of the day) and review focus mode | ✅     |
-| 3    | Unit as a learning path                                       | ☐      |
+| 3    | Unit as a learning path                                       | ✅     |
 | 4    | Listen & read along (player with transcript)                  | ☐      |
 | 5    | Root family and pattern trainer                               | ☐      |
 

@@ -897,3 +897,208 @@ textarea.input {
   font-size: 0.9rem;
   padding: 0.35rem 0.75rem;
 }
+
+/* ---------- Units: book map and learning path ---------- */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: var(--tap);
+  align-self: flex-start;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 600;
+}
+.back-link:hover {
+  color: var(--text);
+}
+
+.unit-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: var(--text);
+  text-decoration: none;
+  border-color: var(--accent);
+}
+.unit-hero > svg {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.unit-hero-number {
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--accent);
+  min-width: 3.5rem;
+  text-align: center;
+}
+
+.unit-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+.unit-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.unit-tile:hover {
+  border-color: var(--accent);
+}
+.unit-tile-current {
+  border: 2px solid var(--accent);
+}
+.unit-tile-number {
+  font-size: 2.4rem;
+  line-height: 1.1;
+  color: var(--text-muted);
+}
+.unit-tile-current .unit-tile-number,
+.unit-tile-done .unit-tile-number {
+  color: var(--accent);
+}
+.unit-tile-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+.unit-tile-done .unit-tile-label svg {
+  color: var(--accent-2);
+}
+.unit-tile-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bg-elev-2);
+  overflow: hidden;
+}
+.unit-tile-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent-2);
+}
+
+.unit-header {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.unit-header > * {
+  position: relative;
+}
+.unit-header-number {
+  position: absolute;
+  top: -1.5rem;
+  right: 0.5rem;
+  font-size: 9rem;
+  line-height: 1;
+  color: var(--bg-elev-2);
+  pointer-events: none;
+}
+
+.path {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.path-station {
+  display: flex;
+  gap: 1rem;
+}
+.path-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.path-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg);
+}
+.path-line {
+  flex-grow: 1;
+  width: 2px;
+  min-height: 1rem;
+  background: var(--border);
+}
+.path-station-done .path-marker {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: var(--on-accent-2);
+}
+.path-station-done .path-line {
+  background: var(--accent-2);
+}
+.path-station-current .path-marker {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-fill) 14%, var(--bg));
+}
+.path-card {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.9rem;
+  padding: 0.65rem 0.25rem;
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+}
+.path-station-current .path-card {
+  padding: 0.9rem 1rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--accent);
+}
+.path-station-upcoming .path-card {
+  opacity: 0.75;
+}
+.path-card:hover .path-card-title {
+  color: var(--accent);
+}
+.path-card-title {
+  font-weight: 700;
+}
+.path-card-detail {
+  font-size: 0.9rem;
+}
+.path-card-cta {
+  margin-top: 0.35rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.lesson-block-focus {
+  border-top-color: var(--accent);
+  scroll-margin-top: 1rem;
+}
+.lesson-block-focus > .row:first-child strong {
+  color: var(--accent);
+}
+
+.unit-title-ar {
+  font-size: clamp(1.9rem, 1.4rem + 2vw, 2.6rem);
+  font-weight: 600;
+  text-align: left;
+}

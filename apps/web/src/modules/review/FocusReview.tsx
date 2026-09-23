@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import type { CardKind } from '@/types';
 import { Icon } from '@/components/Icon';
+import { content } from '@/content';
 import { ReviewSession } from '@/modules/vocab/ReviewSession';
 import { reviewLogRepo } from '@/services/storage';
 import { NEW_PER_DAY, reviewsToday } from '@/services/today';
+import { useContentStore } from '@/state';
 
 /** Due reviews come from every kind, mixed … */
 const ALL_KINDS: CardKind[] = [
@@ -23,6 +25,16 @@ const NEW_KINDS: CardKind[] = ['vocab_ar_de', 'vocab_de_ar'];
  */
 export function FocusReview() {
   const [newLimit, setNewLimit] = useState<number | null>(null);
+  const [params] = useSearchParams();
+  const unit = Number(params.get('unit')) || null;
+  const userVocab = useContentStore((s) => s.userVocab);
+  // With ?unit=n (from a unit's path): only that unit's words, all of them may be new.
+  const unitWords = unit
+    ? [
+        ...content.vokabeln.filter((v) => v.einheit === unit).map((v) => v.id),
+        ...userVocab.filter((v) => v.einheit === unit).map((v) => v.id),
+      ]
+    : null;
 
   useEffect(() => {
     let cancelled = false;
@@ -37,15 +49,20 @@ export function FocusReview() {
 
   return (
     <div className="focus-page">
-      <Link to="/" className="icon-button focus-close" aria-label="Sitzung beenden">
+      <Link
+        to={unit ? `/units/${unit}` : '/'}
+        className="icon-button focus-close"
+        aria-label="Sitzung beenden"
+      >
         <Icon name="close" />
       </Link>
       {newLimit !== null && (
         <ReviewSession
           kinds={ALL_KINDS}
           newKinds={NEW_KINDS}
-          newLimit={newLimit}
-          title="Wiederholen"
+          newLimit={unitWords ? unitWords.length * NEW_KINDS.length : newLimit}
+          contentRefs={unitWords ?? undefined}
+          title={unit ? `Einheit ${unit} · Vokabeln` : 'Wiederholen'}
           variant="focus"
           allowRecognitionAid
         />

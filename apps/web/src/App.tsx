@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { SyncBadge } from './components';
+import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom';
+import { CelebrationToast, SyncBadge } from './components';
 import { Icon } from './components/Icon';
 import { FOCUS_PATHS, isUnderMore, MORE_PATH, NAV_ITEMS } from './navigation';
 import { logger } from './services/logger';
-import { useContentStore, useSettingsStore, useSrsStore, useSyncStore } from './state';
+import {
+  useContentStore,
+  useListenStore,
+  useSettingsStore,
+  useSrsStore,
+  useSyncStore,
+} from './state';
 import './styles/global.css';
 
 /**
@@ -17,6 +23,7 @@ export function App() {
   const loadContent = useContentStore((s) => s.load);
   const loadSrs = useSrsStore((s) => s.load);
   const initSync = useSyncStore((s) => s.init);
+  const loadListening = useListenStore((s) => s.load);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,6 +32,7 @@ export function App() {
       await loadSettings();
       await loadContent();
       await loadSrs();
+      await loadListening();
       initSync();
       if (!cancelled) setReady(true);
     })().catch((error) => {
@@ -37,7 +45,7 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [loadSettings, loadContent, loadSrs, initSync]);
+  }, [loadSettings, loadContent, loadSrs, loadListening, initSync]);
 
   if (!ready) {
     return (
@@ -72,7 +80,9 @@ function Shell() {
   if (FOCUS_PATHS.includes(pathname)) {
     return (
       <main className="focus-main">
+        <ScrollRestoration />
         <Outlet />
+        <CelebrationToast />
       </main>
     );
   }
@@ -114,8 +124,11 @@ function Shell() {
           <SyncBadge />
         </header>
         <main className="app-main">
+          {/* New pages start at the top; back/forward restores the old position. */}
+          <ScrollRestoration />
           <Outlet />
         </main>
+        <CelebrationToast />
       </div>
     </div>
   );

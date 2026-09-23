@@ -37,7 +37,9 @@ describe('Publisher audio (integration)', () => {
     render(<PublisherAudio />);
     await screen.findByRole('heading', { name: 'Einheit 1' });
 
-    await user.click(screen.getByRole('button', { name: '4' }));
+    await user.click(
+      screen.getByRole('button', { name: /^Einheit 4, 0 von \d+ gehört$/ })
+    );
     expect(screen.getByRole('heading', { name: 'Einheit 4' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Vokabeln' }));
@@ -47,7 +49,7 @@ describe('Publisher audio (integration)', () => {
     expect(labels.length).toBeGreaterThan(0);
     expect(labels.every((l) => l.startsWith('Vokabeln:'))).toBe(true);
 
-    await user.click(screen.getByRole('button', { name: 'Abschlusstest' }));
+    await user.click(screen.getByRole('button', { name: /^Abschlusstest, / }));
     expect(screen.getByRole('heading', { name: 'Abschlusstest' })).toBeInTheDocument();
   });
 });

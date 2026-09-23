@@ -10,6 +10,7 @@
 import Dexie, { type Table } from 'dexie';
 import type {
   ExamResult,
+  MediaProgress,
   ReviewLog,
   SettingsRecord,
   SrsCard,
@@ -40,6 +41,8 @@ export class AppDatabase extends Dexie {
   user_vocab!: Table<UserVocab, string>;
   outbox!: Table<OutboxEntry, number>;
   sync_meta!: Table<SyncMeta, string>;
+  /** Local-only until the server has the table (not part of syncableTables yet). */
+  media_progress!: Table<MediaProgress, string>;
 
   constructor(name = 'bayna-yadayk') {
     super(name);
@@ -52,6 +55,10 @@ export class AppDatabase extends Dexie {
       user_vocab: 'id, wurzel, einheit, updated_at, deleted',
       outbox: '++seq, table, recordId, queuedAt',
       sync_meta: 'key',
+    });
+    // v2: listening progress (ADR-0018); existing tables are unchanged.
+    this.version(2).stores({
+      media_progress: 'id, lessonKey, completedAt, updated_at, deleted',
     });
   }
 }

@@ -41,14 +41,21 @@ Teacher assignments with a due date appear as an extra **class quest** (XP set b
 
 ### XP rules (v1)
 
-| Action                                   | XP                                                     |
-| ---------------------------------------- | ------------------------------------------------------ |
-| Review, rating good/easy                 | 2 (hard 1, again 0) — soft cap 150 XP/day from reviews |
-| New card learned (first good)            | 3                                                      |
-| Exam item correct                        | 2; perfect exam +15                                    |
-| Checkpoint correct in a lesson/recording | 3                                                      |
-| Writing/speaking task submitted          | 10 (+5 if AI/teacher grade ≥ 80 %)                     |
-| Daily quest completed                    | per table above                                        |
+| Action                                                             | XP                                                     |
+| ------------------------------------------------------------------ | ------------------------------------------------------ |
+| Review, rating good/easy                                           | 2 (hard 1, again 0) — soft cap 150 XP/day from reviews |
+| New card learned (first good)                                      | 3                                                      |
+| Exam item correct                                                  | 2; perfect exam +15                                    |
+| Checkpoint correct in a lesson/recording                           | 3                                                      |
+| Audio track heard (≥ 85 % actually played, seeking does not count) | 5 — shipped 2026-09-23                                 |
+| All tracks of a lesson heard                                       | +15 bonus — shipped 2026-09-23                         |
+| Writing/speaking task submitted                                    | 10 (+5 if AI/teacher grade ≥ 80 %)                     |
+| Daily quest completed                                              | per table above                                        |
+
+Shipped so far (2026-09-23): review and listening XP computed on the device
+(`apps/web/src/services/engagement/xp.ts`), weekly XP on "Heute", a "+XP" celebration for heard
+tracks and lessons. Listening progress is stored locally (`media_progress`) and joins sync with
+the engagement sprint.
 
 **Levels** follow a gentle curve (`level n` needs `50·n^1.5` XP total). Separately, a
 **mastery ring per unit** shows the percentage of the unit's items with mature cards (≥ 21 d);

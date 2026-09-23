@@ -21,9 +21,16 @@ import {
   masteryBuckets,
   reviewHeatmap,
 } from '@/services/stats';
-import { buildTodayPlan, reviewsToday, wordOfTheDay } from '@/services/today';
+import { buildTodayPlan, localDay, reviewsToday, wordOfTheDay } from '@/services/today';
+import {
+  listeningXpEvents,
+  reviewXpEvents,
+  startOfWeek,
+  sumXp,
+} from '@/services/engagement/xp';
+import { lessonSizes, loadPublisherIndex } from '@/services/audio/publisherIndex';
 import type { TodayStep } from '@/services/today';
-import { useSettingsStore, useSrsStore } from '@/state';
+import { useListenStore, useSettingsStore, useSrsStore } from '@/state';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
   weekday: 'long',
@@ -37,10 +44,23 @@ export function Dashboard() {
   const summary = useSrsStore((s) => s.summary)();
   const dailyGoal = useSettingsStore((s) => s.settings.dailyGoal);
   const [logs, setLogs] = useState<ReviewLog[]>([]);
+  const listening = useListenStore((s) => s.progress);
+  const [sizes, setSizes] = useState<ReadonlyMap<string, number>>(new Map());
 
   useEffect(() => {
     void reviewLogRepo.all().then(setLogs);
   }, [cards]);
+
+  useEffect(() => {
+    let cancelled = false;
+    // Lesson sizes (for lesson bonuses) come from the lazily loaded audio index.
+    void loadPublisherIndex().then((index) => {
+      if (!cancelled) setSizes(lessonSizes(index));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const mastery = masteryBuckets(cards);
   const streak = computeStreak(logs);
@@ -48,6 +68,15 @@ export function Dashboard() {
   const heat = reviewHeatmap(logs);
   const maxHeat = Math.max(1, ...heat.map((h) => h.count));
   const today = reviewsToday(logs);
+  const heard = Object.values(listening).filter((p) => p.completedAt);
+  const todayKey = localDay(new Date());
+  const heardToday = heard.filter(
+    (p) => localDay(new Date(p.completedAt!)) === todayKey
+  ).length;
+  const weekXp = sumXp(
+    [...reviewXpEvents(logs), ...listeningXpEvents(heard, sizes)],
+    startOfWeek()
+  );
   const plan = buildTodayPlan({
     dueCount: summary.dueCount,
     newCount: summary.newCount,
@@ -55,6 +84,7 @@ export function Dashboard() {
     dailyGoal,
     reviewedToday: today.reviewed,
     newLearnedToday: today.newLearned,
+    heardToday,
   });
   const current = plan.steps.find((s) => s.state === 'current');
   const word = wordOfTheDay(content.vokabeln);
@@ -69,22 +99,25 @@ export function Dashboard() {
           <span className="muted">{DATE_FORMAT.format(new Date())}</span>
           <h1>Ahlan wa sahlan</h1>
         </div>
-        <span
-          className="badge"
-          style={{ fontSize: '0.9rem', padding: '0.35rem 0.75rem' }}
-        >
-          <span style={{ color: 'var(--accent)', display: 'inline-flex' }}>
-            <Icon name="flame" size={16} />
+        <div className="row" style={{ gap: '0.5rem' }}>
+          <span className="badge header-chip">
+            <strong style={{ color: 'var(--accent)' }}>{weekXp} XP</strong>
+            <span>diese Woche</span>
           </span>
-          {streak === 0 ? (
-            'Heute starten'
-          ) : (
-            <>
-              {streak === 1 ? '1 Tag' : `${streak} Tage`}
-              <span className="visually-hidden"> in Folge gelernt</span>
-            </>
-          )}
-        </span>
+          <span className="badge header-chip">
+            <span style={{ color: 'var(--accent)', display: 'inline-flex' }}>
+              <Icon name="flame" size={16} />
+            </span>
+            {streak === 0 ? (
+              'Heute starten'
+            ) : (
+              <>
+                {streak === 1 ? '1 Tag' : `${streak} Tage`}
+                <span className="visually-hidden"> in Folge gelernt</span>
+              </>
+            )}
+          </span>
+        </div>
       </header>
 
       <div className="today-grid">

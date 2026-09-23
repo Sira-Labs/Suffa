@@ -24,6 +24,8 @@ export interface TodayInput {
   reviewedToday: number;
   /** Cards whose first review ever happened today. */
   newLearnedToday: number;
+  /** Audio tracks that counted as heard today. */
+  heardToday?: number;
 }
 
 export const REVIEW_PATH = '/review';
@@ -51,7 +53,7 @@ export function buildTodayPlan(input: TodayInput): {
   const done: Record<TodayStep['id'], boolean> = {
     review: input.dueCount === 0,
     new: newToday === 0 || input.newLearnedToday >= NEW_PER_DAY,
-    listen: false, // not tracked yet; always offered
+    listen: (input.heardToday ?? 0) > 0,
   };
 
   const steps: Omit<TodayStep, 'state'>[] = [
@@ -81,7 +83,10 @@ export function buildTodayPlan(input: TodayInput): {
     {
       id: 'listen',
       label: 'Dialog hören',
-      detail: 'Offizielles Audio zum Buch',
+      detail:
+        (input.heardToday ?? 0) > 0
+          ? `${plural(input.heardToday!, 'Aufnahme', 'Aufnahmen')} gehört`
+          : 'Offizielles Audio zum Buch',
       to: '/library',
     },
   ];

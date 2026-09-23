@@ -6,3 +6,4 @@ export * from './RatingButtons';
 export * from './SyncBadge';
 export * from './RecallInput';
 export * from './RouteError';
+export * from './CelebrationToast';

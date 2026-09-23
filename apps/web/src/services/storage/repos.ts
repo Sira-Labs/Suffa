@@ -10,6 +10,7 @@
 import { v4 as uuid } from 'uuid';
 import type {
   ExamResult,
+  MediaProgress,
   ReviewLog,
   SettingsRecord,
   SrsCard,
@@ -174,5 +175,20 @@ export const userVocabRepo = {
       await database.user_vocab.put(updated);
       await enqueue('user_vocab', id, database);
     });
+  },
+};
+
+/* ----------------------------- Listening progress ----------------------------- */
+
+/** Local-only for now: no outbox entry until the server has a media_progress table. */
+// TODO(2026-12-13): sync media_progress with the engagement sprint (S5, ADR-0016).
+export const mediaProgressRepo = {
+  async all(database: AppDatabase = db): Promise<MediaProgress[]> {
+    return database.media_progress.filter((m) => !m.deleted).toArray();
+  },
+  async put(record: MediaProgress, database: AppDatabase = db): Promise<MediaProgress> {
+    const stamped = stamp(record);
+    await database.media_progress.put(stamped);
+    return stamped;
   },
 };

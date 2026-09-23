@@ -90,3 +90,18 @@ describe('wordOfTheDay', () => {
     expect(wordOfTheDay([], new Date())).toBeNull();
   });
 });
+
+describe('buildTodayPlan: listening', () => {
+  it('ticks off "Dialog hören" once a track was heard today', () => {
+    const { steps } = buildTodayPlan({
+      dueCount: 0,
+      newCount: 0,
+      leechCount: 0,
+      dailyGoal: 20,
+      reviewedToday: 3,
+      newLearnedToday: 0,
+      heardToday: 2,
+    });
+    expect(steps[2]).toMatchObject({ state: 'done', detail: '2 Aufnahmen gehört' });
+  });
+});

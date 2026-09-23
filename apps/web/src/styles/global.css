@@ -725,3 +725,175 @@ textarea.input {
   flex-grow: 1;
   justify-content: center;
 }
+
+/* ---------- Celebration ("+5 XP") ---------- */
+
+.celebration-region {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--nav-height) + 1.75rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 60;
+}
+@media (min-width: 960px) {
+  .celebration-region {
+    left: var(--sidebar-width);
+    bottom: 2rem;
+  }
+}
+.celebration {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem 0.85rem 0.85rem;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  border: 1px solid var(--accent);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 35%);
+  animation:
+    celebration-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both,
+    celebration-out 0.35s ease-in 2.45s both;
+  cursor: pointer;
+}
+.celebration-big {
+  padding: 1.1rem 1.6rem 1.1rem 1.1rem;
+  border-width: 2px;
+}
+.celebration-burst {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+}
+.celebration-big .celebration-burst {
+  width: 60px;
+  height: 60px;
+}
+.celebration-medal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  animation: celebration-pop 0.6s cubic-bezier(0.2, 1.6, 0.4, 1) 0.1s both;
+}
+.celebration-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 2px;
+  background: var(--accent-fill);
+  opacity: 0;
+  animation: celebration-particle 0.9s ease-out 0.15s both;
+}
+.celebration-particle-teal {
+  background: var(--accent-2);
+  border-radius: 50%;
+}
+.celebration-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.celebration-xp {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--accent);
+}
+.celebration-big .celebration-xp {
+  font-size: 1.7rem;
+}
+
+@keyframes celebration-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes celebration-out {
+  to {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes celebration-pop {
+  from {
+    transform: scale(0.3);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes celebration-particle {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--angle)) translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(var(--distance)) scale(0.4);
+  }
+}
+
+/* ---------- Listening progress ---------- */
+
+.badge-done {
+  background: color-mix(in srgb, var(--accent-2) 18%, var(--bg-elev));
+  border-color: var(--accent-2);
+  color: var(--text);
+}
+.badge-done svg {
+  color: var(--accent-2);
+}
+/* Unit chips show how much of the unit was heard as a bar along the bottom edge. */
+.unit-chip {
+  position: relative;
+  overflow: hidden;
+  min-width: var(--tap);
+}
+.unit-chip::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: var(--p, 0%);
+  background: var(--accent-2);
+}
+.unit-chip-done {
+  border-color: var(--accent-2);
+}
+.unit-chip-done svg {
+  color: var(--accent-2);
+}
+.btn-accent.unit-chip-done svg {
+  color: var(--on-accent);
+}
+.lesson-block {
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.track-row-heard audio {
+  opacity: 0.85;
+}
+.header-chip {
+  font-size: 0.9rem;
+  padding: 0.35rem 0.75rem;
+}

@@ -69,3 +69,11 @@ precached for offline use (≈ 370 kB); other scripts load on demand.
 | 5    | Root family and pattern trainer                               | ☐      |
 
 Each step ships on its own, tested, so learners never see a half-migrated app.
+
+## Feedback moments
+
+- **Celebration toast** (`CelebrationToast`): "+5 XP · Dialog gehört" with a medal and a small
+  particle burst in saffron and teal; a bigger burst for milestones (whole lesson). Announced via
+  `role="status"`; particles are decorative and disappear under reduced motion.
+- **Listening progress:** a check badge per heard track, "2/3 gehört" per lesson, a progress bar
+  along the bottom of each unit chip, and the whole book's progress on top of the library.

@@ -1,0 +1,16 @@
+/*
+ * Fonts, bundled with the app (offline-first; the CSP allows only same-origin fonts).
+ * Only the subsets we use are precached (see vite.config.ts): Latin for German UI text,
+ * Arabic for the learning content. Browsers fetch a subset only when its characters appear.
+ *
+ * - Manrope: UI text
+ * - Fraunces: display headings
+ * - Amiri: Arabic text with full tashkīl
+ * - Reem Kufi: Arabic display (unit titles, roots)
+ */
+@import '@fontsource-variable/manrope/wght.css';
+@import '@fontsource-variable/fraunces/wght.css';
+@import '@fontsource-variable/reem-kufi/wght.css';
+@import '@fontsource/amiri/arabic-400.css';
+@import '@fontsource/amiri/arabic-700.css';
+@import '@fontsource/amiri/latin-400.css';

@@ -1,0 +1,468 @@
+{
+  "einheit": 10,
+  "titel": "الجَوّ – Das Wetter",
+  "status": "entwurf",
+  "kulturnotiz": "Auf der Arabischen Halbinsel wird es im Sommer über 45 °C heiß; Regen gilt als Segen. Jahreszeiten und Himmelsrichtungen werden mit dem Artikel genannt: الصَّيْف، الشِّتاء.",
+  "vokabeln": [
+    {
+      "id": "v-jaww",
+      "ar": "جَوّ",
+      "tr": "ǧaww",
+      "de": "Wetter; Luft",
+      "wurzel": "ج-و-و",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-shams",
+      "ar": "شَمْس",
+      "tr": "šams",
+      "de": "Sonne",
+      "wurzel": "ش-م-س",
+      "plural": "شُموس",
+      "einheit": 10
+    },
+    {
+      "id": "v-matar",
+      "ar": "مَطَر",
+      "tr": "maṭar",
+      "de": "Regen",
+      "wurzel": "م-ط-ر",
+      "plural": "أَمْطار",
+      "einheit": 10
+    },
+    {
+      "id": "v-rih",
+      "ar": "ريح",
+      "tr": "rīḥ",
+      "de": "Wind",
+      "wurzel": "ر-و-ح",
+      "plural": "رِياح",
+      "einheit": 10
+    },
+    {
+      "id": "v-sahab",
+      "ar": "سَحاب",
+      "tr": "saḥāb",
+      "de": "Wolken",
+      "wurzel": "س-ح-ب",
+      "plural": "سُحُب",
+      "einheit": 10
+    },
+    {
+      "id": "v-thalj",
+      "ar": "ثَلْج",
+      "tr": "ṯalǧ",
+      "de": "Schnee; Eis",
+      "wurzel": "ث-ل-ج",
+      "plural": "ثُلوج",
+      "einheit": 10
+    },
+    {
+      "id": "v-sama",
+      "ar": "سَماء",
+      "tr": "samāʾ",
+      "de": "Himmel",
+      "wurzel": "س-م-و",
+      "plural": "سَماوات",
+      "einheit": 10
+    },
+    {
+      "id": "v-harara",
+      "ar": "حَرارَة",
+      "tr": "ḥarāra",
+      "de": "Wärme; Temperatur",
+      "wurzel": "ح-ر-ر",
+      "plural": null,
+      "einheit": 10,
+      "hinweis": "دَرَجَةُ الْحَرارَةِ = die Temperatur"
+    },
+    {
+      "id": "v-daraja",
+      "ar": "دَرَجَة",
+      "tr": "daraǧa",
+      "de": "Grad; Stufe",
+      "wurzel": "د-ر-ج",
+      "plural": "دَرَجات",
+      "einheit": 10
+    },
+    {
+      "id": "v-harr",
+      "ar": "حارّ",
+      "tr": "ḥārr",
+      "de": "heiß",
+      "wurzel": "ح-ر-ر",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-barid",
+      "ar": "بارِد",
+      "tr": "bārid",
+      "de": "kalt",
+      "wurzel": "ب-ر-د",
+      "wazn": "فاعِل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-mutadil",
+      "ar": "مُعْتَدِل",
+      "tr": "muʿtadil",
+      "de": "mild, gemäßigt",
+      "wurzel": "ع-د-ل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-sayf",
+      "ar": "الصَّيْف",
+      "tr": "aṣ-ṣayf",
+      "de": "Sommer",
+      "wurzel": "ص-ي-ف",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-shita",
+      "ar": "الشِّتاء",
+      "tr": "aš-šitāʾ",
+      "de": "Winter",
+      "wurzel": "ش-ت-و",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-rabi",
+      "ar": "الرَّبيع",
+      "tr": "ar-rabīʿ",
+      "de": "Frühling",
+      "wurzel": "ر-ب-ع",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-kharif",
+      "ar": "الخَريف",
+      "tr": "al-charīf",
+      "de": "Herbst",
+      "wurzel": "خ-ر-ف",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-sana",
+      "ar": "سَنَة",
+      "tr": "sana",
+      "de": "Jahr",
+      "wurzel": "س-ن-و",
+      "plural": "سَنَوات",
+      "einheit": 10
+    },
+    {
+      "id": "v-ghaim",
+      "ar": "غائِم",
+      "tr": "ġāʾim",
+      "de": "bewölkt",
+      "wurzel": "غ-ي-م",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-mushmis",
+      "ar": "مُشْمِس",
+      "tr": "mušmis",
+      "de": "sonnig",
+      "wurzel": "ش-م-س",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-mumtir",
+      "ar": "مُمْطِر",
+      "tr": "mumṭir",
+      "de": "regnerisch",
+      "wurzel": "م-ط-ر",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-shadid",
+      "ar": "شَديد",
+      "tr": "šadīd",
+      "de": "stark, heftig",
+      "wurzel": "ش-د-د",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-qalil",
+      "ar": "قَليل",
+      "tr": "qalīl",
+      "de": "wenig",
+      "wurzel": "ق-ل-ل",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-kathir",
+      "ar": "كَثير",
+      "tr": "kaṯīr",
+      "de": "viel",
+      "wurzel": "ك-ث-ر",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-limadha",
+      "ar": "لِماذا",
+      "tr": "li-māḏā",
+      "de": "warum?",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-uhibbu",
+      "ar": "أُحِبُّ",
+      "tr": "uḥibbu",
+      "de": "ich liebe, ich mag",
+      "wurzel": "ح-ب-ب",
+      "plural": null,
+      "einheit": 10,
+      "hinweis": "تُحِبُّ = du magst"
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-10-1",
+      "einheit": 10,
+      "dialog": 1,
+      "titel": "كَيْفَ الْجَوُّ؟",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "كَيْفَ الْجَوُّ في الرِّياضِ الْيَوْمَ؟",
+          "de": "Wie ist das Wetter heute in Riad?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "الْجَوُّ حارٌّ جِدّاً، وَالشَّمْسُ تَسْطَعُ.",
+          "de": "Es ist sehr heiß, und die Sonne scheint."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "كَمْ دَرَجَةُ الْحَرارَةِ؟",
+          "de": "Wie hoch ist die Temperatur?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَرْبَعونَ دَرَجَةً! وَكَيْفَ الْجَوُّ في أَلْمانِيا؟",
+          "de": "Vierzig Grad! Und wie ist das Wetter in Deutschland?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "الْجَوُّ بارِدٌ وَغائِمٌ، وَالْمَطَرُ يَنْزِلُ.",
+          "de": "Es ist kalt und bewölkt, und es regnet."
+        }
+      ]
+    },
+    {
+      "id": "d-10-2",
+      "einheit": 10,
+      "dialog": 2,
+      "titel": "أَيُّ فَصْلٍ تُحِبُّ؟",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "أَيُّ فَصْلٍ تُحِبُّ يا يوسُفُ؟",
+          "de": "Welche Jahreszeit magst du, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أُحِبُّ الرَّبيعَ لِأَنَّ الْجَوَّ مُعْتَدِلٌ.",
+          "de": "Ich mag den Frühling, weil das Wetter mild ist."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أَنا أُحِبُّ الشِّتاءَ.",
+          "de": "Ich mag den Winter."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "لِماذا؟",
+          "de": "Warum?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "لِأَنَّ الثَّلْجَ يَنْزِلُ في الشِّتاءِ في بَلَدي.",
+          "de": "Weil in meinem Land im Winter Schnee fällt."
+        }
+      ]
+    },
+    {
+      "id": "d-10-3",
+      "einheit": 10,
+      "dialog": 3,
+      "titel": "الْبَرْدُ",
+      "zeilen": [
+        {
+          "sp": "عُمَر",
+          "ar": "الْجَوُّ بارِدٌ الْيَوْمَ!",
+          "de": "Heute ist es kalt!"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، وَالرّيحُ شَديدَةٌ.",
+          "de": "Ja, und der Wind ist stark."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَنا لا أُحِبُّ الْبَرْدَ.",
+          "de": "Ich mag die Kälte nicht."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "وَأَنا أُحِبُّهُ! الْجَوُّ في الصَّيْفِ حارٌّ جِدّاً.",
+          "de": "Und ich mag sie! Im Sommer ist es sehr heiß."
+        }
+      ]
+    }
+  ],
+  "grammatik": [
+    {
+      "id": "g-10-1",
+      "einheit": 10,
+      "abschnitt": 1,
+      "titel": "Der Vergleich: أَكْبَرُ مِنْ",
+      "regel": "أَفْعَلُ مِنْ = …er als",
+      "erklaerung": [
+        "Der Komparativ hat die Form أَفْعَلُ und ändert sich nicht nach Geschlecht: كَبير → أَكْبَرُ, بارِد → أَبْرَدُ.",
+        "„als“ heißt مِنْ: الشِّتاءُ أَبْرَدُ مِنَ الْخَريفِ."
+      ],
+      "beispiele": [
+        {
+          "ar": "الصَّيْفُ أَحَرُّ مِنَ الرَّبيعِ.",
+          "de": "Der Sommer ist heißer als der Frühling."
+        },
+        {
+          "ar": "الْيَوْمُ أَبْرَدُ مِنْ أَمْسِ.",
+          "de": "Heute ist es kälter als gestern."
+        },
+        {
+          "ar": "مَكَّةُ أَحَرُّ مِنْ بَرْلينَ.",
+          "de": "Mekka ist heißer als Berlin."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-10-1#0",
+          "frage": "Komparativ von صَغيرٌ",
+          "ar": null,
+          "antwort": "أَصْغَرُ",
+          "ablenker": ["صُغْرى", "صَغيرَةٌ", "مُصَغَّرٌ"]
+        },
+        {
+          "id": "g-10-1#1",
+          "frage": "„Sie ist größer als ich.“",
+          "ar": null,
+          "antwort": "هِيَ أَكْبَرُ مِنّي.",
+          "ablenker": [
+            "هِيَ كُبْرى مِنّي.",
+            "هِيَ أَكْبَرُ مِنْ أَنا.",
+            "هِيَ كَبيرَةٌ مِنّي."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g-10-2",
+      "einheit": 10,
+      "abschnitt": 2,
+      "titel": "Welcher? – أَيُّ",
+      "regel": "أَيُّ + Nomen im Genitiv, unbestimmt: أَيُّ فَصْلٍ؟",
+      "erklaerung": [
+        "أَيُّ bildet eine Genitivverbindung mit einem unbestimmten Nomen: أَيُّ يَوْمٍ؟ أَيُّ لَوْنٍ؟",
+        "Die Antwort nennt das Gemeinte: أُحِبُّ الرَّبيعَ – Ich mag den Frühling."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَيُّ فَصْلٍ تُحِبُّ؟",
+          "de": "Welche Jahreszeit magst du?"
+        },
+        {
+          "ar": "في أَيِّ شَهْرٍ؟",
+          "de": "In welchem Monat?"
+        },
+        {
+          "ar": "أَيُّ يَوْمٍ الْيَوْمَ؟",
+          "de": "Welcher Tag ist heute?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-10-2#0",
+          "frage": "„Welche Stadt?“",
+          "ar": null,
+          "antwort": "أَيُّ مَدينَةٍ؟",
+          "ablenker": ["أَيُّ الْمَدينَةُ؟", "أَيُّ مَدينَةٌ؟", "ما مَدينَةٍ؟"]
+        },
+        {
+          "id": "g-10-2#1",
+          "frage": "In welcher Form steht das Nomen nach أَيُّ?",
+          "ar": null,
+          "antwort": "unbestimmt, Genitiv",
+          "ablenker": ["bestimmt, Nominativ", "Plural", "Akkusativ"]
+        }
+      ]
+    },
+    {
+      "id": "g-10-3",
+      "einheit": 10,
+      "abschnitt": 3,
+      "titel": "كانَ – war",
+      "regel": "كانَ + Prädikat im Akkusativ: كانَ الْجَوُّ بارِداً",
+      "erklaerung": [
+        "كانَ macht einen Nominalsatz zur Vergangenheit. Das Prädikat steht dann im Akkusativ (-an).",
+        "Es wird konjugiert wie ein Perfekt: كُنْتُ, كُنْتَ, كانَتْ."
+      ],
+      "beispiele": [
+        {
+          "ar": "كانَ الْجَوُّ جَميلاً.",
+          "de": "Das Wetter war schön."
+        },
+        {
+          "ar": "كانَتِ السَّماءُ صافِيَةً.",
+          "de": "Der Himmel war klar."
+        },
+        {
+          "ar": "كُنْتُ مَريضاً أَمْسِ.",
+          "de": "Ich war gestern krank."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-10-3#0",
+          "frage": "„Es war kalt.“ (der Tag)",
+          "ar": null,
+          "antwort": "كانَ الْيَوْمُ بارِداً.",
+          "ablenker": [
+            "كانَ الْيَوْمُ بارِدٌ.",
+            "الْيَوْمُ كانَ بارِدٌ.",
+            "كانَتِ الْيَوْمُ بارِدَةً."
+          ]
+        },
+        {
+          "id": "g-10-3#1",
+          "frage": "„Ich war beschäftigt.“ (m)",
+          "ar": null,
+          "antwort": "كُنْتُ مَشْغولاً.",
+          "ablenker": ["كانَ مَشْغولٌ.", "كُنْتُ مَشْغولٌ.", "أَنا كانَ مَشْغولاً."]
+        }
+      ]
+    }
+  ]
+}

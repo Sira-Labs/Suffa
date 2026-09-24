@@ -1,44 +1,78 @@
-# ADR-0002: Offline-first Sync mit Last-Write-Wins
+# ADR-0002: Offline-first sync with last-write-wins
 
-- Status: akzeptiert
-- Datum: 2026-06-13
+- Status: accepted
+- Date: 2026-06-13
 
-## Kontext
+## Context
 
-Der Lernstand muss über mehrere Geräte (Handy + Desktop) eines Nutzers
-abgleichbar sein, während die App **offline** voll funktioniert. Echte
-gleichzeitige Bearbeitung desselben Datensatzes auf zwei Geräten ist selten.
+A user's learning progress must be syncable across several devices (phone + desktop) while the
+app works fully **offline**. Truly concurrent editing of the same record on two devices is rare.
 
-## Entscheidung
+## Decision
 
-- **IndexedDB (Dexie) ist die Single Source of Truth** auf dem Gerät. Die UI
-  liest/schreibt ausschließlich lokal.
-- Jeder synchronisierbare Datensatz trägt `id` (UUID bzw. deterministische ID),
-  `updated_at` (ISO) und `deleted` (Soft-Delete-Tombstone).
-- **Persistente Mutation-Queue (Outbox)**: jede lokale Schreiboperation legt
-  einen Outbox-Eintrag an. Ein Sync-Zyklus macht **push → pull → reconcile**.
-- **Konfliktlösung: Last-Write-Wins pro Datensatz** über `updated_at`
-  (`src/services/sync/reconcile.ts`). Ganzer Datensatz gewinnt, kein Feld-Merge.
-- Soft-Deletes nehmen als normaler Datensatz am LWW teil (eine neuere Bearbeitung
-  kann eine ältere Löschung überstimmen und umgekehrt).
-- Schlägt push/pull fehl, bleibt die Outbox erhalten → kein Datenverlust, der
-  nächste Zyklus versucht es erneut.
+- **IndexedDB (Dexie) is the single source of truth** on the device. The UI reads and writes
+  locally only.
+- Every syncable record carries `id` (UUID or deterministic ID), `updated_at` (ISO) and
+  `deleted` (soft-delete tombstone).
+- **Persistent mutation queue (outbox)**: every local write creates an outbox entry. A sync
+  cycle runs **push → pull → reconcile**.
+- **Conflict resolution: last-write-wins per record** via `updated_at`
+  (`src/services/sync/reconcile.ts`). The whole record wins; no field-level merge.
+- Soft deletes take part in LWW like any other record (a newer edit can override an older
+  deletion and vice versa).
+- If push/pull fails, the outbox is kept → no data loss; the next cycle retries.
 
-## Begründung der deterministischen Karten-IDs
+## Rationale for deterministic card IDs
 
-SRS-Karten erhalten die ID `kind:contentRef` (z. B. `vocab_ar_de:v-ism`). Legen
-zwei Geräte vor dem ersten Sync dieselbe logische Karte an, teilen sie sich die
-ID und werden per LWW zusammengeführt statt dupliziert. Da diese IDs nur **pro
-Nutzer** eindeutig sind, ist der Primärschlüssel im Backend `(user_id, id)` und
-der Upsert nutzt `onConflict='user_id,id'`.
+SRS cards get the ID `kind:contentRef` (e.g. `vocab_ar_de:v-ism`). If two devices create the
+same logical card before the first sync, they share the ID and are merged via LWW instead of
+being duplicated. Since these IDs are only unique **per user**, the backend primary key is
+`(user_id, id)` and the upsert uses `onConflict='user_id,id'`.
 
-## Alternativen
+## Alternatives
 
-- **CRDTs / operationales Merge**: robuster bei echter Nebenläufigkeit, aber
-  deutlich komplexer. Für persönliche Lerndaten überdimensioniert.
+- **CRDTs / operational merge**: more robust under true concurrency, but considerably more
+  complex. Overkill for personal learning data.
 
-## Konsequenzen
+## Consequences
 
-Einfache, vorhersagbare Semantik. Theoretischer Nachteil: bei echter
-gleichzeitiger Bearbeitung kann eine Änderung verloren gehen (die ältere). Für
-Einzelnutzer-Lerndaten akzeptabel.
+Simple, predictable semantics. Theoretical drawback: with truly concurrent editing one change
+(the older one) can be lost. Acceptable for single-user learning data.
+
+## Update 2026-09-24: cards weigh reviews, not timestamps
+
+Plain last-write-wins lost learning progress between two devices: every device creates
+missing SRS cards with a fresh `updated_at` when the app starts, so a card another device
+had merely created beat the same card reviewed earlier. Now:
+
+- **SRS cards:** the version with the later `lastReviewed` wins; `updated_at` only breaks
+  ties (`cardPrecedence` in the app, the same rule in the API's upsert). A local winner with
+  an older timestamp is re-stamped before the push, so other devices' pulls see it.
+- **Repair:** review logs are append-only and reach every device intact. After each sync, a
+  card whose logs are ahead of it is rebuilt by replaying them (scheduling has no fuzz, so
+  the result is identical on every device) and pushed.
+- All other tables keep plain last-write-wins.
+
+## Update 2026-09-24: progress is synced too
+
+Unit practice (`practice_progress`, which unlocks units and earns XP), started units
+(`unit_enrollments`), daily check-ins, "Entdecken" progress and listening progress
+(`media_progress`) are synced like the original five tables (API migration 0006). Their ids
+are deterministic (e.g. `unit:skill:item`, the day, the track), so two devices' progress
+merges as a union and XP counts each item once. Listening progress keeps a finished track
+finished (`listeningPrecedence`, same rule in the API). Dexie schema version 7 queues what a
+device already had, once, so existing progress reaches the account on the first sync. The
+legacy Supabase backend keeps these tables local (`supportsTable`).
+
+## Update 2026-09-24: pull by server time, sync automatically
+
+The pull watermark was the newest `updated_at` a device had seen. A device that uploads its
+existing data later (e.g. after the progress tables joined sync) pushes old `updated_at`
+values, and devices that had pulled before never received them. Now the server stamps every
+insert and update with its own time (`synced_at`, API migration 0007) and pulls page by
+`(synced_at, id)`; the response carries that time as `watermark`, and devices pull from it
+with a two-minute overlap for writes in flight. The old watermarks were dropped, so every
+device pulls everything once.
+
+The app also syncs by itself: when it returns to the foreground, every five minutes while
+visible, and within a minute of local changes (at most every 30 s; `autoSync.ts`).

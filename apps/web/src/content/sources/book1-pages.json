@@ -1,0 +1,24 @@
+{
+  "book": 1,
+  "status": "estimated",
+  "note": "First book page of each unit, estimated from the publisher's page videos (unit title cards and topics). Confirm against the printed book and set status to 'verified'.",
+  "lastPage": 440,
+  "unitStartPages": {
+    "1": 1,
+    "2": 26,
+    "3": 55,
+    "4": 81,
+    "5": 108,
+    "6": 136,
+    "7": 163,
+    "8": 192,
+    "9": 219,
+    "10": 247,
+    "11": 275,
+    "12": 302,
+    "13": 330,
+    "14": 358,
+    "15": 386,
+    "16": 415
+  }
+}

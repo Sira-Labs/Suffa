@@ -131,9 +131,15 @@ tashkīl validator; tutor cannot read another user's data (tool-level authorisat
 ### F6 — Learning core upgrades _(Should)_
 
 - **FSRS** scheduler behind the existing `schedule()` interface (ADR-0001 already anticipates it).
-- Server-side **pronunciation scoring** (ADR-0015) as an alternative to browser STT.
+- **Pronunciation assessment** with Arabic speech models: letter-level feedback on the
+  sounds learners struggle with (ع ح ق ص ض ط ظ, hamza, vowel length, shadda), chosen by an
+  evaluation against teacher ratings (ADR-0015, ADR-0022).
 - Content growth: all 16 units of Book 1, then Book 2; audio per vocab item.
-- UI languages: German (existing) → English → Arabic UI (RTL chrome).
+- Languages: separate settings for UI, tutoring and meaning language — German (today),
+  English, later Arabic UI with RTL chrome (ADR-0021).
+- **Tolerant answer checking** (shipped 2026-09-23): any one of several meanings counts
+  („Ort“ for بَلَد = „Land, Ort“), optional parts, articles, umlaut spellings and small typos
+  are accepted; the other meanings are shown after answering.
 
 ### F7 — Engagement: daily & weekly achievements _(Must — pilot)_
 

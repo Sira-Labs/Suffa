@@ -35,3 +35,6 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+# TypeScript incremental build info (local build state)
+*.tsbuildinfo

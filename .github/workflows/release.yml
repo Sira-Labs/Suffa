@@ -1,7 +1,8 @@
 name: release
 
-# Builds the suffa-web and suffa-api images, publishes them to GHCR and (optionally) deploys
-# them to CapRover. Mirrors Tabayyun's release workflow.
+# Runs the CI checks, builds the suffa-web and suffa-api images, smoke-tests each image in a
+# real container, publishes them to GHCR and (optionally) deploys them to CapRover.
+# Nothing is pushed or deployed unless the checks and the smoke tests pass.
 # The feature branch is included until it is merged, so images exist for the first deploy.
 # TODO(2026-10-05): remove the feature branch trigger once it is merged into main.
 on:
@@ -16,8 +17,13 @@ env:
   IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/suffa
 
 jobs:
+  checks:
+    name: ci checks
+    uses: ./.github/workflows/ci.yml
+
   images:
-    name: build and publish ${{ matrix.name }}
+    name: build, smoke-test and publish ${{ matrix.name }}
+    needs: checks
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -31,17 +37,106 @@ jobs:
             dockerfile: infra/docker/web.Dockerfile
           - name: api
             dockerfile: infra/docker/api.Dockerfile
+          - name: backup
+            dockerfile: infra/docker/backup.Dockerfile
+    # Real database for the api smoke test (unused by the web job).
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: suffa
+          POSTGRES_PASSWORD: smoke0123456789abcdef
+          POSTGRES_DB: suffa
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U suffa" --health-interval 2s --health-timeout 5s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - id: tag
         run: echo "tag=sha-$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
       - uses: docker/setup-buildx-action@v3
+      - name: build image (local, for the smoke test)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          load: true
+          tags: smoke/suffa-${{ matrix.name }}:test
+          # web: sync settings compiled into the PWA (VITE_SYNC_BACKEND=off = offline build).
+          # api: version string reported by /api/version.
+          build-args: |
+            VITE_SYNC_BACKEND=${{ vars.VITE_SYNC_BACKEND }}
+            VITE_SYNC_ENABLED=${{ vars.VITE_SYNC_ENABLED || 'true' }}
+            SUFFA_VERSION=${{ steps.tag.outputs.tag }}
+          cache-from: type=gha,scope=${{ matrix.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+      - name: smoke test web
+        if: matrix.name == 'web'
+        run: |
+          docker run -d --name web -p 8080:80 smoke/suffa-web:test
+          for i in $(seq 1 20); do curl -fsS http://127.0.0.1:8080/healthz-web && break; sleep 1; done
+          # The health endpoint must answer itself (not the SPA fallback) and name the image.
+          curl -fsS http://127.0.0.1:8080/healthz-web | grep -q '"role":"web","version":"${{ steps.tag.outputs.tag }}"'
+          curl -fsS http://127.0.0.1:8080/ | grep -q '<title>Suffa'
+          curl -fsS -o /dev/null http://127.0.0.1:8080/brand/suffa-mark.svg
+          curl -fsS http://127.0.0.1:8080/some/deep/link | grep -q '<div id="root">'
+      - name: smoke test api + worker
+        if: matrix.name == 'api'
+        env:
+          DB: postgres://suffa:smoke0123456789abcdef@127.0.0.1:5432/suffa
+        run: |
+          SECRET=$(openssl rand -hex 32)
+          run() { docker run --network host -e SUFFA_ENV=prod -e SUFFA_DATABASE_URL="$DB" -e SUFFA_AUTH_SECRET="$SECRET" -e SUFFA_PUBLIC_URL=http://127.0.0.1:8080 "$@"; }
+          # A worker started before the api has migrated must exit with code 3.
+          set +e; run --rm -e SUFFA_ROLE=worker smoke/suffa-api:test; code=$?; set -e
+          test "$code" = 3 || { echo "expected worker exit 3, got $code"; exit 1; }
+          run -d --name api smoke/suffa-api:test
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8000/healthz && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8000/healthz | grep -q '"status":"ok"'
+          # The job queue (pg-boss) is installed and its depth reported (ADR-0020).
+          curl -fsS http://127.0.0.1:8000/healthz | grep -q '"queue":{"waiting":0'
+          # Error tracking is off without a DSN, and the PWA is told so.
+          curl -fsS http://127.0.0.1:8000/api/client-config | grep -q '"errorDsn":null'
+          # Sync stays closed without a signed-in session.
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/v1/sync/srs_cards/pull)" = 401
+          # Without SMTP the api runs, but sign-in stays off (ADR-0008) and says so in the log.
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/v1/me)" = 404
+          docker logs api 2>&1 | grep -q 'auth.disabled' || { docker logs api; exit 1; }
+          run -d --name worker -e SUFFA_ROLE=worker smoke/suffa-api:test
+          sleep 3
+          docker logs worker 2>&1 | grep -q 'worker.start' || { docker logs worker; exit 1; }
+          # A redeploy sends SIGTERM: the worker drains the queue and exits cleanly, well
+          # before Docker's 10 s kill timeout.
+          start=$(date +%s); docker stop worker >/dev/null; took=$(( $(date +%s) - start ))
+          test "$(docker inspect -f '{{.State.ExitCode}}' worker)" = 0 || { docker logs worker; exit 1; }
+          test "$took" -lt 8 || { echo "worker took ${took}s to stop"; exit 1; }
+          docker logs api | tail -5
+      - name: smoke test backup (dump, verify, upload, restore)
+        if: matrix.name == 'backup'
+        env:
+          DB: postgres://suffa:smoke0123456789abcdef@127.0.0.1:5432/suffa
+        run: |
+          mkdir -p /tmp/backups && chmod 777 /tmp/backups
+          psql "$DB" -qc "create table smoke (id int primary key, word text); insert into smoke values (1, 'بَلَد')"
+          psql "$DB" -qc "create database restore_smoke"
+          run() { docker run --rm --network host -v /tmp/backups:/backups -e SUFFA_BACKUP_LOCAL_DIR=/backups "$@"; }
+          run -e SUFFA_BACKUP_MODE=once -e SUFFA_BACKUP_DATABASE_URL="$DB" smoke/suffa-backup:test
+          find /tmp/backups -name 'suffa-*.dump' | grep -q dump
+          # Restoring into the production URL must be refused (exit 2).
+          set +e; run --entrypoint /opt/suffa-backup/restore.sh -e SUFFA_BACKUP_DATABASE_URL="$DB" \
+            -e SUFFA_RESTORE_DATABASE_URL="$DB" smoke/suffa-backup:test latest; code=$?; set -e
+          test "$code" = 2
+          run --entrypoint /opt/suffa-backup/restore.sh -e SUFFA_BACKUP_DATABASE_URL="$DB" \
+            -e SUFFA_RESTORE_DATABASE_URL="${DB%/suffa}/restore_smoke" smoke/suffa-backup:test latest
+          test "$(psql "${DB%/suffa}/restore_smoke" -tAc 'select word from smoke where id = 1')" = 'بَلَد'
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
+      - name: publish image
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ${{ matrix.dockerfile }}
@@ -49,15 +144,11 @@ jobs:
           tags: |
             ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:${{ steps.tag.outputs.tag }}
             ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:latest
-          # web: public values compiled into the PWA (anon key is protected by RLS); empty = offline build.
-          # api: version string reported by /api/version.
           build-args: |
-            VITE_SUPABASE_URL=${{ vars.VITE_SUPABASE_URL }}
-            VITE_SUPABASE_ANON_KEY=${{ vars.VITE_SUPABASE_ANON_KEY }}
+            VITE_SYNC_BACKEND=${{ vars.VITE_SYNC_BACKEND }}
             VITE_SYNC_ENABLED=${{ vars.VITE_SYNC_ENABLED || 'true' }}
             SUFFA_VERSION=${{ steps.tag.outputs.tag }}
           cache-from: type=gha,scope=${{ matrix.name }}
-          cache-to: type=gha,mode=max,scope=${{ matrix.name }}
 
   deploy-caprover:
     name: deploy to CapRover
@@ -71,9 +162,11 @@ jobs:
         env:
           API_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_API }}
           WORKER_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
+          BACKUP_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
         run: |
           echo "api=$([ -n "$API_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "worker=$([ -n "$WORKER_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "backup=$([ -n "$BACKUP_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
       # Order matters: the api migrates the schema; the worker waits for it (exit code 3).
       - name: deploy api
         if: steps.gate.outputs.api == 'true'
@@ -91,6 +184,14 @@ jobs:
           app: ${{ vars.CAPROVER_APP_WORKER || 'suffa-worker' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
           image: ${{ env.IMAGE_PREFIX }}-api:${{ needs.images.outputs.tag }}
+      - name: deploy backup
+        if: steps.gate.outputs.backup == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER }}
+          app: ${{ vars.CAPROVER_APP_BACKUP || 'suffa-backup' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
+          image: ${{ env.IMAGE_PREFIX }}-backup:${{ needs.images.outputs.tag }}
       - name: deploy web
         uses: caprover/deploy-from-github@v2
         with:

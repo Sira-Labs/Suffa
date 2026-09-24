@@ -1,0 +1,493 @@
+{
+  "einheit": 4,
+  "titel": "الحَياة اليَوْمِيَّة – Der Tagesablauf",
+  "status": "entwurf",
+  "kulturnotiz": "Der Tag vieler Muslime ist durch die fünf Gebete gegliedert: الفجر، الظهر، العصر، المغرب، العشاء. Uhrzeiten werden mit Ordnungszahlen angegeben: السّاعةُ الخامسةُ = fünf Uhr.",
+  "vokabeln": [
+    {
+      "id": "v-yawm",
+      "ar": "يَوْم",
+      "tr": "yawm",
+      "de": "Tag",
+      "wurzel": "ي-و-م",
+      "plural": "أَيّام",
+      "einheit": 4
+    },
+    {
+      "id": "v-sabahan",
+      "ar": "صَباحاً",
+      "tr": "ṣabāḥan",
+      "de": "morgens",
+      "wurzel": "ص-ب-ح",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-masaan",
+      "ar": "مَساءً",
+      "tr": "masāʾan",
+      "de": "abends",
+      "wurzel": "م-س-و",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-layl",
+      "ar": "لَيْل",
+      "tr": "layl",
+      "de": "Nacht",
+      "wurzel": "ل-ي-ل",
+      "plural": "لَيالٍ",
+      "einheit": 4
+    },
+    {
+      "id": "v-zuhr",
+      "ar": "ظُهْر",
+      "tr": "ẓuhr",
+      "de": "Mittag; Mittagsgebet",
+      "wurzel": "ظ-ه-ر",
+      "plural": null,
+      "einheit": 4,
+      "hinweis": "بَعْدَ الظُّهْرِ = nachmittags"
+    },
+    {
+      "id": "v-saa",
+      "ar": "ساعَة",
+      "tr": "sāʿa",
+      "de": "Stunde; Uhr",
+      "wurzel": "س-و-ع",
+      "plural": "ساعات",
+      "einheit": 4,
+      "hinweis": "كَمِ السّاعَةُ؟ = Wie spät ist es?"
+    },
+    {
+      "id": "v-waqt",
+      "ar": "وَقْت",
+      "tr": "waqt",
+      "de": "Zeit",
+      "wurzel": "و-ق-ت",
+      "plural": "أَوْقات",
+      "einheit": 4
+    },
+    {
+      "id": "v-fajr",
+      "ar": "فَجْر",
+      "tr": "faǧr",
+      "de": "Morgendämmerung; Morgengebet",
+      "wurzel": "ف-ج-ر",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-salat",
+      "ar": "صَلاة",
+      "tr": "ṣalāh",
+      "de": "Gebet",
+      "wurzel": "ص-ل-و",
+      "plural": "صَلَوات",
+      "einheit": 4
+    },
+    {
+      "id": "v-masjid",
+      "ar": "مَسْجِد",
+      "tr": "masǧid",
+      "de": "Moschee",
+      "wurzel": "س-ج-د",
+      "wazn": "مَفْعِل",
+      "plural": "مَساجِد",
+      "einheit": 4
+    },
+    {
+      "id": "v-madrasa",
+      "ar": "مَدْرَسَة",
+      "tr": "madrasa",
+      "de": "Schule",
+      "wurzel": "د-ر-س",
+      "wazn": "مَفْعَلَة",
+      "plural": "مَدارِس",
+      "einheit": 4
+    },
+    {
+      "id": "v-amal",
+      "ar": "عَمَل",
+      "tr": "ʿamal",
+      "de": "Arbeit",
+      "wurzel": "ع-م-ل",
+      "plural": "أَعْمال",
+      "einheit": 4
+    },
+    {
+      "id": "v-futur",
+      "ar": "فُطور",
+      "tr": "fuṭūr",
+      "de": "Frühstück",
+      "wurzel": "ف-ط-ر",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-ghada",
+      "ar": "غَداء",
+      "tr": "ġadāʾ",
+      "de": "Mittagessen",
+      "wurzel": "غ-د-و",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-asha",
+      "ar": "عَشاء",
+      "tr": "ʿašāʾ",
+      "de": "Abendessen",
+      "wurzel": "ع-ش-و",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-sayyara",
+      "ar": "سَيّارَة",
+      "tr": "sayyāra",
+      "de": "Auto",
+      "wurzel": "س-ي-ر",
+      "plural": "سَيّارات",
+      "einheit": 4
+    },
+    {
+      "id": "v-hafila",
+      "ar": "حافِلَة",
+      "tr": "ḥāfila",
+      "de": "Bus",
+      "wurzel": "ح-ف-ل",
+      "plural": "حافِلات",
+      "einheit": 4
+    },
+    {
+      "id": "v-kitab",
+      "ar": "كِتاب",
+      "tr": "kitāb",
+      "de": "Buch",
+      "wurzel": "ك-ت-ب",
+      "wazn": "فِعال",
+      "plural": "كُتُب",
+      "einheit": 4
+    },
+    {
+      "id": "v-dars",
+      "ar": "دَرْس",
+      "tr": "dars",
+      "de": "Lektion; Unterricht",
+      "wurzel": "د-ر-س",
+      "plural": "دُروس",
+      "einheit": 4
+    },
+    {
+      "id": "v-wajib",
+      "ar": "واجِب",
+      "tr": "wāǧib",
+      "de": "Hausaufgabe; Pflicht",
+      "wurzel": "و-ج-ب",
+      "wazn": "فاعِل",
+      "plural": "واجِبات",
+      "einheit": 4
+    },
+    {
+      "id": "v-mubakkiran",
+      "ar": "مُبَكِّراً",
+      "tr": "mubakkiran",
+      "de": "früh",
+      "wurzel": "ب-ك-ر",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-thumma",
+      "ar": "ثُمَّ",
+      "tr": "ṯumma",
+      "de": "dann, danach",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-qabla",
+      "ar": "قَبْلَ",
+      "tr": "qabla",
+      "de": "vor (zeitlich)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-bada",
+      "ar": "بَعْدَ",
+      "tr": "baʿda",
+      "de": "nach (zeitlich)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-mata",
+      "ar": "مَتى",
+      "tr": "matā",
+      "de": "wann?",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-ila",
+      "ar": "إِلى",
+      "tr": "ilā",
+      "de": "zu, nach (Richtung)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 4
+    },
+    {
+      "id": "v-kull",
+      "ar": "كُلّ",
+      "tr": "kull",
+      "de": "jeder, alle",
+      "wurzel": "ك-ل-ل",
+      "plural": null,
+      "einheit": 4,
+      "hinweis": "كُلَّ يَوْمٍ = jeden Tag"
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-4-1",
+      "einheit": 4,
+      "dialog": 1,
+      "titel": "يَوْمُ عُمَرَ",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "مَتى تَذْهَبُ إِلى الْجامِعَةِ يا عُمَرُ؟",
+          "de": "Wann gehst du zur Universität, ʿUmar?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَذْهَبُ صَباحاً بَعْدَ الْفُطورِ.",
+          "de": "Ich gehe morgens nach dem Frühstück."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "هَلْ تَذْهَبُ بِالسَّيّارَةِ؟",
+          "de": "Fährst du mit dem Auto?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "لا، أَذْهَبُ بِالْحافِلَةِ.",
+          "de": "Nein, ich fahre mit dem Bus."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "وَمَتى تَرْجِعُ إِلى الْبَيْتِ؟",
+          "de": "Und wann kommst du nach Hause zurück?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَرْجِعُ بَعْدَ الظُّهْرِ، ثُمَّ أَكْتُبُ الْواجِبَ.",
+          "de": "Ich komme nachmittags zurück, dann schreibe ich die Hausaufgabe."
+        }
+      ]
+    },
+    {
+      "id": "d-4-2",
+      "einheit": 4,
+      "dialog": 2,
+      "titel": "صَلاةُ الْفَجْرِ",
+      "zeilen": [
+        {
+          "sp": "الْأَب",
+          "ar": "يا يوسُفُ، الصَّلاةُ!",
+          "de": "Yūsuf, das Gebet!"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "كَمِ السّاعَةُ يا أَبي؟",
+          "de": "Wie spät ist es, Vater?"
+        },
+        {
+          "sp": "الْأَب",
+          "ar": "السّاعَةُ الْخامِسَةُ.",
+          "de": "Es ist fünf Uhr."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَخْرُجُ إِلى الْمَسْجِدِ مَعاً؟",
+          "de": "Gehen wir zusammen zur Moschee?"
+        },
+        {
+          "sp": "الْأَب",
+          "ar": "نَعَمْ، ثُمَّ نَرْجِعُ لِلْفُطورِ.",
+          "de": "Ja, danach kommen wir zum Frühstück zurück."
+        }
+      ]
+    },
+    {
+      "id": "d-4-3",
+      "einheit": 4,
+      "dialog": 3,
+      "titel": "مَتى نِمْتَ؟",
+      "zeilen": [
+        {
+          "sp": "الْأُمّ",
+          "ar": "مَتى نِمْتَ أَمْسِ يا يوسُفُ؟",
+          "de": "Wann bist du gestern schlafen gegangen, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نِمْتُ السّاعَةَ الْعاشِرَةَ.",
+          "de": "Ich bin um zehn Uhr schlafen gegangen."
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "وَمَتى اسْتَيْقَظْتَ؟",
+          "de": "Und wann bist du aufgewacht?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "اِسْتَيْقَظْتُ مُبَكِّراً لِصَلاةِ الْفَجْرِ.",
+          "de": "Ich bin früh zum Morgengebet aufgewacht."
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "أَحْسَنْتَ!",
+          "de": "Gut gemacht!"
+        }
+      ]
+    }
+  ],
+  "grammatik": [
+    {
+      "id": "g-4-1",
+      "einheit": 4,
+      "abschnitt": 1,
+      "titel": "Das Präsens (Muḍāriʿ) im Singular",
+      "regel": "أَذْهَبُ ich gehe · تَذْهَبُ du gehst / sie geht · يَذْهَبُ er geht · تَذْهَبينَ du gehst (f)",
+      "erklaerung": [
+        "Das Präsens wird mit Vorsilben gebildet: أَ für ich, تَ für du und sie, يَ für er.",
+        "Zu einer Frau sagt man تَذْهَبينَ – mit der Endung ـينَ."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَسْتَيْقِظُ في الصَّباحِ.",
+          "de": "Ich wache morgens auf."
+        },
+        {
+          "ar": "يَذْهَبُ عُمَرُ إِلى الْجامِعَةِ.",
+          "de": "ʿUmar geht zur Universität."
+        },
+        {
+          "ar": "مَتى تَنامينَ؟",
+          "de": "Wann schläfst du? (f)"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-4-1#0",
+          "frage": "„Ich trinke Tee.“ – Welche Form?",
+          "ar": "… الشّايَ.",
+          "antwort": "أَشْرَبُ",
+          "ablenker": ["يَشْرَبُ", "تَشْرَبُ", "شَرِبَ"]
+        },
+        {
+          "id": "g-4-1#1",
+          "frage": "„Er schreibt.“ – Welche Form?",
+          "ar": null,
+          "antwort": "يَكْتُبُ",
+          "ablenker": ["أَكْتُبُ", "تَكْتُبينَ", "كَتَبْتُ"]
+        }
+      ]
+    },
+    {
+      "id": "g-4-2",
+      "einheit": 4,
+      "abschnitt": 2,
+      "titel": "Das Perfekt (Māḍī) im Singular",
+      "regel": "ذَهَبْتُ ich ging · ذَهَبْتَ du gingst · ذَهَبَ er ging · ذَهَبَتْ sie ging",
+      "erklaerung": [
+        "Das Perfekt beschreibt Abgeschlossenes und wird mit Endungen gebildet: ـتُ ich, ـتَ du (m), ـتِ du (f), ـَتْ sie.",
+        "Die Grundform (er) ist die Form, unter der Verben im Wörterbuch stehen: ذَهَبَ, كَتَبَ, صَلّى."
+      ],
+      "beispiele": [
+        {
+          "ar": "صَلَّيْتُ الْفَجْرَ.",
+          "de": "Ich habe das Morgengebet gebetet."
+        },
+        {
+          "ar": "مَتى نِمْتَ؟",
+          "de": "Wann hast du geschlafen?"
+        },
+        {
+          "ar": "ذَهَبَتْ إِلى السّوقِ.",
+          "de": "Sie ging zum Markt."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-4-2#0",
+          "frage": "„Ich habe geschrieben.“",
+          "ar": null,
+          "antwort": "كَتَبْتُ",
+          "ablenker": ["كَتَبَ", "أَكْتُبُ", "كَتَبَتْ"]
+        },
+        {
+          "id": "g-4-2#1",
+          "frage": "„Sie ging.“",
+          "ar": null,
+          "antwort": "ذَهَبَتْ",
+          "ablenker": ["ذَهَبْتُ", "تَذْهَبُ", "ذَهَبَ"]
+        }
+      ]
+    },
+    {
+      "id": "g-4-3",
+      "einheit": 4,
+      "abschnitt": 3,
+      "titel": "Die Uhrzeit",
+      "regel": "السّاعَةُ الْخامِسَةُ = es ist fünf Uhr",
+      "erklaerung": [
+        "Die Uhrzeit nutzt feminine Ordnungszahlen: الثّانِيَةُ, الثّالِثَةُ, الرّابِعَةُ … Nur „ein Uhr“ heißt الْواحِدَةُ.",
+        "مَتى؟ fragt „wann?“, كَمِ السّاعَةُ؟ „wie spät ist es?“."
+      ],
+      "beispiele": [
+        {
+          "ar": "كَمِ السّاعَةُ؟",
+          "de": "Wie spät ist es?"
+        },
+        {
+          "ar": "السّاعَةُ الثّالِثَةُ.",
+          "de": "Es ist drei Uhr."
+        },
+        {
+          "ar": "أَنامُ في السّاعَةِ الْعاشِرَةِ.",
+          "de": "Ich schlafe um zehn Uhr."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-4-3#0",
+          "frage": "„Es ist vier Uhr.“",
+          "ar": null,
+          "antwort": "السّاعَةُ الرّابِعَةُ.",
+          "ablenker": [
+            "السّاعَةُ أَرْبَعَةٌ.",
+            "أَرْبَعُ ساعاتٍ.",
+            "السّاعَةُ الرّابِعُ."
+          ]
+        },
+        {
+          "id": "g-4-3#1",
+          "frage": "Wie fragst du „Wann?“",
+          "ar": null,
+          "antwort": "مَتى؟",
+          "ablenker": ["كَمْ؟", "أَيْنَ؟", "مَنْ؟"]
+        }
+      ]
+    }
+  ]
+}

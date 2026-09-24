@@ -1,6 +1,8 @@
 # ADR-0007: Replace Supabase Cloud with a self-hosted API + Postgres on CapRover
 
-- Status: proposed
+- Status: accepted – done 2026-09-24: all data lives in suffa-api's Postgres; Supabase is removed
+  from the app, the CSP and the repository (no data to migrate beyond the PO's own, which the
+  devices had already synced to the API).
 - Date: 2026-09-23
 - Supersedes (partially): ADR-0004 (the interface stays; the default provider changes)
 

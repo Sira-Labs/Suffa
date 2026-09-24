@@ -1,0 +1,426 @@
+{
+  "einheit": 12,
+  "titel": "الهِوايات – Die Hobbys",
+  "status": "entwurf",
+  "kulturnotiz": "Reiten, Schwimmen und Bogenschießen gelten in der islamischen Tradition als empfohlene Sportarten. Die arabische Kalligrafie (الخَطّ) ist eine eigene Kunstform.",
+  "vokabeln": [
+    {
+      "id": "v-hiwaya",
+      "ar": "هِوايَة",
+      "tr": "hiwāya",
+      "de": "Hobby",
+      "wurzel": "ه-و-ي",
+      "plural": "هِوايات",
+      "einheit": 12
+    },
+    {
+      "id": "v-riyada",
+      "ar": "رِياضَة",
+      "tr": "riyāḍa",
+      "de": "Sport",
+      "wurzel": "ر-و-ض",
+      "plural": "رِياضات",
+      "einheit": 12
+    },
+    {
+      "id": "v-kurat-alqadam",
+      "ar": "كُرَةُ الْقَدَمِ",
+      "tr": "kuratu l-qadam",
+      "de": "Fußball",
+      "wurzel": "ك-ر-و",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-sibaha",
+      "ar": "سِباحَة",
+      "tr": "sibāḥa",
+      "de": "Schwimmen",
+      "wurzel": "س-ب-ح",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-qiraa",
+      "ar": "قِراءَة",
+      "tr": "qirāʾa",
+      "de": "Lesen",
+      "wurzel": "ق-ر-أ",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-rasm",
+      "ar": "رَسْم",
+      "tr": "rasm",
+      "de": "Zeichnen; Zeichnung",
+      "wurzel": "ر-س-م",
+      "plural": "رُسوم",
+      "einheit": 12
+    },
+    {
+      "id": "v-khatt",
+      "ar": "خَطّ",
+      "tr": "chaṭṭ",
+      "de": "Schrift; Kalligrafie",
+      "wurzel": "خ-ط-ط",
+      "plural": "خُطوط",
+      "einheit": 12
+    },
+    {
+      "id": "v-furusiyya",
+      "ar": "فُروسِيَّة",
+      "tr": "furūsiyya",
+      "de": "Reiten, Reitkunst",
+      "wurzel": "ف-ر-س",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-hisan",
+      "ar": "حِصان",
+      "tr": "ḥiṣān",
+      "de": "Pferd",
+      "wurzel": "ح-ص-ن",
+      "plural": "أَحْصِنَة",
+      "einheit": 12
+    },
+    {
+      "id": "v-malab",
+      "ar": "مَلْعَب",
+      "tr": "malʿab",
+      "de": "Sportplatz, Stadion",
+      "wurzel": "ل-ع-ب",
+      "wazn": "مَفْعَل",
+      "plural": "مَلاعِب",
+      "einheit": 12
+    },
+    {
+      "id": "v-fariq",
+      "ar": "فَريق",
+      "tr": "farīq",
+      "de": "Mannschaft",
+      "wurzel": "ف-ر-ق",
+      "plural": "فِرَق",
+      "einheit": 12
+    },
+    {
+      "id": "v-mubarah",
+      "ar": "مُباراة",
+      "tr": "mubārāh",
+      "de": "Spiel, Wettkampf",
+      "wurzel": "ب-ر-ي",
+      "plural": "مُبارَيات",
+      "einheit": 12
+    },
+    {
+      "id": "v-qissa",
+      "ar": "قِصَّة",
+      "tr": "qiṣṣa",
+      "de": "Geschichte, Erzählung",
+      "wurzel": "ق-ص-ص",
+      "plural": "قِصَص",
+      "einheit": 12
+    },
+    {
+      "id": "v-majalla",
+      "ar": "مَجَلَّة",
+      "tr": "maǧalla",
+      "de": "Zeitschrift",
+      "wurzel": "ج-ل-ل",
+      "plural": "مَجَلّات",
+      "einheit": 12
+    },
+    {
+      "id": "v-sahifa",
+      "ar": "صَحيفَة",
+      "tr": "ṣaḥīfa",
+      "de": "Zeitung",
+      "wurzel": "ص-ح-ف",
+      "plural": "صُحُف",
+      "einheit": 12
+    },
+    {
+      "id": "v-rihla",
+      "ar": "رِحْلَة",
+      "tr": "riḥla",
+      "de": "Ausflug; Reise",
+      "wurzel": "ر-ح-ل",
+      "plural": "رِحْلات",
+      "einheit": 12
+    },
+    {
+      "id": "v-faragh",
+      "ar": "فَراغ",
+      "tr": "farāġ",
+      "de": "Freizeit; Leere",
+      "wurzel": "ف-ر-غ",
+      "plural": null,
+      "einheit": 12,
+      "hinweis": "وَقْتُ الْفَراغِ = Freizeit"
+    },
+    {
+      "id": "v-mufaddal",
+      "ar": "مُفَضَّل",
+      "tr": "mufaḍḍal",
+      "de": "Lieblings-, bevorzugt",
+      "wurzel": "ف-ض-ل",
+      "wazn": "مُفَعَّل",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-mumti",
+      "ar": "مُمْتِع",
+      "tr": "mumtiʿ",
+      "de": "unterhaltsam, spannend",
+      "wurzel": "م-ت-ع",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-mahir",
+      "ar": "ماهِر",
+      "tr": "māhir",
+      "de": "geschickt",
+      "wurzel": "م-ه-ر",
+      "wazn": "فاعِل",
+      "plural": "ماهِرون",
+      "einheit": 12
+    },
+    {
+      "id": "v-harf",
+      "ar": "حَرْف",
+      "tr": "ḥarf",
+      "de": "Buchstabe",
+      "wurzel": "ح-ر-ف",
+      "plural": "حُروف",
+      "einheit": 12
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-12-1",
+      "einheit": 12,
+      "dialog": 1,
+      "titel": "وَقْتُ الْفَراغِ",
+      "zeilen": [
+        {
+          "sp": "يوسُف",
+          "ar": "ماذا تَفْعَلُ في وَقْتِ الْفَراغِ يا عُمَرُ؟",
+          "de": "Was machst du in deiner Freizeit, ʿUmar?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَلْعَبُ كُرَةَ الْقَدَمِ مَعَ أَصْدِقائي.",
+          "de": "Ich spiele Fußball mit meinen Freunden."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أَيْنَ تَلْعَبونَ؟",
+          "de": "Wo spielt ihr?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "نَلْعَبُ في مَلْعَبِ الْجامِعَةِ يَوْمَ الْجُمُعَةِ. وَأَنْتَ؟",
+          "de": "Wir spielen freitags auf dem Sportplatz der Universität. Und du?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أَنا أَسْبَحُ. السِّباحَةُ رِياضَتي الْمُفَضَّلَةُ.",
+          "de": "Ich schwimme. Schwimmen ist mein Lieblingssport."
+        }
+      ]
+    },
+    {
+      "id": "d-12-2",
+      "einheit": 12,
+      "dialog": 2,
+      "titel": "هِوايَةُ سارَةَ",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "ما هِوايَتُكِ يا سارَةُ؟",
+          "de": "Was ist dein Hobby, Sāra?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أُحِبُّ الْخَطَّ الْعَرَبِيَّ. أَرْسُمُ الْحُروفَ كُلَّ يَوْمٍ.",
+          "de": "Ich liebe die arabische Kalligrafie. Ich zeichne jeden Tag Buchstaben."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "ما شاءَ اللهُ، أَنْتِ ماهِرَةٌ!",
+          "de": "Wie schön, du bist geschickt!"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "وَأَنْتِ؟",
+          "de": "Und du?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "هِوايَتي الْقِراءَةُ. أَقْرَأُ قِصَصاً مُمْتِعَةً.",
+          "de": "Mein Hobby ist Lesen. Ich lese spannende Geschichten."
+        }
+      ]
+    },
+    {
+      "id": "d-12-3",
+      "einheit": 12,
+      "dialog": 3,
+      "titel": "قِصَّةٌ مُمْتِعَةٌ",
+      "zeilen": [
+        {
+          "sp": "الْأَب",
+          "ar": "ماذا تَقْرَأُ يا يوسُفُ؟",
+          "de": "Was liest du, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أَقْرَأُ قِصَّةً عَنْ رِحْلَةٍ في الصَّحْراءِ.",
+          "de": "Ich lese eine Geschichte über eine Reise in der Wüste."
+        },
+        {
+          "sp": "الْأَب",
+          "ar": "هَلْ هِيَ مُمْتِعَةٌ؟",
+          "de": "Ist sie spannend?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، جِدّاً. أَقْرَأُ كُلَّ يَوْمٍ قَبْلَ النَّوْمِ.",
+          "de": "Ja, sehr. Ich lese jeden Tag vor dem Schlafengehen."
+        }
+      ]
+    }
+  ],
+  "grammatik": [
+    {
+      "id": "g-12-1",
+      "einheit": 12,
+      "abschnitt": 1,
+      "titel": "Mögen + Verbalnomen",
+      "regel": "أُحِبُّ الْقِراءَةَ = ich lese gern",
+      "erklaerung": [
+        "Nach أُحِبُّ steht oft das Verbalnomen (Maṣdar) mit ال: الْقِراءَةُ das Lesen, السِّباحَةُ das Schwimmen, الرَّسْمُ das Malen.",
+        "Es steht als Objekt im Akkusativ: أُحِبُّ السِّباحَةَ."
+      ],
+      "beispiele": [
+        {
+          "ar": "أُحِبُّ الْقِراءَةَ.",
+          "de": "Ich lese gern."
+        },
+        {
+          "ar": "هِوايَتي الرَّسْمُ.",
+          "de": "Mein Hobby ist das Malen."
+        },
+        {
+          "ar": "هَلْ تُحِبُّ السِّباحَةَ؟",
+          "de": "Schwimmst du gern?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-12-1#0",
+          "frage": "„Ich schreibe gern.“",
+          "ar": null,
+          "antwort": "أُحِبُّ الْكِتابَةَ.",
+          "ablenker": ["أُحِبُّ الْكِتابَ.", "أُحِبُّ كَتَبَ.", "أُحِبُّ الْكاتِبَ."]
+        },
+        {
+          "id": "g-12-1#1",
+          "frage": "Wie heißt das Verbalnomen zu قَرَأَ?",
+          "ar": null,
+          "antwort": "قِراءَةٌ",
+          "ablenker": ["قارِئٌ", "مَقْروءٌ", "قُرْآنٌ"]
+        }
+      ]
+    },
+    {
+      "id": "g-12-2",
+      "einheit": 12,
+      "abschnitt": 2,
+      "titel": "Wie oft?",
+      "regel": "دائِماً immer · أَحْياناً manchmal · كُلَّ يَوْمٍ jeden Tag · أَبَداً nie (mit Verneinung)",
+      "erklaerung": [
+        "Zeitangaben dieser Art stehen im Akkusativ (-an bzw. -a): كُلَّ أُسْبوعٍ, صَباحاً.",
+        "أَبَداً steht mit einer Verneinung: لا أَسْبَحُ أَبَداً – Ich schwimme nie."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَقْرَأُ كُلَّ يَوْمٍ.",
+          "de": "Ich lese jeden Tag."
+        },
+        {
+          "ar": "أَلْعَبُ كُرَةَ الْقَدَمِ أَحْياناً.",
+          "de": "Manchmal spiele ich Fußball."
+        },
+        {
+          "ar": "لا أُشاهِدُ التِّلْفازَ أَبَداً.",
+          "de": "Ich sehe nie fern."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-12-2#0",
+          "frage": "„immer“",
+          "ar": null,
+          "antwort": "دائِماً",
+          "ablenker": ["أَحْياناً", "أَبَداً", "قَليلاً"]
+        },
+        {
+          "id": "g-12-2#1",
+          "frage": "„Ich zeichne jede Woche.“",
+          "ar": null,
+          "antwort": "أَرْسُمُ كُلَّ أُسْبوعٍ.",
+          "ablenker": [
+            "أَرْسُمُ كُلُّ أُسْبوعٍ.",
+            "أَرْسُمُ كُلِّ أُسْبوعٍ.",
+            "أَرْسُمُ الْأُسْبوعَ كُلٌّ."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g-12-3",
+      "einheit": 12,
+      "abschnitt": 3,
+      "titel": "Relativpronomen الَّذي und الَّتي",
+      "regel": "الَّذي (m) · الَّتي (f) = der/die/das (welcher)",
+      "erklaerung": [
+        "Nach einem bestimmten Nomen verbindet الَّذي/الَّتي es mit einem Nebensatz: الْقِصَّةُ الَّتي قَرَأْتُها.",
+        "Nach einem unbestimmten Nomen fällt das Relativpronomen weg: قِصَّةٌ قَرَأْتُها – eine Geschichte, die ich gelesen habe."
+      ],
+      "beispiele": [
+        {
+          "ar": "الْكِتابُ الَّذي أَقْرَأُهُ مُمْتِعٌ.",
+          "de": "Das Buch, das ich lese, ist spannend."
+        },
+        {
+          "ar": "الْبِنْتُ الَّتي تَرْسُمُ أُخْتي.",
+          "de": "Das Mädchen, das malt, ist meine Schwester."
+        },
+        {
+          "ar": "قِصَّةٌ قَرَأْتُها أَمْسِ",
+          "de": "eine Geschichte, die ich gestern gelesen habe"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-12-3#0",
+          "frage": "„die Geschichte, die …“",
+          "ar": "الْقِصَّةُ … قَرَأْتُها",
+          "antwort": "الَّتي",
+          "ablenker": ["الَّذي", "الَّذينَ", "ما"]
+        },
+        {
+          "id": "g-12-3#1",
+          "frage": "„der Film, den …“",
+          "ar": "الْفيلْمُ … شاهَدْتُهُ",
+          "antwort": "الَّذي",
+          "ablenker": ["الَّتي", "مَنْ", "الَّذينَ"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,35 +1,34 @@
-# ADR-0001: SRS-Engine im SM-2-Stil mit 4-Stufen-Bewertung
+# ADR-0001: SM-2-style SRS engine with 4-level grading
 
-- Status: akzeptiert
-- Datum: 2026-06-13
+- Status: accepted
+- Date: 2026-06-13
 
-## Kontext
+## Context
 
-Kern der App ist Spaced Repetition. Wir brauchen ein Scheduling, das offline und
-deterministisch rechnet, gut verstanden ist und sich testen lässt.
+Spaced repetition is the core of the app. We need scheduling that computes offline and
+deterministically, is well understood and is testable.
 
-## Entscheidung
+## Decision
 
-Wir implementieren eine SM-2-Variante (`src/services/srs/engine.ts`):
+We implement an SM-2 variant (`src/services/srs/engine.ts`):
 
-- **4-stufige Bewertung** (`again`/`hard`/`good`/`easy`) statt der klassischen
-  0–5-Skala – näher an Anki/FSRS und passend zu den UI-Buttons.
-- **Lernphase mit festen Intervallen**: erste erfolgreiche Wiederholung 1 Tag,
-  zweite 6 Tage, danach `Intervall × Ease`.
-- **Ease** startet bei 2.5, Minimum 1.3; Anpassung pro Bewertung.
-- **`again` ist ein Lapse**: Reps-Reset, Ease-Strafe, erneute Fälligkeit;
-  ab `LEECH_LAPSE_THRESHOLD` Lapses wird die Karte als **Leech** markiert
-  (automatisches Fehlerprotokoll → „Schwierige Wörter“).
-- Reine Funktionen (kein I/O) → vollständig unit-testbar (`srs.test.ts`).
+- **4-level grading** (`again`/`hard`/`good`/`easy`) instead of the classic 0–5 scale — closer
+  to Anki/FSRS and matching the UI buttons.
+- **Learning phase with fixed intervals**: first successful review 1 day, second 6 days, then
+  `interval × ease`.
+- **Ease** starts at 2.5, minimum 1.3; adjusted per grade.
+- **`again` is a lapse**: reps reset, ease penalty, due again; from `LEECH_LAPSE_THRESHOLD`
+  lapses on, the card is marked as a **leech** (automatic error log → "Schwierige Wörter"
+  (difficult words)).
+- Pure functions (no I/O) → fully unit-testable (`srs.test.ts`).
 
-## Alternativen
+## Alternatives
 
-- **FSRS** (moderner, genauer): höhere Komplexität, mehr Parameter, schwerer
-  nachvollziehbar. Für Buch 1 ist SM-2 ausreichend; ein späterer Wechsel ist
-  hinter dem `schedule()`-Interface lokal möglich.
+- **FSRS** (more modern, more accurate): higher complexity, more parameters, harder to reason
+  about. SM-2 is sufficient for Book 1; switching later is possible locally behind the
+  `schedule()` interface.
 
-## Konsequenzen
+## Consequences
 
-Vorhersagbares, erklärbares Verhalten; Intervall-Vorschau pro Button möglich.
-Etwas weniger optimal als FSRS bei sehr großen Decks – für den Lehrwerk-Umfang
-unerheblich.
+Predictable, explainable behaviour; per-button interval preview is possible. Slightly less
+optimal than FSRS for very large decks — irrelevant at the size of a textbook course.

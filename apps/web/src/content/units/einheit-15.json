@@ -1,0 +1,436 @@
+{
+  "einheit": 15,
+  "titel": "الصِّحَّة – Die Gesundheit",
+  "status": "entwurf",
+  "kulturnotiz": "Einem Kranken wünscht man „شِفاءً عاجِلاً“ (baldige Genesung) oder „لا بَأْسَ، طَهورٌ إِنْ شاءَ الله“. Körperteile, die paarweise vorkommen (يَد، رِجْل، عَيْن، أُذُن), sind grammatisch weiblich.",
+  "vokabeln": [
+    {
+      "id": "v-sihha",
+      "ar": "صِحَّة",
+      "tr": "ṣiḥḥa",
+      "de": "Gesundheit",
+      "wurzel": "ص-ح-ح",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-marid",
+      "ar": "مَريض",
+      "tr": "marīḍ",
+      "de": "krank; Patient",
+      "wurzel": "م-ر-ض",
+      "wazn": "فَعيل",
+      "plural": "مَرْضى",
+      "einheit": 15
+    },
+    {
+      "id": "v-dawa",
+      "ar": "دَواء",
+      "tr": "dawāʾ",
+      "de": "Medikament",
+      "wurzel": "د-و-ي",
+      "plural": "أَدْوِيَة",
+      "einheit": 15
+    },
+    {
+      "id": "v-saydaliyya",
+      "ar": "صَيْدَلِيَّة",
+      "tr": "ṣaydaliyya",
+      "de": "Apotheke",
+      "wurzel": "ص-ي-د-ل",
+      "plural": "صَيْدَلِيّات",
+      "einheit": 15
+    },
+    {
+      "id": "v-alam",
+      "ar": "أَلَم",
+      "tr": "alam",
+      "de": "Schmerz",
+      "wurzel": "أ-ل-م",
+      "plural": "آلام",
+      "einheit": 15
+    },
+    {
+      "id": "v-ras",
+      "ar": "رَأْس",
+      "tr": "raʾs",
+      "de": "Kopf",
+      "wurzel": "ر-أ-س",
+      "plural": "رُؤوس",
+      "einheit": 15
+    },
+    {
+      "id": "v-batn",
+      "ar": "بَطْن",
+      "tr": "baṭn",
+      "de": "Bauch",
+      "wurzel": "ب-ط-ن",
+      "plural": "بُطون",
+      "einheit": 15
+    },
+    {
+      "id": "v-yad",
+      "ar": "يَد",
+      "tr": "yad",
+      "de": "Hand",
+      "wurzel": "ي-د-ي",
+      "plural": "أَيْدٍ",
+      "einheit": 15
+    },
+    {
+      "id": "v-rijl",
+      "ar": "رِجْل",
+      "tr": "riǧl",
+      "de": "Bein, Fuß",
+      "wurzel": "ر-ج-ل",
+      "plural": "أَرْجُل",
+      "einheit": 15
+    },
+    {
+      "id": "v-ayn",
+      "ar": "عَيْن",
+      "tr": "ʿayn",
+      "de": "Auge",
+      "wurzel": "ع-ي-ن",
+      "plural": "عُيون",
+      "einheit": 15
+    },
+    {
+      "id": "v-udhun",
+      "ar": "أُذُن",
+      "tr": "uḏun",
+      "de": "Ohr",
+      "wurzel": "أ-ذ-ن",
+      "plural": "آذان",
+      "einheit": 15
+    },
+    {
+      "id": "v-anf",
+      "ar": "أَنْف",
+      "tr": "anf",
+      "de": "Nase",
+      "wurzel": "أ-ن-ف",
+      "plural": "أُنوف",
+      "einheit": 15
+    },
+    {
+      "id": "v-fam",
+      "ar": "فَم",
+      "tr": "fam",
+      "de": "Mund",
+      "wurzel": "ف-م-و",
+      "plural": "أَفْواه",
+      "einheit": 15
+    },
+    {
+      "id": "v-sinn",
+      "ar": "سِنّ",
+      "tr": "sinn",
+      "de": "Zahn",
+      "wurzel": "س-ن-ن",
+      "plural": "أَسْنان",
+      "einheit": 15
+    },
+    {
+      "id": "v-humma",
+      "ar": "حُمّى",
+      "tr": "ḥummā",
+      "de": "Fieber",
+      "wurzel": "ح-م-م",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-zukam",
+      "ar": "زُكام",
+      "tr": "zukām",
+      "de": "Schnupfen, Erkältung",
+      "wurzel": "ز-ك-م",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-salim",
+      "ar": "سَليم",
+      "tr": "salīm",
+      "de": "gesund, unversehrt",
+      "wurzel": "س-ل-م",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-shifa",
+      "ar": "شِفاء",
+      "tr": "šifāʾ",
+      "de": "Heilung, Genesung",
+      "wurzel": "ش-ف-ي",
+      "plural": null,
+      "einheit": 15,
+      "hinweis": "شِفاءً عاجِلاً = gute Besserung"
+    },
+    {
+      "id": "v-duktur",
+      "ar": "دُكْتور",
+      "tr": "duktūr",
+      "de": "Doktor",
+      "wurzel": "",
+      "plural": "دَكاتِرَة",
+      "einheit": 15,
+      "hinweis": "Lehnwort; auch Anrede für Ärzte"
+    },
+    {
+      "id": "v-mundhu",
+      "ar": "مُنْذُ",
+      "tr": "munḏu",
+      "de": "seit",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-miskin",
+      "ar": "مِسْكين",
+      "tr": "miskīn",
+      "de": "arm, bedauernswert",
+      "wurzel": "س-ك-ن",
+      "plural": "مَساكين",
+      "einheit": 15,
+      "hinweis": "gleiche Wurzel wie سَكَنَ"
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-15-1",
+      "einheit": 15,
+      "dialog": 1,
+      "titel": "عِنْدَ الطَّبيبِ",
+      "zeilen": [
+        {
+          "sp": "الطَّبيب",
+          "ar": "ما بِكَ؟",
+          "de": "Was fehlt dir?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَشْعُرُ بِأَلَمٍ في رَأْسي، وَعِنْدي حُمّى.",
+          "de": "Ich habe Kopfschmerzen, und ich habe Fieber."
+        },
+        {
+          "sp": "الطَّبيب",
+          "ar": "مُنْذُ مَتى؟",
+          "de": "Seit wann?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "مُنْذُ يَوْمَيْنِ.",
+          "de": "Seit zwei Tagen."
+        },
+        {
+          "sp": "الطَّبيب",
+          "ar": "أَفْحَصُكَ الْآنَ ... عِنْدَكَ زُكامٌ. خُذْ هٰذا الدَّواءَ ثَلاثَ مَرّاتٍ في الْيَوْمِ.",
+          "de": "Ich untersuche dich jetzt … Du hast eine Erkältung. Nimm dieses Medikament dreimal am Tag."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "شُكْراً يا دُكْتورُ.",
+          "de": "Danke, Herr Doktor."
+        }
+      ]
+    },
+    {
+      "id": "d-15-2",
+      "einheit": 15,
+      "dialog": 2,
+      "titel": "شِفاءً عاجِلاً",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "أَيْنَ مَرْيَمُ الْيَوْمَ؟",
+          "de": "Wo ist Maryam heute?"
+        },
+        {
+          "sp": "الْمُدَرِّسَة",
+          "ar": "مَرْيَمُ مَريضَةٌ. عِنْدَها أَلَمٌ في بَطْنِها.",
+          "de": "Maryam ist krank. Sie hat Bauchschmerzen."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "مِسْكينَةٌ! أَذْهَبُ إِلَيْها بَعْدَ الدَّرْسِ.",
+          "de": "Die Arme! Ich gehe nach dem Unterricht zu ihr."
+        },
+        {
+          "sp": "الْمُدَرِّسَة",
+          "ar": "قولي لَها: شِفاءً عاجِلاً.",
+          "de": "Sag ihr: Gute Besserung."
+        }
+      ]
+    },
+    {
+      "id": "d-15-3",
+      "einheit": 15,
+      "dialog": 3,
+      "titel": "في الصَّيْدَلِيَّةِ",
+      "zeilen": [
+        {
+          "sp": "عُمَر",
+          "ar": "السَّلامُ عَلَيْكُمْ. أُريدُ هٰذا الدَّواءَ، مِنْ فَضْلِكَ.",
+          "de": "Friede sei mit euch. Ich möchte dieses Medikament, bitte."
+        },
+        {
+          "sp": "الصَّيْدَلِيّ",
+          "ar": "هٰذا دَواءٌ لِلزُّكامِ. خُذْهُ بَعْدَ الطَّعامِ.",
+          "de": "Das ist ein Mittel gegen Erkältung. Nimm es nach dem Essen."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "كَمْ مَرَّةً في الْيَوْمِ؟",
+          "de": "Wie oft am Tag?"
+        },
+        {
+          "sp": "الصَّيْدَلِيّ",
+          "ar": "ثَلاثَ مَرّاتٍ. شِفاءً عاجِلاً!",
+          "de": "Dreimal. Gute Besserung!"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "شُكْراً جَزيلاً.",
+          "de": "Vielen Dank."
+        }
+      ]
+    }
+  ],
+  "grammatik": [
+    {
+      "id": "g-15-1",
+      "einheit": 15,
+      "abschnitt": 1,
+      "titel": "Objektendungen am Verb",
+      "regel": "يُؤْلِمُني = es tut mir weh · ساعِدْني = hilf mir",
+      "erklaerung": [
+        "Das Objekt „mich“ wird als ـني an das Verb gehängt; die übrigen Objektendungen gleichen den Possessivendungen: ـكَ, ـهُ, ـها.",
+        "Schmerzen: يُؤْلِمُني رَأْسي – Mein Kopf tut mir weh."
+      ],
+      "beispiele": [
+        {
+          "ar": "يُؤْلِمُني رَأْسي.",
+          "de": "Mein Kopf tut mir weh."
+        },
+        {
+          "ar": "فَحَصَني الطَّبيبُ.",
+          "de": "Der Arzt hat mich untersucht."
+        },
+        {
+          "ar": "سَأَزورُكَ غَداً.",
+          "de": "Ich werde dich morgen besuchen."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-15-1#0",
+          "frage": "„Der Arzt hat ihn untersucht.“",
+          "ar": null,
+          "antwort": "فَحَصَهُ الطَّبيبُ.",
+          "ablenker": [
+            "فَحَصَني الطَّبيبُ.",
+            "فَحَصَها الطَّبيبُ.",
+            "فَحَصَ هُوَ الطَّبيبُ."
+          ]
+        },
+        {
+          "id": "g-15-1#1",
+          "frage": "Welche Endung heißt „mich“ am Verb?",
+          "ar": null,
+          "antwort": "ـني",
+          "ablenker": ["ـي", "ـكَ", "ـنا"]
+        }
+      ]
+    },
+    {
+      "id": "g-15-2",
+      "einheit": 15,
+      "abschnitt": 2,
+      "titel": "Müssen: يَجِبُ أَنْ",
+      "regel": "يَجِبُ أَنْ تَرْتاحَ = du musst dich ausruhen",
+      "erklaerung": [
+        "يَجِبُ bleibt unverändert; die Person steckt im Verb nach أَنْ, das im Subjunktiv (-a) steht.",
+        "Mit عَلى geht es auch: يَجِبُ عَلَيْكَ أَنْ تَشْرَبَ الْماءَ."
+      ],
+      "beispiele": [
+        {
+          "ar": "يَجِبُ أَنْ تَشْرَبَ ماءً كَثيراً.",
+          "de": "Du musst viel Wasser trinken."
+        },
+        {
+          "ar": "يَجِبُ أَنْ أَذْهَبَ إِلى الطَّبيبِ.",
+          "de": "Ich muss zum Arzt gehen."
+        },
+        {
+          "ar": "يَجِبُ عَلَيْها أَنْ تَرْتاحَ.",
+          "de": "Sie muss sich ausruhen."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-15-2#0",
+          "frage": "„Ich muss schlafen.“",
+          "ar": null,
+          "antwort": "يَجِبُ أَنْ أَنامَ.",
+          "ablenker": [
+            "يَجِبُ أَنا أَنامُ.",
+            "أَجِبُ أَنْ أَنامَ.",
+            "يَجِبُ أَنْ نِمْتُ."
+          ]
+        },
+        {
+          "id": "g-15-2#1",
+          "frage": "Was ändert sich in يَجِبُ أَنْ …?",
+          "ar": null,
+          "antwort": "das Verb nach أَنْ",
+          "ablenker": ["يَجِبُ", "أَنْ", "nichts"]
+        }
+      ]
+    },
+    {
+      "id": "g-15-3",
+      "einheit": 15,
+      "abschnitt": 3,
+      "titel": "Der verneinte Imperativ",
+      "regel": "لا + Jussiv: لا تَأْكُلْ = iss nicht!",
+      "erklaerung": [
+        "Verbote bildet man mit لا und der Präsensform ohne Endvokal (Jussiv): تَأْكُلُ → لا تَأْكُلْ.",
+        "Zu einer Frau: لا تَأْكُلي; zu mehreren: لا تَأْكُلوا."
+      ],
+      "beispiele": [
+        {
+          "ar": "لا تَأْكُلْ كَثيراً.",
+          "de": "Iss nicht zu viel!"
+        },
+        {
+          "ar": "لا تَنامي مُتَأَخِّرَةً.",
+          "de": "Geh nicht spät schlafen! (f)"
+        },
+        {
+          "ar": "لا تَقْلَقْ.",
+          "de": "Mach dir keine Sorgen."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-15-3#0",
+          "frage": "„Rauch nicht!“ (m)",
+          "ar": null,
+          "antwort": "لا تُدَخِّنْ.",
+          "ablenker": ["لا تُدَخِّنُ.", "ما دَخَّنْتَ.", "لا دَخِّنْ."]
+        },
+        {
+          "id": "g-15-3#1",
+          "frage": "„Trink nicht!“ zu einer Frau",
+          "ar": null,
+          "antwort": "لا تَشْرَبي.",
+          "ablenker": ["لا تَشْرَبْ.", "لا تَشْرَبينَ.", "ما شَرِبْتِ."]
+        }
+      ]
+    }
+  ]
+}

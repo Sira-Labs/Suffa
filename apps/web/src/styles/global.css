@@ -1,0 +1,1794 @@
+@import './fonts.css';
+
+/*
+ * Suffa design tokens (redesign 2026-09, see docs/spec/04-design-system.md).
+ * Dark is the default; light is a warm "paper" theme. Variable names are shared by all
+ * modules, so changing a token restyles the whole app.
+ */
+:root {
+  --arabic-font-scale: 1;
+  --font-ui: 'Manrope Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-arabic: 'Amiri', 'Scheherazade New', 'Times New Roman', serif;
+  --font-arabic-display: 'Reem Kufi Variable', 'Amiri', serif;
+
+  --radius-sm: 12px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --space: 1rem;
+  --tap: 44px;
+  --nav-height: 72px;
+  --sidebar-width: 240px;
+
+  /* Saffron fill with dark text works in both themes. */
+  --accent-fill: #e8a93b;
+  --on-accent: #1a1206;
+  --paper: #f4eee2;
+  --on-paper: #1b2420;
+  --on-paper-muted: #56615b;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0f1714;
+  --bg-elev: #17221e;
+  --bg-elev-2: #22302b;
+  --text: #f4eee2;
+  --text-muted: #a9b5ae;
+  --border: #2e3d37;
+  /* text-safe accent (links, highlights) */
+  --accent: #e8a93b;
+  --accent-2: #3fb5a3;
+  --on-accent-2: #06201c;
+  --good: #4cc3a5;
+  --warn: #e8a93b;
+  --bad: #f08a73;
+  --info: #8cc4f2;
+  --focus: #f3c274;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f6f1e7;
+  --bg-elev: #fffdf8;
+  --bg-elev-2: #ede5d5;
+  --text: #1b2420;
+  --text-muted: #56615b;
+  --border: #dcd2bf;
+  --accent: #8a5a12;
+  --accent-2: #1f7a6d;
+  --on-accent-2: #ffffff;
+  --good: #1f7a6d;
+  --warn: #8a5a12;
+  --bad: #b4432b;
+  --info: #25609b;
+  --focus: #8a5a12;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.15;
+  margin: 0;
+}
+h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.75rem, 1.3rem + 2vw, 2.4rem);
+  letter-spacing: -0.01em;
+}
+h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+/* ---------- Layout ---------- */
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-main {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 1rem 1rem calc(var(--nav-height) + 2rem);
+}
+
+.app-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.brand-mark {
+  flex-shrink: 0;
+  border-radius: 8px;
+}
+.brand-latin {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.35rem;
+}
+.brand-arabic {
+  font-family: var(--font-arabic-display);
+  font-size: 1.2rem;
+  color: var(--accent);
+}
+
+/* Mobile: floating bottom bar with five destinations. */
+.app-nav {
+  position: fixed;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.4rem;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--bg-elev) 92%, transparent);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  z-index: 50;
+}
+.app-nav .nav-link-secondary {
+  display: none;
+}
+
+.nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 52px;
+  padding: 0.3rem 0.25rem;
+  border-radius: 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.nav-link:hover {
+  color: var(--text);
+}
+.nav-link-active {
+  color: var(--text);
+  background: var(--bg-elev-2);
+}
+.nav-link-active svg {
+  color: var(--accent);
+}
+.nav-label {
+  white-space: nowrap;
+}
+.nav-brand,
+.nav-footer {
+  display: none;
+}
+
+/* Desktop: sidebar with every destination. */
+@media (min-width: 960px) {
+  .app-shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  }
+  /* Brand and sync status live in the sidebar on wide screens. */
+  .app-topbar {
+    display: none;
+  }
+  .app-content {
+    min-width: 0;
+  }
+  .app-main {
+    padding: 2rem 2rem 3rem;
+  }
+  .app-nav {
+    position: sticky;
+    top: 0;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 1.5rem 1rem;
+    border-radius: 0;
+    border: 0;
+    border-right: 1px solid var(--border);
+    background: var(--bg);
+    backdrop-filter: none;
+    grid-row: 1 / span 2;
+  }
+  .app-nav .nav-link-secondary {
+    display: flex;
+  }
+  .app-nav .nav-link-more {
+    display: none;
+  }
+  .nav-brand {
+    display: flex;
+    padding: 0 0.75rem 1.5rem;
+  }
+  .nav-footer {
+    display: block;
+    margin-top: auto;
+    padding: 0 0.75rem;
+  }
+  .nav-link {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    min-height: var(--tap);
+    padding: 0 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.95rem;
+  }
+}
+
+/* ---------- Surfaces ---------- */
+
+.card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+
+/* Warm "paper" card for highlighted Arabic content (word of the day, examples). */
+.paper {
+  background: var(--paper);
+  color: var(--on-paper);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+.paper .muted {
+  color: var(--on-paper-muted);
+}
+
+.eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---------- Controls ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: var(--tap);
+  border: 1px solid var(--border);
+  background: var(--bg-elev-2);
+  color: var(--text);
+  padding: 0 1rem;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.05s;
+}
+.btn:hover {
+  border-color: var(--accent);
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary,
+.btn-accent {
+  background: var(--accent-fill);
+  border-color: var(--accent-fill);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.btn-primary:hover,
+.btn-accent:hover {
+  border-color: var(--text);
+}
+.btn-lg {
+  min-height: 56px;
+  padding: 0 1.5rem;
+  font-size: 1.05rem;
+  border-radius: var(--radius);
+}
+
+.input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 1rem;
+}
+textarea.input {
+  padding: 0.75rem 1rem;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--bg-elev-2);
+}
+
+/* ---------- Arabic typography: generous, with clearly visible tashkīl ---------- */
+
+.arabic {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  text-align: right;
+  font-size: calc(1.9rem * var(--arabic-font-scale));
+  line-height: 2;
+}
+.arabic-lg {
+  font-size: calc(3rem * var(--arabic-font-scale));
+}
+.arabic-hero {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  font-size: calc(clamp(3.5rem, 2.5rem + 6vw, 6rem) * var(--arabic-font-scale));
+  line-height: 1.3;
+}
+.arabic-display {
+  font-family: var(--font-arabic-display);
+  direction: rtl;
+}
+.arabic-inline {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+.feedback-good {
+  color: var(--good);
+}
+.feedback-bad {
+  color: var(--bad);
+}
+.feedback-warn {
+  color: var(--warn);
+}
+
+.diff-added {
+  color: var(--bad);
+  text-decoration: line-through;
+}
+.diff-removed {
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 18%, transparent);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ---------- "Mehr" page ---------- */
+
+.more-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+.more-tile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 72px;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.more-tile:hover {
+  border-color: var(--accent);
+}
+.more-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: var(--bg-elev-2);
+  color: var(--accent);
+}
+
+/* ---------- "Heute" ---------- */
+
+.today-grid {
+  display: grid;
+  gap: 1rem;
+}
+@media (min-width: 720px) {
+  .today-grid {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: stretch;
+  }
+}
+
+.today-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.today-step {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+}
+.today-step-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.today-step-done .today-step-marker {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: var(--on-accent-2);
+}
+.today-step-current .today-step-marker {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.today-step-upcoming {
+  opacity: 0.75;
+}
+.today-step-body {
+  display: flex;
+  flex-direction: column;
+  min-height: var(--tap);
+  justify-content: center;
+  flex-grow: 1;
+  color: var(--text);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+.today-step-label {
+  font-weight: 600;
+}
+
+/* Round icon-only button (speak, close …); always give it an aria-label. */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--tap);
+  height: var(--tap);
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+}
+.icon-button:hover {
+  border-color: var(--accent);
+}
+.icon-button-paper {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--on-paper) 25%, transparent);
+  color: var(--on-paper);
+}
+.paper .arabic {
+  color: var(--on-paper);
+}
+
+/* ---------- Review session (inline and focus mode) ---------- */
+
+.review-stage {
+  gap: 1rem;
+}
+.review-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.review-progress-row h2 {
+  flex-basis: 100%;
+}
+.review-progress {
+  flex-grow: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-elev-2);
+  overflow: hidden;
+}
+.review-progress > div {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent-2);
+  transition: width 0.3s;
+}
+.review-count {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+.review-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+.review-card .arabic {
+  text-align: center;
+}
+.review-prompt-latin {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 1.2rem + 2vw, 2.4rem);
+  font-weight: 600;
+}
+.review-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 1.5rem 0.5rem;
+}
+.review-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  color: var(--on-accent-2);
+}
+
+.rating-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.rating-button {
+  flex-direction: column;
+  gap: 0;
+  min-height: 60px;
+  padding: 0 0.25rem;
+}
+.rating-button small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.rating-again {
+  background: color-mix(in srgb, var(--bad) 14%, var(--bg-elev));
+  border-color: color-mix(in srgb, var(--bad) 45%, var(--border));
+}
+.rating-good {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: var(--on-accent-2);
+}
+.rating-good small {
+  color: inherit;
+}
+
+/* Focus mode: full height, prompt in the middle, answer at the thumb. */
+.focus-main {
+  min-height: 100vh;
+  min-height: 100dvh;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: calc(0.75rem + env(safe-area-inset-top, 0px)) 1rem
+    calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+}
+.focus-page {
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.focus-close {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+}
+.review-stage-focus {
+  flex-grow: 1;
+}
+.review-stage-focus .review-progress-row {
+  padding-left: calc(var(--tap) + 0.5rem);
+  min-height: var(--tap);
+}
+.review-stage-focus .review-card {
+  flex-grow: 1;
+  justify-content: center;
+}
+.review-stage-focus .review-empty {
+  flex-grow: 1;
+  justify-content: center;
+}
+
+/* ---------- Celebration ("+5 XP") ---------- */
+
+.celebration-region {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--nav-height) + 1.75rem + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 60;
+}
+@media (min-width: 960px) {
+  .celebration-region {
+    left: var(--sidebar-width);
+    bottom: 2rem;
+  }
+}
+.celebration {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1.25rem 0.85rem 0.85rem;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  border: 1px solid var(--accent);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 35%);
+  animation:
+    celebration-in 0.45s cubic-bezier(0.2, 1.4, 0.4, 1) both,
+    celebration-out 0.35s ease-in 2.45s both;
+  cursor: pointer;
+}
+.celebration-big {
+  padding: 1.1rem 1.6rem 1.1rem 1.1rem;
+  border-width: 2px;
+}
+.celebration-burst {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+}
+.celebration-big .celebration-burst {
+  width: 60px;
+  height: 60px;
+}
+.celebration-medal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  animation: celebration-pop 0.6s cubic-bezier(0.2, 1.6, 0.4, 1) 0.1s both;
+}
+.celebration-particle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 2px;
+  background: var(--accent-fill);
+  opacity: 0;
+  animation: celebration-particle 0.9s ease-out 0.15s both;
+}
+.celebration-particle-teal {
+  background: var(--accent-2);
+  border-radius: 50%;
+}
+.celebration-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+.celebration-xp {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  color: var(--accent);
+}
+.celebration-big .celebration-xp {
+  font-size: 1.7rem;
+}
+
+@keyframes celebration-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes celebration-out {
+  to {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes celebration-pop {
+  from {
+    transform: scale(0.3);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+@keyframes celebration-particle {
+  0% {
+    opacity: 1;
+    transform: rotate(var(--angle)) translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--angle)) translateX(var(--distance)) scale(0.4);
+  }
+}
+
+/* ---------- Listening progress ---------- */
+
+.badge-done {
+  background: color-mix(in srgb, var(--accent-2) 18%, var(--bg-elev));
+  border-color: var(--accent-2);
+  color: var(--text);
+}
+.badge-done svg {
+  color: var(--accent-2);
+}
+/* Unit chips show how much of the unit was heard as a bar along the bottom edge. */
+.unit-chip {
+  position: relative;
+  overflow: hidden;
+  min-width: var(--tap);
+}
+.unit-chip::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: var(--p, 0%);
+  background: var(--accent-2);
+}
+.unit-chip-done {
+  border-color: var(--accent-2);
+}
+.unit-chip-done svg {
+  color: var(--accent-2);
+}
+.btn-accent.unit-chip-done svg {
+  color: var(--on-accent);
+}
+.lesson-block {
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.track-row-heard audio {
+  opacity: 0.85;
+}
+.header-chip {
+  font-size: 0.9rem;
+  padding: 0.35rem 0.75rem;
+}
+
+/* ---------- Units: book map and learning path ---------- */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: var(--tap);
+  align-self: flex-start;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 600;
+}
+.back-link:hover {
+  color: var(--text);
+}
+
+.unit-hero {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  color: var(--text);
+  text-decoration: none;
+  border-color: var(--accent);
+}
+.unit-hero > svg {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.unit-hero-number {
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--accent);
+  min-width: 3.5rem;
+  text-align: center;
+}
+
+.unit-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.75rem;
+}
+.unit-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.unit-tile:hover {
+  border-color: var(--accent);
+}
+.unit-tile-current {
+  border: 2px solid var(--accent);
+}
+.unit-tile-number {
+  font-size: 2.4rem;
+  line-height: 1.1;
+  color: var(--text-muted);
+}
+.unit-tile-current .unit-tile-number,
+.unit-tile-done .unit-tile-number {
+  color: var(--accent);
+}
+.unit-tile-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+.unit-tile-done .unit-tile-label svg {
+  color: var(--accent-2);
+}
+.unit-tile-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--bg-elev-2);
+  overflow: hidden;
+}
+.unit-tile-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent-2);
+}
+
+.unit-header {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.unit-header > * {
+  position: relative;
+}
+.unit-header-number {
+  position: absolute;
+  top: -1.5rem;
+  right: 0.5rem;
+  font-size: 9rem;
+  line-height: 1;
+  color: var(--bg-elev-2);
+  pointer-events: none;
+}
+
+.path {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.path-station {
+  display: flex;
+  gap: 1rem;
+}
+.path-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.path-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg);
+}
+.path-line {
+  flex-grow: 1;
+  width: 2px;
+  min-height: 1rem;
+  background: var(--border);
+}
+.path-station-done .path-marker {
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+  color: var(--on-accent-2);
+}
+.path-station-done .path-line {
+  background: var(--accent-2);
+}
+.path-station-current .path-marker {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent-fill) 14%, var(--bg));
+}
+.path-card {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-bottom: 0.9rem;
+  padding: 0.65rem 0.25rem;
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+}
+.path-station-current .path-card {
+  padding: 0.9rem 1rem;
+  background: var(--bg-elev);
+  border: 1px solid var(--accent);
+}
+.path-station-upcoming .path-card {
+  opacity: 0.75;
+}
+/* Optional stations (page videos): dashed marker, never "done" or "current". */
+.path-station-optional .path-marker {
+  border-style: dashed;
+  color: var(--info);
+}
+.path-card:hover .path-card-title {
+  color: var(--accent);
+}
+.path-card-title {
+  font-weight: 700;
+}
+.path-card-detail {
+  font-size: 0.9rem;
+}
+.path-card-cta {
+  margin-top: 0.35rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Unit sections: one dialogue at a time; done ones fold away, later ones stay closed. */
+.path-sections {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.path-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+}
+.path-section-title {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+}
+.path-section-done summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius);
+  background: var(--bg-elev);
+  cursor: pointer;
+  font-weight: 700;
+}
+.path-section-done summary svg {
+  color: var(--accent-2);
+}
+.path-section-done details[open] summary {
+  margin-bottom: 0.75rem;
+}
+.path-section-locked {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+}
+.path-section-hint {
+  margin-left: auto;
+  font-size: 0.85rem;
+}
+
+.lesson-block-focus {
+  border-top-color: var(--accent);
+  scroll-margin-top: 1rem;
+}
+.lesson-block-focus > .row:first-child strong {
+  color: var(--accent);
+}
+
+.unit-title-ar {
+  font-size: clamp(1.9rem, 1.4rem + 2vw, 2.6rem);
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Page videos: a chip per book page, a 16:9 frame with a poster until the learner presses play. */
+.icon-btn {
+  min-width: var(--tap);
+  padding: 0;
+  justify-content: center;
+}
+.page-chips {
+  gap: 0.4rem;
+}
+.page-chip {
+  font-variant-numeric: tabular-nums;
+  padding: 0.35rem 0.7rem;
+  min-height: 36px;
+}
+.video-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #000;
+}
+.video-frame iframe,
+.video-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.video-poster {
+  padding: 0;
+  cursor: pointer;
+  background: #000;
+}
+.video-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  transition: opacity 0.2s;
+}
+.video-poster:hover img,
+.video-poster:focus-visible img {
+  opacity: 1;
+}
+.video-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: -32px 0 0 -32px;
+  border-radius: 50%;
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 40%);
+}
+
+/* Skill rings in the unit header: one dial per skill, filled by progress (--p). */
+.skill-rings {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.skill-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: var(--tap);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-decoration: none;
+}
+.skill-ring:hover {
+  color: var(--accent);
+}
+.skill-ring-dial {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--text);
+  background:
+    radial-gradient(closest-side, var(--bg-elev) 78%, transparent 80%),
+    conic-gradient(var(--accent-2) var(--p, 0%), var(--bg-elev-2) 0);
+}
+
+/* Forgetting reminder: only after a break, so it may stand out. */
+.forgetting-reminder {
+  border-color: color-mix(in srgb, var(--warn) 55%, var(--border));
+  background: color-mix(in srgb, var(--warn) 7%, var(--bg-elev));
+}
+
+/* Unit gate: locked notice and the start panel with the pace choice. */
+.unit-gate {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.pace-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: var(--tap);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  cursor: pointer;
+}
+.pace-option input {
+  accent-color: var(--accent-fill);
+  width: 18px;
+  height: 18px;
+}
+.pace-option-on {
+  border: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent-fill) 12%, var(--bg-elev));
+}
+.pace-weeks {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.pace-option-on .pace-weeks {
+  color: var(--accent);
+}
+.deadline-chip {
+  align-self: flex-start;
+  gap: 0.4rem;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.deadline-chip-over {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+.unit-tile-locked {
+  opacity: 0.55;
+}
+.unit-tile-locked .unit-tile-label svg {
+  color: var(--text-muted);
+}
+.current-unit-card {
+  gap: 0.6rem;
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.current-unit-name {
+  font-weight: 500;
+}
+.level-card {
+  color: var(--text);
+  text-decoration: none;
+  gap: 0.6rem;
+}
+.level-card:hover .level-card-title {
+  color: var(--accent);
+}
+
+/* Milestone (stage passed): full screen, big medal, a burst of saffron and teal. */
+.milestone {
+  position: relative;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  text-align: center;
+  overflow: hidden;
+}
+.milestone-medal {
+  display: grid;
+  place-items: center;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #f3c274,
+    var(--accent-fill) 55%,
+    #8a5a12
+  );
+  color: var(--on-accent);
+  font-size: 4rem;
+  box-shadow:
+    0 0 0 10px color-mix(in srgb, var(--accent-fill) 14%, transparent),
+    0 0 0 22px color-mix(in srgb, var(--accent-fill) 7%, transparent);
+  animation: celebration-pop 0.6s ease-out both;
+  margin-bottom: 1.25rem;
+}
+.milestone-eyebrow {
+  color: var(--accent-2);
+}
+.milestone-title {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.15;
+}
+.milestone-xp {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+.milestone-actions {
+  width: 100%;
+  margin-top: 1rem;
+}
+.milestone-burst span {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--accent-fill);
+  transform: rotate(calc(var(--i) * 26deg)) translateY(0);
+  animation: milestone-fly 1.4s ease-out calc(var(--i) * 30ms) both;
+}
+.milestone-burst span:nth-child(odd) {
+  background: var(--accent-2);
+  border-radius: 50%;
+}
+@keyframes milestone-fly {
+  from {
+    opacity: 1;
+    transform: rotate(calc(var(--i) * 26deg)) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 26deg)) translateY(-170px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .milestone-medal,
+  .milestone-burst span {
+    animation: none;
+  }
+  .milestone-burst {
+    display: none;
+  }
+}
+
+/* Level map: one card per stage, the stage test at its end. */
+.level-title-ar {
+  font-size: 0.75em;
+  color: var(--text-muted);
+}
+.stage-card-locked {
+  opacity: 0.75;
+}
+.stage-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.stage-card-running .stage-badge,
+.stage-card-test-ready .stage-badge {
+  color: var(--accent);
+}
+.stage-card-done .stage-badge {
+  color: var(--accent-2);
+}
+.stage-test {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.stage-test-done {
+  border-style: solid;
+  border-color: var(--accent-2);
+  color: var(--text);
+}
+.stage-test-done svg {
+  color: var(--accent-2);
+}
+
+/* "Entdecken": curated media cards; the player opens inline after a tap. */
+.discover-filters {
+  gap: 0.5rem;
+}
+.discover-pick {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-2) 16%, var(--bg-elev)),
+    var(--bg-elev)
+  );
+}
+.discover-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.discover-card {
+  gap: 0.45rem;
+}
+.discover-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--bg-elev-2), var(--bg-elev));
+}
+.discover-quran .discover-thumb {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-2) 35%, var(--bg-elev)),
+    var(--bg-elev)
+  );
+}
+.discover-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+}
+.discover-tag,
+.discover-duration {
+  position: absolute;
+  bottom: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: #fff;
+  background: rgb(0 0 0 / 65%);
+}
+.discover-tag {
+  left: 6px;
+}
+.discover-duration {
+  right: 6px;
+}
+.discover-category {
+  color: var(--accent);
+}
+.discover-quran .discover-category {
+  color: var(--accent-2);
+}
+
+/* Example sentence under a revealed vocabulary card. */
+.word-example {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.word-example figcaption {
+  font-size: 0.8rem;
+}
+
+/* Writing steps inside a unit: each exercise with its own count. */
+.write-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.write-step-count {
+  margin-inline-start: 0.4rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Daily check-in on the word of the day. */
+.word-checkin-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  color: var(--on-paper-muted);
+}
+.level-card-stage {
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+.level-card-stage svg {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+/* "Heute" progress tiles and the wobbly words list. */
+.stat-tile {
+  text-align: center;
+}
+.stat-tile-hint {
+  font-size: 0.8rem;
+}
+.weak-words summary {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  cursor: pointer;
+  list-style: none;
+}
+.weak-words summary::-webkit-details-marker {
+  display: none;
+}
+.weak-words-count {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--bad);
+  min-width: 2ch;
+  text-align: center;
+}
+.weak-words-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.weak-words-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 0.4rem;
+}
+.weak-words-cta {
+  margin-top: 0.75rem;
+}
+
+/* Cloze: a real sentence with one gap, four choices. */
+.cloze-sentence {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 2;
+  text-align: right;
+}
+.cloze-gap {
+  color: var(--accent);
+  font-family: var(--font-ui, inherit);
+  letter-spacing: 0.1em;
+}
+.cloze-filled {
+  background: color-mix(in srgb, var(--accent-2) 25%, transparent);
+  color: inherit;
+  border-radius: 6px;
+  padding: 0 0.2em;
+}
+.cloze-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.cloze-choice {
+  font-size: 1.35rem;
+  justify-content: center;
+}
+.cloze-choice-wrong {
+  border-color: var(--bad);
+  opacity: 0.6;
+}
+
+/* Grammar: rule card with examples, then the questions. */
+.grammar-rule-line {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-inline-start: 3px solid var(--accent);
+  background: var(--bg-elev-2);
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+.grammar-examples {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.grammar-example {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  text-align: start;
+}
+.grammar-example .muted {
+  align-self: flex-start;
+  font-size: 0.9rem;
+}
+.grammar-question-ar {
+  margin: 0;
+  font-size: 1.4rem;
+  text-align: right;
+}
+.grammar-options {
+  display: grid;
+  gap: 0.5rem;
+}
+.grammar-option {
+  justify-content: center;
+  text-align: center;
+}
+.grammar-option.arabic-inline {
+  font-size: 1.25rem;
+}
+
+/* Alphabet course. */
+.alphabet-lessons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.alphabet-lesson {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.alphabet-lesson-done {
+  border-color: color-mix(in srgb, var(--accent-2) 50%, var(--border));
+}
+.alphabet-lesson-letters {
+  font-size: 1.6rem;
+  min-width: 5.5rem;
+  text-align: center;
+  color: var(--accent);
+}
+.alphabet-letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.alphabet-letter {
+  min-width: 3.25rem;
+  font-size: 1.8rem;
+  justify-content: center;
+}
+.alphabet-forms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  direction: rtl;
+}
+.alphabet-forms li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  direction: ltr;
+}
+.alphabet-form {
+  font-size: 2rem;
+  line-height: 1.6;
+}
+.alphabet-prompt {
+  margin: 0;
+  font-size: 3.5rem;
+  text-align: center;
+  line-height: 1.6;
+}
+.alphabet-prompt-name {
+  margin: 0;
+  font-size: 1.3rem;
+  text-align: center;
+}
+.alphabet-title {
+  margin: 0;
+  font-size: 2.4rem;
+  text-align: start;
+}
+
+/* Entdecken: one player on top; cards only choose what plays. */
+.discover-now {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  scroll-margin-top: 1rem;
+}
+.discover-tag-live {
+  background: var(--accent);
+  color: var(--on-accent, #1a1a1a);
+}
+
+/* How much of a video was watched: a thin bar along the bottom of the thumbnail. */
+.discover-watched {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+.discover-watched span {
+  display: block;
+  height: 100%;
+  background: var(--bad, #e5484d);
+}

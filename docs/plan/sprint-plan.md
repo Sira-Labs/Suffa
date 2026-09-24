@@ -9,6 +9,61 @@ demoed · no secrets in code · structured logs on new paths.
 
 ---
 
+## Progress (as of 2026-09-23)
+
+Sprints 1–2 (P0) were planned for Oct 5 – Nov 1 and shipped early, all stories. Gate G0 is met
+(one-command deploy, restore drill passed). Dates of later sprints are kept as buffer.
+
+```mermaid
+gantt
+  dateFormat YYYY-MM-DD
+  axisFormat %d %b
+  todayMarker on
+  section P0 Foundation
+  S1 New home, same app (6/6)        :done, s1, 2026-10-05, 14d
+  S2 Operable (6/6)                  :done, s2, after s1, 14d
+  G0 met                             :milestone, done, g0, 2026-09-23, 0d
+  section P1 Identity
+  S3 Who are you? (5/5)              :done, s3, after s2, 14d
+  S4 Classes & admin (4/5)          :active, s4, after s3, 14d
+  section P2 Engagement
+  S5 Every day counts               :s5, after s4, 14d
+  S6 Class spirit                    :s6, after s5, 14d
+  Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
+```
+
+```mermaid
+pie showData
+  title Sprint 1–2 story points
+  "Done" : 38
+  "Open" : 2
+```
+
+| Story                   | Status | Notes                                                                                                                                            |
+| ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                            |
+| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                          |
+| 1.3 api skeleton        | ✅     |                                                                                                                                                  |
+| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                 |
+| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                               |
+| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                      |
+| 2.1 release workflow    | ✅     |                                                                                                                                                  |
+| 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                     |
+| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open   |
+| 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                   |
+| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                              |
+| 2.6 browser router      | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline     |
+| 3.1 Better Auth         | ✅     | magic link only, Google Workspace SMTP relay (port 587); rate limits in Postgres; httpOnly session cookie; open-redirect guard                   |
+| 3.2 authz               | ✅     | `authz/` policies + `authorize()` middleware; route × role matrix test fails on any route without a policy; first admin route `GET /admin/users` |
+| 3.3 ApiSyncProvider     | ✅     | same-origin cookie sync; `VITE_SYNC_BACKEND=off` for an offline build                                                                            |
+| 3.4 account UI          | ✅     | devices (browser, last activity), sign out one or all others, time zone; an ended session fails on its next request                              |
+| 3.5 security review     | ✅     | `docs/security/2026-09-review-auth-sync.md`: shared rate-limit bucket (proxy IP) and token-leaking Better Auth endpoints fixed; rest ticketed    |
+| 4.1 Supabase migration  | ✅     | nothing to migrate (only the PO's data, already synced to the API by the devices); Supabase removed from app, CSP and repo                       |
+| 4.2 admin area          | ✅     | users (search, role, disable), audit log; admin actions need a TOTP second factor confirmed within 12 h                                          |
+| 4.3 classes             | ✅     | create, invite link + QR (14 days, token hashed), join from a signed-out phone, teacher approval; scoped `class:manage`                          |
+| 4.4 GDPR                | ✅     | JSON export of all data; account deletion cascades (checked over every table with `user_id`), sole-teacher classes archived                      |
+| 4.5 pilot kick-off      | 📋     | interview guide and records in `docs/pilot/kickoff-interview.md`; the conversation itself is the PO's                                            |
+
 ## P0 — Foundation
 
 ### Sprint 1 (Oct 5 – Oct 18) — _"New home, same app"_
@@ -41,7 +96,7 @@ demoed · no secrets in code · structured logs on new paths.
 
 | #   | Story                                                                          | Pts | Acceptance                                            |
 | --- | ------------------------------------------------------------------------------ | --- | ----------------------------------------------------- |
-| 3.1 | Better Auth: magic link, password, passkeys; SMTP; auth rate limits (ADR-0008) | 5   | Sign-in on two devices; tokens never in localStorage. |
+| 3.1 | Better Auth: magic link only; SMTP (Gmail in dev); auth rate limits (ADR-0008) | 5   | Sign-in on two devices; tokens never in localStorage. |
 | 3.2 | `authz/` policies + route middleware (ADR-0009)                                | 5   | Route × role matrix test green.                       |
 | 3.3 | `ApiSyncProvider` + env selection                                              | 5   | Sync suite green; user bound to session.              |
 | 3.4 | Account UI: methods, sessions, sign out others; time-zone setting              | 3   | Revoked session fails within 60 s.                    |
@@ -122,7 +177,7 @@ demoed · no secrets in code · structured logs on new paths.
 
 | #    | Story                                                                                      | Pts | Acceptance                                 |
 | ---- | ------------------------------------------------------------------------------------------ | --- | ------------------------------------------ |
-| 10.1 | Tutor API (SSE), curriculum pack + learner snapshot                                        | 5   | First token p50 < 1.5 s.                   |
+| 10.1 | Tutor API (SSE), curriculum pack + learner snapshot; tutoring language de/en (ADR-0021)    | 5   | First token p50 < 1.5 s.                   |
 | 10.2 | Tools: lookup_vocab, get_root_family, get_learner_state, get_media_segment (authz-checked) | 5   | No cross-user access (test).               |
 | 10.3 | Tutor UI module; "ask about this minute" in recordings                                     | 5   | RTL + tashkīl level correct; 👍/👎 stored. |
 | 10.4 | Validators + repair retry; tutor produce-quests                                            | 5   | Fixture-tested.                            |
@@ -175,12 +230,26 @@ demoed · no secrets in code · structured logs on new paths.
 
 ## P7 — Next level
 
-- **Sprint 15 (Apr 19 – May 2):** server STT pronunciation scoring (ADR-0015); FSRS behind
+- **Sprint 15 (Apr 19 – May 2):** pronunciation assessment (ADR-0022): G2P for vocalised
+  MSA, evaluation harness on consented pilot recordings, ASR assessor as default and phoneme
+  assessor if it wins the evaluation; FSRS behind
   `schedule()` with migration flag.
-- **Sprint 16 (May 3 – May 16):** content CMS + offline bundles (ADR-0014); English UI;
+- **Sprint 16 (May 3 – May 16):** content CMS + offline bundles (ADR-0014); English UI,
+  per-language glosses and meaning-language setting (ADR-0021);
   WCAG 2.2 AA audit; `v2.2`.
 
 ---
+
+## Shipped outside the plan
+
+- **2026-09-23 — tolerant answer checking:** translations accept any one of several meanings,
+  optional parts, articles, umlaut spellings and small typos; the other meanings are shown after
+  answering; German answers are typed left-to-right (was: Arabic input style). Pilot data from
+  January also feeds the pronunciation evaluation (ADR-0022).
+- **2026-09-23 — iPhone recording and pronunciation rating:** format detection (`audio/mp4`),
+  timeouts and concrete German help texts instead of silent failures.
+- **2026-09-23 — security updates:** React Router 7, uuid 11.1; `npm audit` clean for
+  production dependencies.
 
 ## Backlog (unscheduled)
 

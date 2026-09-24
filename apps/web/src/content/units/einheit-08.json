@@ -1,0 +1,425 @@
+{
+  "einheit": 8,
+  "titel": "العَمَل – Die Arbeit",
+  "status": "entwurf",
+  "kulturnotiz": "Berufe folgen oft festen Mustern: فَعّال für Handwerk und Tätigkeit (طَبّاخ Koch, فَلّاح Bauer), مُفَعِّل/مُفَعِّلَة für Ausbildung und Pflege (مُدَرِّس، مُمَرِّضَة).",
+  "vokabeln": [
+    {
+      "id": "v-muwazzaf",
+      "ar": "مُوَظَّف",
+      "tr": "muwaẓẓaf",
+      "de": "Angestellter, Beamter",
+      "wurzel": "و-ظ-ف",
+      "wazn": "مُفَعَّل",
+      "plural": "مُوَظَّفون",
+      "einheit": 8
+    },
+    {
+      "id": "v-sharika",
+      "ar": "شَرِكَة",
+      "tr": "šarika",
+      "de": "Firma",
+      "wurzel": "ش-ر-ك",
+      "plural": "شَرِكات",
+      "einheit": 8
+    },
+    {
+      "id": "v-mustashfa",
+      "ar": "مُسْتَشْفى",
+      "tr": "mustašfā",
+      "de": "Krankenhaus",
+      "wurzel": "ش-ف-ي",
+      "plural": "مُسْتَشْفَيات",
+      "einheit": 8
+    },
+    {
+      "id": "v-iyada",
+      "ar": "عِيادَة",
+      "tr": "ʿiyāda",
+      "de": "Praxis, Klinik",
+      "wurzel": "ع-و-د",
+      "plural": "عِيادات",
+      "einheit": 8
+    },
+    {
+      "id": "v-mumarrida",
+      "ar": "مُمَرِّضَة",
+      "tr": "mumarriḍa",
+      "de": "Krankenschwester",
+      "wurzel": "م-ر-ض",
+      "wazn": "مُفَعِّلَة",
+      "plural": "مُمَرِّضات",
+      "einheit": 8
+    },
+    {
+      "id": "v-tajir",
+      "ar": "تاجِر",
+      "tr": "tāǧir",
+      "de": "Händler",
+      "wurzel": "ت-ج-ر",
+      "wazn": "فاعِل",
+      "plural": "تُجّار",
+      "einheit": 8
+    },
+    {
+      "id": "v-saiq",
+      "ar": "سائِق",
+      "tr": "sāʾiq",
+      "de": "Fahrer",
+      "wurzel": "س-و-ق",
+      "wazn": "فاعِل",
+      "plural": "سائِقون",
+      "einheit": 8
+    },
+    {
+      "id": "v-tabbakh",
+      "ar": "طَبّاخ",
+      "tr": "ṭabbāch",
+      "de": "Koch",
+      "wurzel": "ط-ب-خ",
+      "wazn": "فَعّال",
+      "plural": "طَبّاخون",
+      "einheit": 8
+    },
+    {
+      "id": "v-fallah",
+      "ar": "فَلّاح",
+      "tr": "fallāḥ",
+      "de": "Bauer",
+      "wurzel": "ف-ل-ح",
+      "wazn": "فَعّال",
+      "plural": "فَلّاحون",
+      "einheit": 8
+    },
+    {
+      "id": "v-mihna",
+      "ar": "مِهْنَة",
+      "tr": "mihna",
+      "de": "Beruf",
+      "wurzel": "م-ه-ن",
+      "plural": "مِهَن",
+      "einheit": 8
+    },
+    {
+      "id": "v-mudir",
+      "ar": "مُدير",
+      "tr": "mudīr",
+      "de": "Direktor, Chef",
+      "wurzel": "د-و-ر",
+      "plural": "مُديرون",
+      "einheit": 8
+    },
+    {
+      "id": "v-ratib",
+      "ar": "راتِب",
+      "tr": "rātib",
+      "de": "Gehalt",
+      "wurzel": "ر-ت-ب",
+      "plural": "رَواتِب",
+      "einheit": 8
+    },
+    {
+      "id": "v-mawid",
+      "ar": "مَوْعِد",
+      "tr": "mawʿid",
+      "de": "Termin, Verabredung",
+      "wurzel": "و-ع-د",
+      "wazn": "مَفْعِل",
+      "plural": "مَواعيد",
+      "einheit": 8
+    },
+    {
+      "id": "v-masna",
+      "ar": "مَصْنَع",
+      "tr": "maṣnaʿ",
+      "de": "Fabrik",
+      "wurzel": "ص-ن-ع",
+      "wazn": "مَفْعَل",
+      "plural": "مَصانِع",
+      "einheit": 8
+    },
+    {
+      "id": "v-mazraa",
+      "ar": "مَزْرَعَة",
+      "tr": "mazraʿa",
+      "de": "Bauernhof",
+      "wurzel": "ز-ر-ع",
+      "wazn": "مَفْعَلَة",
+      "plural": "مَزارِع",
+      "einheit": 8
+    },
+    {
+      "id": "v-mashghul",
+      "ar": "مَشْغول",
+      "tr": "mašġūl",
+      "de": "beschäftigt",
+      "wurzel": "ش-غ-ل",
+      "wazn": "مَفْعول",
+      "plural": null,
+      "einheit": 8
+    },
+    {
+      "id": "v-mutab",
+      "ar": "مُتْعَب",
+      "tr": "mutʿab",
+      "de": "müde, erschöpft",
+      "wurzel": "ت-ع-ب",
+      "plural": null,
+      "einheit": 8
+    },
+    {
+      "id": "v-nashit",
+      "ar": "نَشيط",
+      "tr": "našīṭ",
+      "de": "aktiv, tatkräftig",
+      "wurzel": "ن-ش-ط",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 8
+    },
+    {
+      "id": "v-yawmiyyan",
+      "ar": "يَوْمِيّاً",
+      "tr": "yawmiyyan",
+      "de": "täglich",
+      "wurzel": "ي-و-م",
+      "plural": null,
+      "einheit": 8
+    },
+    {
+      "id": "v-thamina",
+      "ar": "الثّامِنَة",
+      "tr": "aṯ-ṯāmina",
+      "de": "acht Uhr (die achte Stunde)",
+      "wurzel": "ث-م-ن",
+      "plural": null,
+      "einheit": 8,
+      "hinweis": "السّاعَةَ الثّامِنَةَ = um acht Uhr"
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-8-1",
+      "einheit": 8,
+      "dialog": 1,
+      "titel": "ما عَمَلُكَ؟",
+      "zeilen": [
+        {
+          "sp": "يوسُف",
+          "ar": "ما عَمَلُكَ يا عَمّي؟",
+          "de": "Was arbeitest du, Onkel?"
+        },
+        {
+          "sp": "الْعَمّ",
+          "ar": "أَنا مُهَنْدِسٌ. أَعْمَلُ في شَرِكَةٍ كَبيرَةٍ.",
+          "de": "Ich bin Ingenieur. Ich arbeite in einer großen Firma."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "مَتى تَحْضُرُ إِلى الشَّرِكَةِ؟",
+          "de": "Wann kommst du in die Firma?"
+        },
+        {
+          "sp": "الْعَمّ",
+          "ar": "أَحْضُرُ السّاعَةَ الثّامِنَةَ صَباحاً.",
+          "de": "Ich komme um acht Uhr morgens."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "هَلْ أَنْتَ مُتْعَبٌ بَعْدَ الْعَمَلِ؟",
+          "de": "Bist du nach der Arbeit müde?"
+        },
+        {
+          "sp": "الْعَمّ",
+          "ar": "أَحْياناً، لٰكِنَّ الْعَمَلَ جَميلٌ.",
+          "de": "Manchmal, aber die Arbeit ist schön."
+        }
+      ]
+    },
+    {
+      "id": "d-8-2",
+      "einheit": 8,
+      "dialog": 2,
+      "titel": "في الْعِيادَةِ",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "أَيْنَ تَعْمَلُ أُخْتُكِ؟",
+          "de": "Wo arbeitet deine Schwester?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "تَعْمَلُ مُمَرِّضَةً في عِيادَةٍ قَريبَةٍ.",
+          "de": "Sie arbeitet als Krankenschwester in einer Praxis in der Nähe."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "هِيَ مَشْغولَةٌ دائِماً!",
+          "de": "Sie ist immer beschäftigt!"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "نَعَمْ، تَفْتَحُ الْعِيادَةَ مُبَكِّراً كُلَّ يَوْمٍ.",
+          "de": "Ja, sie öffnet die Praxis jeden Tag früh."
+        }
+      ]
+    },
+    {
+      "id": "d-8-3",
+      "einheit": 8,
+      "dialog": 3,
+      "titel": "في الْمَزْرَعَةِ",
+      "zeilen": [
+        {
+          "sp": "يوسُف",
+          "ar": "أَيْنَ يَعْمَلُ جَدُّكَ يا عُمَرُ؟",
+          "de": "Wo arbeitet dein Großvater, ʿUmar?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "جَدّي فَلّاحٌ. يَعْمَلُ في مَزْرَعَةٍ في الْقَرْيَةِ.",
+          "de": "Mein Großvater ist Bauer. Er arbeitet auf einem Hof im Dorf."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "هَلْ عَمَلُهُ صَعْبٌ؟",
+          "de": "Ist seine Arbeit schwer?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "نَعَمْ، لٰكِنَّهُ نَشيطٌ جِدّاً. يَحْضُرُ إِلى الْمَزْرَعَةِ بَعْدَ الْفَجْرِ.",
+          "de": "Ja, aber er ist sehr tatkräftig. Er ist schon nach dem Morgengebet auf dem Hof."
+        }
+      ]
+    }
+  ],
+  "grammatik": [
+    {
+      "id": "g-8-1",
+      "einheit": 8,
+      "abschnitt": 1,
+      "titel": "Personalpronomen im Plural",
+      "regel": "نَحْنُ wir · أَنْتُمْ ihr · هُمْ sie (Pl.)",
+      "erklaerung": [
+        "نَحْنُ gilt für Männer und Frauen. أَنْتُمْ und هُمْ stehen für gemischte oder männliche Gruppen; für reine Frauengruppen gibt es أَنْتُنَّ und هُنَّ.",
+        "Wie im Singular brauchen sie kein „sein“: نَحْنُ مُهَنْدِسونَ – Wir sind Ingenieure."
+      ],
+      "beispiele": [
+        {
+          "ar": "نَحْنُ طُلّابٌ.",
+          "de": "Wir sind Studenten."
+        },
+        {
+          "ar": "أَيْنَ تَعْمَلونَ؟",
+          "de": "Wo arbeitet ihr?"
+        },
+        {
+          "ar": "هُمْ في الْمَزْرَعَةِ.",
+          "de": "Sie sind auf dem Bauernhof."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-8-1#0",
+          "frage": "„Wir arbeiten im Krankenhaus.“",
+          "ar": "… نَعْمَلُ في الْمُسْتَشْفى.",
+          "antwort": "نَحْنُ",
+          "ablenker": ["هُمْ", "أَنْتُمْ", "أَنا"]
+        },
+        {
+          "id": "g-8-1#1",
+          "frage": "Was bedeutet هُمْ?",
+          "ar": null,
+          "antwort": "sie (Plural)",
+          "ablenker": ["sie (eine Frau)", "ihr", "wir"]
+        }
+      ]
+    },
+    {
+      "id": "g-8-2",
+      "einheit": 8,
+      "abschnitt": 2,
+      "titel": "Die Nisba-Endung",
+      "regel": "مِصْرُ → مِصْرِيٌّ / مِصْرِيَّةٌ",
+      "erklaerung": [
+        "Mit ـِيٌّ (m) bzw. ـِيَّةٌ (f) wird aus einem Land, Ort oder Fach ein Adjektiv der Herkunft oder Zugehörigkeit.",
+        "Ein ة oder Artikel des Grundworts fällt weg: السُّعودِيَّةُ → سُعودِيٌّ, الزِّراعَةُ → زِراعِيٌّ."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَنا مِصْرِيٌّ.",
+          "de": "Ich bin Ägypter."
+        },
+        {
+          "ar": "هِيَ طَبيبَةٌ سورِيَّةٌ.",
+          "de": "Sie ist eine syrische Ärztin."
+        },
+        {
+          "ar": "عَمَلٌ زِراعِيٌّ",
+          "de": "landwirtschaftliche Arbeit"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-8-2#0",
+          "frage": "„Sie ist Deutsche.“",
+          "ar": null,
+          "antwort": "هِيَ أَلْمانِيَّةٌ.",
+          "ablenker": ["هِيَ أَلْمانِيٌّ.", "هِيَ أَلْمانِيا.", "هِيَ الْأَلْمانِيُّ."]
+        },
+        {
+          "id": "g-8-2#1",
+          "frage": "Nisba von لُبْنانُ (m)",
+          "ar": null,
+          "antwort": "لُبْنانِيٌّ",
+          "ablenker": ["لُبْنانِيَّةٌ", "لُبْنانُ", "اللُّبْنانُ"]
+        }
+      ]
+    },
+    {
+      "id": "g-8-3",
+      "einheit": 8,
+      "abschnitt": 3,
+      "titel": "„Haben“ mit عِنْدَ",
+      "regel": "عِنْدي = ich habe · عِنْدَكَ = du hast",
+      "erklaerung": [
+        "Das Arabische hat kein Verb „haben“. Man sagt „bei mir ist …“: عِنْدي سَيّارَةٌ – Ich habe ein Auto.",
+        "عِنْدَ nimmt die Possessivendungen: عِنْدَهُ, عِنْدَها, عِنْدَنا."
+      ],
+      "beispiele": [
+        {
+          "ar": "عِنْدي عَمَلٌ كَثيرٌ.",
+          "de": "Ich habe viel Arbeit."
+        },
+        {
+          "ar": "هَلْ عِنْدَكَ وَقْتٌ؟",
+          "de": "Hast du Zeit?"
+        },
+        {
+          "ar": "عِنْدَها عِيادَةٌ.",
+          "de": "Sie hat eine Praxis."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-8-3#0",
+          "frage": "„Wir haben eine Farm.“",
+          "ar": null,
+          "antwort": "عِنْدَنا مَزْرَعَةٌ.",
+          "ablenker": [
+            "عِنْدي مَزْرَعَةٌ.",
+            "نَحْنُ مَزْرَعَةٌ.",
+            "عِنْدَهُمْ مَزْرَعَةٌ."
+          ]
+        },
+        {
+          "id": "g-8-3#1",
+          "frage": "„Er hat ein Büro.“",
+          "ar": null,
+          "antwort": "عِنْدَهُ مَكْتَبٌ.",
+          "ablenker": ["عِنْدَها مَكْتَبٌ.", "هُوَ مَكْتَبٌ.", "عِنْدَكَ مَكْتَبٌ."]
+        }
+      ]
+    }
+  ]
+}

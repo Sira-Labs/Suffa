@@ -1,29 +1,27 @@
-# ADR-0004: Austauschbares Sync-Backend über SyncProvider-Interface
+# ADR-0004: Swappable sync backend via a SyncProvider interface
 
-- Status: akzeptiert
-- Datum: 2026-06-13
+- Status: accepted
+- Date: 2026-06-13
 
-## Kontext
+## Context
 
-Heute nutzen wir Supabase (Auth + Postgres + RLS). Aus Gründen der Datenhoheit
-könnte später ein selbst gehostetes Backend (z. B. PocketBase) gewünscht sein.
-Außerdem muss die App ganz ohne Backend (reiner Offline-Betrieb) laufen.
+Today we use Supabase (Auth + Postgres + RLS). For data-sovereignty reasons a self-hosted
+backend (e.g. PocketBase) might be wanted later. The app must also run with no backend at all
+(pure offline mode).
 
-## Entscheidung
+## Decision
 
-- Ein **`SyncProvider`-Interface** (`src/services/sync/provider.ts`) kapselt
-  Auth (Magic-Link), `push` und `pull`. Fehler werden als `Result<T>`
-  zurückgegeben (kein blindes `catch`-all).
-- Konkrete Implementierungen:
-  - **`SupabaseSyncProvider`** – produktiv, gegen Supabase.
-  - **`NoopSyncProvider`** – reiner Offline-Betrieb ohne Login.
-- Eine **Factory** (`factory.ts`) wählt anhand der `.env`-Konfiguration den
-  Provider. Fehlt die Konfiguration oder ist `VITE_SYNC_ENABLED=false`, wird der
-  Noop-Provider verwendet.
-- Die `SyncEngine` ist providerunabhängig (Dependency Injection im Konstruktor).
+- A **`SyncProvider` interface** (`src/services/sync/provider.ts`) encapsulates auth (magic
+  link), `push` and `pull`. Errors are returned as `Result<T>` (no blind catch-all).
+- Concrete implementations:
+  - **`SupabaseSyncProvider`** — production, against Supabase.
+  - **`NoopSyncProvider`** — pure offline mode without login.
+- A **factory** (`factory.ts`) picks the provider based on the `.env` configuration. If the
+  configuration is missing or `VITE_SYNC_ENABLED=false`, the noop provider is used.
+- The `SyncEngine` is provider-agnostic (dependency injection via the constructor).
 
-## Konsequenzen
+## Consequences
 
-Backend-Wechsel = neue Provider-Klasse, kein Eingriff in Engine/Stores/UI.
-Die App ist ohne jede Konfiguration sofort offline nutzbar; „Anmelden &
-hochladen“ wird durch späteres Setzen eines echten Providers möglich.
+Switching backends = a new provider class, no changes to engine/stores/UI. The app is usable
+offline immediately without any configuration; "Anmelden & hochladen" (sign in & upload)
+becomes possible once a real provider is configured.

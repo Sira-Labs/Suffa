@@ -1,0 +1,91 @@
+# GlitchTip — CapRover one-click template: error tracking and uptime checks (Sentry-compatible).
+# One instance serves all your projects (Suffa, Tabayyun, …): one GlitchTip project per app,
+# each app uses its own DSN with the official Sentry SDK of its language.
+#
+# Use: CapRover → Apps → One-Click Apps/Databases → ">> TEMPLATE <<" → paste this file →
+#      app name "glitchtip" → Deploy. Creates "glitchtip" (web + background worker in one
+#      container) and "glitchtip-db" (Postgres 17). No Redis/Valkey: GlitchTip 6 keeps its task
+#      queue and cache in Postgres, which is plenty for a handful of small apps.
+# Afterwards: enable HTTPS on "glitchtip", register the first account (only the first sign-up
+# is allowed), then follow docs/ops/caprover-deployment.md, section 9 "Error tracking".
+captainVersion: 4
+services:
+  $$cap_appname-db:
+    image: postgres:17-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: glitchtip
+      POSTGRES_PASSWORD: $$cap_db_password
+      POSTGRES_DB: glitchtip
+    volumes:
+      - $$cap_appname-db-data:/var/lib/postgresql/data
+    caproverExtra:
+      notExposeAsWebApp: 'true'
+
+  $$cap_appname:
+    image: glitchtip/glitchtip:$$cap_tag
+    restart: always
+    depends_on:
+      - $$cap_appname-db
+    environment:
+      SERVER_ROLE: all_in_one
+      DATABASE_URL: postgres://glitchtip:$$cap_db_password@srv-captain--$$cap_appname-db:5432/glitchtip
+      VALKEY_URL: ''
+      SECRET_KEY: $$cap_secret_key
+      GLITCHTIP_DOMAIN: https://$$cap_appname.$$cap_root_domain
+      ALLOWED_HOSTS: $$cap_appname.$$cap_root_domain,localhost,127.0.0.1
+      DEFAULT_FROM_EMAIL: $$cap_from_email
+      EMAIL_URL: $$cap_email_url
+      ENABLE_USER_REGISTRATION: 'False'
+      ENABLE_ORGANIZATION_CREATION: 'False'
+      GLITCHTIP_RETENTION_DAYS: $$cap_retention_days
+      PORT: '8000'
+    volumes:
+      - $$cap_appname-uploads:/code/uploads
+    caproverExtra:
+      containerHttpPort: '8000'
+
+caproverOneClickApp:
+  variables:
+    - id: $$cap_tag
+      label: GlitchTip image tag
+      defaultValue: '6'
+      description: Major version tag; check https://glitchtip.com/blog/ before moving to a new major.
+      validRegex: /^[A-Za-z0-9._-]+$/
+    - id: $$cap_db_password
+      label: Database password
+      defaultValue: $$cap_gen_random_hex(32)
+      validRegex: /^[A-Za-z0-9]{16,}$/
+    - id: $$cap_secret_key
+      label: Secret key
+      defaultValue: $$cap_gen_random_hex(64)
+      description: Signs sessions; keep it secret and stable.
+      validRegex: /^[A-Za-z0-9]{32,}$/
+    - id: $$cap_from_email
+      label: Sender address for alert e-mails
+      defaultValue: glitchtip@example.com
+      validRegex: /^[^@\s]+@[^@\s]+$/
+    - id: $$cap_email_url
+      label: E-mail transport
+      defaultValue: consolemail://
+      description: 'consolemail:// sends nothing (alerts only in the UI). For real mail: smtp+tls://user:password@smtp.example.com:587'
+      validRegex: /^[a-z+]+:\/\/.*$/
+    - id: $$cap_retention_days
+      label: Keep events for (days)
+      defaultValue: '90'
+      validRegex: /^[0-9]{1,4}$/
+  instructions:
+    start: >-
+      Self-hosted GlitchTip: error tracking and uptime checks for all your apps (Sentry SDKs
+      work unchanged). One app container plus its own Postgres, no Redis. Use the app name
+      "glitchtip".
+    end: >-
+      Done. 1) Enable HTTPS for $$cap_appname (HTTP Settings). 2) Open
+      https://$$cap_appname.$$cap_root_domain and register right away: only the first account
+      may sign up. 3) Create the organization "Suffa" and the projects suffa-api and suffa-web,
+      then set their DSNs as SUFFA_ERROR_DSN and SUFFA_WEB_ERROR_DSN on suffa-api (and
+      SUFFA_ERROR_DSN on suffa-worker). Details: docs/ops/caprover-deployment.md, section 9.
+  displayName: GlitchTip (error tracking and uptime)
+  isOfficial: false
+  description: Sentry-compatible error tracking and uptime monitoring, Postgres only.
+  documentation: https://github.com/thedatadudech/suffa/blob/main/docs/ops/caprover-deployment.md

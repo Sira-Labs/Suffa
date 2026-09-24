@@ -1,0 +1,515 @@
+{
+  "einheit": 3,
+  "titel": "السَّكَن – Das Wohnen",
+  "status": "entwurf",
+  "kulturnotiz": "Die Wurzel س-ك-ن trägt die Idee von Ruhe und Sich-Niederlassen: مَسْكَن (Wohnung), سُكّان (Bewohner), سَكينة (innere Ruhe) und سُكون (das Sukūn-Zeichen).",
+  "vokabeln": [
+    {
+      "id": "v-maskan",
+      "ar": "مَسْكَن",
+      "tr": "maskan",
+      "de": "Wohnung, Wohnsitz",
+      "wurzel": "س-ك-ن",
+      "wazn": "مَفْعَل",
+      "plural": "مَساكِن",
+      "einheit": 3
+    },
+    {
+      "id": "v-sakin",
+      "ar": "ساكِن",
+      "tr": "sākin",
+      "de": "Bewohner; (Buchstabe) mit Sukūn",
+      "wurzel": "س-ك-ن",
+      "plural": "سُكّان",
+      "einheit": 3
+    },
+    {
+      "id": "v-bayt",
+      "ar": "بَيْت",
+      "tr": "bayt",
+      "de": "Haus",
+      "wurzel": "ب-ي-ت",
+      "plural": "بُيوت",
+      "einheit": 3
+    },
+    {
+      "id": "v-shaqqa",
+      "ar": "شَقَّة",
+      "tr": "šaqqa",
+      "de": "Wohnung (Apartment)",
+      "wurzel": "ش-ق-ق",
+      "plural": "شُقَق",
+      "einheit": 3
+    },
+    {
+      "id": "v-ghurfa",
+      "ar": "غُرْفَة",
+      "tr": "ġurfa",
+      "de": "Zimmer",
+      "wurzel": "غ-ر-ف",
+      "plural": "غُرَف",
+      "einheit": 3
+    },
+    {
+      "id": "v-matbakh",
+      "ar": "مَطْبَخ",
+      "tr": "maṭbach",
+      "de": "Küche",
+      "wurzel": "ط-ب-خ",
+      "wazn": "مَفْعَل",
+      "plural": "مَطابِخ",
+      "einheit": 3
+    },
+    {
+      "id": "v-hammam",
+      "ar": "حَمّام",
+      "tr": "ḥammām",
+      "de": "Badezimmer",
+      "wurzel": "ح-م-م",
+      "plural": "حَمّامات",
+      "einheit": 3
+    },
+    {
+      "id": "v-bab",
+      "ar": "باب",
+      "tr": "bāb",
+      "de": "Tür",
+      "wurzel": "ب-و-ب",
+      "plural": "أَبْواب",
+      "einheit": 3
+    },
+    {
+      "id": "v-nafidha",
+      "ar": "نافِذَة",
+      "tr": "nāfiḏa",
+      "de": "Fenster",
+      "wurzel": "ن-ف-ذ",
+      "wazn": "فاعِلَة",
+      "plural": "نَوافِذ",
+      "einheit": 3
+    },
+    {
+      "id": "v-sarir",
+      "ar": "سَرير",
+      "tr": "sarīr",
+      "de": "Bett",
+      "wurzel": "س-ر-ر",
+      "wazn": "فَعيل",
+      "plural": "أَسِرَّة",
+      "einheit": 3
+    },
+    {
+      "id": "v-maktab",
+      "ar": "مَكْتَب",
+      "tr": "maktab",
+      "de": "Schreibtisch; Büro",
+      "wurzel": "ك-ت-ب",
+      "wazn": "مَفْعَل",
+      "plural": "مَكاتِب",
+      "einheit": 3
+    },
+    {
+      "id": "v-kursi",
+      "ar": "كُرْسِيّ",
+      "tr": "kursiyy",
+      "de": "Stuhl",
+      "wurzel": "ك-ر-س",
+      "plural": "كَراسِيّ",
+      "einheit": 3
+    },
+    {
+      "id": "v-miftah",
+      "ar": "مِفْتاح",
+      "tr": "miftāḥ",
+      "de": "Schlüssel",
+      "wurzel": "ف-ت-ح",
+      "wazn": "مِفْعال",
+      "plural": "مَفاتيح",
+      "einheit": 3
+    },
+    {
+      "id": "v-hadiqa",
+      "ar": "حَديقَة",
+      "tr": "ḥadīqa",
+      "de": "Garten",
+      "wurzel": "ح-د-ق",
+      "plural": "حَدائِق",
+      "einheit": 3
+    },
+    {
+      "id": "v-tabiq",
+      "ar": "طابِق",
+      "tr": "ṭābiq",
+      "de": "Stockwerk",
+      "wurzel": "ط-ب-ق",
+      "plural": "طَوابِق",
+      "einheit": 3
+    },
+    {
+      "id": "v-madina",
+      "ar": "مَدينَة",
+      "tr": "madīna",
+      "de": "Stadt",
+      "wurzel": "م-د-ن",
+      "plural": "مُدُن",
+      "einheit": 3
+    },
+    {
+      "id": "v-shari",
+      "ar": "شارِع",
+      "tr": "šāriʿ",
+      "de": "Straße",
+      "wurzel": "ش-ر-ع",
+      "plural": "شَوارِع",
+      "einheit": 3
+    },
+    {
+      "id": "v-jar",
+      "ar": "جار",
+      "tr": "ǧār",
+      "de": "Nachbar",
+      "wurzel": "ج-و-ر",
+      "plural": "جيران",
+      "einheit": 3
+    },
+    {
+      "id": "v-jamia",
+      "ar": "جامِعَة",
+      "tr": "ǧāmiʿa",
+      "de": "Universität",
+      "wurzel": "ج-م-ع",
+      "plural": "جامِعات",
+      "einheit": 3
+    },
+    {
+      "id": "v-qarib",
+      "ar": "قَريب",
+      "tr": "qarīb",
+      "de": "nah",
+      "wurzel": "ق-ر-ب",
+      "wazn": "فَعيل",
+      "plural": "أَقْرِباء",
+      "einheit": 3,
+      "hinweis": "قَريبٌ مِنْ = nahe bei; als Nomen auch „Verwandter“ (Plural أَقْرِباء)"
+    },
+    {
+      "id": "v-baid",
+      "ar": "بَعيد",
+      "tr": "baʿīd",
+      "de": "weit, fern",
+      "wurzel": "ب-ع-د",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 3
+    },
+    {
+      "id": "v-wasi",
+      "ar": "واسِع",
+      "tr": "wāsiʿ",
+      "de": "geräumig, weit",
+      "wurzel": "و-س-ع",
+      "wazn": "فاعِل",
+      "plural": null,
+      "einheit": 3
+    },
+    {
+      "id": "v-dayyiq",
+      "ar": "ضَيِّق",
+      "tr": "ḍayyiq",
+      "de": "eng",
+      "wurzel": "ض-ي-ق",
+      "plural": null,
+      "einheit": 3
+    },
+    {
+      "id": "v-huna",
+      "ar": "هُنا",
+      "tr": "hunā",
+      "de": "hier",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 3
+    },
+    {
+      "id": "v-hunaka",
+      "ar": "هُناكَ",
+      "tr": "hunāka",
+      "de": "dort",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 3
+    },
+    {
+      "id": "v-ala",
+      "ar": "عَلى",
+      "tr": "ʿalā",
+      "de": "auf",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 3
+    },
+    {
+      "id": "v-tahta",
+      "ar": "تَحْتَ",
+      "tr": "taḥta",
+      "de": "unter",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 3
+    },
+    {
+      "id": "v-amama",
+      "ar": "أَمامَ",
+      "tr": "amāma",
+      "de": "vor (örtlich)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 3
+    },
+    {
+      "id": "v-maa",
+      "ar": "مَعَ",
+      "tr": "maʿa",
+      "de": "mit",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 3
+    },
+    {
+      "id": "v-inda",
+      "ar": "عِنْدَ",
+      "tr": "ʿinda",
+      "de": "bei",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 3,
+      "hinweis": "عِنْدي = ich habe; عِنْدَنا = wir haben"
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-3-1",
+      "einheit": 3,
+      "dialog": 1,
+      "titel": "أَيْنَ تَسْكُنينَ؟",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "أَيْنَ تَسْكُنينَ يا مَرْيَمُ؟",
+          "de": "Wo wohnst du, Maryam?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "أَسْكُنُ في شَقَّةٍ قَريبَةٍ مِنَ الْجامِعَةِ.",
+          "de": "Ich wohne in einer Wohnung nahe der Universität."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "هَلِ الشَّقَّةُ واسِعَةٌ؟",
+          "de": "Ist die Wohnung geräumig?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "لا، هِيَ صَغيرَةٌ: غُرْفَتانِ وَمَطْبَخٌ وَحَمّامٌ.",
+          "de": "Nein, sie ist klein: zwei Zimmer, eine Küche und ein Bad."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أَنا أَسْكُنُ في بَيْتٍ كَبيرٍ مَعَ أُسْرَتي. عِنْدَنا حَديقَةٌ.",
+          "de": "Ich wohne mit meiner Familie in einem großen Haus. Wir haben einen Garten."
+        }
+      ]
+    },
+    {
+      "id": "d-3-2",
+      "einheit": 3,
+      "dialog": 2,
+      "titel": "أَيْنَ الْمِفْتاحُ؟",
+      "zeilen": [
+        {
+          "sp": "الْأُمّ",
+          "ar": "أَيْنَ الْمِفْتاحُ يا يوسُفُ؟",
+          "de": "Wo ist der Schlüssel, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "الْمِفْتاحُ عَلى الْمَكْتَبِ.",
+          "de": "Der Schlüssel ist auf dem Schreibtisch."
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "لا، هُوَ لَيْسَ هُنا.",
+          "de": "Nein, er ist nicht hier."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "هُوَ تَحْتَ الْكُرْسِيِّ، هُناكَ!",
+          "de": "Er ist unter dem Stuhl, dort!"
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "نَعَمْ، شُكْراً يا يوسُفُ.",
+          "de": "Ja, danke, Yūsuf."
+        }
+      ]
+    },
+    {
+      "id": "d-3-3",
+      "einheit": 3,
+      "dialog": 3,
+      "titel": "جارٌ جَديدٌ",
+      "zeilen": [
+        {
+          "sp": "الْجار",
+          "ar": "السَّلامُ عَلَيْكُمْ. أَنا جارُكُمُ الْجَديدُ.",
+          "de": "Friede sei mit euch. Ich bin euer neuer Nachbar."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "وَعَلَيْكُمُ السَّلامُ، أَهْلاً وَسَهْلاً! أَيْنَ تَسْكُنُ؟",
+          "de": "Und mit euch sei der Friede, willkommen! Wo wohnst du?"
+        },
+        {
+          "sp": "الْجار",
+          "ar": "أَسْكُنُ في الطّابِقِ الثّاني.",
+          "de": "Ich wohne im zweiten Stock."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "هَلِ الشَّقَّةُ واسِعَةٌ؟",
+          "de": "Ist die Wohnung geräumig?"
+        },
+        {
+          "sp": "الْجار",
+          "ar": "نَعَمْ، وَفيها نافِذَةٌ كَبيرَةٌ أَمامَ الْحَديقَةِ.",
+          "de": "Ja, und sie hat ein großes Fenster zum Garten."
+        }
+      ]
+    }
+  ],
+  "grammatik": [
+    {
+      "id": "g-3-1",
+      "einheit": 3,
+      "abschnitt": 1,
+      "titel": "Wo? – أَيْنَ und Ortspräpositionen",
+      "regel": "في in · عَلى auf · تَحْتَ unter · أَمامَ vor · بِجانِبِ neben",
+      "erklaerung": [
+        "Nach einer Präposition steht das Nomen im Genitiv: في الْبَيْتِ, عَلى الْمَكْتَبِ.",
+        "أَيْنَ fragt nach dem Ort: أَيْنَ الْمِفْتاحُ؟ – Wo ist der Schlüssel?"
+      ],
+      "beispiele": [
+        {
+          "ar": "أَيْنَ الْمِفْتاحُ؟",
+          "de": "Wo ist der Schlüssel?"
+        },
+        {
+          "ar": "الْمِفْتاحُ عَلى الطّاوِلَةِ.",
+          "de": "Der Schlüssel ist auf dem Tisch."
+        },
+        {
+          "ar": "الْقِطُّ تَحْتَ السَّريرِ.",
+          "de": "Die Katze ist unter dem Bett."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-3-1#0",
+          "frage": "„Das Buch ist auf dem Tisch.“ – Welche Präposition?",
+          "ar": "الْكِتابُ … الطّاوِلَةِ.",
+          "antwort": "عَلى",
+          "ablenker": ["تَحْتَ", "مِنْ", "أَيْنَ"]
+        },
+        {
+          "id": "g-3-1#1",
+          "frage": "Welche Endung hat das Nomen nach في?",
+          "ar": "في الْبَيْت…",
+          "antwort": "-i (Genitiv): الْبَيْتِ",
+          "ablenker": ["-u: الْبَيْتُ", "-a: الْبَيْتَ", "-un: بَيْتٌ"]
+        }
+      ]
+    },
+    {
+      "id": "g-3-2",
+      "einheit": 3,
+      "abschnitt": 2,
+      "titel": "Bestimmt und unbestimmt",
+      "regel": "بَيْتٌ ein Haus · الْبَيْتُ das Haus",
+      "erklaerung": [
+        "Unbestimmte Nomen tragen Tanwīn (-un, -in, -an), bestimmte den Artikel ال ohne Tanwīn.",
+        "Vor Sonnenbuchstaben (ت د ر س ش ص ن …) wird das l von ال nicht gesprochen, der Buchstabe verdoppelt sich: الشَّقَّةُ (asch-schaqqa)."
+      ],
+      "beispiele": [
+        {
+          "ar": "شَقَّةٌ جَديدَةٌ",
+          "de": "eine neue Wohnung"
+        },
+        {
+          "ar": "الشَّقَّةُ جَديدَةٌ.",
+          "de": "Die Wohnung ist neu."
+        },
+        {
+          "ar": "الْغُرْفَةُ كَبيرَةٌ.",
+          "de": "Das Zimmer ist groß."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-3-2#0",
+          "frage": "Bei welchem Wort wird das l von ال nicht gesprochen?",
+          "ar": null,
+          "antwort": "السَّريرُ",
+          "ablenker": ["الْقَمَرُ", "الْبابُ", "الْمَطْبَخُ"]
+        },
+        {
+          "id": "g-3-2#1",
+          "frage": "Welche Form bedeutet „ein Zimmer“?",
+          "ar": null,
+          "antwort": "غُرْفَةٌ",
+          "ablenker": ["الْغُرْفَةُ", "غُرْفَتي", "الْغُرْفَةِ"]
+        }
+      ]
+    },
+    {
+      "id": "g-3-3",
+      "einheit": 3,
+      "abschnitt": 3,
+      "titel": "هُناكَ – es gibt",
+      "regel": "هُناكَ + Nomen = es gibt …",
+      "erklaerung": [
+        "هُناكَ heißt „dort“, am Satzanfang aber auch „es gibt“: هُناكَ مَسْجِدٌ قَريبٌ – Es gibt eine Moschee in der Nähe.",
+        "هُنا heißt „hier“: أَسْكُنُ هُنا – Ich wohne hier."
+      ],
+      "beispiele": [
+        {
+          "ar": "هُناكَ حَديقَةٌ أَمامَ الْبَيْتِ.",
+          "de": "Es gibt einen Garten vor dem Haus."
+        },
+        {
+          "ar": "أَسْكُنُ هُنا.",
+          "de": "Ich wohne hier."
+        },
+        {
+          "ar": "هَلْ هُناكَ مَطْبَخٌ؟",
+          "de": "Gibt es eine Küche?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-3-3#0",
+          "frage": "Wie sagst du „Es gibt ein Bad.“?",
+          "ar": null,
+          "antwort": "هُناكَ حَمّامٌ.",
+          "ablenker": ["هُنا الْحَمّامُ.", "هٰذا حَمّامٌ.", "أَيْنَ الْحَمّامُ؟"]
+        },
+        {
+          "id": "g-3-3#1",
+          "frage": "Was bedeutet هُنا?",
+          "ar": null,
+          "antwort": "hier",
+          "ablenker": ["dort", "es gibt", "wo"]
+        }
+      ]
+    }
+  ]
+}

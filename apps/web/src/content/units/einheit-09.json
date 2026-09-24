@@ -1,0 +1,477 @@
+{
+  "einheit": 9,
+  "titel": "التَّسَوُّق – Einkaufen",
+  "status": "entwurf",
+  "kulturnotiz": "Auf dem Markt (السّوق) wird oft gehandelt. Farbadjektive haben ein eigenes Muster: أَفْعَل für männlich (أَحْمَر), فَعْلاء für weiblich (حَمْراء).",
+  "vokabeln": [
+    {
+      "id": "v-suq",
+      "ar": "سوق",
+      "tr": "sūq",
+      "de": "Markt",
+      "wurzel": "س-و-ق",
+      "plural": "أَسْواق",
+      "einheit": 9
+    },
+    {
+      "id": "v-dukkan",
+      "ar": "دُكّان",
+      "tr": "dukkān",
+      "de": "Laden",
+      "wurzel": "",
+      "plural": "دَكاكين",
+      "einheit": 9
+    },
+    {
+      "id": "v-thaman",
+      "ar": "ثَمَن",
+      "tr": "ṯaman",
+      "de": "Preis",
+      "wurzel": "ث-م-ن",
+      "plural": "أَثْمان",
+      "einheit": 9
+    },
+    {
+      "id": "v-riyal",
+      "ar": "رِيال",
+      "tr": "riyāl",
+      "de": "Riyal (Währung)",
+      "wurzel": "",
+      "plural": "رِيالات",
+      "einheit": 9
+    },
+    {
+      "id": "v-nuqud",
+      "ar": "نُقود",
+      "tr": "nuqūd",
+      "de": "Geld",
+      "wurzel": "ن-ق-د",
+      "plural": null,
+      "einheit": 9
+    },
+    {
+      "id": "v-ghali",
+      "ar": "غالٍ",
+      "tr": "ġālin",
+      "de": "teuer",
+      "wurzel": "غ-ل-و",
+      "plural": null,
+      "einheit": 9,
+      "hinweis": "mit Artikel: الْغالي"
+    },
+    {
+      "id": "v-rakhis",
+      "ar": "رَخيص",
+      "tr": "rachīṣ",
+      "de": "billig",
+      "wurzel": "ر-خ-ص",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 9
+    },
+    {
+      "id": "v-qamis",
+      "ar": "قَميص",
+      "tr": "qamīṣ",
+      "de": "Hemd",
+      "wurzel": "ق-م-ص",
+      "plural": "قُمْصان",
+      "einheit": 9
+    },
+    {
+      "id": "v-thawb",
+      "ar": "ثَوْب",
+      "tr": "ṯawb",
+      "de": "Gewand (Thawb)",
+      "wurzel": "ث-و-ب",
+      "plural": "ثِياب",
+      "einheit": 9
+    },
+    {
+      "id": "v-hidha",
+      "ar": "حِذاء",
+      "tr": "ḥiḏāʾ",
+      "de": "Schuh",
+      "wurzel": "ح-ذ-و",
+      "plural": "أَحْذِيَة",
+      "einheit": 9
+    },
+    {
+      "id": "v-haqiba",
+      "ar": "حَقيبَة",
+      "tr": "ḥaqība",
+      "de": "Tasche; Koffer",
+      "wurzel": "ح-ق-ب",
+      "plural": "حَقائِب",
+      "einheit": 9
+    },
+    {
+      "id": "v-lawn",
+      "ar": "لَوْن",
+      "tr": "lawn",
+      "de": "Farbe",
+      "wurzel": "ل-و-ن",
+      "plural": "أَلْوان",
+      "einheit": 9
+    },
+    {
+      "id": "v-abyad",
+      "ar": "أَبْيَض",
+      "tr": "abyaḍ",
+      "de": "weiß",
+      "wurzel": "ب-ي-ض",
+      "wazn": "أَفْعَل",
+      "plural": "بيض",
+      "einheit": 9,
+      "hinweis": "weiblich: بَيْضاء"
+    },
+    {
+      "id": "v-aswad",
+      "ar": "أَسْوَد",
+      "tr": "aswad",
+      "de": "schwarz",
+      "wurzel": "س-و-د",
+      "wazn": "أَفْعَل",
+      "plural": "سود",
+      "einheit": 9,
+      "hinweis": "weiblich: سَوْداء"
+    },
+    {
+      "id": "v-ahmar",
+      "ar": "أَحْمَر",
+      "tr": "aḥmar",
+      "de": "rot",
+      "wurzel": "ح-م-ر",
+      "wazn": "أَفْعَل",
+      "plural": "حُمْر",
+      "einheit": 9,
+      "hinweis": "weiblich: حَمْراء"
+    },
+    {
+      "id": "v-akhdar",
+      "ar": "أَخْضَر",
+      "tr": "achḍar",
+      "de": "grün",
+      "wurzel": "خ-ض-ر",
+      "wazn": "أَفْعَل",
+      "plural": "خُضْر",
+      "einheit": 9,
+      "hinweis": "weiblich: خَضْراء"
+    },
+    {
+      "id": "v-azraq",
+      "ar": "أَزْرَق",
+      "tr": "azraq",
+      "de": "blau",
+      "wurzel": "ز-ر-ق",
+      "wazn": "أَفْعَل",
+      "plural": "زُرْق",
+      "einheit": 9,
+      "hinweis": "weiblich: زَرْقاء"
+    },
+    {
+      "id": "v-bai",
+      "ar": "بائِع",
+      "tr": "bāʾiʿ",
+      "de": "Verkäufer",
+      "wurzel": "ب-ي-ع",
+      "wazn": "فاعِل",
+      "plural": "باعَة",
+      "einheit": 9
+    },
+    {
+      "id": "v-bikam",
+      "ar": "بِكَمْ",
+      "tr": "bi-kam",
+      "de": "wie viel kostet …?",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 9,
+      "hinweis": "بِكَمْ هٰذا؟ = Wie viel kostet das?"
+    },
+    {
+      "id": "v-hadiyya",
+      "ar": "هَدِيَّة",
+      "tr": "hadiyya",
+      "de": "Geschenk",
+      "wurzel": "ه-د-ي",
+      "plural": "هَدايا",
+      "einheit": 9
+    },
+    {
+      "id": "v-ashara",
+      "ar": "عَشَرَة",
+      "tr": "ʿašara",
+      "de": "zehn",
+      "wurzel": "ع-ش-ر",
+      "plural": null,
+      "einheit": 9
+    },
+    {
+      "id": "v-ishrun",
+      "ar": "عِشْرون",
+      "tr": "ʿišrūn",
+      "de": "zwanzig",
+      "wurzel": "ع-ش-ر",
+      "plural": null,
+      "einheit": 9
+    },
+    {
+      "id": "v-mia",
+      "ar": "مِئَة",
+      "tr": "miʾa",
+      "de": "hundert",
+      "wurzel": "م-أ-ي",
+      "plural": null,
+      "einheit": 9
+    },
+    {
+      "id": "v-tayyib",
+      "ar": "طَيِّب",
+      "tr": "ṭayyib",
+      "de": "gut; in Ordnung",
+      "wurzel": "ط-ي-ب",
+      "plural": null,
+      "einheit": 9
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-9-1",
+      "einheit": 9,
+      "dialog": 1,
+      "titel": "في السّوقِ",
+      "zeilen": [
+        {
+          "sp": "عُمَر",
+          "ar": "بِكَمْ هٰذا الْقَميصُ؟",
+          "de": "Wie viel kostet dieses Hemd?"
+        },
+        {
+          "sp": "الْبائِع",
+          "ar": "بِخَمْسينَ رِيالاً.",
+          "de": "Fünfzig Riyal."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "هٰذا غالٍ! عِنْدَكَ قَميصٌ رَخيصٌ؟",
+          "de": "Das ist teuer! Hast du ein billiges Hemd?"
+        },
+        {
+          "sp": "الْبائِع",
+          "ar": "نَعَمْ، هٰذا الْقَميصُ الْأَبْيَضُ بِثَلاثينَ رِيالاً.",
+          "de": "Ja, dieses weiße Hemd kostet dreißig Riyal."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "طَيِّبٌ، أَدْفَعُ ثَلاثينَ رِيالاً.",
+          "de": "Gut, ich zahle dreißig Riyal."
+        }
+      ]
+    },
+    {
+      "id": "d-9-2",
+      "einheit": 9,
+      "dialog": 2,
+      "titel": "هَدِيَّةٌ لِأُمّي",
+      "zeilen": [
+        {
+          "sp": "الْبائِعَة",
+          "ar": "ماذا تَطْلُبينَ؟",
+          "de": "Was wünschst du?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أُريدُ حَقيبَةً هَدِيَّةً لِأُمّي.",
+          "de": "Ich möchte eine Tasche als Geschenk für meine Mutter."
+        },
+        {
+          "sp": "الْبائِعَة",
+          "ar": "عِنْدَنا حَقيبَةٌ سَوْداءُ وَحَقيبَةٌ حَمْراءُ.",
+          "de": "Wir haben eine schwarze und eine rote Tasche."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "الْحَمْراءُ جَميلَةٌ. بِكَمْ هِيَ؟",
+          "de": "Die rote ist schön. Wie viel kostet sie?"
+        },
+        {
+          "sp": "الْبائِعَة",
+          "ar": "بِمِئَةِ رِيالٍ.",
+          "de": "Hundert Riyal."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "طَيِّبٌ، أَحْمِلُها مَعي.",
+          "de": "Gut, ich nehme sie mit."
+        }
+      ]
+    },
+    {
+      "id": "d-9-3",
+      "einheit": 9,
+      "dialog": 3,
+      "titel": "ماذا نَشْتَري؟",
+      "zeilen": [
+        {
+          "sp": "الْأُمّ",
+          "ar": "ماذا نَشْتَري الْيَوْمَ يا سارَةُ؟",
+          "de": "Was kaufen wir heute, Sāra?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "نَشْتَري خُضاراً وَفاكِهَةً وَخُبْزاً.",
+          "de": "Wir kaufen Gemüse, Obst und Brot."
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "بِكَمْ كيلو التُّفّاحِ؟",
+          "de": "Wie viel kostet ein Kilo Äpfel?"
+        },
+        {
+          "sp": "الْبائِع",
+          "ar": "بِعَشَرَةِ رِيالاتٍ.",
+          "de": "Zehn Riyal."
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "طَيِّبٌ، نَشْتَري كيلو واحِداً.",
+          "de": "Gut, wir kaufen ein Kilo."
+        }
+      ]
+    }
+  ],
+  "grammatik": [
+    {
+      "id": "g-9-1",
+      "einheit": 9,
+      "abschnitt": 1,
+      "titel": "هٰذا الْكِتابُ oder هٰذا كِتابٌ?",
+      "regel": "هٰذا كِتابٌ = das ist ein Buch · هٰذا الْكِتابُ = dieses Buch",
+      "erklaerung": [
+        "Folgt auf هٰذا/هٰذِهِ ein unbestimmtes Nomen, entsteht ein Satz. Folgt ein bestimmtes Nomen, heißt es „dieser/diese …“.",
+        "So: هٰذا الْقَميصُ جَميلٌ – Dieses Hemd ist schön."
+      ],
+      "beispiele": [
+        {
+          "ar": "هٰذا قَميصٌ.",
+          "de": "Das ist ein Hemd."
+        },
+        {
+          "ar": "هٰذا الْقَميصُ غالٍ.",
+          "de": "Dieses Hemd ist teuer."
+        },
+        {
+          "ar": "بِكَمْ هٰذِهِ الْحَقيبَةُ؟",
+          "de": "Wie viel kostet diese Tasche?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-9-1#0",
+          "frage": "„Diese Tasche ist schön.“",
+          "ar": null,
+          "antwort": "هٰذِهِ الْحَقيبَةُ جَميلَةٌ.",
+          "ablenker": [
+            "هٰذِهِ حَقيبَةٌ جَميلَةٌ.",
+            "هٰذا الْحَقيبَةُ جَميلٌ.",
+            "الْحَقيبَةُ هٰذِهِ الْجَميلَةُ."
+          ]
+        },
+        {
+          "id": "g-9-1#1",
+          "frage": "Was bedeutet هٰذا كِتابٌ?",
+          "ar": null,
+          "antwort": "Das ist ein Buch.",
+          "ablenker": ["dieses Buch", "Das Buch ist hier.", "mein Buch"]
+        }
+      ]
+    },
+    {
+      "id": "g-9-2",
+      "einheit": 9,
+      "abschnitt": 2,
+      "titel": "Wollen: أُريدُ أَنْ …",
+      "regel": "أُريدُ أَنْ أَشْتَرِيَ = ich möchte kaufen",
+      "erklaerung": [
+        "Nach أَنْ steht das Präsens mit der Endung -a (Subjunktiv): أَشْتَري → أَنْ أَشْتَرِيَ, أَذْهَبُ → أَنْ أَذْهَبَ.",
+        "Mit einem Nomen reicht أُريدُ allein: أُريدُ هٰذا – Ich möchte das."
+      ],
+      "beispiele": [
+        {
+          "ar": "أُريدُ أَنْ أَشْتَرِيَ هَدِيَّةً.",
+          "de": "Ich möchte ein Geschenk kaufen."
+        },
+        {
+          "ar": "هَلْ تُريدُ أَنْ تَذْهَبَ مَعي؟",
+          "de": "Willst du mit mir gehen?"
+        },
+        {
+          "ar": "أُريدُ كيلو تُفّاحٍ.",
+          "de": "Ich möchte ein Kilo Äpfel."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-9-2#0",
+          "frage": "„Ich möchte gehen.“",
+          "ar": null,
+          "antwort": "أُريدُ أَنْ أَذْهَبَ.",
+          "ablenker": [
+            "أُريدُ أَنْ أَذْهَبُ.",
+            "أُريدُ ذَهَبْتُ.",
+            "أُريدُ أَذْهَبَ أَنْ."
+          ]
+        },
+        {
+          "id": "g-9-2#1",
+          "frage": "Welche Endung bekommt das Verb nach أَنْ?",
+          "ar": null,
+          "antwort": "-a (Subjunktiv)",
+          "ablenker": ["-u", "keine Änderung", "-i"]
+        }
+      ]
+    },
+    {
+      "id": "g-9-3",
+      "einheit": 9,
+      "abschnitt": 3,
+      "titel": "Farben",
+      "regel": "أَحْمَرُ rot (m) · حَمْراءُ rot (f)",
+      "erklaerung": [
+        "Farben haben eine eigene Form: maskulin أَفْعَلُ, feminin فَعْلاءُ – أَبْيَضُ/بَيْضاءُ, أَسْوَدُ/سَوْداءُ, أَخْضَرُ/خَضْراءُ.",
+        "Sie folgen dem Nomen wie jedes Adjektiv: سَيّارَةٌ بَيْضاءُ – ein weißes Auto."
+      ],
+      "beispiele": [
+        {
+          "ar": "قَميصٌ أَزْرَقُ",
+          "de": "ein blaues Hemd"
+        },
+        {
+          "ar": "حَقيبَةٌ سَوْداءُ",
+          "de": "eine schwarze Tasche"
+        },
+        {
+          "ar": "الْوَرْدَةُ الْحَمْراءُ",
+          "de": "die rote Rose"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-9-3#0",
+          "frage": "„eine grüne Tasche“",
+          "ar": null,
+          "antwort": "حَقيبَةٌ خَضْراءُ",
+          "ablenker": ["حَقيبَةٌ أَخْضَرُ", "حَقيبَةٌ خَضْراءٌ", "خَضْراءُ حَقيبَةٌ"]
+        },
+        {
+          "id": "g-9-3#1",
+          "frage": "Feminin von أَبْيَضُ",
+          "ar": null,
+          "antwort": "بَيْضاءُ",
+          "ablenker": ["أَبْيَضَةٌ", "بَيْضَةٌ", "بيضٌ"]
+        }
+      ]
+    }
+  ]
+}

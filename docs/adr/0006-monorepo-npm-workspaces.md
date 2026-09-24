@@ -1,6 +1,7 @@
 # ADR-0006: Monorepo with npm workspaces (web, api, worker, shared packages)
 
-- Status: proposed
+- Status: accepted (implemented 2026-09-23: `apps/web`, `apps/api`; `packages/*` are added
+  when code is first shared between the apps)
 - Date: 2026-09-23
 
 ## Context

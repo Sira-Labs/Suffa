@@ -34,7 +34,8 @@ initially, with room to add nodes.
 - **Observability:** pino JSON logs, `/healthz` + `/readyz`, GlitchTip for errors, uptime check
   (e.g. Uptime Kuma), AI spend dashboard in admin panel.
 - **Web hosting change:** served by our nginx, so the app can switch from `createHashRouter` to
-  `createBrowserRouter` with SPA fallback.
+  `createBrowserRouter` with SPA fallback. Done 2026-09-24 (story 2.6): Caddy `try_files` and
+  the service worker's `navigateFallback` answer deep links; old `/#/…` links are rewritten.
 
 ## Alternatives
 

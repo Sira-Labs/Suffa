@@ -1,0 +1,535 @@
+{
+  "einheit": 2,
+  "titel": "الأُسْرَة – Die Familie",
+  "status": "entwurf",
+  "kulturnotiz": "Die Familie steht im Mittelpunkt des Alltags. Verwandte werden genau benannt: عَمّ ist der Bruder des Vaters, خال der Bruder der Mutter. Beim Loben sagt man „ما شاء الله“.",
+  "vokabeln": [
+    {
+      "id": "v-usra",
+      "ar": "أُسْرَة",
+      "tr": "usra",
+      "de": "Familie",
+      "wurzel": "أ-س-ر",
+      "plural": "أُسَر",
+      "einheit": 2
+    },
+    {
+      "id": "v-ab",
+      "ar": "أَب",
+      "tr": "ab",
+      "de": "Vater",
+      "wurzel": "أ-ب-و",
+      "plural": "آباء",
+      "einheit": 2,
+      "hinweis": "أَبي = mein Vater"
+    },
+    {
+      "id": "v-umm",
+      "ar": "أُمّ",
+      "tr": "umm",
+      "de": "Mutter",
+      "wurzel": "أ-م-م",
+      "plural": "أُمَّهات",
+      "einheit": 2,
+      "hinweis": "أُمّي = meine Mutter"
+    },
+    {
+      "id": "v-akh",
+      "ar": "أَخ",
+      "tr": "ach",
+      "de": "Bruder",
+      "wurzel": "أ-خ-و",
+      "plural": "إِخْوَة",
+      "einheit": 2,
+      "hinweis": "أَخي = mein Bruder"
+    },
+    {
+      "id": "v-ukht",
+      "ar": "أُخْت",
+      "tr": "ucht",
+      "de": "Schwester",
+      "wurzel": "أ-خ-و",
+      "plural": "أَخَوات",
+      "einheit": 2
+    },
+    {
+      "id": "v-ibn",
+      "ar": "اِبْن",
+      "tr": "ibn",
+      "de": "Sohn",
+      "wurzel": "ب-ن-و",
+      "plural": "أَبْناء",
+      "einheit": 2
+    },
+    {
+      "id": "v-bint",
+      "ar": "بِنْت",
+      "tr": "bint",
+      "de": "Tochter; Mädchen",
+      "wurzel": "ب-ن-و",
+      "plural": "بَنات",
+      "einheit": 2
+    },
+    {
+      "id": "v-jadd",
+      "ar": "جَدّ",
+      "tr": "ǧadd",
+      "de": "Großvater",
+      "wurzel": "ج-د-د",
+      "plural": "أَجْداد",
+      "einheit": 2
+    },
+    {
+      "id": "v-jadda",
+      "ar": "جَدَّة",
+      "tr": "ǧadda",
+      "de": "Großmutter",
+      "wurzel": "ج-د-د",
+      "plural": "جَدّات",
+      "einheit": 2
+    },
+    {
+      "id": "v-amm",
+      "ar": "عَمّ",
+      "tr": "ʿamm",
+      "de": "Onkel (väterlicherseits)",
+      "wurzel": "ع-م-م",
+      "plural": "أَعْمام",
+      "einheit": 2
+    },
+    {
+      "id": "v-khal",
+      "ar": "خال",
+      "tr": "chāl",
+      "de": "Onkel (mütterlicherseits)",
+      "wurzel": "خ-و-ل",
+      "plural": "أَخْوال",
+      "einheit": 2
+    },
+    {
+      "id": "v-zawj",
+      "ar": "زَوْج",
+      "tr": "zawǧ",
+      "de": "Ehemann",
+      "wurzel": "ز-و-ج",
+      "plural": "أَزْواج",
+      "einheit": 2
+    },
+    {
+      "id": "v-zawja",
+      "ar": "زَوْجَة",
+      "tr": "zawǧa",
+      "de": "Ehefrau",
+      "wurzel": "ز-و-ج",
+      "plural": "زَوْجات",
+      "einheit": 2
+    },
+    {
+      "id": "v-tifl",
+      "ar": "طِفْل",
+      "tr": "ṭifl",
+      "de": "Kind",
+      "wurzel": "ط-ف-ل",
+      "plural": "أَطْفال",
+      "einheit": 2
+    },
+    {
+      "id": "v-walad",
+      "ar": "وَلَد",
+      "tr": "walad",
+      "de": "Junge; Kind",
+      "wurzel": "و-ل-د",
+      "plural": "أَوْلاد",
+      "einheit": 2
+    },
+    {
+      "id": "v-rajul",
+      "ar": "رَجُل",
+      "tr": "raǧul",
+      "de": "Mann",
+      "wurzel": "ر-ج-ل",
+      "plural": "رِجال",
+      "einheit": 2
+    },
+    {
+      "id": "v-imraa",
+      "ar": "اِمْرَأَة",
+      "tr": "imraʾa",
+      "de": "Frau",
+      "wurzel": "م-ر-أ",
+      "plural": "نِساء",
+      "einheit": 2,
+      "hinweis": "Der Plural نِساء hat eine andere Wurzel."
+    },
+    {
+      "id": "v-hadha",
+      "ar": "هٰذا",
+      "tr": "hāḏā",
+      "de": "dies, das (m.)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 2
+    },
+    {
+      "id": "v-hadhihi",
+      "ar": "هٰذِهِ",
+      "tr": "hāḏihi",
+      "de": "diese, das (f.)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 2
+    },
+    {
+      "id": "v-fi",
+      "ar": "فِي",
+      "tr": "fī",
+      "de": "in",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 2
+    },
+    {
+      "id": "v-kabir",
+      "ar": "كَبير",
+      "tr": "kabīr",
+      "de": "groß; alt",
+      "wurzel": "ك-ب-ر",
+      "wazn": "فَعيل",
+      "plural": "كِبار",
+      "einheit": 2
+    },
+    {
+      "id": "v-saghir",
+      "ar": "صَغير",
+      "tr": "ṣaġīr",
+      "de": "klein; jung",
+      "wurzel": "ص-غ-ر",
+      "wazn": "فَعيل",
+      "plural": "صِغار",
+      "einheit": 2
+    },
+    {
+      "id": "v-jamil",
+      "ar": "جَميل",
+      "tr": "ǧamīl",
+      "de": "schön",
+      "wurzel": "ج-م-ل",
+      "wazn": "فَعيل",
+      "plural": "جِمال",
+      "einheit": 2
+    },
+    {
+      "id": "v-tabib",
+      "ar": "طَبيب",
+      "tr": "ṭabīb",
+      "de": "Arzt",
+      "wurzel": "ط-ب-ب",
+      "wazn": "فَعيل",
+      "plural": "أَطِبّاء",
+      "einheit": 2
+    },
+    {
+      "id": "v-muhandis",
+      "ar": "مُهَنْدِس",
+      "tr": "muhandis",
+      "de": "Ingenieur",
+      "wurzel": "ه-ن-د-س",
+      "plural": "مُهَنْدِسون",
+      "einheit": 2
+    },
+    {
+      "id": "v-sura",
+      "ar": "صُورَة",
+      "tr": "ṣūra",
+      "de": "Bild, Foto",
+      "wurzel": "ص-و-ر",
+      "plural": "صُوَر",
+      "einheit": 2
+    },
+    {
+      "id": "v-kam",
+      "ar": "كَمْ",
+      "tr": "kam",
+      "de": "wie viel(e)?",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 2
+    },
+    {
+      "id": "v-wahid",
+      "ar": "واحِد",
+      "tr": "wāḥid",
+      "de": "eins",
+      "wurzel": "و-ح-د",
+      "plural": null,
+      "einheit": 2
+    },
+    {
+      "id": "v-ithnan",
+      "ar": "اِثْنان",
+      "tr": "iṯnān",
+      "de": "zwei",
+      "wurzel": "ث-ن-ي",
+      "plural": null,
+      "einheit": 2
+    },
+    {
+      "id": "v-thalatha",
+      "ar": "ثَلاثَة",
+      "tr": "ṯalāṯa",
+      "de": "drei",
+      "wurzel": "ث-ل-ث",
+      "plural": null,
+      "einheit": 2
+    },
+    {
+      "id": "v-arbaa",
+      "ar": "أَرْبَعَة",
+      "tr": "arbaʿa",
+      "de": "vier",
+      "wurzel": "ر-ب-ع",
+      "plural": null,
+      "einheit": 2
+    },
+    {
+      "id": "v-khamsa",
+      "ar": "خَمْسَة",
+      "tr": "chamsa",
+      "de": "fünf",
+      "wurzel": "خ-م-س",
+      "plural": null,
+      "einheit": 2
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-2-1",
+      "einheit": 2,
+      "dialog": 1,
+      "titel": "صُورَةُ الْأُسْرَةِ",
+      "zeilen": [
+        {
+          "sp": "عُمَر",
+          "ar": "مَنْ هٰذا في الصّورَةِ؟",
+          "de": "Wer ist das auf dem Foto?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "هٰذا أَبي، وَهٰذِهِ أُمّي.",
+          "de": "Das ist mein Vater, und das ist meine Mutter."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "ما شاءَ اللهُ! وَمَنْ هٰذا الْوَلَدُ الصَّغيرُ؟",
+          "de": "Wie schön! Und wer ist dieser kleine Junge?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "هٰذا أَخي خالِدٌ. هُوَ طالِبٌ.",
+          "de": "Das ist mein Bruder Chālid. Er ist Schüler."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "وَمَنْ هٰذِهِ؟",
+          "de": "Und wer ist das?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "هٰذِهِ أُخْتي فاطِمَةُ. هِيَ طَبيبَةٌ.",
+          "de": "Das ist meine Schwester Fāṭima. Sie ist Ärztin."
+        }
+      ]
+    },
+    {
+      "id": "d-2-2",
+      "einheit": 2,
+      "dialog": 2,
+      "titel": "أُسْرَةٌ كَبيرَةٌ",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "هَلْ لَكِ أَخٌ يا مَرْيَمُ؟",
+          "de": "Hast du einen Bruder, Maryam?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "نَعَمْ، لي أَخٌ وَأُخْتانِ.",
+          "de": "Ja, ich habe einen Bruder und zwei Schwestern."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "ما شاءَ اللهُ! أُسْرَتُكِ كَبيرَةٌ.",
+          "de": "Wie schön! Deine Familie ist groß."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "وَأَنْتِ؟",
+          "de": "Und du?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أُسْرَتي صَغيرَةٌ: أَنا وَأَبي وَأُمّي.",
+          "de": "Meine Familie ist klein: ich, mein Vater und meine Mutter."
+        }
+      ]
+    },
+    {
+      "id": "d-2-3",
+      "einheit": 2,
+      "dialog": 3,
+      "titel": "جَدّي وَجَدَّتي",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "هَلْ جَدُّكَ في الْبَيْتِ يا يوسُفُ؟",
+          "de": "Ist dein Großvater zu Hause, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، جَدّي وَجَدَّتي في الْبَيْتِ.",
+          "de": "Ja, mein Großvater und meine Großmutter sind zu Hause."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "كَمْ وَلَداً عِنْدَ عَمِّكَ؟",
+          "de": "Wie viele Kinder hat dein Onkel?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "عِنْدَهُ ثَلاثَةُ أَوْلادٍ وَبِنْتٌ واحِدَةٌ.",
+          "de": "Er hat drei Söhne und eine Tochter."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "ما شاءَ اللهُ!",
+          "de": "Wie schön!"
+        }
+      ]
+    }
+  ],
+  "grammatik": [
+    {
+      "id": "g-2-1",
+      "einheit": 2,
+      "abschnitt": 1,
+      "titel": "هٰذا und هٰذِهِ – dieser, diese",
+      "regel": "هٰذا für maskuline, هٰذِهِ für feminine Nomen",
+      "erklaerung": [
+        "Fast alle femininen Nomen enden auf ة (tāʾ marbūṭa): أُمٌّ ist eine Ausnahme, sie ist natürlich feminin.",
+        "هٰذا أَبي heißt „Das ist mein Vater“, هٰذِهِ أُمّي „Das ist meine Mutter“."
+      ],
+      "beispiele": [
+        {
+          "ar": "هٰذا أَخي.",
+          "de": "Das ist mein Bruder."
+        },
+        {
+          "ar": "هٰذِهِ أُخْتي.",
+          "de": "Das ist meine Schwester."
+        },
+        {
+          "ar": "هٰذِهِ صورَةُ الْأُسْرَةِ.",
+          "de": "Das ist das Familienfoto."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-2-1#0",
+          "frage": "Was passt? „… جَدَّتي.“",
+          "ar": "… جَدَّتي.",
+          "antwort": "هٰذِهِ",
+          "ablenker": ["هٰذا", "هُوَ", "أَنا"]
+        },
+        {
+          "id": "g-2-1#1",
+          "frage": "Was passt? „… بَيْتٌ كَبيرٌ.“",
+          "ar": "… بَيْتٌ كَبيرٌ.",
+          "antwort": "هٰذا",
+          "ablenker": ["هٰذِهِ", "هِيَ", "أَنْتِ"]
+        }
+      ]
+    },
+    {
+      "id": "g-2-2",
+      "einheit": 2,
+      "abschnitt": 2,
+      "titel": "Possessivendungen",
+      "regel": "ـي mein · ـكَ dein (m) · ـكِ dein (f) · ـهُ sein · ـها ihr",
+      "erklaerung": [
+        "Besitz wird als Endung an das Nomen gehängt; der Artikel ال fällt dann weg: بَيْت → بَيْتي.",
+        "Bei Wörtern auf ة wird vor der Endung ein ت gesprochen und geschrieben: أُسْرَة → أُسْرَتي."
+      ],
+      "beispiele": [
+        {
+          "ar": "أُسْرَتي كَبيرَةٌ.",
+          "de": "Meine Familie ist groß."
+        },
+        {
+          "ar": "ما اسْمُكَ؟",
+          "de": "Wie heißt du? (m)"
+        },
+        {
+          "ar": "أَبوها مُهَنْدِسٌ.",
+          "de": "Ihr Vater ist Ingenieur."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-2-2#0",
+          "frage": "Wie heißt „meine Schwester“?",
+          "ar": null,
+          "antwort": "أُخْتي",
+          "ablenker": ["أُخْتُكَ", "أُخْتُها", "الْأُخْتي"]
+        },
+        {
+          "id": "g-2-2#1",
+          "frage": "Wie heißt „ihr Haus“ (von ihr)?",
+          "ar": null,
+          "antwort": "بَيْتُها",
+          "ablenker": ["بَيْتُهُ", "بَيْتي", "بَيْتُكِ"]
+        }
+      ]
+    },
+    {
+      "id": "g-2-3",
+      "einheit": 2,
+      "abschnitt": 3,
+      "titel": "Die Genitivverbindung (Iḍāfa)",
+      "regel": "صورَةُ الْأُسْرَةِ = das Foto der Familie",
+      "erklaerung": [
+        "Zwei Nomen hintereinander bilden eine Genitivverbindung: das erste hat nie ال und nie Tanwīn, das zweite steht im Genitiv (-i).",
+        "Die ganze Verbindung ist bestimmt, wenn das zweite Wort bestimmt ist: بَيْتُ جَدّي – das Haus meines Großvaters."
+      ],
+      "beispiele": [
+        {
+          "ar": "صورَةُ الْأُسْرَةِ",
+          "de": "das Foto der Familie"
+        },
+        {
+          "ar": "بَيْتُ جَدّي",
+          "de": "das Haus meines Großvaters"
+        },
+        {
+          "ar": "اسْمُ الْمُدَرِّسِ",
+          "de": "der Name des Lehrers"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-2-3#0",
+          "frage": "Welche Form ist richtig für „das Auto des Vaters“?",
+          "ar": null,
+          "antwort": "سَيّارَةُ الْأَبِ",
+          "ablenker": ["السَّيّارَةُ الْأَبِ", "سَيّارَةٌ الْأَبُ", "سَيّارَةُ الْأَبُ"]
+        },
+        {
+          "id": "g-2-3#1",
+          "frage": "Welcher Kasus steht beim zweiten Wort einer Iḍāfa?",
+          "ar": null,
+          "antwort": "Genitiv (-i)",
+          "ablenker": ["Nominativ (-u)", "Akkusativ (-a)", "kein Kasus"]
+        }
+      ]
+    }
+  ]
+}

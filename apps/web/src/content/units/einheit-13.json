@@ -1,0 +1,433 @@
+{
+  "einheit": 13,
+  "titel": "السَّفَر – Das Reisen",
+  "status": "entwurf",
+  "kulturnotiz": "Reisenden wünscht man „رِحْلَةً سَعيدَةً“ (gute Reise) oder „في أَمانِ الله“ (in Gottes Schutz). Die Wurzel س-ف-ر steckt in سَفَر (Reise), مُسافِر (Reisender) und سِفارَة (Botschaft).",
+  "vokabeln": [
+    {
+      "id": "v-safar",
+      "ar": "سَفَر",
+      "tr": "safar",
+      "de": "Reise, Reisen",
+      "wurzel": "س-ف-ر",
+      "plural": "أَسْفار",
+      "einheit": 13
+    },
+    {
+      "id": "v-mataar",
+      "ar": "مَطار",
+      "tr": "maṭār",
+      "de": "Flughafen",
+      "wurzel": "ط-ي-ر",
+      "plural": "مَطارات",
+      "einheit": 13
+    },
+    {
+      "id": "v-taira",
+      "ar": "طائِرَة",
+      "tr": "ṭāʾira",
+      "de": "Flugzeug",
+      "wurzel": "ط-ي-ر",
+      "plural": "طائِرات",
+      "einheit": 13
+    },
+    {
+      "id": "v-qitar",
+      "ar": "قِطار",
+      "tr": "qiṭār",
+      "de": "Zug",
+      "wurzel": "ق-ط-ر",
+      "plural": "قِطارات",
+      "einheit": 13
+    },
+    {
+      "id": "v-safina",
+      "ar": "سَفينَة",
+      "tr": "safīna",
+      "de": "Schiff",
+      "wurzel": "س-ف-ن",
+      "plural": "سُفُن",
+      "einheit": 13
+    },
+    {
+      "id": "v-tadhkira",
+      "ar": "تَذْكِرَة",
+      "tr": "taḏkira",
+      "de": "Fahrkarte, Ticket",
+      "wurzel": "ذ-ك-ر",
+      "plural": "تَذاكِر",
+      "einheit": 13
+    },
+    {
+      "id": "v-jawaz",
+      "ar": "جَوازُ السَّفَرِ",
+      "tr": "ǧawāzu s-safar",
+      "de": "Reisepass",
+      "wurzel": "ج-و-ز",
+      "plural": "جَوازاتُ السَّفَرِ",
+      "einheit": 13
+    },
+    {
+      "id": "v-tashira",
+      "ar": "تَأْشيرَة",
+      "tr": "taʾšīra",
+      "de": "Visum",
+      "wurzel": "أ-ش-ر",
+      "plural": "تَأْشيرات",
+      "einheit": 13
+    },
+    {
+      "id": "v-funduq",
+      "ar": "فُنْدُق",
+      "tr": "funduq",
+      "de": "Hotel",
+      "wurzel": "",
+      "plural": "فَنادِق",
+      "einheit": 13,
+      "hinweis": "Lehnwort (griech. pandocheion)"
+    },
+    {
+      "id": "v-musafir",
+      "ar": "مُسافِر",
+      "tr": "musāfir",
+      "de": "Reisender",
+      "wurzel": "س-ف-ر",
+      "wazn": "مُفاعِل",
+      "plural": "مُسافِرون",
+      "einheit": 13
+    },
+    {
+      "id": "v-mahatta",
+      "ar": "مَحَطَّة",
+      "tr": "maḥaṭṭa",
+      "de": "Station, Bahnhof",
+      "wurzel": "ح-ط-ط",
+      "plural": "مَحَطّات",
+      "einheit": 13
+    },
+    {
+      "id": "v-wusul",
+      "ar": "وُصول",
+      "tr": "wuṣūl",
+      "de": "Ankunft",
+      "wurzel": "و-ص-ل",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-mughadara",
+      "ar": "مُغادَرَة",
+      "tr": "muġādara",
+      "de": "Abreise, Abflug",
+      "wurzel": "غ-د-ر",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-dakhil",
+      "ar": "داخِل",
+      "tr": "dāchil",
+      "de": "innen; Inland",
+      "wurzel": "د-خ-ل",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-kharij",
+      "ar": "خارِج",
+      "tr": "chāriǧ",
+      "de": "außen; Ausland",
+      "wurzel": "خ-ر-ج",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-daqiqa",
+      "ar": "دَقيقَة",
+      "tr": "daqīqa",
+      "de": "Minute",
+      "wurzel": "د-ق-ق",
+      "plural": "دَقائِق",
+      "einheit": 13
+    },
+    {
+      "id": "v-sari",
+      "ar": "سَريع",
+      "tr": "sarīʿ",
+      "de": "schnell",
+      "wurzel": "س-ر-ع",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-bati",
+      "ar": "بَطيء",
+      "tr": "baṭīʾ",
+      "de": "langsam",
+      "wurzel": "ب-ط-أ",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-sifara",
+      "ar": "سِفارَة",
+      "tr": "sifāra",
+      "de": "Botschaft",
+      "wurzel": "س-ف-ر",
+      "plural": "سِفارات",
+      "einheit": 13
+    },
+    {
+      "id": "v-saeed",
+      "ar": "سَعيد",
+      "tr": "saʿīd",
+      "de": "glücklich",
+      "wurzel": "س-ع-د",
+      "wazn": "فَعيل",
+      "plural": "سُعَداء",
+      "einheit": 13,
+      "hinweis": "رِحْلَةً سَعيدَةً = gute Reise"
+    },
+    {
+      "id": "v-mumtaz",
+      "ar": "مُمْتاز",
+      "tr": "mumtāz",
+      "de": "ausgezeichnet",
+      "wurzel": "م-ي-ز",
+      "plural": null,
+      "einheit": 13
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-13-1",
+      "einheit": 13,
+      "dialog": 1,
+      "titel": "في الْمَطارِ",
+      "zeilen": [
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "جَوازُ السَّفَرِ، مِنْ فَضْلِكِ.",
+          "de": "Den Reisepass, bitte."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "تَفَضَّلْ. هٰذا جَوازي، وَهٰذِهِ التَّأْشيرَةُ.",
+          "de": "Bitte. Das ist mein Pass, und das ist das Visum."
+        },
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "إِلى أَيْنَ؟",
+          "de": "Wohin?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "إِلى جِدَّةَ.",
+          "de": "Nach Dschidda."
+        },
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "الطّائِرَةُ في السّاعَةِ الْعاشِرَةِ. رِحْلَةً سَعيدَةً!",
+          "de": "Das Flugzeug geht um zehn Uhr. Gute Reise!"
+        }
+      ]
+    },
+    {
+      "id": "d-13-2",
+      "einheit": 13,
+      "dialog": 2,
+      "titel": "بِالْقِطارِ",
+      "zeilen": [
+        {
+          "sp": "عُمَر",
+          "ar": "هَلْ حَجَزْتَ التَّذْكِرَةَ يا يوسُفُ؟",
+          "de": "Hast du das Ticket gebucht, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، حَجَزْتُ تَذْكِرَتَيْنِ لِلْقِطارِ إِلى الْمَدينَةِ.",
+          "de": "Ja, ich habe zwei Zugtickets nach Medina gebucht."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "مَتى نَرْكَبُ الْقِطارَ؟",
+          "de": "Wann steigen wir in den Zug?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "غَداً صَباحاً مِنَ الْمَحَطَّةِ. الْقِطارُ سَريعٌ جِدّاً.",
+          "de": "Morgen früh am Bahnhof. Der Zug ist sehr schnell."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "مُمْتازٌ!",
+          "de": "Ausgezeichnet!"
+        }
+      ]
+    },
+    {
+      "id": "d-13-3",
+      "einheit": 13,
+      "dialog": 3,
+      "titel": "في الْفُنْدُقِ",
+      "zeilen": [
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "أَهْلاً وَسَهْلاً! هَلْ عِنْدَكَ حَجْزٌ؟",
+          "de": "Herzlich willkommen! Haben Sie eine Reservierung?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "نَعَمْ، حَجَزْتُ غُرْفَةً لِثَلاثَةِ أَيّامٍ. أُسافِرُ بَعْدَ ذٰلِكَ إِلى الْمَدينَةِ.",
+          "de": "Ja, ich habe ein Zimmer für drei Tage gebucht. Danach reise ich nach Medina."
+        },
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "هٰذا مِفْتاحُ الْغُرْفَةِ، في الطّابِقِ الرّابِعِ.",
+          "de": "Hier ist der Zimmerschlüssel, im vierten Stock."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "شُكْراً. مَتى الْفُطورُ؟",
+          "de": "Danke. Wann gibt es Frühstück?"
+        },
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "مِنَ السّاعَةِ السّادِسَةِ إِلى السّاعَةِ الْعاشِرَةِ.",
+          "de": "Von sechs bis zehn Uhr."
+        }
+      ]
+    }
+  ],
+  "grammatik": [
+    {
+      "id": "g-13-1",
+      "einheit": 13,
+      "abschnitt": 1,
+      "titel": "Verkehrsmittel mit بِـ",
+      "regel": "بِالْقِطارِ mit dem Zug · بِالطّائِرَةِ mit dem Flugzeug",
+      "erklaerung": [
+        "بِـ wird direkt an das Nomen geschrieben und verlangt den Genitiv: بِالسَّيّارَةِ, بِالْحافِلَةِ.",
+        "„zu Fuß“ heißt dagegen مَشْياً oder عَلى الْأَقْدامِ."
+      ],
+      "beispiele": [
+        {
+          "ar": "سافَرْنا بِالْقِطارِ.",
+          "de": "Wir sind mit dem Zug gereist."
+        },
+        {
+          "ar": "أَذْهَبُ إِلى الْعَمَلِ بِالسَّيّارَةِ.",
+          "de": "Ich fahre mit dem Auto zur Arbeit."
+        },
+        {
+          "ar": "كَيْفَ سافَرْتَ؟ – بِالطّائِرَةِ.",
+          "de": "Wie bist du gereist? – Mit dem Flugzeug."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-13-1#0",
+          "frage": "„mit dem Bus“",
+          "ar": null,
+          "antwort": "بِالْحافِلَةِ",
+          "ablenker": ["في الْحافِلَةُ", "بِالْحافِلَةُ", "مَعَ حافِلَةٍ"]
+        },
+        {
+          "id": "g-13-1#1",
+          "frage": "Welcher Kasus folgt auf بِـ?",
+          "ar": null,
+          "antwort": "Genitiv",
+          "ablenker": ["Nominativ", "Akkusativ", "keiner"]
+        }
+      ]
+    },
+    {
+      "id": "g-13-2",
+      "einheit": 13,
+      "abschnitt": 2,
+      "titel": "Der Superlativ",
+      "regel": "أَكْبَرُ مَدينَةٍ = die größte Stadt",
+      "erklaerung": [
+        "Der Superlativ nutzt die Form أَفْعَلُ vor einem unbestimmten Nomen im Genitiv: أَجْمَلُ فُنْدُقٍ – das schönste Hotel.",
+        "Mit ال und nach dem Nomen geht es auch: الْفُنْدُقُ الْأَكْبَرُ."
+      ],
+      "beispiele": [
+        {
+          "ar": "الْقاهِرَةُ أَكْبَرُ مَدينَةٍ في مِصْرَ.",
+          "de": "Kairo ist die größte Stadt in Ägypten."
+        },
+        {
+          "ar": "هٰذا أَرْخَصُ فُنْدُقٍ.",
+          "de": "Das ist das billigste Hotel."
+        },
+        {
+          "ar": "أَسْرَعُ قِطارٍ",
+          "de": "der schnellste Zug"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-13-2#0",
+          "frage": "„das schönste Land“",
+          "ar": null,
+          "antwort": "أَجْمَلُ بَلَدٍ",
+          "ablenker": ["أَجْمَلُ الْبَلَدُ", "بَلَدٌ أَجْمَلُ", "جَميلُ بَلَدٍ"]
+        },
+        {
+          "id": "g-13-2#1",
+          "frage": "„der schnellste Zug“",
+          "ar": null,
+          "antwort": "أَسْرَعُ قِطارٍ",
+          "ablenker": ["أَسْرَعُ قِطارٌ", "سَريعُ الْقِطارِ", "الْقِطارُ أَسْرَعُ"]
+        }
+      ]
+    },
+    {
+      "id": "g-13-3",
+      "einheit": 13,
+      "abschnitt": 3,
+      "titel": "Der Verbalsatz: Verb zuerst",
+      "regel": "سافَرَ الطُّلّابُ = die Studenten reisten",
+      "erklaerung": [
+        "Im Verbalsatz steht das Verb vorne und bleibt im Singular, auch wenn das Subjekt im Plural steht: وَصَلَ الْمُسافِرونَ.",
+        "Das Geschlecht passt sich an: وَصَلَتِ الطّائِرَةُ – das Flugzeug (f) ist gelandet."
+      ],
+      "beispiele": [
+        {
+          "ar": "وَصَلَتِ الطّائِرَةُ.",
+          "de": "Das Flugzeug ist angekommen."
+        },
+        {
+          "ar": "سافَرَ الطُّلّابُ أَمْسِ.",
+          "de": "Die Studenten sind gestern gereist."
+        },
+        {
+          "ar": "يَنْتَظِرُ الْمُسافِرونَ.",
+          "de": "Die Reisenden warten."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-13-3#0",
+          "frage": "„Die Reisenden kamen an.“",
+          "ar": null,
+          "antwort": "وَصَلَ الْمُسافِرونَ.",
+          "ablenker": [
+            "وَصَلوا الْمُسافِرونَ.",
+            "وَصَلَتِ الْمُسافِرونَ.",
+            "الْمُسافِرونَ وَصَلَ."
+          ]
+        },
+        {
+          "id": "g-13-3#1",
+          "frage": "„Der Zug fuhr ab.“ – Welche Form?",
+          "ar": "… الْقِطارُ.",
+          "antwort": "غادَرَ",
+          "ablenker": ["غادَرَتْ", "غادَروا", "يُغادِرونَ"]
+        }
+      ]
+    }
+  ]
+}

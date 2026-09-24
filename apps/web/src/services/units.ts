@@ -54,6 +54,8 @@ export interface UnitPathInput {
   wordStarted: (wordId: string) => boolean;
   /** Is this practice item done? */
   practised: (skill: PracticeSkill, itemId: string) => boolean;
+  /** Words with a cloze task (example sentences load on demand; none until then). */
+  clozeIds?: ReadonlySet<string>;
   /** Verb ids of the unit (drilled in the closing section). */
   verbIds?: readonly string[];
   /** The learner's own words for this unit (studied in the closing section). */
@@ -172,6 +174,19 @@ function sectionStations(
       to: `/review?unit=${u}&${q}`,
       done: count(words, input.wordStarted),
       total: words.length,
+    });
+  }
+  const cloze = words.filter((id) => input.clozeIds?.has(id));
+  if (cloze.length > 0) {
+    const filled = count(cloze, (id) => input.practised('cloze', id));
+    drafts.push({
+      id: `u${u}-s${section.no}-cloze`,
+      kind: 'cloze',
+      label: 'Lückentext',
+      detail: `${filled} von ${cloze.length} Sätzen ergänzt`,
+      to: `/units/${u}/cloze?${q}`,
+      done: filled,
+      total: cloze.length,
     });
   }
   if (section.writeIds.length > 0) {

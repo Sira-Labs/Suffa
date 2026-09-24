@@ -1,7 +1,7 @@
 import type { Syncable } from './srs';
 
 /** Skills practised inside a unit, besides listening and vocabulary cards. */
-export type PracticeSkill = 'read' | 'write' | 'speak' | 'verbs';
+export type PracticeSkill = 'read' | 'cloze' | 'write' | 'speak' | 'verbs';
 
 /**
  * One practised item of a unit skill (a dialogue read, a word written correctly, a dialogue

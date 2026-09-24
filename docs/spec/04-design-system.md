@@ -110,6 +110,13 @@ opened first (Dexie v6 `discover_progress`, local). It stays there until it is m
 or unpinned ("Lösen"); any item can also be pinned by hand ("Anheften"). The item playing right
 now stays where it was tapped and moves up on the next visit, so nothing jumps under the finger.
 
+**Lückentext (cloze).** Each dialogue section gets a cloze station after its words: a real
+example sentence (Tatoeba or own) with the word blanked out, the German translation, and four
+words of the unit to choose from. A correct first pick counts (+2 XP); wrong picks are marked and
+can be retried. Words whose sentences only contain phrases or other forms get no task (392 of
+401 words have one). The example sentences load on demand, so the station appears once they
+are there.
+
 ## Feedback moments
 
 - **Celebration toast** (`CelebrationToast`): "+5 XP · Dialog gehört" with a medal and a small

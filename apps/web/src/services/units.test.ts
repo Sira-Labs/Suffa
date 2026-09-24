@@ -79,6 +79,23 @@ describe('unitPath', () => {
     expect(path[0]!.stations.at(-1)).toMatchObject({ optional: true, state: 'optional' });
   });
 
+  it('adds a cloze station after the words once example sentences are known', () => {
+    const path = unitPath(input({ clozeIds: new Set(['w1a']) }));
+    expect(path[0]!.stations.map((s) => s.label)).toEqual([
+      'Dialog hören',
+      'Dialog lesen',
+      'Wörter lernen',
+      'Lückentext',
+      'Schreiben',
+      'Nachsprechen',
+    ]);
+    expect(path[0]!.stations[3]).toMatchObject({
+      to: '/units/1/cloze?section=1',
+      total: 1,
+    });
+    expect(path[1]!.stations.some((s) => s.kind === 'cloze')).toBe(false);
+  });
+
   it("maps the publisher's k-th dialogue lesson to section k", () => {
     const path = unitPath(input());
     expect(path.map((s) => s.stations.find((st) => st.kind === 'dialogue')?.to)).toEqual([

@@ -17,7 +17,8 @@ import { content } from '@/content';
 import userEvent from '@testing-library/user-event';
 import index from '@/content/sources/book1-audio.json';
 import { lessonKey, trackId } from '@/services/audio/publisherIndex';
-import { dialogueSections } from '@/services/practice';
+import { clozeFor, dialogueSections } from '@/services/practice';
+import { loadExamples } from '@/services/examples';
 import type { AudioUnit } from '@/types';
 
 function renderAt(path: string) {
@@ -200,6 +201,29 @@ describe('Units (integration)', () => {
     await user.click(within(steps).getByRole('button', { name: /^Abschreiben/ }));
     expect(screen.queryByText(words[0]!.ar)).toBeNull();
     expect(screen.getByText(words[1]!.ar)).toBeInTheDocument();
+  });
+
+  it('fills gaps in real sentences inside a section and counts each sentence', async () => {
+    const user = userEvent.setup();
+    const [first] = dialogueSections(content, 1);
+    const examples = (await loadExamples()).examples;
+    const withTask = first!.wordIds.filter((id) =>
+      clozeFor(content.vokabeln.find((v) => v.id === id)!, examples[id] ?? [])
+    );
+    const word = content.vokabeln.find((v) => v.id === withTask[0])!;
+    renderAt('/units/1/cloze?section=1');
+    expect(
+      await screen.findByRole('heading', { name: 'Lückentext' })
+    ).toBeInTheDocument();
+    expect(await screen.findByText(/Welches Wort fehlt\?/)).toBeInTheDocument();
+    const progress = screen.getByRole('progressbar', { name: 'Fortschritt Lückentext' });
+    expect(progress).toHaveAttribute('aria-valuemax', String(withTask.length));
+    const choices = screen.getByRole('group', { name: 'Auswahl' });
+    expect(within(choices).getAllByRole('button')).toHaveLength(4);
+    await user.click(within(choices).getByRole('button', { name: word.ar }));
+    await waitFor(() => expect(progress).toHaveAttribute('aria-valuenow', '1'));
+    expect(screen.getByText(new RegExp(`Richtig – ${word.ar}`))).toBeInTheDocument();
+    expect(useCelebrationStore.getState().current).toMatchObject({ title: 'Richtig' });
   });
 
   it('shows skill rings and the practice stations of the unit', async () => {

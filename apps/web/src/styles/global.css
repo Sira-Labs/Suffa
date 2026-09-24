@@ -1606,3 +1606,35 @@ textarea.input {
 .weak-words-cta {
   margin-top: 0.75rem;
 }
+
+/* Cloze: a real sentence with one gap, four choices. */
+.cloze-sentence {
+  margin: 0;
+  font-size: 1.6rem;
+  line-height: 2;
+  text-align: right;
+}
+.cloze-gap {
+  color: var(--accent);
+  font-family: var(--font-ui, inherit);
+  letter-spacing: 0.1em;
+}
+.cloze-filled {
+  background: color-mix(in srgb, var(--accent-2) 25%, transparent);
+  color: inherit;
+  border-radius: 6px;
+  padding: 0 0.2em;
+}
+.cloze-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.cloze-choice {
+  font-size: 1.35rem;
+  justify-content: center;
+}
+.cloze-choice-wrong {
+  border-color: var(--bad);
+  opacity: 0.6;
+}

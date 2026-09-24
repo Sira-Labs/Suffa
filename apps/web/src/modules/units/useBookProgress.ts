@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useClozeIds } from './useClozeIds';
 import type { AudioUnit, PracticeSkill, PublisherAudioIndex } from '@/types';
 import { content, unitInfos } from '@/content';
 import { loadPublisherIndex, trackId } from '@/services/audio/publisherIndex';
@@ -74,6 +75,7 @@ export function useBookProgress(): {
   const cards = useSrsStore((s) => s.cards);
   const userVocab = useContentStore((s) => s.userVocab);
   const practiced = usePracticeStore((s) => s.records);
+  const clozeIds = useClozeIds();
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +114,7 @@ export function useBookProgress(): {
           if (card && card.interval >= MATURE_DAYS) vocab.mature += 1;
         }
         const testPassed = passedTest(exams, unit.unit) !== null;
-        const items = unitPracticeItems(content, unit.unit);
+        const items = unitPracticeItems(content, unit.unit, clozeIds ?? undefined);
         const practice = Object.fromEntries(
           PRACTICE_SKILLS.map((skill) => [
             skill,
@@ -145,6 +147,7 @@ export function useBookProgress(): {
           },
           practised: (skill, id) => Boolean(practiced[practiceId(unit.unit, skill, id)]),
           verbIds: items.verbs,
+          clozeIds: clozeIds ?? undefined,
           ownWordIds,
           testPassed,
           videos: videoStation(videoData, unit.unit),
@@ -160,7 +163,17 @@ export function useBookProgress(): {
           draft: drafts.has(unit.unit),
         };
       });
-  }, [index, cards, userVocab, listening, exams, enrollments, videoData, practiced]);
+  }, [
+    index,
+    cards,
+    userVocab,
+    listening,
+    exams,
+    enrollments,
+    videoData,
+    practiced,
+    clozeIds,
+  ]);
 
   return { index, units };
 }

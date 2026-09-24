@@ -41,6 +41,7 @@ describe('unit practice items', () => {
   it('collects the items of one unit per skill', () => {
     expect(unitPracticeItems(bundle, 1)).toEqual({
       read: ['d1'],
+      cloze: [],
       write: [
         'w1',
         'diktat:w1',
@@ -53,6 +54,7 @@ describe('unit practice items', () => {
     });
     expect(unitPracticeItems(bundle, 3)).toEqual({
       read: [],
+      cloze: [],
       write: [],
       speak: [],
       verbs: [],

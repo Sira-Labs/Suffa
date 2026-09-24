@@ -12,6 +12,7 @@ import type {
 
 export const PRACTICE_SKILLS: readonly PracticeSkill[] = [
   'read',
+  'cloze',
   'write',
   'speak',
   'verbs',
@@ -72,13 +73,21 @@ export function writeItemIds(tasks: Record<WriteExercise, string[]>): string[] {
   return WRITE_EXERCISES.flatMap((ex) => tasks[ex].map((id) => writeItemId(ex, id)));
 }
 
+/**
+ * Items per skill of one unit. Cloze tasks need the example sentences (loaded on demand):
+ * `clozeIds` are the words that have one; without it the unit has no cloze items yet.
+ */
 export function unitPracticeItems(
   bundle: Pick<ContentBundle, 'dialoge' | 'vokabeln' | 'verben'>,
-  unit: number
+  unit: number,
+  clozeIds?: ReadonlySet<string>
 ): Record<PracticeSkill, string[]> {
   const dialogues = bundle.dialoge.filter((d) => d.einheit === unit);
   return {
     read: dialogues.map((d) => d.id),
+    cloze: bundle.vokabeln
+      .filter((v) => v.einheit === unit && clozeIds?.has(v.id))
+      .map((v) => v.id),
     write: writeItemIds(
       writeTasks(
         dialogues,

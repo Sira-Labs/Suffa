@@ -19,6 +19,12 @@ export const STATION_META: Record<
     icon: 'read',
     hint: 'Dialog lesen, Wörter antippen, Verständnisfrage beantworten',
   },
+  cloze: {
+    label: 'Lückentext',
+    icon: 'read',
+    hint: 'Setz das fehlende Wort in echte Sätze ein',
+    sectionHint: 'Die Wörter dieses Dialogs in echten Sätzen',
+  },
   write: {
     label: 'Schreiben',
     icon: 'write',

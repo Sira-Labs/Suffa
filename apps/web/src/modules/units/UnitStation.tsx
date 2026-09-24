@@ -19,6 +19,8 @@ import { Reading } from '@/modules/reading';
 import { Writing } from '@/modules/writing';
 import { Speaking } from '@/modules/speaking';
 import { Conjugation } from '@/modules/conjugation';
+import { Cloze } from '@/modules/cloze';
+import { useClozeIds } from './useClozeIds';
 import { isStationKey, STATION_META } from './skills';
 
 const UNITS = 16;
@@ -42,9 +44,10 @@ export function UnitStation() {
     () => dialogueSections(content, unit).find((s) => s.no === sectionNo) ?? null,
     [unit, sectionNo]
   );
+  const clozeIds = useClozeIds();
   const items = useMemo(
-    () => sectionItems(unitPracticeItems(content, unit), section),
-    [unit, section]
+    () => sectionItems(unitPracticeItems(content, unit, clozeIds ?? undefined), section),
+    [unit, section, clozeIds]
   );
 
   const skill = station !== 'listen' ? (station as PracticeSkill) : null;
@@ -165,6 +168,7 @@ export function UnitStation() {
       {station === 'read' && scope && <Reading scope={scope} />}
       {station === 'write' && scope && <Writing scope={scope} />}
       {station === 'speak' && scope && <Speaking scope={scope} />}
+      {station === 'cloze' && scope && <Cloze scope={scope} />}
       {station === 'verbs' && scope && <Conjugation scope={scope} />}
     </div>
   );
@@ -178,6 +182,7 @@ function sectionItems(
   if (!section) return all;
   return {
     read: [section.dialogId],
+    cloze: all.cloze.filter((id) => section.wordIds.includes(id)),
     write: section.writeIds,
     speak: section.lineIds,
     verbs: all.verbs,

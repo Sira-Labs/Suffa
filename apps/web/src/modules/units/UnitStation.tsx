@@ -3,7 +3,12 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import type { PracticeSkill, UnitPracticeScope } from '@/types';
 import { Icon } from '@/components/Icon';
 import { content } from '@/content';
-import { practiceCount, unitPracticeItems } from '@/services/practice';
+import {
+  dialogueSections,
+  practiceCount,
+  unitPracticeItems,
+  type UnitSection,
+} from '@/services/practice';
 import { useCelebrationStore, useEnrollmentStore, usePracticeStore } from '@/state';
 import { isUnlocked } from '@/services/enrollment';
 import { LockedPanel } from './UnitGate';
@@ -29,19 +34,30 @@ export function UnitStation() {
   const records = usePracticeStore((s) => s.records);
   const practise = usePracticeStore((s) => s.practise);
   const celebrate = useCelebrationStore((s) => s.show);
-  const items = useMemo(() => unitPracticeItems(content, unit), [unit]);
   const exams = useEnrollmentStore((s) => s.exams);
+  // ?section=k (from the unit path): only dialogue k and its words.
+  const sectionNo = Number(params.get('section')) || null;
+  const section = useMemo<UnitSection | null>(
+    () => dialogueSections(content, unit).find((s) => s.no === sectionNo) ?? null,
+    [unit, sectionNo]
+  );
+  const items = useMemo(
+    () => sectionItems(unitPracticeItems(content, unit), section),
+    [unit, section]
+  );
 
   const skill = station !== 'listen' ? (station as PracticeSkill) : null;
   const scope = useMemo<UnitPracticeScope | null>(() => {
     if (!skill) return null;
     return {
       unit,
+      ...(section && { dialogIds: [section.dialogId], wordIds: section.wordIds }),
       onPractised(itemId) {
         void practise(unit, skill, itemId, items[skill]).then((outcome) => {
           if (outcome.stationComplete) {
+            const where = section ? `Dialog ${section.no}` : `Einheit ${unit}`;
             celebrate({
-              title: `${STATION_META[skill].label} geschafft · Einheit ${unit}`,
+              title: `${STATION_META[skill].label} geschafft · ${where}`,
               xp: outcome.xp,
               big: true,
             });
@@ -49,7 +65,7 @@ export function UnitStation() {
         });
       },
     };
-  }, [skill, unit, items, practise, celebrate]);
+  }, [skill, unit, section, items, practise, celebrate]);
 
   if (!Number.isInteger(unit) || unit < 1 || unit > UNITS || !isStationKey(station)) {
     return (
@@ -78,6 +94,9 @@ export function UnitStation() {
   const total = skill ? items[skill].length : 0;
   const done = skill ? practiceCount(records, unit, skill, items[skill]) : 0;
   const lesson = Number(params.get('lesson')) || undefined;
+  // From a section only its dialogue lesson; ?view=videos only the page videos.
+  const videosOnly = params.get('view') === 'videos';
+  const onlyLesson = section ? lesson : undefined;
 
   return (
     <div className="stack" style={{ gap: '1.25rem' }}>
@@ -88,13 +107,14 @@ export function UnitStation() {
       <header className="stack" style={{ gap: '0.35rem' }}>
         <span className="eyebrow" style={{ color: 'var(--accent)' }}>
           Einheit {unit}
+          {section && ` · Dialog ${section.no}`}
         </span>
         <h1 style={{ margin: 0 }} className="row">
           <Icon name={meta.icon} size={26} />
           {meta.label}
         </h1>
         <p className="muted" style={{ margin: 0 }}>
-          {meta.hint}
+          {(section && meta.sectionHint) || meta.hint}
         </p>
         {skill && total > 0 && (
           <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
@@ -117,18 +137,23 @@ export function UnitStation() {
 
       {station === 'listen' && (
         <>
-          <section className="card stack" aria-label="Buchseiten-Videos">
-            <BookVideos unit={unit} />
-          </section>
-          <section className="card stack" aria-label="Offizielle Audios">
-            <PublisherAudio
-              key={`${unit}-${lesson ?? ''}`}
-              unit={unit}
-              initialUnit={unit}
-              focusLesson={lesson}
-              hideUnitPicker
-            />
-          </section>
+          {!onlyLesson && (
+            <section className="card stack" aria-label="Buchseiten-Videos">
+              <BookVideos unit={unit} />
+            </section>
+          )}
+          {!videosOnly && (
+            <section className="card stack" aria-label="Offizielle Audios">
+              <PublisherAudio
+                key={`${unit}-${lesson ?? ''}`}
+                unit={unit}
+                initialUnit={unit}
+                focusLesson={lesson}
+                onlyLesson={onlyLesson}
+                hideUnitPicker
+              />
+            </section>
+          )}
         </>
       )}
       {station === 'read' && scope && <Reading scope={scope} />}
@@ -137,4 +162,18 @@ export function UnitStation() {
       {station === 'verbs' && scope && <Conjugation scope={scope} />}
     </div>
   );
+}
+
+/** A section narrows reading and speaking to its dialogue and writing to its words. */
+function sectionItems(
+  all: Record<PracticeSkill, string[]>,
+  section: UnitSection | null
+): Record<PracticeSkill, string[]> {
+  if (!section) return all;
+  return {
+    read: [section.dialogId],
+    write: section.wordIds,
+    speak: section.lineIds,
+    verbs: all.verbs,
+  };
 }

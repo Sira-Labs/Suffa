@@ -8,9 +8,9 @@ import {
   type BookVideoData,
 } from '@/services/video/bookVideos';
 import {
+  unitPath,
   unitProgress,
-  unitStations,
-  type Station,
+  type PathSection,
   type VocabStats,
 } from '@/services/units';
 import {
@@ -26,7 +26,13 @@ import {
   passedTest,
   type EnrollmentStatus,
 } from '@/services/enrollment';
-import { PRACTICE_SKILLS, practiceCount, unitPracticeItems } from '@/services/practice';
+import {
+  dialogueSections,
+  PRACTICE_SKILLS,
+  practiceCount,
+  practiceId,
+  unitPracticeItems,
+} from '@/services/practice';
 
 /** A card is "sure" once its interval reaches three weeks (same rule as mastery). */
 const MATURE_DAYS = 21;
@@ -41,7 +47,8 @@ export interface SkillProgress {
 export interface UnitOverview {
   unit: AudioUnit;
   title: string | null;
-  stations: Station[];
+  /** One focused section per dialogue, then the closing section. */
+  sections: PathSection[];
   progress: ReturnType<typeof unitProgress>;
   skills: SkillProgress[];
   /** Opens with the previous unit's test (unit 1 is always open). */
@@ -91,9 +98,12 @@ export function useBookProgress(): {
     return index.units
       .filter((u) => u.kind === 'unit')
       .map((unit) => {
+        const ownWordIds = userVocab
+          .filter((v) => v.einheit === unit.unit)
+          .map((v) => v.id);
         const words = [
           ...content.vokabeln.filter((v) => v.einheit === unit.unit).map((v) => v.id),
-          ...userVocab.filter((v) => v.einheit === unit.unit).map((v) => v.id),
+          ...ownWordIds,
         ];
         const vocab: VocabStats = { total: words.length, started: 0, mature: 0 };
         for (const id of words) {
@@ -125,19 +135,25 @@ export function useBookProgress(): {
           ...PRACTICE_SKILLS.map((skill) => ({ key: skill, ...practice[skill] })),
         ];
         const skills = allSkills.filter((sk) => sk.total > 0);
-        const stations = unitStations({
+        const sections = unitPath({
           unit,
           isHeard,
-          vocab,
+          sections: dialogueSections(content, unit.unit),
+          wordStarted: (id) => {
+            const card = cardById.get(`vocab_ar_de:${id}`);
+            return Boolean(card && (card.reps > 0 || card.lastReviewed));
+          },
+          practised: (skill, id) => Boolean(practiced[practiceId(unit.unit, skill, id)]),
+          verbIds: items.verbs,
+          ownWordIds,
           testPassed,
           videos: videoStation(videoData, unit.unit),
-          practice,
         });
         return {
           unit,
           title: titles.get(unit.unit) ?? null,
-          stations,
-          progress: unitProgress(stations),
+          sections,
+          progress: unitProgress(sections),
           skills,
           unlocked: isUnlocked(unit.unit, exams),
           status: enrollmentStatus(enrollments[unit.unit], exams, unit.unit),

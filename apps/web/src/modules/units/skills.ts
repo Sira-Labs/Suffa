@@ -6,12 +6,13 @@ export type UnitStationKey = 'listen' | PracticeSkill;
 
 export const STATION_META: Record<
   UnitStationKey,
-  { label: string; icon: IconName; hint: string }
+  { label: string; icon: IconName; hint: string; sectionHint?: string }
 > = {
   listen: {
     label: 'Hören & Sehen',
     icon: 'listen',
     hint: 'Verlagsvideo zur Buchseite und das offizielle Audio',
+    sectionHint: 'Das offizielle Audio zu diesem Dialog',
   },
   read: {
     label: 'Lesen',
@@ -22,11 +23,13 @@ export const STATION_META: Record<
     label: 'Schreiben',
     icon: 'write',
     hint: 'Jedes Wort der Einheit einmal richtig schreiben',
+    sectionHint: 'Jedes Wort dieses Dialogs einmal richtig schreiben',
   },
   speak: {
     label: 'Sprechen',
     icon: 'speak',
     hint: 'Jeden Satz der Dialoge nachsprechen und aufnehmen',
+    sectionHint: 'Jeden Satz des Dialogs nachsprechen und aufnehmen',
   },
   verbs: {
     label: 'Konjugation',

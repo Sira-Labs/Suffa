@@ -2,29 +2,28 @@ import { useMemo, useState } from 'react';
 import type { DialogZeile, UnitPracticeScope, Vokabel } from '@/types';
 import { ArabicText, Feedback, RecallInput } from '@/components';
 import { content } from '@/content';
+import { scopedDialogues, scopedWords } from '@/services/practice';
 import { diffArabic, gradeAnswer, type AnswerVerdict } from '@/services/srs';
 import { speakArabic, isTtsSupported } from '@/services/speech';
 
 type Tab = 'abschreiben' | 'diktat' | 'translit' | 'satzbau' | 'uebersetzung';
 
 /**
- * Writing practice. With a `scope` (inside a unit) it uses only that unit's words and
- * sentences and reports each correctly written word to the unit's writing station.
+ * Writing practice. With a `scope` (inside a unit) it uses only that unit's (or section's)
+ * words and sentences and reports each correctly written word to the unit's writing station.
  */
 export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
   // Copying comes first: learners start by typing the words they see.
   const [tab, setTab] = useState<Tab>('abschreiben');
   const words = useMemo(
-    () =>
-      scope ? content.vokabeln.filter((v) => v.einheit === scope.unit) : content.vokabeln,
+    () => (scope ? scopedWords(content.vokabeln, scope) : content.vokabeln),
     [scope]
   );
   const lines = useMemo(
     () =>
-      (scope
-        ? content.dialoge.filter((d) => d.einheit === scope.unit)
-        : content.dialoge
-      ).flatMap((d) => d.zeilen),
+      (scope ? scopedDialogues(content.dialoge, scope) : content.dialoge).flatMap(
+        (d) => d.zeilen
+      ),
     [scope]
   );
   const onCorrect = (word: Vokabel) => scope?.onPractised(word.id);

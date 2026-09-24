@@ -84,6 +84,14 @@ a station of its path and opens at `/units/:unit/:station` with only that unit's
 | 3    | Levels (= books) and stages (units 1–8 + mid-term test, 9–16 + final test), milestone screen                                                                                             | ✅     |
 | 4    | "Entdecken": curated media library (Arabic language, Quran, stories, podcasts); navigation Heute · Einheit · Entdecken · Training · Mehr                                                 | ✅     |
 
+**Focused sections (after v2).** A unit's path shows one dialogue at a time. Each own dialogue is
+a section: the publisher's k-th dialogue lesson, reading dialogue k, its words (cards and
+writing) and speaking its lines (optional). Words belong to the first dialogue they occur in
+(stem match), the rest are spread evenly (`dialogueSections`). Done sections fold away and can
+be reopened; later sections show only "folgt danach". A closing section ("Abschluss") holds the
+publisher's remaining lessons, own words, verbs and the unit test. Station pages and the focus
+review take `?section=k` and offer only that section's items.
+
 ## Feedback moments
 
 - **Celebration toast** (`CelebrationToast`): "+5 XP · Dialog gehört" with a medal and a small

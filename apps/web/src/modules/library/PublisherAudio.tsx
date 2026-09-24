@@ -64,6 +64,7 @@ export function PublisherAudio({
   initialUnit = 1,
   unit: controlledUnit,
   focusLesson,
+  onlyLesson,
   onUnitChange,
   hideUnitPicker = false,
 }: {
@@ -72,6 +73,8 @@ export function PublisherAudio({
   unit?: number;
   /** Lesson to scroll to and highlight (from a unit's learning path). */
   focusLesson?: number;
+  /** Show only this lesson (a unit section focuses on one dialogue). */
+  onlyLesson?: number;
   /** Called when the learner picks another unit (the page shows that unit's videos too). */
   onUnitChange?: (unit: number) => void;
   /** Inside a unit: no book progress bar and no unit chips, only this unit's lessons. */
@@ -109,7 +112,7 @@ export function PublisherAudio({
     if (!index || focusLesson === undefined) return;
     document
       .getElementById(`lesson-${focusLesson}`)
-      ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      ?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
   }, [index, focusLesson]);
 
   const stats = useMemo(() => {
@@ -143,6 +146,8 @@ export function PublisherAudio({
     filter === 'open'
       ? !isHeard(progress, trackId(index.book, track.url))
       : !active.kinds || active.kinds.includes(track.kind);
+  const focused = unit.lessons.filter((l) => l.lesson === onlyLesson);
+  const lessons = focused.length > 0 ? focused : unit.lessons;
 
   return (
     <div className="stack">
@@ -203,7 +208,7 @@ export function PublisherAudio({
       </div>
 
       {!hideUnitPicker && <h2 style={{ margin: 0 }}>{unitLabel(unit)}</h2>}
-      {unit.lessons.map((lesson) => (
+      {lessons.map((lesson) => (
         <LessonBlock
           key={lesson.lesson}
           book={index.book}
@@ -214,12 +219,11 @@ export function PublisherAudio({
           focused={lesson.lesson === focusLesson}
         />
       ))}
-      {filter === 'open' &&
-        unit.lessons.every((l) => l.tracks.every((t) => !visible(t))) && (
-          <p className="feedback-good" style={{ margin: 0, fontWeight: 600 }}>
-            Alles in dieser Einheit gehört.
-          </p>
-        )}
+      {filter === 'open' && lessons.every((l) => l.tracks.every((t) => !visible(t))) && (
+        <p className="feedback-good" style={{ margin: 0, fontWeight: 600 }}>
+          {focused.length > 0 ? 'Alles gehört.' : 'Alles in dieser Einheit gehört.'}
+        </p>
+      )}
       <p className="muted" style={{ fontSize: '0.85em' }}>
         Audio: © {index.source.publisher}, alle Rechte beim Verlag. Wird direkt vom
         Verlagsserver abgespielt und braucht eine Internetverbindung.

@@ -21,6 +21,10 @@ export interface PracticeRecord extends Syncable {
 /** A skill module opened inside a unit: only that unit's content, successes reported. */
 export interface UnitPracticeScope {
   unit: number;
+  /** Inside a section: only these dialogues (reading, speaking, sentence exercises). */
+  dialogIds?: readonly string[];
+  /** Inside a section: only these words (writing). */
+  wordIds?: readonly string[];
   /** Called with the item id after a successful answer or finished item. */
   onPractised(itemId: string): void;
 }

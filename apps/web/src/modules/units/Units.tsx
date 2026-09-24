@@ -45,7 +45,7 @@ export function Units() {
             <strong style={{ fontSize: '1.15rem' }}>Einheit {current.unit.unit}</strong>
           )}
           <span className="muted">
-            {current.progress.doneStations} von {current.progress.stations} Stationen ·{' '}
+            {current.progress.doneSections} von {current.progress.sections} Abschnitten ·{' '}
             {current.progress.percent} %
           </span>
         </span>

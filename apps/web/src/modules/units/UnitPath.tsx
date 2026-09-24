@@ -4,6 +4,7 @@ import { Icon, type IconName } from '@/components/Icon';
 import {
   arabicNumber,
   splitUnitTitle,
+  type PathSection,
   type Station,
   type StationKind,
 } from '@/services/units';
@@ -39,7 +40,10 @@ function skillLink(unit: number, key: SkillProgress['key']): string {
   return `/units/${unit}/${key}`;
 }
 
-/** One unit as a learning path: stations in order, the next one highlighted. */
+/**
+ * One unit as a learning path of focused sections: finished dialogues fold away, the current
+ * one is open with its stations, later ones only show that they come next.
+ */
 export function UnitPath() {
   const { unit: param } = useParams();
   const number = Number(param);
@@ -56,7 +60,7 @@ export function UnitPath() {
       </div>
     );
   }
-  const { unit, title, stations, progress, skills, unlocked, status, draft } = entry;
+  const { unit, title, sections, progress, skills, unlocked, status, draft } = entry;
   const prev = units.find((u) => u.unit.unit === number - 1);
   const next = units.find((u) => u.unit.unit === number + 1);
 
@@ -94,7 +98,7 @@ export function UnitPath() {
             <div style={{ width: `${progress.percent}%` }} />
           </div>
           <span className="muted" style={{ whiteSpace: 'nowrap' }}>
-            {progress.doneStations} von {progress.stations} Stationen
+            {progress.doneSections} von {progress.sections} Abschnitten
           </span>
         </div>
         {skills.length > 0 && (
@@ -125,13 +129,9 @@ export function UnitPath() {
       {!unlocked && <LockedPanel unit={unit.unit} />}
       {unlocked && status.state === 'not-started' && <StartPanel unit={unit.unit} />}
       {unlocked && (
-        <ol className="path" aria-label={`Lernpfad Einheit ${unit.unit}`}>
-          {stations.map((station, i) => (
-            <PathStation
-              key={station.id}
-              station={station}
-              last={i === stations.length - 1}
-            />
+        <ol className="path-sections" aria-label={`Lernpfad Einheit ${unit.unit}`}>
+          {sections.map((section) => (
+            <PathSectionItem key={section.id} section={section} />
           ))}
         </ol>
       )}
@@ -173,6 +173,66 @@ function UnitTitle({ title, unit }: { title: string | null; unit: number }) {
   );
 }
 
+function sectionHeading(section: PathSection) {
+  return (
+    <>
+      <span className="path-section-label">{section.label}</span>
+      {section.title && (
+        <span lang="ar" dir="rtl" className="arabic path-section-title">
+          {section.title}
+        </span>
+      )}
+    </>
+  );
+}
+
+function StationList({ section }: { section: PathSection }) {
+  return (
+    <ol className="path" aria-label={section.label}>
+      {section.stations.map((station, i) => (
+        <PathStation
+          key={station.id}
+          station={station}
+          last={i === section.stations.length - 1}
+        />
+      ))}
+    </ol>
+  );
+}
+
+/** A section: done ones fold away (still open to revisit), later ones stay closed. */
+function PathSectionItem({ section }: { section: PathSection }) {
+  if (section.state === 'locked') {
+    return (
+      <li className="path-section path-section-locked">
+        <Icon name="lock" size={16} />
+        <span>{section.label}</span>
+        <span className="muted path-section-hint">folgt danach</span>
+      </li>
+    );
+  }
+  if (section.state === 'done') {
+    return (
+      <li className="path-section path-section-done">
+        <details>
+          <summary>
+            <Icon name="check" size={16} strokeWidth={2.6} />
+            {sectionHeading(section)}
+            <span className="visually-hidden"> (erledigt)</span>
+          </summary>
+          <StationList section={section} />
+        </details>
+      </li>
+    );
+  }
+  return (
+    <li className="path-section path-section-current">
+      <h2 className="path-section-heading">{sectionHeading(section)}</h2>
+      <StationList section={section} />
+    </li>
+  );
+}
+
 /** Stations measured in heard tracks (the others carry their count in the detail line). */
 const LISTENING_KINDS = new Set<StationKind>([
   'dialogue',
@@ -207,8 +267,10 @@ function PathStation({ station, last }: { station: Station; last: boolean }) {
           {stateLabel && <span className="visually-hidden"> ({stateLabel})</span>}
         </span>
         <span className="muted path-card-detail">{station.detail}</span>
-        {station.state === 'optional' && (
-          <span className="muted path-card-detail">Optional · im Buch mitlesen</span>
+        {station.optional && station.state !== 'done' && (
+          <span className="muted path-card-detail">
+            {station.kind === 'video' ? 'Optional · im Buch mitlesen' : 'Optional'}
+          </span>
         )}
         {station.total > 0 && LISTENING_KINDS.has(station.kind) && (
           <span className="muted path-card-detail">

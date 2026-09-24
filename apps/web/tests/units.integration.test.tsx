@@ -16,6 +16,7 @@ import { content } from '@/content';
 import userEvent from '@testing-library/user-event';
 import index from '@/content/sources/book1-audio.json';
 import { lessonKey, trackId } from '@/services/audio/publisherIndex';
+import { dialogueSections } from '@/services/practice';
 import type { AudioUnit } from '@/types';
 
 function renderAt(path: string) {
@@ -73,25 +74,72 @@ describe('Units (integration)', () => {
     }
     renderAt('/units/1');
     const path = await screen.findByRole('list', { name: 'Lernpfad Einheit 1' });
-    const stations = within(path).getAllByRole('link');
-    // Page videos load lazily and come first as an optional station.
+    // Page videos load lazily and come first in dialogue 1 as an optional station.
     expect(
       await within(path).findByRole('link', { name: /Buchseiten-Videos/ })
-    ).toHaveAttribute('href', '/units/1/listen');
+    ).toHaveAttribute('href', '/units/1/listen?view=videos');
     expect(
-      within(path).getByRole('link', { name: /Dialog 1 \(erledigt\)/ })
-    ).toBeTruthy();
+      within(path).getByRole('link', { name: /Dialog hören \(erledigt\)/ })
+    ).toHaveAttribute('href', '/units/1/listen?lesson=1&section=1');
     expect(
-      within(path).getByRole('link', { name: /Dialog 2 \(als Nächstes\)/ })
-    ).toBeTruthy();
-    expect(stations.length).toBeGreaterThan(5);
-    expect(within(path).getByRole('link', { name: /Vokabeln lernen/ })).toHaveAttribute(
+      within(path).getByRole('link', { name: /Dialog lesen \(als Nächstes\)/ })
+    ).toHaveAttribute('href', '/units/1/read?section=1');
+    expect(within(path).getByRole('link', { name: /Wörter lernen/ })).toHaveAttribute(
       'href',
-      '/review?unit=1'
+      '/review?unit=1&section=1'
     );
     expect(screen.getByRole('link', { name: 'Einheit 2' })).toHaveAttribute(
       'href',
       '/units/2'
+    );
+  });
+
+  it('shows one dialogue at a time and keeps the later ones closed', async () => {
+    renderAt('/units/1');
+    const path = await screen.findByRole('list', { name: 'Lernpfad Einheit 1' });
+    expect(within(path).getByRole('heading', { name: /Dialog 1/ })).toBeInTheDocument();
+    expect(within(path).getAllByRole('list', { name: /^Dialog/ })).toHaveLength(1);
+    // Later sections show no stations, only that they follow.
+    expect(within(path).getByText('Dialog 2')).toBeInTheDocument();
+    expect(within(path).getByText('Abschluss')).toBeInTheDocument();
+    expect(within(path).getAllByText('folgt danach')).toHaveLength(3);
+    const links = within(path)
+      .getAllByRole('link')
+      .map((a) => a.getAttribute('href'));
+    expect(links.some((href) => href?.includes('lesson=2'))).toBe(false);
+    expect(links).not.toContain('/exam?unit=1');
+  });
+
+  it('opens a section station with only that dialogue and its words', async () => {
+    const [first] = dialogueSections(content, 1);
+    renderAt('/units/1/write?section=1');
+    const progress = await screen.findByRole('progressbar', {
+      name: 'Fortschritt Schreiben',
+    });
+    expect(progress).toHaveAttribute('aria-valuemax', String(first!.wordIds.length));
+    expect(screen.getByText('Einheit 1 · Dialog 1')).toBeInTheDocument();
+  });
+
+  it('plays only the dialogue lesson of a section, without the page videos', async () => {
+    const { container } = renderAt('/units/1/listen?lesson=1&section=1');
+    await waitFor(() =>
+      expect(container.querySelectorAll('[id^="lesson-"]')).toHaveLength(1)
+    );
+    expect(container.querySelector('#lesson-1')).not.toBeNull();
+    expect(screen.queryByRole('region', { name: 'Buchseiten-Videos' })).toBeNull();
+  });
+
+  it('studies only the words of a section in focus mode', async () => {
+    const [first] = dialogueSections(content, 1);
+    renderAt('/review?unit=1&section=1');
+    expect(
+      await screen.findByRole('heading', { name: 'Einheit 1 · Dialog 1 · Wörter' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('progressbar', { name: 'Fortschritt der Sitzung' })
+    ).toHaveAttribute(
+      'aria-valuemax',
+      String(Math.min(first!.wordIds.length, UNIT_SESSION_WORDS) * 2)
     );
   });
 
@@ -147,9 +195,12 @@ describe('Units (integration)', () => {
       within(rings).getByRole('link', { name: /^Schreiben: 0 von \d+$/ })
     ).toHaveAttribute('href', '/units/1/write');
     const path = screen.getByRole('list', { name: 'Lernpfad Einheit 1' });
-    expect(within(path).getByRole('link', { name: /Sprechen/ })).toHaveAttribute(
+    expect(
+      within(path).getByRole('link', { name: /Dialog lesen \(erledigt\)/ })
+    ).toBeInTheDocument();
+    expect(within(path).getByRole('link', { name: /Nachsprechen/ })).toHaveAttribute(
       'href',
-      '/units/1/speak'
+      '/units/1/speak?section=1'
     );
   });
 });

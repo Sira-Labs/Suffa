@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import type { UnitPracticeScope } from '@/types';
-import { lineId } from '@/services/practice';
+import { lineId, scopedDialogues } from '@/services/practice';
 import { ArabicText } from '@/components';
 import { content } from '@/content';
 import { speakArabic, isTtsSupported } from '@/services/speech';
@@ -22,17 +22,16 @@ import { recognitionHelp, recorderHelp, type HelpContext } from './speechHelp';
 type Tab = 'shadowing' | 'phonologie';
 
 /**
- * Speaking practice. With a `scope` (inside a unit) shadowing uses only that unit's dialogue
- * lines; a line counts once the learner recorded it or had it scored.
+ * Speaking practice. With a `scope` (inside a unit) shadowing uses only that unit's (or section's)
+ * dialogue lines; a line counts once the learner recorded it or had it scored.
  */
 export function Speaking({ scope }: { scope?: UnitPracticeScope } = {}) {
   const [tab, setTab] = useState<Tab>('shadowing');
   const lines = useMemo(
     () =>
-      (scope
-        ? content.dialoge.filter((d) => d.einheit === scope.unit)
-        : content.dialoge
-      ).flatMap((d) => d.zeilen.map((z, i) => ({ ...z, id: lineId(d.id, i) }))),
+      (scope ? scopedDialogues(content.dialoge, scope) : content.dialoge).flatMap((d) =>
+        d.zeilen.map((z, i) => ({ ...z, id: lineId(d.id, i) }))
+      ),
     [scope]
   );
   return (

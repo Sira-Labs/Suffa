@@ -3,6 +3,7 @@ import type { Dialog, UnitPracticeScope } from '@/types';
 import { TashkilToggle } from '@/components';
 import { applyTashkilLevel } from '@/components/ArabicText';
 import { content } from '@/content';
+import { scopedDialogues } from '@/services/practice';
 import { normalizeArabic } from '@/services/srs';
 import { speakArabic } from '@/services/speech';
 import { useSettingsStore } from '@/state';
@@ -14,13 +15,12 @@ for (const v of content.vokabeln) {
 }
 
 /**
- * Reading with tap-a-word glosses. With a `scope` (inside a unit) only that unit's dialogues;
+ * Reading with tap-a-word glosses. With a `scope` (inside a unit) only that unit's or section's dialogues;
  * a dialogue counts as read once its comprehension question is answered correctly.
  */
 export function Reading({ scope }: { scope?: UnitPracticeScope } = {}) {
   const dialoge = useMemo(
-    () =>
-      scope ? content.dialoge.filter((d) => d.einheit === scope.unit) : content.dialoge,
+    () => (scope ? scopedDialogues(content.dialoge, scope) : content.dialoge),
     [scope]
   );
   const [selected, setSelected] = useState<Dialog | undefined>(dialoge[0]);

@@ -1,1 +1,324 @@
-{ "retrieved": "2026-09-24", "channels": [] }
+{
+  "retrieved": "2026-09-24",
+  "channels": [
+    {
+      "handle": "@Arabic101",
+      "channelId": "UCEcQu_9GNDiGU_vqjVZXj3Q",
+      "title": "Arabic 101",
+      "url": "https://www.youtube.com/@Arabic101",
+      "category": "sprache",
+      "language": "Englisch",
+      "variety": "MSA/Quran",
+      "level": "1",
+      "why": "Sehr etablierter Kanal mit klaren Lektionen zu Schrift, Vokalen und Aussprache bis hin zu Tajwid.",
+      "items": [
+        {
+          "type": "playlist",
+          "id": "PL6TlMIZ5ylgpLYKU_z1YxdAAw7wrTWvcQ",
+          "title": "How to READ anything in Arabic - Arabic 101 -Arabic Literacy",
+          "why": "Lesen lernen von Grund auf – ideal parallel zu den ersten Lektionen von Buch 1.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "c-7SVieC_04",
+          "title": "How to READ ARABIC? - The alphabet - Lesson 1 - Arabic 101",
+          "why": "Erste Alphabet-Lektion, kompakt und gut erklärt.",
+          "minutes": 14
+        },
+        {
+          "type": "playlist",
+          "id": "PL6TlMIZ5ylgqM4Uuu7iAhIeuSdF0v9yxo",
+          "title": "Learn Tajweed Easily (Beginner)",
+          "why": "Tajwid-Einstieg für Anfänger, sobald das Alphabet sitzt.",
+          "minutes": null
+        }
+      ]
+    },
+    {
+      "handle": "@LearnArabicKhasu",
+      "channelId": "UC9rnrMdYzfqdjiuNXV7q8oQ",
+      "title": "Learn Arabic with Khasu",
+      "url": "https://www.youtube.com/@LearnArabicKhasu",
+      "category": "sprache",
+      "language": "Englisch",
+      "variety": "MSA",
+      "level": "1-2",
+      "why": "Nur Fusha – von einem Nicht-Muttersprachler, der Lernwege sehr nachvollziehbar erklärt.",
+      "items": [
+        {
+          "type": "playlist",
+          "id": "PLEvX8tEStNowpq3D8DDnlkYDNq4rhcrLg",
+          "title": "BEGINNER COURSE (FULL)",
+          "why": "Kompletter kostenloser Anfängerkurs (Live-Lektionen) von Null an.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "Cen6VYKftqQ",
+          "title": "Learn & Speak Arabic from Scratch – Lesson 1/50",
+          "why": "Erste Lektion des Anfängerkurses – guter Einstieg.",
+          "minutes": 42
+        },
+        {
+          "type": "video",
+          "id": "7niCm9f3HUk",
+          "title": "Learn Arabic with Quran | Sura al-Asr | Vocabulary, Grammar",
+          "why": "Wortschatz und Grammatik an einer kurzen Sure – verbindet Sprache und Quran.",
+          "minutes": 14
+        }
+      ]
+    },
+    {
+      "handle": "@arabicto-arabisch-lernen",
+      "channelId": "UCvqGcmeTd0YkgaiZAlT73hQ",
+      "title": "Arabicto - Arabisch lernen",
+      "url": "https://www.youtube.com/@arabicto-arabisch-lernen",
+      "category": "sprache",
+      "language": "Deutsch",
+      "variety": "MSA",
+      "level": "1",
+      "why": "Deutschsprachiger Hocharabisch-Kanal (Plattform arabicto.com) mit ausführlichen Alphabet- und Anfängerlektionen.",
+      "items": [
+        {
+          "type": "video",
+          "id": "dguLPD6zaF0",
+          "title": "Arabisches Alphabet [01] - Arabisch lernen für Anfänger",
+          "why": "Alphabet-Einführung komplett auf Deutsch.",
+          "minutes": 24
+        },
+        {
+          "type": "video",
+          "id": "3gHPygcht4Q",
+          "title": "Arabischkurs für Anfänger I [01] - Arabisch Online lernen",
+          "why": "Erste Kurslektion auf Deutsch für absolute Anfänger.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "hUo9nU7M_cM",
+          "title": "Arabisch im Alltag [01] - Arabisch lernen",
+          "why": "Alltagsausdrücke auf Hocharabisch mit deutscher Erklärung.",
+          "minutes": 30
+        }
+      ]
+    },
+    {
+      "handle": "@orient-academy-arabisch-lernen",
+      "channelId": "UCFeEwnGStTFzrGK7V4vRb5g",
+      "title": "Orient Academy",
+      "url": "https://www.youtube.com/@orient-academy-arabisch-lernen",
+      "category": "sprache",
+      "language": "Deutsch",
+      "variety": "MSA",
+      "level": "1-2",
+      "why": "Deutsche Sprachschule mit kurzen Wortschatz-, Grammatik- und Alphabetvideos nach GER-Niveaus.",
+      "items": [
+        {
+          "type": "playlist",
+          "id": "PLFssXxgR2ePbWkwpeBynZlb_T4vgWEeuM",
+          "title": "Arabisches Alphabet – Buchstaben mit Vorlesen",
+          "why": "Buchstaben mit Vorlesen – auf Deutsch.",
+          "minutes": null
+        },
+        {
+          "type": "playlist",
+          "id": "PLFssXxgR2ePaXOhIZjdpQOCD7hSfgYWpJ",
+          "title": "Arabischkurs für Anfänger A1/A2 – Grammatik, Wortschatz, Satzbau",
+          "why": "A1/A2-Grundlagen (Grammatik, Wortschatz, Satzbau) auf Deutsch.",
+          "minutes": null
+        }
+      ]
+    },
+    {
+      "handle": "@understandquran",
+      "channelId": "UCdqEwn5bGGbFE0u8UqdHmGQ",
+      "title": "Understand Al-Quran Official",
+      "url": "https://www.youtube.com/@understandquran",
+      "category": "quran",
+      "language": "Englisch",
+      "variety": "Quran",
+      "level": "1",
+      "why": "Bekannter Kurs „Understand Qur'an & Salah – the easy way“: Al-Fatiha und Gebetsvokabular in 10-Minuten-Lektionen.",
+      "items": [
+        {
+          "type": "playlist",
+          "id": "PL62RQxDpIL7V8i_EfzI3w1oJznG5FJhs7",
+          "title": "10-Minuten-Lektionen – Kurs 1",
+          "why": "Kurze Lektionen zu Al-Fatiha, Pronomen und häufigen Quran-Wörtern.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "w-QRISHjNIg",
+          "title": "Lesson 2a – Al-Fatiha, Verse 1–3 (Understand Al-Qur'an & Salah)",
+          "why": "Die ersten Verse der Fatiha Wort für Wort.",
+          "minutes": 10
+        },
+        {
+          "type": "video",
+          "id": "i11pMILnbxY",
+          "title": "Lesson 1a – Intro & Ta'awwudh (Understand Al-Qur'an & Salah)",
+          "why": "Einstieg mit Ta'awwudh – kurz und anfängerfreundlich.",
+          "minutes": 10
+        }
+      ]
+    },
+    {
+      "handle": "@thinkarabicacademy",
+      "channelId": "UCRuL_oqFOyXGZicRHlgNecg",
+      "title": "Think Arabic",
+      "url": "https://www.youtube.com/@thinkarabicacademy",
+      "category": "quran",
+      "language": "Englisch",
+      "variety": "Quran",
+      "level": "1",
+      "why": "Strukturierter Quran-Lesekurs für absolute Anfänger plus Gebet Wort für Wort; der Kanal lehrt sonst Fusha.",
+      "items": [
+        {
+          "type": "playlist",
+          "id": "PLMpZpT9IRpAC3CgmxnJJxXXVXNCPi7htq",
+          "title": "Learn to Read Quran - Full Beginners Course",
+          "why": "Vollständiger Kurs zum Quran-Lesen, Buchstabe für Buchstabe.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "ZuyeuDNfr4s",
+          "title": "Learn to Read Quran Lesson 1 - alif, baa, taa, thaa",
+          "why": "Erste Lektion – dieselben Buchstaben wie am Anfang von Buch 1.",
+          "minutes": 39
+        },
+        {
+          "type": "playlist",
+          "id": "PLMpZpT9IRpAACqCwdyfuW2bsd1GPCyv8U",
+          "title": "Pray in Arabic Word by Word - For Beginners",
+          "why": "Gebetstexte Wort für Wort verstehen.",
+          "minutes": null
+        }
+      ]
+    },
+    {
+      "handle": "@bayyinah",
+      "channelId": "UCRtiU-lpcBSi-ipFKyfIkug",
+      "title": "Nouman Ali Khan - Official - Bayyinah",
+      "url": "https://www.youtube.com/@bayyinah",
+      "category": "quran",
+      "language": "Englisch",
+      "variety": "Quran",
+      "level": "2-3",
+      "why": "Renommiertes Bayyinah Institute; das Dream-BIG-Intensivprogramm vermittelt die Grammatik des Quran-Arabisch.",
+      "items": [
+        {
+          "type": "playlist",
+          "id": "PLutdSTmJ7bAIApzbo3C9vu1eWsMh2ZyUj",
+          "title": "Dream BIG: 10-Day Live Arabic Intensive",
+          "why": "Grammatik-Intensivkurs für Quran-Arabisch – für Fortgeschrittene nach Buch 1.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "XU4q9RmLj38",
+          "title": "Dream BIG: Arabic Intensive - Day 1 | Nouman Ali Khan",
+          "why": "Tag 1 als Einstieg (lang, ca. 2 Stunden).",
+          "minutes": 132
+        }
+      ]
+    },
+    {
+      "handle": "@ahmadsidiqi7438",
+      "channelId": "UCP522u1-NU3CgH-m70q69Cg",
+      "title": "Ahmad Sidiqi",
+      "url": "https://www.youtube.com/@ahmadsidiqi7438",
+      "category": "quran",
+      "language": "Deutsch",
+      "variety": "Quran",
+      "level": "1-2",
+      "why": "Einer der wenigen deutschsprachigen Kurse zum Quran-Lesen und Tajwid mit klaren Lektionen.",
+      "items": [
+        {
+          "type": "playlist",
+          "id": "PL27J3xm_kIzIYMQupCqbDjtZcKxxobJtl",
+          "title": "Quran Karim Lesen lernen mit Tajweed",
+          "why": "Lese- und Tajwid-Lektionen komplett auf Deutsch.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "txdTdDdPZ9w",
+          "title": "Quran Karim Tajweed lernen ( Lektion 1 ) auf Deutsch",
+          "why": "Tajwid-Lektion 1 auf Deutsch – kurz.",
+          "minutes": 6
+        }
+      ]
+    },
+    {
+      "handle": "@arabiccomprehensible",
+      "channelId": "UCQdEQ6KW8fpwuVSdtalXupg",
+      "title": "Arabic comprehensible",
+      "url": "https://www.youtube.com/@arabiccomprehensible",
+      "category": "geschichten",
+      "language": "Arabisch (mit Bildern)",
+      "variety": "MSA",
+      "level": "1",
+      "why": "Kurze, langsame Bildgeschichten nach der Comprehensible-Input-Methode – ideal zum Hören ab Buch 1.",
+      "items": [
+        {
+          "type": "playlist",
+          "id": "PLUHDV_xXMUq0AJulrPfc8XQx_v3TBZ10b",
+          "title": "complete beginners - MSA",
+          "why": "Fusha-Geschichten für absolute Anfänger.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "jVxVpkJ1miI",
+          "title": "Learn Arabic with a story for complete beginners -  (COMPREHENSIBLE INPUT) # learnArabic",
+          "why": "Einfache Geschichte, durch Bilder verständlich.",
+          "minutes": 10
+        },
+        {
+          "type": "video",
+          "id": "u3NHT23f7G0",
+          "title": "EASY ARABIC STORY FOR ABSOLUTE BEGINNERS | MSA فصحى Fusha (where's my ball)",
+          "why": "Sehr einfache Fusha-Geschichte mit Grundwortschatz.",
+          "minutes": 7
+        }
+      ]
+    },
+    {
+      "handle": "@ArabicPod101",
+      "channelId": "UC5bjJ5x0i_XRGTMHF2IoL8w",
+      "title": "Learn Arabic with ArabicPod101.com",
+      "url": "https://www.youtube.com/@ArabicPod101",
+      "category": "podcasts",
+      "language": "Englisch",
+      "variety": "MSA",
+      "level": "1",
+      "why": "Großer, professioneller Podcast-Anbieter; kurze Hördialoge mit Verständnisfragen für absolute Anfänger.",
+      "items": [
+        {
+          "type": "playlist",
+          "id": "PLsr1ERsR7y1kqo7us0Hksr6oeNELZMQNe",
+          "title": "Arabic Listening Comprehension for Absolute Beginners",
+          "why": "Kurze Hördialoge (1–2 Min.) mit Fragen – ideal für den Einstieg ins Hörverstehen.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "61ZHwUmMSWA",
+          "title": "Learn Arabic - Arabic Listening Practice - At a Bookstore",
+          "why": "Alltagsdialog in der Buchhandlung.",
+          "minutes": 2
+        },
+        {
+          "type": "playlist",
+          "id": "PLsr1ERsR7y1kcIlz7khCw4ZR6mz3jvCSH",
+          "title": "Learn Arabic - Arabic Alphabet Made Easy",
+          "why": "Alphabet in kurzen Einheiten als Ergänzung.",
+          "minutes": null
+        }
+      ]
+    }
+  ]
+}

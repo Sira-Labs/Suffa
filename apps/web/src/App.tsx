@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom';
 import { CelebrationToast, SyncBadge } from './components';
 import { Icon } from './components/Icon';
-import { FOCUS_PATHS, isUnderMore, MORE_PATH, NAV_ITEMS } from './navigation';
+import { isFocusPath, isUnderMore, MORE_PATH, NAV_ITEMS } from './navigation';
 import { logger } from './services/logger';
 import {
   useContentStore,
@@ -91,7 +91,7 @@ function Brand() {
 function Shell() {
   const { pathname } = useLocation();
   const moreActive = isUnderMore(pathname);
-  if (FOCUS_PATHS.includes(pathname)) {
+  if (isFocusPath(pathname)) {
     return (
       <main className="focus-main">
         <ScrollRestoration />

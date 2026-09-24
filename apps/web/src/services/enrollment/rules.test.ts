@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { ExamResult, UnitEnrollment } from '@/types';
-import { enrollmentStatus, isUnlocked, passedTest, targetDate } from './rules';
+import {
+  STAGES,
+  STAGE_TEST_FORMAT,
+  enrollmentStatus,
+  isUnlocked,
+  passedTest,
+  stageState,
+  targetDate,
+} from './rules';
 
 const exam = (unit: number, score: number, finishedAt: string) =>
   ({ units: [unit], score, total: 10, finishedAt, deleted: false }) as ExamResult;
@@ -55,5 +63,34 @@ describe('enrollment rules', () => {
         2
       )
     ).toMatchObject({ state: 'completed', onTime: false });
+  });
+
+  it('runs stage 1 until all unit tests pass, then the stage test opens stage 2', () => {
+    const units1to8 = [1, 2, 3, 4, 5, 6, 7, 8].map((u) =>
+      exam(u, 9, '2026-09-20T10:00:00Z')
+    );
+    const [stage1, stage2] = STAGES;
+    expect(stageState(stage1!, [])).toEqual({ state: 'running', unitsPassed: 0 });
+    expect(stageState(stage2!, [])).toEqual({ state: 'locked' });
+    expect(stageState(stage1!, units1to8)).toEqual({
+      state: 'test-ready',
+      unitsPassed: 8,
+    });
+    expect(isUnlocked(9, units1to8)).toBe(false);
+
+    const stageTest = {
+      ...exam(1, 9, '2026-09-21T10:00:00Z'),
+      units: [1, 2, 3],
+      format: STAGE_TEST_FORMAT,
+    } as ExamResult;
+    expect(stageState(stage1!, [...units1to8, stageTest])).toMatchObject({
+      state: 'done',
+    });
+    expect(stageState(stage2!, [...units1to8, stageTest])).toMatchObject({
+      state: 'running',
+    });
+    expect(isUnlocked(9, [...units1to8, stageTest])).toBe(true);
+    // A stage test is never mistaken for a unit test.
+    expect(passedTest([{ ...stageTest, units: [1] } as ExamResult], 1)).toBeNull();
   });
 });

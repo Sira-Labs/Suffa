@@ -11,7 +11,7 @@ import type {
   ReviewRating,
   UnitEnrollment,
 } from '@/types';
-import { enrollmentStatus } from '@/services/enrollment';
+import { STAGES, enrollmentStatus, stageTestPassed } from '@/services/enrollment';
 import { localDay } from '@/services/today';
 
 export const XP_RULES = {
@@ -28,6 +28,8 @@ export const XP_RULES = {
   itemPractised: 2,
   /** Unit test passed by the unit's target date (soft deadline: late only loses this). */
   unitOnTime: 50,
+  /** Stage test passed (units 1–8 or 9–16 of a book). */
+  stageComplete: 250,
 } as const;
 
 /** Share of a track that must actually be played to count as heard. */
@@ -36,7 +38,14 @@ export const HEARD_THRESHOLD = 0.85;
 export interface XpEvent {
   at: string;
   points: number;
-  kind: 'review' | 'new-card' | 'track' | 'lesson' | 'practice' | 'unit-on-time';
+  kind:
+    | 'review'
+    | 'new-card'
+    | 'track'
+    | 'lesson'
+    | 'practice'
+    | 'unit-on-time'
+    | 'stage';
   ref: string;
 }
 
@@ -129,6 +138,23 @@ export function unitOnTimeXpEvents(
         ref: e.id,
       },
     ];
+  });
+}
+
+/** Stage bonus: once per stage, at its first passing stage test. */
+export function stageXpEvents(exams: ExamResult[]): XpEvent[] {
+  return STAGES.flatMap((stage) => {
+    const passed = stageTestPassed(exams, stage);
+    return passed
+      ? [
+          {
+            at: passed.finishedAt,
+            points: XP_RULES.stageComplete,
+            kind: 'stage' as const,
+            ref: `stage-${stage.id}`,
+          },
+        ]
+      : [];
   });
 }
 

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { UnitPath, UnitStation, Units } from '@/modules/units';
+import { Milestone, UnitPath, UnitStation, Units } from '@/modules/units';
 import { db, examRepo } from '@/services/storage';
 import {
   useContentStore,
@@ -19,17 +19,22 @@ function renderAt(path: string) {
       { path: '/units', element: <Units /> },
       { path: '/units/:unit', element: <UnitPath /> },
       { path: '/units/:unit/:station', element: <UnitStation /> },
+      { path: '/milestone/:stage', element: <Milestone /> },
     ],
     { initialEntries: [path] }
   );
   return render(<RouterProvider router={router} />);
 }
 
-async function passUnitTest(unit: number) {
+async function passUnitTest(
+  unit: number,
+  format: 'mixed_chapter' | 'stage_test' = 'mixed_chapter',
+  units = [unit]
+) {
   const now = new Date().toISOString();
   await examRepo.add({
-    format: 'mixed_chapter',
-    units: [unit],
+    format,
+    units,
     score: 9,
     total: 10,
     items: [],
@@ -65,7 +70,7 @@ describe('Unit enrollment (integration)', () => {
 
   it('marks locked units on the book map', async () => {
     renderAt('/units');
-    const grid = await screen.findByRole('list', { name: 'Alle Einheiten' });
+    const grid = await screen.findByRole('list', { name: 'Etappe 1: Einheiten' });
     expect(
       within(grid).getByRole('link', { name: /^Einheit 2.*gesperrt$/ })
     ).toBeTruthy();
@@ -106,6 +111,41 @@ describe('Unit enrollment (integration)', () => {
     renderAt('/units/2');
     expect(
       await screen.findByRole('heading', { name: 'Dein Tempo für Einheit 2' })
+    ).toBeInTheDocument();
+  });
+
+  it('offers the stage test once all eight unit tests are passed', async () => {
+    for (const unit of [1, 2, 3, 4, 5, 6, 7, 8]) await passUnitTest(unit);
+    renderAt('/units');
+    expect(
+      await screen.findByRole('link', { name: 'Zwischentest starten' })
+    ).toHaveAttribute('href', '/exam?stage=1');
+    expect(
+      within(screen.getByRole('list', { name: 'Etappe 2: Einheiten' })).getByRole(
+        'link',
+        {
+          name: /^Einheit 9.*gesperrt$/,
+        }
+      )
+    ).toBeTruthy();
+  });
+
+  it('celebrates a passed stage and opens stage 2', async () => {
+    for (const unit of [1, 2, 3, 4, 5, 6, 7, 8]) await passUnitTest(unit);
+    await passUnitTest(1, 'stage_test', [1, 2, 3]);
+    renderAt('/milestone/1');
+    expect(await screen.findByText('Etappe geschafft')).toBeInTheDocument();
+    expect(screen.getByText('+250 XP')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Etappe 2 beginnen' })).toHaveAttribute(
+      'href',
+      '/units/9'
+    );
+  });
+
+  it('does not celebrate a stage that is not passed yet', async () => {
+    renderAt('/milestone/1');
+    expect(
+      await screen.findByRole('heading', { name: 'Noch nicht geschafft' })
     ).toBeInTheDocument();
   });
 });

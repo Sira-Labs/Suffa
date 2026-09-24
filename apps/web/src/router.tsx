@@ -13,7 +13,7 @@ import { Library } from './modules/library';
 import { Settings } from './modules/settings';
 import { More } from './modules/more';
 import { FocusReview } from './modules/review';
-import { UnitPath, UnitStation, Units } from './modules/units';
+import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
 
 /**
  * HashRouter: robust for static PWA hosting (no server rewrite needed),
@@ -40,6 +40,7 @@ export const router = createHashRouter([
       { path: 'units', element: <Units /> },
       { path: 'units/:unit', element: <UnitPath /> },
       { path: 'units/:unit/:station', element: <UnitStation /> },
+      { path: 'milestone/:stage', element: <Milestone /> },
     ],
   },
 ]);

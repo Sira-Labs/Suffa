@@ -1266,3 +1266,130 @@ textarea.input {
 .current-unit-card:hover strong {
   color: var(--accent);
 }
+
+/* Milestone (stage passed): full screen, big medal, a burst of saffron and teal. */
+.milestone {
+  position: relative;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  text-align: center;
+  overflow: hidden;
+}
+.milestone-medal {
+  display: grid;
+  place-items: center;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    #f3c274,
+    var(--accent-fill) 55%,
+    #8a5a12
+  );
+  color: var(--on-accent);
+  font-size: 4rem;
+  box-shadow:
+    0 0 0 10px color-mix(in srgb, var(--accent-fill) 14%, transparent),
+    0 0 0 22px color-mix(in srgb, var(--accent-fill) 7%, transparent);
+  animation: celebration-pop 0.6s ease-out both;
+  margin-bottom: 1.25rem;
+}
+.milestone-eyebrow {
+  color: var(--accent-2);
+}
+.milestone-title {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.15;
+}
+.milestone-xp {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+.milestone-actions {
+  width: 100%;
+  margin-top: 1rem;
+}
+.milestone-burst span {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--accent-fill);
+  transform: rotate(calc(var(--i) * 26deg)) translateY(0);
+  animation: milestone-fly 1.4s ease-out calc(var(--i) * 30ms) both;
+}
+.milestone-burst span:nth-child(odd) {
+  background: var(--accent-2);
+  border-radius: 50%;
+}
+@keyframes milestone-fly {
+  from {
+    opacity: 1;
+    transform: rotate(calc(var(--i) * 26deg)) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 26deg)) translateY(-170px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .milestone-medal,
+  .milestone-burst span {
+    animation: none;
+  }
+  .milestone-burst {
+    display: none;
+  }
+}
+
+/* Level map: one card per stage, the stage test at its end. */
+.level-title-ar {
+  font-size: 0.75em;
+  color: var(--text-muted);
+}
+.stage-card-locked {
+  opacity: 0.75;
+}
+.stage-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.stage-card-running .stage-badge,
+.stage-card-test-ready .stage-badge {
+  color: var(--accent);
+}
+.stage-card-done .stage-badge {
+  color: var(--accent-2);
+}
+.stage-test {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.stage-test-done {
+  border-style: solid;
+  border-color: var(--accent-2);
+  color: var(--text);
+}
+.stage-test-done svg {
+  color: var(--accent-2);
+}

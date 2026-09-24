@@ -40,6 +40,7 @@ export function passedTest(
       .filter(
         (e) =>
           !e.deleted &&
+          e.format !== STAGE_TEST_FORMAT &&
           e.units.length === 1 &&
           e.units[0] === unit &&
           e.total > 0 &&
@@ -49,9 +50,98 @@ export function passedTest(
   );
 }
 
-/** Unit 1 is always open; every further unit opens with the previous unit's test. */
+/**
+ * Levels and stages (step 3): a level is a book, each book has two stages of eight units that
+ * end with a stage test (the publisher's mid-term and final test cover the same halves).
+ */
+export interface Stage {
+  id: number;
+  book: number;
+  units: readonly number[];
+  /** Learner-facing names (German). */
+  name: string;
+  test: string;
+  badge: string;
+}
+
+export const STAGE_TEST_FORMAT = 'stage_test';
+
+const range = (from: number, to: number) =>
+  Array.from({ length: to - from + 1 }, (_, i) => from + i);
+
+export const STAGES: readonly Stage[] = [
+  {
+    id: 1,
+    book: 1,
+    units: range(1, 8),
+    name: 'Etappe 1',
+    test: 'Zwischentest',
+    badge: 'Grundstein',
+  },
+  {
+    id: 2,
+    book: 1,
+    units: range(9, 16),
+    name: 'Etappe 2',
+    test: 'Abschlusstest',
+    badge: 'Buch 1',
+  },
+];
+
+export function stageOf(unit: number): Stage | undefined {
+  return STAGES.find((s) => s.units.includes(unit));
+}
+
+/** The first passing stage test of `stage` (format stage_test, units within the stage). */
+export function stageTestPassed(
+  exams: readonly ExamResult[],
+  stage: Stage
+): ExamResult | null {
+  return (
+    exams
+      .filter(
+        (e) =>
+          !e.deleted &&
+          e.format === STAGE_TEST_FORMAT &&
+          e.units.length > 0 &&
+          e.units.every((u) => stage.units.includes(u)) &&
+          e.total > 0 &&
+          e.score / e.total >= PASS_RATIO
+      )
+      .sort((a, b) => a.finishedAt.localeCompare(b.finishedAt))[0] ?? null
+  );
+}
+
+export type StageState =
+  | { state: 'locked' }
+  | { state: 'running'; unitsPassed: number }
+  | { state: 'test-ready'; unitsPassed: number }
+  | { state: 'done'; passed: ExamResult };
+
+export function stageState(stage: Stage, exams: readonly ExamResult[]): StageState {
+  const passed = stageTestPassed(exams, stage);
+  if (passed) return { state: 'done', passed };
+  const previous = STAGES.find((s) => s.id === stage.id - 1);
+  if (previous && !stageTestPassed(exams, previous)) return { state: 'locked' };
+  const unitsPassed = stage.units.filter((u) => passedTest(exams, u)).length;
+  return unitsPassed === stage.units.length
+    ? { state: 'test-ready', unitsPassed }
+    : { state: 'running', unitsPassed };
+}
+
+/**
+ * Unit 1 is always open; every further unit opens with the previous unit's test, and the
+ * first unit of a stage also needs the previous stage's test.
+ */
 export function isUnlocked(unit: number, exams: readonly ExamResult[]): boolean {
-  return unit <= 1 || passedTest(exams, unit - 1) !== null;
+  if (unit <= 1) return true;
+  if (!passedTest(exams, unit - 1)) return false;
+  const stage = stageOf(unit);
+  const previous = stage && STAGES.find((s) => s.id === stage.id - 1);
+  if (stage && previous && stage.units[0] === unit) {
+    return stageTestPassed(exams, previous) !== null;
+  }
+  return true;
 }
 
 export type EnrollmentStatus =

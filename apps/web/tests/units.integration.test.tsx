@@ -41,10 +41,15 @@ describe('Units (integration)', () => {
     await useListenStore.getState().load();
   });
 
-  it('shows all 16 units and continues where the learner is', async () => {
+  it('shows level 1 as two stages of eight units and continues where the learner is', async () => {
     renderAt('/units');
-    const grid = await screen.findByRole('list', { name: 'Alle Einheiten' });
-    expect(within(grid).getAllByRole('link')).toHaveLength(16);
+    const stage1 = await screen.findByRole('list', { name: 'Etappe 1: Einheiten' });
+    const stage2 = screen.getByRole('list', { name: 'Etappe 2: Einheiten' });
+    expect(within(stage1).getAllByRole('link')).toHaveLength(8);
+    expect(within(stage2).getAllByRole('link')).toHaveLength(8);
+    expect(
+      screen.getByText(/öffnet nach allen Einheitstests \(0 von 8\)/)
+    ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Weiter in Einheit 1/ })).toHaveAttribute(
       'href',
       '/units/1'

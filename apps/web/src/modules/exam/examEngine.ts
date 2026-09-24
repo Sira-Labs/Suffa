@@ -216,11 +216,13 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
     mixed_chapter: () => null, // realised via the other formats
     speed: () => null,
     adaptive: () => null,
+    stage_test: () => null, // a stage test mixes the other formats
   };
 
   // "mixed_chapter", "speed" and "adaptive" draw on the full format set.
   const baseFormats = config.formats.filter(
-    (f) => f !== 'mixed_chapter' && f !== 'speed' && f !== 'adaptive'
+    (f) =>
+      f !== 'mixed_chapter' && f !== 'speed' && f !== 'adaptive' && f !== 'stage_test'
   );
   const effectiveFormats =
     baseFormats.length > 0

@@ -74,7 +74,9 @@ export type ExamFormat =
   | 'minimalpair'
   | 'mixed_chapter'
   | 'speed'
-  | 'adaptive';
+  | 'adaptive'
+  /** Test at the end of a stage (units 1–8 or 9–16), step 3 of the unit room. */
+  | 'stage_test';
 
 export interface ExamItemResult {
   contentRef: string;

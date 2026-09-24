@@ -96,7 +96,12 @@ export const NAV_ITEMS: readonly NavItem[] = [
 export const MORE_PATH = '/more';
 
 /** Full-screen routes without navigation (one task at a time). */
-export const FOCUS_PATHS: readonly string[] = ['/review'];
+export const FOCUS_PATHS: readonly string[] = ['/review', '/milestone'];
+
+/** True for a focus route or anything below it (e.g. /milestone/1). */
+export function isFocusPath(pathname: string): boolean {
+  return FOCUS_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
 
 /** True when the "Mehr" tab should be highlighted on mobile. */
 export function isUnderMore(pathname: string): boolean {

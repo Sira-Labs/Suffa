@@ -51,6 +51,7 @@ Teacher assignments with a due date appear as an extra **class quest** (XP set b
 | All tracks of a lesson heard                                       | +15 bonus — shipped 2026-09-23                         |
 | Unit practice item, first success (read, write, speak, verbs)      | 2 — shipped 2026-09-23                                 |
 | Unit test passed by the unit's target date                         | +50 — shipped 2026-09-23 (late only loses this bonus)  |
+| Stage test passed (units 1–8 or 9–16 of a book)                    | +250 — shipped 2026-09-24, with milestone screen       |
 | Writing/speaking task submitted                                    | 10 (+5 if AI/teacher grade ≥ 80 %)                     |
 | Daily quest completed                                              | per table above                                        |
 

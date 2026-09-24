@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { ExamFormat, ExamItemResult } from '@/types';
 import { ArabicText, RecallInput } from '@/components';
 import { gradeRecall, isCorrect } from '@/services/srs';
@@ -13,7 +13,12 @@ import {
   useSrsStore,
   useSyncStore,
 } from '@/state';
-import { PASS_RATIO, enrollmentStatus } from '@/services/enrollment';
+import {
+  PASS_RATIO,
+  STAGES,
+  STAGE_TEST_FORMAT,
+  enrollmentStatus,
+} from '@/services/enrollment';
 import { XP_RULES } from '@/services/engagement/xp';
 import { generateExam, type ExamQuestion } from './examEngine';
 
@@ -31,6 +36,7 @@ const FORMAT_LABELS: Record<ExamFormat, string> = {
   mixed_chapter: 'Gemischte Kapitelprüfung',
   speed: 'Speed-Round',
   adaptive: 'Adaptiver Modus',
+  stage_test: 'Etappentest',
 };
 
 type Stage = 'config' | 'running' | 'result';
@@ -58,11 +64,16 @@ export function Exam() {
   // ?unit=n (unit test from a learning path) preselects that unit if it has content.
   const [params] = useSearchParams();
   const requestedUnit = Number(params.get('unit'));
-  const [selectedUnits, setSelectedUnits] = useState<number[]>(() =>
-    unitInfos.some((u) => u.einheit === requestedUnit)
+  // ?stage=n (stage test from the level map) covers every unit of the stage with content.
+  const stageTest = STAGES.find((s) => s.id === Number(params.get('stage')));
+  const [selectedUnits, setSelectedUnits] = useState<number[]>(() => {
+    if (stageTest) {
+      return unitInfos.map((u) => u.einheit).filter((u) => stageTest.units.includes(u));
+    }
+    return unitInfos.some((u) => u.einheit === requestedUnit)
       ? [requestedUnit]
-      : unitInfos.map((u) => u.einheit)
-  );
+      : unitInfos.map((u) => u.einheit);
+  });
   const [count, setCount] = useState(10);
   const [speed, setSpeed] = useState(false);
   const [questions, setQuestions] = useState<ExamQuestion[]>([]);
@@ -85,6 +96,7 @@ export function Exam() {
   if (stage === 'config') {
     return (
       <ExamConfig
+        stageTitle={stageTest ? `${stageTest.test} · ${stageTest.name}` : null}
         selectedFormats={selectedFormats}
         setSelectedFormats={setSelectedFormats}
         selectedUnits={selectedUnits}
@@ -114,12 +126,15 @@ export function Exam() {
       items={items}
       formats={selectedFormats}
       units={selectedUnits}
+      stageId={stageTest?.id ?? null}
       onRestart={() => setStage('config')}
     />
   );
 }
 
 function ExamConfig(props: {
+  /** Set for a stage test: fixed units, own heading. */
+  stageTitle: string | null;
   selectedFormats: ExamFormat[];
   setSelectedFormats: (f: ExamFormat[]) => void;
   selectedUnits: number[];
@@ -143,7 +158,7 @@ function ExamConfig(props: {
 
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Prüfungsmodus</h1>
+      <h1 style={{ margin: 0 }}>{props.stageTitle ?? 'Prüfungsmodus'}</h1>
       <p className="muted">
         Wähle Formate und Einheiten. Die Fragen werden interleaved gestellt (verschiedene
         Formate gemischt) – wie in der echten Klassenprüfung.
@@ -164,23 +179,25 @@ function ExamConfig(props: {
         </div>
       </div>
 
-      <div className="card stack">
-        <strong>Einheiten (gemischte Kapitelprüfung)</strong>
-        <div className="row">
-          {unitInfos.map((u) => (
-            <button
-              key={u.einheit}
-              className={`btn ${props.selectedUnits.includes(u.einheit) ? 'btn-accent' : ''}`}
-              onClick={() => toggleUnit(u.einheit)}
-            >
-              E{u.einheit}
-            </button>
-          ))}
+      {!props.stageTitle && (
+        <div className="card stack">
+          <strong>Einheiten (gemischte Kapitelprüfung)</strong>
+          <div className="row">
+            {unitInfos.map((u) => (
+              <button
+                key={u.einheit}
+                className={`btn ${props.selectedUnits.includes(u.einheit) ? 'btn-accent' : ''}`}
+                onClick={() => toggleUnit(u.einheit)}
+              >
+                E{u.einheit}
+              </button>
+            ))}
+          </div>
+          <p className="muted" style={{ margin: 0 }}>
+            Beispiel echte Prüfung: „Kapitel 1 → Kapitel 3 Dialog 1“ – wähle E1–E3.
+          </p>
         </div>
-        <p className="muted" style={{ margin: 0 }}>
-          Beispiel echte Prüfung: „Kapitel 1 → Kapitel 3 Dialog 1“ – wähle E1–E3.
-        </p>
-      </div>
+      )}
 
       <div className="card stack">
         <strong>Umfang</strong>
@@ -354,13 +371,17 @@ function ExamResultView({
   items,
   formats,
   units,
+  stageId,
   onRestart,
 }: {
   items: ExamItemResult[];
   formats: ExamFormat[];
   units: number[];
+  /** Set for a stage test: saved as stage_test, a pass leads to the milestone. */
+  stageId: number | null;
   onRestart: () => void;
 }) {
+  const navigate = useNavigate();
   const reloadSrs = useSrsStore((s) => s.load);
   const refreshPending = useSyncStore((s) => s.refreshPending);
   const score = items.filter((i) => i.correct).length;
@@ -388,7 +409,12 @@ function ExamResultView({
   const persistResult = async () => {
     const now = new Date().toISOString();
     await examRepo.add({
-      format: formats.length > 1 ? 'mixed_chapter' : (formats[0] ?? 'mixed_chapter'),
+      format:
+        stageId !== null
+          ? STAGE_TEST_FORMAT
+          : formats.length > 1
+            ? 'mixed_chapter'
+            : (formats[0] ?? 'mixed_chapter'),
       units,
       score,
       total: items.length,
@@ -398,7 +424,10 @@ function ExamResultView({
     });
     // A passed unit test opens the next unit (redesign v2, step 2).
     await useEnrollmentStore.getState().reloadExams();
-    const unit = units.length === 1 ? units[0]! : null;
+    if (stageId !== null && items.length > 0 && score / items.length >= PASS_RATIO) {
+      navigate(`/milestone/${stageId}`);
+    }
+    const unit = stageId === null && units.length === 1 ? units[0]! : null;
     if (unit !== null && items.length > 0 && score / items.length >= PASS_RATIO) {
       const { enrollments, exams } = useEnrollmentStore.getState();
       const status = enrollmentStatus(enrollments[unit], exams, unit);

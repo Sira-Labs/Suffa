@@ -12,6 +12,7 @@ import {
   listeningXpEvents,
   practiceXpEvents,
   unitOnTimeXpEvents,
+  stageXpEvents,
   reviewXpEvents,
   startOfWeek,
   sumXp,
@@ -77,6 +78,7 @@ export function Dashboard() {
       ...listeningXpEvents(heard, sizes),
       ...practiceXpEvents(Object.values(practised)),
       ...unitOnTimeXpEvents(Object.values(enrollments), exams),
+      ...stageXpEvents(exams),
     ],
     startOfWeek()
   );

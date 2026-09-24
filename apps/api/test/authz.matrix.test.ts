@@ -8,6 +8,7 @@ import { createApp } from '../src/app.js';
 import type { AccountRepository } from '../src/account/repository.js';
 import type { AdminRepository } from '../src/admin/repository.js';
 import type { ClassRepository } from '../src/classes/repository.js';
+import type { PrivacyRepository } from '../src/privacy/repository.js';
 import { SecondFactorService } from '../src/account/secondFactor.js';
 import { SecretBox } from '../src/security/secretBox.js';
 import type { Me } from '../src/auth/betterAuth.js';
@@ -47,6 +48,19 @@ const adminRepo: AdminRepository = {
   updateUser: async () => null,
   listAudit: async () => ({ entries: [], next: null }),
 };
+const privacyRepo: PrivacyRepository = {
+  export: async () => ({
+    exportedAt: '2026-09-24T00:00:00.000Z',
+    profile: {},
+    secondFactorEnabled: false,
+    sessions: [],
+    classes: [],
+    learningData: {} as never,
+    auditLog: [],
+  }),
+  delete: async () => true,
+};
+
 /** Nobody is a member of any class here: class:manage is left to admins. */
 const classRepo: ClassRepository = {
   create: async () => ({
@@ -113,7 +127,13 @@ function buildApp() {
       log: quiet,
       publicUrl: 'https://s.example',
     },
-    account: { repo: accountRepo, sessions: sessionActors, secondFactor, log: quiet },
+    account: {
+      repo: accountRepo,
+      sessions: sessionActors,
+      secondFactor,
+      privacy: privacyRepo,
+      log: quiet,
+    },
     auth: {
       handler: async () => Response.json({ ok: true }),
       me: async (h) => actorFrom(h),

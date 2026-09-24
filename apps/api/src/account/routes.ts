@@ -8,6 +8,8 @@
  *   GET    /2fa                     → { enabled, confirmed }
  *   POST   /2fa/setup               → { uri, secret }  (409 when already enabled)
  *   POST   /2fa/confirm  { code }   → 204; enables a pending setup, confirms this session
+ *   GET    /export                  → JSON download of everything stored about you (GDPR)
+ *   DELETE /             { confirm: <your email> } → 204; deletes the account and its data
  *
  * Sessions live in the database and are checked on every request (no cookie cache), so an
  * ended session fails on its very next request.
@@ -23,9 +25,12 @@ import {
 } from '../authz/middleware.js';
 import type { AccountRepository } from './repository.js';
 import type { SecondFactorService } from './secondFactor.js';
+import type { PrivacyRepository } from '../privacy/repository.js';
 
 export interface AccountRouteDeps {
   repo: AccountRepository;
+  /** GDPR export and account deletion. */
+  privacy?: PrivacyRepository;
   /** TOTP second factor (admins need it for admin actions). */
   secondFactor?: SecondFactorService;
   /** Records privileged account changes (second factor enabled). */
@@ -172,6 +177,43 @@ export function createAccountRoutes(
           ip: c.req.header('x-real-ip') ?? null,
         });
       }
+      return c.body(null, 204);
+    });
+  }
+
+  const privacy = deps.privacy;
+  if (privacy) {
+    app.get('/export', read, async (c) => {
+      const data = await privacy.export(c.get('actor').id);
+      c.header('Cache-Control', 'no-store');
+      c.header(
+        'Content-Disposition',
+        `attachment; filename="suffa-export-${data.exportedAt.slice(0, 10)}.json"`
+      );
+      return c.json(data);
+    });
+
+    app.delete('/', write, async (c) => {
+      const actor = c.get('actor');
+      let body: unknown;
+      try {
+        body = await c.req.json();
+      } catch {
+        return c.json({ error: 'invalid_json' }, 400);
+      }
+      // Typing the own address guards against a slip (and a forged click).
+      const parsed = z
+        .object({ confirm: z.string().max(320) })
+        .strict()
+        .safeParse(body);
+      if (
+        !parsed.success ||
+        parsed.data.confirm.trim().toLowerCase() !== actor.email.toLowerCase()
+      ) {
+        return c.json({ error: 'confirmation_mismatch' }, 400);
+      }
+      await privacy.delete(actor.id, c.req.header('x-real-ip') ?? null);
+      deps.log.info({ userId: actor.id }, 'account.deleted');
       return c.body(null, 204);
     });
   }

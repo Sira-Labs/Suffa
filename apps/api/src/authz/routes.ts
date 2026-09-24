@@ -43,6 +43,8 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   { method: 'GET', path: '/api/v1/invites/:token', action: 'class:join' },
   { method: 'POST', path: '/api/v1/invites/:token/join', action: 'class:join' },
   { method: 'GET', path: '/api/v1/account/2fa', action: 'profile:read' },
+  { method: 'GET', path: '/api/v1/account/export', action: 'profile:read' },
+  { method: 'DELETE', path: '/api/v1/account', action: 'profile:write' },
   { method: 'POST', path: '/api/v1/account/2fa/setup', action: 'profile:write' },
   { method: 'POST', path: '/api/v1/account/2fa/confirm', action: 'profile:write' },
 ];

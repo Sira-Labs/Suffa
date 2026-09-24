@@ -12,6 +12,7 @@ import { loadMigrations, migrate } from '../src/migrate.js';
 import { PgSyncRepository } from '../src/sync/repository.js';
 import { PgAdminRepository } from '../src/admin/repository.js';
 import { PgAccountRepository } from '../src/account/repository.js';
+import { PgPrivacyRepository } from '../src/privacy/repository.js';
 import {
   PgSecondFactorRepository,
   SecondFactorService,
@@ -74,6 +75,7 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       admin: { repo: new PgAdminRepository(pool), auth: sessions, log: quiet },
       account: {
         repo: new PgAccountRepository(pool),
+        privacy: new PgPrivacyRepository(pool),
         sessions: { actor: (h) => sessions.sessionActor(h) },
         secondFactor: new SecondFactorService(
           new PgSecondFactorRepository(pool),
@@ -444,5 +446,30 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       details: { endedSessions: 1 },
     });
     expect(entries[2]!.details).toEqual({ from: 'student', to: 'teacher' });
+  });
+
+  it('deletes the account only with the own address typed in (story 4.4)', async () => {
+    const cookie = await signInDevice('weg@example.org', '203.0.113.90');
+    const remove = (confirm: string) =>
+      app.request('/api/v1/account', {
+        method: 'DELETE',
+        headers: { cookie, origin: PUBLIC_URL, 'content-type': 'application/json' },
+        body: JSON.stringify({ confirm }),
+      });
+    const exported = await app.request('/api/v1/account/export', { headers: { cookie } });
+    expect(exported.headers.get('content-disposition')).toMatch(
+      /attachment; filename="suffa-export-/
+    );
+    expect(await exported.json()).toMatchObject({
+      profile: { email: 'weg@example.org' },
+    });
+
+    expect((await remove('someone@example.org')).status).toBe(400);
+    expect((await remove(' Weg@Example.org ')).status).toBe(204);
+    expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(401);
+    const { rows } = await pool.query(
+      "select 1 from users where email = 'weg@example.org'"
+    );
+    expect(rows).toHaveLength(0);
   });
 });

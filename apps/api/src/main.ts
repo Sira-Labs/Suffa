@@ -21,6 +21,7 @@ import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/res
 import { PgSyncRepository } from './sync/repository.js';
 import { PgAdminRepository } from './admin/repository.js';
 import { PgClassRepository } from './classes/repository.js';
+import { PgPrivacyRepository } from './privacy/repository.js';
 import { PgAccountRepository } from './account/repository.js';
 import type { AccountRouteDeps } from './account/routes.js';
 import { PgSecondFactorRepository, SecondFactorService } from './account/secondFactor.js';
@@ -155,6 +156,7 @@ async function main(): Promise<void> {
     resolvers.push(sessions);
     accountRoutes = {
       repo: new PgAccountRepository(pool),
+      privacy: new PgPrivacyRepository(pool),
       sessions: { actor: (h) => sessions.sessionActor(h) },
       secondFactor: new SecondFactorService(
         new PgSecondFactorRepository(pool),

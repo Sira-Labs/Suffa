@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { TashkilToggle } from '@/components';
 import { useSettingsStore, useSyncStore } from '@/state';
 import { AccountDevices } from './AccountDevices';
+import { PrivacyCard } from './PrivacyCard';
 
 export function Settings() {
   const settings = useSettingsStore((s) => s.settings);
@@ -71,6 +72,8 @@ export function Settings() {
           />
         </label>
       </div>
+
+      <PrivacyCard />
 
       <SourcesCard />
     </div>

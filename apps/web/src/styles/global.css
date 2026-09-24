@@ -1393,3 +1393,72 @@ textarea.input {
 .stage-test-done svg {
   color: var(--accent-2);
 }
+
+/* "Entdecken": curated media cards; the player opens inline after a tap. */
+.discover-filters {
+  gap: 0.5rem;
+}
+.discover-pick {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-2) 16%, var(--bg-elev)),
+    var(--bg-elev)
+  );
+}
+.discover-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+.discover-card {
+  gap: 0.45rem;
+}
+.discover-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--bg-elev-2), var(--bg-elev));
+}
+.discover-quran .discover-thumb {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--accent-2) 35%, var(--bg-elev)),
+    var(--bg-elev)
+  );
+}
+.discover-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+}
+.discover-tag,
+.discover-duration {
+  position: absolute;
+  bottom: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: #fff;
+  background: rgb(0 0 0 / 65%);
+}
+.discover-tag {
+  left: 6px;
+}
+.discover-duration {
+  right: 6px;
+}
+.discover-category {
+  color: var(--accent);
+}
+.discover-quran .discover-category {
+  color: var(--accent-2);
+}

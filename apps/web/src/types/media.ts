@@ -8,7 +8,8 @@ import type { Syncable } from './srs';
 export interface MediaProgress extends Syncable {
   /** Stable track id, e.g. "b1/unit01/lesson01/01" (see trackId()). */
   id: string;
-  source: 'publisher-audio';
+  /** Publisher audio track or a video marked as seen in "Entdecken". */
+  source: 'publisher-audio' | 'discover-video';
   /** Audio URL. */
   ref: string;
   /** Lesson key the track belongs to, e.g. "b1/u1/l1" (for lesson bonuses). */

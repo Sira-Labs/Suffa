@@ -44,7 +44,7 @@ describe('buildTodayPlan', () => {
       reviewedToday: 20,
     });
     expect(steps.map((s) => s.state)).toEqual(['done', 'done', 'current']);
-    expect(steps[2]!.to).toBe('/library');
+    expect(steps[2]!.to).toBe('/units');
   });
 
   it('uses singular forms and estimates minutes', () => {

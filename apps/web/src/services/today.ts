@@ -26,6 +26,8 @@ export interface TodayInput {
   newLearnedToday: number;
   /** Audio tracks that counted as heard today. */
   heardToday?: number;
+  /** Where "Dialog hören" leads: the started unit's listening station, else the units. */
+  listenPath?: string;
 }
 
 export const REVIEW_PATH = '/review';
@@ -86,8 +88,8 @@ export function buildTodayPlan(input: TodayInput): {
       detail:
         (input.heardToday ?? 0) > 0
           ? `${plural(input.heardToday!, 'Aufnahme', 'Aufnahmen')} gehört`
-          : 'Offizielles Audio zum Buch',
-      to: '/library',
+          : 'Offizielles Audio in deiner Einheit',
+      to: input.listenPath ?? '/units',
     },
   ];
 

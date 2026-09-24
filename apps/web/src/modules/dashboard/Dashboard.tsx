@@ -27,7 +27,7 @@ import {
   useSettingsStore,
   useSrsStore,
 } from '@/state';
-import { CurrentUnitCard } from './CurrentUnitCard';
+import { CurrentUnitCard, currentUnit } from './CurrentUnitCard';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
   weekday: 'long',
@@ -45,6 +45,7 @@ export function Dashboard() {
   const practised = usePracticeStore((s) => s.records);
   const enrollments = useEnrollmentStore((s) => s.enrollments);
   const exams = useEnrollmentStore((s) => s.exams);
+  const activeUnit = currentUnit(enrollments, exams);
   const [sizes, setSizes] = useState<ReadonlyMap<string, number>>(new Map());
 
   useEffect(() => {
@@ -90,6 +91,7 @@ export function Dashboard() {
     reviewedToday: today.reviewed,
     newLearnedToday: today.newLearned,
     heardToday,
+    listenPath: activeUnit ? `/units/${activeUnit}/listen` : '/units',
   });
   const current = plan.steps.find((s) => s.state === 'current');
   const word = wordOfTheDay(content.vokabeln);

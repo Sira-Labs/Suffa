@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
+import type { ExamResult, UnitEnrollment } from '@/types';
 import { enrollmentStatus } from '@/services/enrollment';
 import { useEnrollmentStore } from '@/state';
 import { daysLeftLabel } from '@/modules/units/UnitGate';
@@ -11,10 +12,7 @@ import { daysLeftLabel } from '@/modules/units/UnitGate';
 export function CurrentUnitCard() {
   const enrollments = useEnrollmentStore((s) => s.enrollments);
   const exams = useEnrollmentStore((s) => s.exams);
-  const active = Object.values(enrollments)
-    .map((e) => ({ e, status: enrollmentStatus(e, exams, e.unit) }))
-    .filter(({ status }) => status.state === 'running' || status.state === 'overdue')
-    .sort((a, b) => b.e.startedAt.localeCompare(a.e.startedAt))[0];
+  const active = activeEnrollment(enrollments, exams);
   if (!active) return null;
 
   const { e, status } = active;
@@ -41,4 +39,23 @@ export function CurrentUnitCard() {
       <Icon name="arrowRight" />
     </Link>
   );
+}
+
+/** The latest started unit whose test is not passed yet. */
+function activeEnrollment(
+  enrollments: Record<number, UnitEnrollment>,
+  exams: ExamResult[]
+) {
+  return Object.values(enrollments)
+    .map((e) => ({ e, status: enrollmentStatus(e, exams, e.unit) }))
+    .filter(({ status }) => status.state === 'running' || status.state === 'overdue')
+    .sort((a, b) => b.e.startedAt.localeCompare(a.e.startedAt))[0];
+}
+
+/** Unit number of the active unit, if any (for links on "Heute"). */
+export function currentUnit(
+  enrollments: Record<number, UnitEnrollment>,
+  exams: ExamResult[]
+): number | null {
+  return activeEnrollment(enrollments, exams)?.e.unit ?? null;
 }

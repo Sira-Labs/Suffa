@@ -1,14 +1,50 @@
 import { Link } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
-import { NAV_ITEMS } from '@/navigation';
+import { NAV_ITEMS, type NavItem } from '@/navigation';
 
 /** Mobile overflow page: every destination that does not fit into the bottom bar. */
 export function More() {
-  const items = NAV_ITEMS.filter((item) => item.tier === 'secondary');
+  return (
+    <HubPage
+      title="Mehr"
+      listLabel="Weitere Bereiche"
+      items={NAV_ITEMS.filter((item) => item.tier === 'secondary')}
+    />
+  );
+}
+
+/** "Training": practice across all units (the unit room covers one unit at a time). */
+export function Training() {
+  return (
+    <HubPage
+      title="Training"
+      intro="Üben über alle Einheiten hinweg – ergänzend zu deiner aktuellen Einheit."
+      listLabel="Trainingsbereiche"
+      items={NAV_ITEMS.filter((item) => item.tier === 'training')}
+    />
+  );
+}
+
+function HubPage({
+  title,
+  intro,
+  listLabel,
+  items,
+}: {
+  title: string;
+  intro?: string;
+  listLabel: string;
+  items: NavItem[];
+}) {
   return (
     <div className="stack">
-      <h1>Mehr</h1>
-      <ul className="more-grid" aria-label="Weitere Bereiche">
+      <h1>{title}</h1>
+      {intro && (
+        <p className="muted" style={{ margin: 0 }}>
+          {intro}
+        </p>
+      )}
+      <ul className="more-grid" aria-label={listLabel}>
         {items.map((item) => (
           <li key={item.to}>
             <Link to={item.to} className="more-tile">

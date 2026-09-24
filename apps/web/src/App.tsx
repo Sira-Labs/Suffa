@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom';
 import { CelebrationToast, SyncBadge } from './components';
 import { Icon } from './components/Icon';
-import { isFocusPath, isUnderMore, MORE_PATH, NAV_ITEMS } from './navigation';
+import {
+  isFocusPath,
+  isUnderMore,
+  isUnderTraining,
+  MORE_PATH,
+  NAV_ITEMS,
+  TRAINING_PATH,
+} from './navigation';
 import { logger } from './services/logger';
 import {
   useContentStore,
@@ -111,9 +118,12 @@ function Shell() {
             key={item.to}
             to={item.to}
             end={item.end}
-            className={({ isActive }) =>
-              `nav-link${item.tier === 'secondary' ? ' nav-link-secondary' : ''}${isActive ? ' nav-link-active' : ''}`
-            }
+            className={({ isActive }) => {
+              // The Training tab stays lit on every training page (phone bar).
+              const active =
+                isActive || (item.to === TRAINING_PATH && isUnderTraining(pathname));
+              return `nav-link${item.tier !== 'primary' ? ' nav-link-secondary' : ''}${active ? ' nav-link-active' : ''}`;
+            }}
           >
             <Icon name={item.icon} />
             <span className="nav-label">{item.label}</span>

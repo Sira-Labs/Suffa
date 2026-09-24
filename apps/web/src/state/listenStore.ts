@@ -25,6 +25,11 @@ interface ListenState {
   load(): Promise<void>;
   /** Adds actually played seconds of a track; detects "heard" and lesson completion. */
   record(track: TrackRef, playedSec: number, durationSec: number): Promise<ListenOutcome>;
+  /**
+   * Marks a curated video as seen ("Entdecken"). Embedded YouTube playback cannot be measured
+   * without YouTube's tracking API, so the learner confirms it. Returns false if already seen.
+   */
+  markSeen(id: string, url: string): Promise<boolean>;
 }
 
 const NOTHING: ListenOutcome = { trackHeard: false, lessonComplete: false, xp: 0 };
@@ -36,6 +41,25 @@ export const useListenStore = create<ListenState>((set, get) => ({
   async load() {
     const all = await mediaProgressRepo.all();
     set({ progress: Object.fromEntries(all.map((p) => [p.id, p])), loaded: true });
+  },
+
+  async markSeen(id, url) {
+    if (get().progress[id]?.completedAt) return false;
+    const now = new Date().toISOString();
+    const next: MediaProgress = {
+      id,
+      source: 'discover-video',
+      ref: url,
+      lessonKey: 'discover',
+      durationSec: 0,
+      listenedSec: 0,
+      completedAt: now,
+      updated_at: now,
+      deleted: false,
+    };
+    set({ progress: { ...get().progress, [id]: next } });
+    await mediaProgressRepo.put(next);
+    return true;
   },
 
   async record(track, playedSec, durationSec) {

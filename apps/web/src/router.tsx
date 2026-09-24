@@ -11,7 +11,8 @@ import { Conjugation } from './modules/conjugation';
 import { Exam } from './modules/exam';
 import { Library } from './modules/library';
 import { Settings } from './modules/settings';
-import { More } from './modules/more';
+import { More, Training } from './modules/more';
+import { Discover } from './modules/discover';
 import { FocusReview } from './modules/review';
 import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
 
@@ -36,6 +37,8 @@ export const router = createHashRouter([
       { path: 'library', element: <Library /> },
       { path: 'settings', element: <Settings /> },
       { path: 'more', element: <More /> },
+      { path: 'training', element: <Training /> },
+      { path: 'discover', element: <Discover /> },
       { path: 'review', element: <FocusReview /> },
       { path: 'units', element: <Units /> },
       { path: 'units/:unit', element: <UnitPath /> },

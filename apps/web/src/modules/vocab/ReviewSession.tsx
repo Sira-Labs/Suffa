@@ -91,7 +91,7 @@ export function ReviewSession({
             Dialog?
           </p>
           <div className="row" style={{ justifyContent: 'center' }}>
-            <Link className="btn btn-primary" to="/library">
+            <Link className="btn btn-primary" to="/units">
               Dialog hören
             </Link>
             <Link className="btn" to="/">

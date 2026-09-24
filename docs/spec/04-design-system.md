@@ -46,8 +46,10 @@ precached for offline use (≈ 370 kB); other scripts load on demand.
 
 ## Layout and navigation
 
-- **Phone:** floating bottom bar with five destinations — Heute, Einheiten, Hören, Wurzeln, Mehr.
-  "Mehr" lists the rest (Vokabeln, Lesen, Schreiben, Sprechen, Konjugation, Prüfung, Einstellungen).
+- **Phone:** floating bottom bar with five destinations — Heute, Einheit, Entdecken, Training,
+  Mehr (redesign v2). "Training" gathers practice across all units (Wiederholen, Vokabeln,
+  Wurzeln, Konjugation, Prüfung); "Mehr" lists the rest (Buch-Medien, Lesen, Schreiben, Sprechen,
+  Einstellungen). Inside a unit every skill opens as a station of the unit.
 - **Desktop (≥ 960 px):** sidebar with every destination, brand on top, sync status at the
   bottom.
 - One navigation definition (`navigation.ts`) drives both layouts.
@@ -80,7 +82,7 @@ a station of its path and opens at `/units/:unit/:station` with only that unit's
 | 1    | Unit room: stations for listening (page video + audio), reading, writing, speaking, verbs; skill rings; first success per item counted (`practice_progress`, +2 XP), station celebration | ✅     |
 | 2    | Start a unit with a pace (3/2/1 weeks), countdown, one extension; next unit unlocks with the unit test (≥ 80 %)                                                                          | ✅     |
 | 3    | Levels (= books) and stages (units 1–8 + mid-term test, 9–16 + final test), milestone screen                                                                                             | ✅     |
-| 4    | "Entdecken": curated media library (Arabic language, Quran, stories, podcasts); navigation Heute · Einheit · Entdecken · Training · Mehr                                                 | ☐      |
+| 4    | "Entdecken": curated media library (Arabic language, Quran, stories, podcasts); navigation Heute · Einheit · Entdecken · Training · Mehr                                                 | ✅     |
 
 ## Feedback moments
 

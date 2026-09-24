@@ -5,3 +5,4 @@ export * from './media';
 export * from './bookVideos';
 export * from './practice';
 export * from './enrollment';
+export * from './discover';

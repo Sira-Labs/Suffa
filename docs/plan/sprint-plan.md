@@ -27,7 +27,7 @@ gantt
   S3 Who are you? (5/5)              :done, s3, after s2, 14d
   S4 Classes & admin (4/5)          :active, s4, after s3, 14d
   section P2 Engagement
-  S5 Every day counts               :s5, after s4, 14d
+  S5 Every day counts (5/5)         :done, s5, after s4, 14d
   S6 Class spirit                    :s6, after s5, 14d
   Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
 ```
@@ -39,30 +39,35 @@ pie showData
   "Open" : 2
 ```
 
-| Story                   | Status | Notes                                                                                                                                            |
-| ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                            |
-| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                          |
-| 1.3 api skeleton        | ✅     |                                                                                                                                                  |
-| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                 |
-| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                               |
-| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                      |
-| 2.1 release workflow    | ✅     |                                                                                                                                                  |
-| 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                     |
-| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open   |
-| 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                   |
-| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                              |
-| 2.6 browser router      | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline     |
-| 3.1 Better Auth         | ✅     | magic link only, Google Workspace SMTP relay (port 587); rate limits in Postgres; httpOnly session cookie; open-redirect guard                   |
-| 3.2 authz               | ✅     | `authz/` policies + `authorize()` middleware; route × role matrix test fails on any route without a policy; first admin route `GET /admin/users` |
-| 3.3 ApiSyncProvider     | ✅     | same-origin cookie sync; `VITE_SYNC_BACKEND=off` for an offline build                                                                            |
-| 3.4 account UI          | ✅     | devices (browser, last activity), sign out one or all others, time zone; an ended session fails on its next request                              |
-| 3.5 security review     | ✅     | `docs/security/2026-09-review-auth-sync.md`: shared rate-limit bucket (proxy IP) and token-leaking Better Auth endpoints fixed; rest ticketed    |
-| 4.1 Supabase migration  | ✅     | nothing to migrate (only the PO's data, already synced to the API by the devices); Supabase removed from app, CSP and repo                       |
-| 4.2 admin area          | ✅     | users (search, role, disable), audit log; admin actions need a TOTP second factor confirmed within 12 h                                          |
-| 4.3 classes             | ✅     | create, invite link + QR (14 days, token hashed), join from a signed-out phone, teacher approval; scoped `class:manage`                          |
-| 4.4 GDPR                | ✅     | JSON export of all data; account deletion cascades (checked over every table with `user_id`), sole-teacher classes archived                      |
-| 4.5 pilot kick-off      | 📋     | interview guide and records in `docs/pilot/kickoff-interview.md`; the conversation itself is the PO's                                            |
+| Story                   | Status | Notes                                                                                                                                               |
+| ----------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                               |
+| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                             |
+| 1.3 api skeleton        | ✅     |                                                                                                                                                     |
+| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                    |
+| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                                  |
+| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                         |
+| 2.1 release workflow    | ✅     |                                                                                                                                                     |
+| 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                        |
+| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open      |
+| 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                      |
+| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                                 |
+| 2.6 browser router      | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline        |
+| 3.1 Better Auth         | ✅     | magic link only, Google Workspace SMTP relay (port 587); rate limits in Postgres; httpOnly session cookie; open-redirect guard                      |
+| 3.2 authz               | ✅     | `authz/` policies + `authorize()` middleware; route × role matrix test fails on any route without a policy; first admin route `GET /admin/users`    |
+| 3.3 ApiSyncProvider     | ✅     | same-origin cookie sync; `VITE_SYNC_BACKEND=off` for an offline build                                                                               |
+| 3.4 account UI          | ✅     | devices (browser, last activity), sign out one or all others, time zone; an ended session fails on its next request                                 |
+| 3.5 security review     | ✅     | `docs/security/2026-09-review-auth-sync.md`: shared rate-limit bucket (proxy IP) and token-leaking Better Auth endpoints fixed; rest ticketed       |
+| 4.1 Supabase migration  | ✅     | nothing to migrate (only the PO's data, already synced to the API by the devices); Supabase removed from app, CSP and repo                          |
+| 4.2 admin area          | ✅     | users (search, role, disable), audit log; admin actions need a TOTP second factor confirmed within 12 h                                             |
+| 4.3 classes             | ✅     | create, invite link + QR (14 days, token hashed), join from a signed-out phone, teacher approval; scoped `class:manage`                             |
+| 4.4 GDPR                | ✅     | JSON export of all data; account deletion cascades (checked over every table with `user_id`), sole-teacher classes archived                         |
+| 4.5 pilot kick-off      | 📋     | interview guide and records in `docs/pilot/kickoff-interview.md`; the conversation itself is the PO's                                               |
+| 5.1 engagement package  | ✅     | `packages/engagement`: XP, units/stages, days in the learner's zone, quests, streak + shields, weekly goal, badges, levels; 100 % branch coverage   |
+| 5.2 Today card          | ✅     | "Tagesaufgaben": 3 quests per day (same on every device), bonus, streak, shields, weekly goal; toasts for quests and badges; offline                |
+| 5.3 badges + level      | ✅     | "Abzeichen" gallery (10 badges × tiers + stages), XP level on "Heute", mastery ring (mature words) on every unit tile                               |
+| 5.4 server recompute    | ✅     | debounced worker job after each push; plausibility checks; `xp_ledger`, `quest_progress`, `achievement_unlocks`, `engagement_state`; app reconciles |
+| 5.5 weekly goal         | ✅     | 3/5/7 active days (synced setting); weekly streak; a missed day never breaks a met week                                                             |
 
 ## P0 — Foundation
 

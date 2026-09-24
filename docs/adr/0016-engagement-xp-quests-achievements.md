@@ -1,6 +1,6 @@
 # ADR-0016: Engagement system — XP, daily quests, weekly challenges, achievements
 
-- Status: proposed
+- Status: accepted (implemented in Sprint 5)
 - Date: 2026-09-24
 
 ## Context
@@ -50,3 +50,26 @@ Rules live in one tested package used by web and worker. New tables: `xp_ledger`
 `quest_progress`, `achievement_defs`, `achievement_unlocks`, `class_challenges`,
 `teacher_badges`, `push_subscriptions`. Changing XP weights is a versioned rules change
 (`rulesVersion`) with a recompute job.
+
+## Implementation (Sprint 5)
+
+- **One rulebook:** `packages/engagement` is pure TypeScript without dependencies. The app
+  imports it from source (Vite alias); the api compiles it first (`prebuild`) and its image
+  ships the package's `dist`. Inputs are structural (`ReviewEntry`, `ExamEntry`, …), so the
+  app's records and the server's rows fit without mapping.
+- **Days** are computed with `Intl` in the account's time zone (`users.time_zone`; the app
+  sets it from the device at sign-in when empty). A day counts for the streak when at least
+  one daily quest was done.
+- **Quests** depend on the day only (FNV hash of the date per slot), so all devices and the
+  server agree, also offline. Every quest is doable without a microphone.
+- **Badges** are measured on facts that only grow (cards that became mature, perfect
+  tests, lessons heard, streak lengths reached), so recomputing never takes one away; the
+  server additionally never deletes `achievement_unlocks` rows.
+- **Server recompute:** each push that applied records queues a debounced (20 s) job per
+  learner on the `engagement` queue. The worker drops implausible records (answers under
+  500 ms, more than 30 reviews or practice items in any minute, the same card twice within
+  2 s, timestamps in the future, impossible scores) and replaces the learner's `xp_ledger`.
+  `GET /api/v1/engagement` serves the result; the app shows the server's totals once all its
+  data is uploaded and the server computed after the newest local event, and always shows
+  the badges the server knows.
+- `RULES_VERSION` is stored with every ledger row; changing a weight bumps it.

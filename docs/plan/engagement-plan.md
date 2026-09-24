@@ -56,7 +56,12 @@ Teacher assignments with a due date appear as an extra **class quest** (XP set b
 | Writing/speaking task submitted                                    | 10 (+5 if AI/teacher grade ≥ 80 %)                     |
 | Daily quest completed                                              | per table above                                        |
 
-Shipped so far (2026-09-23): review and listening XP computed on the device
+Shipped in Sprint 5 (2026-09-24): the rules live in `packages/engagement` and run on the
+device and on the server (ADR-0016, implementation notes); daily quests with bonus, streak
+with rest-day shields, weekly goal, the badge gallery (v1 without roots, class and seasonal
+badges), XP levels and mastery rings. Server recompute with plausibility checks.
+
+Shipped before (2026-09-23): review and listening XP computed on the device
 (`apps/web/src/services/engagement/xp.ts`), weekly XP on "Heute", a "+XP" celebration for heard
 tracks and lessons. Listening progress is stored locally (`media_progress`) and joins sync with
 the engagement sprint, as do unit practice (`practice_progress`) and started units with pace and

@@ -3,9 +3,9 @@
 </p>
 
 <p align="center">
-  <b>Offline-first Arabic learning platform</b> for Modern Standard Arabic (فصحى), built around
-  <i>Al-Arabiyya bayna Yadayk</i> (العربية بين يديك).<br>
-  Spaced repetition · roots &amp; patterns · full tashkīl · classes · daily &amp; weekly achievements
+  <b>Offline-first Arabic learning app</b> for Modern Standard Arabic (فصحى).<br>
+  16 units along the topics of Book 1 of <i>Al-Arabiyya bayna Yadayk</i>, with our own texts ·
+  spaced repetition · roots &amp; patterns · full tashkīl
 </p>
 
 <p align="center">
@@ -27,55 +27,85 @@ Suffa brings that idea to learning Arabic: **students, their teacher and an AI a
 teacher (al-Muʿallim) around one curriculum**, and it works even without internet.
 
 The logo shows exactly that: a palm-frond roof on palm-trunk pillars, an open book on the
-platform, and the eight-pointed star of Islamic geometry.
+platform, and the eight-pointed star of Islamic geometry. It appears in the app header
+(sidebar on desktop, top bar on phones), on the loading screen and as the PWA icon; the iOS and
+Android apps will use the same mark.
 
 ## Screenshots
 
 <table>
   <tr>
-    <td width="58%"><img src="docs/assets/screenshot-dashboard.png" alt="Dashboard with due cards, streak, mastery and forgetting curve"></td>
-    <td width="21%"><img src="docs/assets/screenshot-vocab-mobile.png" alt="Vocabulary trainer on a phone, fully vocalised"></td>
-    <td width="21%"><img src="docs/assets/screenshot-roots-mobile.png" alt="Root explorer on a phone"></td>
+    <td width="60%"><img src="docs/assets/screenshot-home.png" alt="Heute: the current unit with its next step, today's path, word of the day with daily check-in"></td>
+    <td width="20%"><img src="docs/assets/screenshot-unit-mobile.png" alt="A unit on a phone: dialogue 1 with its stations"></td>
+    <td width="20%"><img src="docs/assets/screenshot-cloze-mobile.png" alt="Cloze exercise on a phone"></td>
   </tr>
   <tr>
-    <td align="center"><sub>Dashboard: what's due, streak, mastery</sub></td>
-    <td align="center"><sub>Vocabulary with tashkīl levels</sub></td>
-    <td align="center"><sub>Root &amp; pattern explorer</sub></td>
+    <td align="center"><sub>"Heute": your unit, today's path, word of the day</sub></td>
+    <td align="center"><sub>One dialogue at a time</sub></td>
+    <td align="center"><sub>Cloze from real sentences</sub></td>
   </tr>
 </table>
 
-## What you can do today
+## How it works
 
-| Module                      | What it does                                                                                                                                            |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 📊 **Dashboard**            | Due cards, streak, mastery, forgetting curve, heat-map and "what next".                                                                                 |
-| 🗂️ **Vocabulary (SRS)**     | Active recall AR→DE / DE→AR, plurals, root→word, nisba. Tolerant checking: any one meaning, small typos, umlauts. SM-2 scheduling with leech detection. |
-| 🌳 **Roots (الجذر والوزن)** | Every word linked to its root and pattern; "same root?" drills.                                                                                         |
-| 📖 **Reading**              | Vocalised dialogues with tap-a-word glosses; translation on demand.                                                                                     |
-| ✍️ **Writing**              | Dictation and translation with character-level feedback, tolerant of missing tashkīl.                                                                   |
-| 🎤 **Speaking**             | Shadowing, recording and minimal-pair drills (ع/ء, ح/ه, ق/ك …).                                                                                         |
-| 🔄 **Conjugation**          | Past, present and imperative tables across all persons.                                                                                                 |
-| 🎯 **Exams**                | Interleaved, mixed-chapter, speed and adaptive formats; wrong answers become due cards.                                                                 |
-| 🎬 **Library**              | Embedded video lessons and the official audio.                                                                                                          |
-| 🔁 **Sync**                 | Offline-first on each device (IndexedDB), with an outbox and last-write-wins sync across phone and desktop.                                             |
+**Level 1 = Book 1, in two stages of eight units.** A learner starts a unit with a pace
+(3, 2 or 1 weeks), works through it and unlocks the next unit with the unit test (≥ 80 %).
+Each stage ends with a stage test, a badge and a milestone screen.
+
+**A unit shows one dialogue at a time.** Each dialogue is a section with its own stations; later
+sections stay closed until the current one is done, and a closing section holds the
+publisher's exercises, the verbs and the unit test.
+
+| Station in a section | What the learner does                                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 🎧 Dialog hören      | The publisher's official audio for this dialogue (streamed from the publisher); page videos as an optional extra.      |
+| 📖 Dialog lesen      | Our own vocalised dialogue with tap-a-word glosses and a comprehension question.                                       |
+| 🗂️ Wörter lernen     | The dialogue's words as spaced-repetition cards (AR→DE, DE→AR), tolerant checking.                                     |
+| 🧩 Lückentext        | Real example sentences with the word blanked out; pick it from four words of the unit.                                 |
+| ✍️ Schreiben         | Five counted steps: copy, dictation, transliteration → script, sentence building, translation. Resumes where you left. |
+| 🎤 Nachsprechen      | Shadowing and recording of the dialogue lines (optional).                                                              |
+
+**Around the units**
+
+| Area             | What it does                                                                                                                                        |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ☀️ **Heute**     | Opens with your unit and its next step ("Fortsetzen"), today's path, word of the day with a daily check-in (+10 XP), level card, wobbly words.      |
+| 🏋️ **Training**  | Review, vocabulary, roots (الجذر والوزن), conjugation and exams — only with the units you have reached, so nothing from later units shows up early. |
+| 🧭 **Entdecken** | A curated library of YouTube videos and podcasts on Arabic and the Quran; started videos are pinned to "Weiterschauen" until seen or unpinned.      |
+| ⭐ **XP**        | Points for reviews, heard tracks, practised items, the daily check-in, units finished on time and stages; shown the moment you earn them.           |
+| 🔁 **Sync**      | Offline-first on each device (IndexedDB) with an outbox and last-write-wins sync; engagement data joins the sync in the engagement sprint.          |
 
 The interface is in **German**; learning content is MSA with full vocalisation.
 
+## Content and rights
+
+- **Own texts.** Word lists (401), dialogues (48) and verbs (51) for all 16 units are written
+  for Suffa along the topics of Book 1. No text from the book is in this repository. They are
+  drafts (`status: "entwurf"`) until a teacher has reviewed them.
+- **Example sentences** (471) come from [Tatoeba](https://tatoeba.org) (CC BY 2.0 FR, with
+  attribution per sentence) or were written for Suffa.
+- **Publisher media.** The official audio and the page videos of _Al-Arabiyya bayna Yadayk_ are
+  only linked and played from the publisher's servers and YouTube; nothing is copied.
+- **Entdecken** embeds YouTube videos with the no-cookie player; they belong to their channels.
+
 ## Where it's going
 
-| Phase                      | When (plan)     | Highlights                                                                       |
-| -------------------------- | --------------- | -------------------------------------------------------------------------------- |
-| Foundation                 | Oct 2026        | Own API on CapRover, CI, backups                                                 |
-| Accounts, roles & classes  | Nov 2026        | Student / teacher / admin, invite links, admin panel                             |
-| Engagement                 | Dec 2026        | Daily quests, XP, streak shields, badges, class weekly challenges, reminders     |
-| **Teacher pilot**          | **Jan 4, 2027** | First real class                                                                 |
-| Teacher recordings         | Jan 2027        | Google Drive import, transcripts, interactive checkpoints, offline audio         |
-| AI teacher **al-Muʿallim** | Feb–Mar 2027    | Explain, converse, drill and grade; Anthropic, OpenRouter or Hugging Face models |
-| Interactive YouTube        | Mar 2027        | Muhammad al-Andalusi's lessons with checkpoints                                  |
-| iOS & Android apps         | Apr 2027        | Capacitor apps, native reminders and push                                        |
+| Phase                      | When (plan)     | Highlights                                                                          |
+| -------------------------- | --------------- | ----------------------------------------------------------------------------------- |
+| Learning experience        | ✅ Sep 2026     | Unit room, focused sections, guided writing, cloze, levels & stages, XP (on device) |
+| Foundation                 | Oct 2026        | Own API on CapRover, CI, backups (almost done)                                      |
+| Accounts, roles & classes  | Nov 2026        | Student / teacher / admin, invite links, admin panel                                |
+| Engagement                 | Dec 2026        | Server sync of progress, daily quests, streak shields, class challenges, reminders  |
+| **Teacher pilot**          | **Jan 4, 2027** | First real class                                                                    |
+| Teacher recordings         | Jan 2027        | Google Drive import, transcripts, interactive checkpoints, offline audio            |
+| AI teacher **al-Muʿallim** | Feb–Mar 2027    | Explain, converse, drill and grade; Anthropic, OpenRouter or Hugging Face models    |
+| Interactive YouTube        | Mar 2027        | Muhammad al-Andalusi's lessons with checkpoints                                     |
+| iOS & Android apps         | Apr 2027        | Capacitor apps, native reminders and push                                           |
 
+Next on the device: grammar points per unit and an alphabet course for absolute beginners.
 Details: [roadmap](docs/plan/roadmap.md) · [sprint plan](docs/plan/sprint-plan.md) ·
-[engagement plan](docs/plan/engagement-plan.md) · [cost plan](docs/plan/cost-plan.md).
+[engagement plan](docs/plan/engagement-plan.md) · [content plan](docs/plan/content-plan.md) ·
+[cost plan](docs/plan/cost-plan.md).
 
 ## Architecture
 
@@ -114,7 +144,7 @@ run across both workspaces:
 | `npm run preview`   | Serve the build locally (test the PWA)   |
 | `npm run lint`      | ESLint                                   |
 | `npm run typecheck` | TypeScript                               |
-| `npm test`          | Vitest (web + api)                       |
+| `npm test`          | Vitest (web + api) and the content tools |
 | `npm run format`    | Prettier                                 |
 
 API (health, migrations, sync endpoints, job queue on pg-boss):
@@ -156,13 +186,20 @@ No secrets live in the code. The anon key is public by design; row-level securit
 ## Project structure
 
 ```
-apps/web/       PWA (@suffa/web): src/modules (dashboard, vocab, roots, reading, writing,
-                speaking, conjugation, exam, library, settings), src/services (srs,
-                storage, sync, speech, audio), state, content (JSON per unit), tests
+apps/web/       PWA (@suffa/web)
+  src/modules/  dashboard (Heute), units (level map, unit path, stations), discover,
+                review, vocab, roots, reading, cloze, writing, speaking, conjugation,
+                exam, library (book media), settings, more
+  src/services/ srs, units & practice (sections, cloze, writing tasks), enrollment,
+                engagement (XP), discover, storage (Dexie), sync, speech, audio, video
+  src/content/  units/einheit-NN.json (own texts), meta.json, sources/ (examples,
+                discover catalogue, publisher audio/video index)
+  tests/        integration tests (Vitest + Testing Library)
 apps/api/       suffa-api / suffa-worker (@suffa/api: Hono, Postgres, migrations)
+tools/content/  scripts that build the video index and find Tatoeba examples
 infra/          Dockerfiles, Caddyfile, CapRover templates
 supabase/       schema + row-level security (current sync backend)
-docs/           specs, ADRs, roadmap, sprint/engagement/cost plans, ops runbook
+docs/           specs, ADRs, roadmap, sprint/engagement/content/cost plans, ops runbook
 apps/web/public/brand/   logo (SVG)
 ```
 
@@ -183,5 +220,6 @@ License, bundled via `@fontsource`. See `apps/web/src/styles/fonts.css`.
 
 ## Licence
 
-Code: MIT (see `LICENSE`). Content from _Al-Arabiyya bayna Yadayk_ is copyrighted by its
-publishers; the seed data is for learning and demo purposes.
+Code: MIT (see `LICENSE`). Own learning texts are drafts written for Suffa; example sentences
+from Tatoeba are under CC BY 2.0 FR. _Al-Arabiyya bayna Yadayk_ and its audio and videos are
+copyrighted by their publisher; Suffa only links to them.

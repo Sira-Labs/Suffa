@@ -10,6 +10,7 @@
 import { v4 as uuid } from 'uuid';
 import type {
   DailyCheckIn,
+  DiscoverProgress,
   ExamResult,
   MediaProgress,
   PracticeRecord,
@@ -237,6 +238,24 @@ export const checkInRepo = {
   async put(record: DailyCheckIn, database: AppDatabase = db): Promise<DailyCheckIn> {
     const stamped = stamp(record);
     await database.daily_checkins.put(stamped);
+    return stamped;
+  },
+};
+
+/* ----------------------------- Discover progress ------------------------------ */
+
+/** Local-only like the other engagement tables; joins sync with them. */
+// TODO(2026-12-13): sync discover_progress with the engagement sprint (S5, ADR-0016).
+export const discoverRepo = {
+  async all(database: AppDatabase = db): Promise<DiscoverProgress[]> {
+    return database.discover_progress.filter((p) => !p.deleted).toArray();
+  },
+  async put(
+    record: DiscoverProgress,
+    database: AppDatabase = db
+  ): Promise<DiscoverProgress> {
+    const stamped = stamp(record);
+    await database.discover_progress.put(stamped);
     return stamped;
   },
 };

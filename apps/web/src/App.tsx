@@ -15,6 +15,7 @@ import { useTrainingScope } from './modules/units/useReachedUnits';
 import {
   useCheckInStore,
   useContentStore,
+  useDiscoverStore,
   useListenStore,
   usePracticeStore,
   useEnrollmentStore,
@@ -38,6 +39,7 @@ export function App() {
   const loadPractice = usePracticeStore((s) => s.load);
   const loadEnrollments = useEnrollmentStore((s) => s.load);
   const loadCheckIns = useCheckInStore((s) => s.load);
+  const loadDiscover = useDiscoverStore((s) => s.load);
   // New cards and training content come only from the units the learner reached.
   useTrainingScope();
 
@@ -52,6 +54,7 @@ export function App() {
       await loadPractice();
       await loadEnrollments();
       await loadCheckIns();
+      await loadDiscover();
       initSync();
       if (!cancelled) setReady(true);
     })().catch((error) => {
@@ -72,6 +75,7 @@ export function App() {
     loadPractice,
     loadEnrollments,
     loadCheckIns,
+    loadDiscover,
     initSync,
   ]);
 

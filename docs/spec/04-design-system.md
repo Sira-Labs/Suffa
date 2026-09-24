@@ -105,6 +105,11 @@ station. The word of the day comes from the reached units and carries the daily 
 the mastery bar. Training and the free practice pages offer only the units reached so far; new
 SRS cards come from those units and own words, due reviews stay untouched.
 
+**Entdecken: Weiterschauen.** Playing an item pins it to "Weiterschauen" on top, the last
+opened first (Dexie v6 `discover_progress`, local). It stays there until it is marked as seen
+or unpinned ("Lösen"); any item can also be pinned by hand ("Anheften"). The item playing right
+now stays where it was tapped and moves up on the next visit, so nothing jumps under the finger.
+
 ## Feedback moments
 
 - **Celebration toast** (`CelebrationToast`): "+5 XP · Dialog gehört" with a medal and a small

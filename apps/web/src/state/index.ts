@@ -7,3 +7,4 @@ export * from './celebrationStore';
 export * from './practiceStore';
 export * from './enrollmentStore';
 export * from './checkInStore';
+export * from './discoverStore';

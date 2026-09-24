@@ -10,6 +10,7 @@
 import Dexie, { type Table } from 'dexie';
 import type {
   DailyCheckIn,
+  DiscoverProgress,
   ExamResult,
   MediaProgress,
   PracticeRecord,
@@ -51,6 +52,7 @@ export class AppDatabase extends Dexie {
   /** Local-only for now: started units with pace and target date. */
   unit_enrollments!: Table<UnitEnrollment, string>;
   daily_checkins!: Table<DailyCheckIn, string>;
+  discover_progress!: Table<DiscoverProgress, string>;
 
   constructor(name = 'bayna-yadayk') {
     super(name);
@@ -79,6 +81,10 @@ export class AppDatabase extends Dexie {
     // v5: daily check-in with the word of the day.
     this.version(5).stores({
       daily_checkins: 'id, updated_at, deleted',
+    });
+    // v6: started and pinned items of the "Entdecken" library.
+    this.version(6).stores({
+      discover_progress: 'id, openedAt, updated_at, deleted',
     });
   }
 }

@@ -9,12 +9,13 @@ import {
   entries as allEntries,
   levelIncludes,
   loadDiscover,
+  pinnedEntries,
   seenId,
   weeklyPick,
   youtubeUrl,
 } from '@/services/discover';
 import { XP_RULES } from '@/services/engagement/xp';
-import { useCelebrationStore, useListenStore } from '@/state';
+import { useCelebrationStore, useDiscoverStore, useListenStore } from '@/state';
 
 const log = logger.child('discover');
 
@@ -33,13 +34,16 @@ const FILTERS: { id: Filter; label: string }[] = [
 /**
  * "Entdecken": a curated library of YouTube videos and podcasts about the Arabic language and
  * the Quran, beyond the book. Items play inline (no-cookie player, only after a tap) and can
- * be marked as seen for XP.
+ * be marked as seen for XP. Started items are pinned to "Weiterschauen" on top (last opened
+ * first) until they are seen or unpinned; any item can be pinned by hand.
  */
 export function Discover() {
   const [catalog, setCatalog] = useState<DiscoverCatalog | null>(null);
   const [failed, setFailed] = useState(false);
   const [filter, setFilter] = useState<Filter>('mine');
   const [playing, setPlaying] = useState<string | null>(null);
+  const progress = useDiscoverStore((s) => s.progress);
+  const listened = useListenStore((s) => s.progress);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,8 +65,14 @@ export function Discover() {
     () => list.filter((e) => levelIncludes(e.channel.level, CURRENT_LEVEL)),
     [list]
   );
-  const visible =
-    filter === 'mine' ? forLevel : list.filter((e) => e.channel.category === filter);
+  // The item playing right now stays where it was tapped; it moves up on the next visit.
+  const pinned = pinnedEntries(list, progress, (e) =>
+    Boolean(listened[seenId(e)]?.completedAt)
+  ).filter((e) => e.id !== playing);
+  const pinnedIds = new Set(pinned.map((e) => e.id));
+  const visible = (
+    filter === 'mine' ? forLevel : list.filter((e) => e.channel.category === filter)
+  ).filter((e) => !pinnedIds.has(e.id));
   const pick = weeklyPick(forLevel);
 
   if (failed) return <p className="muted">Die Mediathek konnte nicht geladen werden.</p>;
@@ -77,6 +87,28 @@ export function Discover() {
           zu Stufe {CURRENT_LEVEL}
         </p>
       </header>
+
+      {pinned.length > 0 && (
+        <section
+          className="stack"
+          aria-labelledby="pinned-title"
+          style={{ gap: '0.75rem' }}
+        >
+          <h2 id="pinned-title" className="eyebrow" style={{ margin: 0 }}>
+            Weiterschauen
+          </h2>
+          <ul className="discover-list" aria-label="Weiterschauen">
+            {pinned.map((entry) => (
+              <DiscoverCard
+                key={`${entry.channel.handle}-${entry.id}`}
+                entry={entry}
+                playing={false}
+                onPlay={() => setPlaying(entry.id)}
+              />
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className="row discover-filters" role="group" aria-label="Kategorie">
         {FILTERS.map((f) => (
@@ -111,7 +143,9 @@ export function Discover() {
         <p className="muted">
           {list.length === 0
             ? 'Die Auswahl wird gerade zusammengestellt – schau bald wieder vorbei.'
-            : 'In dieser Kategorie gibt es noch keine Empfehlungen.'}
+            : pinned.length > 0
+              ? 'Alles Weitere aus dieser Auswahl steht oben unter „Weiterschauen“.'
+              : 'In dieser Kategorie gibt es noch keine Empfehlungen.'}
         </p>
       ) : (
         <ul className="discover-list" aria-label="Empfehlungen">
@@ -146,6 +180,13 @@ function DiscoverCard({
 }) {
   const seen = useListenStore((s) => Boolean(s.progress[seenId(entry)]?.completedAt));
   const markSeen = useListenStore((s) => s.markSeen);
+  const state = useDiscoverStore((s) => s.progress[seenId(entry)]);
+  const open = useDiscoverStore((s) => s.open);
+  const setPinned = useDiscoverStore((s) => s.setPinned);
+  const play = () => {
+    onPlay();
+    void open(seenId(entry));
+  };
   const celebrate = useCelebrationStore((s) => s.show);
   const thumb = discoverThumbnail(entry);
   const { channel } = entry;
@@ -170,7 +211,7 @@ function DiscoverCard({
       ) : (
         <button
           className="discover-thumb"
-          onClick={onPlay}
+          onClick={play}
           aria-label={`${entry.title} abspielen`}
         >
           {thumb ? <img src={thumb} alt="" loading="lazy" /> : null}
@@ -196,19 +237,28 @@ function DiscoverCard({
       <p className="muted" style={{ margin: 0, fontStyle: 'italic' }}>
         „{entry.why}“
       </p>
-      {seen ? (
-        <span className="badge badge-done" style={{ alignSelf: 'start' }}>
-          <Icon name="check" size={14} strokeWidth={2.6} /> Gesehen
-        </span>
-      ) : (
-        <button
-          className="btn"
-          style={{ alignSelf: 'start' }}
-          onClick={() => void confirmSeen()}
-        >
-          Als gesehen markieren
-        </button>
-      )}
+      <div className="row" style={{ gap: '0.5rem' }}>
+        {seen ? (
+          <span className="badge badge-done">
+            <Icon name="check" size={14} strokeWidth={2.6} /> Gesehen
+          </span>
+        ) : (
+          <>
+            {state?.startedAt && <span className="badge">Angefangen</span>}
+            <button className="btn" onClick={() => void confirmSeen()}>
+              Als gesehen markieren
+            </button>
+            <button
+              className="btn"
+              aria-pressed={Boolean(state?.pinned)}
+              aria-label={`${entry.title} ${state?.pinned ? 'lösen' : 'anheften'}`}
+              onClick={() => void setPinned(seenId(entry), !state?.pinned)}
+            >
+              {state?.pinned ? 'Lösen' : 'Anheften'}
+            </button>
+          </>
+        )}
+      </div>
     </li>
   );
 }

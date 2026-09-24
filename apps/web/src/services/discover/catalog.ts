@@ -7,6 +7,7 @@ import type {
   DiscoverCategory,
   DiscoverEntry,
   DiscoverItem,
+  DiscoverProgress,
 } from '@/types';
 
 let cached: Promise<DiscoverCatalog> | null = null;
@@ -78,4 +79,20 @@ export function youtubeUrl(item: DiscoverItem): string {
 /** Media progress id of a seen item. */
 export function seenId(item: DiscoverItem): string {
   return `yt/${item.id}`;
+}
+
+/**
+ * "Weiterschauen": pinned items not seen yet, most recently opened first. Items the catalog no
+ * longer lists drop out.
+ */
+export function pinnedEntries<T extends DiscoverItem>(
+  items: readonly T[],
+  progress: Readonly<Record<string, DiscoverProgress>>,
+  isSeen: (item: T) => boolean
+): T[] {
+  return items
+    .filter((item) => progress[seenId(item)]?.pinned && !isSeen(item))
+    .sort((a, b) =>
+      progress[seenId(b)]!.openedAt.localeCompare(progress[seenId(a)]!.openedAt)
+    );
 }

@@ -3,6 +3,8 @@
  * for Suffa learners. Only links, titles and our notes are stored; videos are embedded with
  * YouTube's player (no-cookie) and never copied (ADR-0023).
  */
+import type { Syncable } from './srs';
+
 export type DiscoverCategory = 'sprache' | 'quran' | 'geschichten' | 'podcasts';
 
 export interface DiscoverItem {
@@ -39,4 +41,19 @@ export interface DiscoverCatalog {
 /** An item together with its channel, as the library lists it. */
 export interface DiscoverEntry extends DiscoverItem {
   channel: DiscoverChannel;
+}
+
+/**
+ * A library item the learner opened: started items are pinned to "Weiterschauen" (newest
+ * first) until they are marked as seen or the learner unpins them. Local like the other
+ * engagement tables.
+ */
+export interface DiscoverProgress extends Syncable {
+  /** Same id as the seen record: `yt/${item.id}`. */
+  id: string;
+  /** First time the item was played (null when only pinned by hand). */
+  startedAt: string | null;
+  /** Last time it was played or pinned; orders "Weiterschauen". */
+  openedAt: string;
+  pinned: boolean;
 }

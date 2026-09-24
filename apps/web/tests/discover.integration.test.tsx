@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import type { DiscoverCatalog } from '@/types';
 import { db } from '@/services/storage';
-import { useListenStore } from '@/state';
+import { useDiscoverStore, useListenStore } from '@/state';
 
 const catalog: DiscoverCatalog = {
   retrieved: '2026-09-24',
@@ -90,8 +90,9 @@ function renderDiscover() {
 /** Step 4: the curated media library. */
 describe('Entdecken (integration)', () => {
   beforeEach(async () => {
-    await db.media_progress.clear();
+    await Promise.all([db.media_progress.clear(), db.discover_progress.clear()]);
     await useListenStore.getState().load();
+    await useDiscoverStore.getState().load();
   });
 
   it('shows items for the learner level and filters by category', async () => {
@@ -129,5 +130,55 @@ describe('Entdecken (integration)', () => {
     expect(useListenStore.getState().progress['yt/vid00000001']).toMatchObject({
       source: 'discover-video',
     });
+  });
+
+  it('pins started videos on top, last opened first, until unpinned or seen', async () => {
+    const user = userEvent.setup();
+    const first = renderDiscover();
+    await screen.findByRole('list', { name: 'Empfehlungen' });
+    await user.click(screen.getByRole('button', { name: 'Das Alphabet abspielen' }));
+    await user.click(screen.getByRole('button', { name: 'Tajwid-Reihe abspielen' }));
+    // While playing, a card stays where it was tapped.
+    expect(
+      within(screen.getByRole('list', { name: 'Empfehlungen' })).getByTitle(
+        'Tajwid-Reihe'
+      )
+    ).toBeInTheDocument();
+    first.unmount();
+
+    // Next visit: both on top, the last opened first, marked as started.
+    renderDiscover();
+    const pinned = await screen.findByRole('list', { name: 'Weiterschauen' });
+    expect(
+      within(pinned)
+        .getAllByRole('listitem')
+        .map((li) => li.querySelector('strong')!.textContent)
+    ).toEqual(['Tajwid-Reihe', 'Das Alphabet']);
+    expect(within(pinned).getAllByText('Angefangen')).toHaveLength(2);
+    expect(screen.queryByRole('list', { name: 'Empfehlungen' })).toBeNull();
+    expect(screen.getByText(/steht oben unter „Weiterschauen“/)).toBeInTheDocument();
+
+    // Unpin one the learner does not like: it goes back into the list, still "Angefangen".
+    await user.click(within(pinned).getByRole('button', { name: 'Tajwid-Reihe lösen' }));
+    expect(within(pinned).queryByText('Tajwid-Reihe')).toBeNull();
+    const list = screen.getByRole('list', { name: 'Empfehlungen' });
+    expect(within(list).getByText('Tajwid-Reihe')).toBeInTheDocument();
+    expect(within(list).getByText('Angefangen')).toBeInTheDocument();
+
+    // Seen items leave "Weiterschauen" by themselves.
+    await user.click(
+      within(pinned).getByRole('button', { name: 'Als gesehen markieren' })
+    );
+    expect(screen.queryByRole('list', { name: 'Weiterschauen' })).toBeNull();
+  });
+
+  it('pins any item by hand', async () => {
+    const user = userEvent.setup();
+    renderDiscover();
+    await screen.findByRole('list', { name: 'Empfehlungen' });
+    await user.click(screen.getByRole('button', { name: 'Das Alphabet anheften' }));
+    const pinned = await screen.findByRole('list', { name: 'Weiterschauen' });
+    expect(within(pinned).getByText('Das Alphabet')).toBeInTheDocument();
+    expect(within(pinned).queryByText('Angefangen')).toBeNull();
   });
 });

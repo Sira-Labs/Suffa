@@ -13,6 +13,8 @@ import {
   practiceXpEvents,
   unitOnTimeXpEvents,
   stageXpEvents,
+  checkInXpEvents,
+  XP_RULES,
   reviewXpEvents,
   startOfWeek,
   sumXp,
@@ -21,6 +23,8 @@ import { lessonSizes, loadPublisherIndex } from '@/services/audio/publisherIndex
 import type { TodayStep } from '@/services/today';
 import { ForgettingReminder } from './ForgettingReminder';
 import {
+  useCelebrationStore,
+  useCheckInStore,
   useEnrollmentStore,
   useListenStore,
   usePracticeStore,
@@ -28,6 +32,8 @@ import {
   useSrsStore,
 } from '@/state';
 import { CurrentUnitCard, currentUnit } from './CurrentUnitCard';
+import { LevelCard } from './LevelCard';
+import { useReachedUnits } from '@/modules/units/useReachedUnits';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
   weekday: 'long',
@@ -47,6 +53,10 @@ export function Dashboard() {
   const exams = useEnrollmentStore((s) => s.exams);
   const activeUnit = currentUnit(enrollments, exams);
   const [sizes, setSizes] = useState<ReadonlyMap<string, number>>(new Map());
+  const checkIns = useCheckInStore((s) => s.checkIns);
+  const checkIn = useCheckInStore((s) => s.checkIn);
+  const celebrate = useCelebrationStore((s) => s.show);
+  const { keep } = useReachedUnits();
 
   useEffect(() => {
     void reviewLogRepo.all().then(setLogs);
@@ -73,16 +83,16 @@ export function Dashboard() {
   const heardToday = heard.filter(
     (p) => localDay(new Date(p.completedAt!)) === todayKey
   ).length;
-  const weekXp = sumXp(
-    [
-      ...reviewXpEvents(logs),
-      ...listeningXpEvents(heard, sizes),
-      ...practiceXpEvents(Object.values(practised)),
-      ...unitOnTimeXpEvents(Object.values(enrollments), exams),
-      ...stageXpEvents(exams),
-    ],
-    startOfWeek()
-  );
+  const xpEvents = [
+    ...reviewXpEvents(logs),
+    ...listeningXpEvents(heard, sizes),
+    ...practiceXpEvents(Object.values(practised)),
+    ...unitOnTimeXpEvents(Object.values(enrollments), exams),
+    ...stageXpEvents(exams),
+    ...checkInXpEvents(Object.values(checkIns)),
+  ];
+  const weekXp = sumXp(xpEvents, startOfWeek());
+  const totalXp = sumXp(xpEvents, new Date(0));
   const plan = buildTodayPlan({
     dueCount: summary.dueCount,
     newCount: summary.newCount,
@@ -94,7 +104,15 @@ export function Dashboard() {
     listenPath: activeUnit ? `/units/${activeUnit}/listen` : '/units',
   });
   const current = plan.steps.find((s) => s.state === 'current');
-  const word = wordOfTheDay(content.vokabeln);
+  // The word of the day comes from the units reached so far.
+  const word = wordOfTheDay(content.vokabeln.filter(keep));
+  const checkedIn = Boolean(checkIns[todayKey]);
+  const onCheckIn = () => {
+    if (!word) return;
+    void checkIn(word.id).then(({ first, xp }) => {
+      if (first) celebrate({ title: 'Tages-Check-in', xp, big: false });
+    });
+  };
 
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>
@@ -127,8 +145,8 @@ export function Dashboard() {
         </div>
       </header>
 
-      <ForgettingReminder cards={cards} logs={logs} />
       <CurrentUnitCard />
+      <ForgettingReminder cards={cards} logs={logs} />
 
       <div className="today-grid">
         <section
@@ -199,6 +217,15 @@ export function Dashboard() {
                 </>
               ) : null}
             </p>
+            {checkedIn ? (
+              <p className="word-checkin-done" style={{ margin: 0 }}>
+                <Icon name="check" size={16} strokeWidth={2.6} /> Heute eingecheckt
+              </p>
+            ) : (
+              <button type="button" className="btn btn-primary" onClick={onCheckIn}>
+                {`Wort gelernt · Check-in +${XP_RULES.dailyCheckIn} XP`}
+              </button>
+            )}
           </section>
         )}
       </div>
@@ -207,6 +234,7 @@ export function Dashboard() {
         <h2 id="progress" className="eyebrow">
           Fortschritt
         </h2>
+        <LevelCard totalXp={totalXp} />
         <div
           className="grid"
           style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}
@@ -217,10 +245,6 @@ export function Dashboard() {
           <Stat label="Schwierig" value={summary.leechCount} accent="var(--bad)" />
         </div>
 
-        <div className="card stack">
-          <strong>Beherrschung</strong>
-          <MasteryBar mastery={mastery} />
-        </div>
         <div className="card stack">
           <strong>Aktivität (letzte 28 Tage)</strong>
           <div className="row" style={{ gap: 4 }} aria-label="Wiederholungs-Heatmap">
@@ -291,34 +315,6 @@ function Stat({
     <div className="card" style={{ textAlign: 'center' }}>
       <div style={{ fontSize: '1.8rem', fontWeight: 700, color: accent }}>{value}</div>
       <div className="muted">{label}</div>
-    </div>
-  );
-}
-
-function MasteryBar({ mastery }: { mastery: ReturnType<typeof masteryBuckets> }) {
-  const segments = [
-    { key: 'neu', value: mastery.neu, color: 'var(--accent)', label: 'Neu' },
-    { key: 'lernend', value: mastery.lernend, color: 'var(--info)', label: 'Lernend' },
-    { key: 'reif', value: mastery.reif, color: 'var(--good)', label: 'Reif' },
-  ];
-  const total = Math.max(1, mastery.neu + mastery.lernend + mastery.reif);
-  return (
-    <div className="stack" style={{ gap: '0.5rem' }}>
-      <div style={{ display: 'flex', height: 16, borderRadius: 8, overflow: 'hidden' }}>
-        {segments.map((s) => (
-          <div
-            key={s.key}
-            style={{ width: `${(s.value / total) * 100}%`, background: s.color }}
-          />
-        ))}
-      </div>
-      <div className="row" style={{ gap: '1rem' }}>
-        {segments.map((s) => (
-          <span key={s.key} className="muted">
-            <span style={{ color: s.color }}>●</span> {s.label}: {s.value}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }

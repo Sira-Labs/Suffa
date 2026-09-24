@@ -98,6 +98,13 @@ order, never repeats a solved one, moves on after a correct answer and continues
 learner left off when switching steps. Every first correct answer shows "+2 XP" at once; all
 five steps count toward the unit (copying keeps the bare word id, so earlier progress stays).
 
+**Heute, after v2.** The page opens with "Deine Einheit": the started unit (or the next one to
+start), its current section and next station, the countdown and one "Fortsetzen" button to that
+station. The word of the day comes from the reached units and carries the daily check-in
+(+10 XP once a day). The level card (Stufe 1, stage badge, units passed, total XP) replaces
+the mastery bar. Training and the free practice pages offer only the units reached so far; new
+SRS cards come from those units and own words, due reviews stay untouched.
+
 ## Feedback moments
 
 - **Celebration toast** (`CelebrationToast`): "+5 XP · Dialog gehört" with a medal and a small

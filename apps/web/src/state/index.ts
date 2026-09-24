@@ -6,3 +6,4 @@ export * from './listenStore';
 export * from './celebrationStore';
 export * from './practiceStore';
 export * from './enrollmentStore';
+export * from './checkInStore';

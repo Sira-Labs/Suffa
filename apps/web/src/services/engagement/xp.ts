@@ -4,6 +4,7 @@
  * XP rewards effortful recall and finished listening, not raw volume.
  */
 import type {
+  DailyCheckIn,
   ExamResult,
   MediaProgress,
   PracticeRecord,
@@ -26,6 +27,8 @@ export const XP_RULES = {
   lessonComplete: 15,
   /** First success with an item of a unit skill (read, write, speak, verbs). */
   itemPractised: 2,
+  /** Daily check-in with the word of the day (once per local day). */
+  dailyCheckIn: 10,
   /** Unit test passed by the unit's target date (soft deadline: late only loses this). */
   unitOnTime: 50,
   /** Stage test passed (units 1–8 or 9–16 of a book). */
@@ -45,7 +48,8 @@ export interface XpEvent {
     | 'lesson'
     | 'practice'
     | 'unit-on-time'
-    | 'stage';
+    | 'stage'
+    | 'checkin';
   ref: string;
 }
 
@@ -139,6 +143,18 @@ export function unitOnTimeXpEvents(
       },
     ];
   });
+}
+
+/** XP events from daily check-ins: one per day. */
+export function checkInXpEvents(checkIns: DailyCheckIn[]): XpEvent[] {
+  return checkIns
+    .filter((c) => !c.deleted)
+    .map((c) => ({
+      at: c.checkedAt,
+      points: XP_RULES.dailyCheckIn,
+      kind: 'checkin' as const,
+      ref: c.id,
+    }));
 }
 
 /** Stage bonus: once per stage, at its first passing stage test. */

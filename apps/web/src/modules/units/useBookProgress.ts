@@ -173,3 +173,12 @@ function videoStation(
   if (!unitVideos) return null;
   return { count: unitVideos.videos.length, from: unitVideos.from, to: unitVideos.to };
 }
+
+/** The unit to continue: the first unlocked one whose test is not passed yet (else the last). */
+export function unitToContinue(units: readonly UnitOverview[]): UnitOverview | null {
+  return (
+    units.find((u) => u.unlocked && u.status.state !== 'completed') ??
+    units[units.length - 1] ??
+    null
+  );
+}

@@ -1310,12 +1310,18 @@ textarea.input {
   color: var(--text-muted);
 }
 .current-unit-card {
-  color: var(--text);
-  text-decoration: none;
-  flex-wrap: nowrap;
+  gap: 0.6rem;
   border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
 }
-.current-unit-card:hover strong {
+.current-unit-name {
+  font-weight: 500;
+}
+.level-card {
+  color: var(--text);
+  text-decoration: none;
+  gap: 0.6rem;
+}
+.level-card:hover .level-card-title {
   color: var(--accent);
 }
 
@@ -1539,4 +1545,22 @@ textarea.input {
   font-size: 0.8rem;
   opacity: 0.8;
   font-variant-numeric: tabular-nums;
+}
+
+/* Daily check-in on the word of the day. */
+.word-checkin-done {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  color: var(--on-paper-muted);
+}
+.level-card-stage {
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+.level-card-stage svg {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
 }

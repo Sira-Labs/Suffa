@@ -9,6 +9,7 @@
  */
 import Dexie, { type Table } from 'dexie';
 import type {
+  DailyCheckIn,
   ExamResult,
   MediaProgress,
   PracticeRecord,
@@ -49,6 +50,7 @@ export class AppDatabase extends Dexie {
   practice_progress!: Table<PracticeRecord, string>;
   /** Local-only for now: started units with pace and target date. */
   unit_enrollments!: Table<UnitEnrollment, string>;
+  daily_checkins!: Table<DailyCheckIn, string>;
 
   constructor(name = 'bayna-yadayk') {
     super(name);
@@ -73,6 +75,10 @@ export class AppDatabase extends Dexie {
     // v4: started units with pace and target date (step 2 of the unit room).
     this.version(4).stores({
       unit_enrollments: 'id, unit, updated_at, deleted',
+    });
+    // v5: daily check-in with the word of the day.
+    this.version(5).stores({
+      daily_checkins: 'id, updated_at, deleted',
     });
   }
 }

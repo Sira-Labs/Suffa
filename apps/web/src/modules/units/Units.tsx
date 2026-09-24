@@ -3,7 +3,7 @@ import { Icon } from '@/components/Icon';
 import { arabicNumber, splitUnitTitle } from '@/services/units';
 import { STAGES, stageState, type Stage, type StageState } from '@/services/enrollment';
 import { useEnrollmentStore } from '@/state';
-import { useBookProgress, type UnitOverview } from './useBookProgress';
+import { unitToContinue, useBookProgress, type UnitOverview } from './useBookProgress';
 
 /**
  * Level map (step 3): Book 1 = level 1, in two stages of eight units that each end with a
@@ -14,9 +14,7 @@ export function Units() {
   const exams = useEnrollmentStore((s) => s.exams);
   if (units.length === 0) return <p className="muted">Lade Einheiten …</p>;
   // The unit to continue: the first open one whose test is not passed yet.
-  const current =
-    units.find((u) => u.unlocked && u.status.state !== 'completed') ??
-    units[units.length - 1]!;
+  const current = unitToContinue(units)!;
 
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>

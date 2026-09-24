@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import type { MediaProgress, ReviewLog, ReviewRating } from '@/types';
-import { listeningXpEvents, reviewXpEvents, startOfWeek, sumXp, XP_RULES } from './xp';
+import type { DailyCheckIn, MediaProgress, ReviewLog, ReviewRating } from '@/types';
+import {
+  checkInXpEvents,
+  listeningXpEvents,
+  reviewXpEvents,
+  startOfWeek,
+  sumXp,
+  XP_RULES,
+} from './xp';
 
 const log = (cardId: string, rating: ReviewRating, reviewedAt: string): ReviewLog =>
   ({
@@ -100,5 +107,19 @@ describe('sumXp and startOfWeek', () => {
       { at: new Date(2026, 8, 22, 12).toISOString(), points: 5, kind: 'track', ref: 'y' },
     ] as const;
     expect(sumXp([...events], monday, now)).toBe(5);
+  });
+});
+
+describe('check-in XP', () => {
+  it('gives one event per checked-in day, none for deleted records', () => {
+    const day = (id: string, deleted = false) =>
+      ({ id, wordId: 'w', checkedAt: `${id}T08:00:00.000Z`, deleted }) as DailyCheckIn;
+    const events = checkInXpEvents([
+      day('2026-09-22'),
+      day('2026-09-23'),
+      day('x', true),
+    ]);
+    expect(events.map((e) => e.ref)).toEqual(['2026-09-22', '2026-09-23']);
+    expect(events.every((e) => e.points === XP_RULES.dailyCheckIn)).toBe(true);
   });
 });

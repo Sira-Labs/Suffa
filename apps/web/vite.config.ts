@@ -47,6 +47,8 @@ export default defineConfig({
           '**/*-{cyrillic,cyrillic-ext,greek,vietnamese}-*.woff2',
         ],
         navigateFallback: 'index.html',
+        // Server routes are never answered with the app shell.
+        navigateFallbackDenylist: [/^\/api\//, /^\/healthz/, /^\/media\//],
         runtimeCaching: [
           {
             // YouTube: online only, never treat as app shell. The publisher's audio is

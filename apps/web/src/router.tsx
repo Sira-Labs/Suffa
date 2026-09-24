@@ -1,5 +1,6 @@
-import { createHashRouter } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import { App } from './App';
+import { migrateLegacyHashUrl } from './services/legacyHashUrl';
 import { RouteError } from './components';
 import { Dashboard } from './modules/dashboard';
 import { VocabTrainer } from './modules/vocab';
@@ -18,10 +19,13 @@ import { FocusReview } from './modules/review';
 import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
 
 /**
- * HashRouter: robust for static PWA hosting (no server rewrite needed),
- * also works offline from the cache.
+ * Normal paths (story 2.6, ADR-0013): Caddy answers unknown paths with index.html and the
+ * service worker does the same offline (navigateFallback), so deep links work everywhere.
+ * Old `/#/…` links are rewritten before the router reads the URL.
  */
-export const router = createHashRouter([
+migrateLegacyHashUrl(window.location, window.history);
+
+export const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,

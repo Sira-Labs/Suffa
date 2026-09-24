@@ -7,17 +7,16 @@
 
 ## Where we are (2026-09-24)
 
-**P0 Foundation is almost done before its planned start:** 11 of 12 stories shipped
-(Sprints 1–2 were planned for Oct 5 – Nov 1). Live on CapRover: web, api, worker, database,
-nightly verified backups (restore drill passed), job queue, error tracking. Open in P0: 2.6
-browser router. **Gate G0 is met.** The dates below are unchanged on purpose: the lead is
+**P0 Foundation is done before its planned start:** all 12 stories shipped (Sprints 1–2 were
+planned for Oct 5 – Nov 1; 2.6, normal URLs instead of `#/`, landed on 2026-09-24). Live on
+CapRover: web, api, worker, database, nightly verified backups (restore drill passed), job
+queue, error tracking. **Gate G0 is met.** The dates below are unchanged on purpose: the lead is
 buffer for the pilot on Jan 4; P1 (accounts, roles, classes) can start early.
 
 ```mermaid
 pie showData
   title P0 Foundation — stories
-  "Done" : 11
-  "Open (2.6 browser router)" : 1
+  "Done" : 12
 ```
 
 ### Learning experience shipped ahead of plan (2026-09-23 – 09-24)
@@ -39,8 +38,7 @@ parts of **P2 Engagement** forward; what is left for P2 is server-side (see the 
 
 **Next on the device side** (before or alongside P1):
 
-1. Open P0 story 2.6 (browser router instead of hash URLs).
-2. Teacher reviews the content drafts (words, dialogues, examples) — deferred: we continue
+1. Teacher reviews the content drafts (words, dialogues, examples) — deferred: we continue
    without it for now and mark units as checked once he has looked at them.
 
 ## Why this order
@@ -61,7 +59,7 @@ gantt
   axisFormat %b
   todayMarker on
   section Foundation
-  P0 shipped early (11/12 stories)   :done, p0done, 2026-09-23, 12d
+  P0 shipped early (12/12 stories)   :done, p0done, 2026-09-23, 12d
   P0 plan – monorepo, CI, CapRover   :active, p0, 2026-10-05, 28d
   G0 deploy + restore drill          :milestone, done, g0, 2026-09-23, 0d
   section Pilot readiness
@@ -80,17 +78,17 @@ gantt
   P7 Speech, FSRS, CMS, English UI   :p7, after p6, 28d
 ```
 
-| Phase                            | Sprints | Dates (approx.) | Status  | Outcome / exit criteria                                                                                                                                                                                                                                                                           | Release               |
-| -------------------------------- | ------- | --------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
-| **P0 Foundation**                | S1–S2   | Oct 5 – Nov 1   | ◐ 11/12 | Monorepo, CI, Tabayyun-style CapRover deploy (`docs/ops/caprover-deployment.md`), API + worker, sync endpoints, Postgres queue, backups, error tracking.                                                                                                                                          | `v1.1`                |
-| **P1 Identity, roles & classes** | S3–S4   | Nov 2 – Nov 29  | ☐       | Better Auth, RBAC, `ApiSyncProvider`, Supabase migrated, admin v1, **classes + invite links**.                                                                                                                                                                                                    | `v1.2` — Supabase off |
-| **P2 Engagement**                | S5–S6   | Nov 30 – Dec 27 | ◐ local | XP, levels/stages, stage badges and daily check-in shipped on the device. Open: server sync of the engagement tables (`media_progress`, `practice_progress`, `unit_enrollments`, `daily_checkins`), daily quests, streak shields, class weekly challenge, teacher badges, Web Push, weekly recap. | `v1.3`                |
-| **🎓 Pilot starts**              | —       | **Jan 4, 2027** | —       | Teacher's class onboarded.                                                                                                                                                                                                                                                                        | —                     |
-| **P3 Teacher recordings**        | S7–S8   | Dec 28 – Jan 24 | ☐       | RustFS storage, Google Drive import + direct upload, transcode, transcripts, checkpoints, offline audio, assignments.                                                                                                                                                                             | `v1.4`                |
-| **P4 AI teacher**                | S9–S11  | Jan 25 – Mar 7  | ☐       | LLM gateway (Anthropic / OpenRouter / HF), al-Muʿallim explain/converse/drill/grade, evals, review queue.                                                                                                                                                                                         | `v2.0-beta`           |
-| **P5 Interactive YouTube**       | S12     | Mar 8 – Mar 21  | ☐       | Muhammad al-Andalusi channel import in the same player.                                                                                                                                                                                                                                           | `v2.0`                |
-| **P6 Mobile apps**               | S13–S14 | Mar 22 – Apr 18 | ☐       | Capacitor iOS/Android, native reminders & push, offline audio, store release, opt-in leagues, certificates.                                                                                                                                                                                       | `v2.1` (stores)       |
-| **P7 Next level**                | S15–S16 | Apr 19 – May 16 | ☐       | Server STT pronunciation, FSRS, content CMS, English UI, accessibility.                                                                                                                                                                                                                           | `v2.2`                |
+| Phase                            | Sprints | Dates (approx.) | Status   | Outcome / exit criteria                                                                                                                                                                                                                                                                           | Release               |
+| -------------------------------- | ------- | --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| **P0 Foundation**                | S1–S2   | Oct 5 – Nov 1   | ✅ 12/12 | Monorepo, CI, Tabayyun-style CapRover deploy (`docs/ops/caprover-deployment.md`), API + worker, sync endpoints, Postgres queue, backups, error tracking.                                                                                                                                          | `v1.1`                |
+| **P1 Identity, roles & classes** | S3–S4   | Nov 2 – Nov 29  | ☐        | Better Auth, RBAC, `ApiSyncProvider`, Supabase migrated, admin v1, **classes + invite links**.                                                                                                                                                                                                    | `v1.2` — Supabase off |
+| **P2 Engagement**                | S5–S6   | Nov 30 – Dec 27 | ◐ local  | XP, levels/stages, stage badges and daily check-in shipped on the device. Open: server sync of the engagement tables (`media_progress`, `practice_progress`, `unit_enrollments`, `daily_checkins`), daily quests, streak shields, class weekly challenge, teacher badges, Web Push, weekly recap. | `v1.3`                |
+| **🎓 Pilot starts**              | —       | **Jan 4, 2027** | —        | Teacher's class onboarded.                                                                                                                                                                                                                                                                        | —                     |
+| **P3 Teacher recordings**        | S7–S8   | Dec 28 – Jan 24 | ☐        | RustFS storage, Google Drive import + direct upload, transcode, transcripts, checkpoints, offline audio, assignments.                                                                                                                                                                             | `v1.4`                |
+| **P4 AI teacher**                | S9–S11  | Jan 25 – Mar 7  | ☐        | LLM gateway (Anthropic / OpenRouter / HF), al-Muʿallim explain/converse/drill/grade, evals, review queue.                                                                                                                                                                                         | `v2.0-beta`           |
+| **P5 Interactive YouTube**       | S12     | Mar 8 – Mar 21  | ☐        | Muhammad al-Andalusi channel import in the same player.                                                                                                                                                                                                                                           | `v2.0`                |
+| **P6 Mobile apps**               | S13–S14 | Mar 22 – Apr 18 | ☐        | Capacitor iOS/Android, native reminders & push, offline audio, store release, opt-in leagues, certificates.                                                                                                                                                                                       | `v2.1` (stores)       |
+| **P7 Next level**                | S15–S16 | Apr 19 – May 16 | ☐        | Server STT pronunciation, FSRS, content CMS, English UI, accessibility.                                                                                                                                                                                                                           | `v2.2`                |
 
 ## Milestone gates
 

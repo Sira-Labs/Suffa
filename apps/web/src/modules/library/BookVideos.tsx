@@ -62,7 +62,7 @@ export function BookVideos({ unit }: { unit: number }) {
   }
 
   const { videos } = unitVideos;
-  // HashRouter owns the URL hash, so jump to the audio section by scrolling instead.
+  // Scroll instead of a #fragment: the section sits inside a page that may re-render.
   const toAudio = (event: MouseEvent) => {
     event.preventDefault();
     document.getElementById('audio-heading')?.scrollIntoView?.({ behavior: 'smooth' });

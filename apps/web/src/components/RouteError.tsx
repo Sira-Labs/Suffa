@@ -23,7 +23,7 @@ export function RouteError() {
           : 'Der Fehler wurde gemeldet. Deine Lernfortschritte sind lokal gespeichert und bleiben erhalten.'}
       </p>
       <p style={{ display: 'flex', gap: '0.5rem' }}>
-        <a href="#/">Zur Übersicht</a>
+        <a href="/">Zur Übersicht</a>
         {!notFound && (
           <button type="button" onClick={() => window.location.reload()}>
             Neu laden

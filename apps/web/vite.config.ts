@@ -51,8 +51,9 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api\//, /^\/healthz/, /^\/media\//],
         runtimeCaching: [
           {
-            // YouTube: online only, never treat as app shell. The publisher's audio is
-            // intentionally not routed through the worker (see src/pwa/runtimeCaching.ts).
+            // YouTube: online only, never treat as app shell. The publisher's audio and the
+            // video thumbnails are intentionally not routed through the worker (see
+            // src/pwa/runtimeCaching.ts).
             urlPattern: NETWORK_ONLY_PATTERN,
             handler: 'NetworkOnly',
           },

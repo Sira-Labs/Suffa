@@ -1,0 +1,307 @@
+{
+  "einheit": 10,
+  "titel": "الجَوّ – Das Wetter",
+  "status": "entwurf",
+  "kulturnotiz": "Auf der Arabischen Halbinsel wird es im Sommer über 45 °C heiß; Regen gilt als Segen. Jahreszeiten und Himmelsrichtungen werden mit dem Artikel genannt: الصَّيْف، الشِّتاء.",
+  "vokabeln": [
+    {
+      "id": "v-jaww",
+      "ar": "جَوّ",
+      "tr": "ǧaww",
+      "de": "Wetter; Luft",
+      "wurzel": "ج-و-و",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-shams",
+      "ar": "شَمْس",
+      "tr": "šams",
+      "de": "Sonne",
+      "wurzel": "ش-م-س",
+      "plural": "شُموس",
+      "einheit": 10
+    },
+    {
+      "id": "v-matar",
+      "ar": "مَطَر",
+      "tr": "maṭar",
+      "de": "Regen",
+      "wurzel": "م-ط-ر",
+      "plural": "أَمْطار",
+      "einheit": 10
+    },
+    {
+      "id": "v-rih",
+      "ar": "ريح",
+      "tr": "rīḥ",
+      "de": "Wind",
+      "wurzel": "ر-و-ح",
+      "plural": "رِياح",
+      "einheit": 10
+    },
+    {
+      "id": "v-sahab",
+      "ar": "سَحاب",
+      "tr": "saḥāb",
+      "de": "Wolken",
+      "wurzel": "س-ح-ب",
+      "plural": "سُحُب",
+      "einheit": 10
+    },
+    {
+      "id": "v-thalj",
+      "ar": "ثَلْج",
+      "tr": "ṯalǧ",
+      "de": "Schnee; Eis",
+      "wurzel": "ث-ل-ج",
+      "plural": "ثُلوج",
+      "einheit": 10
+    },
+    {
+      "id": "v-sama",
+      "ar": "سَماء",
+      "tr": "samāʾ",
+      "de": "Himmel",
+      "wurzel": "س-م-و",
+      "plural": "سَماوات",
+      "einheit": 10
+    },
+    {
+      "id": "v-harara",
+      "ar": "حَرارَة",
+      "tr": "ḥarāra",
+      "de": "Wärme; Temperatur",
+      "wurzel": "ح-ر-ر",
+      "plural": null,
+      "einheit": 10,
+      "hinweis": "دَرَجَةُ الْحَرارَةِ = die Temperatur"
+    },
+    {
+      "id": "v-daraja",
+      "ar": "دَرَجَة",
+      "tr": "daraǧa",
+      "de": "Grad; Stufe",
+      "wurzel": "د-ر-ج",
+      "plural": "دَرَجات",
+      "einheit": 10
+    },
+    {
+      "id": "v-harr",
+      "ar": "حارّ",
+      "tr": "ḥārr",
+      "de": "heiß",
+      "wurzel": "ح-ر-ر",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-barid",
+      "ar": "بارِد",
+      "tr": "bārid",
+      "de": "kalt",
+      "wurzel": "ب-ر-د",
+      "wazn": "فاعِل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-mutadil",
+      "ar": "مُعْتَدِل",
+      "tr": "muʿtadil",
+      "de": "mild, gemäßigt",
+      "wurzel": "ع-د-ل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-sayf",
+      "ar": "الصَّيْف",
+      "tr": "aṣ-ṣayf",
+      "de": "Sommer",
+      "wurzel": "ص-ي-ف",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-shita",
+      "ar": "الشِّتاء",
+      "tr": "aš-šitāʾ",
+      "de": "Winter",
+      "wurzel": "ش-ت-و",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-rabi",
+      "ar": "الرَّبيع",
+      "tr": "ar-rabīʿ",
+      "de": "Frühling",
+      "wurzel": "ر-ب-ع",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-kharif",
+      "ar": "الخَريف",
+      "tr": "al-charīf",
+      "de": "Herbst",
+      "wurzel": "خ-ر-ف",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-sana",
+      "ar": "سَنَة",
+      "tr": "sana",
+      "de": "Jahr",
+      "wurzel": "س-ن-و",
+      "plural": "سَنَوات",
+      "einheit": 10
+    },
+    {
+      "id": "v-ghaim",
+      "ar": "غائِم",
+      "tr": "ġāʾim",
+      "de": "bewölkt",
+      "wurzel": "غ-ي-م",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-mushmis",
+      "ar": "مُشْمِس",
+      "tr": "mušmis",
+      "de": "sonnig",
+      "wurzel": "ش-م-س",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-mumtir",
+      "ar": "مُمْطِر",
+      "tr": "mumṭir",
+      "de": "regnerisch",
+      "wurzel": "م-ط-ر",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-shadid",
+      "ar": "شَديد",
+      "tr": "šadīd",
+      "de": "stark, heftig",
+      "wurzel": "ش-د-د",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-qalil",
+      "ar": "قَليل",
+      "tr": "qalīl",
+      "de": "wenig",
+      "wurzel": "ق-ل-ل",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-kathir",
+      "ar": "كَثير",
+      "tr": "kaṯīr",
+      "de": "viel",
+      "wurzel": "ك-ث-ر",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-limadha",
+      "ar": "لِماذا",
+      "tr": "li-māḏā",
+      "de": "warum?",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 10
+    },
+    {
+      "id": "v-uhibbu",
+      "ar": "أُحِبُّ",
+      "tr": "uḥibbu",
+      "de": "ich liebe, ich mag",
+      "wurzel": "ح-ب-ب",
+      "plural": null,
+      "einheit": 10,
+      "hinweis": "تُحِبُّ = du magst"
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-10-1",
+      "einheit": 10,
+      "dialog": 1,
+      "titel": "كَيْفَ الْجَوُّ؟",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "كَيْفَ الْجَوُّ في الرِّياضِ الْيَوْمَ؟",
+          "de": "Wie ist das Wetter heute in Riad?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "الْجَوُّ حارٌّ جِدّاً، وَالشَّمْسُ تَسْطَعُ.",
+          "de": "Es ist sehr heiß, und die Sonne scheint."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "كَمْ دَرَجَةُ الْحَرارَةِ؟",
+          "de": "Wie hoch ist die Temperatur?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَرْبَعونَ دَرَجَةً! وَكَيْفَ الْجَوُّ في أَلْمانِيا؟",
+          "de": "Vierzig Grad! Und wie ist das Wetter in Deutschland?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "الْجَوُّ بارِدٌ وَغائِمٌ، وَالْمَطَرُ يَنْزِلُ.",
+          "de": "Es ist kalt und bewölkt, und es regnet."
+        }
+      ]
+    },
+    {
+      "id": "d-10-2",
+      "einheit": 10,
+      "dialog": 2,
+      "titel": "أَيُّ فَصْلٍ تُحِبُّ؟",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "أَيُّ فَصْلٍ تُحِبُّ يا يوسُفُ؟",
+          "de": "Welche Jahreszeit magst du, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أُحِبُّ الرَّبيعَ لِأَنَّ الْجَوَّ مُعْتَدِلٌ.",
+          "de": "Ich mag den Frühling, weil das Wetter mild ist."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أَنا أُحِبُّ الشِّتاءَ.",
+          "de": "Ich mag den Winter."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "لِماذا؟",
+          "de": "Warum?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "لِأَنَّ الثَّلْجَ يَنْزِلُ في الشِّتاءِ في بَلَدي.",
+          "de": "Weil in meinem Land im Winter Schnee fällt."
+        }
+      ]
+    }
+  ]
+}

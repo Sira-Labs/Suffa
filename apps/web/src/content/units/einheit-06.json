@@ -1,0 +1,303 @@
+{
+  "einheit": 6,
+  "titel": "الصَّلاة – Das Gebet",
+  "status": "entwurf",
+  "kulturnotiz": "Fünfmal am Tag ruft der Muezzin zum Gebet. Vor dem Gebet steht die Waschung (الوُضوء); gebetet wird in Richtung der Kaaba (القِبْلَة). Das Freitagsgebet (صلاة الجمعة) versammelt die Gemeinschaft.",
+  "vokabeln": [
+    {
+      "id": "v-wudu",
+      "ar": "وُضوء",
+      "tr": "wuḍūʾ",
+      "de": "rituelle Waschung",
+      "wurzel": "و-ض-أ",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-qibla",
+      "ar": "قِبْلَة",
+      "tr": "qibla",
+      "de": "Gebetsrichtung",
+      "wurzel": "ق-ب-ل",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-imam",
+      "ar": "إِمام",
+      "tr": "imām",
+      "de": "Imam, Vorbeter",
+      "wurzel": "أ-م-م",
+      "plural": "أَئِمَّة",
+      "einheit": 6
+    },
+    {
+      "id": "v-adhan",
+      "ar": "أَذان",
+      "tr": "aḏān",
+      "de": "Gebetsruf",
+      "wurzel": "أ-ذ-ن",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-muadhdhin",
+      "ar": "مُؤَذِّن",
+      "tr": "muʾaḏḏin",
+      "de": "Gebetsrufer, Muezzin",
+      "wurzel": "أ-ذ-ن",
+      "wazn": "مُفَعِّل",
+      "plural": "مُؤَذِّنون",
+      "einheit": 6
+    },
+    {
+      "id": "v-sajjada",
+      "ar": "سَجّادَة",
+      "tr": "saǧǧāda",
+      "de": "Gebetsteppich",
+      "wurzel": "س-ج-د",
+      "plural": "سَجاجيد",
+      "einheit": 6
+    },
+    {
+      "id": "v-rakaa",
+      "ar": "رَكْعَة",
+      "tr": "rakʿa",
+      "de": "Gebetseinheit (Rakʿa)",
+      "wurzel": "ر-ك-ع",
+      "plural": "رَكَعات",
+      "einheit": 6
+    },
+    {
+      "id": "v-jumua",
+      "ar": "الجُمُعَة",
+      "tr": "al-ǧumuʿa",
+      "de": "Freitag",
+      "wurzel": "ج-م-ع",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-asr",
+      "ar": "العَصْر",
+      "tr": "al-ʿaṣr",
+      "de": "Nachmittag; Nachmittagsgebet",
+      "wurzel": "ع-ص-ر",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-maghrib",
+      "ar": "المَغْرِب",
+      "tr": "al-maġrib",
+      "de": "Sonnenuntergang; Abendgebet",
+      "wurzel": "غ-ر-ب",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-isha",
+      "ar": "العِشاء",
+      "tr": "al-ʿišāʾ",
+      "de": "Nachtgebet",
+      "wurzel": "ع-ش-و",
+      "plural": null,
+      "einheit": 6,
+      "hinweis": "nicht verwechseln mit عَشاء (Abendessen)"
+    },
+    {
+      "id": "v-quran",
+      "ar": "القُرْآن",
+      "tr": "al-qurʾān",
+      "de": "der Quran",
+      "wurzel": "ق-ر-أ",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-surah",
+      "ar": "سورَة",
+      "tr": "sūra",
+      "de": "Sure",
+      "wurzel": "س-و-ر",
+      "plural": "سُوَر",
+      "einheit": 6
+    },
+    {
+      "id": "v-aya",
+      "ar": "آيَة",
+      "tr": "āya",
+      "de": "Vers; Zeichen",
+      "wurzel": "أ-ي-ي",
+      "plural": "آيات",
+      "einheit": 6
+    },
+    {
+      "id": "v-dua",
+      "ar": "دُعاء",
+      "tr": "duʿāʾ",
+      "de": "Bittgebet",
+      "wurzel": "د-ع-و",
+      "plural": "أَدْعِيَة",
+      "einheit": 6
+    },
+    {
+      "id": "v-muslim",
+      "ar": "مُسْلِم",
+      "tr": "muslim",
+      "de": "Muslim",
+      "wurzel": "س-ل-م",
+      "wazn": "مُفْعِل",
+      "plural": "مُسْلِمون",
+      "einheit": 6
+    },
+    {
+      "id": "v-jamaa",
+      "ar": "جَماعَة",
+      "tr": "ǧamāʿa",
+      "de": "Gemeinschaft, Gruppe",
+      "wurzel": "ج-م-ع",
+      "plural": "جَماعات",
+      "einheit": 6
+    },
+    {
+      "id": "v-nazif",
+      "ar": "نَظيف",
+      "tr": "naẓīf",
+      "de": "sauber",
+      "wurzel": "ن-ظ-ف",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-marra",
+      "ar": "مَرَّة",
+      "tr": "marra",
+      "de": "Mal",
+      "wurzel": "م-ر-ر",
+      "plural": "مَرّات",
+      "einheit": 6,
+      "hinweis": "خَمْسَ مَرّاتٍ = fünfmal"
+    },
+    {
+      "id": "v-alan",
+      "ar": "الآنَ",
+      "tr": "al-āna",
+      "de": "jetzt",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-daiman",
+      "ar": "دائِماً",
+      "tr": "dāʾiman",
+      "de": "immer",
+      "wurzel": "د-و-م",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-ahyanan",
+      "ar": "أَحْياناً",
+      "tr": "aḥyānan",
+      "de": "manchmal",
+      "wurzel": "ح-ي-ن",
+      "plural": null,
+      "einheit": 6
+    },
+    {
+      "id": "v-allahu-akbar",
+      "ar": "اللهُ أَكْبَرُ",
+      "tr": "allāhu akbar",
+      "de": "Gott ist größer",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 6,
+      "hinweis": "Eröffnung jedes Gebets; أَكْبَر kommt von ك-ب-ر"
+    },
+    {
+      "id": "v-jazak",
+      "ar": "جَزاكَ اللهُ خَيْراً",
+      "tr": "ǧazāka llāhu chayran",
+      "de": "Möge Gott es dir mit Gutem vergelten (Dank)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 6
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-6-1",
+      "einheit": 6,
+      "dialog": 1,
+      "titel": "وَقْتُ الصَّلاةِ",
+      "zeilen": [
+        {
+          "sp": "عُمَر",
+          "ar": "اِسْمَعْ، هٰذا الْأَذانُ!",
+          "de": "Hör mal, das ist der Gebetsruf!"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، الْآنَ صَلاةُ الْعَصْرِ.",
+          "de": "Ja, jetzt ist das Nachmittagsgebet."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَيْنَ الْمَسْجِدُ؟",
+          "de": "Wo ist die Moschee?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "الْمَسْجِدُ قَريبٌ، هُناكَ أَمامَ الْجامِعَةِ.",
+          "de": "Die Moschee ist nah, dort vor der Universität."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "نُصَلّي مَعَ الْجَماعَةِ؟",
+          "de": "Beten wir mit der Gemeinschaft?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، الصَّلاةُ مَعَ الْجَماعَةِ خَيْرٌ.",
+          "de": "Ja, das Gebet in Gemeinschaft ist gut."
+        }
+      ]
+    },
+    {
+      "id": "d-6-2",
+      "einheit": 6,
+      "dialog": 2,
+      "titel": "كَمْ رَكْعَةً؟",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "كَمْ رَكْعَةً في صَلاةِ الْمَغْرِبِ؟",
+          "de": "Wie viele Rakʿas hat das Abendgebet?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "ثَلاثُ رَكَعاتٍ.",
+          "de": "Drei Rakʿas."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "وَصَلاةُ الْفَجْرِ؟",
+          "de": "Und das Morgengebet?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "رَكْعَتانِ. نَرْكَعُ وَنَسْجُدُ، ثُمَّ نَجْلِسُ.",
+          "de": "Zwei. Wir verbeugen uns, werfen uns nieder und sitzen dann."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "جَزاكِ اللهُ خَيْراً!",
+          "de": "Möge Gott es dir vergelten!"
+        }
+      ]
+    }
+  ]
+}

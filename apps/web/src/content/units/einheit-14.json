@@ -1,0 +1,268 @@
+{
+  "einheit": 14,
+  "titel": "الحَجّ والعُمْرَة – Hadsch und Umra",
+  "status": "entwurf",
+  "kulturnotiz": "Der Hadsch findet im Monat ذو الحِجَّة statt und endet mit dem Opferfest (عيد الأضحى). Die Umra ist die „kleine Pilgerfahrt“ und jederzeit möglich. Pilger rufen die Talbiya: „لَبَّيْكَ اللّهُمَّ لَبَّيْك“.",
+  "vokabeln": [
+    {
+      "id": "v-hajj",
+      "ar": "الحَجّ",
+      "tr": "al-ḥaǧǧ",
+      "de": "Hadsch, große Pilgerfahrt",
+      "wurzel": "ح-ج-ج",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-umra",
+      "ar": "العُمْرَة",
+      "tr": "al-ʿumra",
+      "de": "Umra, kleine Pilgerfahrt",
+      "wurzel": "ع-م-ر",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-hajj-pilger",
+      "ar": "حاجّ",
+      "tr": "ḥāǧǧ",
+      "de": "Pilger",
+      "wurzel": "ح-ج-ج",
+      "plural": "حُجّاج",
+      "einheit": 14
+    },
+    {
+      "id": "v-kaba",
+      "ar": "الكَعْبَة",
+      "tr": "al-kaʿba",
+      "de": "die Kaaba",
+      "wurzel": "ك-ع-ب",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-haram",
+      "ar": "الحَرَم",
+      "tr": "al-ḥaram",
+      "de": "heiliger Bezirk; die Heilige Moschee",
+      "wurzel": "ح-ر-م",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-ihram",
+      "ar": "إِحْرام",
+      "tr": "iḥrām",
+      "de": "Weihezustand; Pilgergewand",
+      "wurzel": "ح-ر-م",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-tawaf",
+      "ar": "طَواف",
+      "tr": "ṭawāf",
+      "de": "Umrundung (der Kaaba)",
+      "wurzel": "ط-و-ف",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-say",
+      "ar": "سَعْي",
+      "tr": "saʿy",
+      "de": "Gehen zwischen Ṣafā und Marwa",
+      "wurzel": "س-ع-ي",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-arafat",
+      "ar": "عَرَفات",
+      "tr": "ʿarafāt",
+      "de": "ʿArafāt (Ebene bei Mekka)",
+      "wurzel": "ع-ر-ف",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-mina",
+      "ar": "مِنى",
+      "tr": "minā",
+      "de": "Minā (Ort bei Mekka)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-zamzam",
+      "ar": "زَمْزَم",
+      "tr": "zamzam",
+      "de": "Zamzam (Quelle in Mekka)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-talbiya",
+      "ar": "تَلْبِيَة",
+      "tr": "talbiya",
+      "de": "Talbiya (Ruf der Pilger)",
+      "wurzel": "ل-ب-ي",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-dhulhijja",
+      "ar": "ذو الحِجَّة",
+      "tr": "ḏū l-ḥiǧǧa",
+      "de": "Pilgermonat (12. Monat)",
+      "wurzel": "ح-ج-ج",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-id",
+      "ar": "عيد",
+      "tr": "ʿīd",
+      "de": "Fest",
+      "wurzel": "ع-و-د",
+      "plural": "أَعْياد",
+      "einheit": 14
+    },
+    {
+      "id": "v-adha",
+      "ar": "الأَضْحى",
+      "tr": "al-aḍḥā",
+      "de": "Opfer(fest)",
+      "wurzel": "ض-ح-ي",
+      "plural": null,
+      "einheit": 14,
+      "hinweis": "عيدُ الأَضْحى = Opferfest"
+    },
+    {
+      "id": "v-mubarak",
+      "ar": "مُبارَك",
+      "tr": "mubārak",
+      "de": "gesegnet",
+      "wurzel": "ب-ر-ك",
+      "plural": null,
+      "einheit": 14,
+      "hinweis": "عيدٌ مُبارَكٌ = gesegnetes Fest"
+    },
+    {
+      "id": "v-ziham",
+      "ar": "زِحام",
+      "tr": "ziḥām",
+      "de": "Gedränge",
+      "wurzel": "ز-ح-م",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-malabis",
+      "ar": "مَلابِس",
+      "tr": "malābis",
+      "de": "Kleidung",
+      "wurzel": "ل-ب-س",
+      "plural": null,
+      "einheit": 14,
+      "hinweis": "Plural von مَلْبَس"
+    },
+    {
+      "id": "v-shar",
+      "ar": "شَعْر",
+      "tr": "šaʿr",
+      "de": "Haar",
+      "wurzel": "ش-ع-ر",
+      "plural": "شُعور",
+      "einheit": 14
+    },
+    {
+      "id": "v-ams",
+      "ar": "أَمْسِ",
+      "tr": "amsi",
+      "de": "gestern",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 14
+    },
+    {
+      "id": "v-inshaallah",
+      "ar": "إِنْ شاءَ اللهُ",
+      "tr": "in šāʾa llāh",
+      "de": "so Gott will",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 14
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-14-1",
+      "einheit": 14,
+      "dialog": 1,
+      "titel": "إِلى مَكَّةَ",
+      "zeilen": [
+        {
+          "sp": "يوسُف",
+          "ar": "سَأَذْهَبُ إِلى الْحَجِّ هٰذِهِ السَّنَةَ، إِنْ شاءَ اللهُ.",
+          "de": "Ich gehe dieses Jahr zum Hadsch, so Gott will."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "ما شاءَ اللهُ! هَلْ عِنْدَكَ مَلابِسُ الْإِحْرامِ؟",
+          "de": "Wie schön! Hast du die Iḥrām-Kleidung?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، أَلْبَسُ الْإِحْرامَ قَبْلَ مَكَّةَ.",
+          "de": "Ja, ich lege das Iḥrām vor Mekka an."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "وَبَعْدَ الطَّوافِ وَالسَّعْيِ؟",
+          "de": "Und nach dem Ṭawāf und dem Saʿy?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أَحْلِقُ شَعْري، وَأَشْكُرُ اللهَ.",
+          "de": "Ich rasiere mein Haar und danke Gott."
+        }
+      ]
+    },
+    {
+      "id": "d-14-2",
+      "einheit": 14,
+      "dialog": 2,
+      "titel": "عيدٌ مُبارَكٌ",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "عيدٌ مُبارَكٌ يا مَرْيَمُ!",
+          "de": "Gesegnetes Fest, Maryam!"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "عيدٌ مُبارَكٌ! هَلْ رَجَعَ أَبوكِ مِنَ الْحَجِّ؟",
+          "de": "Gesegnetes Fest! Ist dein Vater vom Hadsch zurück?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "نَعَمْ، رَجَعَ أَمْسِ.",
+          "de": "Ja, er ist gestern zurückgekehrt."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "الْحَمْدُ لِلَّهِ!",
+          "de": "Gott sei Dank!"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "وَمَعَهُ ماءُ زَمْزَمَ لَنا.",
+          "de": "Und er hat Zamzam-Wasser für uns mitgebracht."
+        }
+      ]
+    }
+  ]
+}

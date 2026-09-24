@@ -1,0 +1,297 @@
+{
+  "einheit": 11,
+  "titel": "النّاس والأَماكِن – Menschen und Orte",
+  "status": "entwurf",
+  "kulturnotiz": "Die arabische Welt reicht vom Atlantik bis zum Golf. Viele Ländernamen tragen den Artikel (المَغْرِب، العِراق، السُّودان), andere nicht (مِصْر، تونِس).",
+  "vokabeln": [
+    {
+      "id": "v-nas",
+      "ar": "ناس",
+      "tr": "nās",
+      "de": "Leute, Menschen",
+      "wurzel": "ن-و-س",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-makan",
+      "ar": "مَكان",
+      "tr": "makān",
+      "de": "Ort, Platz",
+      "wurzel": "ك-و-ن",
+      "plural": "أَماكِن",
+      "einheit": 11
+    },
+    {
+      "id": "v-watan",
+      "ar": "وَطَن",
+      "tr": "waṭan",
+      "de": "Heimat",
+      "wurzel": "و-ط-ن",
+      "plural": "أَوْطان",
+      "einheit": 11
+    },
+    {
+      "id": "v-asima",
+      "ar": "عاصِمَة",
+      "tr": "ʿāṣima",
+      "de": "Hauptstadt",
+      "wurzel": "ع-ص-م",
+      "plural": "عَواصِم",
+      "einheit": 11
+    },
+    {
+      "id": "v-qarya",
+      "ar": "قَرْيَة",
+      "tr": "qarya",
+      "de": "Dorf",
+      "wurzel": "ق-ر-ي",
+      "plural": "قُرىً",
+      "einheit": 11
+    },
+    {
+      "id": "v-bahr",
+      "ar": "بَحْر",
+      "tr": "baḥr",
+      "de": "Meer",
+      "wurzel": "ب-ح-ر",
+      "plural": "بِحار",
+      "einheit": 11
+    },
+    {
+      "id": "v-nahr",
+      "ar": "نَهْر",
+      "tr": "nahr",
+      "de": "Fluss",
+      "wurzel": "ن-ه-ر",
+      "plural": "أَنْهار",
+      "einheit": 11
+    },
+    {
+      "id": "v-jabal",
+      "ar": "جَبَل",
+      "tr": "ǧabal",
+      "de": "Berg",
+      "wurzel": "ج-ب-ل",
+      "plural": "جِبال",
+      "einheit": 11
+    },
+    {
+      "id": "v-sahra",
+      "ar": "صَحْراء",
+      "tr": "ṣaḥrāʾ",
+      "de": "Wüste",
+      "wurzel": "ص-ح-ر",
+      "plural": "صَحارٍ",
+      "einheit": 11
+    },
+    {
+      "id": "v-shamal",
+      "ar": "الشَّمال",
+      "tr": "aš-šamāl",
+      "de": "Norden",
+      "wurzel": "ش-م-ل",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-janub",
+      "ar": "الجَنوب",
+      "tr": "al-ǧanūb",
+      "de": "Süden",
+      "wurzel": "ج-ن-ب",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-sharq",
+      "ar": "الشَّرْق",
+      "tr": "aš-šarq",
+      "de": "Osten",
+      "wurzel": "ش-ر-ق",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-gharb",
+      "ar": "الغَرْب",
+      "tr": "al-ġarb",
+      "de": "Westen",
+      "wurzel": "غ-ر-ب",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-wasat",
+      "ar": "وَسَط",
+      "tr": "wasaṭ",
+      "de": "Mitte",
+      "wurzel": "و-س-ط",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-mashhur",
+      "ar": "مَشْهور",
+      "tr": "mašhūr",
+      "de": "berühmt",
+      "wurzel": "ش-ه-ر",
+      "wazn": "مَفْعول",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-qadim",
+      "ar": "قَديم",
+      "tr": "qadīm",
+      "de": "alt (Dinge)",
+      "wurzel": "ق-د-م",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-hadith",
+      "ar": "حَديث",
+      "tr": "ḥadīṯ",
+      "de": "modern, neu",
+      "wurzel": "ح-د-ث",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-shab",
+      "ar": "شَعْب",
+      "tr": "šaʿb",
+      "de": "Volk",
+      "wurzel": "ش-ع-ب",
+      "plural": "شُعوب",
+      "einheit": 11
+    },
+    {
+      "id": "v-muhimm",
+      "ar": "مُهِمّ",
+      "tr": "muhimm",
+      "de": "wichtig",
+      "wurzel": "ه-م-م",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-kharita",
+      "ar": "خَريطَة",
+      "tr": "charīṭa",
+      "de": "Landkarte",
+      "wurzel": "خ-ر-ط",
+      "plural": "خَرائِط",
+      "einheit": 11
+    },
+    {
+      "id": "v-mathaf",
+      "ar": "مَتْحَف",
+      "tr": "matḥaf",
+      "de": "Museum",
+      "wurzel": "ت-ح-ف",
+      "wazn": "مَفْعَل",
+      "plural": "مَتاحِف",
+      "einheit": 11
+    },
+    {
+      "id": "v-aalam",
+      "ar": "عالَم",
+      "tr": "ʿālam",
+      "de": "Welt",
+      "wurzel": "ع-ل-م",
+      "plural": null,
+      "einheit": 11
+    },
+    {
+      "id": "v-tarikh",
+      "ar": "تاريخ",
+      "tr": "tārīch",
+      "de": "Geschichte; Datum",
+      "wurzel": "أ-ر-خ",
+      "plural": "تَواريخ",
+      "einheit": 11
+    },
+    {
+      "id": "v-mamlaka",
+      "ar": "مَمْلَكَة",
+      "tr": "mamlaka",
+      "de": "Königreich",
+      "wurzel": "م-ل-ك",
+      "wazn": "مَفْعَلَة",
+      "plural": "مَمالِك",
+      "einheit": 11
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-11-1",
+      "einheit": 11,
+      "dialog": 1,
+      "titel": "عاصِمَةُ مِصْرَ",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "هَلْ تَعْرِفُ مَدينَةَ الْقاهِرَةِ؟",
+          "de": "Kennst du die Stadt Kairo?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "نَعَمْ، أَعْرِفُها. هِيَ عاصِمَةُ مِصْرَ.",
+          "de": "Ja, ich kenne sie. Sie ist die Hauptstadt Ägyptens."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "هَلْ هِيَ مَدينَةٌ قَديمَةٌ؟",
+          "de": "Ist sie eine alte Stadt?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "نَعَمْ، وَفيها نَهْرُ النّيلِ وَمَتاحِفُ مَشْهورَةٌ.",
+          "de": "Ja, und dort sind der Nil und berühmte Museen."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "ما شاءَ اللهُ!",
+          "de": "Wie schön!"
+        }
+      ]
+    },
+    {
+      "id": "d-11-2",
+      "einheit": 11,
+      "dialog": 2,
+      "titel": "الْخَريطَةُ",
+      "zeilen": [
+        {
+          "sp": "الْمُدَرِّس",
+          "ar": "اُنْظُروا إِلى الْخَريطَةِ. أَيْنَ الرِّياضُ؟",
+          "de": "Schaut auf die Landkarte. Wo liegt Riad?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "الرِّياضُ في وَسَطِ الْمَمْلَكَةِ.",
+          "de": "Riad liegt in der Mitte des Königreichs."
+        },
+        {
+          "sp": "الْمُدَرِّس",
+          "ar": "وَأَيْنَ مَكَّةُ؟",
+          "de": "Und wo liegt Mekka?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "مَكَّةُ في الْغَرْبِ، قَريبَةٌ مِنَ الْبَحْرِ.",
+          "de": "Mekka liegt im Westen, nahe am Meer."
+        },
+        {
+          "sp": "الْمُدَرِّس",
+          "ar": "أَحْسَنْتُمْ!",
+          "de": "Gut gemacht!"
+        }
+      ]
+    }
+  ]
+}

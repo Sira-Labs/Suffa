@@ -1,0 +1,350 @@
+{
+  "einheit": 5,
+  "titel": "الطَّعام والشَّراب – Essen und Trinken",
+  "status": "entwurf",
+  "kulturnotiz": "Gastfreundschaft zeigt sich beim Essen: Gästen werden Kaffee und Datteln angeboten. Vor dem Essen sagt man „بِسْمِ الله“, danach „الحَمْدُ لله“.",
+  "vokabeln": [
+    {
+      "id": "v-taam",
+      "ar": "طَعام",
+      "tr": "ṭaʿām",
+      "de": "Essen, Speise",
+      "wurzel": "ط-ع-م",
+      "plural": "أَطْعِمَة",
+      "einheit": 5
+    },
+    {
+      "id": "v-sharab",
+      "ar": "شَراب",
+      "tr": "šarāb",
+      "de": "Getränk",
+      "wurzel": "ش-ر-ب",
+      "plural": "أَشْرِبَة",
+      "einheit": 5
+    },
+    {
+      "id": "v-mai",
+      "ar": "ماء",
+      "tr": "māʾ",
+      "de": "Wasser",
+      "wurzel": "م-و-ه",
+      "plural": "مِياه",
+      "einheit": 5
+    },
+    {
+      "id": "v-khubz",
+      "ar": "خُبْز",
+      "tr": "chubz",
+      "de": "Brot",
+      "wurzel": "خ-ب-ز",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-halib",
+      "ar": "حَليب",
+      "tr": "ḥalīb",
+      "de": "Milch",
+      "wurzel": "ح-ل-ب",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-shay",
+      "ar": "شاي",
+      "tr": "šāy",
+      "de": "Tee",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 5,
+      "hinweis": "Lehnwort, keine arabische Wurzel"
+    },
+    {
+      "id": "v-qahwa",
+      "ar": "قَهْوَة",
+      "tr": "qahwa",
+      "de": "Kaffee",
+      "wurzel": "ق-ه-و",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-asir",
+      "ar": "عَصير",
+      "tr": "ʿaṣīr",
+      "de": "Saft",
+      "wurzel": "ع-ص-ر",
+      "wazn": "فَعيل",
+      "plural": "عَصائِر",
+      "einheit": 5
+    },
+    {
+      "id": "v-lahm",
+      "ar": "لَحْم",
+      "tr": "laḥm",
+      "de": "Fleisch",
+      "wurzel": "ل-ح-م",
+      "plural": "لُحوم",
+      "einheit": 5
+    },
+    {
+      "id": "v-dajaj",
+      "ar": "دَجاج",
+      "tr": "daǧāǧ",
+      "de": "Hähnchen",
+      "wurzel": "د-ج-ج",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-samak",
+      "ar": "سَمَك",
+      "tr": "samak",
+      "de": "Fisch",
+      "wurzel": "س-م-ك",
+      "plural": "أَسْماك",
+      "einheit": 5
+    },
+    {
+      "id": "v-aruzz",
+      "ar": "أَرُزّ",
+      "tr": "aruzz",
+      "de": "Reis",
+      "wurzel": "أ-ر-ز",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-bayd",
+      "ar": "بَيْض",
+      "tr": "bayḍ",
+      "de": "Eier",
+      "wurzel": "ب-ي-ض",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-fakiha",
+      "ar": "فاكِهَة",
+      "tr": "fākiha",
+      "de": "Obst",
+      "wurzel": "ف-ك-ه",
+      "plural": "فَواكِه",
+      "einheit": 5
+    },
+    {
+      "id": "v-tuffah",
+      "ar": "تُفّاح",
+      "tr": "tuffāḥ",
+      "de": "Äpfel",
+      "wurzel": "ت-ف-ح",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-tamr",
+      "ar": "تَمْر",
+      "tr": "tamr",
+      "de": "Datteln",
+      "wurzel": "ت-م-ر",
+      "plural": "تُمور",
+      "einheit": 5
+    },
+    {
+      "id": "v-khudar",
+      "ar": "خُضار",
+      "tr": "chuḍār",
+      "de": "Gemüse",
+      "wurzel": "خ-ض-ر",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-milh",
+      "ar": "مِلْح",
+      "tr": "milḥ",
+      "de": "Salz",
+      "wurzel": "م-ل-ح",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-matam",
+      "ar": "مَطْعَم",
+      "tr": "maṭʿam",
+      "de": "Restaurant",
+      "wurzel": "ط-ع-م",
+      "wazn": "مَفْعَل",
+      "plural": "مَطاعِم",
+      "einheit": 5
+    },
+    {
+      "id": "v-maida",
+      "ar": "مائِدَة",
+      "tr": "māʾida",
+      "de": "Esstisch; gedeckter Tisch",
+      "wurzel": "م-ي-د",
+      "plural": "مَوائِد",
+      "einheit": 5
+    },
+    {
+      "id": "v-sahn",
+      "ar": "صَحْن",
+      "tr": "ṣaḥn",
+      "de": "Teller",
+      "wurzel": "ص-ح-ن",
+      "plural": "صُحون",
+      "einheit": 5
+    },
+    {
+      "id": "v-kaas",
+      "ar": "كَأْس",
+      "tr": "kaʾs",
+      "de": "Glas, Becher",
+      "wurzel": "ك-أ-س",
+      "plural": "كُؤوس",
+      "einheit": 5
+    },
+    {
+      "id": "v-jaai",
+      "ar": "جائِع",
+      "tr": "ǧāʾiʿ",
+      "de": "hungrig",
+      "wurzel": "ج-و-ع",
+      "wazn": "فاعِل",
+      "plural": "جِياع",
+      "einheit": 5
+    },
+    {
+      "id": "v-atshan",
+      "ar": "عَطْشان",
+      "tr": "ʿaṭšān",
+      "de": "durstig",
+      "wurzel": "ع-ط-ش",
+      "wazn": "فَعْلان",
+      "plural": "عِطاش",
+      "einheit": 5
+    },
+    {
+      "id": "v-ladhidh",
+      "ar": "لَذيذ",
+      "tr": "laḏīḏ",
+      "de": "lecker",
+      "wurzel": "ل-ذ-ذ",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-urid",
+      "ar": "أُريدُ",
+      "tr": "urīdu",
+      "de": "ich möchte",
+      "wurzel": "ر-و-د",
+      "plural": null,
+      "einheit": 5,
+      "hinweis": "أُريدُ ماءً = ich möchte Wasser; تُريدُ = du möchtest"
+    },
+    {
+      "id": "v-min-fadlik",
+      "ar": "مِنْ فَضْلِكَ",
+      "tr": "min faḍlika",
+      "de": "bitte (bei einer Bitte)",
+      "wurzel": "ف-ض-ل",
+      "plural": null,
+      "einheit": 5,
+      "hinweis": "zu einer Frau: مِنْ فَضْلِكِ"
+    },
+    {
+      "id": "v-madha",
+      "ar": "ماذا",
+      "tr": "māḏā",
+      "de": "was? (vor Verben)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 5
+    },
+    {
+      "id": "v-jiddan",
+      "ar": "جِدّاً",
+      "tr": "ǧiddan",
+      "de": "sehr",
+      "wurzel": "ج-د-د",
+      "plural": null,
+      "einheit": 5
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-5-1",
+      "einheit": 5,
+      "dialog": 1,
+      "titel": "في الْمَطْعَمِ",
+      "zeilen": [
+        {
+          "sp": "النّادِل",
+          "ar": "أَهْلاً وَسَهْلاً. ماذا تُريدُ؟",
+          "de": "Herzlich willkommen. Was möchtest du?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أُريدُ دَجاجاً وَأَرُزّاً، مِنْ فَضْلِكَ.",
+          "de": "Ich möchte Hähnchen und Reis, bitte."
+        },
+        {
+          "sp": "النّادِل",
+          "ar": "وَماذا تَشْرَبُ؟",
+          "de": "Und was trinkst du?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَشْرَبُ عَصيرَ تُفّاحٍ.",
+          "de": "Ich trinke Apfelsaft."
+        },
+        {
+          "sp": "النّادِل",
+          "ar": "وَأَنْتَ يا يوسُفُ؟",
+          "de": "Und du, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أَنا عَطْشانُ. أُريدُ ماءً وَشاياً.",
+          "de": "Ich bin durstig. Ich möchte Wasser und Tee."
+        }
+      ]
+    },
+    {
+      "id": "d-5-2",
+      "einheit": 5,
+      "dialog": 2,
+      "titel": "الطَّعامُ لَذيذٌ",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "ماذا تَطْبُخينَ يا أُمّي؟",
+          "de": "Was kochst du, Mama?"
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "أَطْبُخُ سَمَكاً وَخُضاراً.",
+          "de": "Ich koche Fisch und Gemüse."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أَنا جائِعَةٌ جِدّاً!",
+          "de": "Ich bin sehr hungrig!"
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "الطَّعامُ عَلى الْمائِدَةِ. بِسْمِ اللهِ.",
+          "de": "Das Essen steht auf dem Tisch. Im Namen Gottes."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "ما شاءَ اللهُ، الطَّعامُ لَذيذٌ!",
+          "de": "Wie schön, das Essen ist lecker!"
+        }
+      ]
+    }
+  ]
+}

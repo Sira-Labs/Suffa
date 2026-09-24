@@ -1,0 +1,269 @@
+{
+  "einheit": 12,
+  "titel": "الهِوايات – Die Hobbys",
+  "status": "entwurf",
+  "kulturnotiz": "Reiten, Schwimmen und Bogenschießen gelten in der islamischen Tradition als empfohlene Sportarten. Die arabische Kalligrafie (الخَطّ) ist eine eigene Kunstform.",
+  "vokabeln": [
+    {
+      "id": "v-hiwaya",
+      "ar": "هِوايَة",
+      "tr": "hiwāya",
+      "de": "Hobby",
+      "wurzel": "ه-و-ي",
+      "plural": "هِوايات",
+      "einheit": 12
+    },
+    {
+      "id": "v-riyada",
+      "ar": "رِياضَة",
+      "tr": "riyāḍa",
+      "de": "Sport",
+      "wurzel": "ر-و-ض",
+      "plural": "رِياضات",
+      "einheit": 12
+    },
+    {
+      "id": "v-kurat-alqadam",
+      "ar": "كُرَةُ الْقَدَمِ",
+      "tr": "kuratu l-qadam",
+      "de": "Fußball",
+      "wurzel": "ك-ر-و",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-sibaha",
+      "ar": "سِباحَة",
+      "tr": "sibāḥa",
+      "de": "Schwimmen",
+      "wurzel": "س-ب-ح",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-qiraa",
+      "ar": "قِراءَة",
+      "tr": "qirāʾa",
+      "de": "Lesen",
+      "wurzel": "ق-ر-أ",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-rasm",
+      "ar": "رَسْم",
+      "tr": "rasm",
+      "de": "Zeichnen; Zeichnung",
+      "wurzel": "ر-س-م",
+      "plural": "رُسوم",
+      "einheit": 12
+    },
+    {
+      "id": "v-khatt",
+      "ar": "خَطّ",
+      "tr": "chaṭṭ",
+      "de": "Schrift; Kalligrafie",
+      "wurzel": "خ-ط-ط",
+      "plural": "خُطوط",
+      "einheit": 12
+    },
+    {
+      "id": "v-furusiyya",
+      "ar": "فُروسِيَّة",
+      "tr": "furūsiyya",
+      "de": "Reiten, Reitkunst",
+      "wurzel": "ف-ر-س",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-hisan",
+      "ar": "حِصان",
+      "tr": "ḥiṣān",
+      "de": "Pferd",
+      "wurzel": "ح-ص-ن",
+      "plural": "أَحْصِنَة",
+      "einheit": 12
+    },
+    {
+      "id": "v-malab",
+      "ar": "مَلْعَب",
+      "tr": "malʿab",
+      "de": "Sportplatz, Stadion",
+      "wurzel": "ل-ع-ب",
+      "wazn": "مَفْعَل",
+      "plural": "مَلاعِب",
+      "einheit": 12
+    },
+    {
+      "id": "v-fariq",
+      "ar": "فَريق",
+      "tr": "farīq",
+      "de": "Mannschaft",
+      "wurzel": "ف-ر-ق",
+      "plural": "فِرَق",
+      "einheit": 12
+    },
+    {
+      "id": "v-mubarah",
+      "ar": "مُباراة",
+      "tr": "mubārāh",
+      "de": "Spiel, Wettkampf",
+      "wurzel": "ب-ر-ي",
+      "plural": "مُبارَيات",
+      "einheit": 12
+    },
+    {
+      "id": "v-qissa",
+      "ar": "قِصَّة",
+      "tr": "qiṣṣa",
+      "de": "Geschichte, Erzählung",
+      "wurzel": "ق-ص-ص",
+      "plural": "قِصَص",
+      "einheit": 12
+    },
+    {
+      "id": "v-majalla",
+      "ar": "مَجَلَّة",
+      "tr": "maǧalla",
+      "de": "Zeitschrift",
+      "wurzel": "ج-ل-ل",
+      "plural": "مَجَلّات",
+      "einheit": 12
+    },
+    {
+      "id": "v-sahifa",
+      "ar": "صَحيفَة",
+      "tr": "ṣaḥīfa",
+      "de": "Zeitung",
+      "wurzel": "ص-ح-ف",
+      "plural": "صُحُف",
+      "einheit": 12
+    },
+    {
+      "id": "v-rihla",
+      "ar": "رِحْلَة",
+      "tr": "riḥla",
+      "de": "Ausflug; Reise",
+      "wurzel": "ر-ح-ل",
+      "plural": "رِحْلات",
+      "einheit": 12
+    },
+    {
+      "id": "v-faragh",
+      "ar": "فَراغ",
+      "tr": "farāġ",
+      "de": "Freizeit; Leere",
+      "wurzel": "ف-ر-غ",
+      "plural": null,
+      "einheit": 12,
+      "hinweis": "وَقْتُ الْفَراغِ = Freizeit"
+    },
+    {
+      "id": "v-mufaddal",
+      "ar": "مُفَضَّل",
+      "tr": "mufaḍḍal",
+      "de": "Lieblings-, bevorzugt",
+      "wurzel": "ف-ض-ل",
+      "wazn": "مُفَعَّل",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-mumti",
+      "ar": "مُمْتِع",
+      "tr": "mumtiʿ",
+      "de": "unterhaltsam, spannend",
+      "wurzel": "م-ت-ع",
+      "plural": null,
+      "einheit": 12
+    },
+    {
+      "id": "v-mahir",
+      "ar": "ماهِر",
+      "tr": "māhir",
+      "de": "geschickt",
+      "wurzel": "م-ه-ر",
+      "wazn": "فاعِل",
+      "plural": "ماهِرون",
+      "einheit": 12
+    },
+    {
+      "id": "v-harf",
+      "ar": "حَرْف",
+      "tr": "ḥarf",
+      "de": "Buchstabe",
+      "wurzel": "ح-ر-ف",
+      "plural": "حُروف",
+      "einheit": 12
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-12-1",
+      "einheit": 12,
+      "dialog": 1,
+      "titel": "وَقْتُ الْفَراغِ",
+      "zeilen": [
+        {
+          "sp": "يوسُف",
+          "ar": "ماذا تَفْعَلُ في وَقْتِ الْفَراغِ يا عُمَرُ؟",
+          "de": "Was machst du in deiner Freizeit, ʿUmar?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَلْعَبُ كُرَةَ الْقَدَمِ مَعَ أَصْدِقائي.",
+          "de": "Ich spiele Fußball mit meinen Freunden."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أَيْنَ تَلْعَبونَ؟",
+          "de": "Wo spielt ihr?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "نَلْعَبُ في مَلْعَبِ الْجامِعَةِ يَوْمَ الْجُمُعَةِ. وَأَنْتَ؟",
+          "de": "Wir spielen freitags auf dem Sportplatz der Universität. Und du?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أَنا أَسْبَحُ. السِّباحَةُ رِياضَتي الْمُفَضَّلَةُ.",
+          "de": "Ich schwimme. Schwimmen ist mein Lieblingssport."
+        }
+      ]
+    },
+    {
+      "id": "d-12-2",
+      "einheit": 12,
+      "dialog": 2,
+      "titel": "هِوايَةُ سارَةَ",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "ما هِوايَتُكِ يا سارَةُ؟",
+          "de": "Was ist dein Hobby, Sāra?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أُحِبُّ الْخَطَّ الْعَرَبِيَّ. أَرْسُمُ الْحُروفَ كُلَّ يَوْمٍ.",
+          "de": "Ich liebe die arabische Kalligrafie. Ich zeichne jeden Tag Buchstaben."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "ما شاءَ اللهُ، أَنْتِ ماهِرَةٌ!",
+          "de": "Wie schön, du bist geschickt!"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "وَأَنْتِ؟",
+          "de": "Und du?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "هِوايَتي الْقِراءَةُ. أَقْرَأُ قِصَصاً مُمْتِعَةً.",
+          "de": "Mein Hobby ist Lesen. Ich lese spannende Geschichten."
+        }
+      ]
+    }
+  ]
+}

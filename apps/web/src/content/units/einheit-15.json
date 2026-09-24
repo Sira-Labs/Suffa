@@ -1,0 +1,270 @@
+{
+  "einheit": 15,
+  "titel": "الصِّحَّة – Die Gesundheit",
+  "status": "entwurf",
+  "kulturnotiz": "Einem Kranken wünscht man „شِفاءً عاجِلاً“ (baldige Genesung) oder „لا بَأْسَ، طَهورٌ إِنْ شاءَ الله“. Körperteile, die paarweise vorkommen (يَد، رِجْل، عَيْن، أُذُن), sind grammatisch weiblich.",
+  "vokabeln": [
+    {
+      "id": "v-sihha",
+      "ar": "صِحَّة",
+      "tr": "ṣiḥḥa",
+      "de": "Gesundheit",
+      "wurzel": "ص-ح-ح",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-marid",
+      "ar": "مَريض",
+      "tr": "marīḍ",
+      "de": "krank; Patient",
+      "wurzel": "م-ر-ض",
+      "wazn": "فَعيل",
+      "plural": "مَرْضى",
+      "einheit": 15
+    },
+    {
+      "id": "v-dawa",
+      "ar": "دَواء",
+      "tr": "dawāʾ",
+      "de": "Medikament",
+      "wurzel": "د-و-ي",
+      "plural": "أَدْوِيَة",
+      "einheit": 15
+    },
+    {
+      "id": "v-saydaliyya",
+      "ar": "صَيْدَلِيَّة",
+      "tr": "ṣaydaliyya",
+      "de": "Apotheke",
+      "wurzel": "ص-ي-د-ل",
+      "plural": "صَيْدَلِيّات",
+      "einheit": 15
+    },
+    {
+      "id": "v-alam",
+      "ar": "أَلَم",
+      "tr": "alam",
+      "de": "Schmerz",
+      "wurzel": "أ-ل-م",
+      "plural": "آلام",
+      "einheit": 15
+    },
+    {
+      "id": "v-ras",
+      "ar": "رَأْس",
+      "tr": "raʾs",
+      "de": "Kopf",
+      "wurzel": "ر-أ-س",
+      "plural": "رُؤوس",
+      "einheit": 15
+    },
+    {
+      "id": "v-batn",
+      "ar": "بَطْن",
+      "tr": "baṭn",
+      "de": "Bauch",
+      "wurzel": "ب-ط-ن",
+      "plural": "بُطون",
+      "einheit": 15
+    },
+    {
+      "id": "v-yad",
+      "ar": "يَد",
+      "tr": "yad",
+      "de": "Hand",
+      "wurzel": "ي-د-ي",
+      "plural": "أَيْدٍ",
+      "einheit": 15
+    },
+    {
+      "id": "v-rijl",
+      "ar": "رِجْل",
+      "tr": "riǧl",
+      "de": "Bein, Fuß",
+      "wurzel": "ر-ج-ل",
+      "plural": "أَرْجُل",
+      "einheit": 15
+    },
+    {
+      "id": "v-ayn",
+      "ar": "عَيْن",
+      "tr": "ʿayn",
+      "de": "Auge",
+      "wurzel": "ع-ي-ن",
+      "plural": "عُيون",
+      "einheit": 15
+    },
+    {
+      "id": "v-udhun",
+      "ar": "أُذُن",
+      "tr": "uḏun",
+      "de": "Ohr",
+      "wurzel": "أ-ذ-ن",
+      "plural": "آذان",
+      "einheit": 15
+    },
+    {
+      "id": "v-anf",
+      "ar": "أَنْف",
+      "tr": "anf",
+      "de": "Nase",
+      "wurzel": "أ-ن-ف",
+      "plural": "أُنوف",
+      "einheit": 15
+    },
+    {
+      "id": "v-fam",
+      "ar": "فَم",
+      "tr": "fam",
+      "de": "Mund",
+      "wurzel": "ف-م-و",
+      "plural": "أَفْواه",
+      "einheit": 15
+    },
+    {
+      "id": "v-sinn",
+      "ar": "سِنّ",
+      "tr": "sinn",
+      "de": "Zahn",
+      "wurzel": "س-ن-ن",
+      "plural": "أَسْنان",
+      "einheit": 15
+    },
+    {
+      "id": "v-humma",
+      "ar": "حُمّى",
+      "tr": "ḥummā",
+      "de": "Fieber",
+      "wurzel": "ح-م-م",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-zukam",
+      "ar": "زُكام",
+      "tr": "zukām",
+      "de": "Schnupfen, Erkältung",
+      "wurzel": "ز-ك-م",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-salim",
+      "ar": "سَليم",
+      "tr": "salīm",
+      "de": "gesund, unversehrt",
+      "wurzel": "س-ل-م",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-shifa",
+      "ar": "شِفاء",
+      "tr": "šifāʾ",
+      "de": "Heilung, Genesung",
+      "wurzel": "ش-ف-ي",
+      "plural": null,
+      "einheit": 15,
+      "hinweis": "شِفاءً عاجِلاً = gute Besserung"
+    },
+    {
+      "id": "v-duktur",
+      "ar": "دُكْتور",
+      "tr": "duktūr",
+      "de": "Doktor",
+      "wurzel": "",
+      "plural": "دَكاتِرَة",
+      "einheit": 15,
+      "hinweis": "Lehnwort; auch Anrede für Ärzte"
+    },
+    {
+      "id": "v-mundhu",
+      "ar": "مُنْذُ",
+      "tr": "munḏu",
+      "de": "seit",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 15
+    },
+    {
+      "id": "v-miskin",
+      "ar": "مِسْكين",
+      "tr": "miskīn",
+      "de": "arm, bedauernswert",
+      "wurzel": "س-ك-ن",
+      "plural": "مَساكين",
+      "einheit": 15,
+      "hinweis": "gleiche Wurzel wie سَكَنَ"
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-15-1",
+      "einheit": 15,
+      "dialog": 1,
+      "titel": "عِنْدَ الطَّبيبِ",
+      "zeilen": [
+        {
+          "sp": "الطَّبيب",
+          "ar": "ما بِكَ؟",
+          "de": "Was fehlt dir?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَشْعُرُ بِأَلَمٍ في رَأْسي، وَعِنْدي حُمّى.",
+          "de": "Ich habe Kopfschmerzen, und ich habe Fieber."
+        },
+        {
+          "sp": "الطَّبيب",
+          "ar": "مُنْذُ مَتى؟",
+          "de": "Seit wann?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "مُنْذُ يَوْمَيْنِ.",
+          "de": "Seit zwei Tagen."
+        },
+        {
+          "sp": "الطَّبيب",
+          "ar": "أَفْحَصُكَ الْآنَ ... عِنْدَكَ زُكامٌ. خُذْ هٰذا الدَّواءَ ثَلاثَ مَرّاتٍ في الْيَوْمِ.",
+          "de": "Ich untersuche dich jetzt … Du hast eine Erkältung. Nimm dieses Medikament dreimal am Tag."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "شُكْراً يا دُكْتورُ.",
+          "de": "Danke, Herr Doktor."
+        }
+      ]
+    },
+    {
+      "id": "d-15-2",
+      "einheit": 15,
+      "dialog": 2,
+      "titel": "شِفاءً عاجِلاً",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "أَيْنَ مَرْيَمُ الْيَوْمَ؟",
+          "de": "Wo ist Maryam heute?"
+        },
+        {
+          "sp": "الْمُدَرِّسَة",
+          "ar": "مَرْيَمُ مَريضَةٌ. عِنْدَها أَلَمٌ في بَطْنِها.",
+          "de": "Maryam ist krank. Sie hat Bauchschmerzen."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "مِسْكينَةٌ! أَذْهَبُ إِلَيْها بَعْدَ الدَّرْسِ.",
+          "de": "Die Arme! Ich gehe nach dem Unterricht zu ihr."
+        },
+        {
+          "sp": "الْمُدَرِّسَة",
+          "ar": "قولي لَها: شِفاءً عاجِلاً.",
+          "de": "Sag ihr: Gute Besserung."
+        }
+      ]
+    }
+  ]
+}

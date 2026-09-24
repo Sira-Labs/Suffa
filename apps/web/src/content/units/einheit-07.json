@@ -1,0 +1,320 @@
+{
+  "einheit": 7,
+  "titel": "الدِّراسَة – Schule und Studium",
+  "status": "entwurf",
+  "kulturnotiz": "Die Wurzel د-ر-س steckt in دَرْس (Lektion), مَدْرَسَة (Schule), مُدَرِّس (Lehrer) und دِراسَة (Studium). Wer eine Wurzel kennt, erkennt viele Wörter wieder.",
+  "vokabeln": [
+    {
+      "id": "v-dirasa",
+      "ar": "دِراسَة",
+      "tr": "dirāsa",
+      "de": "Studium",
+      "wurzel": "د-ر-س",
+      "plural": null,
+      "einheit": 7
+    },
+    {
+      "id": "v-kulliyya",
+      "ar": "كُلِّيَّة",
+      "tr": "kulliyya",
+      "de": "Fakultät",
+      "wurzel": "ك-ل-ل",
+      "plural": "كُلِّيّات",
+      "einheit": 7
+    },
+    {
+      "id": "v-fasl",
+      "ar": "فَصْل",
+      "tr": "faṣl",
+      "de": "Klassenzimmer; Semester; Jahreszeit",
+      "wurzel": "ف-ص-ل",
+      "plural": "فُصول",
+      "einheit": 7
+    },
+    {
+      "id": "v-qalam",
+      "ar": "قَلَم",
+      "tr": "qalam",
+      "de": "Stift",
+      "wurzel": "ق-ل-م",
+      "plural": "أَقْلام",
+      "einheit": 7
+    },
+    {
+      "id": "v-daftar",
+      "ar": "دَفْتَر",
+      "tr": "daftar",
+      "de": "Heft",
+      "wurzel": "",
+      "plural": "دَفاتِر",
+      "einheit": 7,
+      "hinweis": "Lehnwort, keine arabische Wurzel"
+    },
+    {
+      "id": "v-sabbura",
+      "ar": "سَبّورَة",
+      "tr": "sabbūra",
+      "de": "Tafel",
+      "wurzel": "س-ب-ر",
+      "plural": "سَبّورات",
+      "einheit": 7
+    },
+    {
+      "id": "v-maktaba",
+      "ar": "مَكْتَبَة",
+      "tr": "maktaba",
+      "de": "Bibliothek; Buchhandlung",
+      "wurzel": "ك-ت-ب",
+      "wazn": "مَفْعَلَة",
+      "plural": "مَكْتَبات",
+      "einheit": 7
+    },
+    {
+      "id": "v-imtihan",
+      "ar": "اِمْتِحان",
+      "tr": "imtiḥān",
+      "de": "Prüfung",
+      "wurzel": "م-ح-ن",
+      "plural": "اِمْتِحانات",
+      "einheit": 7
+    },
+    {
+      "id": "v-sual",
+      "ar": "سُؤال",
+      "tr": "suʾāl",
+      "de": "Frage",
+      "wurzel": "س-أ-ل",
+      "plural": "أَسْئِلَة",
+      "einheit": 7
+    },
+    {
+      "id": "v-jawab",
+      "ar": "جَواب",
+      "tr": "ǧawāb",
+      "de": "Antwort",
+      "wurzel": "ج-و-ب",
+      "plural": "أَجْوِبَة",
+      "einheit": 7
+    },
+    {
+      "id": "v-kalima",
+      "ar": "كَلِمَة",
+      "tr": "kalima",
+      "de": "Wort",
+      "wurzel": "ك-ل-م",
+      "plural": "كَلِمات",
+      "einheit": 7
+    },
+    {
+      "id": "v-jumla",
+      "ar": "جُمْلَة",
+      "tr": "ǧumla",
+      "de": "Satz",
+      "wurzel": "ج-م-ل",
+      "plural": "جُمَل",
+      "einheit": 7
+    },
+    {
+      "id": "v-qawaid",
+      "ar": "قَواعِد",
+      "tr": "qawāʿid",
+      "de": "Grammatik (Regeln)",
+      "wurzel": "ق-ع-د",
+      "plural": null,
+      "einheit": 7,
+      "hinweis": "Plural von قاعِدَة (Regel)"
+    },
+    {
+      "id": "v-sahl",
+      "ar": "سَهْل",
+      "tr": "sahl",
+      "de": "leicht",
+      "wurzel": "س-ه-ل",
+      "plural": null,
+      "einheit": 7
+    },
+    {
+      "id": "v-sab",
+      "ar": "صَعْب",
+      "tr": "ṣaʿb",
+      "de": "schwer, schwierig",
+      "wurzel": "ص-ع-ب",
+      "plural": null,
+      "einheit": 7
+    },
+    {
+      "id": "v-mujtahid",
+      "ar": "مُجْتَهِد",
+      "tr": "muǧtahid",
+      "de": "fleißig",
+      "wurzel": "ج-ه-د",
+      "plural": "مُجْتَهِدون",
+      "einheit": 7
+    },
+    {
+      "id": "v-najih",
+      "ar": "ناجِح",
+      "tr": "nāǧiḥ",
+      "de": "erfolgreich; bestanden",
+      "wurzel": "ن-ج-ح",
+      "wazn": "فاعِل",
+      "plural": "ناجِحون",
+      "einheit": 7
+    },
+    {
+      "id": "v-zamil",
+      "ar": "زَميل",
+      "tr": "zamīl",
+      "de": "Mitschüler, Kollege",
+      "wurzel": "ز-م-ل",
+      "wazn": "فَعيل",
+      "plural": "زُمَلاء",
+      "einheit": 7
+    },
+    {
+      "id": "v-usbu",
+      "ar": "أُسْبوع",
+      "tr": "usbūʿ",
+      "de": "Woche",
+      "wurzel": "س-ب-ع",
+      "plural": "أَسابيع",
+      "einheit": 7
+    },
+    {
+      "id": "v-sabt",
+      "ar": "السَّبْت",
+      "tr": "as-sabt",
+      "de": "Samstag",
+      "wurzel": "س-ب-ت",
+      "plural": null,
+      "einheit": 7
+    },
+    {
+      "id": "v-ahad",
+      "ar": "الأَحَد",
+      "tr": "al-aḥad",
+      "de": "Sonntag",
+      "wurzel": "أ-ح-د",
+      "plural": null,
+      "einheit": 7
+    },
+    {
+      "id": "v-ithnayn",
+      "ar": "الاِثْنَيْن",
+      "tr": "al-iṯnayn",
+      "de": "Montag",
+      "wurzel": "ث-ن-ي",
+      "plural": null,
+      "einheit": 7
+    },
+    {
+      "id": "v-ghadan",
+      "ar": "غَداً",
+      "tr": "ġadan",
+      "de": "morgen",
+      "wurzel": "غ-د-و",
+      "plural": null,
+      "einheit": 7
+    },
+    {
+      "id": "v-alyawm",
+      "ar": "اليَوْمَ",
+      "tr": "al-yawma",
+      "de": "heute",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 7
+    },
+    {
+      "id": "v-lianna",
+      "ar": "لِأَنَّ",
+      "tr": "li-anna",
+      "de": "weil",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 7
+    },
+    {
+      "id": "v-lakinna",
+      "ar": "لٰكِنَّ",
+      "tr": "lākinna",
+      "de": "aber",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 7
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-7-1",
+      "einheit": 7,
+      "dialog": 1,
+      "titel": "في الْكُلِّيَّةِ",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "ماذا تَدْرُسُ يا عُمَرُ؟",
+          "de": "Was studierst du, ʿUmar?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَدْرُسُ اللُّغَةَ الْعَرَبِيَّةَ في كُلِّيَّةِ اللُّغاتِ.",
+          "de": "Ich studiere Arabisch an der Fakultät für Sprachen."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "هَلِ الدِّراسَةُ صَعْبَةٌ؟",
+          "de": "Ist das Studium schwer?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "الْقَواعِدُ صَعْبَةٌ، لٰكِنَّ الْكَلِماتِ سَهْلَةٌ.",
+          "de": "Die Grammatik ist schwer, aber die Wörter sind leicht."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "أَنْتَ طالِبٌ مُجْتَهِدٌ!",
+          "de": "Du bist ein fleißiger Student!"
+        }
+      ]
+    },
+    {
+      "id": "d-7-2",
+      "einheit": 7,
+      "dialog": 2,
+      "titel": "الِامْتِحانُ غَداً",
+      "zeilen": [
+        {
+          "sp": "الْمُدَرِّس",
+          "ar": "الِامْتِحانُ غَداً. هَلْ فَهِمْتُمُ الدَّرْسَ؟",
+          "de": "Die Prüfung ist morgen. Habt ihr die Lektion verstanden?"
+        },
+        {
+          "sp": "الطُّلّاب",
+          "ar": "نَعَمْ، فَهِمْنا.",
+          "de": "Ja, wir haben verstanden."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "يا أُسْتاذُ، عِنْدي سُؤالٌ.",
+          "de": "Herr Lehrer, ich habe eine Frage."
+        },
+        {
+          "sp": "الْمُدَرِّس",
+          "ar": "تَفَضَّلي.",
+          "de": "Bitte schön."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "هَلْ نَكْتُبُ جُمَلاً في الِامْتِحانِ؟",
+          "de": "Schreiben wir in der Prüfung Sätze?"
+        },
+        {
+          "sp": "الْمُدَرِّس",
+          "ar": "نَعَمْ، تَكْتُبونَ خَمْسَ جُمَلٍ.",
+          "de": "Ja, ihr schreibt fünf Sätze."
+        }
+      ]
+    }
+  ]
+}

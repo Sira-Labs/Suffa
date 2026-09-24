@@ -1,0 +1,235 @@
+{
+  "einheit": 16,
+  "titel": "الإِجازَة – Die Ferien",
+  "status": "entwurf",
+  "kulturnotiz": "Wer verreist, bringt oft Geschenke (هَدايا) für Familie und Nachbarn mit. Nach der Rückkehr sagt man „الحَمْدُ لله عَلى السَّلامَة“ (Gott sei Dank für die gesunde Rückkehr).",
+  "vokabeln": [
+    {
+      "id": "v-ijaza",
+      "ar": "إِجازَة",
+      "tr": "iǧāza",
+      "de": "Urlaub, Ferien",
+      "wurzel": "ج-و-ز",
+      "plural": "إِجازات",
+      "einheit": 16
+    },
+    {
+      "id": "v-shati",
+      "ar": "شاطِئ",
+      "tr": "šāṭiʾ",
+      "de": "Strand, Ufer",
+      "wurzel": "ش-ط-أ",
+      "plural": "شَواطِئ",
+      "einheit": 16
+    },
+    {
+      "id": "v-raml",
+      "ar": "رَمْل",
+      "tr": "raml",
+      "de": "Sand",
+      "wurzel": "ر-م-ل",
+      "plural": "رِمال",
+      "einheit": 16
+    },
+    {
+      "id": "v-khayma",
+      "ar": "خَيْمَة",
+      "tr": "chayma",
+      "de": "Zelt",
+      "wurzel": "خ-ي-م",
+      "plural": "خِيام",
+      "einheit": 16
+    },
+    {
+      "id": "v-mukhayyam",
+      "ar": "مُخَيَّم",
+      "tr": "muchayyam",
+      "de": "Zeltlager, Camp",
+      "wurzel": "خ-ي-م",
+      "plural": "مُخَيَّمات",
+      "einheit": 16
+    },
+    {
+      "id": "v-ziyara",
+      "ar": "زِيارَة",
+      "tr": "ziyāra",
+      "de": "Besuch",
+      "wurzel": "ز-و-ر",
+      "plural": "زِيارات",
+      "einheit": 16
+    },
+    {
+      "id": "v-shahr",
+      "ar": "شَهْر",
+      "tr": "šahr",
+      "de": "Monat",
+      "wurzel": "ش-ه-ر",
+      "plural": "أَشْهُر",
+      "einheit": 16
+    },
+    {
+      "id": "v-saih",
+      "ar": "سائِح",
+      "tr": "sāʾiḥ",
+      "de": "Tourist",
+      "wurzel": "س-ي-ح",
+      "wazn": "فاعِل",
+      "plural": "سُيّاح",
+      "einheit": 16
+    },
+    {
+      "id": "v-siyaha",
+      "ar": "سِياحَة",
+      "tr": "siyāḥa",
+      "de": "Tourismus",
+      "wurzel": "س-ي-ح",
+      "plural": null,
+      "einheit": 16
+    },
+    {
+      "id": "v-manzar",
+      "ar": "مَنْظَر",
+      "tr": "manẓar",
+      "de": "Aussicht, Anblick",
+      "wurzel": "ن-ظ-ر",
+      "wazn": "مَفْعَل",
+      "plural": "مَناظِر",
+      "einheit": 16
+    },
+    {
+      "id": "v-farhan",
+      "ar": "فَرْحان",
+      "tr": "farḥān",
+      "de": "froh",
+      "wurzel": "ف-ر-ح",
+      "wazn": "فَعْلان",
+      "plural": null,
+      "einheit": 16
+    },
+    {
+      "id": "v-dhikra",
+      "ar": "ذِكْرى",
+      "tr": "ḏikrā",
+      "de": "Erinnerung",
+      "wurzel": "ذ-ك-ر",
+      "plural": "ذِكْرَيات",
+      "einheit": 16
+    },
+    {
+      "id": "v-risala",
+      "ar": "رِسالَة",
+      "tr": "risāla",
+      "de": "Brief; Nachricht",
+      "wurzel": "ر-س-ل",
+      "plural": "رَسائِل",
+      "einheit": 16
+    },
+    {
+      "id": "v-hatif",
+      "ar": "هاتِف",
+      "tr": "hātif",
+      "de": "Telefon",
+      "wurzel": "ه-ت-ف",
+      "plural": "هَواتِف",
+      "einheit": 16
+    },
+    {
+      "id": "v-sura-foto",
+      "ar": "صُوَر",
+      "tr": "ṣuwar",
+      "de": "Fotos, Bilder",
+      "wurzel": "ص-و-ر",
+      "plural": null,
+      "einheit": 16,
+      "hinweis": "Plural von صُورَة"
+    },
+    {
+      "id": "v-hadaya",
+      "ar": "هَدايا",
+      "tr": "hadāyā",
+      "de": "Geschenke",
+      "wurzel": "ه-د-ي",
+      "plural": null,
+      "einheit": 16,
+      "hinweis": "Plural von هَدِيَّة"
+    },
+    {
+      "id": "v-kana",
+      "ar": "كانَ",
+      "tr": "kāna",
+      "de": "war (er war)",
+      "wurzel": "ك-و-ن",
+      "plural": null,
+      "einheit": 16,
+      "hinweis": "كانَتِ الْإِجازَةُ جَميلَةً = die Ferien waren schön"
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-16-1",
+      "einheit": 16,
+      "dialog": 1,
+      "titel": "خُطَّةُ الْإِجازَةِ",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "مَتى الْإِجازَةُ يا سارَةُ؟",
+          "de": "Wann sind die Ferien, Sāra?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "بَعْدَ أُسْبوعٍ. نَرْحَلُ إِلى الْبَحْرِ الْأَحْمَرِ.",
+          "de": "In einer Woche. Wir fahren ans Rote Meer."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "ما شاءَ اللهُ! هَلْ تَسْكُنونَ في فُنْدُقٍ؟",
+          "de": "Wie schön! Wohnt ihr in einem Hotel?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "لا، في خَيْمَةٍ قَريبَةٍ مِنَ الشّاطِئِ.",
+          "de": "Nein, in einem Zelt nahe am Strand."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "إِجازَةً سَعيدَةً!",
+          "de": "Schöne Ferien!"
+        }
+      ]
+    },
+    {
+      "id": "d-16-2",
+      "einheit": 16,
+      "dialog": 2,
+      "titel": "بَعْدَ الْإِجازَةِ",
+      "zeilen": [
+        {
+          "sp": "يوسُف",
+          "ar": "كَيْفَ كانَتِ الْإِجازَةُ يا عُمَرُ؟",
+          "de": "Wie waren die Ferien, ʿUmar?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "كانَتْ جَميلَةً جِدّاً. زُرْتُ جَدّي في الْقَرْيَةِ.",
+          "de": "Sie waren sehr schön. Ich habe meinen Großvater im Dorf besucht."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "وَماذا فَعَلْتَ هُناكَ؟",
+          "de": "Und was hast du dort gemacht?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "جَمَعْتُ التَّمْرَ مَعَ جَدّي، وَفَرِحْتُ كَثيراً.",
+          "de": "Ich habe mit meinem Großvater Datteln geerntet und mich sehr gefreut."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "الْحَمْدُ لِلَّهِ عَلى السَّلامَةِ!",
+          "de": "Schön, dass du gut zurück bist!"
+        }
+      ]
+    }
+  ]
+}

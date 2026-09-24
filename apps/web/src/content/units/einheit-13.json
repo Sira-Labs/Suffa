@@ -1,0 +1,271 @@
+{
+  "einheit": 13,
+  "titel": "السَّفَر – Das Reisen",
+  "status": "entwurf",
+  "kulturnotiz": "Reisenden wünscht man „رِحْلَةً سَعيدَةً“ (gute Reise) oder „في أَمانِ الله“ (in Gottes Schutz). Die Wurzel س-ف-ر steckt in سَفَر (Reise), مُسافِر (Reisender) und سِفارَة (Botschaft).",
+  "vokabeln": [
+    {
+      "id": "v-safar",
+      "ar": "سَفَر",
+      "tr": "safar",
+      "de": "Reise, Reisen",
+      "wurzel": "س-ف-ر",
+      "plural": "أَسْفار",
+      "einheit": 13
+    },
+    {
+      "id": "v-mataar",
+      "ar": "مَطار",
+      "tr": "maṭār",
+      "de": "Flughafen",
+      "wurzel": "ط-ي-ر",
+      "plural": "مَطارات",
+      "einheit": 13
+    },
+    {
+      "id": "v-taira",
+      "ar": "طائِرَة",
+      "tr": "ṭāʾira",
+      "de": "Flugzeug",
+      "wurzel": "ط-ي-ر",
+      "plural": "طائِرات",
+      "einheit": 13
+    },
+    {
+      "id": "v-qitar",
+      "ar": "قِطار",
+      "tr": "qiṭār",
+      "de": "Zug",
+      "wurzel": "ق-ط-ر",
+      "plural": "قِطارات",
+      "einheit": 13
+    },
+    {
+      "id": "v-safina",
+      "ar": "سَفينَة",
+      "tr": "safīna",
+      "de": "Schiff",
+      "wurzel": "س-ف-ن",
+      "plural": "سُفُن",
+      "einheit": 13
+    },
+    {
+      "id": "v-tadhkira",
+      "ar": "تَذْكِرَة",
+      "tr": "taḏkira",
+      "de": "Fahrkarte, Ticket",
+      "wurzel": "ذ-ك-ر",
+      "plural": "تَذاكِر",
+      "einheit": 13
+    },
+    {
+      "id": "v-jawaz",
+      "ar": "جَوازُ السَّفَرِ",
+      "tr": "ǧawāzu s-safar",
+      "de": "Reisepass",
+      "wurzel": "ج-و-ز",
+      "plural": "جَوازاتُ السَّفَرِ",
+      "einheit": 13
+    },
+    {
+      "id": "v-tashira",
+      "ar": "تَأْشيرَة",
+      "tr": "taʾšīra",
+      "de": "Visum",
+      "wurzel": "أ-ش-ر",
+      "plural": "تَأْشيرات",
+      "einheit": 13
+    },
+    {
+      "id": "v-funduq",
+      "ar": "فُنْدُق",
+      "tr": "funduq",
+      "de": "Hotel",
+      "wurzel": "",
+      "plural": "فَنادِق",
+      "einheit": 13,
+      "hinweis": "Lehnwort (griech. pandocheion)"
+    },
+    {
+      "id": "v-musafir",
+      "ar": "مُسافِر",
+      "tr": "musāfir",
+      "de": "Reisender",
+      "wurzel": "س-ف-ر",
+      "wazn": "مُفاعِل",
+      "plural": "مُسافِرون",
+      "einheit": 13
+    },
+    {
+      "id": "v-mahatta",
+      "ar": "مَحَطَّة",
+      "tr": "maḥaṭṭa",
+      "de": "Station, Bahnhof",
+      "wurzel": "ح-ط-ط",
+      "plural": "مَحَطّات",
+      "einheit": 13
+    },
+    {
+      "id": "v-wusul",
+      "ar": "وُصول",
+      "tr": "wuṣūl",
+      "de": "Ankunft",
+      "wurzel": "و-ص-ل",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-mughadara",
+      "ar": "مُغادَرَة",
+      "tr": "muġādara",
+      "de": "Abreise, Abflug",
+      "wurzel": "غ-د-ر",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-dakhil",
+      "ar": "داخِل",
+      "tr": "dāchil",
+      "de": "innen; Inland",
+      "wurzel": "د-خ-ل",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-kharij",
+      "ar": "خارِج",
+      "tr": "chāriǧ",
+      "de": "außen; Ausland",
+      "wurzel": "خ-ر-ج",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-daqiqa",
+      "ar": "دَقيقَة",
+      "tr": "daqīqa",
+      "de": "Minute",
+      "wurzel": "د-ق-ق",
+      "plural": "دَقائِق",
+      "einheit": 13
+    },
+    {
+      "id": "v-sari",
+      "ar": "سَريع",
+      "tr": "sarīʿ",
+      "de": "schnell",
+      "wurzel": "س-ر-ع",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-bati",
+      "ar": "بَطيء",
+      "tr": "baṭīʾ",
+      "de": "langsam",
+      "wurzel": "ب-ط-أ",
+      "wazn": "فَعيل",
+      "plural": null,
+      "einheit": 13
+    },
+    {
+      "id": "v-sifara",
+      "ar": "سِفارَة",
+      "tr": "sifāra",
+      "de": "Botschaft",
+      "wurzel": "س-ف-ر",
+      "plural": "سِفارات",
+      "einheit": 13
+    },
+    {
+      "id": "v-saeed",
+      "ar": "سَعيد",
+      "tr": "saʿīd",
+      "de": "glücklich",
+      "wurzel": "س-ع-د",
+      "wazn": "فَعيل",
+      "plural": "سُعَداء",
+      "einheit": 13,
+      "hinweis": "رِحْلَةً سَعيدَةً = gute Reise"
+    },
+    {
+      "id": "v-mumtaz",
+      "ar": "مُمْتاز",
+      "tr": "mumtāz",
+      "de": "ausgezeichnet",
+      "wurzel": "م-ي-ز",
+      "plural": null,
+      "einheit": 13
+    }
+  ],
+  "dialoge": [
+    {
+      "id": "d-13-1",
+      "einheit": 13,
+      "dialog": 1,
+      "titel": "في الْمَطارِ",
+      "zeilen": [
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "جَوازُ السَّفَرِ، مِنْ فَضْلِكِ.",
+          "de": "Den Reisepass, bitte."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "تَفَضَّلْ. هٰذا جَوازي، وَهٰذِهِ التَّأْشيرَةُ.",
+          "de": "Bitte. Das ist mein Pass, und das ist das Visum."
+        },
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "إِلى أَيْنَ؟",
+          "de": "Wohin?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "إِلى جِدَّةَ.",
+          "de": "Nach Dschidda."
+        },
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "الطّائِرَةُ في السّاعَةِ الْعاشِرَةِ. رِحْلَةً سَعيدَةً!",
+          "de": "Das Flugzeug geht um zehn Uhr. Gute Reise!"
+        }
+      ]
+    },
+    {
+      "id": "d-13-2",
+      "einheit": 13,
+      "dialog": 2,
+      "titel": "بِالْقِطارِ",
+      "zeilen": [
+        {
+          "sp": "عُمَر",
+          "ar": "هَلْ حَجَزْتَ التَّذْكِرَةَ يا يوسُفُ؟",
+          "de": "Hast du das Ticket gebucht, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، حَجَزْتُ تَذْكِرَتَيْنِ لِلْقِطارِ إِلى الْمَدينَةِ.",
+          "de": "Ja, ich habe zwei Zugtickets nach Medina gebucht."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "مَتى نَرْكَبُ الْقِطارَ؟",
+          "de": "Wann steigen wir in den Zug?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "غَداً صَباحاً مِنَ الْمَحَطَّةِ. الْقِطارُ سَريعٌ جِدّاً.",
+          "de": "Morgen früh am Bahnhof. Der Zug ist sehr schnell."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "مُمْتازٌ!",
+          "de": "Ausgezeichnet!"
+        }
+      ]
+    }
+  ]
+}

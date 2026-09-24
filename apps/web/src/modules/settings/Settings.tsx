@@ -88,6 +88,8 @@ function AccountPanel() {
   // Back from the magic link (/settings?angemeldet=1): confirm once.
   const [params] = useSearchParams();
   const justSignedIn = params.get('angemeldet') === '1';
+  // A failed link comes back to the same page with ?error=… (expired, already used).
+  const linkError = signInLinkError(params.get('error'));
 
   if (!provider.isConfigured()) {
     return (
@@ -139,6 +141,7 @@ function AccountPanel() {
 
   return (
     <form className="stack" onSubmit={submit}>
+      {linkError && !message && <span className="feedback-bad">{linkError}</span>}
       <p className="muted">
         Anmelden ohne Passwort: Du bekommst einen Link per E-Mail. Mit demselben Konto auf
         Handy und Computer wird dein Lernstand automatisch abgeglichen.
@@ -205,4 +208,13 @@ function SourcesCard() {
       </ul>
     </section>
   );
+}
+
+/** German explanation for the error code Better Auth appends to a failed magic link. */
+export function signInLinkError(code: string | null): string | null {
+  if (!code) return null;
+  if (code === 'INVALID_TOKEN' || code === 'EXPIRED_TOKEN') {
+    return 'Dieser Anmeldelink ist abgelaufen oder wurde schon benutzt. Fordere unten einen neuen an.';
+  }
+  return 'Die Anmeldung hat nicht geklappt. Fordere unten einen neuen Link an.';
 }

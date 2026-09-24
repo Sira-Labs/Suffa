@@ -18,6 +18,7 @@ describe('AdminApi', () => {
     expect(await client.listUsers({})).toEqual({
       ok: false,
       status: 403,
+      code: 'second_factor_required',
       message: 'Bitte bestätige zuerst den Code aus deiner Authenticator-App.',
     });
   });

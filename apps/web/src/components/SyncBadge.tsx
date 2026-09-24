@@ -22,7 +22,7 @@ export function SyncBadge() {
       className="badge"
       onClick={() => void syncNow()}
       title="Automatischer Abgleich – tippen zum sofortigen Abgleichen"
-      style={{ cursor: 'pointer' }}
+      style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
     >
       <span
         aria-hidden

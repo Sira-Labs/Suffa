@@ -94,6 +94,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     tier: 'training',
   },
   {
+    to: '/classes',
+    label: 'Klassen',
+    icon: 'path',
+    description: 'Deine Klasse beitreten oder als Lehrkraft führen',
+    tier: 'secondary',
+  },
+  {
     to: '/library',
     label: 'Buch-Medien',
     icon: 'listen',

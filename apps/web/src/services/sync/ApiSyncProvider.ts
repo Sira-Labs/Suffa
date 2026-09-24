@@ -116,7 +116,14 @@ export class ApiSyncProvider implements SyncProvider {
     return this.state;
   }
 
-  async signInWithEmail(email: string): Promise<Result<void>> {
+  /**
+   * Mails a sign-in link. `returnTo` is the in-app path the link leads back to (e.g. an
+   * invite page); the server only accepts paths inside the app.
+   */
+  async signInWithEmail(
+    email: string,
+    returnTo: string = SIGN_IN_RETURN_PATH
+  ): Promise<Result<void>> {
     const trimmed = email.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
       return fail('invalid-email', 'Ungültige E-Mail-Adresse.');
@@ -126,7 +133,7 @@ export class ApiSyncProvider implements SyncProvider {
       response = await this.request('/api/v1/auth/sign-in/magic-link', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ email: trimmed, callbackURL: SIGN_IN_RETURN_PATH }),
+        body: JSON.stringify({ email: trimmed, callbackURL: returnTo }),
       });
     } catch {
       return fail('offline', 'Keine Verbindung – versuch es gleich noch einmal.');

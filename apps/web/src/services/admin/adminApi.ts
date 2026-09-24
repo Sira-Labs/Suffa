@@ -2,6 +2,8 @@
  * Client for the admin area and the second factor (story 4.2). Same origin, session cookie;
  * errors come back as German messages the page can show as they are.
  */
+import { apiRequest, type Fetch } from '@/services/api/request';
+
 export type Role = 'student' | 'teacher' | 'admin';
 
 export interface AdminUser {
@@ -25,10 +27,6 @@ export interface AuditEntry {
   createdAt: string;
 }
 
-export type ApiResult<T> =
-  | { ok: true; value: T }
-  | { ok: false; status: number; message: string };
-
 const MESSAGES: Record<string, string> = {
   second_factor_required: 'Bitte bestätige zuerst den Code aus deiner Authenticator-App.',
   invalid_code: 'Der Code stimmt nicht. Nimm den aktuellen Code aus der App.',
@@ -36,12 +34,7 @@ const MESSAGES: Record<string, string> = {
   not_set_up: 'Die Zwei-Faktor-Anmeldung ist noch nicht eingerichtet.',
   already_enabled: 'Die Zwei-Faktor-Anmeldung ist schon eingerichtet.',
   cannot_change_self: 'Das eigene Konto kann hier nicht geändert werden.',
-  forbidden: 'Dafür fehlt die Berechtigung.',
-  unauthorized: 'Bitte melde dich erneut an.',
-  not_found: 'Nicht gefunden.',
 };
-
-type Fetch = typeof fetch;
 
 export class AdminApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
@@ -85,28 +78,8 @@ export class AdminApi {
     );
   }
 
-  private async call<T>(path: string, init: RequestInit = {}): Promise<ApiResult<T>> {
-    let response: Response;
-    try {
-      response = await this.fetchImpl(path, {
-        ...init,
-        credentials: 'same-origin',
-        headers: init.body ? { 'content-type': 'application/json' } : undefined,
-      });
-    } catch {
-      return { ok: false, status: 0, message: 'Keine Verbindung.' };
-    }
-    if (response.status === 204) return { ok: true, value: undefined as T };
-    const body = (await response.json().catch(() => null)) as { error?: string } | null;
-    if (!response.ok) {
-      const code = body?.error ?? '';
-      return {
-        ok: false,
-        status: response.status,
-        message: MESSAGES[code] ?? `Serverfehler (${response.status}).`,
-      };
-    }
-    return { ok: true, value: body as T };
+  private call<T>(path: string, init: RequestInit = {}) {
+    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
   }
 }
 

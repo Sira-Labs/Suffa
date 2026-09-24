@@ -45,7 +45,8 @@ export interface SyncProvider {
   onAuthChange(listener: AuthListener): () => void;
 
   /** Trigger a magic-link login via email. */
-  signInWithEmail(email: string): Promise<Result<void>>;
+  /** `returnTo`: in-app path the link leads back to (backends may ignore it). */
+  signInWithEmail(email: string, returnTo?: string): Promise<Result<void>>;
   signOut(): Promise<Result<void>>;
 
   /**

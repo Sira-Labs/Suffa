@@ -18,6 +18,7 @@ import { Discover } from './modules/discover';
 import { FocusReview } from './modules/review';
 import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
 import { Admin } from './modules/admin';
+import { Classes, Join } from './modules/classes';
 
 /**
  * Normal paths (story 2.6, ADR-0013): Caddy answers unknown paths with index.html and the
@@ -45,6 +46,8 @@ export const router = createBrowserRouter([
       { path: 'library', element: <Library /> },
       { path: 'settings', element: <Settings /> },
       { path: 'admin', element: <Admin /> },
+      { path: 'classes', element: <Classes /> },
+      { path: 'join/:token', element: <Join /> },
       { path: 'more', element: <More /> },
       { path: 'training', element: <Training /> },
       { path: 'discover', element: <Discover /> },

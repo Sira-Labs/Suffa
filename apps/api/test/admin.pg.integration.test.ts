@@ -29,7 +29,7 @@ describe.skipIf(!url)('PgAdminRepository', () => {
       insert into users (id, email, name, role, created_at) values
         ('00000000-0000-4000-8000-000000000001', 'amina@example.org', 'Amina', 'student', '2026-09-01T10:00:00Z'),
         ('00000000-0000-4000-8000-000000000002', 'bilal@example.org', 'Bilal', 'teacher', '2026-09-01T10:01:00Z'),
-        ('00000000-0000-4000-8000-000000000003', 'a_b@example.org',   null,    'student', '2026-09-01T10:02:00Z'),
+        ('00000000-0000-4000-8000-000000000003', 'a_b@example.org',   '',    'student', '2026-09-01T10:02:00Z'),
         ('00000000-0000-4000-8000-000000000004', 'aXb@example.org',   null,    'student', '2026-09-01T10:02:00Z'),
         ('00000000-0000-4000-8000-000000000005', 'chef@example.org',  'Chef',  'admin',   '2026-09-01T10:03:00Z')`);
   });
@@ -66,6 +66,11 @@ describe.skipIf(!url)('PgAdminRepository', () => {
     // "_" must not match any character: only a_b, not aXb.
     expect(await names('a_b')).toEqual(['a_b@example.org']);
     expect(await names('%')).toEqual([]);
+  });
+
+  it('reports an empty name as no name', async () => {
+    const { users } = await repo.listUsers({ search: 'a_b', after: null, limit: 1 });
+    expect(users[0]!.name).toBeNull();
   });
 
   it('returns the fields the admin area shows', async () => {

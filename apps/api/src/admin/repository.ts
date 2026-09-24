@@ -69,7 +69,7 @@ export class PgAdminRepository implements AdminRepository {
     const page = rows.slice(0, limit).map((r) => ({
       id: r.id,
       email: r.email,
-      name: r.name,
+      name: r.name || null,
       role: r.role,
       emailVerified: r.email_verified,
       createdAt: r.created_at.toISOString(),

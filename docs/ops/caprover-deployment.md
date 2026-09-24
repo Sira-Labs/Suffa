@@ -113,7 +113,7 @@ Env (App Configs → Environment variables):
 | `SUFFA_ERROR_DSN`                                                           | DSN of the GlitchTip project `suffa-api` (§9); unset = no error reporting                               | S2          |
 | `SUFFA_WEB_ERROR_DSN`                                                       | DSN of the GlitchTip project `suffa-web` (§9), handed to the PWA via `/api/client-config`               | S2          |
 | `SUFFA_SYNC_DEV_TOKENS`                                                     | **never in prod** (the api refuses to start): `token=userUuid;…` for local/test sync before Better Auth | dev only    |
-| `SUFFA_SMTP_HOST`, `SUFFA_SMTP_PORT`                                        | `smtp-relay.gmail.com`, `465` – Google Workspace SMTP relay (§ Sign-in mails)                           | S3          |
+| `SUFFA_SMTP_HOST`, `SUFFA_SMTP_PORT`                                        | `smtp-relay.gmail.com`, `587` – Google Workspace SMTP relay (§ Sign-in mails)                           | S3          |
 | `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD`                                    | optional, only if the relay requires SMTP authentication (Workspace user + app password)                | S3          |
 | `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                              | S7          |
 | `SUFFA_MAIL_FROM`                                                           | `Suffa <noreply@<domain>>` – any address of the Workspace domain                                        | S3          |
@@ -426,19 +426,23 @@ If Tabayyun's rule already allows the server's IP, Suffa can use it as is (same 
 
 **2. Environment of `suffa-api`** (App Configs → Environment variables):
 
-| Name                                     | Value                                                                     |
-| ---------------------------------------- | ------------------------------------------------------------------------- |
-| `SUFFA_SMTP_HOST`                        | `smtp-relay.gmail.com`                                                    |
-| `SUFFA_SMTP_PORT`                        | `465` (implicit TLS) or `587` (STARTTLS, enforced)                        |
-| `SUFFA_MAIL_FROM`                        | `Suffa <noreply@your-domain>` – any address of the Workspace domain       |
-| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD` | only with "Require SMTP Authentication": the user and its app password    |
-| `SUFFA_PUBLIC_URL`                       | `https://suffa.<domain>`; its host name is also the relay greeting (EHLO) |
+| Name                                     | Value                                                                                      |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `SUFFA_SMTP_HOST`                        | `smtp-relay.gmail.com`                                                                     |
+| `SUFFA_SMTP_PORT`                        | `587` (STARTTLS, enforced; default) or `465` (implicit TLS). Many hosts block outgoing 465 |
+| `SUFFA_MAIL_FROM`                        | `Suffa <noreply@your-domain>` – any address of the Workspace domain                        |
+| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD` | only with "Require SMTP Authentication": the user and its app password                     |
+| `SUFFA_PUBLIC_URL`                       | `https://suffa.<domain>`; its host name is also the relay greeting (EHLO)                  |
 
 **3. Restart** the app. The log shows `auth.enabled` with `mail: smtp`. Without host and sender
 it logs `auth.disabled`; the app keeps working offline, only sign-in and sync stay off.
 
 The relay answers `550 5.7.0 Mail relay denied` when neither the IP rule nor authentication
 matches, and `421 4.7.0 Try again later, closing connection. (EHLO)` when the server greets with
-a name Google does not accept – Suffa greets with the host of `SUFFA_PUBLIC_URL`. Secrets live
+a name Google does not accept – Suffa greets with the host of `SUFFA_PUBLIC_URL`. Failed sends
+are logged as `mail.send_failed` with host, port and the SMTP answer; `ETIMEDOUT` or `ESOCKET`
+there means the outgoing port is blocked by the host (common for 465 and 25) – use `587`. A
+sign-in request answered with `403 INVALID_ORIGIN` means `SUFFA_PUBLIC_URL` differs from the
+address in the browser; `auth.enabled` logs the origin the api expects. Secrets live
 only in CapRover, never in the repository. Outside prod the api may run without SMTP: the
 sign-in link is then written to the log (`auth.magic_link_logged`) for local testing.

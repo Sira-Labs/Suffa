@@ -59,7 +59,7 @@ const RawEnvSchema = z.object({
     .optional(),
   /** SMTP for sign-in mails: the Google Workspace relay (smtp-relay.gmail.com). */
   SUFFA_SMTP_HOST: z.string().trim().optional(),
-  SUFFA_SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(465),
+  SUFFA_SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
   SUFFA_SMTP_USER: z.string().trim().optional(),
   SUFFA_SMTP_PASSWORD: z.string().optional(),
   SUFFA_MAIL_FROM: z.string().trim().optional(),

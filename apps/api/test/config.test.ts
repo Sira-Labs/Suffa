@@ -42,7 +42,7 @@ describe('loadConfig', () => {
     expect(config.publicUrl).toBe('https://suffa.example.org');
     expect(config.smtp).toMatchObject({
       host: 'smtp-relay.gmail.com',
-      port: 465,
+      port: 587,
       auth: { user: 'noreply@example.org' },
       clientName: 'suffa.example.org',
     });

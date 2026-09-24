@@ -33,7 +33,7 @@ services:
       # Sign-in mails (magic link) through the Google Workspace SMTP relay, as for Tabayyun.
       # User/password only if the relay requires SMTP authentication. Empty sender = no sign-in.
       SUFFA_SMTP_HOST: $$cap_smtp_host
-      SUFFA_SMTP_PORT: '465'
+      SUFFA_SMTP_PORT: '587'
       SUFFA_SMTP_USER: $$cap_smtp_user
       SUFFA_SMTP_PASSWORD: $$cap_smtp_password
       SUFFA_MAIL_FROM: $$cap_mail_from

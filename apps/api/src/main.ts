@@ -140,7 +140,7 @@ async function main(): Promise<void> {
       pool,
       secret: config.authSecret,
       publicUrl: config.publicUrl,
-      mailer: config.smtp ? new SmtpMailer(config.smtp) : new LogMailer(log),
+      mailer: config.smtp ? new SmtpMailer(config.smtp, log) : new LogMailer(log),
       production: config.env === 'prod',
     });
     const sessions = new SessionResolver(betterAuth);

@@ -44,10 +44,23 @@ export function magicLinkMail(url: string): {
   return { subject, text, html };
 }
 
+/**
+ * Seconds to wait for the SMTP server. The sign-in request waits for the mail, and the proxy in
+ * front gives up after 60 s; a blocked port must fail fast and visibly, not as a gateway timeout.
+ */
+export const SMTP_TIMEOUT_MS = { connection: 10_000, greeting: 10_000, socket: 20_000 };
+
+export interface MailLog {
+  error(obj: object, msg: string): void;
+}
+
 export class SmtpMailer implements Mailer {
   private readonly transport: Transporter;
 
-  constructor(private readonly settings: SmtpSettings) {
+  constructor(
+    private readonly settings: SmtpSettings,
+    private readonly log?: MailLog
+  ) {
     const implicitTls = settings.port === 465;
     this.transport = nodemailer.createTransport({
       host: settings.host,
@@ -56,6 +69,9 @@ export class SmtpMailer implements Mailer {
       secure: implicitTls,
       requireTLS: !implicitTls,
       name: settings.clientName,
+      connectionTimeout: SMTP_TIMEOUT_MS.connection,
+      greetingTimeout: SMTP_TIMEOUT_MS.greeting,
+      socketTimeout: SMTP_TIMEOUT_MS.socket,
       auth: settings.auth
         ? { user: settings.auth.user, pass: settings.auth.password }
         : undefined,
@@ -63,11 +79,31 @@ export class SmtpMailer implements Mailer {
   }
 
   async sendMagicLink(email: string, url: string): Promise<void> {
-    await this.transport.sendMail({
-      from: this.settings.from,
-      to: email,
-      ...magicLinkMail(url),
-    });
+    try {
+      await this.transport.sendMail({
+        from: this.settings.from,
+        to: email,
+        ...magicLinkMail(url),
+      });
+    } catch (error) {
+      // Never log the link or the address: host, port and the SMTP answer are enough to act on.
+      const { code, responseCode, message } = error as {
+        code?: string;
+        responseCode?: number;
+        message?: string;
+      };
+      this.log?.error(
+        {
+          host: this.settings.host,
+          port: this.settings.port,
+          code,
+          responseCode,
+          message,
+        },
+        'mail.send_failed'
+      );
+      throw error;
+    }
   }
 }
 

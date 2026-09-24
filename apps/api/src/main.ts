@@ -149,7 +149,11 @@ async function main(): Promise<void> {
       handler: (request) => betterAuth.handler(request),
       me: (h) => sessions.me(h),
     };
-    log.info({ mail: config.smtp ? 'smtp' : 'log' }, 'auth.enabled');
+    // The origin is what browsers must send; a mismatch answers 403 INVALID_ORIGIN.
+    log.info(
+      { mail: config.smtp ? 'smtp' : 'log', origin: new URL(config.publicUrl).origin },
+      'auth.enabled'
+    );
   } else if (!canMail) {
     log.error(
       'auth.disabled: SMTP is not configured (SUFFA_SMTP_HOST and SUFFA_MAIL_FROM)'

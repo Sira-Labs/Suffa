@@ -1,6 +1,6 @@
 # ADR-0009: Role-based access control — platform roles + class roles
 
-- Status: accepted (policies and middleware in place since story 3.2; classes follow in Sprint 4)
+- Status: accepted (policies and middleware since story 3.2; admin area, second factor and classes since Sprint 4)
 - Date: 2026-09-23
 
 ## Context
@@ -47,3 +47,17 @@ integration test that runs every route against every role.
 - The role is read from `users` on every request (no role in the cookie), so a change applies
   at once. Unknown values in the database fall back to `student`.
 - Dev tokens (outside prod only) always act as students.
+
+## Implementation (Sprint 4)
+
+- **Admin area (4.2):** role changes and disabling go through `PATCH /api/v1/admin/users/:id`
+  and are written to `audit_log` in the same transaction. Disabling ends all sessions; a
+  disabled user has no working session. Admins cannot change themselves.
+- **Second factor:** actions in `SECOND_FACTOR_ACTIONS` (all `admin:*`) need a session that
+  confirmed a TOTP code within 12 hours (`sessions.second_factor_at`). The secret is sealed
+  with AES-256-GCM, key derived from `SUFFA_AUTH_SECRET` (rotating it means re-enrolling).
+- **Classes (4.3):** `class:manage` is scoped; `authorize()` takes a scope loader that reads
+  the caller's class role from `class_members` (only `status = 'active'`). Invite tokens are
+  random (192 bit), stored as SHA-256, valid 14 days, one per class.
+- **GDPR (4.4):** export of everything stored about a user; deletion cascades through the
+  foreign keys, archives classes the user taught alone, and leaves an actor-less audit entry.

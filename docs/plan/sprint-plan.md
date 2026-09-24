@@ -25,7 +25,7 @@ gantt
   G0 met                             :milestone, done, g0, 2026-09-23, 0d
   section P1 Identity
   S3 Who are you? (5/5)              :done, s3, after s2, 14d
-  S4 Classes & admin                 :s4, after s3, 14d
+  S4 Classes & admin (3/5)          :active, s4, after s3, 14d
   section P2 Engagement
   S5 Every day counts               :s5, after s4, 14d
   S6 Class spirit                    :s6, after s5, 14d
@@ -58,6 +58,11 @@ pie showData
 | 3.3 ApiSyncProvider     | ✅     | same-origin cookie sync; `VITE_SYNC_BACKEND=api\|supabase\|off`                                                                                  |
 | 3.4 account UI          | ✅     | devices (browser, last activity), sign out one or all others, time zone; an ended session fails on its next request                              |
 | 3.5 security review     | ✅     | `docs/security/2026-09-review-auth-sync.md`: shared rate-limit bucket (proxy IP) and token-leaking Better Auth endpoints fixed; rest ticketed    |
+| 4.1 Supabase migration  | ⏳     | waits for the PO: is there production data in Supabase besides the PO's own (which already reached the API through the devices)?                 |
+| 4.2 admin area          | ✅     | users (search, role, disable), audit log; admin actions need a TOTP second factor confirmed within 12 h                                          |
+| 4.3 classes             | ✅     | create, invite link + QR (14 days, token hashed), join from a signed-out phone, teacher approval; scoped `class:manage`                          |
+| 4.4 GDPR                | ✅     | JSON export of all data; account deletion cascades (checked over every table with `user_id`), sole-teacher classes archived                      |
+| 4.5 pilot kick-off      | 📋     | interview guide and records in `docs/pilot/kickoff-interview.md`; the conversation itself is the PO's                                            |
 
 ## P0 — Foundation
 

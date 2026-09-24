@@ -110,7 +110,12 @@ only choose what plays and can move freely without restarting the video. Playing
 it to "Weiterschauen" at once (last opened first, Dexie v6 `discover_progress`, local); the card
 shows "Läuft oben". It stays pinned until it is marked as seen or unpinned ("Lösen", also from
 the player, which keeps playing); any item can be pinned by hand ("Anheften"). Every item
-appears exactly once: pinned on top, otherwise in the list.
+appears exactly once: pinned on top, otherwise in the list. The player continues where the learner stopped:
+the YouTube IFrame API (loaded on demand, attached to the running embed via `enablejsapi`)
+reports the position on pause, every 10 s and when the player closes; it is stored with the
+video length (and, for playlists, the video number). Cards show "Angefangen · 40 % geschaut"
+and a thin progress bar on the thumbnail; from 97 % a video starts over. Without the API the
+video still plays, only from the start.
 
 **Lückentext (cloze).** Each dialogue section gets a cloze station after its words: a real
 example sentence (Tatoeba or own) with the word blanked out, the German translation, and four

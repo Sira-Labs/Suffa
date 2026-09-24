@@ -56,4 +56,10 @@ export interface DiscoverProgress extends Syncable {
   /** Last time it was played or pinned; orders "Weiterschauen". */
   openedAt: string;
   pinned: boolean;
+  /** Where the learner stopped watching (seconds into the current video). */
+  positionSec?: number;
+  /** For playlists: which video (0-based) the position belongs to. */
+  playlistIndex?: number;
+  /** Length of that video, for the "x % watched" bar. */
+  durationSec?: number;
 }

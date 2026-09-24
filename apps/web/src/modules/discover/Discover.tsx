@@ -1,10 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { DiscoverCatalog, DiscoverCategory, DiscoverEntry } from '@/types';
+import type {
+  DiscoverCatalog,
+  DiscoverCategory,
+  DiscoverEntry,
+  DiscoverProgress,
+} from '@/types';
 import { Icon } from '@/components/Icon';
 import { logger } from '@/services/logger';
 import {
   CATEGORY_LABELS,
   discoverEmbedUrl,
+  formatPosition,
+  watchedPercent,
   discoverThumbnail,
   entries as allEntries,
   levelIncludes,
@@ -13,7 +20,9 @@ import {
   seenId,
   weeklyPick,
   youtubeUrl,
+  type ResumeAt,
 } from '@/services/discover';
+import { loadYouTubeApi, type YouTubePlayer } from '@/services/discover/youtubeApi';
 import { XP_RULES } from '@/services/engagement/xp';
 import { useCelebrationStore, useDiscoverStore, useListenStore } from '@/state';
 
@@ -120,15 +129,7 @@ export function Discover() {
               <Icon name="close" size={18} />
             </button>
           </div>
-          <div className="video-frame">
-            <iframe
-              key={playing.id}
-              title={playing.title}
-              src={discoverEmbedUrl(playing)}
-              allow="autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
+          <ResumablePlayer key={playing.id} entry={playing} />
           <strong>{playing.title}</strong>
           <span className="muted" style={{ fontSize: '0.9rem' }}>
             {playing.channel.title}
@@ -218,6 +219,84 @@ export function Discover() {
   );
 }
 
+/** How often the position is saved while a video plays. */
+const SAVE_EVERY_MS = 10_000;
+/** From here on a video counts as watched to the end (credits, end screens). */
+const FINISHED_PERCENT = 97;
+
+/**
+ * The embed, continuing where the learner stopped. The YouTube API attaches to the running
+ * iframe to read the position (on pause, every few seconds and when the player closes);
+ * without it the video still plays, only from the start.
+ */
+function ResumablePlayer({ entry }: { entry: DiscoverEntry }) {
+  const id = seenId(entry);
+  const savePosition = useDiscoverStore((s) => s.savePosition);
+  // Read once: the iframe must not reload while positions are saved.
+  const [resume] = useState<ResumeAt>(() => {
+    const saved = useDiscoverStore.getState().progress[id];
+    // Watched to the end: start over instead of at the last second.
+    if ((watchedPercent(saved) ?? 0) >= FINISHED_PERCENT) return {};
+    return { positionSec: saved?.positionSec, playlistIndex: saved?.playlistIndex };
+  });
+  const frameRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    let player: YouTubePlayer | null = null;
+    let timer: number | undefined;
+    let cancelled = false;
+    const save = () => {
+      // The player's methods exist only once it is ready.
+      if (typeof player?.getCurrentTime !== 'function') return;
+      const index = player.getPlaylistIndex?.();
+      const duration = player.getDuration();
+      void savePosition(
+        id,
+        player.getCurrentTime(),
+        index !== undefined && index >= 0 ? index : undefined,
+        duration
+      );
+    };
+    loadYouTubeApi()
+      .then((YT) => {
+        if (cancelled || !frameRef.current) return;
+        player = new YT.Player(frameRef.current, {
+          events: {
+            onStateChange: ({ data }) => {
+              if (data === YT.PlayerState.PAUSED) save();
+              // Finished: 100 %; the next play starts from the beginning again.
+              if (data === YT.PlayerState.ENDED) save();
+            },
+          },
+        });
+        timer = window.setInterval(save, SAVE_EVERY_MS);
+      })
+      .catch((error: unknown) => {
+        log.info('YouTube API unavailable; playing without resume', {
+          message: error instanceof Error ? error.message : String(error),
+        });
+      });
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearInterval(timer);
+      save();
+    };
+  }, [id, savePosition]);
+
+  return (
+    <div className="video-frame">
+      <iframe
+        ref={frameRef}
+        title={entry.title}
+        // origin lets the YouTube API talk to this page (postMessage) safely.
+        src={`${discoverEmbedUrl(entry, resume)}&origin=${encodeURIComponent(window.location.origin)}`}
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowFullScreen
+      />
+    </div>
+  );
+}
+
 /** Seen, started, pin/unpin: the same actions on a card and in the player. */
 function ItemActions({ entry }: { entry: DiscoverEntry }) {
   const seen = useListenStore((s) => Boolean(s.progress[seenId(entry)]?.completedAt));
@@ -241,7 +320,7 @@ function ItemActions({ entry }: { entry: DiscoverEntry }) {
   }
   return (
     <div className="row" style={{ gap: '0.5rem' }}>
-      {state?.startedAt && <span className="badge">Angefangen</span>}
+      {state?.startedAt && <span className="badge">{startedLabel(state)}</span>}
       <button className="btn" onClick={() => void confirmSeen()}>
         Als gesehen markieren
       </button>
@@ -257,6 +336,18 @@ function ItemActions({ entry }: { entry: DiscoverEntry }) {
   );
 }
 
+/** "Angefangen · 40 % geschaut" (with the video number for playlists). */
+function startedLabel(state: DiscoverProgress): string {
+  const percent = watchedPercent(state);
+  const where = state.playlistIndex ? `Video ${state.playlistIndex + 1}: ` : '';
+  if (percent !== null && percent > 0)
+    return `Angefangen · ${where}${percent} % geschaut`;
+  if ((state.positionSec ?? 0) >= 5) {
+    return `Angefangen · ${where}bei ${formatPosition(state.positionSec!)}`;
+  }
+  return 'Angefangen';
+}
+
 function DiscoverCard({
   entry,
   playing,
@@ -268,6 +359,7 @@ function DiscoverCard({
 }) {
   const thumb = discoverThumbnail(entry);
   const { channel } = entry;
+  const percent = watchedPercent(useDiscoverStore((s) => s.progress[seenId(entry)]));
 
   return (
     <li className={`card stack discover-card discover-${channel.category}`}>
@@ -287,6 +379,18 @@ function DiscoverCard({
         {entry.minutes ? (
           <span className="discover-duration">{entry.minutes} Min.</span>
         ) : null}
+        {percent !== null && percent > 0 && (
+          <span
+            className="discover-watched"
+            role="progressbar"
+            aria-label={`${entry.title}: ${percent} % geschaut`}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percent}
+          >
+            <span style={{ width: `${percent}%` }} />
+          </span>
+        )}
       </button>
       <span className="eyebrow discover-category">
         {CATEGORY_LABELS[channel.category]} · Stufe {channel.level} · {channel.variety}

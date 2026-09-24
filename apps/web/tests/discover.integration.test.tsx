@@ -116,7 +116,8 @@ describe('Entdecken (integration)', () => {
     expect(document.querySelector('iframe')).toBeNull();
     await user.click(screen.getByRole('button', { name: 'Tajwid-Reihe abspielen' }));
     expect(screen.getByTitle('Tajwid-Reihe').getAttribute('src')).toBe(
-      'https://www.youtube-nocookie.com/embed/videoseries?list=PLquran&rel=0&autoplay=1'
+      'https://www.youtube-nocookie.com/embed/videoseries?list=PLquran&rel=0&autoplay=1&enablejsapi=1' +
+        `&origin=${encodeURIComponent(window.location.origin)}`
     );
   });
 
@@ -210,5 +211,38 @@ describe('Entdecken (integration)', () => {
     const pinned = await screen.findByRole('list', { name: 'Weiterschauen' });
     expect(within(pinned).getByText('Das Alphabet')).toBeInTheDocument();
     expect(within(pinned).queryByText('Angefangen')).toBeNull();
+  });
+
+  it('shows how much was watched and continues there', async () => {
+    const user = userEvent.setup();
+    await useDiscoverStore.getState().open('yt/vid00000001');
+    await useDiscoverStore.getState().savePosition('yt/vid00000001', 216, undefined, 540);
+    renderDiscover();
+    const pinned = await screen.findByRole('list', { name: 'Weiterschauen' });
+    expect(within(pinned).getByText('Angefangen · 40 % geschaut')).toBeInTheDocument();
+    expect(
+      within(pinned).getByRole('progressbar', { name: 'Das Alphabet: 40 % geschaut' })
+    ).toHaveAttribute('aria-valuenow', '40');
+    await user.click(
+      within(pinned).getByRole('button', { name: 'Das Alphabet abspielen' })
+    );
+    const player = screen.getByRole('region', { name: 'Jetzt läuft' });
+    expect(within(player).getByTitle('Das Alphabet').getAttribute('src')).toMatch(
+      /&start=216&origin=/
+    );
+  });
+
+  it('starts a finished video from the beginning again', async () => {
+    const user = userEvent.setup();
+    await useDiscoverStore.getState().open('yt/vid00000001');
+    await useDiscoverStore.getState().savePosition('yt/vid00000001', 538, undefined, 540);
+    renderDiscover();
+    await user.click(
+      await screen.findByRole('button', { name: 'Das Alphabet abspielen' })
+    );
+    const player = screen.getByRole('region', { name: 'Jetzt läuft' });
+    expect(within(player).getByTitle('Das Alphabet').getAttribute('src')).not.toMatch(
+      /start=/
+    );
   });
 });

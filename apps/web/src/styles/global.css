@@ -1777,3 +1777,18 @@ textarea.input {
   background: var(--accent);
   color: var(--on-accent, #1a1a1a);
 }
+
+/* How much of a video was watched: a thin bar along the bottom of the thumbnail. */
+.discover-watched {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
+}
+.discover-watched span {
+  display: block;
+  height: 100%;
+  background: var(--bad, #e5484d);
+}

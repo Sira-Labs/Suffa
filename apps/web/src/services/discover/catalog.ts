@@ -56,12 +56,38 @@ export function weeklyPick<T>(
   return items[(isoWeek(date) + date.getFullYear()) % items.length];
 }
 
-/** Privacy-enhanced embed; a playlist plays as a series. */
-export function discoverEmbedUrl(item: DiscoverItem): string {
+/** Where to continue: seconds into the video and, for a playlist, which video (0-based). */
+export interface ResumeAt {
+  positionSec?: number;
+  playlistIndex?: number;
+}
+
+/**
+ * Privacy-enhanced embed; a playlist plays as a series. `enablejsapi` lets the page read the
+ * position (to continue later); `resume` starts where the learner stopped.
+ */
+export function discoverEmbedUrl(item: DiscoverItem, resume: ResumeAt = {}): string {
   const id = encodeURIComponent(item.id);
-  return item.type === 'playlist'
-    ? `https://www.youtube-nocookie.com/embed/videoseries?list=${id}&rel=0&autoplay=1`
-    : `https://www.youtube-nocookie.com/embed/${id}?rel=0&autoplay=1`;
+  const base =
+    item.type === 'playlist'
+      ? `https://www.youtube-nocookie.com/embed/videoseries?list=${id}`
+      : `https://www.youtube-nocookie.com/embed/${id}?`;
+  const params = [`rel=0`, `autoplay=1`, `enablejsapi=1`];
+  if (item.type === 'playlist' && resume.playlistIndex) {
+    params.push(`index=${resume.playlistIndex}`);
+  }
+  const start = Math.floor(resume.positionSec ?? 0);
+  if (start > 0) params.push(`start=${start}`);
+  return `${base}${item.type === 'playlist' ? '&' : ''}${params.join('&')}`;
+}
+
+/** "4:05" or "1:02:03". */
+export function formatPosition(seconds: number): string {
+  const s = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const rest = String(s % 60).padStart(2, '0');
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${rest}` : `${m}:${rest}`;
 }
 
 export function discoverThumbnail(item: DiscoverItem): string | null {
@@ -95,4 +121,12 @@ export function pinnedEntries<T extends DiscoverItem>(
     .sort((a, b) =>
       progress[seenId(b)]!.openedAt.localeCompare(progress[seenId(a)]!.openedAt)
     );
+}
+
+/** Share of the current video watched (0–100), or null without a known length. */
+export function watchedPercent(
+  progress: Pick<DiscoverProgress, 'positionSec' | 'durationSec'> | undefined
+): number | null {
+  if (!progress?.durationSec || progress.positionSec === undefined) return null;
+  return Math.min(100, Math.round((progress.positionSec / progress.durationSec) * 100));
 }

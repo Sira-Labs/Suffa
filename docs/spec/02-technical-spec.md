@@ -237,13 +237,13 @@ export interface ModelRouter {
 
 Same pattern as Tabayyun; full runbook in `docs/ops/caprover-deployment.md`.
 
-| CapRover app   | Image                                                | Persistent  | Notes                                                                   |
-| -------------- | ---------------------------------------------------- | ----------- | ----------------------------------------------------------------------- |
-| `suffa-web`    | `ghcr.io/thedatadudech/suffa-web` (Caddy + PWA)      | no          | Public domain; proxies `/api` → api, `/media` → rustfs; CSP             |
-| `suffa-api`    | `ghcr.io/thedatadudech/suffa-api` (Node 22 + ffmpeg) | no          | Port 8000; migrates DB on start                                         |
-| `suffa-worker` | same image, `SUFFA_ROLE=worker`                      | `/data/tmp` | pg-boss jobs: imports, transcode, whisper, engagement, push             |
-| `suffa-db`     | `pgvector/pgvector:<pinned>-pg17`                    | yes         | Plain app, internal only; nightly `pg_dump` off-box                     |
-| `rustfs`       | existing (shared with Tabayyun)                      | yes         | Buckets `suffa-media`, `suffa-uploads`, `suffa-content`; Suffa-only key |
+| CapRover app   | Image                                            | Persistent  | Notes                                                                   |
+| -------------- | ------------------------------------------------ | ----------- | ----------------------------------------------------------------------- |
+| `suffa-web`    | `ghcr.io/sira-labs/suffa-web` (Caddy + PWA)      | no          | Public domain; proxies `/api` → api, `/media` → rustfs; CSP             |
+| `suffa-api`    | `ghcr.io/sira-labs/suffa-api` (Node 22 + ffmpeg) | no          | Port 8000; migrates DB on start                                         |
+| `suffa-worker` | same image, `SUFFA_ROLE=worker`                  | `/data/tmp` | pg-boss jobs: imports, transcode, whisper, engagement, push             |
+| `suffa-db`     | `pgvector/pgvector:<pinned>-pg17`                | yes         | Plain app, internal only; nightly `pg_dump` off-box                     |
+| `rustfs`       | existing (shared with Tabayyun)                  | yes         | Buckets `suffa-media`, `suffa-uploads`, `suffa-content`; Suffa-only key |
 
 CI (GitHub Actions): lint → typecheck → test → build images → GHCR →
 `caprover/deploy-from-github@v2` with per-app tokens (`CAPROVER_APP_TOKEN_API|WEB|WORKER`).

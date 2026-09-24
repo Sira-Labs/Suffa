@@ -166,7 +166,7 @@ push them to GHCR, and CapRover runs them.
    or [`suffa-full.yml`](infra/caprover/one-click/suffa-full.yml) (db, api, worker, web).
 3. Enter the app name **`suffa`**, then deploy.
 
-The images are public on GHCR (`ghcr.io/thedatadudech/suffa-web`, `suffa-api`), so CapRover
+The images are public on GHCR (`ghcr.io/sira-labs/suffa-web`, `suffa-api`), so CapRover
 needs no registry credentials.
 Optional: [`suffa-backup.yml`](infra/caprover/one-click/suffa-backup.yml) (nightly verified
 backups to RustFS) and [`glitchtip.yml`](infra/caprover/one-click/glitchtip.yml) (error tracking

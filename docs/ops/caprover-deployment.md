@@ -31,9 +31,11 @@ Apps/Databases → `>> TEMPLATE <<`**, paste the file, enter the app name (**`su
 | `glitchtip.yml`    | `glitchtip`, `glitchtip-db`                          | Error tracking and uptime checks (§9)                                        |
 
 The images are built by `.github/workflows/release.yml` on every push to `main` and
-published **publicly** on GHCR (`ghcr.io/thedatadudech/suffa-web`, `suffa-api`), so CapRover
+published **publicly** on GHCR (`ghcr.io/sira-labs/suffa-web`, `suffa-api`), so CapRover
 needs no registry credentials. If a pull ever fails with `unauthorized`, open the package on
-GitHub (Packages → suffa-web / suffa-api → Package settings) and set its visibility to public.
+GitHub (Packages → suffa-web / suffa-api / suffa-backup → Package settings) and set its
+visibility to public. In a GitHub organization new packages start **private**: after the
+first release there, make all three public once.
 For deploying without GHCR, the root `captain-definition` builds the same image on the server
 (method 3 in Tabayyun's guide).
 
@@ -42,9 +44,9 @@ For deploying without GHCR, the root `captain-definition` builds the same image 
 | #   | CapRover app          | Image                                          | Persistent data                                   | Public domain                   | Notes                                                                                |
 | --- | --------------------- | ---------------------------------------------- | ------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
 | 1   | `suffa-db`            | `pgvector/pgvector:<pinned>-pg17`              | `/var/lib/postgresql/data` (label `suffa-pgdata`) | no                              | Plain app, not a one-click DB (needs pgvector). No host port.                        |
-| 2   | `suffa-api`           | `ghcr.io/thedatadudech/suffa-api:<sha>`        | none                                              | optional                        | Runs DB migrations on start; refuses to start on placeholder secrets. Port **8000**. |
+| 2   | `suffa-api`           | `ghcr.io/sira-labs/suffa-api:<sha>`            | none                                              | optional                        | Runs DB migrations on start; refuses to start on placeholder secrets. Port **8000**. |
 | 3   | `suffa-worker`        | same image as api                              | `/data/tmp` (scratch for transcodes)              | no                              | `SUFFA_ROLE=worker`. Has `ffmpeg`. Exits with code 3 until the api has migrated.     |
-| 4   | `suffa-web`           | `ghcr.io/thedatadudech/suffa-web:<sha>`        | none                                              | **yes** (e.g. `suffa.<domain>`) | Caddy + PWA; proxies `/api`, `/healthz`, `/media`. Port **80**.                      |
+| 4   | `suffa-web`           | `ghcr.io/sira-labs/suffa-web:<sha>`            | none                                              | **yes** (e.g. `suffa.<domain>`) | Caddy + PWA; proxies `/api`, `/healthz`, `/media`. Port **80**.                      |
 | —   | `rustfs` (**exists**) | `rustfs/rustfs:1.0.0` (as pinned for Tabayyun) | existing                                          | no                              | Add buckets + a Suffa-only key (below).                                              |
 
 Separate `suffa-db` rather than a second database inside `tabayyun-db`: the two apps then
@@ -207,7 +209,7 @@ to GHCR, and deploys with `caprover/deploy-from-github@v2`. Every step is skippe
 
 Every night a small app takes a `pg_dump` of `suffa-db`, checks that it can be read back
 (`pg_restore --list`), uploads it to the RustFS bucket `suffa` and checks the uploaded size.
-Image: `ghcr.io/thedatadudech/suffa-backup` (scripts in `infra/backup/`).
+Image: `ghcr.io/sira-labs/suffa-backup` (scripts in `infra/backup/`).
 
 ```
 suffa/postgres/daily/YYYY/MM/suffa-<timestamp>.dump     every night

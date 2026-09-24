@@ -13,9 +13,6 @@ on:
 permissions:
   contents: read
 
-env:
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/suffa
-
 jobs:
   checks:
     name: ci checks
@@ -52,6 +49,9 @@ jobs:
           --health-cmd "pg_isready -U suffa" --health-interval 2s --health-timeout 5s
           --health-retries 20
     steps:
+      # Image names must be lowercase; the owner (e.g. "Sira-Labs") may not be.
+      - name: image prefix
+        run: echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/suffa" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - id: tag
         run: echo "tag=sha-$(git rev-parse --short=7 HEAD)" >> "$GITHUB_OUTPUT"
@@ -157,6 +157,9 @@ jobs:
     # Skipped until the repository variable CAPROVER_SERVER is set.
     if: ${{ vars.CAPROVER_SERVER != '' }}
     steps:
+      # Image names must be lowercase; the owner (e.g. "Sira-Labs") may not be.
+      - name: image prefix
+        run: echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/suffa" >> "$GITHUB_ENV"
       - name: which apps are configured?
         id: gate
         env:

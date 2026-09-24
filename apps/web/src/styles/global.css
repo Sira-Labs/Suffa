@@ -1792,3 +1792,67 @@ textarea.input {
   height: 100%;
   background: var(--bad, #e5484d);
 }
+
+/* ---------- Daily quests (story 5.2) ---------- */
+.quest-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.quest-body {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  background: var(--bg-elev-2);
+  color: inherit;
+  text-decoration: none;
+}
+.quest-body:hover,
+.quest-body:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+}
+.quest-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.quest-done .quest-icon {
+  color: var(--bg);
+  background: var(--good);
+}
+.quest-title {
+  font-weight: 600;
+}
+.quest-done .quest-title {
+  color: var(--text-muted);
+}
+.quest-xp,
+.quest-count {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+.quest .review-progress > span {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent-2);
+}
+.quest-done .review-progress > span {
+  background: var(--good);
+}
+.quest-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}

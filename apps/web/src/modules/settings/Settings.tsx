@@ -1,3 +1,4 @@
+import { WEEKLY_GOALS } from '@suffa/engagement';
 import { useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { TashkilToggle } from '@/components';
@@ -70,6 +71,26 @@ export function Settings() {
             onChange={(e) => void update({ dailyGoal: Number(e.target.value) })}
             style={{ width: 100 }}
           />
+        </label>
+        <label className="row" style={{ justifyContent: 'space-between' }}>
+          <span className="stack" style={{ gap: 0 }}>
+            <span>Wochenziel</span>
+            <span className="muted" style={{ fontSize: '0.85rem' }}>
+              Lerntage pro Woche – ein freier Tag bricht das Ziel nicht
+            </span>
+          </span>
+          <select
+            className="input"
+            value={settings.weeklyGoal ?? 5}
+            onChange={(e) => void update({ weeklyGoal: Number(e.target.value) })}
+            style={{ width: 130 }}
+          >
+            {WEEKLY_GOALS.map((goal) => (
+              <option key={goal} value={goal}>
+                {goal} Tage
+              </option>
+            ))}
+          </select>
         </label>
       </div>
 

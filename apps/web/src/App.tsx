@@ -12,6 +12,7 @@ import {
 } from './navigation';
 import { logger } from './services/logger';
 import { useTrainingScope } from './modules/units/useReachedUnits';
+import { EngagementWatcher } from './modules/engagement/EngagementWatcher';
 import {
   useCheckInStore,
   useContentStore,
@@ -91,7 +92,12 @@ export function App() {
     );
   }
 
-  return <Shell />;
+  return (
+    <>
+      <EngagementWatcher />
+      <Shell />
+    </>
+  );
 }
 
 function Brand() {

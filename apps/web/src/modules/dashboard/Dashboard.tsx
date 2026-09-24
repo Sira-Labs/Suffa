@@ -1,45 +1,30 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import type { ReviewLog, SrsCard } from '@/types';
+import type { SrsCard } from '@/types';
 import { content } from '@/content';
 import { ArabicText } from '@/components';
 import { Icon } from '@/components/Icon';
-import { reviewLogRepo } from '@/services/storage';
 import { isTtsSupported, speakArabic } from '@/services/speech';
-import {
-  computeStreak,
-  masteryBuckets,
-  reviewHeatmap,
-  weakCards,
-} from '@/services/stats';
+import { masteryBuckets, reviewHeatmap, weakCards } from '@/services/stats';
 import { buildTodayPlan, localDay, reviewsToday, wordOfTheDay } from '@/services/today';
-import {
-  listeningXpEvents,
-  practiceXpEvents,
-  unitOnTimeXpEvents,
-  stageXpEvents,
-  checkInXpEvents,
-  XP_RULES,
-  reviewXpEvents,
-  startOfWeek,
-  sumXp,
-} from '@/services/engagement/xp';
-import { lessonSizes, loadPublisherIndex } from '@/services/audio/publisherIndex';
+import { XP_RULES } from '@/services/engagement/xp';
 import type { TodayStep } from '@/services/today';
 import { ForgettingReminder } from './ForgettingReminder';
 import {
   useCelebrationStore,
   useCheckInStore,
   useContentStore,
+  useEngagementStore,
   useEnrollmentStore,
   useListenStore,
-  usePracticeStore,
   useSettingsStore,
   useSrsStore,
 } from '@/state';
 import { CurrentUnitCard, currentUnit } from './CurrentUnitCard';
 import { LevelCard } from './LevelCard';
 import { useReachedUnits } from '@/modules/units/useReachedUnits';
+import { TodayQuests } from '@/modules/engagement/TodayQuests';
+import { useEngagement } from '@/modules/engagement/useEngagement';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
   weekday: 'long',
@@ -52,36 +37,25 @@ export function Dashboard() {
   const cards = useSrsStore((s) => s.cards);
   const summary = useSrsStore((s) => s.summary)();
   const dailyGoal = useSettingsStore((s) => s.settings.dailyGoal);
-  const [logs, setLogs] = useState<ReviewLog[]>([]);
+  const logs = useEngagementStore((s) => s.logs);
+  const refreshLogs = useEngagementStore((s) => s.refresh);
   const listening = useListenStore((s) => s.progress);
-  const practised = usePracticeStore((s) => s.records);
   const enrollments = useEnrollmentStore((s) => s.enrollments);
   const exams = useEnrollmentStore((s) => s.exams);
   const activeUnit = currentUnit(enrollments, exams);
-  const [sizes, setSizes] = useState<ReadonlyMap<string, number>>(new Map());
   const checkIns = useCheckInStore((s) => s.checkIns);
   const checkIn = useCheckInStore((s) => s.checkIn);
   const celebrate = useCelebrationStore((s) => s.show);
   const { keep } = useReachedUnits();
 
-  useEffect(() => {
-    void reviewLogRepo.all().then(setLogs);
-  }, [cards]);
+  const engagement = useEngagement();
 
   useEffect(() => {
-    let cancelled = false;
-    // Lesson sizes (for lesson bonuses) come from the lazily loaded audio index.
-    void loadPublisherIndex().then((index) => {
-      if (!cancelled) setSizes(lessonSizes(index));
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
+    void refreshLogs();
+  }, [cards, refreshLogs]);
   const mastery = masteryBuckets(cards);
   const weak = weakCards(cards, logs);
-  const streak = computeStreak(logs);
+  const streak = engagement.streak.current;
   const heat = reviewHeatmap(logs);
   const maxHeat = Math.max(1, ...heat.map((h) => h.count));
   const today = reviewsToday(logs);
@@ -90,16 +64,7 @@ export function Dashboard() {
   const heardToday = heard.filter(
     (p) => localDay(new Date(p.completedAt!)) === todayKey
   ).length;
-  const xpEvents = [
-    ...reviewXpEvents(logs),
-    ...listeningXpEvents(heard, sizes),
-    ...practiceXpEvents(Object.values(practised)),
-    ...unitOnTimeXpEvents(Object.values(enrollments), exams),
-    ...stageXpEvents(exams),
-    ...checkInXpEvents(Object.values(checkIns)),
-  ];
-  const weekXp = sumXp(xpEvents, startOfWeek());
-  const totalXp = sumXp(xpEvents, new Date(0));
+  const { weekXp, totalXp } = engagement;
   const plan = buildTodayPlan({
     dueCount: summary.dueCount,
     newCount: summary.newCount,
@@ -153,6 +118,7 @@ export function Dashboard() {
       </header>
 
       <CurrentUnitCard />
+      <TodayQuests summary={engagement} unit={activeUnit ?? 1} />
       <ForgettingReminder cards={cards} logs={logs} />
 
       <div className="today-grid">
@@ -241,7 +207,7 @@ export function Dashboard() {
         <h2 id="progress" className="eyebrow">
           Fortschritt
         </h2>
-        <LevelCard totalXp={totalXp} />
+        <LevelCard totalXp={totalXp} level={engagement.level} />
         <div
           className="grid"
           style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}

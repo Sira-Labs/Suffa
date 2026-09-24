@@ -125,6 +125,7 @@ export const defaultSettings: SettingsRecord = {
   theme: 'dark',
   arabicFontScale: 1,
   dailyGoal: 20,
+  weeklyGoal: 5,
   showTransliteration: true,
   dialectNotes: false,
   updated_at: new Date(0).toISOString(),

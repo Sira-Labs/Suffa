@@ -95,6 +95,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
         theme: 'light',
         arabicFontScale: 1.25,
         dailyGoal: 30,
+        weeklyGoal: 3,
         showTransliteration: false,
         dialectNotes: true,
       },

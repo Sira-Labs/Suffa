@@ -67,6 +67,8 @@ export const SYNC_SCHEMAS = {
     theme: z.enum(['dark', 'light']),
     arabicFontScale: z.number().min(0.5).max(3),
     dailyGoal: z.number().int().min(1).max(1000),
+    // Active days per week (story 5.5); older app versions do not send it yet.
+    weeklyGoal: z.union([z.literal(3), z.literal(5), z.literal(7)]).default(5),
     showTransliteration: z.boolean(),
     dialectNotes: z.boolean(),
   }),

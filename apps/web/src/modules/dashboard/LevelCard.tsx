@@ -1,14 +1,15 @@
 import { Link } from 'react-router-dom';
+import type { Level } from '@suffa/engagement';
 import { Icon } from '@/components/Icon';
 import { STAGES, stageState } from '@/services/enrollment';
 import { useBookProgress } from '@/modules/units/useBookProgress';
 import { useEnrollmentStore } from '@/state';
 
 /**
- * Where the learner stands: level 1 (Book 1), the running stage with its badge, units passed
- * and all XP earned so far. Replaces the old mastery bar on "Heute".
+ * Where the learner stands: the XP level with the way to the next one, level 1 (Book 1), the
+ * running stage with its badge and the units passed.
  */
-export function LevelCard({ totalXp }: { totalXp: number }) {
+export function LevelCard({ totalXp, level }: { totalXp: number; level: Level }) {
   const exams = useEnrollmentStore((s) => s.exams);
   const { units } = useBookProgress();
   const passed = units.filter((u) => u.status.state === 'completed').length;
@@ -26,8 +27,23 @@ export function LevelCard({ totalXp }: { totalXp: number }) {
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <span className="eyebrow">Dein Level</span>
         <span className="badge header-chip">
-          <strong style={{ color: 'var(--accent)' }}>{totalXp} XP</strong>
-          <span>gesamt</span>
+          <strong style={{ color: 'var(--accent)' }}>Level {level.level}</strong>
+          <span>{totalXp} XP</span>
+        </span>
+      </div>
+      <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
+        <div
+          className="review-progress"
+          role="progressbar"
+          aria-label={`Weg zu Level ${level.level + 1}`}
+          aria-valuemin={0}
+          aria-valuemax={level.span}
+          aria-valuenow={level.into}
+        >
+          <div style={{ width: `${(level.into / level.span) * 100}%` }} />
+        </div>
+        <span className="muted" style={{ whiteSpace: 'nowrap' }}>
+          noch {level.span - level.into} XP bis Level {level.level + 1}
         </span>
       </div>
       <strong

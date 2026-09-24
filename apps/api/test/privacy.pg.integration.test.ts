@@ -85,6 +85,7 @@ describe.skipIf(!url)('Privacy: export and delete (Postgres)', () => {
       quests: [],
       achievements: [],
     });
+    expect(data.classRecognition).toEqual({ badges: [], shoutouts: [], challenges: [] });
     expect(data.sessions).toEqual([expect.objectContaining({ user_agent: 'Firefox' })]);
     const text = JSON.stringify(data);
     expect(text).not.toContain('secret-token-value');

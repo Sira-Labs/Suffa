@@ -5,7 +5,7 @@
 import type { Action } from './policies.js';
 
 export interface RoutePolicy {
-  method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   path: string;
   action: Action;
 }
@@ -39,6 +39,22 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   {
     method: 'DELETE',
     path: '/api/v1/classes/:id/members/:userId',
+    action: 'class:manage',
+  },
+  { method: 'GET', path: '/api/v1/classes/:id/progress', action: 'class:progress:read' },
+  { method: 'GET', path: '/api/v1/classes/:id/feed', action: 'class:read' },
+  { method: 'PUT', path: '/api/v1/classes/:id/challenge', action: 'class:manage' },
+  { method: 'DELETE', path: '/api/v1/classes/:id/challenge', action: 'class:manage' },
+  { method: 'POST', path: '/api/v1/classes/:id/badges', action: 'class:manage' },
+  {
+    method: 'POST',
+    path: '/api/v1/classes/:id/badges/:badgeId/awards',
+    action: 'class:manage',
+  },
+  { method: 'POST', path: '/api/v1/classes/:id/shoutouts', action: 'class:manage' },
+  {
+    method: 'DELETE',
+    path: '/api/v1/classes/:id/shoutouts/:shoutoutId',
     action: 'class:manage',
   },
   { method: 'GET', path: '/api/v1/invites/:token', action: 'class:join' },

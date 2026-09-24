@@ -43,6 +43,8 @@ export const RBAC_MATRIX = {
   'class:manage': ['teacher', 'admin'],
   /** See one's classes and join one with an invite. */
   'class:join': ['student', 'teacher', 'admin'],
+  /** Read a class's feed (challenge, shout-outs, badges); scoped: active member of it. */
+  'class:read': ['student', 'teacher', 'admin'],
   /** Read aggregated progress of a class; additionally scoped by class role. */
   'class:progress:read': ['teacher', 'admin'],
   /** List and search users in the admin area. */
@@ -88,6 +90,9 @@ export function can(actor: Actor | null, action: Action, scope?: ClassScope): bo
     case 'class:manage':
       // Admins oversee every class; teachers only classes they teach.
       return actor.role === 'admin' || scope?.classRole === 'teacher';
+    case 'class:read':
+      // Any active member of the class (pending learners wait for approval first).
+      return actor.role === 'admin' || (scope?.classRole ?? null) !== null;
     default:
       return true;
   }

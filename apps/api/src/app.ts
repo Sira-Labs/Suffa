@@ -14,6 +14,10 @@ import {
 } from './auth/betterAuth.js';
 import { createAccountRoutes, type AccountRouteDeps } from './account/routes.js';
 import { createClassRoutes, type ClassRouteDeps } from './classes/routes.js';
+import {
+  createClassSpiritRoutes,
+  type ClassSpiritRouteDeps,
+} from './classes/spiritRoutes.js';
 import { sameOriginOnly } from './http/sameOrigin.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
 import { createEngagementRoutes, type EngagementRouteDeps } from './engagement/routes.js';
@@ -39,6 +43,8 @@ export interface AppDeps {
   onProbeError?: (error: unknown) => void;
   /** Sync endpoints; omitted in tests that only exercise health/version. */
   sync?: SyncRouteDeps;
+  /** Class dashboard, challenge, teacher badges and shout-outs (Sprint 6). */
+  classSpirit?: ClassSpiritRouteDeps;
   /** The server's copy of XP, streak and badges (story 5.4). */
   engagement?: EngagementRouteDeps;
   /** Browser error reporting: /api/client-config and the /api/errors tunnel. */
@@ -129,6 +135,7 @@ export function createApp(deps: AppDeps): Hono {
   }
   if (deps.account) app.route('/api/v1/account', createAccountRoutes(deps.account));
   if (deps.classes) app.route('/api/v1', createClassRoutes(deps.classes));
+  if (deps.classSpirit) app.route('/api/v1', createClassSpiritRoutes(deps.classSpirit));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));

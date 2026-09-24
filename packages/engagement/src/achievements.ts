@@ -108,6 +108,14 @@ export const BADGES: readonly BadgeDef[] = [
     rule: '{n}× volle Punktzahl in einem Test',
     thresholds: [1, 5, 10],
   },
+  {
+    id: 'ruh',
+    name: 'Rūḥ al-Faṣl',
+    arabic: 'رُوح الفَصل',
+    meaning: 'Klassengeist',
+    rule: '{n} Klassen-Challenges mitgeschafft',
+    thresholds: [1, 5, 10],
+  },
   ...STAGES.map((stage) => ({
     id: `stage-${stage.id}`,
     name: stage.badge,
@@ -133,6 +141,8 @@ export interface AchievementFacts {
   weeklyGoalsMetOn: readonly string[];
   /** Days all three quests were done, in order. */
   allQuestsOn: readonly string[];
+  /** Class challenges reached with the learner's help (known to the server only). */
+  classChallengesOn?: readonly string[];
 }
 
 /** Instants at which each count went up by one, per badge. */
@@ -189,6 +199,7 @@ function steps(input: EngagementInput, facts: AchievementFacts, timeZone: string
     mutakallim: bySkill('speak'),
     mutasarrif: bySkill('verbs'),
     najm: perfectAt,
+    ruh: [...(facts.classChallengesOn ?? [])],
   };
   for (const stage of STAGES) {
     const passed = stageTestPassed(input.exams, stage);

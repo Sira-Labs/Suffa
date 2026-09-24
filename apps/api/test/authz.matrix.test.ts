@@ -57,6 +57,7 @@ const privacyRepo: PrivacyRepository = {
     classes: [],
     learningData: {} as never,
     engagement: { state: null, xpLedger: [], quests: [], achievements: [] },
+    classRecognition: { badges: [], shoutouts: [], challenges: [] },
     auditLog: [],
   }),
   delete: async () => true,
@@ -121,6 +122,23 @@ function buildApp() {
       queueDepth: async () => ({ waiting: 0, active: 0, failed: 0, deadLetter: 0 }),
     },
     sync: { repo: syncRepo, auth: resolver, log: quiet },
+    classSpirit: {
+      classes: classRepo,
+      progress: {
+        progress: async () => ({ since: '', students: [], matureByRef: {}, leeches: [] }),
+      },
+      spirit: {
+        feed: async () => ({ challenge: null, shoutouts: [], badges: [] }),
+        setChallenge: async () => ({}) as never,
+        removeChallenge: async () => false,
+        createBadge: async () => ({}) as never,
+        award: async () => false,
+        shoutout: async () => null,
+        removeShoutout: async () => false,
+      },
+      auth: resolver,
+      log: quiet,
+    },
     engagement: {
       repo: { load: async () => null, save: async () => {}, state: async () => null },
       auth: resolver,
@@ -162,7 +180,9 @@ function requestFor(route: { method: string; path: string }, role: Role | null) 
         ? JSON.stringify(
             route.method === 'POST' ? { records: [], name: 'x' } : { timeZone: 'UTC' }
           )
-        : undefined,
+        : route.method === 'PUT'
+          ? JSON.stringify({ template: 'xp', target: 100, timeZone: 'UTC' })
+          : undefined,
   });
 }
 

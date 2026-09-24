@@ -25,6 +25,12 @@ export interface AccountExport {
     quests: Record<string, unknown>[];
     achievements: Record<string, unknown>[];
   };
+  /** Recognition inside classes: badges and shout-outs received, challenges helped. */
+  classRecognition: {
+    badges: Record<string, unknown>[];
+    shoutouts: Record<string, unknown>[];
+    challenges: Record<string, unknown>[];
+  };
   auditLog: Record<string, unknown>[];
 }
 
@@ -97,6 +103,27 @@ export class PgPrivacyRepository implements PrivacyRepository {
         achievements: await q(
           `select badge_id, tier, unlocked_at
              from achievement_unlocks where user_id = $1 order by unlocked_at, badge_id`
+        ),
+      },
+      classRecognition: {
+        badges: await q(
+          `select c.name as class, b.name, b.message, a.awarded_at
+             from teacher_badge_awards a
+             join teacher_badges b on b.id = a.badge_id
+             join classes c on c.id = b.class_id
+            where a.user_id = $1 order by a.awarded_at`
+        ),
+        shoutouts: await q(
+          `select c.name as class, s.message, s.created_at
+             from class_shoutouts s join classes c on c.id = s.class_id
+            where s.user_id = $1 order by s.created_at`
+        ),
+        challenges: await q(
+          `select c.name as class, ch.week_start::text, ch.template, ch.target, ch.reached_at
+             from class_challenge_contributors cc
+             join class_challenges ch on ch.id = cc.challenge_id
+             join classes c on c.id = ch.class_id
+            where cc.user_id = $1 order by ch.week_start`
         ),
       },
       auditLog: await q(

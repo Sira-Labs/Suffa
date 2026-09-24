@@ -3,6 +3,8 @@
  * Exit codes: 1 = invalid configuration / fatal error, 3 = schema revision mismatch
  * (worker started before the api migrated; CapRover restarts it).
  */
+import { PgClassProgressRepository } from './classes/progress.js';
+import { PgClassSpiritRepository } from './classes/spirit.js';
 import { registerEngagement, requestRecompute } from './engagement/jobs.js';
 import { PgEngagementRepository } from './engagement/repository.js';
 import { fileURLToPath } from 'node:url';
@@ -219,6 +221,13 @@ async function main(): Promise<void> {
       onPushed: requestRecompute(boss),
     },
     engagement: { repo: new PgEngagementRepository(pool), auth, log },
+    classSpirit: {
+      classes: new PgClassRepository(pool),
+      progress: new PgClassProgressRepository(pool),
+      spirit: new PgClassSpiritRepository(pool),
+      auth,
+      log,
+    },
     admin: { repo: new PgAdminRepository(pool), auth, log },
     classes: config.publicUrl
       ? {

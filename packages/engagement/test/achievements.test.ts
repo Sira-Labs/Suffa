@@ -100,6 +100,17 @@ describe('achievements', () => {
     ]);
   });
 
+  it('counts class challenges when they are known', () => {
+    const unlocks = evaluateAchievements(
+      empty(),
+      { ...noFacts, classChallengesOn: ['2026-09-06', '2026-09-13'] },
+      TZ
+    );
+    expect(unlocks).toEqual([
+      { badgeId: 'ruh', tier: 'bronze', threshold: 1, unlockedAt: '2026-09-06' },
+    ]);
+  });
+
   it('reports progress towards the next tier', () => {
     const days = Array.from(
       { length: 12 },

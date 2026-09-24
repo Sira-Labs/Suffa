@@ -12,10 +12,13 @@ export interface YouTubePlayer {
   destroy(): void;
 }
 
-interface YouTubeNamespace {
+export interface YouTubeNamespace {
   Player: new (
     element: HTMLIFrameElement,
-    options: { events?: { onStateChange?: (event: { data: number }) => void } }
+    options: {
+      host?: string;
+      events?: { onStateChange?: (event: { data: number }) => void };
+    }
   ) => YouTubePlayer;
   PlayerState: { ENDED: number; PLAYING: number; PAUSED: number };
 }
@@ -54,4 +57,21 @@ export function loadYouTubeApi(timeoutMs = 10_000): Promise<YouTubeNamespace> {
     document.head.appendChild(script);
   });
   return loading;
+}
+
+/**
+ * Attaches the API to an embed that is already playing. The API talks to the iframe via
+ * postMessage and only accepts answers from its host, which defaults to www.youtube.com:
+ * for a youtube-nocookie.com embed the player never became ready, so no position was ever
+ * read. The host is therefore taken from the iframe's own URL.
+ */
+export function attachPlayer(
+  YT: YouTubeNamespace,
+  frame: HTMLIFrameElement,
+  onStateChange: (state: number) => void
+): YouTubePlayer {
+  return new YT.Player(frame, {
+    host: new URL(frame.src).origin,
+    events: { onStateChange: ({ data }) => onStateChange(data) },
+  });
 }

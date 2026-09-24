@@ -25,6 +25,27 @@ export function masteryBuckets(cards: SrsCard[]): MasteryBuckets {
   return result;
 }
 
+/**
+ * Wobbly cards: the learner's last answer was "Nochmal" or "Schwer", or the card is a leech
+ * (forgotten LEECH_LAPSE_THRESHOLD times). Newest first, so the dashboard can list them.
+ */
+export function weakCards(cards: SrsCard[], logs: ReviewLog[]): SrsCard[] {
+  const last = new Map<string, ReviewLog>();
+  for (const log of logs) {
+    const seen = last.get(log.cardId);
+    if (!seen || log.reviewedAt > seen.reviewedAt) last.set(log.cardId, log);
+  }
+  return cards
+    .filter((c) => {
+      if (c.deleted) return false;
+      const rating = last.get(c.id)?.rating;
+      return c.leech || rating === 'again' || rating === 'hard';
+    })
+    .sort((a, b) =>
+      (last.get(b.id)?.reviewedAt ?? '').localeCompare(last.get(a.id)?.reviewedAt ?? '')
+    );
+}
+
 /** Day-based streak (consecutive days with at least one review). */
 export function computeStreak(logs: ReviewLog[], now: Date = new Date()): number {
   if (logs.length === 0) return 0;

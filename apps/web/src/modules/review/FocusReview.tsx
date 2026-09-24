@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import type { CardKind } from '@/types';
+import type { CardKind, SrsCard } from '@/types';
 import { Icon } from '@/components/Icon';
 import { content } from '@/content';
 import { dialogueSections } from '@/services/practice';
 import { ReviewSession } from '@/modules/vocab/ReviewSession';
 import { reviewLogRepo } from '@/services/storage';
+import { weakCards } from '@/services/stats';
 import { NEW_PER_DAY, reviewsToday } from '@/services/today';
 
 /** New words per unit session: a unit has ~30 words, a sitting should stay short. */
 export const UNIT_SESSION_WORDS = 10;
-import { useContentStore } from '@/state';
+/** Wobbly cards per extra practice sitting. */
+export const WEAK_SESSION_CARDS = 20;
+import { useContentStore, useSrsStore } from '@/state';
 
 /** Due reviews come from every kind, mixed … */
 const ALL_KINDS: CardKind[] = [
@@ -29,26 +32,32 @@ const NEW_KINDS: CardKind[] = ['vocab_ar_de', 'vocab_de_ar'];
  */
 export function FocusReview() {
   const [newLimit, setNewLimit] = useState<number | null>(null);
+  // ?focus=weak (from "Heute"): the wobbly words, due or not.
+  const [weak, setWeak] = useState<SrsCard[] | null>(null);
   const [params] = useSearchParams();
+  const weakOnly = params.get('focus') === 'weak';
   const unit = Number(params.get('unit')) || null;
   const userVocab = useContentStore((s) => s.userVocab);
   const section = params.get('section');
   // With ?unit=n (from a unit's path): only that unit's words, all of them may be new;
   // &section=k narrows to dialogue k's words, &section=eigene to the learner's own words.
   const unitWords = unit ? sessionWords(unit, section, userVocab) : null;
-  const title = !unit
-    ? 'Wiederholen'
-    : section === 'eigene'
-      ? `Einheit ${unit} · Eigene Wörter`
-      : section
-        ? `Einheit ${unit} · Dialog ${section} · Wörter`
-        : `Einheit ${unit} · Vokabeln`;
+  const title = weakOnly
+    ? 'Wackelige Wörter'
+    : !unit
+      ? 'Wiederholen'
+      : section === 'eigene'
+        ? `Einheit ${unit} · Eigene Wörter`
+        : section
+          ? `Einheit ${unit} · Dialog ${section} · Wörter`
+          : `Einheit ${unit} · Vokabeln`;
 
   useEffect(() => {
     let cancelled = false;
     void reviewLogRepo.all().then((logs) => {
-      if (!cancelled)
-        setNewLimit(Math.max(0, NEW_PER_DAY - reviewsToday(logs).newLearned));
+      if (cancelled) return;
+      setNewLimit(Math.max(0, NEW_PER_DAY - reviewsToday(logs).newLearned));
+      setWeak(weakCards(useSrsStore.getState().cards, logs).slice(0, WEAK_SESSION_CARDS));
     });
     return () => {
       cancelled = true;
@@ -74,6 +83,7 @@ export function FocusReview() {
               : newLimit
           }
           contentRefs={unitWords ?? undefined}
+          cards={weakOnly ? (weak ?? []) : undefined}
           title={title}
           variant="focus"
           allowRecognitionAid

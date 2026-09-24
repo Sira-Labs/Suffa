@@ -34,6 +34,8 @@ interface ReviewSessionProps {
   newKinds?: CardKind[];
   /** Only cards about these content items (e.g. one unit's words). */
   contentRefs?: string[];
+  /** A fixed set of cards to practise, due or not (e.g. the wobbly words). */
+  cards?: SrsCard[];
 }
 
 type Phase = 'prompt' | 'graded';
@@ -51,6 +53,7 @@ export function ReviewSession({
   newLimit,
   newKinds,
   contentRefs,
+  cards,
 }: ReviewSessionProps) {
   const focus = variant === 'focus';
   const userVocab = useContentStore((s) => s.userVocab);
@@ -59,8 +62,10 @@ export function ReviewSession({
   const refreshPending = useSyncStore((s) => s.refreshPending);
   const dailyGoal = useSettingsStore((s) => s.settings.dailyGoal);
 
-  const [queue, setQueue] = useState<SrsCard[]>(() =>
-    useSrsStore.getState().getQueue(kinds, newLimit ?? dailyGoal, newKinds, contentRefs)
+  const [queue, setQueue] = useState<SrsCard[]>(
+    () =>
+      cards ??
+      useSrsStore.getState().getQueue(kinds, newLimit ?? dailyGoal, newKinds, contentRefs)
   );
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState('');

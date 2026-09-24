@@ -1,12 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { ReviewLog } from '@/types';
+import type { ReviewLog, SrsCard } from '@/types';
 import { content } from '@/content';
 import { ArabicText } from '@/components';
 import { Icon } from '@/components/Icon';
 import { reviewLogRepo } from '@/services/storage';
 import { isTtsSupported, speakArabic } from '@/services/speech';
-import { computeStreak, masteryBuckets, reviewHeatmap } from '@/services/stats';
+import {
+  computeStreak,
+  masteryBuckets,
+  reviewHeatmap,
+  weakCards,
+} from '@/services/stats';
 import { buildTodayPlan, localDay, reviewsToday, wordOfTheDay } from '@/services/today';
 import {
   listeningXpEvents,
@@ -25,6 +30,7 @@ import { ForgettingReminder } from './ForgettingReminder';
 import {
   useCelebrationStore,
   useCheckInStore,
+  useContentStore,
   useEnrollmentStore,
   useListenStore,
   usePracticeStore,
@@ -74,6 +80,7 @@ export function Dashboard() {
   }, []);
 
   const mastery = masteryBuckets(cards);
+  const weak = weakCards(cards, logs);
   const streak = computeStreak(logs);
   const heat = reviewHeatmap(logs);
   const maxHeat = Math.max(1, ...heat.map((h) => h.count));
@@ -239,11 +246,32 @@ export function Dashboard() {
           className="grid"
           style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}
         >
-          <Stat label="Fällig heute" value={summary.dueCount} accent="var(--info)" />
-          <Stat label="Neu verfügbar" value={summary.newCount} accent="var(--accent)" />
-          <Stat label="Reif" value={mastery.reif} accent="var(--good)" />
-          <Stat label="Schwierig" value={summary.leechCount} accent="var(--bad)" />
+          <Stat
+            label="Fällig heute"
+            hint="heute zu wiederholen"
+            value={summary.dueCount}
+            accent="var(--info)"
+          />
+          <Stat
+            label="Neu verfügbar"
+            hint="aus deinen Einheiten"
+            value={summary.newCount}
+            accent="var(--accent)"
+          />
+          <Stat
+            label="Lernend"
+            hint="gesehen, noch unter 3 Wochen"
+            value={mastery.lernend}
+            accent="var(--text)"
+          />
+          <Stat
+            label="Sicher"
+            hint="3 Wochen und länger gemerkt"
+            value={mastery.reif}
+            accent="var(--good)"
+          />
         </div>
+        <WeakWords cards={weak} />
 
         <div className="card stack">
           <strong>Aktivität (letzte 28 Tage)</strong>
@@ -304,17 +332,76 @@ function TodayStepItem({ step, index }: { step: TodayStep; index: number }) {
 
 function Stat({
   label,
+  hint,
   value,
   accent,
 }: {
   label: string;
+  hint: string;
   value: number | string;
   accent: string;
 }) {
   return (
-    <div className="card" style={{ textAlign: 'center' }}>
+    <div className="card stat-tile">
       <div style={{ fontSize: '1.8rem', fontWeight: 700, color: accent }}>{value}</div>
-      <div className="muted">{label}</div>
+      <div style={{ fontWeight: 600 }}>{label}</div>
+      <div className="muted stat-tile-hint">{hint}</div>
     </div>
+  );
+}
+
+/**
+ * Wobbly words: last answered "Schwer" or "Nochmal" (or forgotten again and again). They come
+ * back sooner (short intervals); the list shows which ones they are.
+ */
+function WeakWords({ cards }: { cards: SrsCard[] }) {
+  const userVocab = useContentStore((s) => s.userVocab);
+  const words = useMemo(() => {
+    const byId = new Map<string, { ar: string; de: string }>(
+      [...content.vokabeln, ...userVocab].map((v) => [v.id, v])
+    );
+    const seen = new Set<string>();
+    return cards.flatMap((c) => {
+      const word = byId.get(c.contentRef);
+      if (!word || seen.has(c.contentRef)) return [];
+      seen.add(c.contentRef);
+      return [{ id: c.contentRef, ...word }];
+    });
+  }, [cards, userVocab]);
+
+  return (
+    <details className="card weak-words">
+      <summary>
+        <span className="weak-words-count">{words.length}</span>
+        <span className="stack" style={{ gap: 0 }}>
+          <strong>Wackelige Wörter</strong>
+          <span className="muted stat-tile-hint">
+            zuletzt „Schwer“ oder „Nochmal“ – kommen schneller wieder dran
+          </span>
+        </span>
+      </summary>
+      {words.length === 0 ? (
+        <p className="muted" style={{ margin: 0 }}>
+          Gerade keine. Sobald du ein Wort mit „Schwer“ oder „Nochmal“ bewertest, steht es
+          hier.
+        </p>
+      ) : (
+        <>
+          <Link to="/review?focus=weak" className="btn btn-primary weak-words-cta">
+            Jetzt gezielt üben
+          </Link>
+          <ul className="weak-words-list">
+            {words.map((w) => (
+              <li key={w.id}>
+                <span lang="ar" dir="rtl" className="arabic-inline">
+                  {w.ar}
+                </span>
+                <span className="muted">{w.de}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </details>
   );
 }

@@ -10,6 +10,7 @@ import { randomUUID } from 'node:crypto';
 import { betterAuth } from 'better-auth';
 import { magicLink } from 'better-auth/plugins';
 import type pg from 'pg';
+import { isRole, type Actor, type Role } from '../authz/policies.js';
 import type { AuthResolver } from './resolver.js';
 import type { Mailer } from './mailer.js';
 
@@ -160,7 +161,7 @@ export interface Me {
   id: string;
   email: string;
   name: string | null;
-  role: 'student' | 'teacher' | 'admin';
+  role: Role;
 }
 
 /** Session lookup for other routes (sync, /me): the session cookie identifies the user. */
@@ -171,12 +172,14 @@ export class SessionResolver implements AuthResolver {
     const session = await this.auth.api.getSession({ headers });
     if (!session) return null;
     const user = session.user as typeof session.user & { role?: string };
-    const role = user.role === 'teacher' || user.role === 'admin' ? user.role : 'student';
+    // An unknown value in the database never grants more than a student has.
+    const role = isRole(user.role) ? user.role : 'student';
     return { id: user.id, email: user.email, name: user.name || null, role };
   }
 
-  async resolve(headers: Headers): Promise<string | null> {
-    return (await this.me(headers))?.id ?? null;
+  async actor(headers: Headers): Promise<Actor | null> {
+    const me = await this.me(headers);
+    return me ? { id: me.id, role: me.role } : null;
   }
 }
 
@@ -184,10 +187,10 @@ export class SessionResolver implements AuthResolver {
 export class ChainResolver implements AuthResolver {
   constructor(private readonly resolvers: readonly AuthResolver[]) {}
 
-  async resolve(headers: Headers): Promise<string | null> {
+  async actor(headers: Headers): Promise<Actor | null> {
     for (const resolver of this.resolvers) {
-      const userId = await resolver.resolve(headers);
-      if (userId) return userId;
+      const actor = await resolver.actor(headers);
+      if (actor) return actor;
     }
     return null;
   }

@@ -19,6 +19,7 @@ import {
 } from './observability/errors.js';
 import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/resolver.js';
 import { PgSyncRepository } from './sync/repository.js';
+import { PgAdminRepository } from './admin/repository.js';
 import { ConfigError, loadConfig, redactDatabaseUrl } from './config.js';
 import {
   currentRevision,
@@ -182,6 +183,8 @@ async function main(): Promise<void> {
     },
     onProbeError: (error) => log.warn({ err: error }, 'health.db_unreachable'),
     sync: { repo: new PgSyncRepository(pool), auth, log },
+    admin: { repo: new PgAdminRepository(pool), auth, log },
+    authzLog: log,
     auth: authRoutes,
     errorTunnel: { webDsn: config.webErrorDsn, log },
     onUnhandledError: (error, path) => {

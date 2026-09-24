@@ -1,20 +1,22 @@
 /**
  * Resolves the authenticated user of a request (dependency-injected into the routes).
  *
- * Until Better Auth lands (Sprint 3, ADR-0008) there are only two implementations:
- * - `DenyAllResolver` (default): every request is unauthenticated → sync answers 401.
+ * Implementations:
+ * - `SessionResolver` (betterAuth.ts): the session cookie of a magic-link sign-in.
+ * - `DenyAllResolver` (default): every request is unauthenticated → protected routes 401.
  * - `DevTokenResolver`: static bearer tokens mapped to user ids, for tests and local
- *   development only; the config refuses it in prod.
+ *   development only; the config refuses it in prod. Dev tokens always act as students.
  */
 import { createHash, timingSafeEqual } from 'node:crypto';
+import type { Actor } from '../authz/policies.js';
 
 export interface AuthResolver {
-  /** Returns the user id for the request, or null when it is not authenticated. */
-  resolve(headers: Headers): Promise<string | null>;
+  /** The signed-in person with their platform role, or null when unauthenticated. */
+  actor(headers: Headers): Promise<Actor | null>;
 }
 
 export class DenyAllResolver implements AuthResolver {
-  async resolve(): Promise<null> {
+  async actor(): Promise<null> {
     return null;
   }
 }
@@ -30,7 +32,7 @@ export class DevTokenResolver implements AuthResolver {
     this.tokens = [...tokens].map(([token, userId]) => ({ hash: digest(token), userId }));
   }
 
-  async resolve(headers: Headers): Promise<string | null> {
+  async actor(headers: Headers): Promise<Actor | null> {
     const match = /^Bearer\s+(\S+)$/i.exec(headers.get('authorization') ?? '');
     if (!match?.[1]) return null;
     const presented = digest(match[1]);
@@ -39,6 +41,6 @@ export class DevTokenResolver implements AuthResolver {
     for (const entry of this.tokens) {
       if (timingSafeEqual(entry.hash, presented)) userId = entry.userId;
     }
-    return userId;
+    return userId ? { id: userId, role: 'student' } : null;
   }
 }

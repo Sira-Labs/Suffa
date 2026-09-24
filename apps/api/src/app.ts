@@ -7,6 +7,8 @@ import type { QueueDepth } from './jobs/queue.js';
 import { createErrorTunnel, type ErrorTunnelDeps } from './observability/tunnel.js';
 import { createSyncRoutes, type SyncRouteDeps } from './sync/routes.js';
 import { AUTH_BASE_PATH, rejectUnsafeRedirect, type Me } from './auth/betterAuth.js';
+import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
+import { authorize, type AuthorizeLog } from './authz/middleware.js';
 
 export interface AuthRouteDeps {
   /** Better Auth's request handler for everything under AUTH_BASE_PATH. */
@@ -32,6 +34,10 @@ export interface AppDeps {
   errorTunnel?: ErrorTunnelDeps;
   /** Sign-in (Better Auth) and the signed-in user; omitted when sign-in is not configured. */
   auth?: AuthRouteDeps;
+  /** Admin area (users); every route needs an admin. */
+  admin?: AdminRouteDeps;
+  /** Where denied requests are logged (authz.denied). */
+  authzLog?: AuthorizeLog;
   /** Called for unhandled errors; the client only sees a generic 500. */
   onUnhandledError?: (error: unknown, path: string) => void;
 }
@@ -84,13 +90,15 @@ export function createApp(deps: AppDeps): Hono {
       const rejected = await rejectUnsafeRedirect(c.req.raw);
       return rejected ?? auth.handler(c.req.raw);
     });
-    app.get('/api/v1/me', async (c) => {
-      const me = await auth.me(c.req.raw.headers);
+    // The profile doubles as the actor: one session lookup per request.
+    const profiles = { actor: (headers: Headers) => auth.me(headers) };
+    app.get('/api/v1/me', authorize(profiles, 'profile:read', deps.authzLog), (c) => {
       c.header('Cache-Control', 'no-store');
-      return me ? c.json(me) : c.json({ error: 'unauthenticated' }, 401);
+      return c.json(c.get('actor'));
     });
   }
   if (deps.sync) app.route('/api/v1/sync', createSyncRoutes(deps.sync));
+  if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));
   app.onError((error, c) => {

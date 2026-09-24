@@ -10,6 +10,7 @@ import { ChainResolver, createAuth, SessionResolver } from '../src/auth/betterAu
 import type { Mailer } from '../src/auth/mailer.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
 import { PgSyncRepository } from '../src/sync/repository.js';
+import { PgAdminRepository } from '../src/admin/repository.js';
 
 const url = process.env.SUFFA_TEST_DATABASE_URL;
 const PUBLIC_URL = 'http://localhost:5173';
@@ -62,6 +63,7 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
         log: quiet,
       },
       auth: { handler: (request) => auth.handler(request), me: (h) => sessions.me(h) },
+      admin: { repo: new PgAdminRepository(pool), auth: sessions, log: quiet },
     });
   });
 
@@ -183,5 +185,27 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
     });
     expect(out.status).toBe(200);
     expect((await app.request('/api/v1/me', { headers: { cookie } })).status).toBe(401);
+  });
+
+  it('applies a role change on the next request (no stale role in the cookie)', async () => {
+    await requestLink('lehrer@example.org');
+    const { cookie } = await openLink(mailer.links[0]!.url);
+    const users = () => app.request('/api/v1/admin/users', { headers: { cookie } });
+    expect((await users()).status).toBe(403);
+
+    await pool.query(
+      "update users set role = 'admin' where email = 'lehrer@example.org'"
+    );
+    const response = await users();
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { users: { email: string; role: string }[] };
+    expect(body.users).toEqual([
+      expect.objectContaining({ email: 'lehrer@example.org', role: 'admin' }),
+    ]);
+
+    await pool.query(
+      "update users set role = 'student' where email = 'lehrer@example.org'"
+    );
+    expect((await users()).status).toBe(403);
   });
 });

@@ -4,14 +4,15 @@
  *   POST /:table/push   body { records: [...] }          → { received, applied }
  *   GET  /:table/pull   ?since=ISO&afterId=&limit=      → { records, next }
  *
- * Every request is authenticated by the injected AuthResolver; `user_id` is taken from it
- * and any `user_id` in the payload is ignored (the schemas strip unknown fields).
+ * Every request needs the `sync:own` permission (authz middleware); `user_id` is the signed-in
+ * actor's and any `user_id` in the payload is ignored (the schemas strip unknown fields).
  */
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import type { Logger } from 'pino';
 import { z } from 'zod';
 import type { AuthResolver } from '../auth/resolver.js';
+import { authorize, type ActorEnv } from '../authz/middleware.js';
 import type { SyncRepository } from './repository.js';
 import {
   DEFAULT_PULL_LIMIT,
@@ -28,8 +29,6 @@ export interface SyncRouteDeps {
   log: Pick<Logger, 'info' | 'warn' | 'error'>;
 }
 
-type Env = { Variables: { userId: string } };
-
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
 
 const PullQuery = z.object({
@@ -38,15 +37,10 @@ const PullQuery = z.object({
   limit: z.coerce.number().int().min(1).max(MAX_PULL_LIMIT).default(DEFAULT_PULL_LIMIT),
 });
 
-export function createSyncRoutes(deps: SyncRouteDeps): Hono<Env> {
-  const app = new Hono<Env>();
+export function createSyncRoutes(deps: SyncRouteDeps): Hono<ActorEnv> {
+  const app = new Hono<ActorEnv>();
 
-  app.use('*', async (c, next) => {
-    const userId = await deps.auth.resolve(c.req.raw.headers);
-    if (!userId) return c.json({ error: 'unauthorized' }, 401);
-    c.set('userId', userId);
-    await next();
-  });
+  app.use('*', authorize(deps.auth, 'sync:own', deps.log));
 
   app.post(
     '/:table/push',
@@ -91,7 +85,7 @@ export function createSyncRoutes(deps: SyncRouteDeps): Hono<Env> {
         records.push(parsed.data as SyncRecord);
       }
 
-      const userId = c.get('userId');
+      const userId = c.get('actor').id;
       const applied = await deps.repo.upsert(userId, table, records);
       deps.log.info({ table, userId, received: records.length, applied }, 'sync.push');
       return c.json({ received: records.length, applied });
@@ -111,7 +105,7 @@ export function createSyncRoutes(deps: SyncRouteDeps): Hono<Env> {
     if (query.data.afterId && !query.data.since) {
       return c.json({ error: 'invalid_query', issues: ['afterId requires since'] }, 400);
     }
-    const page = await deps.repo.pull(c.get('userId'), table, {
+    const page = await deps.repo.pull(c.get('actor').id, table, {
       since: query.data.since ?? null,
       afterId: query.data.afterId ?? null,
       limit: query.data.limit,

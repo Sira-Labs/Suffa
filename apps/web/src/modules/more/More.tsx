@@ -1,14 +1,30 @@
 import { Link } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { NAV_ITEMS, type NavItem } from '@/navigation';
+import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
+import { useSyncStore } from '@/state';
+
+/** Admins also see the admin area (story 4.2). */
+const ADMIN_ITEM: NavItem = {
+  to: '/admin',
+  label: 'Verwaltung',
+  description: 'Nutzer, Rollen und Protokoll',
+  icon: 'lock',
+  tier: 'secondary',
+};
 
 /** Mobile overflow page: every destination that does not fit into the bottom bar. */
 export function More() {
+  const provider = useSyncStore((s) => s.provider);
+  useSyncStore((s) => s.auth); // re-render when the signed-in user changes
+  const isAdmin =
+    provider instanceof ApiSyncProvider && provider.currentUser()?.role === 'admin';
+  const items = NAV_ITEMS.filter((item) => item.tier === 'secondary');
   return (
     <HubPage
       title="Mehr"
       listLabel="Weitere Bereiche"
-      items={NAV_ITEMS.filter((item) => item.tier === 'secondary')}
+      items={isAdmin ? [...items, ADMIN_ITEM] : items}
     />
   );
 }

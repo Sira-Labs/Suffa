@@ -17,6 +17,7 @@ import { Alphabet, AlphabetLessonPage } from './modules/alphabet';
 import { Discover } from './modules/discover';
 import { FocusReview } from './modules/review';
 import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
+import { Admin } from './modules/admin';
 
 /**
  * Normal paths (story 2.6, ADR-0013): Caddy answers unknown paths with index.html and the
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
       { path: 'exam', element: <Exam /> },
       { path: 'library', element: <Library /> },
       { path: 'settings', element: <Settings /> },
+      { path: 'admin', element: <Admin /> },
       { path: 'more', element: <More /> },
       { path: 'training', element: <Training /> },
       { path: 'discover', element: <Discover /> },

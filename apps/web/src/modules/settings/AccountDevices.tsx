@@ -3,6 +3,7 @@
  * API; the old Supabase backend has no device management.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ApiSyncProvider, type DeviceSession } from '@/services/sync/ApiSyncProvider';
 import { useSyncStore } from '@/state';
 import { browserTimeZone, describeDevice, timeZoneOptions } from './devices';
@@ -15,6 +16,11 @@ export function AccountDevices() {
   if (!(provider instanceof ApiSyncProvider)) return null;
   return (
     <>
+      {provider.currentUser()?.role === 'admin' && (
+        <Link to="/admin" className="btn" style={{ alignSelf: 'flex-start' }}>
+          Verwaltung öffnen
+        </Link>
+      )}
       <TimeZoneSetting provider={provider} />
       <DeviceList provider={provider} />
     </>

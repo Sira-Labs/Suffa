@@ -6,8 +6,10 @@
 export interface ExampleSentence {
   ar: string;
   de: string;
-  /** Tatoeba sentence id of the Arabic original. */
-  tatoeba: number;
+  /** Tatoeba sentence (CC BY 2.0 FR) or an own sentence written for Suffa. */
+  quelle: 'tatoeba' | 'suffa';
+  /** Tatoeba sentence id of the Arabic original (Tatoeba sentences only). */
+  tatoeba?: number;
   autor?: string;
   /** Who wrote the German translation. */
   deVon: 'tatoeba' | 'suffa';

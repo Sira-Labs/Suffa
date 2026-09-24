@@ -38,17 +38,21 @@ export function WordExample({ vocabId }: { vocabId: string }) {
         {example.ar}
       </ArabicText>
       <span>{example.de}</span>
-      <figcaption className="muted">
-        Beispiel:{' '}
-        <a href={tatoebaUrl(example.tatoeba)} target="_blank" rel="noreferrer">
-          {source.name} #{example.tatoeba}
-        </a>
-        {example.autor ? ` von ${example.autor}` : ''} ·{' '}
-        <a href={source.licenseUrl} target="_blank" rel="noreferrer">
-          {source.license}
-        </a>
-        {example.deVon === 'suffa' ? ' · Übersetzung: Suffa' : ''}
-      </figcaption>
+      {example.quelle === 'suffa' || !example.tatoeba ? (
+        <figcaption className="muted">Eigener Beispielsatz (Suffa)</figcaption>
+      ) : (
+        <figcaption className="muted">
+          Beispiel:{' '}
+          <a href={tatoebaUrl(example.tatoeba)} target="_blank" rel="noreferrer">
+            {source.name} #{example.tatoeba}
+          </a>
+          {example.autor ? ` von ${example.autor}` : ''} ·{' '}
+          <a href={source.licenseUrl} target="_blank" rel="noreferrer">
+            {source.license}
+          </a>
+          {example.deVon === 'suffa' ? ' · Übersetzung: Suffa' : ''}
+        </figcaption>
+      )}
     </figure>
   );
 }

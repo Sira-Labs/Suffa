@@ -14,14 +14,16 @@
         "de": "Wie heißt mein Arzt?",
         "tatoeba": 5051476,
         "autor": "Crataegus",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       },
       {
         "ar": "ما اِسْمُكَ؟",
         "de": "Wie heißt du?",
         "tatoeba": 332223,
         "autor": "Samer",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-salam": [
@@ -30,7 +32,8 @@
         "de": "Auf Wiedersehen.",
         "tatoeba": 372112,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-chayr": [
@@ -39,14 +42,16 @@
         "de": "Es geht mir gut. Danke der Nachfrage!",
         "tatoeba": 5601829,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "صَباحُ الخَيْرِ.",
         "de": "Guten Morgen!",
         "tatoeba": 375518,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jinsiyya": [
@@ -55,7 +60,8 @@
         "de": "Jeder Mensch hat das Recht auf eine Staatsangehörigkeit.",
         "tatoeba": 629357,
         "autor": "Samer",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-balad": [
@@ -64,14 +70,16 @@
         "de": "Ist Gibraltar ein Land?",
         "tatoeba": 10063449,
         "autor": "LinaTamazight",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هولَنْدا بَلَدٌ صَغيرٌ.",
         "de": "Holland ist ein kleines Land.",
         "tatoeba": 489201,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ana": [
@@ -80,7 +88,8 @@
         "de": "Ich bin sehr müde heute.",
         "tatoeba": 1021816,
         "autor": "alkhaldy",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-anta": [
@@ -89,7 +98,8 @@
         "de": "Bist du im Moment beschäftigt?",
         "tatoeba": 911377,
         "autor": "kazuya00",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-huwa": [
@@ -98,14 +108,16 @@
         "de": "Entschuldigung, wie spät ist es?",
         "tatoeba": 944755,
         "autor": "mayok",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "الْيَوْمُ هُوَ الْأَحَدُ.",
         "de": "Heute ist Sonntag.",
         "tatoeba": 1034932,
         "autor": "alkhaldy",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-hiya": [
@@ -114,14 +126,16 @@
         "de": "Ist sie Ärztin?",
         "tatoeba": 386614,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هَلْ هِيَ جَميلَةٌ؟",
         "de": "Ist sie schön?",
         "tatoeba": 13026230,
         "autor": "Naityahia",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-nahnu": [
@@ -130,14 +144,16 @@
         "de": "Wir sind im Museum.",
         "tatoeba": 6985659,
         "autor": "User105223",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "نَحْنُ لا نَعْلَمُ مَنْ هِيَ.",
         "de": "Wir kennen sie nicht.",
         "tatoeba": 448451,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-min": [
@@ -146,7 +162,8 @@
         "de": "Woher kommt sie?",
         "tatoeba": 13823221,
         "autor": "Rifabdares",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ma": [
@@ -155,14 +172,16 @@
         "de": "„Was ist das?“ – „Das ist ein Buch.“",
         "tatoeba": 13446609,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "ما تاريخُ الْيَوْمِ؟",
         "de": "Welches Datum haben wir heute?",
         "tatoeba": 399135,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ayna": [
@@ -171,14 +190,16 @@
         "de": "Woher kommt er?",
         "tatoeba": 13823223,
         "autor": "Rifabdares",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَيْنَ بَيْتُكَ؟",
         "de": "Wo wohnst du?",
         "tatoeba": 370705,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-kayfa": [
@@ -187,7 +208,8 @@
         "de": "„Wie geht es dir?“ – „Mir geht es gut, danke.“",
         "tatoeba": 3093184,
         "autor": "odexed",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-man": [
@@ -196,14 +218,16 @@
         "de": "Mit wem spreche ich?",
         "tatoeba": 404423,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "مَنْ هٰذا؟",
         "de": "Wer ist das?",
         "tatoeba": 12354906,
         "autor": "dididodo",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-naam": [
@@ -212,7 +236,8 @@
         "de": "Heute nicht, morgen doch.",
         "tatoeba": 1597717,
         "autor": "Amastan",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-la": [
@@ -221,14 +246,16 @@
         "de": "Ich mag die Schule nicht.",
         "tatoeba": 336163,
         "autor": "socom",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "لا أُريدُ الْعَمَلَ.",
         "de": "Ich will nicht arbeiten.",
         "tatoeba": 488833,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-hal-frage": [
@@ -237,14 +264,16 @@
         "de": "Regnet es?",
         "tatoeba": 458421,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هَلْ عِنْدَكَ سَيّارَةٌ؟",
         "de": "Hast du ein Auto?",
         "tatoeba": 515069,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-marhaban": [
@@ -253,7 +282,8 @@
         "de": "Hallo, ist da jemand?",
         "tatoeba": 3051678,
         "autor": "altusi",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-sabah": [
@@ -262,7 +292,8 @@
         "de": "Heute Morgen ist es kalt.",
         "tatoeba": 1905939,
         "autor": "Asma",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-nur": [
@@ -271,7 +302,8 @@
         "de": "Er hat vergessen, das Licht auszumachen.",
         "tatoeba": 419520,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-masa": [
@@ -280,7 +312,8 @@
         "de": "Guten Abend!",
         "tatoeba": 375519,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-afwan": [
@@ -289,7 +322,8 @@
         "de": "Entschuldigung, wie spät ist es?",
         "tatoeba": 4465882,
         "autor": "Safa_Alfulaij",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-talib": [
@@ -298,14 +332,16 @@
         "de": "Ich bin ein neuer Student.",
         "tatoeba": 1111775,
         "autor": "User105223",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هِيَ طالِبَةٌ.",
         "de": "Sie ist Studentin.",
         "tatoeba": 3084650,
         "autor": "odexed",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-taliba": [
@@ -314,14 +350,16 @@
         "de": "Ich bin keine Studentin.",
         "tatoeba": 13361925,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "فاطِمَةُ أَكْبَرُ طالِبَةٍ في فَصْلِنا.",
         "de": "Fatima ist die älteste Studentin in unserer Klasse.",
         "tatoeba": 370969,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mudarris": [
@@ -330,7 +368,8 @@
         "de": "Mein Vater ist Lehrer.",
         "tatoeba": 370923,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ustadh": [
@@ -339,7 +378,8 @@
         "de": "Der Lehrer hat recht.",
         "tatoeba": 5118954,
         "autor": "Safa_Alfulaij",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sadiq": [
@@ -348,14 +388,16 @@
         "de": "Ich bin als Freund hier.",
         "tatoeba": 1969266,
         "autor": "swingman57",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنْتَ صَديقي.",
         "de": "Du bist mein Freund.",
         "tatoeba": 370561,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jadid": [
@@ -364,14 +406,16 @@
         "de": "Glückliches neues Jahr!",
         "tatoeba": 1879794,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "عِنْدي سَيّارَةٌ جَديدَةٌ.",
         "de": "Ich habe ein neues Auto.",
         "tatoeba": 13415624,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-arabi": [
@@ -380,14 +424,16 @@
         "de": "Arabisch ist eine schöne Sprache.",
         "tatoeba": 3064691,
         "autor": "altusi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أُحِبُّ اللُّغَةَ الْعَرَبِيَّةَ.",
         "de": "Ich mag die arabische Sprache.",
         "tatoeba": 370686,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-almani": [
@@ -396,14 +442,16 @@
         "de": "Ich bin Deutscher.",
         "tatoeba": 7828436,
         "autor": "MisterBrown",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا أَلْمانِيَّةٌ.",
         "de": "Ich bin Deutsche.",
         "tatoeba": 13334187,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-lugha": [
@@ -412,7 +460,8 @@
         "de": "Arabisch ist schwer!",
         "tatoeba": 13434107,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ab": [
@@ -421,14 +470,16 @@
         "de": "Dieses Auto gehört meinem Vater.",
         "tatoeba": 3067656,
         "autor": "odexed",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "الطِّفْلُ يَحْتاجُ إِلى أَبٍ.",
         "de": "Ein Kind braucht einen Vater.",
         "tatoeba": 12151259,
         "autor": "aennes_dschielaehni",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-umm": [
@@ -437,14 +488,16 @@
         "de": "Ich bin Mutter.",
         "tatoeba": 13563294,
         "autor": "ninefi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هَلْ أُمُّكُمْ في الْمَنْزِلِ؟",
         "de": "Ist eure Mutter zu Hause?",
         "tatoeba": 1573574,
         "autor": "Amastan",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ukht": [
@@ -453,7 +506,8 @@
         "de": "Meine Schwester hat eine sehr schöne Handschrift.",
         "tatoeba": 11136531,
         "autor": "z7me",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ibn": [
@@ -462,7 +516,8 @@
         "de": "Was macht dein Sohn in Deutschland?",
         "tatoeba": 7623241,
         "autor": "meriem2036",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-bint": [
@@ -471,14 +526,16 @@
         "de": "Sie ist ein Mädchen.",
         "tatoeba": 4525545,
         "autor": "Gaeltacht",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا لا أَعْرِفُ هٰذِهِ الْبِنْتَ.",
         "de": "Dieses Mädchen kenne ich nicht.",
         "tatoeba": 13893086,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jadd": [
@@ -487,7 +544,8 @@
         "de": "Wie heißt dein Großvater?",
         "tatoeba": 3064719,
         "autor": "altusi",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-amm": [
@@ -496,7 +554,8 @@
         "de": "Er ist mein Onkel.",
         "tatoeba": 426203,
         "autor": "qahwa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-khal": [
@@ -505,7 +564,8 @@
         "de": "Er ist mein Onkel.",
         "tatoeba": 426205,
         "autor": "qahwa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-zawj": [
@@ -514,14 +574,16 @@
         "de": "Wer ist mit meinem Mann im Auto?",
         "tatoeba": 11987801,
         "autor": "dididodo",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       },
       {
         "ar": "زَوْجُها مُدَرِّسٌ.",
         "de": "Ihr Mann ist Lehrer.",
         "tatoeba": 11686990,
         "autor": "dididodo",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-tifl": [
@@ -530,14 +592,16 @@
         "de": "„Wo ist das Kind?“ – „Das Kind schläft.“",
         "tatoeba": 6737298,
         "autor": "Safa_Alfulaij",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "تَبْقى الْمَرْأَةُ في الْبَيْتِ مَعَ الطِّفْلِ.",
         "de": "Die Frau bleibt zu Hause beim Kind.",
         "tatoeba": 5543372,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-walad": [
@@ -546,14 +610,16 @@
         "de": "Der Junge ist durstig.",
         "tatoeba": 371005,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا وَلَدٌ.",
         "de": "Ich bin ein Junge.",
         "tatoeba": 375724,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-rajul": [
@@ -562,7 +628,8 @@
         "de": "Der Mann hat meine Handtasche gestohlen.",
         "tatoeba": 370586,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-imraa": [
@@ -571,7 +638,8 @@
         "de": "Ich bin eine Frau.",
         "tatoeba": 2615041,
         "autor": "Eldad",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-hadha": [
@@ -580,14 +648,16 @@
         "de": "Dieses Buch gehört Ali.",
         "tatoeba": 370670,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هٰذا سُؤالٌ صَعْبٌ.",
         "de": "Das ist eine schwere Frage.",
         "tatoeba": 508689,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-hadhihi": [
@@ -596,7 +666,8 @@
         "de": "Ich mag dieses Foto.",
         "tatoeba": 371454,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-fi": [
@@ -605,14 +676,16 @@
         "de": "Ich bin zu Hause.",
         "tatoeba": 371611,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا في السَّيّارَةِ.",
         "de": "Ich bin im Auto.",
         "tatoeba": 6679518,
         "autor": "marhabaan",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-kabir": [
@@ -621,7 +694,8 @@
         "de": "Das Haus ist groß.",
         "tatoeba": 2990232,
         "autor": "odexed",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-saghir": [
@@ -630,7 +704,8 @@
         "de": "Das Haus ist klein, aber schön.",
         "tatoeba": 4238214,
         "autor": "amrbekhit",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-jamil": [
@@ -639,13 +714,15 @@
         "de": "Es ist ein schöner Tag.",
         "tatoeba": 443026,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هٰذا بَيْتٌ جَميلٌ.",
         "de": "Das ist ein schönes Haus.",
         "tatoeba": 2652828,
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-tabib": [
@@ -654,14 +731,16 @@
         "de": "Mein Nachbar ist Arzt.",
         "tatoeba": 5602202,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا طَبيبَةٌ.",
         "de": "Ich bin Ärztin.",
         "tatoeba": 13459902,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-muhandis": [
@@ -670,7 +749,8 @@
         "de": "Ich bin Ingenieur.",
         "tatoeba": 3222075,
         "autor": "odexed",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-kam": [
@@ -679,14 +759,16 @@
         "de": "Wie spät ist es dort?",
         "tatoeba": 5042890,
         "autor": "Crataegus",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "كَمْ عُمْرُكَ؟",
         "de": "Wie alt bist du?",
         "tatoeba": 375538,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-wahid": [
@@ -695,7 +777,8 @@
         "de": "Zwei Köpfe denken besser als einer.",
         "tatoeba": 1329415,
         "autor": "alanood",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ithnan": [
@@ -704,7 +787,8 @@
         "de": "Eins plus zwei ist gleich drei.",
         "tatoeba": 475792,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-thalatha": [
@@ -713,7 +797,8 @@
         "de": "Er war dreimal in Frankreich.",
         "tatoeba": 3065708,
         "autor": "altusi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-arbaa": [
@@ -722,7 +807,8 @@
         "de": "Heute bin ich vier Jahre alt.",
         "tatoeba": 1905850,
         "autor": "Asma",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-sakin": [
@@ -731,7 +817,8 @@
         "de": "Ich wohne auf dem Land.",
         "tatoeba": 3054794,
         "autor": "altusi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-bayt": [
@@ -740,14 +827,16 @@
         "de": "Er ist gerade zu Hause.",
         "tatoeba": 371877,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "مَنْ مالِكُ هٰذا الْبَيْتِ؟",
         "de": "Wem gehört dieses Haus?",
         "tatoeba": 371668,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-shaqqa": [
@@ -756,7 +845,8 @@
         "de": "Wie hoch ist die Miete für diese Wohnung?",
         "tatoeba": 5961757,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ghurfa": [
@@ -765,7 +855,8 @@
         "de": "Haben Sie noch Zimmer frei?",
         "tatoeba": 11581641,
         "autor": "dididodo",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-matbakh": [
@@ -774,7 +865,8 @@
         "de": "Die Küche ist nach Süden gerichtet.",
         "tatoeba": 5961903,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-nafidha": [
@@ -783,7 +875,8 @@
         "de": "Mach das Fenster zu, bevor du rausgehst.",
         "tatoeba": 1871507,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sarir": [
@@ -792,7 +885,8 @@
         "de": "Die Bettwäsche wird einmal die Woche gewechselt.",
         "tatoeba": 1570020,
         "autor": "Grim_fandango",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-maktab": [
@@ -801,7 +895,8 @@
         "de": "Auf dem Schreibtisch liegt ein Apfel.",
         "tatoeba": 371317,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-kursi": [
@@ -810,7 +905,8 @@
         "de": "Sie sprang vom Stuhl.",
         "tatoeba": 5599126,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-miftah": [
@@ -819,7 +915,8 @@
         "de": "Wo ist mein Schlüssel?",
         "tatoeba": 7422335,
         "autor": "OsoHombre",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-hadiqa": [
@@ -828,7 +925,8 @@
         "de": "Was für ein schöner Garten.",
         "tatoeba": 398439,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-tabiq": [
@@ -837,7 +935,8 @@
         "de": "Ich wohne im Erdgeschoss.",
         "tatoeba": 371393,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-madina": [
@@ -846,7 +945,8 @@
         "de": "Sie wohnt in der Stadt.",
         "tatoeba": 11136448,
         "autor": "z7me",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-shari": [
@@ -855,7 +955,8 @@
         "de": "Ich bin ihr auf der Straße begegnet.",
         "tatoeba": 370591,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jar": [
@@ -864,7 +965,8 @@
         "de": "Er ist mein Nachbar.",
         "tatoeba": 5602189,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jamia": [
@@ -873,7 +975,8 @@
         "de": "Wann wurde diese Universität gegründet?",
         "tatoeba": 332182,
         "autor": "awael58",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qarib": [
@@ -882,7 +985,8 @@
         "de": "Mein Haus ist nahe am Bahnhof.",
         "tatoeba": 418880,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-baid": [
@@ -891,7 +995,8 @@
         "de": "Aus den Augen, aus dem Sinn.",
         "tatoeba": 1443613,
         "autor": "enteka",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-wasi": [
@@ -900,7 +1005,8 @@
         "de": "Der Fluss ist breit.",
         "tatoeba": 13671304,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-huna": [
@@ -909,13 +1015,15 @@
         "de": "Das Klima hier ist mild.",
         "tatoeba": 371278,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "لِماذا أَنا هُنا؟",
         "de": "Warum bin ich hier?",
         "tatoeba": 13356299,
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-hunaka": [
@@ -924,7 +1032,8 @@
         "de": "In Griechenland gibt es viele Inseln.",
         "tatoeba": 1924062,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-amama": [
@@ -933,7 +1042,8 @@
         "de": "Wir stehen vor einem Trümmerhaufen.",
         "tatoeba": 11136453,
         "autor": "z7me",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-maa": [
@@ -942,14 +1052,16 @@
         "de": "Hast du einen Stift bei dir?",
         "tatoeba": 607925,
         "autor": "Samer",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا مَعَكَ.",
         "de": "Ich bin bei dir.",
         "tatoeba": 375714,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-inda": [
@@ -958,7 +1070,8 @@
         "de": "Ich habe eine Freundin.",
         "tatoeba": 13415628,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-yawm": [
@@ -967,14 +1080,16 @@
         "de": "Heute scheint die Sonne.",
         "tatoeba": 475801,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "الْيَوْمُ يَوْمُ السَّبْتِ.",
         "de": "Heute ist Samstag.",
         "tatoeba": 661666,
         "autor": "Eldad",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sabahan": [
@@ -983,7 +1098,8 @@
         "de": "Wir treffen uns morgen früh am Bahnhof.",
         "tatoeba": 5051473,
         "autor": "Crataegus",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-layl": [
@@ -992,7 +1108,8 @@
         "de": "Gute Nacht.",
         "tatoeba": 1002593,
         "autor": "damascene",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-zuhr": [
@@ -1001,7 +1118,8 @@
         "de": "Ich rufe dich morgen Nachmittag an.",
         "tatoeba": 686257,
         "autor": "Samer",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-saa": [
@@ -1010,14 +1128,16 @@
         "de": "Wie viele Stunden hast du in dieser Woche gearbeitet?",
         "tatoeba": 7743121,
         "autor": "safafarman",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "«كَمِ السّاعَةُ الْآنَ؟» «إِنَّها الثّالِثَةُ وَعِشْرونَ دَقيقَةً.»",
         "de": "„Wie spät ist es?“ – „Es ist zwanzig nach drei.“",
         "tatoeba": 372020,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-waqt": [
@@ -1026,7 +1146,8 @@
         "de": "Wir haben viel Zeit.",
         "tatoeba": 4531927,
         "autor": "Amastan",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-fajr": [
@@ -1035,7 +1156,8 @@
         "de": "Die Touristen mussten die Stadt vor der Morgendämmerung verlassen.",
         "tatoeba": 4122132,
         "autor": "fadi",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-salat": [
@@ -1044,7 +1166,8 @@
         "de": "Ich kann jetzt nicht beten.",
         "tatoeba": 11677651,
         "autor": "dididodo",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-masjid": [
@@ -1053,7 +1176,8 @@
         "de": "Wo ist die Moschee?",
         "tatoeba": 11250621,
         "autor": "Amghar",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-madrasa": [
@@ -1062,14 +1186,16 @@
         "de": "Sie war auf dem Weg zur Schule.",
         "tatoeba": 13331687,
         "autor": "Igider15",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "لِماذا لَمْ تَذْهَبْ إِلى الْمَدْرَسَةِ الْيَوْمَ؟",
         "de": "Warum bist du heute nicht zur Schule gegangen?",
         "tatoeba": 13870556,
         "autor": "ninefi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-amal": [
@@ -1078,14 +1204,16 @@
         "de": "Verschiebe nicht auf morgen, was du heute kannst besorgen.",
         "tatoeba": 1329458,
         "autor": "alanood",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هَلْ لَدَيْكَ خِبْرَةٌ في الْعَمَلِ؟",
         "de": "Haben Sie Berufserfahrung?",
         "tatoeba": 1397389,
         "autor": "alanood",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-futur": [
@@ -1094,7 +1222,8 @@
         "de": "Möchtest du ein gekochtes Ei zum Frühstück?",
         "tatoeba": 3061114,
         "autor": "altusi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ghada": [
@@ -1103,7 +1232,8 @@
         "de": "Es ist Zeit fürs Mittagessen.",
         "tatoeba": 443020,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-asha": [
@@ -1112,14 +1242,16 @@
         "de": "Sie isst zu Abend.",
         "tatoeba": 371415,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَوَدُّ أَنْ أَدْعُوَكَ إِلى الْعَشاءِ.",
         "de": "Ich möchte dich zum Abendessen einladen.",
         "tatoeba": 1431887,
         "autor": "azjani",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sayyara": [
@@ -1128,14 +1260,16 @@
         "de": "Wessen Auto ist das?",
         "tatoeba": 376258,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هَلْ لَدَيْكَ سَيّارَةٌ؟",
         "de": "Hast du ein Auto?",
         "tatoeba": 513862,
         "autor": "qahwa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-hafila": [
@@ -1144,7 +1278,8 @@
         "de": "Wie viel kostet die Fahrt mit dem Bus?",
         "tatoeba": 11080780,
         "autor": "Amghar",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-kitab": [
@@ -1153,14 +1288,16 @@
         "de": "Das ist ein Buch.",
         "tatoeba": 370541,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هٰذا كِتابُها.",
         "de": "Das ist ihr Buch.",
         "tatoeba": 370542,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-wajib": [
@@ -1169,14 +1306,16 @@
         "de": "Keine Ursache.",
         "tatoeba": 602074,
         "autor": "Eldad",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هَلْ حَلَلْتَ واجِبَكَ بِنَفْسِكَ؟",
         "de": "Hast du die Hausaufgaben alleine gemacht?",
         "tatoeba": 620158,
         "autor": "Samer",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qabla": [
@@ -1185,7 +1324,8 @@
         "de": "Ich muss das Buch vor Samstag zurückgeben.",
         "tatoeba": 608037,
         "autor": "Samer",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-bada": [
@@ -1194,7 +1334,8 @@
         "de": "Wohin gehst du übermorgen?",
         "tatoeba": 1871994,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mata": [
@@ -1203,14 +1344,16 @@
         "de": "Wann ist er geboren?",
         "tatoeba": 1429352,
         "autor": "enteka",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "مَتى سَتَعودُ إِلى الْبَيْتِ؟",
         "de": "Wann kommst du nach Hause?",
         "tatoeba": 419557,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ila": [
@@ -1219,14 +1362,16 @@
         "de": "Brauchst du Geld?",
         "tatoeba": 1393219,
         "autor": "alanood",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "ذَهَبْتُ الْيَوْمَ إِلى الطَّبيبِ.",
         "de": "Heute bin ich zum Arzt gegangen.",
         "tatoeba": 332368,
         "autor": "MOHAMMAD",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-kull": [
@@ -1235,7 +1380,8 @@
         "de": "Jede Minute mit dir ist ein Geschenk.",
         "tatoeba": 5369967,
         "autor": "fares139",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-taam": [
@@ -1244,7 +1390,8 @@
         "de": "Die Leute benötigen Lebensmittel.",
         "tatoeba": 5609753,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sharab": [
@@ -1253,7 +1400,8 @@
         "de": "Danke für das Getränk.",
         "tatoeba": 6679751,
         "autor": "marhabaan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mai": [
@@ -1262,14 +1410,16 @@
         "de": "Ist das Wasser kalt?",
         "tatoeba": 8434009,
         "autor": "TheBahi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "الْماءُ مُهِمٌّ جِدّاً.",
         "de": "Wasser ist sehr wichtig.",
         "tatoeba": 8434022,
         "autor": "TheBahi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-khubz": [
@@ -1278,14 +1428,16 @@
         "de": "Wer hat das Brot gegessen?",
         "tatoeba": 371957,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا آكُلُ الْخُبْزَ.",
         "de": "Ich esse Brot.",
         "tatoeba": 1572077,
         "autor": "Amastan",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-halib": [
@@ -1294,7 +1446,8 @@
         "de": "Ich bin allergisch gegen Milch.",
         "tatoeba": 6044376,
         "autor": "Hosam",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-shay": [
@@ -1303,13 +1456,15 @@
         "de": "Ich trinke keinen Tee.",
         "tatoeba": 4348091,
         "autor": "odexed",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "إِنَّهُ يُحِبُّ الشّايَ.",
         "de": "Er liebt Tee.",
         "tatoeba": 1118827,
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qahwa": [
@@ -1318,7 +1473,8 @@
         "de": "Ich mag keinen Kaffee.",
         "tatoeba": 395490,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-asir": [
@@ -1327,7 +1483,8 @@
         "de": "Möchtest du Fruchtsaft?",
         "tatoeba": 607990,
         "autor": "Samer",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-lahm": [
@@ -1336,14 +1493,16 @@
         "de": "Niemand isst hier Fleisch.",
         "tatoeba": 8539846,
         "autor": "TheBahi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا لا آكُلُ اللَّحْمَ. أَنا نَباتِيٌّ.",
         "de": "Ich esse kein Fleisch. Ich bin Vegetarier.",
         "tatoeba": 13736249,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-samak": [
@@ -1352,7 +1511,8 @@
         "de": "Fische leben im Wasser.",
         "tatoeba": 8433983,
         "autor": "TheBahi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-aruzz": [
@@ -1361,7 +1521,8 @@
         "de": "Er hat viel Reis gegessen.",
         "tatoeba": 7937882,
         "autor": "ofxxx",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-bayd": [
@@ -1370,7 +1531,8 @@
         "de": "Wie viele Eier sind in der Küche?",
         "tatoeba": 1580585,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-fakiha": [
@@ -1379,7 +1541,8 @@
         "de": "Äpfel sind leckeres Obst.",
         "tatoeba": 3040396,
         "autor": "odexed",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-tuffah": [
@@ -1387,7 +1550,8 @@
         "ar": "أَنا آكُلُ تُفّاحَةً.",
         "de": "Ich esse einen Apfel.",
         "tatoeba": 2707192,
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-khudar": [
@@ -1396,7 +1560,8 @@
         "de": "Sie verkauft Gemüse.",
         "tatoeba": 1010403,
         "autor": "alkhaldy",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-milh": [
@@ -1405,7 +1570,8 @@
         "de": "Gib nicht zu viel Salz dazu.",
         "tatoeba": 10225065,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-matam": [
@@ -1414,7 +1580,8 @@
         "de": "Ich mag dieses Restaurant.",
         "tatoeba": 11990990,
         "autor": "LdjuherTaqvaylit",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-tahta": [
@@ -1423,7 +1590,8 @@
         "de": "Die Katze ist unter dem Tisch.",
         "tatoeba": 2638464,
         "autor": "User105223",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-jaai": [
@@ -1432,14 +1600,16 @@
         "de": "Ich habe großen Hunger.",
         "tatoeba": 400026,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا جائِعٌ.",
         "de": "Ich habe Hunger.",
         "tatoeba": 404103,
         "autor": "qahwa",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-atshan": [
@@ -1448,7 +1618,8 @@
         "de": "Ich bin sehr durstig.",
         "tatoeba": 375763,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ladhidh": [
@@ -1457,14 +1628,16 @@
         "de": "Wie lecker!",
         "tatoeba": 458398,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "الْبوظَةُ دائِماً لَذيذَةٌ.",
         "de": "Eis ist immer lecker.",
         "tatoeba": 7739811,
         "autor": "violet",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-urid": [
@@ -1472,7 +1645,8 @@
         "ar": "لا أُريدُ الْكَثيرَ.",
         "de": "Ich will nicht viel.",
         "tatoeba": 11443112,
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-min-fadlik": [
@@ -1481,14 +1655,16 @@
         "de": "Einen Augenblick bitte.",
         "tatoeba": 374777,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "مِنْ فَضْلِكَ أَصْلِحِ السَّيّارَةَ.",
         "de": "Reparieren Sie bitte das Auto.",
         "tatoeba": 376256,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jiddan": [
@@ -1497,14 +1673,16 @@
         "de": "Ich mag sie sehr.",
         "tatoeba": 5537702,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "إِنَّهُ سَهْلٌ جِدّاً.",
         "de": "Das ist sehr einfach.",
         "tatoeba": 672479,
         "autor": "Samer",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-sajjada": [
@@ -1513,7 +1691,8 @@
         "de": "Die Katze liegt auf dem Teppich.",
         "tatoeba": 489410,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-jumua": [
@@ -1522,7 +1701,8 @@
         "de": "Sonntag, Montag, Dienstag, Mittwoch, Donnerstag, Freitag und Samstag.",
         "tatoeba": 13579420,
         "autor": "rul",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-asr": [
@@ -1531,7 +1711,8 @@
         "de": "Heute Nachmittag war es sehr heiß.",
         "tatoeba": 371234,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-maghrib": [
@@ -1540,7 +1721,8 @@
         "de": "Wir leben in Marokko.",
         "tatoeba": 7804078,
         "autor": "MisterBrown",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-quran": [
@@ -1549,7 +1731,8 @@
         "de": "Das heilige Buch der Muslime ist der Quran.",
         "tatoeba": 665628,
         "autor": "Samer",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-surah": [
@@ -1558,7 +1741,8 @@
         "de": "Aus welcher Sure stammt dieser Vers?",
         "tatoeba": 4284119,
         "autor": "odexed",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-nazif": [
@@ -1567,7 +1751,8 @@
         "de": "Unsere Kleidung war immer sauber.",
         "tatoeba": 6981630,
         "autor": "OsoHombre",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-marra": [
@@ -1576,7 +1761,8 @@
         "de": "Man lebt nur einmal.",
         "tatoeba": 595296,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-alan": [
@@ -1585,7 +1771,8 @@
         "de": "Jetzt erinnere ich mich.",
         "tatoeba": 371056,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ahyanan": [
@@ -1594,14 +1781,16 @@
         "de": "Er hat mich gelegentlich besucht.",
         "tatoeba": 7731023,
         "autor": "violet",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "الطَّريقُ إِلى السَّعادَةِ يَحْتاجُ أَحْياناً شَجاعَةً.",
         "de": "Der Weg ins Glück braucht manchmal Mut.",
         "tatoeba": 5537567,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-allahu-akbar": [
@@ -1610,7 +1799,8 @@
         "de": "Gott ist größer!",
         "tatoeba": 1937635,
         "autor": "LanguageExpert",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-dirasa": [
@@ -1619,7 +1809,8 @@
         "de": "Sie können nicht studieren, weil sie sehr müde sind.",
         "tatoeba": 4942245,
         "autor": "damascene",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-fasl": [
@@ -1628,14 +1819,16 @@
         "de": "Im Süden Spaniens ist es sehr heiß im Sommer.",
         "tatoeba": 458426,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "عَلَيْنا إِطْعامُ الطُّيورِ في فَصْلِ الشِّتاءِ.",
         "de": "Im Winter müssen wir die Vögel füttern.",
         "tatoeba": 1876202,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qalam": [
@@ -1644,7 +1837,8 @@
         "de": "Wem gehört dieser Stift?",
         "tatoeba": 376313,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-daftar": [
@@ -1653,7 +1847,8 @@
         "de": "Das ist mein Heft.",
         "tatoeba": 370563,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-sabbura": [
@@ -1662,7 +1857,8 @@
         "de": "Der Mathelehrer hat einen Kreis an die Tafel gezeichnet.",
         "tatoeba": 1586216,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-maktaba": [
@@ -1671,7 +1867,8 @@
         "de": "Ist das die Bibliothek?",
         "tatoeba": 11043639,
         "autor": "Amghar",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-imtihan": [
@@ -1680,14 +1877,16 @@
         "de": "Ich habe morgen eine Prüfung.",
         "tatoeba": 489295,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَنا مُتَأَكِّدٌ أَنَّهُ سَيَجْتازُ الِامْتِحانَ.",
         "de": "Ich bin sicher, dass er die Prüfung besteht.",
         "tatoeba": 3212867,
         "autor": "Hosam",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sual": [
@@ -1696,7 +1895,8 @@
         "de": "Das ist eine sehr wichtige Frage.",
         "tatoeba": 371384,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-jawab": [
@@ -1705,7 +1905,8 @@
         "de": "Deine Antwort ist richtig.",
         "tatoeba": 11672932,
         "autor": "dididodo",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-kalima": [
@@ -1714,14 +1915,16 @@
         "de": "Was bedeutet dieses Wort?",
         "tatoeba": 507421,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هِيَ تَتَعَلَّمُ كَلِماتٍ جَديدَةً.",
         "de": "Sie lernt neue Vokabeln.",
         "tatoeba": 5961135,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jumla": [
@@ -1730,7 +1933,8 @@
         "de": "Diesen Satz nicht übersetzen!",
         "tatoeba": 1929551,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qawaid": [
@@ -1739,7 +1943,8 @@
         "de": "Die Grammatik dieser Sprache ist sehr schwer.",
         "tatoeba": 13177570,
         "autor": "atitarev",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-sahl": [
@@ -1748,7 +1953,8 @@
         "de": "Reisen ist heutzutage leicht.",
         "tatoeba": 416561,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sab": [
@@ -1757,7 +1963,8 @@
         "de": "Ist Arabisch schwierig?",
         "tatoeba": 6561319,
         "autor": "OsoHombre",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mujtahid": [
@@ -1766,7 +1973,8 @@
         "de": "Sie ist fleißig und zuverlässig.",
         "tatoeba": 1904243,
         "autor": "Asma",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-najih": [
@@ -1775,7 +1983,8 @@
         "de": "Der neue Plan war sehr erfolgreich.",
         "tatoeba": 1928294,
         "autor": "Asma",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-zamil": [
@@ -1784,7 +1993,8 @@
         "de": "Das ist mein Kollege.",
         "tatoeba": 13228686,
         "autor": "atitarev",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-usbu": [
@@ -1792,7 +2002,8 @@
         "ar": "كَمْ عَدَدُ الْأَيّامِ في الْأُسْبوعِ؟",
         "de": "Wie viele Tage hat die Woche?",
         "tatoeba": 1077335,
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sabt": [
@@ -1801,7 +2012,8 @@
         "de": "Ich bin seit Samstag hier.",
         "tatoeba": 2882561,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-ithnayn": [
@@ -1810,7 +2022,8 @@
         "de": "Heute ist Montag.",
         "tatoeba": 5548501,
         "autor": "WaelAlwasel",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ghadan": [
@@ -1819,7 +2032,8 @@
         "de": "Vielleicht schneit es morgen.",
         "tatoeba": 407052,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-alyawm": [
@@ -1828,7 +2042,8 @@
         "de": "Heute ist es kalt.",
         "tatoeba": 1879753,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-lianna": [
@@ -1837,7 +2052,8 @@
         "de": "Ich bin froh, dass niemand hier ist.",
         "tatoeba": 7134890,
         "autor": "OsoHombre",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-lakinna": [
@@ -1846,7 +2062,8 @@
         "de": "Gut, ich glaube dir, aber das ist das letzte Mal!",
         "tatoeba": 5961087,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sharika": [
@@ -1855,7 +2072,8 @@
         "de": "Wer ist der Chef dieser Firma?",
         "tatoeba": 386585,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mustashfa": [
@@ -1864,7 +2082,8 @@
         "de": "Ich bin ins Krankenhaus gegangen.",
         "tatoeba": 2661743,
         "autor": "sayaNdream",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mumarrida": [
@@ -1873,7 +2092,8 @@
         "de": "Sie träumt davon, Krankenschwester zu werden.",
         "tatoeba": 422654,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-tajir": [
@@ -1882,7 +2102,8 @@
         "de": "Dieser Mann ist Händler.",
         "tatoeba": 2981860,
         "autor": "odexed",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-saiq": [
@@ -1891,7 +2112,8 @@
         "de": "Wir haben einen neuen Busfahrer.",
         "tatoeba": 11080782,
         "autor": "Amghar",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-fallah": [
@@ -1900,7 +2122,8 @@
         "de": "Bauern arbeiten auf dem Feld.",
         "tatoeba": 966471,
         "autor": "damascene",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mudir": [
@@ -1909,7 +2132,8 @@
         "de": "Ich bin der Leiter dieser Praxis.",
         "tatoeba": 6994377,
         "autor": "OsoHombre",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-ratib": [
@@ -1918,7 +2142,8 @@
         "de": "Mein Vater gibt meiner Mutter sein ganzes Monatsgehalt.",
         "tatoeba": 395544,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mawid": [
@@ -1927,14 +2152,16 @@
         "de": "Der Zug kam pünktlich an.",
         "tatoeba": 6325520,
         "autor": "Crataegus",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هَلْ لَدَيْكَ مَوْعِدٌ؟",
         "de": "Haben Sie einen Termin?",
         "tatoeba": 1372618,
         "autor": "alanood",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-masna": [
@@ -1943,7 +2170,8 @@
         "de": "Mein Vater und mein Bruder arbeiten in dieser Fabrik.",
         "tatoeba": 660116,
         "autor": "Samer",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mazraa": [
@@ -1952,7 +2180,8 @@
         "de": "Ich arbeitete auf einem Bauernhof.",
         "tatoeba": 1872122,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mashghul": [
@@ -1961,7 +2190,8 @@
         "de": "Ich bin gerade nicht beschäftigt.",
         "tatoeba": 1880043,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mutab": [
@@ -1970,7 +2200,8 @@
         "de": "Ich bin jetzt müde.",
         "tatoeba": 372207,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-nashit": [
@@ -1979,7 +2210,8 @@
         "de": "Dieser Student ist sehr aktiv.",
         "tatoeba": 460441,
         "autor": "hamad",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-thamina": [
@@ -1988,7 +2220,8 @@
         "de": "Die Schule fängt um halb neun an.",
         "tatoeba": 616399,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-suq": [
@@ -1997,7 +2230,8 @@
         "de": "Ich bin nicht zum Markt gegangen.",
         "tatoeba": 11558359,
         "autor": "Naityahia",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-dukkan": [
@@ -2006,7 +2240,8 @@
         "de": "In dem Laden lebt eine Katze.",
         "tatoeba": 5961079,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-thaman": [
@@ -2015,7 +2250,8 @@
         "de": "Sie war sehr günstig.",
         "tatoeba": 398450,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-nuqud": [
@@ -2024,7 +2260,8 @@
         "de": "Er weiß nicht, wohin mit dem Geld.",
         "tatoeba": 5042895,
         "autor": "Crataegus",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ghali": [
@@ -2033,7 +2270,8 @@
         "de": "Ist das zu teuer?",
         "tatoeba": 4942350,
         "autor": "damascene",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-rakhis": [
@@ -2042,7 +2280,8 @@
         "de": "Kartoffeln sind billig.",
         "tatoeba": 5623896,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qamis": [
@@ -2051,7 +2290,8 @@
         "de": "Er hat ein schwarzes Hemd.",
         "tatoeba": 1887072,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-hidha": [
@@ -2060,7 +2300,8 @@
         "de": "Diese Schuhe sind mir zu groß.",
         "tatoeba": 458521,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-haqiba": [
@@ -2069,7 +2310,8 @@
         "de": "Was für eine schwere Tasche!",
         "tatoeba": 3054764,
         "autor": "altusi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-lawn": [
@@ -2078,14 +2320,16 @@
         "de": "Was für eine Haarfarbe hast du?",
         "tatoeba": 3054771,
         "autor": "altusi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "لَوْنُهُ أَحْمَرُ.",
         "de": "Es ist rot.",
         "tatoeba": 371028,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-abyad": [
@@ -2094,7 +2338,8 @@
         "de": "Er hat zwei Katzen: Die eine ist schwarz und die andere weiß.",
         "tatoeba": 965086,
         "autor": "Samer",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-aswad": [
@@ -2103,7 +2348,8 @@
         "de": "Sein Telefon ist schwarz.",
         "tatoeba": 11609348,
         "autor": "dididodo",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-ahmar": [
@@ -2112,7 +2358,8 @@
         "de": "Welche Farbe ist dir lieber? Blau oder Rot?",
         "tatoeba": 371921,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-akhdar": [
@@ -2121,7 +2368,8 @@
         "de": "Das Wasser ist grün.",
         "tatoeba": 8433978,
         "autor": "TheBahi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-azraq": [
@@ -2130,7 +2378,8 @@
         "de": "Magst du lieber Rot oder Blau?",
         "tatoeba": 5961156,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-bikam": [
@@ -2139,7 +2388,8 @@
         "de": "Wie viel kostet die Uhr?",
         "tatoeba": 4925926,
         "autor": "damascene",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-hadiyya": [
@@ -2148,14 +2398,16 @@
         "de": "Das ist ein Geschenk für dich.",
         "tatoeba": 411503,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هٰذِهِ هَدِيَّةٌ مُتَواضِعَةٌ لَكَ.",
         "de": "Dies ist ein kleines Geschenk für dich.",
         "tatoeba": 3664292,
         "autor": "Alaakhalid",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ishrun": [
@@ -2164,7 +2416,8 @@
         "de": "Es waren ungefähr zwanzig Leute da.",
         "tatoeba": 372012,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mia": [
@@ -2173,7 +2426,8 @@
         "de": "Hundert ist meine Lieblingszahl.",
         "tatoeba": 1580555,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-tayyib": [
@@ -2182,7 +2436,8 @@
         "de": "Dieses Wasser schmeckt gut.",
         "tatoeba": 8434019,
         "autor": "TheBahi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jaww": [
@@ -2191,7 +2446,8 @@
         "de": "Es ist kalt.",
         "tatoeba": 371032,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-shams": [
@@ -2200,14 +2456,16 @@
         "de": "Die Sonne geht im Osten auf.",
         "tatoeba": 13789317,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "تَغْرُبُ الشَّمْسُ في الْغَرْبِ.",
         "de": "Die Sonne geht im Westen unter.",
         "tatoeba": 13789322,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-matar": [
@@ -2216,7 +2474,8 @@
         "de": "Dieses Jahr hat es viel geregnet.",
         "tatoeba": 423817,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-rih": [
@@ -2225,14 +2484,16 @@
         "de": "Wer Wind sät, wird Sturm ernten.",
         "tatoeba": 13728407,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "النَّسْرُ يَطيرُ ضِدَّ الرّيحِ.",
         "de": "Der Adler fliegt gegen den Wind.",
         "tatoeba": 12151234,
         "autor": "aennes_dschielaehni",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sahab": [
@@ -2241,7 +2502,8 @@
         "de": "Eine Wolke ist eine Dampfmasse am Himmel.",
         "tatoeba": 11621460,
         "autor": "elmassoudi",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-thalj": [
@@ -2250,7 +2512,8 @@
         "de": "Der Berg war mit Schnee bedeckt.",
         "tatoeba": 7744838,
         "autor": "violet",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sama": [
@@ -2259,7 +2522,8 @@
         "de": "Sie sah zum Himmel hinauf.",
         "tatoeba": 5539918,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-harara": [
@@ -2268,14 +2532,16 @@
         "de": "Der Frühling ist gekommen. Mit jedem Tag wird es wärmer.",
         "tatoeba": 2519764,
         "autor": "assula",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "لا أَسْتَطيعُ تَحَمُّلَ الْحَرارَةِ.",
         "de": "Ich kann die Hitze nicht ertragen.",
         "tatoeba": 1398503,
         "autor": "alanood",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-daraja": [
@@ -2284,7 +2550,8 @@
         "de": "Auch heute liegt die Temperatur unter null.",
         "tatoeba": 670475,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-harr": [
@@ -2293,7 +2560,8 @@
         "de": "Was für ein heißer Tag das ist!",
         "tatoeba": 461966,
         "autor": "qahwa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-barid": [
@@ -2302,14 +2570,16 @@
         "de": "Das Wasser ist kalt.",
         "tatoeba": 8421878,
         "autor": "TheBahi",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "يُحْفَظُ في مَكانٍ بارِدٍ.",
         "de": "Kühl lagern!",
         "tatoeba": 6934038,
         "autor": "aym",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sayf": [
@@ -2318,7 +2588,8 @@
         "de": "Diesen Sommer reisen wir ins Ausland.",
         "tatoeba": 376052,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-rabi": [
@@ -2327,7 +2598,8 @@
         "de": "Magst du den Frühling oder den Herbst?",
         "tatoeba": 13187833,
         "autor": "atitarev",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-kharif": [
@@ -2336,7 +2608,8 @@
         "de": "Jetzt ist Herbst.",
         "tatoeba": 2602693,
         "autor": "Samer",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-sana": [
@@ -2345,14 +2618,16 @@
         "de": "Januar ist der erste Monat des Jahres.",
         "tatoeba": 448349,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "كُلُّ سَنَةٍ وَأَنْتُمْ بِخَيْرٍ.",
         "de": "Alles Gute zum neuen Jahr (wörtlich: jedes Jahr sollt ihr wohlauf sein).",
         "tatoeba": 372097,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mushmis": [
@@ -2361,7 +2636,8 @@
         "de": "Unser Wohnzimmer ist sonnig.",
         "tatoeba": 1245455,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mumtir": [
@@ -2370,7 +2646,8 @@
         "de": "Heute ist ein Regentag.",
         "tatoeba": 370913,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-qalil": [
@@ -2379,7 +2656,8 @@
         "de": "In der Flasche ist ein wenig Milch.",
         "tatoeba": 1580738,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-kathir": [
@@ -2388,7 +2666,8 @@
         "de": "Trink viel Wasser!",
         "tatoeba": 8421884,
         "autor": "TheBahi",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-limadha": [
@@ -2397,7 +2676,8 @@
         "de": "Warum stellst du mir all diese Fragen?",
         "tatoeba": 1881248,
         "autor": "Asma",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-uhibbu": [
@@ -2406,7 +2686,8 @@
         "de": "Ich mag keine Überraschungen.",
         "tatoeba": 2753165,
         "autor": "spiritofwonder",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-nas": [
@@ -2415,7 +2696,8 @@
         "de": "Menschen sind Menschen.",
         "tatoeba": 13715719,
         "autor": "rul",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-makan": [
@@ -2424,7 +2706,8 @@
         "de": "Du bist an einem sicheren Ort.",
         "tatoeba": 375550,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-asima": [
@@ -2433,7 +2716,8 @@
         "de": "Paris ist die Hauptstadt Frankreichs.",
         "tatoeba": 477356,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qarya": [
@@ -2442,7 +2726,8 @@
         "de": "Die Welt ist ein Dorf.",
         "tatoeba": 370549,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-bahr": [
@@ -2451,7 +2736,8 @@
         "de": "Einige Kinder schwimmen im Meer.",
         "tatoeba": 1072714,
         "autor": "User105223",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-nahr": [
@@ -2460,14 +2746,16 @@
         "de": "Ist das ein Fluss?",
         "tatoeba": 5596456,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "النَّهْرُ جَميلٌ.",
         "de": "Der Fluss ist schön.",
         "tatoeba": 5596458,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jabal": [
@@ -2476,7 +2764,8 @@
         "de": "Wir erreichten den Gipfel des Berges.",
         "tatoeba": 5595630,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sahra": [
@@ -2485,14 +2774,16 @@
         "de": "Die Beduinen leben in der Wüste.",
         "tatoeba": 7723510,
         "autor": "Balamax",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "لَيْسَتِ الصَّحْراءُ أَرْضاً مَيِّتَةً.",
         "de": "Die Wüste ist kein totes Land.",
         "tatoeba": 13743525,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-shamal": [
@@ -2501,7 +2792,8 @@
         "de": "Das Esszimmer schaut nach Norden.",
         "tatoeba": 5961923,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-janub": [
@@ -2510,7 +2802,8 @@
         "de": "Er ist gerade aus Südamerika zurückgekommen.",
         "tatoeba": 7730982,
         "autor": "violet",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sharq": [
@@ -2519,7 +2812,8 @@
         "de": "Die Sonne geht im Westen unter und im Osten auf.",
         "tatoeba": 13789226,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-gharb": [
@@ -2528,7 +2822,8 @@
         "de": "Das Schlafzimmer liegt nach Westen.",
         "tatoeba": 5961901,
         "autor": "baraa",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-wasat": [
@@ -2537,14 +2832,16 @@
         "de": "Wir saßen mitten im Zimmer.",
         "tatoeba": 5601628,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "تَقَعُ أَلْمانِيا في وَسَطِ أوروبّا.",
         "de": "Deutschland liegt mitten in Europa.",
         "tatoeba": 5601626,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mashhur": [
@@ -2553,7 +2850,8 @@
         "de": "Er wurde berühmt.",
         "tatoeba": 5612133,
         "autor": "aym",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qadim": [
@@ -2562,14 +2860,16 @@
         "de": "Das ist ein alter Trick.",
         "tatoeba": 375578,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "روما مَدينَةٌ قَديمَةٌ.",
         "de": "Rom ist eine alte Stadt.",
         "tatoeba": 375582,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-muhimm": [
@@ -2578,7 +2878,8 @@
         "de": "Das Wichtigste ist die Arbeit.",
         "tatoeba": 370594,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-kharita": [
@@ -2587,7 +2888,8 @@
         "de": "Wo ist die Landkarte?",
         "tatoeba": 4221606,
         "autor": "Alaakhalid",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mathaf": [
@@ -2595,7 +2897,8 @@
         "ar": "أَيْنَ الْمَتْحَفُ؟",
         "de": "Wo ist das Museum?",
         "tatoeba": 12403353,
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-aalam": [
@@ -2604,14 +2907,16 @@
         "de": "Die Welt ist schön.",
         "tatoeba": 8900616,
         "autor": "sayaNdream",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "أَوْسَعُ نَهْرٍ في الْعالَمِ هُوَ نَهْرُ الْأَمازونِ.",
         "de": "Der Amazonas ist der breiteste Fluss der Welt.",
         "tatoeba": 13671306,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mamlaka": [
@@ -2619,7 +2924,8 @@
         "ar": "أَنا مِنَ الْمَمْلَكَةِ الْعَرَبِيَّةِ السَّعودِيَّةِ.",
         "de": "Ich komme aus Saudi-Arabien.",
         "tatoeba": 4842486,
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-hiwaya": [
@@ -2628,7 +2934,8 @@
         "de": "Haben Sie noch andere Hobbys?",
         "tatoeba": 6325798,
         "autor": "Crataegus",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-riyada": [
@@ -2637,7 +2944,8 @@
         "de": "Ich mag Sport.",
         "tatoeba": 383046,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-kurat-alqadam": [
@@ -2646,7 +2954,8 @@
         "de": "Ich spiele jetzt Fußball. Und du? Was machst du?",
         "tatoeba": 1872022,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sibaha": [
@@ -2655,7 +2964,8 @@
         "de": "Kannst du schwimmen?",
         "tatoeba": 823721,
         "autor": "Samer",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qiraa": [
@@ -2664,7 +2974,8 @@
         "de": "Das ist ein Buch zum Lesen.",
         "tatoeba": 1584761,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-hisan": [
@@ -2673,7 +2984,8 @@
         "de": "Er ist so stark wie ein Pferd.",
         "tatoeba": 628712,
         "autor": "Samer",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-malab": [
@@ -2682,7 +2994,8 @@
         "de": "Er ist im Stadion.",
         "tatoeba": 6985667,
         "autor": "OsoHombre",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-fariq": [
@@ -2691,7 +3004,8 @@
         "de": "Wer trainiert die Mannschaft?",
         "tatoeba": 371658,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mubarah": [
@@ -2700,7 +3014,8 @@
         "de": "Das Spiel wurde aufgrund eines Gewitters unterbrochen.",
         "tatoeba": 1590147,
         "autor": "Grim_fandango",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qissa": [
@@ -2709,7 +3024,8 @@
         "de": "Diese Geschichte ist wahr.",
         "tatoeba": 370577,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-majalla": [
@@ -2718,7 +3034,8 @@
         "de": "Wirf diese Zeitschrift nicht weg.",
         "tatoeba": 454731,
         "autor": "hamad",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-sahifa": [
@@ -2727,7 +3044,8 @@
         "de": "Sie hat aufgehört, die Zeitung zu lesen.",
         "tatoeba": 5041472,
         "autor": "Crataegus",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-rihla": [
@@ -2736,7 +3054,8 @@
         "de": "Schöne Reise!",
         "tatoeba": 5157380,
         "autor": "Crataegus",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-faragh": [
@@ -2745,7 +3064,8 @@
         "de": "Er hatte viel Freizeit.",
         "tatoeba": 5962115,
         "autor": "baraa",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mufaddal": [
@@ -2754,7 +3074,8 @@
         "de": "Das ist mein Lieblingslehrer.",
         "tatoeba": 7040202,
         "autor": "OsoHombre",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mumti": [
@@ -2763,7 +3084,8 @@
         "de": "Das ist wirklich spannend.",
         "tatoeba": 5674260,
         "autor": "aym",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mahir": [
@@ -2772,7 +3094,8 @@
         "de": "Sie ist sehr geschickt.",
         "tatoeba": 498547,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-harf": [
@@ -2781,7 +3104,8 @@
         "de": "Alif ist der erste Buchstabe des arabischen Alphabets.",
         "tatoeba": 724915,
         "autor": "Eldad",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-safar": [
@@ -2790,14 +3114,16 @@
         "de": "Vergessen Sie die Fahrkarte nicht.",
         "tatoeba": 565393,
         "autor": "Eldad",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "إِلى مَتى جَوازُ سَفَرِكَ صالِحٌ؟",
         "de": "Bis wann ist dein Pass gültig?",
         "tatoeba": 1894867,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mataar": [
@@ -2806,7 +3132,8 @@
         "de": "Sie arbeitet am Flughafen.",
         "tatoeba": 13219116,
         "autor": "LdjuherTaqvaylit",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-taira": [
@@ -2815,7 +3142,8 @@
         "de": "Das Flugzeug ist gelandet.",
         "tatoeba": 5961062,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-qitar": [
@@ -2824,7 +3152,8 @@
         "de": "Wann kommt der Zug?",
         "tatoeba": 7730964,
         "autor": "violet",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-safina": [
@@ -2833,7 +3162,8 @@
         "de": "Kennst du die Arche Noahs?",
         "tatoeba": 8824541,
         "autor": "LinaTamazight",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-tadhkira": [
@@ -2842,7 +3172,8 @@
         "de": "Vergessen Sie ihr Ticket nicht.",
         "tatoeba": 371037,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-jawaz": [
@@ -2851,7 +3182,8 @@
         "de": "Den Reisepass, bitte.",
         "tatoeba": 5496723,
         "autor": "Wildflower81",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-tashira": [
@@ -2860,7 +3192,8 @@
         "de": "Ich habe ein Touristenvisum.",
         "tatoeba": 4116758,
         "autor": "fadi",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-funduq": [
@@ -2869,7 +3202,8 @@
         "de": "Das Hotel ist dort drüben.",
         "tatoeba": 11581731,
         "autor": "dididodo",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-musafir": [
@@ -2878,7 +3212,8 @@
         "de": "Der Bus ist voller Fahrgäste.",
         "tatoeba": 11080751,
         "autor": "Amghar",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-wusul": [
@@ -2887,7 +3222,8 @@
         "de": "Der Weg ist wichtiger als das Ziel.",
         "tatoeba": 13440825,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-kharij": [
@@ -2896,7 +3232,8 @@
         "de": "Ist da draußen jemand?",
         "tatoeba": 7681589,
         "autor": "dhi95",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-daqiqa": [
@@ -2905,7 +3242,8 @@
         "de": "Die Rede dauerte dreißig Minuten.",
         "tatoeba": 371401,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-sari": [
@@ -2914,7 +3252,8 @@
         "de": "Er spricht schnell.",
         "tatoeba": 375565,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-saeed": [
@@ -2923,7 +3262,8 @@
         "de": "Bist du glücklich?",
         "tatoeba": 1872041,
         "autor": "Asma",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mumtaz": [
@@ -2932,7 +3272,8 @@
         "de": "Deine Note in der Prüfung ist ausgezeichnet.",
         "tatoeba": 595375,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-kaba": [
@@ -2941,7 +3282,8 @@
         "de": "Muslime beten immer in Richtung der Kaaba.",
         "tatoeba": 7317040,
         "autor": "OsoHombre",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-id": [
@@ -2950,14 +3292,16 @@
         "de": "Herzlichen Glückwunsch zum Geburtstag!",
         "tatoeba": 332229,
         "autor": "Samer",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "مَتى عيدُ ميلادِكَ؟",
         "de": "Wann hast du Geburtstag?",
         "tatoeba": 371682,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-mubarak": [
@@ -2966,7 +3310,8 @@
         "de": "Gesegnetes Fest!",
         "tatoeba": 8007260,
         "autor": "OsoHombre",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-ziham": [
@@ -2975,7 +3320,8 @@
         "de": "Ich wurde durch einen Stau aufgehalten.",
         "tatoeba": 665485,
         "autor": "Samer",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-shar": [
@@ -2984,7 +3330,8 @@
         "de": "Hast du deine Haare umgefärbt?",
         "tatoeba": 5961064,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ams": [
@@ -2993,7 +3340,8 @@
         "de": "Was hast du gestern gesagt?",
         "tatoeba": 8299904,
         "autor": "Garnetskull",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-inshaallah": [
@@ -3002,7 +3350,8 @@
         "de": "So Gott will.",
         "tatoeba": 1573554,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-sihha": [
@@ -3011,7 +3360,8 @@
         "de": "Mein Vater ist gesund.",
         "tatoeba": 1372381,
         "autor": "alanood",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-marid": [
@@ -3020,14 +3370,16 @@
         "de": "Ich bin krank.",
         "tatoeba": 13981607,
         "autor": "Adelpa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "هَلْ أَنْتَ مَريضٌ؟",
         "de": "Bist du krank?",
         "tatoeba": 13322632,
         "autor": "Igider15",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-dawa": [
@@ -3036,7 +3388,8 @@
         "de": "Ich brauche ein Medikament. Wo ist die Apotheke?",
         "tatoeba": 7976275,
         "autor": "OsoHombre",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-saydaliyya": [
@@ -3045,7 +3398,8 @@
         "de": "Wo ist die Apotheke?",
         "tatoeba": 4103898,
         "autor": "Safa_Alfulaij",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-alam": [
@@ -3054,7 +3408,8 @@
         "de": "Der Schmerz ist unerträglich.",
         "tatoeba": 3647332,
         "autor": "pathem",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-ras": [
@@ -3063,7 +3418,8 @@
         "de": "Ich habe Kopfschmerzen.",
         "tatoeba": 498994,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-yad": [
@@ -3072,7 +3428,8 @@
         "de": "Sie hat etwas in ihrer Hand.",
         "tatoeba": 376203,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-udhun": [
@@ -3081,7 +3438,8 @@
         "de": "Ich flüsterte ihm ins Ohr.",
         "tatoeba": 6991525,
         "autor": "OsoHombre",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-anf": [
@@ -3090,7 +3448,8 @@
         "de": "Was ist denn mit deiner Nase passiert?",
         "tatoeba": 5961750,
         "autor": "baraa",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-humma": [
@@ -3099,7 +3458,8 @@
         "de": "Hast du Fieber?",
         "tatoeba": 443024,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-zukam": [
@@ -3108,7 +3468,8 @@
         "de": "Ich habe eine starke Erkältung.",
         "tatoeba": 6949050,
         "autor": "odexed",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-salim": [
@@ -3117,7 +3478,8 @@
         "de": "Ein gesunder Geist in einem gesunden Körper.",
         "tatoeba": 476144,
         "autor": "saeb",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-mundhu": [
@@ -3126,7 +3488,8 @@
         "de": "Ich warte seit Stunden.",
         "tatoeba": 972991,
         "autor": "Safa_Alfulaij",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-ijaza": [
@@ -3135,7 +3498,8 @@
         "de": "Ich freue mich auf die Sommerferien.",
         "tatoeba": 1894794,
         "autor": "Asma",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-shati": [
@@ -3144,7 +3508,8 @@
         "de": "Der Fischer steht allein am Ufer.",
         "tatoeba": 5595993,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-raml": [
@@ -3153,7 +3518,8 @@
         "de": "Ich mag keinen Sand.",
         "tatoeba": 13932017,
         "autor": "rul",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-khayma": [
@@ -3162,7 +3528,8 @@
         "de": "Dieses Zelt ist eine Moschee.",
         "tatoeba": 11800300,
         "autor": "dididodo",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-ziyara": [
@@ -3171,7 +3538,8 @@
         "de": "Was ist der Zweck Ihres Besuchs in diesem Land?",
         "tatoeba": 1290336,
         "autor": "katrecik",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-saih": [
@@ -3180,7 +3548,8 @@
         "de": "Ich bin Tourist.",
         "tatoeba": 1409258,
         "autor": "alanood",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-siyaha": [
@@ -3189,7 +3558,8 @@
         "de": "Wo ist das Touristenbüro?",
         "tatoeba": 1595375,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-manzar": [
@@ -3198,7 +3568,8 @@
         "de": "Die Aussicht von diesem Gebäude war großartig.",
         "tatoeba": 1579807,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-dhikra": [
@@ -3207,7 +3578,8 @@
         "de": "Lass uns ein Foto zur Erinnerung machen.",
         "tatoeba": 1584813,
         "autor": "Amastan",
-        "deVon": "suffa"
+        "deVon": "suffa",
+        "quelle": "tatoeba"
       }
     ],
     "v-risala": [
@@ -3216,7 +3588,8 @@
         "de": "Kann ich nun diesen Brief absenden?",
         "tatoeba": 5595922,
         "autor": "Sara1994",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-hatif": [
@@ -3225,14 +3598,16 @@
         "de": "Er telefoniert.",
         "tatoeba": 375739,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       },
       {
         "ar": "مَنِ اخْتَرَعَ الْهاتِفَ؟",
         "de": "Wer hat das Telefon erfunden?",
         "tatoeba": 371652,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-hadaya": [
@@ -3241,7 +3616,8 @@
         "de": "Ich kaufe, was wir für die Reise brauchen, und die Geschenke für die Kinder.",
         "tatoeba": 1876975,
         "autor": "Asma",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
       }
     ],
     "v-kana": [
@@ -3250,7 +3626,760 @@
         "de": "Sie hatten nur ein Kind.",
         "tatoeba": 371306,
         "autor": "saeb",
-        "deVon": "tatoeba"
+        "deVon": "tatoeba",
+        "quelle": "tatoeba"
+      }
+    ],
+    "v-hal": [
+      {
+        "ar": "كَيْفَ حالُ أُسْرَتِكَ؟",
+        "de": "Wie geht es deiner Familie?",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-hamd": [
+      {
+        "ar": "الْحَمْدُ لِلَّهِ، أَنا بِخَيْرٍ.",
+        "de": "Gott sei Dank, mir geht es gut.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-dawla": [
+      {
+        "ar": "أَلْمانِيا دَوْلَةٌ كَبيرَةٌ في أوروبّا.",
+        "de": "Deutschland ist ein großer Staat in Europa.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-anti": [
+      {
+        "ar": "مِنْ أَيْنَ أَنْتِ يا سارَةُ؟",
+        "de": "Woher kommst du, Sāra?",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-ahlan": [
+      {
+        "ar": "أَهْلاً وَسَهْلاً في بَيْتِنا!",
+        "de": "Herzlich willkommen in unserem Haus!",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-maa-salama": [
+      {
+        "ar": "مَعَ السَّلامَةِ يا أُسْتاذُ، إِلى الْغَدِ.",
+        "de": "Auf Wiedersehen, Herr Lehrer, bis morgen.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-shukran": [
+      {
+        "ar": "شُكْراً عَلى الْقَهْوَةِ.",
+        "de": "Danke für den Kaffee.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-usra": [
+      {
+        "ar": "أُسْرَتي كَبيرَةٌ: عِنْدي ثَلاثَةُ إِخْوَةٍ.",
+        "de": "Meine Familie ist groß: Ich habe drei Brüder.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-akh": [
+      {
+        "ar": "أَخي طالِبٌ في الْجامِعَةِ.",
+        "de": "Mein Bruder studiert an der Universität.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-jadda": [
+      {
+        "ar": "جَدَّتي تَسْكُنُ مَعَنا في الْبَيْتِ.",
+        "de": "Meine Großmutter wohnt bei uns im Haus.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-zawja": [
+      {
+        "ar": "زَوْجَتُهُ طَبيبَةٌ في الْمُسْتَشْفى.",
+        "de": "Seine Frau ist Ärztin im Krankenhaus.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-sura": [
+      {
+        "ar": "هٰذِهِ صورَةُ أُسْرَتي.",
+        "de": "Das ist ein Foto meiner Familie.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-khamsa": [
+      {
+        "ar": "عِنْدي خَمْسَةُ أَقْلامٍ.",
+        "de": "Ich habe fünf Stifte.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-maskan": [
+      {
+        "ar": "مَسْكَني قَريبٌ مِنَ الْمَسْجِدِ.",
+        "de": "Meine Wohnung ist nahe der Moschee.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-hammam": [
+      {
+        "ar": "الْحَمّامُ بِجانِبِ الْمَطْبَخِ.",
+        "de": "Das Bad ist neben der Küche.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-bab": [
+      {
+        "ar": "أَغْلِقِ الْبابَ، مِنْ فَضْلِكَ.",
+        "de": "Schließ bitte die Tür.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-dayyiq": [
+      {
+        "ar": "الشّارِعُ ضَيِّقٌ جِدّاً.",
+        "de": "Die Straße ist sehr eng.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-ala": [
+      {
+        "ar": "الْكِتابُ عَلى الْمَكْتَبِ.",
+        "de": "Das Buch liegt auf dem Schreibtisch.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-masaan": [
+      {
+        "ar": "أَرْجِعُ إِلى الْبَيْتِ مَساءً.",
+        "de": "Ich komme abends nach Hause.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-dars": [
+      {
+        "ar": "الدَّرْسُ الْيَوْمَ سَهْلٌ.",
+        "de": "Die Lektion heute ist leicht.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-mubakkiran": [
+      {
+        "ar": "أَسْتَيْقِظُ مُبَكِّراً كُلَّ يَوْمٍ.",
+        "de": "Ich wache jeden Tag früh auf.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-thumma": [
+      {
+        "ar": "أُصَلّي الْفَجْرَ، ثُمَّ آكُلُ الْفُطورَ.",
+        "de": "Ich bete das Morgengebet, dann frühstücke ich.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-dajaj": [
+      {
+        "ar": "أُحِبُّ الدَّجاجَ مَعَ الْأَرُزِّ.",
+        "de": "Ich mag Hähnchen mit Reis.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-tamr": [
+      {
+        "ar": "التَّمْرُ لَذيذٌ مَعَ الْقَهْوَةِ.",
+        "de": "Datteln schmecken gut zum Kaffee.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-maida": [
+      {
+        "ar": "جَلَسَتِ الْأُسْرَةُ حَوْلَ الْمائِدَةِ.",
+        "de": "Die Familie saß um den Tisch.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-sahn": [
+      {
+        "ar": "هٰذا الصَّحْنُ نَظيفٌ.",
+        "de": "Dieser Teller ist sauber.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-kaas": [
+      {
+        "ar": "أُريدُ كَأْسَ ماءٍ، مِنْ فَضْلِكَ.",
+        "de": "Ich möchte ein Glas Wasser, bitte.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-madha": [
+      {
+        "ar": "ماذا تَشْرَبُ في الصَّباحِ؟",
+        "de": "Was trinkst du am Morgen?",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-wudu": [
+      {
+        "ar": "الْوُضوءُ قَبْلَ الصَّلاةِ.",
+        "de": "Die Waschung kommt vor dem Gebet.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-qibla": [
+      {
+        "ar": "أَيْنَ الْقِبْلَةُ في هٰذِهِ الْغُرْفَةِ؟",
+        "de": "Wo ist die Gebetsrichtung in diesem Zimmer?",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-imam": [
+      {
+        "ar": "الْإِمامُ يَقْرَأُ الْقُرْآنَ في الصَّلاةِ.",
+        "de": "Der Imam rezitiert im Gebet den Quran.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-adhan": [
+      {
+        "ar": "أَسْمَعُ الْأَذانَ مِنَ الْمَسْجِدِ.",
+        "de": "Ich höre den Gebetsruf von der Moschee.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-muadhdhin": [
+      {
+        "ar": "صَوْتُ الْمُؤَذِّنِ جَميلٌ.",
+        "de": "Die Stimme des Muezzins ist schön.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-rakaa": [
+      {
+        "ar": "صَلاةُ الْفَجْرِ رَكْعَتانِ.",
+        "de": "Das Morgengebet hat zwei Rakʿas.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-isha": [
+      {
+        "ar": "نُصَلّي الْعِشاءَ في الْمَسْجِدِ.",
+        "de": "Wir beten das Nachtgebet in der Moschee.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-aya": [
+      {
+        "ar": "أَحْفَظُ آيَةً جَديدَةً كُلَّ يَوْمٍ.",
+        "de": "Ich lerne jeden Tag einen neuen Vers auswendig.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-dua": [
+      {
+        "ar": "نَقولُ الدُّعاءَ بَعْدَ الصَّلاةِ.",
+        "de": "Nach dem Gebet sprechen wir das Bittgebet.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-muslim": [
+      {
+        "ar": "أَنا مُسْلِمٌ، وَأُصَلّي خَمْسَ مَرّاتٍ في الْيَوْمِ.",
+        "de": "Ich bin Muslim und bete fünfmal am Tag.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-jamaa": [
+      {
+        "ar": "نُصَلّي مَعَ الْجَماعَةِ في الْمَسْجِدِ.",
+        "de": "Wir beten mit der Gemeinschaft in der Moschee.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-daiman": [
+      {
+        "ar": "أَنا دائِماً في الْبَيْتِ مَساءً.",
+        "de": "Abends bin ich immer zu Hause.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-jazak": [
+      {
+        "ar": "جَزاكَ اللهُ خَيْراً عَلى الْمُساعَدَةِ.",
+        "de": "Möge Gott dir deine Hilfe mit Gutem vergelten.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-kulliyya": [
+      {
+        "ar": "أَدْرُسُ في كُلِّيَّةِ الطِّبِّ.",
+        "de": "Ich studiere an der medizinischen Fakultät.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-ahad": [
+      {
+        "ar": "نَذْهَبُ إِلى السّوقِ يَوْمَ الْأَحَدِ.",
+        "de": "Am Sonntag gehen wir auf den Markt.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-muwazzaf": [
+      {
+        "ar": "أَبي مُوَظَّفٌ في شَرِكَةٍ.",
+        "de": "Mein Vater ist Angestellter in einer Firma.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-iyada": [
+      {
+        "ar": "الْعِيادَةُ مَفْتوحَةٌ الْيَوْمَ.",
+        "de": "Die Praxis ist heute geöffnet.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-tabbakh": [
+      {
+        "ar": "الطَّبّاخُ يَعْمَلُ في مَطْعَمٍ كَبيرٍ.",
+        "de": "Der Koch arbeitet in einem großen Restaurant.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-mihna": [
+      {
+        "ar": "ما مِهْنَتُكَ؟",
+        "de": "Was ist dein Beruf?",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-yawmiyyan": [
+      {
+        "ar": "أَقْرَأُ الْقُرْآنَ يَوْمِيّاً.",
+        "de": "Ich lese täglich im Quran.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-riyal": [
+      {
+        "ar": "الشّايُ بِخَمْسَةِ رِيالاتٍ.",
+        "de": "Der Tee kostet fünf Riyal.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-thawb": [
+      {
+        "ar": "يَلْبَسُ الرِّجالُ الثَّوْبَ الْأَبْيَضَ.",
+        "de": "Die Männer tragen den weißen Thawb.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-bai": [
+      {
+        "ar": "الْبائِعُ في السّوقِ لَطيفٌ.",
+        "de": "Der Verkäufer auf dem Markt ist freundlich.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-ashara": [
+      {
+        "ar": "عِنْدي عَشَرَةُ رِيالاتٍ.",
+        "de": "Ich habe zehn Riyal.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-mutadil": [
+      {
+        "ar": "الْجَوُّ في الرَّبيعِ مُعْتَدِلٌ.",
+        "de": "Im Frühling ist das Wetter mild.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-shita": [
+      {
+        "ar": "الشِّتاءُ في أَلْمانِيا بارِدٌ.",
+        "de": "Der Winter in Deutschland ist kalt.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-ghaim": [
+      {
+        "ar": "الْجَوُّ غائِمٌ الْيَوْمَ.",
+        "de": "Heute ist es bewölkt.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-shadid": [
+      {
+        "ar": "الرّيحُ شَديدَةٌ الْيَوْمَ.",
+        "de": "Der Wind ist heute stark.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-watan": [
+      {
+        "ar": "وَطَني جَميلٌ.",
+        "de": "Meine Heimat ist schön.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-hadith": [
+      {
+        "ar": "الرِّياضُ مَدينَةٌ حَديثَةٌ.",
+        "de": "Riad ist eine moderne Stadt.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-shab": [
+      {
+        "ar": "شَعْبُ هٰذا الْبَلَدِ كَريمٌ.",
+        "de": "Das Volk dieses Landes ist gastfreundlich.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-tarikh": [
+      {
+        "ar": "أُحِبُّ تاريخَ الْمُدُنِ الْقَديمَةِ.",
+        "de": "Ich mag die Geschichte alter Städte.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-rasm": [
+      {
+        "ar": "الرَّسْمُ هِوايَتي.",
+        "de": "Zeichnen ist mein Hobby.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-khatt": [
+      {
+        "ar": "خَطُّكَ جَميلٌ جِدّاً!",
+        "de": "Deine Schrift ist sehr schön!",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-furusiyya": [
+      {
+        "ar": "الْفُروسِيَّةُ رِياضَةٌ قَديمَةٌ عِنْدَ الْعَرَبِ.",
+        "de": "Das Reiten ist bei den Arabern ein alter Sport.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-mahatta": [
+      {
+        "ar": "الْمَحَطَّةُ بَعيدَةٌ عَنْ بَيْتي.",
+        "de": "Der Bahnhof ist weit von meinem Haus entfernt.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-mughadara": [
+      {
+        "ar": "الْمُغادَرَةُ السّاعَةَ الْعاشِرَةَ.",
+        "de": "Der Abflug ist um zehn Uhr.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-dakhil": [
+      {
+        "ar": "الْجَوُّ بارِدٌ في الْخارِجِ وَدافِئٌ في الدّاخِلِ.",
+        "de": "Draußen ist es kalt und drinnen warm.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-bati": [
+      {
+        "ar": "هٰذا الْقِطارُ بَطيءٌ.",
+        "de": "Dieser Zug ist langsam.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-sifara": [
+      {
+        "ar": "أَيْنَ السِّفارَةُ الْأَلْمانِيَّةُ؟",
+        "de": "Wo ist die deutsche Botschaft?",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-hajj": [
+      {
+        "ar": "الْحَجُّ فَرْضٌ عَلى الْمُسْلِمِ مَرَّةً في الْعُمْرِ.",
+        "de": "Der Hadsch ist für Muslime einmal im Leben Pflicht.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-umra": [
+      {
+        "ar": "ذَهَبْنا إِلى الْعُمْرَةِ في رَمَضانَ.",
+        "de": "Wir haben im Ramadan die Umra gemacht.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-hajj-pilger": [
+      {
+        "ar": "الْحاجُّ يَلْبَسُ الْإِحْرامَ.",
+        "de": "Der Pilger trägt das Iḥrām.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-haram": [
+      {
+        "ar": "الْحَرَمُ مَليءٌ بِالنّاسِ.",
+        "de": "Die Heilige Moschee ist voller Menschen.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-ihram": [
+      {
+        "ar": "مَلابِسُ الْإِحْرامِ بَيْضاءُ.",
+        "de": "Die Iḥrām-Kleidung ist weiß.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-tawaf": [
+      {
+        "ar": "بَعْدَ الطَّوافِ نُصَلّي رَكْعَتَيْنِ.",
+        "de": "Nach dem Ṭawāf beten wir zwei Rakʿas.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-say": [
+      {
+        "ar": "السَّعْيُ بَيْنَ الصَّفا وَالْمَرْوَةِ.",
+        "de": "Der Saʿy ist zwischen Ṣafā und Marwa.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-arafat": [
+      {
+        "ar": "يَقِفُ الْحُجّاجُ في عَرَفاتٍ.",
+        "de": "Die Pilger stehen in ʿArafāt.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-mina": [
+      {
+        "ar": "يَبيتُ الْحُجّاجُ في مِنى.",
+        "de": "Die Pilger übernachten in Minā.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-zamzam": [
+      {
+        "ar": "ماءُ زَمْزَمَ بارِدٌ وَطَيِّبٌ.",
+        "de": "Das Zamzam-Wasser ist kühl und gut.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-talbiya": [
+      {
+        "ar": "نَسْمَعُ التَّلْبِيَةَ مِنَ الْحُجّاجِ.",
+        "de": "Wir hören die Talbiya der Pilger.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-dhulhijja": [
+      {
+        "ar": "عيدُ الْأَضْحى في شَهْرِ ذي الْحِجَّةِ.",
+        "de": "Das Opferfest ist im Monat Ḏū l-Ḥiǧǧa.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-adha": [
+      {
+        "ar": "عيدُ الْأَضْحى عيدٌ كَبيرٌ.",
+        "de": "Das Opferfest ist ein großes Fest.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-malabis": [
+      {
+        "ar": "مَلابِسي في الْحَقيبَةِ.",
+        "de": "Meine Kleidung ist im Koffer.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-batn": [
+      {
+        "ar": "عِنْدي أَلَمٌ في بَطْني.",
+        "de": "Ich habe Bauchschmerzen.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-rijl": [
+      {
+        "ar": "رِجْلي تُؤْلِمُني.",
+        "de": "Mein Bein tut mir weh.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-ayn": [
+      {
+        "ar": "عِنْدي أَلَمٌ في عَيْني.",
+        "de": "Mein Auge tut weh.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-fam": [
+      {
+        "ar": "اِفْتَحْ فَمَكَ، مِنْ فَضْلِكَ.",
+        "de": "Öffne bitte deinen Mund.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-sinn": [
+      {
+        "ar": "عِنْدي أَلَمٌ في سِنّي.",
+        "de": "Ich habe Zahnschmerzen.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-shifa": [
+      {
+        "ar": "شِفاءً عاجِلاً يا صَديقي!",
+        "de": "Gute Besserung, mein Freund!",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-duktur": [
+      {
+        "ar": "الدُّكْتورُ في الْعِيادَةِ الْآنَ.",
+        "de": "Der Doktor ist jetzt in der Praxis.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-miskin": [
+      {
+        "ar": "الْقِطُّ الْمِسْكينُ جائِعٌ.",
+        "de": "Die arme Katze hat Hunger.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-mukhayyam": [
+      {
+        "ar": "الْمُخَيَّمُ قَريبٌ مِنَ الْبَحْرِ.",
+        "de": "Das Zeltlager ist nahe am Meer.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-shahr": [
+      {
+        "ar": "الْإِجازَةُ شَهْرٌ كامِلٌ.",
+        "de": "Die Ferien dauern einen ganzen Monat.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-farhan": [
+      {
+        "ar": "أَنا فَرْحانُ لِأَنَّ الْإِجازَةَ قَريبَةٌ.",
+        "de": "Ich freue mich, weil bald Ferien sind.",
+        "quelle": "suffa",
+        "deVon": "suffa"
+      }
+    ],
+    "v-sura-foto": [
+      {
+        "ar": "أَخَذْتُ صُوَراً كَثيرَةً عَلى الشّاطِئِ.",
+        "de": "Ich habe am Strand viele Fotos gemacht.",
+        "quelle": "suffa",
+        "deVon": "suffa"
       }
     ]
   }

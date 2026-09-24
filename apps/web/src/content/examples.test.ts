@@ -19,7 +19,8 @@ describe('example sentences', () => {
       expect(list.length).toBeGreaterThan(0);
       expect(list.length).toBeLessThanOrEqual(2);
     }
-    expect(Object.keys(data.examples).length).toBeGreaterThan(250);
+    // Every word of Book 1 has at least one example.
+    expect(Object.keys(data.examples).length).toBe(content.vokabeln.length);
   });
 
   it('keeps every sentence vocalized, translated and attributable', () => {
@@ -27,7 +28,9 @@ describe('example sentences', () => {
       for (const e of list) {
         expect(e.ar).toMatch(HARAKAT);
         expect(e.de.trim().length).toBeGreaterThan(1);
-        expect(Number.isInteger(e.tatoeba) && e.tatoeba > 0).toBe(true);
+        if (e.quelle === 'tatoeba')
+          expect(Number.isInteger(e.tatoeba) && e.tatoeba! > 0).toBe(true);
+        else expect(e.quelle).toBe('suffa');
         expect(['tatoeba', 'suffa']).toContain(e.deVon);
       }
     }

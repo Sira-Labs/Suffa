@@ -18,6 +18,14 @@ describe('Word example (integration)', () => {
     expect(screen.getByRole('link', { name: 'CC BY 2.0 FR' })).toBeInTheDocument();
   });
 
+  it('marks own sentences instead of citing Tatoeba', async () => {
+    const [example] = catalog.examples['v-zamzam']!;
+    render(<WordExample vocabId="v-zamzam" />);
+    expect(await screen.findByText(example!.de)).toBeInTheDocument();
+    expect(screen.getByText('Eigener Beispielsatz (Suffa)')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Tatoeba/ })).toBeNull();
+  });
+
   it('renders nothing for a word without example', async () => {
     const { container } = render(<WordExample vocabId="v-does-not-exist" />);
     await new Promise((r) => setTimeout(r, 20));

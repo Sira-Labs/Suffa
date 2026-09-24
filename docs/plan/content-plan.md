@@ -13,7 +13,7 @@
 | Dialogues                | 48 (own, 3 per unit)     | ≈ 3 per unit (≈ 48)          |
 | Verbs with full tables   | 51                       | ≈ 60–80                      |
 | Grammar points           | none as learnable items  | ≈ 3–4 per unit               |
-| Example sentences        | 377 (Tatoeba, 307 words) | 1–2 per word                 |
+| Example sentences        | 471 (all 401 words)      | 1–2 per word                 |
 | Audio                    | links to publisher audio | per word + per dialogue line |
 | Alphabet / pronunciation | minimal pairs only       | a short course for beginners |
 
@@ -30,8 +30,10 @@ Example sentences come from Tatoeba (`tools/content/tatoeba-examples.mjs` finds 
 short, mostly known words, no dialect markers). They were vocalized with CAMeL Tools (BERT,
 MSA) plus rules for sun letters, then every sentence was reviewed by hand: 533 candidates, 377
 kept, 156 dropped (wrong word, e.g. حُجَّة for حَجّ; alcohol; unsuitable content). Each keeps
-its Tatoeba id and author; German translations come from Tatoeba (246) or Suffa (131). The app
-shows one under a revealed vocabulary card and lists all sources under Einstellungen.
+its Tatoeba id and author; German translations come from Tatoeba (246) or Suffa (131). The 94
+words without a usable Tatoeba sentence (mostly Hajj and prayer terms) got own sentences
+(`"quelle": "suffa"`), so every word has an example. The app shows one under a revealed
+vocabulary card and lists all sources under Einstellungen.
 
 Content lives as JSON in the public repo (ADR-0003) and can only be changed by developers.
 **Content is the bottleneck for the pilot** — the platform is ahead of plan, the material is

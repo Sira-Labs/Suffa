@@ -1462,3 +1462,16 @@ textarea.input {
 .discover-quran .discover-category {
   color: var(--accent-2);
 }
+
+/* Example sentence under a revealed vocabulary card. */
+.word-example {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.75rem 0 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.word-example figcaption {
+  font-size: 0.8rem;
+}

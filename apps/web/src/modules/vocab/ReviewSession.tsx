@@ -1,11 +1,25 @@
 import { useMemo, useState } from 'react';
 import type { CardKind, ReviewRating, SrsCard } from '@/types';
 import { Link } from 'react-router-dom';
-import { ArabicText, Feedback, RatingButtons, RecallInput } from '@/components';
+import {
+  ArabicText,
+  Feedback,
+  RatingButtons,
+  RecallInput,
+  WordExample,
+} from '@/components';
 import { Icon } from '@/components/Icon';
 import { diffArabic, gradeRecall, resolveCard, type RecallGrade } from '@/services/srs';
 import { speakArabic, isTtsSupported } from '@/services/speech';
 import { useContentStore, useSettingsStore, useSrsStore, useSyncStore } from '@/state';
+
+/** Card kinds whose content id is a vocabulary id, so an example sentence can be shown. */
+const EXAMPLE_KINDS: ReadonlySet<CardKind> = new Set([
+  'vocab_ar_de',
+  'vocab_de_ar',
+  'plural',
+  'root_to_word',
+]);
 
 interface ReviewSessionProps {
   kinds?: CardKind[];
@@ -231,6 +245,9 @@ export function ReviewSession({
                 }
                 explanation={resolved.hint}
               />
+              {EXAMPLE_KINDS.has(resolved.kind) && (
+                <WordExample vocabId={resolved.contentRef} />
+              )}
             </div>
             <RatingButtons card={card} onRate={(r) => void handleRate(r)} />
           </div>

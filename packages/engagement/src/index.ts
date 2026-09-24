@@ -1,5 +1,6 @@
 export * from './achievements.js';
 export * from './day.js';
+export * from './lessons.js';
 export * from './levels.js';
 export * from './quests.js';
 export * from './records.js';

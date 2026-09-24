@@ -39,7 +39,8 @@ function setup(
       [ALICE_TOKEN, ALICE],
       [BOB_TOKEN, BOB],
     ])
-  )
+  ),
+  onPushed?: (userId: string) => Promise<void>
 ) {
   const repo = new FakeRepo();
   const app = createApp({
@@ -49,7 +50,12 @@ function setup(
       schemaRevision: async () => null,
       queueDepth: async () => ({ waiting: 0, active: 0, failed: 0, deadLetter: 0 }),
     },
-    sync: { repo, auth, log: { info: () => {}, warn: () => {}, error: () => {} } },
+    sync: {
+      repo,
+      auth,
+      log: { info: () => {}, warn: () => {}, error: () => {} },
+      onPushed,
+    },
   });
   const call = (path: string, init: RequestInit & { token?: string } = {}) =>
     app.request(`/api/v1/sync${path}`, {
@@ -105,6 +111,24 @@ describe('sync routes', () => {
     const [key, stored] = [...repo.rows.entries()][0]!;
     expect(key).toBe(`${ALICE}|srs_cards|vocab_ar_de:v-balad`);
     expect(stored).not.toHaveProperty('user_id');
+  });
+
+  it('queues an engagement recompute after applied records, never failing the push', async () => {
+    const pushed: string[] = [];
+    const { call } = setup(undefined, async (userId) => {
+      pushed.push(userId);
+      if (pushed.length > 1) throw new Error('queue down');
+    });
+    const push = (records: unknown[]) =>
+      call('/srs_cards/push', {
+        method: 'POST',
+        token: ALICE_TOKEN,
+        body: JSON.stringify({ records }),
+      });
+    expect((await push([card('a')])).status).toBe(200);
+    expect((await push([])).status).toBe(200);
+    expect((await push([card('b')])).status).toBe(200);
+    expect(pushed).toEqual([ALICE, ALICE]);
   });
 
   it('keeps users apart', async () => {

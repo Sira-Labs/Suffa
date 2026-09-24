@@ -3,6 +3,8 @@
  * Exit codes: 1 = invalid configuration / fatal error, 3 = schema revision mismatch
  * (worker started before the api migrated; CapRover restarts it).
  */
+import { registerEngagement, requestRecompute } from './engagement/jobs.js';
+import { PgEngagementRepository } from './engagement/repository.js';
 import { fileURLToPath } from 'node:url';
 import { serve } from '@hono/node-server';
 import pg from 'pg';
@@ -105,6 +107,7 @@ async function main(): Promise<void> {
             onError: (error) => errors.capture(error, { source: 'pg-boss' }),
           });
           await registerMaintenance(boss, pool, log, errors);
+          await registerEngagement(boss, new PgEngagementRepository(pool), log, errors);
           return () => boss.stop({ graceful: true, timeout: JOB_DRAIN_TIMEOUT_MS });
         },
         expectedRevision: expected,
@@ -209,7 +212,13 @@ async function main(): Promise<void> {
       queueDepth: () => queueDepth(pool),
     },
     onProbeError: (error) => log.warn({ err: error }, 'health.db_unreachable'),
-    sync: { repo: new PgSyncRepository(pool), auth, log },
+    sync: {
+      repo: new PgSyncRepository(pool),
+      auth,
+      log,
+      onPushed: requestRecompute(boss),
+    },
+    engagement: { repo: new PgEngagementRepository(pool), auth, log },
     admin: { repo: new PgAdminRepository(pool), auth, log },
     classes: config.publicUrl
       ? {

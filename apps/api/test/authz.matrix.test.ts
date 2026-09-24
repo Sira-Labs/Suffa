@@ -56,6 +56,7 @@ const privacyRepo: PrivacyRepository = {
     sessions: [],
     classes: [],
     learningData: {} as never,
+    engagement: { state: null, xpLedger: [], quests: [], achievements: [] },
     auditLog: [],
   }),
   delete: async () => true,
@@ -120,6 +121,11 @@ function buildApp() {
       queueDepth: async () => ({ waiting: 0, active: 0, failed: 0, deadLetter: 0 }),
     },
     sync: { repo: syncRepo, auth: resolver, log: quiet },
+    engagement: {
+      repo: { load: async () => null, save: async () => {}, state: async () => null },
+      auth: resolver,
+      log: quiet,
+    },
     admin: { repo: adminRepo, auth: resolver, log: quiet },
     classes: {
       repo: classRepo,

@@ -16,6 +16,7 @@ import { createAccountRoutes, type AccountRouteDeps } from './account/routes.js'
 import { createClassRoutes, type ClassRouteDeps } from './classes/routes.js';
 import { sameOriginOnly } from './http/sameOrigin.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
+import { createEngagementRoutes, type EngagementRouteDeps } from './engagement/routes.js';
 import { authorize, type AuthorizeLog } from './authz/middleware.js';
 
 export interface AuthRouteDeps {
@@ -38,6 +39,8 @@ export interface AppDeps {
   onProbeError?: (error: unknown) => void;
   /** Sync endpoints; omitted in tests that only exercise health/version. */
   sync?: SyncRouteDeps;
+  /** The server's copy of XP, streak and badges (story 5.4). */
+  engagement?: EngagementRouteDeps;
   /** Browser error reporting: /api/client-config and the /api/errors tunnel. */
   errorTunnel?: ErrorTunnelDeps;
   /** Sign-in (Better Auth) and the signed-in user; omitted when sign-in is not configured. */
@@ -121,6 +124,9 @@ export function createApp(deps: AppDeps): Hono {
     });
   }
   if (deps.sync) app.route('/api/v1/sync', createSyncRoutes(deps.sync));
+  if (deps.engagement) {
+    app.route('/api/v1/engagement', createEngagementRoutes(deps.engagement));
+  }
   if (deps.account) app.route('/api/v1/account', createAccountRoutes(deps.account));
   if (deps.classes) app.route('/api/v1', createClassRoutes(deps.classes));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));

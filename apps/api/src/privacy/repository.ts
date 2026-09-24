@@ -18,6 +18,13 @@ export interface AccountExport {
   sessions: Record<string, unknown>[];
   classes: Record<string, unknown>[];
   learningData: Record<SyncTableName, Record<string, unknown>[]>;
+  /** What the server derived from the learning data: XP, daily quests, badges (story 5.4). */
+  engagement: {
+    state: Record<string, unknown> | null;
+    xpLedger: Record<string, unknown>[];
+    quests: Record<string, unknown>[];
+    achievements: Record<string, unknown>[];
+  };
   auditLog: Record<string, unknown>[];
 }
 
@@ -70,6 +77,28 @@ export class PgPrivacyRepository implements PrivacyRepository {
           where m.user_id = $1 order by m.joined_at`
       ),
       learningData,
+      engagement: {
+        state:
+          (
+            await q(
+              `select total_xp, level, streak_current, streak_longest, shields,
+                      rules_version, rejected, computed_at
+                 from engagement_state where user_id = $1`
+            )
+          )[0] ?? null,
+        xpLedger: await q(
+          `select event_key, kind, points, earned_at, rules_version
+             from xp_ledger where user_id = $1 order by earned_at, event_key`
+        ),
+        quests: await q(
+          `select day::text, quest_id, progress, target, completed_at
+             from quest_progress where user_id = $1 order by day, quest_id`
+        ),
+        achievements: await q(
+          `select badge_id, tier, unlocked_at
+             from achievement_unlocks where user_id = $1 order by unlocked_at, badge_id`
+        ),
+      },
       auditLog: await q(
         `select action, target_type, target_id, details, created_at,
                 (actor_id = $1) as by_you

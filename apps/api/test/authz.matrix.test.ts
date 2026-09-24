@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 import type { AccountRepository } from '../src/account/repository.js';
 import type { AdminRepository } from '../src/admin/repository.js';
+import type { ClassRepository } from '../src/classes/repository.js';
 import { SecondFactorService } from '../src/account/secondFactor.js';
 import { SecretBox } from '../src/security/secretBox.js';
 import type { Me } from '../src/auth/betterAuth.js';
@@ -45,6 +46,26 @@ const adminRepo: AdminRepository = {
   listUsers: async () => ({ users: [], next: null }),
   updateUser: async () => null,
   listAudit: async () => ({ entries: [], next: null }),
+};
+/** Nobody is a member of any class here: class:manage is left to admins. */
+const classRepo: ClassRepository = {
+  create: async () => ({
+    id: 'c',
+    name: 'x',
+    classRole: 'teacher',
+    status: 'active',
+    studentCount: 0,
+    pendingCount: 0,
+    createdAt: '2026-09-24T00:00:00.000Z',
+  }),
+  listFor: async () => [],
+  scope: async () => ({ classRole: null }),
+  createInvite: async () => ({ token: 't', expiresAt: '2026-10-08T00:00:00.000Z' }),
+  members: async () => [],
+  approve: async () => false,
+  remove: async () => false,
+  preview: async () => null,
+  join: async () => ({ ok: false, reason: 'invalid_invite' }),
 };
 const secondFactor = new SecondFactorService(
   {
@@ -86,6 +107,12 @@ function buildApp() {
     },
     sync: { repo: syncRepo, auth: resolver, log: quiet },
     admin: { repo: adminRepo, auth: resolver, log: quiet },
+    classes: {
+      repo: classRepo,
+      auth: resolver,
+      log: quiet,
+      publicUrl: 'https://s.example',
+    },
     account: { repo: accountRepo, sessions: sessionActors, secondFactor, log: quiet },
     auth: {
       handler: async () => Response.json({ ok: true }),
@@ -106,7 +133,9 @@ function requestFor(route: { method: string; path: string }, role: Role | null) 
     headers,
     body:
       route.method === 'POST' || route.method === 'PATCH'
-        ? JSON.stringify(route.method === 'POST' ? { records: [] } : { timeZone: 'UTC' })
+        ? JSON.stringify(
+            route.method === 'POST' ? { records: [], name: 'x' } : { timeZone: 'UTC' }
+          )
         : undefined,
   });
 }

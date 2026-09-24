@@ -20,6 +20,7 @@ import {
 import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/resolver.js';
 import { PgSyncRepository } from './sync/repository.js';
 import { PgAdminRepository } from './admin/repository.js';
+import { PgClassRepository } from './classes/repository.js';
 import { PgAccountRepository } from './account/repository.js';
 import type { AccountRouteDeps } from './account/routes.js';
 import { PgSecondFactorRepository, SecondFactorService } from './account/secondFactor.js';
@@ -207,6 +208,14 @@ async function main(): Promise<void> {
     onProbeError: (error) => log.warn({ err: error }, 'health.db_unreachable'),
     sync: { repo: new PgSyncRepository(pool), auth, log },
     admin: { repo: new PgAdminRepository(pool), auth, log },
+    classes: config.publicUrl
+      ? {
+          repo: new PgClassRepository(pool),
+          auth,
+          log,
+          publicUrl: new URL(config.publicUrl).origin,
+        }
+      : undefined,
     authzLog: log,
     auth: authRoutes,
     account: accountRoutes,

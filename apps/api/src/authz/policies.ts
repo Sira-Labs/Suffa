@@ -37,8 +37,12 @@ export const RBAC_MATRIX = {
   'profile:write': ['student', 'teacher', 'admin'],
   /** Push and pull one's own learning data. */
   'sync:own': ['student', 'teacher', 'admin'],
-  /** Create a class and invite learners (Sprint 4). */
+  /** Create a class. */
   'class:create': ['teacher', 'admin'],
+  /** Invite, approve and remove members; additionally scoped: teacher of that class. */
+  'class:manage': ['teacher', 'admin'],
+  /** See one's classes and join one with an invite. */
+  'class:join': ['student', 'teacher', 'admin'],
   /** Read aggregated progress of a class; additionally scoped by class role. */
   'class:progress:read': ['teacher', 'admin'],
   /** List and search users in the admin area. */
@@ -81,6 +85,7 @@ export function can(actor: Actor | null, action: Action, scope?: ClassScope): bo
   if (!allowed.includes(actor.role)) return false;
   switch (action) {
     case 'class:progress:read':
+    case 'class:manage':
       // Admins oversee every class; teachers only classes they teach.
       return actor.role === 'admin' || scope?.classRole === 'teacher';
     default:

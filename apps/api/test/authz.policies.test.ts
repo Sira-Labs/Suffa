@@ -10,6 +10,8 @@ const EXPECTED: Record<Action, readonly Role[]> = {
   'profile:write': ['student', 'teacher', 'admin'],
   'sync:own': ['student', 'teacher', 'admin'],
   'class:create': ['teacher', 'admin'],
+  'class:manage': ['admin'], // without a class scope only admins
+  'class:join': ['student', 'teacher', 'admin'],
   'class:progress:read': ['admin'], // without a class scope only admins
   'admin:users:read': ['admin'],
   'admin:users:write': ['admin'],

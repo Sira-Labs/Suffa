@@ -13,6 +13,7 @@ import {
   type Me,
 } from './auth/betterAuth.js';
 import { createAccountRoutes, type AccountRouteDeps } from './account/routes.js';
+import { createClassRoutes, type ClassRouteDeps } from './classes/routes.js';
 import { sameOriginOnly } from './http/sameOrigin.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
 import { authorize, type AuthorizeLog } from './authz/middleware.js';
@@ -48,6 +49,8 @@ export interface AppDeps {
    * browser marks as coming from another site are refused (403).
    */
   allowedOrigin?: string;
+  /** Classes, invites and membership approval. */
+  classes?: ClassRouteDeps;
   /** Admin area (users); every route needs an admin. */
   admin?: AdminRouteDeps;
   /** Where denied requests are logged (authz.denied). */
@@ -119,6 +122,7 @@ export function createApp(deps: AppDeps): Hono {
   }
   if (deps.sync) app.route('/api/v1/sync', createSyncRoutes(deps.sync));
   if (deps.account) app.route('/api/v1/account', createAccountRoutes(deps.account));
+  if (deps.classes) app.route('/api/v1', createClassRoutes(deps.classes));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));

@@ -88,7 +88,7 @@ jobs:
           DB: postgres://suffa:smoke0123456789abcdef@127.0.0.1:5432/suffa
         run: |
           SECRET=$(openssl rand -hex 32)
-          run() { docker run --network host -e SUFFA_ENV=prod -e SUFFA_DATABASE_URL="$DB" -e SUFFA_AUTH_SECRET="$SECRET" "$@"; }
+          run() { docker run --network host -e SUFFA_ENV=prod -e SUFFA_DATABASE_URL="$DB" -e SUFFA_AUTH_SECRET="$SECRET" -e SUFFA_PUBLIC_URL=http://127.0.0.1:8080 "$@"; }
           # A worker started before the api has migrated must exit with code 3.
           set +e; run --rm -e SUFFA_ROLE=worker smoke/suffa-api:test; code=$?; set -e
           test "$code" = 3 || { echo "expected worker exit 3, got $code"; exit 1; }
@@ -99,8 +99,11 @@ jobs:
           curl -fsS http://127.0.0.1:8000/healthz | grep -q '"queue":{"waiting":0'
           # Error tracking is off without a DSN, and the PWA is told so.
           curl -fsS http://127.0.0.1:8000/api/client-config | grep -q '"errorDsn":null'
-          # Sync stays closed in prod until real authentication exists (ADR-0008).
+          # Sync stays closed without a signed-in session.
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/v1/sync/srs_cards/pull)" = 401
+          # Without SMTP the api runs, but sign-in stays off (ADR-0008) and says so in the log.
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/v1/me)" = 404
+          docker logs api 2>&1 | grep -q 'auth.disabled' || { docker logs api; exit 1; }
           run -d --name worker -e SUFFA_ROLE=worker smoke/suffa-api:test
           sleep 3
           docker logs worker 2>&1 | grep -q 'worker.start' || { docker logs worker; exit 1; }

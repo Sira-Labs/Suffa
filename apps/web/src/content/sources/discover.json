@@ -66,6 +66,20 @@
           "title": "Learn Arabic with Quran | Sura al-Asr | Vocabulary, Grammar",
           "why": "Wortschatz und Grammatik an einer kurzen Sure – verbindet Sprache und Quran.",
           "minutes": 14
+        },
+        {
+          "type": "video",
+          "id": "dinQIb4ZFXY",
+          "title": "Arabic Conversation for Beginners #1",
+          "why": "Kurze Alltagsgespräche auf Fusha zum Mitsprechen – Untertitel einschalten.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "BIjWf1anHIU",
+          "title": "Easy Arabic Podcast: Episode 1. Listening",
+          "why": "Langsam gesprochener Anfänger-Podcast von Khasu zum Hören und Nachsprechen.",
+          "minutes": null
         }
       ]
     },
@@ -316,6 +330,47 @@
           "id": "PLsr1ERsR7y1kcIlz7khCw4ZR6mz3jvCSH",
           "title": "Learn Arabic - Arabic Alphabet Made Easy",
           "why": "Alphabet in kurzen Einheiten als Ergänzung.",
+          "minutes": null
+        }
+      ]
+    },
+    {
+      "handle": "@ArabicSpeakingPractice",
+      "channelId": "UCzi6C2AIl0-z99WwXNNFHYw",
+      "title": "Arabic Speaking Practice",
+      "url": "https://www.youtube.com/@ArabicSpeakingPractice",
+      "category": "podcasts",
+      "language": "Arabisch",
+      "variety": "MSA",
+      "level": "1-2",
+      "why": "Podcast-Folgen in einfachem Hocharabisch, nach Niveau markiert – für Stufe 1 die A1–A2-Folgen.",
+      "items": [
+        {
+          "type": "video",
+          "id": "aZezbiAEVX0",
+          "title": "A Rainy Day (Slow & Simple Arabic, A1–A2)",
+          "why": "Langsam und einfach gesprochen – guter erster Hörversuch.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "EmMqaqdUsM4",
+          "title": "Learn Arabic Through Conversations: Family Meals (A1–A2)",
+          "why": "Gespräch am Familientisch – Wortschatz zu Familie und Essen.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "sgfp-mF0IWA",
+          "title": "Culture & Hospitality: Hosting Guests in Arabic (A1–A2)",
+          "why": "Gäste empfangen – Begrüßungsformeln wie in Einheit 1.",
+          "minutes": null
+        },
+        {
+          "type": "video",
+          "id": "PWHOn_rEr6I",
+          "title": "Simple Arabic Conversation: Staying Hydrated (A1–A2)",
+          "why": "Kurzes, einfaches Alltagsgespräch.",
           "minutes": null
         }
       ]

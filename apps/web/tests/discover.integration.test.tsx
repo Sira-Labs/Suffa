@@ -132,44 +132,74 @@ describe('Entdecken (integration)', () => {
     });
   });
 
-  it('pins started videos on top, last opened first, until unpinned or seen', async () => {
+  it('plays in one player on top and pins what was started at once', async () => {
     const user = userEvent.setup();
-    const first = renderDiscover();
+    renderDiscover();
     await screen.findByRole('list', { name: 'Empfehlungen' });
     await user.click(screen.getByRole('button', { name: 'Das Alphabet abspielen' }));
-    await user.click(screen.getByRole('button', { name: 'Tajwid-Reihe abspielen' }));
-    // While playing, a card stays where it was tapped.
-    expect(
-      within(screen.getByRole('list', { name: 'Empfehlungen' })).getByTitle(
-        'Tajwid-Reihe'
-      )
-    ).toBeInTheDocument();
-    first.unmount();
+    const player = screen.getByRole('region', { name: 'Jetzt läuft' });
+    expect(within(player).getByTitle('Das Alphabet')).toBeInTheDocument();
+    // Started = pinned right away; the card is shown once, on top, marked as playing.
+    const pinned = screen.getByRole('list', { name: 'Weiterschauen' });
+    expect(within(pinned).getByText('Das Alphabet')).toBeInTheDocument();
+    expect(within(pinned).getByText('Läuft oben')).toBeInTheDocument();
+    const list = screen.getByRole('list', { name: 'Empfehlungen' });
+    expect(within(list).queryByText('Das Alphabet')).toBeNull();
 
-    // Next visit: both on top, the last opened first, marked as started.
-    renderDiscover();
-    const pinned = await screen.findByRole('list', { name: 'Weiterschauen' });
+    // A second video replaces the first in the player and goes on top of "Weiterschauen".
+    await user.click(
+      within(list).getByRole('button', { name: 'Tajwid-Reihe abspielen' })
+    );
+    expect(within(player).getByTitle('Tajwid-Reihe')).toBeInTheDocument();
     expect(
       within(pinned)
         .getAllByRole('listitem')
         .map((li) => li.querySelector('strong')!.textContent)
     ).toEqual(['Tajwid-Reihe', 'Das Alphabet']);
-    expect(within(pinned).getAllByText('Angefangen')).toHaveLength(2);
     expect(screen.queryByRole('list', { name: 'Empfehlungen' })).toBeNull();
     expect(screen.getByText(/steht oben unter „Weiterschauen“/)).toBeInTheDocument();
+  });
 
-    // Unpin one the learner does not like: it goes back into the list, still "Angefangen".
-    await user.click(within(pinned).getByRole('button', { name: 'Tajwid-Reihe lösen' }));
-    expect(within(pinned).queryByText('Tajwid-Reihe')).toBeNull();
+  it('unpins the playing video without stopping it, and drops seen ones', async () => {
+    const user = userEvent.setup();
+    renderDiscover();
+    await screen.findByRole('list', { name: 'Empfehlungen' });
+    await user.click(screen.getByRole('button', { name: 'Tajwid-Reihe abspielen' }));
+    const player = screen.getByRole('region', { name: 'Jetzt läuft' });
+
+    // Unpin from the player: the card goes back to the list, the video keeps playing.
+    await user.click(within(player).getByRole('button', { name: 'Tajwid-Reihe lösen' }));
+    expect(screen.queryByRole('list', { name: 'Weiterschauen' })).toBeNull();
     const list = screen.getByRole('list', { name: 'Empfehlungen' });
     expect(within(list).getByText('Tajwid-Reihe')).toBeInTheDocument();
     expect(within(list).getByText('Angefangen')).toBeInTheDocument();
+    expect(within(player).getByTitle('Tajwid-Reihe')).toBeInTheDocument();
+
+    // Pin it again from the player: it moves on top at once.
+    await user.click(
+      within(player).getByRole('button', { name: 'Tajwid-Reihe anheften' })
+    );
+    const pinned = screen.getByRole('list', { name: 'Weiterschauen' });
+    expect(within(pinned).getByText('Tajwid-Reihe')).toBeInTheDocument();
 
     // Seen items leave "Weiterschauen" by themselves.
     await user.click(
-      within(pinned).getByRole('button', { name: 'Als gesehen markieren' })
+      within(player).getByRole('button', { name: 'Als gesehen markieren' })
     );
     expect(screen.queryByRole('list', { name: 'Weiterschauen' })).toBeNull();
+  });
+
+  it('keeps "Weiterschauen" on the next visit', async () => {
+    const user = userEvent.setup();
+    const first = renderDiscover();
+    await screen.findByRole('list', { name: 'Empfehlungen' });
+    await user.click(screen.getByRole('button', { name: 'Das Alphabet abspielen' }));
+    first.unmount();
+    renderDiscover();
+    const pinned = await screen.findByRole('list', { name: 'Weiterschauen' });
+    expect(within(pinned).getByText('Das Alphabet')).toBeInTheDocument();
+    expect(within(pinned).getByText('Angefangen')).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Jetzt läuft' })).toBeNull();
   });
 
   it('pins any item by hand', async () => {

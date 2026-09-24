@@ -1767,3 +1767,13 @@ textarea.input {
   font-size: 2.4rem;
   text-align: start;
 }
+
+/* Entdecken: one player on top; cards only choose what plays. */
+.discover-now {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  scroll-margin-top: 1rem;
+}
+.discover-tag-live {
+  background: var(--accent);
+  color: var(--on-accent, #1a1a1a);
+}

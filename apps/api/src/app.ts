@@ -6,7 +6,14 @@ import { Hono } from 'hono';
 import type { QueueDepth } from './jobs/queue.js';
 import { createErrorTunnel, type ErrorTunnelDeps } from './observability/tunnel.js';
 import { createSyncRoutes, type SyncRouteDeps } from './sync/routes.js';
-import { AUTH_BASE_PATH, rejectUnsafeRedirect, type Me } from './auth/betterAuth.js';
+import {
+  AUTH_BASE_PATH,
+  isPublicAuthEndpoint,
+  rejectUnsafeRedirect,
+  type Me,
+} from './auth/betterAuth.js';
+import { createAccountRoutes, type AccountRouteDeps } from './account/routes.js';
+import { sameOriginOnly } from './http/sameOrigin.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
 import { authorize, type AuthorizeLog } from './authz/middleware.js';
 
@@ -34,6 +41,13 @@ export interface AppDeps {
   errorTunnel?: ErrorTunnelDeps;
   /** Sign-in (Better Auth) and the signed-in user; omitted when sign-in is not configured. */
   auth?: AuthRouteDeps;
+  /** Account self-service (sessions, settings) for the signed-in user. */
+  account?: AccountRouteDeps;
+  /**
+   * Origin of the web app (SUFFA_PUBLIC_URL). When set, state-changing API requests that a
+   * browser marks as coming from another site are refused (403).
+   */
+  allowedOrigin?: string;
   /** Admin area (users); every route needs an admin. */
   admin?: AdminRouteDeps;
   /** Where denied requests are logged (authz.denied). */
@@ -75,6 +89,8 @@ export function createApp(deps: AppDeps): Hono {
     }
   };
 
+  if (deps.allowedOrigin) app.use('/api/*', sameOriginOnly(deps.allowedOrigin));
+
   app.get('/healthz', healthHandler);
   app.get('/api/healthz', healthHandler);
   app.get('/api/version', (c) =>
@@ -87,6 +103,10 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.auth) {
     const auth = deps.auth;
     app.on(['GET', 'POST'], `${AUTH_BASE_PATH}/*`, async (c) => {
+      // Only the endpoints magic-link sign-in needs; everything else Better Auth ships is off.
+      if (!isPublicAuthEndpoint(c.req.method, c.req.path)) {
+        return c.json({ error: 'not_found' }, 404);
+      }
       const rejected = await rejectUnsafeRedirect(c.req.raw);
       return rejected ?? auth.handler(c.req.raw);
     });
@@ -98,6 +118,7 @@ export function createApp(deps: AppDeps): Hono {
     });
   }
   if (deps.sync) app.route('/api/v1/sync', createSyncRoutes(deps.sync));
+  if (deps.account) app.route('/api/v1/account', createAccountRoutes(deps.account));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));

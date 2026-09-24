@@ -5,7 +5,7 @@
 import type { Action } from './policies.js';
 
 export interface RoutePolicy {
-  method: 'GET' | 'POST';
+  method: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   path: string;
   action: Action;
 }
@@ -13,6 +13,14 @@ export interface RoutePolicy {
 /** Routes behind `authorize()`: 401 without sign-in, 403 without the permission. */
 export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   { method: 'GET', path: '/api/v1/me', action: 'profile:read' },
+  { method: 'GET', path: '/api/v1/account/sessions', action: 'profile:read' },
+  {
+    method: 'POST',
+    path: '/api/v1/account/sessions/revoke-others',
+    action: 'profile:write',
+  },
+  { method: 'DELETE', path: '/api/v1/account/sessions/:id', action: 'profile:write' },
+  { method: 'PATCH', path: '/api/v1/account/settings', action: 'profile:write' },
   { method: 'POST', path: '/api/v1/sync/:table/push', action: 'sync:own' },
   { method: 'GET', path: '/api/v1/sync/:table/pull', action: 'sync:own' },
   { method: 'GET', path: '/api/v1/admin/users', action: 'admin:users:read' },
@@ -20,7 +28,7 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
 
 /**
  * Routes open to everyone: health and version for the platform, browser error reports, and
- * the sign-in flow itself (Better Auth guards its own endpoints with rate limits).
+ * the sign-in flow itself (only PUBLIC_AUTH_ENDPOINTS pass; Better Auth rate-limits them).
  */
 export const PUBLIC_ROUTES: readonly string[] = [
   'GET /healthz',

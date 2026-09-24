@@ -52,6 +52,13 @@ export function createAuth(options: AuthOptions) {
       additionalFields: {
         // Platform role (ADR-0009); only admins change it, never the sign-up request.
         role: { type: 'string', required: false, defaultValue: 'student', input: false },
+        // IANA time zone (e.g. Europe/Zurich); set through PATCH /api/v1/me, never here.
+        timeZone: {
+          type: 'string',
+          required: false,
+          input: false,
+          fieldName: 'time_zone',
+        },
       },
     },
     session: {
@@ -116,6 +123,25 @@ export function createAuth(options: AuthOptions) {
 
 export type SuffaAuth = ReturnType<typeof createAuth>;
 
+/**
+ * The only Better Auth endpoints reachable from outside (relative to AUTH_BASE_PATH). Better
+ * Auth ships many more (password reset, email change, account deletion, session listing with
+ * raw tokens); none of them is needed for magic-link sign-in, and each is attack surface.
+ * Sessions are managed through /api/v1/account instead, which never returns a token.
+ */
+export const PUBLIC_AUTH_ENDPOINTS: readonly string[] = [
+  'POST /sign-in/magic-link',
+  'GET /magic-link/verify',
+  'POST /sign-out',
+];
+
+/** Is this request one of the PUBLIC_AUTH_ENDPOINTS? */
+export function isPublicAuthEndpoint(method: string, pathname: string): boolean {
+  if (!pathname.startsWith(`${AUTH_BASE_PATH}/`)) return false;
+  const endpoint = `${method.toUpperCase()} ${pathname.slice(AUTH_BASE_PATH.length)}`;
+  return PUBLIC_AUTH_ENDPOINTS.includes(endpoint);
+}
+
 /** Query and body fields that name where to go after signing in. */
 const REDIRECT_FIELDS = [
   'callbackURL',
@@ -162,6 +188,12 @@ export interface Me {
   email: string;
   name: string | null;
   role: Role;
+  timeZone: string | null;
+}
+
+/** The signed-in user plus the session of this request (to mark "this device"). */
+export interface SessionActor extends Actor {
+  sessionId: string;
 }
 
 /** Session lookup for other routes (sync, /me): the session cookie identifies the user. */
@@ -169,12 +201,36 @@ export class SessionResolver implements AuthResolver {
   constructor(private readonly auth: SuffaAuth) {}
 
   async me(headers: Headers): Promise<Me | null> {
+    return (await this.current(headers))?.me ?? null;
+  }
+
+  /** The actor with the id of the session the request came with. */
+  async sessionActor(headers: Headers): Promise<SessionActor | null> {
+    const current = await this.current(headers);
+    return current
+      ? { id: current.me.id, role: current.me.role, sessionId: current.sessionId }
+      : null;
+  }
+
+  private async current(headers: Headers): Promise<{ me: Me; sessionId: string } | null> {
     const session = await this.auth.api.getSession({ headers });
     if (!session) return null;
-    const user = session.user as typeof session.user & { role?: string };
+    const user = session.user as typeof session.user & {
+      role?: string;
+      timeZone?: string;
+    };
     // An unknown value in the database never grants more than a student has.
     const role = isRole(user.role) ? user.role : 'student';
-    return { id: user.id, email: user.email, name: user.name || null, role };
+    return {
+      sessionId: session.session.id,
+      me: {
+        id: user.id,
+        email: user.email,
+        name: user.name || null,
+        role,
+        timeZone: user.timeZone || null,
+      },
+    };
   }
 
   async actor(headers: Headers): Promise<Actor | null> {

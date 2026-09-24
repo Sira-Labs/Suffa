@@ -31,6 +31,8 @@ export interface ClassScope {
 export const RBAC_MATRIX = {
   /** Read one's own account (/me). */
   'profile:read': ['student', 'teacher', 'admin'],
+  /** Change one's own settings and end one's own sessions. */
+  'profile:write': ['student', 'teacher', 'admin'],
   /** Push and pull one's own learning data. */
   'sync:own': ['student', 'teacher', 'admin'],
   /** Create a class and invite learners (Sprint 4). */

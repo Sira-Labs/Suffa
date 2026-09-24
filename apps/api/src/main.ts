@@ -20,6 +20,8 @@ import {
 import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/resolver.js';
 import { PgSyncRepository } from './sync/repository.js';
 import { PgAdminRepository } from './admin/repository.js';
+import { PgAccountRepository } from './account/repository.js';
+import type { AccountRouteDeps } from './account/routes.js';
 import { ConfigError, loadConfig, redactDatabaseUrl } from './config.js';
 import {
   currentRevision,
@@ -134,6 +136,7 @@ async function main(): Promise<void> {
   // Sign-in (magic link) needs a secret and the public URL; prod config enforces both.
   const resolvers: AuthResolver[] = [];
   let authRoutes: AuthRouteDeps | undefined;
+  let accountRoutes: AccountRouteDeps | undefined;
   // In prod the link is never written to the log: without SMTP there is no sign-in.
   const canMail = Boolean(config.smtp) || config.env !== 'prod';
   if (config.authSecret && config.publicUrl && canMail) {
@@ -146,6 +149,11 @@ async function main(): Promise<void> {
     });
     const sessions = new SessionResolver(betterAuth);
     resolvers.push(sessions);
+    accountRoutes = {
+      repo: new PgAccountRepository(pool),
+      sessions: { actor: (h) => sessions.sessionActor(h) },
+      log,
+    };
     authRoutes = {
       handler: (request) => betterAuth.handler(request),
       me: (h) => sessions.me(h),
@@ -186,6 +194,8 @@ async function main(): Promise<void> {
     admin: { repo: new PgAdminRepository(pool), auth, log },
     authzLog: log,
     auth: authRoutes,
+    account: accountRoutes,
+    allowedOrigin: config.publicUrl ? new URL(config.publicUrl).origin : undefined,
     errorTunnel: { webDsn: config.webErrorDsn, log },
     onUnhandledError: (error, path) => {
       log.error({ err: error, path }, 'http.unhandled_error');

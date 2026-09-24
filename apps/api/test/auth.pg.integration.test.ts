@@ -11,6 +11,7 @@ import type { Mailer } from '../src/auth/mailer.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
 import { PgSyncRepository } from '../src/sync/repository.js';
 import { PgAdminRepository } from '../src/admin/repository.js';
+import { PgAccountRepository } from '../src/account/repository.js';
 
 const url = process.env.SUFFA_TEST_DATABASE_URL;
 const PUBLIC_URL = 'http://localhost:5173';
@@ -64,6 +65,12 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       },
       auth: { handler: (request) => auth.handler(request), me: (h) => sessions.me(h) },
       admin: { repo: new PgAdminRepository(pool), auth: sessions, log: quiet },
+      account: {
+        repo: new PgAccountRepository(pool),
+        sessions: { actor: (h) => sessions.sessionActor(h) },
+        log: quiet,
+      },
+      allowedOrigin: PUBLIC_URL,
     });
   });
 
@@ -207,5 +214,82 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       "update users set role = 'student' where email = 'lehrer@example.org'"
     );
     expect((await users()).status).toBe(403);
+  });
+
+  /** Signs in once more as the same person, like a second device. */
+  const signInDevice = async (email: string, ip: string) => {
+    await requestLink(email, ip);
+    return (await openLink(mailer.links.at(-1)!.url)).cookie;
+  };
+
+  it('lists devices and signs out the others at once (story 3.4)', async () => {
+    const laptop = await signInDevice('zwei@example.org', '203.0.113.20');
+    const phone = await signInDevice('zwei@example.org', '203.0.113.21');
+    const get = (cookie: string, path: string) =>
+      app.request(path, { headers: { cookie } });
+
+    const list = await get(laptop, '/api/v1/account/sessions');
+    const { sessions } = (await list.json()) as {
+      sessions: { id: string; current: boolean }[];
+    };
+    expect(sessions).toHaveLength(2);
+    expect(sessions.filter((s) => s.current)).toHaveLength(1);
+
+    const revoke = await app.request('/api/v1/account/sessions/revoke-others', {
+      method: 'POST',
+      headers: { cookie: laptop, origin: PUBLIC_URL },
+    });
+    expect(await revoke.json()).toEqual({ revoked: 1 });
+    // The phone's session fails on its very next request; the laptop keeps working.
+    expect((await get(phone, '/api/v1/me')).status).toBe(401);
+    expect((await get(laptop, '/api/v1/me')).status).toBe(200);
+  });
+
+  it("never ends another user's session", async () => {
+    const mine = await signInDevice('eins@example.org', '203.0.113.30');
+    const theirs = await signInDevice('andere@example.org', '203.0.113.31');
+    const { rows } = await pool.query<{ id: string }>(
+      "select s.id from sessions s join users u on u.id = s.user_id where u.email = 'andere@example.org'"
+    );
+    const response = await app.request(`/api/v1/account/sessions/${rows[0]!.id}`, {
+      method: 'DELETE',
+      headers: { cookie: mine, origin: PUBLIC_URL },
+    });
+    expect(response.status).toBe(404);
+    expect(
+      (await app.request('/api/v1/me', { headers: { cookie: theirs } })).status
+    ).toBe(200);
+  });
+
+  it('stores the time zone and returns it with /me', async () => {
+    const cookie = await signInDevice('zeit@example.org', '203.0.113.40');
+    const patch = await app.request('/api/v1/account/settings', {
+      method: 'PATCH',
+      headers: { cookie, origin: PUBLIC_URL, 'content-type': 'application/json' },
+      body: JSON.stringify({ timeZone: 'Asia/Riyadh' }),
+    });
+    expect(patch.status).toBe(204);
+    const me = await app.request('/api/v1/me', { headers: { cookie } });
+    expect(await me.json()).toMatchObject({
+      email: 'zeit@example.org',
+      timeZone: 'Asia/Riyadh',
+    });
+  });
+
+  it('refuses a cross-site write even with a valid session cookie', async () => {
+    const cookie = await signInDevice('csrf@example.org', '203.0.113.50');
+    const response = await app.request('/api/v1/account/sessions/revoke-others', {
+      method: 'POST',
+      headers: { cookie, origin: 'https://evil.example' },
+    });
+    expect(response.status).toBe(403);
+  });
+
+  it('keeps Better Auth endpoints outside the allow-list closed', async () => {
+    const cookie = await signInDevice('liste@example.org', '203.0.113.60');
+    for (const path of ['/get-session', '/list-sessions']) {
+      const response = await app.request(`/api/v1/auth${path}`, { headers: { cookie } });
+      expect(response.status, path).toBe(404);
+    }
   });
 });

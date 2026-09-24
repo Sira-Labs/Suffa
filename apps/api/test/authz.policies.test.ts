@@ -7,6 +7,7 @@ import { ACTIONS, can, ROLES, type Action, type Role } from '../src/authz/polici
  */
 const EXPECTED: Record<Action, readonly Role[]> = {
   'profile:read': ['student', 'teacher', 'admin'],
+  'profile:write': ['student', 'teacher', 'admin'],
   'sync:own': ['student', 'teacher', 'admin'],
   'class:create': ['teacher', 'admin'],
   'class:progress:read': ['admin'], // without a class scope only admins

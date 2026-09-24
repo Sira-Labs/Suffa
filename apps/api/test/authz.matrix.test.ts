@@ -5,6 +5,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
+import type { AccountRepository } from '../src/account/repository.js';
 import type { AdminRepository } from '../src/admin/repository.js';
 import type { Me } from '../src/auth/betterAuth.js';
 import type { AuthResolver } from '../src/auth/resolver.js';
@@ -18,7 +19,9 @@ const quiet = { info: () => {}, warn: () => {}, error: () => {} };
 /** The test picks the caller's role with a header; no header means anonymous. */
 function actorFrom(headers: Headers): Me | null {
   const role = headers.get('x-test-role') as Role | null;
-  return role ? { id: USER_ID, email: 'x@example.org', name: null, role } : null;
+  return role
+    ? { id: USER_ID, email: 'x@example.org', name: null, role, timeZone: null }
+    : null;
 }
 const resolver: AuthResolver = { actor: async (h) => actorFrom(h) };
 
@@ -27,6 +30,18 @@ const syncRepo: SyncRepository = {
   pull: async () => ({ records: [], next: null }),
 };
 const adminRepo: AdminRepository = { listUsers: async () => ({ users: [], next: null }) };
+const accountRepo: AccountRepository = {
+  listSessions: async () => [],
+  revokeSession: async () => true,
+  revokeOtherSessions: async () => 0,
+  setTimeZone: async () => {},
+};
+const sessionActors = {
+  actor: async (h: Headers) => {
+    const me = actorFrom(h);
+    return me ? { id: me.id, role: me.role, sessionId: 'session-1' } : null;
+  },
+};
 
 function buildApp() {
   return createApp({
@@ -38,6 +53,7 @@ function buildApp() {
     },
     sync: { repo: syncRepo, auth: resolver, log: quiet },
     admin: { repo: adminRepo, auth: resolver, log: quiet },
+    account: { repo: accountRepo, sessions: sessionActors, log: quiet },
     auth: {
       handler: async () => Response.json({ ok: true }),
       me: async (h) => actorFrom(h),
@@ -49,13 +65,16 @@ function buildApp() {
 
 /** A concrete request for a route pattern (fills in path parameters). */
 function requestFor(route: { method: string; path: string }, role: Role | null) {
-  const path = route.path.replace(':table', 'srs_cards');
+  const path = route.path.replace(':table', 'srs_cards').replace(':id', 'session-2');
   const headers: Record<string, string> = { 'content-type': 'application/json' };
   if (role) headers['x-test-role'] = role;
   return new Request(`http://localhost${path}`, {
     method: route.method,
     headers,
-    body: route.method === 'POST' ? JSON.stringify({ records: [] }) : undefined,
+    body:
+      route.method === 'POST' || route.method === 'PATCH'
+        ? JSON.stringify(route.method === 'POST' ? { records: [] } : { timeZone: 'UTC' })
+        : undefined,
   });
 }
 
@@ -94,5 +113,28 @@ describe('route × role matrix', () => {
     );
     expect(await response.json()).toMatchObject({ id: USER_ID, role: 'teacher' });
     expect(response.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('exposes only the Better Auth endpoints magic-link sign-in needs', async () => {
+    const call = (method: string, path: string) =>
+      app.request(`/api/v1/auth${path}`, {
+        method,
+        headers: { 'content-type': 'application/json' },
+      });
+    expect((await call('POST', '/sign-in/magic-link')).status).toBe(200);
+    expect((await call('GET', '/magic-link/verify')).status).toBe(200);
+    expect((await call('POST', '/sign-out')).status).toBe(200);
+    for (const [method, path] of [
+      ['GET', '/get-session'],
+      ['GET', '/list-sessions'],
+      ['POST', '/update-user'],
+      ['POST', '/delete-user'],
+      ['POST', '/change-email'],
+      ['POST', '/sign-up/email'],
+      ['POST', '/revoke-sessions'],
+      ['GET', '/magic-link/verify/extra'],
+    ] as const) {
+      expect((await call(method, path)).status, `${method} ${path}`).toBe(404);
+    }
   });
 });

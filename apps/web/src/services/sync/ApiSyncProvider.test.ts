@@ -114,7 +114,11 @@ describe('ApiSyncProvider', () => {
   it('drops to signed-out when the session has ended', async () => {
     let signedIn = true;
     const { provider } = fakeApi((path) =>
-      path === '/api/v1/me' && signedIn ? json(ME) : json({ error: 'unauthorized' }, 401)
+      path === '/api/v1/account/settings'
+        ? new Response(null, { status: 204 })
+        : path === '/api/v1/me' && signedIn
+          ? json(ME)
+          : json({ error: 'unauthorized' }, 401)
     );
     await provider.refresh();
     expect(provider.getAuthState().status).toBe('signed-in');
@@ -122,6 +126,37 @@ describe('ApiSyncProvider', () => {
     const result = await provider.pull('srs_cards', null);
     expect(result).toMatchObject({ ok: false, error: { code: 'not-authenticated' } });
     expect(provider.getAuthState().status).toBe('signed-out');
+  });
+
+  it('adopts the device time zone for an account without one', async () => {
+    const { provider, calls } = fakeApi((path) =>
+      path === '/api/v1/me' ? json(ME) : new Response(null, { status: 204 })
+    );
+    await provider.refresh();
+    await vi.waitFor(() =>
+      expect(calls.some((c) => c.path === '/api/v1/account/settings')).toBe(true)
+    );
+    const patch = calls.find((c) => c.path === '/api/v1/account/settings')!;
+    expect(JSON.parse(String(patch.init?.body))).toEqual({
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    });
+    expect(provider.currentUser()?.timeZone).toBe(
+      Intl.DateTimeFormat().resolvedOptions().timeZone
+    );
+  });
+
+  it('reads the server engagement state', async () => {
+    const state = { totalXp: 120, computedAt: '2026-09-24T10:00:00.000Z' };
+    const { provider } = fakeApi((path) =>
+      path === '/api/v1/engagement'
+        ? json({ state })
+        : json({ error: 'unauthorized' }, 401)
+    );
+    expect(await provider.engagementState()).toEqual({ ok: true, value: state });
+    const offline = new ApiSyncProvider('', (async () => {
+      throw new TypeError('offline');
+    }) as unknown as typeof fetch);
+    expect((await offline.engagementState()).ok).toBe(false);
   });
 
   it('lists devices and signs out the others', async () => {

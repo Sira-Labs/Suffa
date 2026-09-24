@@ -55,6 +55,21 @@ type Fetch = typeof fetch;
 
 const SIGNED_OUT: AuthState = { status: 'signed-out' };
 
+/** The server's copy of the learner's engagement (GET /api/v1/engagement). */
+export interface ServerEngagement {
+  totalXp: number;
+  level: number;
+  streak: { current: number; longest: number; shields: number };
+  rulesVersion: number;
+  rejected: number;
+  computedAt: string;
+  achievements: {
+    badgeId: string;
+    tier: 'bronze' | 'silver' | 'gold';
+    unlockedAt: string;
+  }[];
+}
+
 export class ApiSyncProvider implements SyncProvider {
   readonly name = 'suffa-api';
 
@@ -108,7 +123,12 @@ export class ApiSyncProvider implements SyncProvider {
       this.setUser(null);
     } else if (response.ok) {
       this.available = true;
-      this.setUser((await response.json()) as ApiUser);
+      const user = (await response.json()) as ApiUser;
+      this.setUser(user);
+      // Rewards are counted per day in the account's zone (on the server too): until the
+      // learner picks one, the device's zone is the best guess.
+      const deviceZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (!user.timeZone && deviceZone) void this.setTimeZone(deviceZone);
     } else {
       this.available = true;
       this.setUser(null);
@@ -225,6 +245,14 @@ export class ApiSyncProvider implements SyncProvider {
       { method: 'POST' }
     );
     return result.ok ? { ok: true, value: result.value.revoked } : result;
+  }
+
+  /** XP, streak and badges as the server computed them from the synced data (story 5.4). */
+  async engagementState(): Promise<Result<ServerEngagement | null>> {
+    const result = await this.send<{ state: ServerEngagement | null }>(
+      '/api/v1/engagement'
+    );
+    return result.ok ? { ok: true, value: result.value.state } : result;
   }
 
   /** Stores the account's time zone (IANA name, e.g. "Europe/Zurich"). */

@@ -3,10 +3,12 @@ import {
   DEFAULT_WEEKLY_GOAL,
   isTimeZone,
   isWeeklyGoal,
+  LESSON_SIZES,
   summarize,
   type EngagementSummary,
 } from '@suffa/engagement';
 import { browserTimeZone } from '@/modules/settings/devices';
+import { reconcile } from '@/services/engagement/reconcile';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import {
   useCheckInStore,
@@ -32,9 +34,8 @@ export function useLearnerTimeZone(): string {
  * XP, level, today's quests, streak, weekly goal and badges, from local data only (works
  * offline); the same rules run on the server after a sync.
  */
-export function useEngagement(now?: Date): EngagementSummary {
+export function useLocalEngagement(now?: Date): EngagementSummary {
   const logs = useEngagementStore((s) => s.logs);
-  const sizes = useEngagementStore((s) => s.lessonSizes);
   const tracks = useListenStore((s) => s.progress);
   const practice = usePracticeStore((s) => s.records);
   const enrollments = useEnrollmentStore((s) => s.enrollments);
@@ -55,7 +56,7 @@ export function useEngagement(now?: Date): EngagementSummary {
           checkIns: Object.values(checkIns),
           exams,
           enrollments: Object.values(enrollments),
-          lessonSizes: sizes,
+          lessonSizes: LESSON_SIZES,
         },
         {
           timeZone,
@@ -63,6 +64,14 @@ export function useEngagement(now?: Date): EngagementSummary {
           now: new Date(stamp * 60_000),
         }
       ),
-    [logs, sizes, tracks, practice, checkIns, exams, enrollments, goal, timeZone, stamp]
+    [logs, tracks, practice, checkIns, exams, enrollments, goal, timeZone, stamp]
   );
+}
+
+/** What the app shows: local results, reconciled with the server's once it caught up. */
+export function useEngagement(now?: Date): EngagementSummary {
+  const local = useLocalEngagement(now);
+  const server = useEngagementStore((s) => s.server);
+  const pending = useSyncStore((s) => s.pending);
+  return useMemo(() => reconcile(local, server, pending), [local, server, pending]);
 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { BADGES, QUEST_XP } from '@suffa/engagement';
 import { useCelebrationStore, useEngagementStore, useSrsStore } from '@/state';
-import { useEngagement } from './useEngagement';
+import { useLocalEngagement } from './useEngagement';
 
 const TIER_LABEL = { bronze: 'Bronze', silver: 'Silber', gold: 'Gold' } as const;
 
@@ -13,14 +13,10 @@ const TIER_LABEL = { bronze: 'Bronze', silver: 'Silber', gold: 'Gold' } as const
 export function EngagementWatcher() {
   const cards = useSrsStore((s) => s.cards);
   const refresh = useEngagementStore((s) => s.refresh);
-  const loadLessonSizes = useEngagementStore((s) => s.loadLessonSizes);
   const celebrate = useCelebrationStore((s) => s.show);
-  const summary = useEngagement();
+  // Local results only: badges arriving from the server are not "just reached".
+  const summary = useLocalEngagement();
   const seen = useRef<Set<string> | null>(null);
-
-  useEffect(() => {
-    void loadLessonSizes();
-  }, [loadLessonSizes]);
 
   useEffect(() => {
     void refresh();

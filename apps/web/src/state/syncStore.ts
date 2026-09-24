@@ -19,6 +19,8 @@ import { useListenStore } from './listenStore';
 import { usePracticeStore } from './practiceStore';
 import { useSettingsStore } from './settingsStore';
 import { useSrsStore } from './srsStore';
+import { useEngagementStore } from './engagementStore';
+import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 
 /** Everything a sync can change underneath the screen. */
 async function reloadSyncedStores(): Promise<void> {
@@ -34,6 +36,14 @@ async function reloadSyncedStores(): Promise<void> {
 }
 
 const log = logger.child('state:sync');
+
+/** The server's engagement results; the app reconciles to them (story 5.4). */
+async function refreshServerEngagement(p: SyncProvider): Promise<void> {
+  if (!(p instanceof ApiSyncProvider)) return;
+  const result = await p.engagementState();
+  if (result.ok) useEngagementStore.getState().setServer(result.value);
+  else log.info('Engagement state unavailable', { code: result.error.code });
+}
 
 export type UiSyncStatus = 'idle' | 'syncing' | 'offline' | 'error' | 'disabled';
 
@@ -122,6 +132,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       const lastSyncAt = await engine.lastSyncAt();
       await get().refreshPending();
       set({ status: 'idle', lastSyncAt });
+      await refreshServerEngagement(p);
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'Sync fehlgeschlagen';
       log.error('Sync error', { message });

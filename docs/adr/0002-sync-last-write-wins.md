@@ -38,3 +38,17 @@ being duplicated. Since these IDs are only unique **per user**, the backend prim
 
 Simple, predictable semantics. Theoretical drawback: with truly concurrent editing one change
 (the older one) can be lost. Acceptable for single-user learning data.
+
+## Update 2026-09-24: cards weigh reviews, not timestamps
+
+Plain last-write-wins lost learning progress between two devices: every device creates
+missing SRS cards with a fresh `updated_at` when the app starts, so a card another device
+had merely created beat the same card reviewed earlier. Now:
+
+- **SRS cards:** the version with the later `lastReviewed` wins; `updated_at` only breaks
+  ties (`cardPrecedence` in the app, the same rule in the API's upsert). A local winner with
+  an older timestamp is re-stamped before the push, so other devices' pulls see it.
+- **Repair:** review logs are append-only and reach every device intact. After each sync, a
+  card whose logs are ahead of it is rebuilt by replaying them (scheduling has no fuzz, so
+  the result is identical on every device) and pushed.
+- All other tables keep plain last-write-wins.

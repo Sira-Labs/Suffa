@@ -7,19 +7,30 @@
  *   2. PULL: fetch remote records changed since the last sync.
  *   3. RECONCILE: merge via last-write-wins (see reconcile.ts/ADR-0002).
  *   4. WRITE: write winners locally; delete only successfully pushed outbox entries.
+ * After all tables: cards whose review logs are ahead of them are rebuilt from the logs
+ * (repairCards.ts) and pushed, so learning progress made on any device survives.
  *
  * Offline safety: if push/pull fails, the outbox is kept and the next cycle
  * retries. No data loss.
  */
-import type { SyncTable } from '@/types';
+import type { SrsCard, SyncTable } from '@/types';
 import {
+  cardRepo,
   db,
+  reviewLogRepo,
   syncableTables,
   type AppDatabase,
   type OutboxEntry,
 } from '@/services/storage';
 import { logger } from '@/services/logger';
-import { mergeRecords, type Reconcilable } from './reconcile';
+import {
+  cardPrecedence,
+  lastWriteWins,
+  mergeRecords,
+  type Precedence,
+  type Reconcilable,
+} from './reconcile';
+import { cardsToRepair } from './repairCards';
 import type { SyncProvider, SyncableRecord } from './provider';
 
 const log = logger.child('sync:engine');
@@ -42,7 +53,20 @@ export interface SyncResult {
   pushed: number;
   pulled: number;
   conflictsResolved: number;
+  /** Cards rebuilt from their review logs. */
+  repaired: number;
 }
+
+type SyncRecordOf = Reconcilable & SyncableRecord;
+
+/** How two versions of a record are weighed, per table (default: last-write-wins). */
+function precedenceFor(table: SyncTable): Precedence<SyncRecordOf> {
+  return table === 'srs_cards'
+    ? (cardPrecedence as unknown as Precedence<SyncRecordOf>)
+    : lastWriteWins;
+}
+
+const EMPTY: SyncResult = { pushed: 0, pulled: 0, conflictsResolved: 0, repaired: 0 };
 
 function lastPullKey(table: SyncTable): string {
   return `lastPull:${table}`;
@@ -68,25 +92,28 @@ export class SyncEngine {
   async sync(): Promise<SyncResult> {
     if (this.running) {
       log.debug('Sync already running – skipped');
-      return { pushed: 0, pulled: 0, conflictsResolved: 0 };
+      return { ...EMPTY };
     }
     if (!this.provider.isConfigured()) {
-      return { pushed: 0, pulled: 0, conflictsResolved: 0 };
+      return { ...EMPTY };
     }
     if (this.provider.getAuthState().status !== 'signed-in') {
       log.debug('Not signed in – sync skipped');
-      return { pushed: 0, pulled: 0, conflictsResolved: 0 };
+      return { ...EMPTY };
     }
 
     this.running = true;
-    const totals: SyncResult = { pushed: 0, pulled: 0, conflictsResolved: 0 };
+    const totals: SyncResult = { ...EMPTY };
+    const add = (partial: SyncResult) => {
+      totals.pushed += partial.pushed;
+      totals.pulled += partial.pulled;
+      totals.conflictsResolved += partial.conflictsResolved;
+    };
     try {
-      for (const table of SYNC_TABLES) {
-        const partial = await this.syncTable(table);
-        totals.pushed += partial.pushed;
-        totals.pulled += partial.pulled;
-        totals.conflictsResolved += partial.conflictsResolved;
-      }
+      for (const table of SYNC_TABLES) add(await this.syncTable(table));
+      // Review logs of all devices are now here: bring cards up to them and push the result.
+      totals.repaired = await this.repairCards();
+      if (totals.repaired > 0) add(await this.syncTable('srs_cards'));
       await this.database.sync_meta.put({
         key: 'lastSyncAt',
         value: new Date().toISOString(),
@@ -120,7 +147,7 @@ export class SyncEngine {
     const pullResult = await this.provider.pull(table, since);
     if (!pullResult.ok) {
       log.warn('pull failed', { table, error: pullResult.error.message });
-      return { pushed: 0, pulled: 0, conflictsResolved: 0 };
+      return { ...EMPTY };
     }
     const remotes = pullResult.value as (Reconcilable & SyncableRecord)[];
 
@@ -134,11 +161,24 @@ export class SyncEngine {
     ).filter((r): r is Reconcilable & SyncableRecord => Boolean(r));
     for (const r of extraLocals) localMap.set(r.id, r);
 
-    const { toWriteLocal, toPushRemote } = mergeRecords([...localMap.values()], remotes);
+    const merged = mergeRecords([...localMap.values()], remotes, precedenceFor(table));
+    const { toWriteLocal } = merged;
+    // A local winner that is not newer by timestamp (e.g. a reviewed card against a card
+    // another device only created) gets a fresh one: the server's upsert and the other
+    // devices' pulls both go by updated_at.
+    const remoteById = new Map(remotes.map((r) => [r.id, r]));
+    const now = new Date().toISOString();
+    const toPushRemote = merged.toPushRemote.map((local) => {
+      const remote = remoteById.get(local.id);
+      return remote && local.updated_at <= remote.updated_at
+        ? { ...local, updated_at: now }
+        : local;
+    });
+    const restamped = toPushRemote.filter((r, i) => r !== merged.toPushRemote[i]);
 
     // 3. WRITE: persist remote winners locally (without a new outbox entry).
-    if (toWriteLocal.length > 0) {
-      await handle.bulkPut(toWriteLocal);
+    if (toWriteLocal.length > 0 || restamped.length > 0) {
+      await handle.bulkPut([...toWriteLocal, ...restamped]);
     }
 
     // 4. PUSH: only the local winners (newer than, or unknown to, the backend).
@@ -152,7 +192,7 @@ export class SyncEngine {
           error: pushResult.error.message,
         });
         return {
-          pushed: 0,
+          ...EMPTY,
           pulled: toWriteLocal.length,
           conflictsResolved: toWriteLocal.length,
         };
@@ -174,10 +214,24 @@ export class SyncEngine {
     }
 
     return {
+      ...EMPTY,
       pushed,
       pulled: toWriteLocal.length,
       conflictsResolved: toWriteLocal.length,
     };
+  }
+
+  /** Rebuilds cards whose review logs are ahead of them; returns how many. */
+  private async repairCards(): Promise<number> {
+    const [cards, logs] = await Promise.all([
+      cardRepo.all(this.database),
+      reviewLogRepo.all(this.database),
+    ]);
+    const repaired: SrsCard[] = cardsToRepair(cards, logs);
+    for (const card of repaired) await cardRepo.put(card, this.database);
+    if (repaired.length > 0)
+      log.info('cards rebuilt from review logs', { count: repaired.length });
+    return repaired.length;
   }
 
   private async clearOutbox(entries: OutboxEntry[]): Promise<void> {

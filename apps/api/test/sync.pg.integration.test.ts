@@ -136,6 +136,32 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
     expect(records[0]).toMatchObject({ reps: 2, updated_at: '2026-09-23T11:00:00.000Z' });
   });
 
+  it('never lets a merely created card replace a reviewed one', async () => {
+    const reviewed = {
+      ...card('c2', '2026-09-23T10:00:00.000Z', 5),
+      lastReviewed: '2026-09-23T10:00:00.000Z',
+    };
+    await repo.upsert(ALICE, 'srs_cards', [reviewed]);
+    // Another device created the same card later (fresh updated_at) but never reviewed it.
+    expect(
+      await repo.upsert(ALICE, 'srs_cards', [card('c2', '2026-09-24T08:00:00.000Z', 0)])
+    ).toBe(0);
+    // A later review wins even with an older updated_at; an equal review falls back to LWW.
+    const later = {
+      ...card('c2', '2026-09-23T09:00:00.000Z', 6),
+      lastReviewed: '2026-09-23T12:00:00.000Z',
+    };
+    expect(await repo.upsert(ALICE, 'srs_cards', [later])).toBe(1);
+    const leech = { ...later, leech: true, updated_at: '2026-09-23T13:00:00.000Z' };
+    expect(await repo.upsert(ALICE, 'srs_cards', [leech])).toBe(1);
+    const { records } = await repo.pull(ALICE, 'srs_cards', {
+      since: null,
+      afterId: null,
+      limit: 10,
+    });
+    expect(records[0]).toMatchObject({ reps: 6, leech: true });
+  });
+
   it('keeps identical card ids of different users apart', async () => {
     await repo.upsert(ALICE, 'srs_cards', [
       card('vocab_ar_de:v-balad', '2026-09-23T10:00:00.000Z', 1),

@@ -70,6 +70,20 @@ function toWire(row: Record<string, unknown>): SyncRecord {
   return rest as SyncRecord;
 }
 
+/**
+ * When an incoming record replaces the stored one. Default: last-write-wins on updated_at.
+ * SRS cards: the later actual review wins and updated_at only breaks ties, so a card that a
+ * device merely created (fresh updated_at, never reviewed) cannot wipe out learning progress
+ * made on another device (same rule as the app's cardPrecedence).
+ */
+function acceptIncoming(table: SyncTableName, t: string): string {
+  const newer = `${t}."updated_at" < excluded."updated_at"`;
+  if (table !== 'srs_cards') return newer;
+  const reviewed = (source: string) => `coalesce(${source}."lastReviewed", '-infinity')`;
+  return `(${reviewed('excluded')} > ${reviewed(t)}
+        or (${reviewed('excluded')} = ${reviewed(t)} and ${newer}))`;
+}
+
 export class PgSyncRepository implements SyncRepository {
   constructor(private readonly db: Queryable) {}
 
@@ -102,7 +116,7 @@ export class PgSyncRepository implements SyncRepository {
     const t = quote(table);
     const sql = `insert into ${t} (${insertColumns}) values ${rows.join(', ')}
       on conflict ("user_id", "id") do update set ${updates}
-      where ${t}."updated_at" < excluded."updated_at"
+      where ${acceptIncoming(table, t)}
       returning "id"`;
     const result = await this.db.query(sql, values);
     return result.rowCount ?? 0;

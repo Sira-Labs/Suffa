@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { decide, mergeRecords, type Reconcilable } from './reconcile';
+import { cardPrecedence, decide, mergeRecords, type Reconcilable } from './reconcile';
 
 function rec(id: string, updated_at: string, deleted = false): Reconcilable {
   return { id, updated_at, deleted };
@@ -93,5 +93,34 @@ describe('Sync reconciliation: mergeRecords', () => {
     const second = mergeRecords(first.merged, [rec('a', T3)]);
     expect(second.toWriteLocal).toHaveLength(0);
     expect(second.toPushRemote).toHaveLength(0);
+  });
+});
+
+describe('cardPrecedence (SRS cards)', () => {
+  const cardAt = (updated_at: string, lastReviewed: string | null) => ({
+    id: 'c',
+    updated_at,
+    deleted: false,
+    lastReviewed,
+  });
+
+  it('keeps a reviewed card against a newer but never reviewed one', () => {
+    const phone = cardAt('2026-09-20T10:00:00.000Z', '2026-09-20T10:00:00.000Z');
+    const desktopSeed = cardAt('2026-09-24T08:00:00.000Z', null);
+    expect(decide(phone, desktopSeed, cardPrecedence)).toBe('keep-local');
+    expect(decide(desktopSeed, phone, cardPrecedence)).toBe('take-remote');
+  });
+
+  it('prefers the later review', () => {
+    const early = cardAt('2026-09-24T10:00:00.000Z', '2026-09-20T10:00:00.000Z');
+    const late = cardAt('2026-09-21T10:00:00.000Z', '2026-09-21T10:00:00.000Z');
+    expect(decide(early, late, cardPrecedence)).toBe('take-remote');
+  });
+
+  it('falls back to last-write-wins for the same review', () => {
+    const a = cardAt('2026-09-21T10:00:00.000Z', '2026-09-21T09:00:00.000Z');
+    const b = cardAt('2026-09-21T11:00:00.000Z', '2026-09-21T09:00:00.000Z');
+    expect(decide(a, b, cardPrecedence)).toBe('take-remote');
+    expect(mergeRecords([a], [b], cardPrecedence).toWriteLocal).toEqual([b]);
   });
 });

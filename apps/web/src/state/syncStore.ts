@@ -10,6 +10,7 @@ import {
   type SyncProvider,
 } from '@/services/sync';
 import { logger } from '@/services/logger';
+import { useSrsStore } from './srsStore';
 
 const log = logger.child('state:sync');
 
@@ -88,7 +89,9 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     }
     set({ status: 'syncing', errorMessage: null });
     try {
-      await engine.sync();
+      const result = await engine.sync();
+      // Cards changed underneath the screen (other device, repair): show them right away.
+      if (result.pulled > 0 || result.repaired > 0) await useSrsStore.getState().load();
       const lastSyncAt = await engine.lastSyncAt();
       await get().refreshPending();
       set({ status: 'idle', lastSyncAt });

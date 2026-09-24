@@ -97,6 +97,13 @@ export function App() {
 function Brand() {
   return (
     <Link to="/" className="brand" aria-label="Suffa – zur Übersicht">
+      <img
+        className="brand-mark"
+        src="/brand/suffa-mark.svg"
+        alt=""
+        width={32}
+        height={32}
+      />
       <span className="brand-latin">Suffa</span>
       <span className="brand-arabic" lang="ar">
         الصُّفَّة

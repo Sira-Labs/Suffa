@@ -75,7 +75,8 @@ export function CurrentUnitCard() {
         </>
       ) : (
         <p className="muted" style={{ margin: 0 }}>
-          Wähle dein Tempo und leg mit Dialog 1 los.
+          Wähle dein Tempo und leg mit Dialog 1 los. Noch nie Arabisch gelesen?{' '}
+          <Link to="/alphabet">Erst das Alphabet lernen</Link>
         </p>
       )}
       <Link to={to} className="btn btn-primary btn-lg">

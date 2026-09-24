@@ -41,7 +41,7 @@ describe('navigation', () => {
       within(list)
         .getAllByRole('link')
         .map((a) => a.getAttribute('href'))
-    ).toEqual(['/review', '/vocab', '/roots', '/conjugation', '/exam']);
+    ).toEqual(['/alphabet', '/review', '/vocab', '/roots', '/conjugation', '/exam']);
   });
 
   it('"Mehr" links to every secondary destination', () => {

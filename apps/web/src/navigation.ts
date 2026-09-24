@@ -52,6 +52,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     tier: 'primary',
   },
   {
+    to: '/alphabet',
+    label: 'Alphabet',
+    icon: 'write',
+    description: 'Die 28 Buchstaben – für den Einstieg',
+    tier: 'training',
+  },
+  {
     to: '/review',
     label: 'Wiederholen',
     icon: 'cards',

@@ -12,6 +12,7 @@ import { Exam } from './modules/exam';
 import { Library } from './modules/library';
 import { Settings } from './modules/settings';
 import { More, Training } from './modules/more';
+import { Alphabet, AlphabetLessonPage } from './modules/alphabet';
 import { Discover } from './modules/discover';
 import { FocusReview } from './modules/review';
 import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
@@ -27,6 +28,8 @@ export const router = createHashRouter([
     errorElement: <RouteError />,
     children: [
       { index: true, element: <Dashboard /> },
+      { path: 'alphabet', element: <Alphabet /> },
+      { path: 'alphabet/:lesson', element: <AlphabetLessonPage /> },
       { path: 'vocab', element: <VocabTrainer /> },
       { path: 'roots', element: <RootExplorer /> },
       { path: 'reading', element: <Reading /> },

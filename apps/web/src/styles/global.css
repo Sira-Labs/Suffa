@@ -1693,3 +1693,77 @@ textarea.input {
 .grammar-option.arabic-inline {
   font-size: 1.25rem;
 }
+
+/* Alphabet course. */
+.alphabet-lessons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.alphabet-lesson {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text);
+  text-decoration: none;
+}
+.alphabet-lesson-done {
+  border-color: color-mix(in srgb, var(--accent-2) 50%, var(--border));
+}
+.alphabet-lesson-letters {
+  font-size: 1.6rem;
+  min-width: 5.5rem;
+  text-align: center;
+  color: var(--accent);
+}
+.alphabet-letters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.alphabet-letter {
+  min-width: 3.25rem;
+  font-size: 1.8rem;
+  justify-content: center;
+}
+.alphabet-forms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  direction: rtl;
+}
+.alphabet-forms li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  direction: ltr;
+}
+.alphabet-form {
+  font-size: 2rem;
+  line-height: 1.6;
+}
+.alphabet-prompt {
+  margin: 0;
+  font-size: 3.5rem;
+  text-align: center;
+  line-height: 1.6;
+}
+.alphabet-prompt-name {
+  margin: 0;
+  font-size: 1.3rem;
+  text-align: center;
+}
+.alphabet-title {
+  margin: 0;
+  font-size: 2.4rem;
+  text-align: start;
+}

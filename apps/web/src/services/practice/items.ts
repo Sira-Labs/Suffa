@@ -4,6 +4,7 @@
  */
 import type {
   ContentBundle,
+  CourseSkill,
   Dialog,
   GrammatikPunkt,
   PracticeRecord,
@@ -103,7 +104,11 @@ export function unitPracticeItems(
   };
 }
 
-export function practiceId(unit: number, skill: PracticeSkill, itemId: string): string {
+export function practiceId(
+  unit: number,
+  skill: PracticeSkill | CourseSkill,
+  itemId: string
+): string {
   return `${unit}:${skill}:${itemId}`;
 }
 

@@ -122,6 +122,13 @@ general MSA grammar): a one-line rule, two short paragraphs with Arabic set in t
 examples to tap and hear, then two multiple-choice questions. The station sits right after
 reading the dialogue; each question counts on the first correct answer (+2 XP).
 
+**Alphabet.** A course for absolute beginners under Training (and linked from "Heute" before
+the first unit starts): eight lessons of letters that share a shape (plus ة, ء and the vowel
+signs). Each letter shows its four positional forms, its sound for German speakers and an
+example word, all tappable to hear. The quiz asks both ways – which letter is this (one of its
+forms), and where is this letter – with look-alike letters as distractors. Progress is stored
+as practice records of unit 0 (+2 XP per task).
+
 ## Feedback moments
 
 - **Celebration toast** (`CelebrationToast`): "+5 XP · Dialog gehört" with a medal and a small

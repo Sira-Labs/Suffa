@@ -72,6 +72,7 @@ publisher's exercises, the verbs and the unit test.
 | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ☀️ **Heute**     | Opens with your unit and its next step ("Fortsetzen"), today's path, word of the day with a daily check-in (+10 XP), level card, wobbly words.      |
 | 🏋️ **Training**  | Review, vocabulary, roots (الجذر والوزن), conjugation and exams — only with the units you have reached, so nothing from later units shows up early. |
+| 🔤 **Alphabet**  | For absolute beginners: the 28 letters in eight lessons with forms, sounds, example words and a two-way quiz.                                       |
 | 🧭 **Entdecken** | A curated library of YouTube videos and podcasts on Arabic and the Quran; started videos are pinned to "Weiterschauen" until seen or unpinned.      |
 | ⭐ **XP**        | Points for reviews, heard tracks, practised items, the daily check-in, units finished on time and stages; shown the moment you earn them.           |
 | 🔁 **Sync**      | Offline-first on each device (IndexedDB) with an outbox and last-write-wins sync; engagement data joins the sync in the engagement sprint.          |
@@ -103,7 +104,6 @@ The interface is in **German**; learning content is MSA with full vocalisation.
 | Interactive YouTube        | Mar 2027        | Muhammad al-Andalusi's lessons with checkpoints                                     |
 | iOS & Android apps         | Apr 2027        | Capacitor apps, native reminders and push                                           |
 
-Next on the device: an alphabet course for absolute beginners.
 Details: [roadmap](docs/plan/roadmap.md) · [sprint plan](docs/plan/sprint-plan.md) ·
 [engagement plan](docs/plan/engagement-plan.md) · [content plan](docs/plan/content-plan.md) ·
 [cost plan](docs/plan/cost-plan.md).

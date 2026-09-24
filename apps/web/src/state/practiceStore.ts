@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { PracticeRecord, PracticeSkill } from '@/types';
+import type { CourseSkill, PracticeRecord, PracticeSkill } from '@/types';
 import { practiceRepo } from '@/services/storage';
 import { practiceId } from '@/services/practice';
 import { XP_RULES } from '@/services/engagement/xp';
@@ -22,7 +22,7 @@ interface PracticeState {
    */
   practise(
     unit: number,
-    skill: PracticeSkill,
+    skill: PracticeSkill | CourseSkill,
     itemId: string,
     items: readonly string[]
   ): Promise<PracticeOutcome>;

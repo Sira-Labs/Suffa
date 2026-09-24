@@ -108,8 +108,10 @@ export function createAuth(options: AuthOptions) {
       cookiePrefix: 'suffa',
       useSecureCookies: options.production,
       database: { generateId: () => randomUUID() },
-      // Caddy and CapRover's nginx sit in front; the client address is the first hop.
-      ipAddress: { ipAddressHeaders: ['x-forwarded-for'] },
+      // Caddy (suffa-web) sets X-Real-IP to the client address it resolved from nginx's
+      // X-Forwarded-For and overwrites any value the client sent. The first hop of
+      // X-Forwarded-For is client-controlled and must never be used for rate limits.
+      ipAddress: { ipAddressHeaders: ['x-real-ip'] },
     },
     plugins: [
       magicLink({

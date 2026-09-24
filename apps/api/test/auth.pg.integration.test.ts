@@ -84,7 +84,7 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       headers: {
         'content-type': 'application/json',
         origin: PUBLIC_URL,
-        'x-forwarded-for': ip,
+        'x-real-ip': ip,
       },
       body: JSON.stringify({ email, callbackURL: '/settings' }),
     });
@@ -94,7 +94,7 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
     const target = new URL(link);
     expect(target.origin).toBe(PUBLIC_URL);
     const response = await app.request(`${target.pathname}${target.search}`, {
-      headers: { 'x-forwarded-for': '203.0.113.7' },
+      headers: { 'x-real-ip': '203.0.113.7' },
     });
     const cookie = (response.headers.getSetCookie?.() ?? [])
       .map((c) => c.split(';')[0])
@@ -112,6 +112,12 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
     expect(response.status).toBe(302);
     expect(response.headers.get('location')).toBe(`${PUBLIC_URL}/settings`);
     expect(cookie).toMatch(/^suffa\.session_token=/);
+    // The session cookie is out of reach for scripts and not sent on cross-site requests.
+    const attributes = (response.headers.getSetCookie?.() ?? []).find((c) =>
+      c.startsWith('suffa.session_token=')
+    );
+    expect(attributes).toMatch(/;\s*HttpOnly/i);
+    expect(attributes).toMatch(/;\s*SameSite=Lax/i);
 
     const me = await app.request('/api/v1/me', { headers: { cookie } });
     expect(me.status).toBe(200);
@@ -181,6 +187,28 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
     expect(mailer.links).toHaveLength(5);
     // Another client is not affected.
     expect((await requestLink('other@example.org', '198.51.100.9')).status).toBe(200);
+  });
+
+  it('ignores a client-chosen X-Forwarded-For for rate limits', async () => {
+    // Rotating the first hop must not open a fresh budget: only X-Real-IP (set by Caddy) counts.
+    const statuses: number[] = [];
+    for (let i = 0; i < 6; i++) {
+      const response = await app.request('/api/v1/auth/sign-in/magic-link', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          origin: PUBLIC_URL,
+          'x-real-ip': '192.0.2.44',
+          'x-forwarded-for': `10.0.0.${i}`,
+        },
+        body: JSON.stringify({
+          email: `spoof${i}@example.org`,
+          callbackURL: '/settings',
+        }),
+      });
+      statuses.push(response.status);
+    }
+    expect(statuses.at(-1)).toBe(429);
   });
 
   it('signs out: the session stops working at once', async () => {

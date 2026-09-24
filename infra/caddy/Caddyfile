@@ -5,6 +5,14 @@
 # Until the API exists (Sprint 2), /api answers 502; the offline app is unaffected.
 {
 	admin off
+	# CapRover's nginx (on the private overlay network) is the only hop in front of Caddy.
+	# Trusting private ranges lets Caddy read the client address nginx appends to
+	# X-Forwarded-For; "strict" takes the right-most untrusted entry, so a client cannot
+	# choose its own address by sending X-Forwarded-For itself.
+	servers {
+		trusted_proxies static private_ranges
+		trusted_proxies_strict
+	}
 }
 
 :80 {
@@ -14,6 +22,8 @@
 		# style-src needs 'unsafe-inline' for React style attributes. Supabase stays allowed
 		# until the migration to suffa-api (ADR-0007) is complete.
 		Content-Security-Policy "default-src 'self'; script-src 'self' https://www.youtube.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com; font-src 'self'; media-src 'self' blob: https://old.arabicforall.net; connect-src 'self' https://*.supabase.co wss://*.supabase.co; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://docs.google.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+		# The app is HTTPS-only (CapRover forces HTTPS); browsers must never try plain HTTP.
+		Strict-Transport-Security "max-age=31536000"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
 		Permissions-Policy "camera=(), microphone=(self), geolocation=()"
@@ -32,7 +42,11 @@
 
 	@api path /api/* /healthz
 	handle @api {
-		reverse_proxy {$SUFFA_API_UPSTREAM:srv-captain--suffa-api:8000}
+		reverse_proxy {$SUFFA_API_UPSTREAM:srv-captain--suffa-api:8000} {
+			# The one client address the API trusts (sign-in rate limits, sessions). Always
+			# overwritten here, so a value sent by the client never reaches the API.
+			header_up X-Real-IP {client_ip}
+		}
 	}
 
 	# Presigned S3 URLs signed by the API for the internal RustFS host (ADR-0017).

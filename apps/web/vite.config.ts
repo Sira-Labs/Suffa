@@ -72,6 +72,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // The shared rules are used from source: no build step for the app, one copy of the code.
+      '@suffa/engagement': fileURLToPath(
+        new URL('../../packages/engagement/src/index.ts', import.meta.url)
+      ),
     },
   },
   build: {

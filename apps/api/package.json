@@ -11,11 +11,14 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "prebuild": "npm run build -w @suffa/engagement",
+    "pretypecheck": "npm run build -w @suffa/engagement"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.17",
     "@sentry/core": "^11.0.0",
+    "@suffa/engagement": "0.1.0",
     "better-auth": "^1.7.5",
     "hono": "^4.13.8",
     "nodemailer": "^10.0.10",

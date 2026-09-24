@@ -6,8 +6,11 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/
 COPY apps/api/package.json apps/api/
+COPY packages/engagement/package.json packages/engagement/
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
+COPY packages/engagement packages/engagement
 COPY apps/api apps/api
+# prebuild compiles @suffa/engagement (shared rules) first.
 RUN npm run build -w @suffa/api
 
 # Production dependencies of the api workspace only.
@@ -16,6 +19,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/
 COPY apps/api/package.json apps/api/
+COPY packages/engagement/package.json packages/engagement/
 # npm nests packages it cannot hoist (e.g. better-auth) under the workspace; keep that
 # directory even when it is empty so the runtime stage can always copy it.
 RUN --mount=type=cache,target=/root/.npm \
@@ -28,6 +32,9 @@ WORKDIR /app/apps/api
 COPY --from=deps /app/node_modules /app/node_modules
 COPY --from=deps /app/apps/api/node_modules ./node_modules
 COPY --from=build /app/apps/api/dist ./dist
+# The workspace link node_modules/@suffa/engagement → packages/engagement needs its build.
+COPY --from=build /app/packages/engagement/package.json /app/packages/engagement/
+COPY --from=build /app/packages/engagement/dist /app/packages/engagement/dist
 COPY apps/api/package.json ./
 COPY apps/api/migrations ./migrations
 ARG SUFFA_VERSION=dev

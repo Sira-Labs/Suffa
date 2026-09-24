@@ -32,7 +32,8 @@ export function buildCardSeeds(userVocab: UserVocab[] = []): CardSeed[] {
     seeds.push(seed('vocab_ar_de', v.id));
     seeds.push(seed('vocab_de_ar', v.id));
     if (v.plural) seeds.push(seed('plural', v.id));
-    seeds.push(seed('root_to_word', v.id));
+    // Pronouns and particles have no root: no root card for them.
+    if (v.wurzel) seeds.push(seed('root_to_word', v.id));
   }
 
   for (const n of content.nisba) {

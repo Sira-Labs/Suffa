@@ -56,7 +56,7 @@ export function UnitPath() {
       </div>
     );
   }
-  const { unit, title, stations, progress, skills, unlocked, status } = entry;
+  const { unit, title, stations, progress, skills, unlocked, status, draft } = entry;
   const prev = units.find((u) => u.unit.unit === number - 1);
   const next = units.find((u) => u.unit.unit === number + 1);
 
@@ -76,6 +76,12 @@ export function UnitPath() {
         </span>
         <UnitTitle title={title} unit={unit.unit} />
         {unlocked && <DeadlineChip unit={unit.unit} status={status} />}
+        {draft && (
+          <span className="muted" style={{ fontSize: '0.85rem' }}>
+            Inhalte im Entwurf – eigene Texte zum Buchthema, vom Lehrer noch nicht
+            geprüft.
+          </span>
+        )}
         <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
           <div
             className="review-progress"

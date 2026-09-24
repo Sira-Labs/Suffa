@@ -1,7 +1,8 @@
 {
   "einheit": 1,
   "titel": "التحية والتعارف – Begrüßung und Bekanntschaft",
-  "kulturnotiz": "Die Begrüßung „السلام عليكم“ ist in Saudi-Arabien allgegenwärtig; die Antwort „وعليكم السلام“ ist Pflicht der Höflichkeit. „الحمد لله“ (Lob sei Gott) folgt im Alltag fast jeder Auskunft über das Befinden.",
+  "status": "entwurf",
+  "kulturnotiz": "Die Begrüßung „السلام عليكم“ ist in der arabischen Welt allgegenwärtig; die Antwort „وعليكم السلام“ gehört zur Höflichkeit. „الحمد لله“ (Gott sei Dank) folgt fast jeder Auskunft über das Befinden.",
   "vokabeln": [
     {
       "id": "v-ism",
@@ -21,7 +22,7 @@
       "wurzel": "ح-و-ل",
       "plural": "أَحْوال",
       "einheit": 1,
-      "hinweis": "حالُكَ = حال + ـكَ"
+      "hinweis": "كَيْفَ حالُكَ؟ = Wie geht es dir?"
     },
     {
       "id": "v-salam",
@@ -38,8 +39,9 @@
       "tr": "chayr",
       "de": "das Gute; (mir geht es) gut",
       "wurzel": "خ-ي-ر",
-      "plural": "خِيار / خَيْرات",
-      "einheit": 1
+      "plural": "خَيْرات",
+      "einheit": 1,
+      "hinweis": "بِخَيْرٍ = gut (Antwort auf كيف حالك)"
     },
     {
       "id": "v-hamd",
@@ -48,6 +50,327 @@
       "de": "Lob, Preis",
       "wurzel": "ح-م-د",
       "plural": null,
+      "einheit": 1,
+      "hinweis": "الحَمْدُ لِلَّه = Gott sei Dank"
+    },
+    {
+      "id": "v-jinsiyya",
+      "ar": "جِنْسِيَّة",
+      "tr": "ǧinsiyya",
+      "de": "Nationalität",
+      "wurzel": "ج-ن-س",
+      "plural": "جِنْسِيّات",
+      "einheit": 1,
+      "hinweis": "جِنْس = Gattung; urverwandt mit griech. génos / dt. Genus"
+    },
+    {
+      "id": "v-balad",
+      "ar": "بَلَد",
+      "tr": "balad",
+      "de": "Land, Ort",
+      "wurzel": "ب-ل-د",
+      "plural": "بِلاد / بُلْدان",
+      "einheit": 1
+    },
+    {
+      "id": "v-dawla",
+      "ar": "دَوْلَة",
+      "tr": "dawla",
+      "de": "Staat",
+      "wurzel": "د-و-ل",
+      "plural": "دُوَل",
+      "einheit": 1
+    },
+    {
+      "id": "v-ana",
+      "ar": "أَنا",
+      "tr": "anā",
+      "de": "ich",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-anta",
+      "ar": "أَنْتَ",
+      "tr": "anta",
+      "de": "du (m.)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-anti",
+      "ar": "أَنْتِ",
+      "tr": "anti",
+      "de": "du (f.)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-huwa",
+      "ar": "هُوَ",
+      "tr": "huwa",
+      "de": "er",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-hiya",
+      "ar": "هِيَ",
+      "tr": "hiya",
+      "de": "sie (Sg.)",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-nahnu",
+      "ar": "نَحْنُ",
+      "tr": "naḥnu",
+      "de": "wir",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-man",
+      "ar": "مَنْ",
+      "tr": "man",
+      "de": "wer?",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-ma",
+      "ar": "ما",
+      "tr": "mā",
+      "de": "was?",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1,
+      "hinweis": "ما اسْمُكَ؟ = Wie heißt du?"
+    },
+    {
+      "id": "v-ayna",
+      "ar": "أَيْنَ",
+      "tr": "ayna",
+      "de": "wo?",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1,
+      "hinweis": "مِنْ أَيْنَ؟ = woher?"
+    },
+    {
+      "id": "v-kayfa",
+      "ar": "كَيْفَ",
+      "tr": "kayfa",
+      "de": "wie?",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-min",
+      "ar": "مِنْ",
+      "tr": "min",
+      "de": "von, aus",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-naam",
+      "ar": "نَعَمْ",
+      "tr": "naʿam",
+      "de": "ja",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-la",
+      "ar": "لا",
+      "tr": "lā",
+      "de": "nein; nicht",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-hal-frage",
+      "ar": "هَلْ",
+      "tr": "hal",
+      "de": "Fragewort für Ja/Nein-Fragen",
+      "wurzel": "",
+      "plural": null,
+      "einheit": 1,
+      "hinweis": "هَلْ أَنْتَ طالِبٌ؟ = Bist du Student?"
+    },
+    {
+      "id": "v-marhaban",
+      "ar": "مَرْحَباً",
+      "tr": "marḥaban",
+      "de": "Hallo",
+      "wurzel": "ر-ح-ب",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-ahlan",
+      "ar": "أَهْلاً",
+      "tr": "ahlan",
+      "de": "willkommen",
+      "wurzel": "أ-ه-ل",
+      "plural": null,
+      "einheit": 1,
+      "hinweis": "أَهْلاً وَسَهْلاً = Herzlich willkommen"
+    },
+    {
+      "id": "v-sabah",
+      "ar": "صَباح",
+      "tr": "ṣabāḥ",
+      "de": "Morgen",
+      "wurzel": "ص-ب-ح",
+      "plural": null,
+      "einheit": 1,
+      "hinweis": "صَباحُ الْخَيْر – Antwort: صَباحُ النّور"
+    },
+    {
+      "id": "v-nur",
+      "ar": "نُور",
+      "tr": "nūr",
+      "de": "Licht",
+      "wurzel": "ن-و-ر",
+      "plural": "أَنْوار",
+      "einheit": 1
+    },
+    {
+      "id": "v-masa",
+      "ar": "مَساء",
+      "tr": "masāʾ",
+      "de": "Abend",
+      "wurzel": "م-س-و",
+      "plural": null,
+      "einheit": 1,
+      "hinweis": "مَساءُ الْخَيْر = Guten Abend"
+    },
+    {
+      "id": "v-maa-salama",
+      "ar": "مَعَ السَّلامَة",
+      "tr": "maʿa s-salāma",
+      "de": "Auf Wiedersehen",
+      "wurzel": "س-ل-م",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-shukran",
+      "ar": "شُكْراً",
+      "tr": "šukran",
+      "de": "danke",
+      "wurzel": "ش-ك-ر",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-afwan",
+      "ar": "عَفْواً",
+      "tr": "ʿafwan",
+      "de": "bitte (Antwort auf Danke)",
+      "wurzel": "ع-ف-و",
+      "plural": null,
+      "einheit": 1
+    },
+    {
+      "id": "v-talib",
+      "ar": "طالِب",
+      "tr": "ṭālib",
+      "de": "Student, Schüler",
+      "wurzel": "ط-ل-ب",
+      "wazn": "فاعِل",
+      "plural": "طُلّاب",
+      "einheit": 1
+    },
+    {
+      "id": "v-taliba",
+      "ar": "طالِبَة",
+      "tr": "ṭāliba",
+      "de": "Studentin, Schülerin",
+      "wurzel": "ط-ل-ب",
+      "wazn": "فاعِلَة",
+      "plural": "طالِبات",
+      "einheit": 1
+    },
+    {
+      "id": "v-mudarris",
+      "ar": "مُدَرِّس",
+      "tr": "mudarris",
+      "de": "Lehrer",
+      "wurzel": "د-ر-س",
+      "wazn": "مُفَعِّل",
+      "plural": "مُدَرِّسون",
+      "einheit": 1
+    },
+    {
+      "id": "v-ustadh",
+      "ar": "أُسْتاذ",
+      "tr": "ustāḏ",
+      "de": "Lehrer, Professor (auch als Anrede)",
+      "wurzel": "",
+      "plural": "أَساتِذَة",
+      "einheit": 1,
+      "hinweis": "Lehnwort, keine arabische Wurzel"
+    },
+    {
+      "id": "v-sadiq",
+      "ar": "صَديق",
+      "tr": "ṣadīq",
+      "de": "Freund",
+      "wurzel": "ص-د-ق",
+      "wazn": "فَعيل",
+      "plural": "أَصْدِقاء",
+      "einheit": 1
+    },
+    {
+      "id": "v-jadid",
+      "ar": "جَديد",
+      "tr": "ǧadīd",
+      "de": "neu",
+      "wurzel": "ج-د-د",
+      "wazn": "فَعيل",
+      "plural": "جُدُد",
+      "einheit": 1
+    },
+    {
+      "id": "v-arabi",
+      "ar": "عَرَبِيّ",
+      "tr": "ʿarabiyy",
+      "de": "arabisch; Araber",
+      "wurzel": "ع-ر-ب",
+      "plural": "عَرَب",
+      "einheit": 1
+    },
+    {
+      "id": "v-almani",
+      "ar": "أَلْمانِيّ",
+      "tr": "almāniyy",
+      "de": "deutsch; Deutscher",
+      "wurzel": "",
+      "plural": "أَلْمان",
+      "einheit": 1,
+      "hinweis": "Nisba von أَلْمانيا (Deutschland)"
+    },
+    {
+      "id": "v-lugha",
+      "ar": "لُغَة",
+      "tr": "luġa",
+      "de": "Sprache",
+      "wurzel": "ل-غ-و",
+      "plural": "لُغات",
       "einheit": 1
     }
   ],
@@ -56,27 +379,124 @@
       "id": "d-1-1",
       "einheit": 1,
       "dialog": 1,
-      "titel": "التحية والتعارف",
+      "titel": "طالِبٌ جَديدٌ",
       "zeilen": [
-        { "sp": "خالِد", "ar": "السَّلامُ عَلَيْكُم.", "de": "Friede sei mit euch." },
         {
-          "sp": "خَليل",
-          "ar": "وَعَلَيْكُمُ السَّلام.",
+          "sp": "يوسُف",
+          "ar": "السَّلامُ عَلَيْكُمْ.",
+          "de": "Friede sei mit euch."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "وَعَلَيْكُمُ السَّلامُ.",
           "de": "Und mit euch sei der Friede."
         },
         {
-          "sp": "خالِد",
-          "ar": "اسْمي خالِد، ما اسْمُكَ؟",
-          "de": "Mein Name ist Chālid. Wie ist dein Name?"
+          "sp": "يوسُف",
+          "ar": "أَنا يوسُفُ. مَنْ أَنْتَ؟",
+          "de": "Ich bin Yūsuf. Wer bist du?"
         },
-        { "sp": "خَليل", "ar": "اسْمي خَليل.", "de": "Mein Name ist Chalīl." },
-        { "sp": "خالِد", "ar": "كَيْفَ حالُكَ؟", "de": "Wie geht es dir?" },
         {
-          "sp": "خَليل",
-          "ar": "بِخَيْرٍ، وَالحَمْدُ لله. وَكَيْفَ حالُكَ أنتَ؟",
-          "de": "Gut, Gott sei Dank. Und wie geht es dir?"
+          "sp": "عُمَر",
+          "ar": "أَنا عُمَرُ. أَنا طالِبٌ جَديدٌ.",
+          "de": "Ich bin ʿUmar. Ich bin ein neuer Student."
         },
-        { "sp": "خالِد", "ar": "بِخَيْرٍ، وَالحَمْدُ لله.", "de": "Gut, Gott sei Dank." }
+        {
+          "sp": "يوسُف",
+          "ar": "أَهْلاً وَسَهْلاً يا عُمَرُ. كَيْفَ حالُكَ؟",
+          "de": "Herzlich willkommen, ʿUmar. Wie geht es dir?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "بِخَيْرٍ، وَالْحَمْدُ لِلَّهِ. وَأَنْتَ؟",
+          "de": "Gut, Gott sei Dank. Und dir?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أَنا بِخَيْرٍ، شُكْراً.",
+          "de": "Mir geht es gut, danke."
+        }
+      ]
+    },
+    {
+      "id": "d-1-2",
+      "einheit": 1,
+      "dialog": 2,
+      "titel": "مِنْ أَيْنَ أَنْتِ؟",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "مَرْحَباً! ما اسْمُكِ؟",
+          "de": "Hallo! Wie heißt du?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "اسْمي مَرْيَمُ. وَأَنْتِ؟",
+          "de": "Ich heiße Maryam. Und du?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "اسْمي سارَةُ. مِنْ أَيْنَ أَنْتِ يا مَرْيَمُ؟",
+          "de": "Ich heiße Sāra. Woher kommst du, Maryam?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "أَنا مِنْ مِصْرَ. هَلْ أَنْتِ عَرَبِيَّةٌ؟",
+          "de": "Ich komme aus Ägypten. Bist du Araberin?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "لا، أَنا أَلْمانِيَّةٌ. أَنا طالِبَةٌ.",
+          "de": "Nein, ich bin Deutsche. Ich bin Studentin."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "أَهْلاً وَسَهْلاً!",
+          "de": "Herzlich willkommen!"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "شُكْراً. مَعَ السَّلامَةِ.",
+          "de": "Danke. Auf Wiedersehen."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "مَعَ السَّلامَةِ.",
+          "de": "Auf Wiedersehen."
+        }
+      ]
+    },
+    {
+      "id": "d-1-3",
+      "einheit": 1,
+      "dialog": 3,
+      "titel": "صَباحُ الْخَيْرِ",
+      "zeilen": [
+        {
+          "sp": "أَحْمَد",
+          "ar": "صَباحُ الْخَيْرِ يا أُسْتاذُ.",
+          "de": "Guten Morgen, Herr Lehrer."
+        },
+        {
+          "sp": "الْمُدَرِّس",
+          "ar": "صَباحُ النّورِ يا أَحْمَدُ. كَيْفَ حالُكَ؟",
+          "de": "Guten Morgen, Aḥmad. Wie geht es dir?"
+        },
+        {
+          "sp": "أَحْمَد",
+          "ar": "بِخَيْرٍ، شُكْراً. هَلْ أَنْتَ مُدَرِّسٌ جَديدٌ؟",
+          "de": "Gut, danke. Sind Sie ein neuer Lehrer?"
+        },
+        {
+          "sp": "الْمُدَرِّس",
+          "ar": "نَعَمْ، أَنا مُدَرِّسُ اللُّغَةِ الْعَرَبِيَّةِ.",
+          "de": "Ja, ich bin der Lehrer für die arabische Sprache."
+        },
+        {
+          "sp": "أَحْمَد",
+          "ar": "مَرْحَباً بِكَ!",
+          "de": "Willkommen!"
+        }
       ]
     }
   ]

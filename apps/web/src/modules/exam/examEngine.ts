@@ -75,7 +75,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         expected: v.de,
         expectedIsArabic: false,
         options: distractors(v.de, allDe),
-        hint: `Wurzel ${v.wurzel}`,
+        hint: v.wurzel ? `Wurzel ${v.wurzel}` : undefined,
       };
     },
     vocab_de_ar: () => {
@@ -107,9 +107,10 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
       };
     },
     root: () => {
-      const v = vocab[Math.floor(Math.random() * vocab.length)];
+      const rooted = vocab.filter((x) => x.wurzel);
+      const v = rooted[Math.floor(Math.random() * rooted.length)];
       if (!v) return null;
-      const roots = [...new Set(content.vokabeln.map((x) => x.wurzel))];
+      const roots = [...new Set(content.vokabeln.map((x) => x.wurzel).filter(Boolean))];
       return {
         id: qid(),
         format: 'root',

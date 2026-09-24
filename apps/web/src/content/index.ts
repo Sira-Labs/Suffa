@@ -20,6 +20,8 @@ import metaRaw from './meta.json';
 interface UnitFile {
   einheit: number;
   titel: string;
+  /** "entwurf": own draft content, not yet reviewed by the teacher. */
+  status?: 'entwurf' | 'geprueft';
   kulturnotiz?: string;
   vokabeln: Vokabel[];
   dialoge: Dialog[];
@@ -36,6 +38,7 @@ interface MetaFile {
 export interface UnitInfo {
   einheit: number;
   titel: string;
+  status?: 'entwurf' | 'geprueft';
   kulturnotiz?: string;
 }
 
@@ -67,6 +70,7 @@ export const content: ContentBundle = {
 export const unitInfos: UnitInfo[] = units.map((u) => ({
   einheit: u.einheit,
   titel: u.titel,
+  status: u.status,
   kulturnotiz: u.kulturnotiz,
 }));
 
@@ -90,7 +94,8 @@ export const wurzelFamilien: Map<string, WurzelFamilie> = (() => {
     }
     return entry;
   };
-  for (const v of vokabeln) ensure(v.wurzel).vokabeln.push(v);
+  // Pronouns and particles carry an empty root and form no family.
+  for (const v of vokabeln) if (v.wurzel) ensure(v.wurzel).vokabeln.push(v);
   for (const verb of content.verben) ensure(verb.wurzel).verben.push(verb);
   return map;
 })();

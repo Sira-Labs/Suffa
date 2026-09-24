@@ -6,6 +6,9 @@ import { content } from '@/content';
 import { ReviewSession } from '@/modules/vocab/ReviewSession';
 import { reviewLogRepo } from '@/services/storage';
 import { NEW_PER_DAY, reviewsToday } from '@/services/today';
+
+/** New words per unit session: a unit has ~30 words, a sitting should stay short. */
+export const UNIT_SESSION_WORDS = 10;
 import { useContentStore } from '@/state';
 
 /** Due reviews come from every kind, mixed … */
@@ -60,7 +63,11 @@ export function FocusReview() {
         <ReviewSession
           kinds={ALL_KINDS}
           newKinds={NEW_KINDS}
-          newLimit={unitWords ? unitWords.length * NEW_KINDS.length : newLimit}
+          newLimit={
+            unitWords
+              ? Math.min(unitWords.length, UNIT_SESSION_WORDS) * NEW_KINDS.length
+              : newLimit
+          }
           contentRefs={unitWords ?? undefined}
           title={unit ? `Einheit ${unit} · Vokabeln` : 'Wiederholen'}
           variant="focus"

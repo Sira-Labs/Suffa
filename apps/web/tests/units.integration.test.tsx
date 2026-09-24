@@ -3,6 +3,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { UnitPath, UnitStation, Units } from '@/modules/units';
 import { FocusReview } from '@/modules/review';
+import { UNIT_SESSION_WORDS } from '@/modules/review/FocusReview';
 import { db } from '@/services/storage';
 import {
   useContentStore,
@@ -100,8 +101,12 @@ describe('Units (integration)', () => {
       await screen.findByRole('heading', { name: 'Einheit 2 · Vokabeln' })
     ).toBeInTheDocument();
     const progress = screen.getByRole('progressbar', { name: 'Fortschritt der Sitzung' });
-    // Unit 2 has 3 words → AR→DE and DE→AR cards.
-    expect(progress).toHaveAttribute('aria-valuemax', '6');
+    // New words of unit 2 only, at most UNIT_SESSION_WORDS per sitting, AR→DE and DE→AR.
+    const unitWords = content.vokabeln.filter((v) => v.einheit === 2).length;
+    expect(progress).toHaveAttribute(
+      'aria-valuemax',
+      String(Math.min(unitWords, UNIT_SESSION_WORDS) * 2)
+    );
     expect(screen.getByRole('link', { name: 'Sitzung beenden' })).toHaveAttribute(
       'href',
       '/units/2'

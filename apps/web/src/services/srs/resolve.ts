@@ -61,7 +61,9 @@ export function resolveCard(
         answer: v.de,
         answerIsArabic: false,
         transliteration: v.tr,
-        hint: `Wurzel ${v.wurzel}${v.wazn ? ` · Wazn ${v.wazn}` : ''}`,
+        hint: v.wurzel
+          ? `Wurzel ${v.wurzel}${v.wazn ? ` · Wazn ${v.wazn}` : ''}`
+          : undefined,
         speakable: v.ar,
       };
     }
@@ -76,7 +78,7 @@ export function resolveCard(
         answer: v.ar,
         answerIsArabic: true,
         transliteration: v.tr,
-        hint: `Wurzel ${v.wurzel}`,
+        hint: v.wurzel ? `Wurzel ${v.wurzel}` : undefined,
         speakable: v.ar,
       };
     }
@@ -90,13 +92,13 @@ export function resolveCard(
         promptIsArabic: false,
         answer: v.plural,
         answerIsArabic: true,
-        hint: `Singular ${v.ar} · Wurzel ${v.wurzel}`,
+        hint: `Singular ${v.ar}${v.wurzel ? ` · Wurzel ${v.wurzel}` : ''}`,
         speakable: v.plural,
       };
     }
     case 'root_to_word': {
       const v = vocab.get(contentRef);
-      if (!v) return null;
+      if (!v || !v.wurzel) return null;
       return {
         contentRef,
         kind,

@@ -29,6 +29,7 @@ export interface Vokabel {
   ar: string;
   tr: string;
   de: string;
+  /** Root, e.g. "ك-ت-ب"; empty for pronouns and particles (no root cards for them). */
   wurzel: string;
   wazn?: string;
   /** For uncountable/abstract terms the plural can be null. */

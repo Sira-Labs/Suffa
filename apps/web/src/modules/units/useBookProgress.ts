@@ -47,6 +47,8 @@ export interface UnitOverview {
   /** Opens with the previous unit's test (unit 1 is always open). */
   unlocked: boolean;
   status: EnrollmentStatus;
+  /** Own draft content, not yet reviewed by the teacher. */
+  draft: boolean;
 }
 
 /**
@@ -83,6 +85,9 @@ export function useBookProgress(): {
     const cardById = new Map(cards.map((c) => [c.id, c]));
     // Unit titles exist only where content files do (e.g. "التحية والتعارف – Begrüßung …").
     const titles = new Map(unitInfos.map((u) => [u.einheit, u.titel]));
+    const drafts = new Set(
+      unitInfos.filter((u) => u.status === 'entwurf').map((u) => u.einheit)
+    );
     return index.units
       .filter((u) => u.kind === 'unit')
       .map((unit) => {
@@ -136,6 +141,7 @@ export function useBookProgress(): {
           skills,
           unlocked: isUnlocked(unit.unit, exams),
           status: enrollmentStatus(enrollments[unit.unit], exams, unit.unit),
+          draft: drafts.has(unit.unit),
         };
       });
   }, [index, cards, userVocab, listening, exams, enrollments, videoData, practiced]);

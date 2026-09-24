@@ -18,6 +18,7 @@ const sections: UnitSection[] = [1, 2, 3].map((no) => ({
   title: `حوار ${no}`,
   wordIds: [`w${no}a`, `w${no}b`],
   lineIds: [`d-1-${no}#0`, `d-1-${no}#1`],
+  writeIds: [`w${no}a`, `diktat:w${no}a`],
 }));
 
 function input(overrides: Partial<UnitPathInput> = {}): UnitPathInput {
@@ -64,7 +65,7 @@ describe('unitPath', () => {
       'Dialog hören',
       'Dialog lesen',
       'Wörter lernen',
-      'Wörter schreiben',
+      'Schreiben',
       'Nachsprechen',
     ]);
     expect(path[0]!.stations[0]).toMatchObject({

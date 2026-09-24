@@ -6,6 +6,7 @@ import { FocusReview } from '@/modules/review';
 import { UNIT_SESSION_WORDS } from '@/modules/review/FocusReview';
 import { db } from '@/services/storage';
 import {
+  useCelebrationStore,
   useContentStore,
   useListenStore,
   usePracticeStore,
@@ -116,7 +117,7 @@ describe('Units (integration)', () => {
     const progress = await screen.findByRole('progressbar', {
       name: 'Fortschritt Schreiben',
     });
-    expect(progress).toHaveAttribute('aria-valuemax', String(first!.wordIds.length));
+    expect(progress).toHaveAttribute('aria-valuemax', String(first!.writeIds.length));
     expect(screen.getByText('Einheit 1 · Dialog 1')).toBeInTheDocument();
   });
 
@@ -161,28 +162,44 @@ describe('Units (integration)', () => {
     );
   });
 
-  it('practises writing inside the unit and counts it on the path', async () => {
+  it('guides writing step by step, never repeats a solved word and keeps the place', async () => {
     const user = userEvent.setup();
-    const words = content.vokabeln.filter((v) => v.einheit === 1);
-    renderAt('/units/1/write');
+    const [first] = dialogueSections(content, 1);
+    const words = first!.wordIds.map((id) => content.vokabeln.find((v) => v.id === id)!);
+    const bare = (ar: string) => ar.replace(/[\u064B-\u0652\u0670]/g, '');
+    renderAt('/units/1/write?section=1');
     expect(await screen.findByRole('heading', { name: 'Schreiben' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Einheit 1' })).toHaveAttribute(
-      'href',
-      '/units/1'
-    );
-    // Copying is the first exercise; harakāt are optional, so the bare skeleton counts.
-    expect(screen.getByRole('button', { name: 'Abschreiben' })).toHaveAttribute(
-      'class',
-      expect.stringContaining('btn-accent')
-    );
-    const bare = words[0]!.ar.replace(/[\u064B-\u0652\u0670]/g, '');
-    await user.type(screen.getByRole('textbox'), bare);
+    const steps = screen.getByRole('list', { name: 'Schreibübungen' });
+    // Copying is the first step; harakāt are optional, so the bare skeleton counts.
+    const copy = within(steps).getByRole('button', { name: /^Abschreiben/ });
+    expect(copy).toHaveAttribute('aria-pressed', 'true');
+    expect(copy).toHaveTextContent(`0/${words.length}`);
+
+    await user.type(screen.getByRole('textbox'), bare(words[0]!.ar));
     await user.click(screen.getByRole('button', { name: 'Prüfen' }));
-    const progress = await screen.findByRole('progressbar', {
-      name: 'Fortschritt Schreiben',
-    });
+    const progress = screen.getByRole('progressbar', { name: 'Fortschritt Schreiben' });
     await waitFor(() => expect(progress).toHaveAttribute('aria-valuenow', '1'));
-    expect(progress).toHaveAttribute('aria-valuemax', String(words.length));
+    expect(progress).toHaveAttribute('aria-valuemax', String(first!.writeIds.length));
+    expect(copy).toHaveTextContent(`1/${words.length}`);
+    // Every first correct answer shows its XP right away.
+    expect(useCelebrationStore.getState().current).toMatchObject({
+      title: 'Richtig',
+      xp: 2,
+    });
+
+    // After a correct answer: on to the next open word.
+    await user.click(screen.getByRole('button', { name: 'Weiter' }));
+    expect(screen.getByText(words[1]!.ar)).toBeInTheDocument();
+    expect(
+      screen.getByText(new RegExp(`noch ${words.length - 1} offen`))
+    ).toBeInTheDocument();
+
+    // Dictation is its own step; coming back continues with the first open word.
+    await user.click(within(steps).getByRole('button', { name: /^Diktat/ }));
+    expect(screen.getByRole('button', { name: /Vorlesen/ })).toBeInTheDocument();
+    await user.click(within(steps).getByRole('button', { name: /^Abschreiben/ }));
+    expect(screen.queryByText(words[0]!.ar)).toBeNull();
+    expect(screen.getByText(words[1]!.ar)).toBeInTheDocument();
   });
 
   it('shows skill rings and the practice stations of the unit', async () => {

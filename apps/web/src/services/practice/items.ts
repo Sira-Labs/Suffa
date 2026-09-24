@@ -4,6 +4,7 @@
  */
 import type {
   ContentBundle,
+  Dialog,
   PracticeRecord,
   PracticeSkill,
   UnitPracticeScope,
@@ -21,6 +22,56 @@ export function lineId(dialogId: string, index: number): string {
   return `${dialogId}#${index}`;
 }
 
+/** The writing station's exercises, in learning order (copying first). */
+export const WRITE_EXERCISES = [
+  'abschreiben',
+  'diktat',
+  'umschrift',
+  'satzbau',
+  'uebersetzung',
+] as const;
+export type WriteExercise = (typeof WRITE_EXERCISES)[number];
+
+/** Sentence building needs at least three words to be an exercise. */
+export function isBuildableLine(ar: string): boolean {
+  return ar.trim().split(/\s+/).length >= 3;
+}
+
+/** Translating DE→AR is graded against one model answer, so only short lines. */
+export function isTranslatableLine(ar: string): boolean {
+  return ar.trim().split(/\s+/).length <= 6;
+}
+
+/**
+ * Stored item id of a writing task. Copying keeps the bare word id, so progress saved before
+ * the exercises were split into steps still counts.
+ */
+export function writeItemId(exercise: WriteExercise, id: string): string {
+  return exercise === 'abschreiben' ? id : `${exercise}:${id}`;
+}
+
+/** Word ids (copy, dictation, transliteration) and line ids (building, translation). */
+export function writeTasks(
+  dialogues: readonly Pick<Dialog, 'id' | 'zeilen'>[],
+  wordIds: readonly string[]
+): Record<WriteExercise, string[]> {
+  const lines = dialogues.flatMap((d) =>
+    d.zeilen.map((z, i) => ({ id: lineId(d.id, i), ar: z.ar }))
+  );
+  return {
+    abschreiben: [...wordIds],
+    diktat: [...wordIds],
+    umschrift: [...wordIds],
+    satzbau: lines.filter((l) => isBuildableLine(l.ar)).map((l) => l.id),
+    uebersetzung: lines.filter((l) => isTranslatableLine(l.ar)).map((l) => l.id),
+  };
+}
+
+/** All stored writing item ids of a set of tasks. */
+export function writeItemIds(tasks: Record<WriteExercise, string[]>): string[] {
+  return WRITE_EXERCISES.flatMap((ex) => tasks[ex].map((id) => writeItemId(ex, id)));
+}
+
 export function unitPracticeItems(
   bundle: Pick<ContentBundle, 'dialoge' | 'vokabeln' | 'verben'>,
   unit: number
@@ -28,7 +79,12 @@ export function unitPracticeItems(
   const dialogues = bundle.dialoge.filter((d) => d.einheit === unit);
   return {
     read: dialogues.map((d) => d.id),
-    write: bundle.vokabeln.filter((v) => v.einheit === unit).map((v) => v.id),
+    write: writeItemIds(
+      writeTasks(
+        dialogues,
+        bundle.vokabeln.filter((v) => v.einheit === unit).map((v) => v.id)
+      )
+    ),
     speak: dialogues.flatMap((d) => d.zeilen.map((_, i) => lineId(d.id, i))),
     verbs: bundle.verben.filter((v) => v.einheit === unit).map((v) => v.id),
   };

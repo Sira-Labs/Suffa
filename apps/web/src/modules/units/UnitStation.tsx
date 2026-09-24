@@ -6,6 +6,7 @@ import { content } from '@/content';
 import {
   dialogueSections,
   practiceCount,
+  practiceId,
   unitPracticeItems,
   type UnitSection,
 } from '@/services/practice';
@@ -52,8 +53,13 @@ export function UnitStation() {
     return {
       unit,
       ...(section && { dialogIds: [section.dialogId], wordIds: section.wordIds }),
+      isPractised: (itemId) =>
+        Boolean(usePracticeStore.getState().records[practiceId(unit, skill, itemId)]),
       onPractised(itemId) {
         void practise(unit, skill, itemId, items[skill]).then((outcome) => {
+          if (outcome.first && !outcome.stationComplete) {
+            celebrate({ title: 'Richtig', xp: outcome.xp, big: false });
+          }
           if (outcome.stationComplete) {
             const where = section ? `Dialog ${section.no}` : `Einheit ${unit}`;
             celebrate({
@@ -172,7 +178,7 @@ function sectionItems(
   if (!section) return all;
   return {
     read: [section.dialogId],
-    write: section.wordIds,
+    write: section.writeIds,
     speak: section.lineIds,
     verbs: all.verbs,
   };

@@ -1527,3 +1527,16 @@ textarea.input {
 .word-example figcaption {
   font-size: 0.8rem;
 }
+
+/* Writing steps inside a unit: each exercise with its own count. */
+.write-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.write-step-count {
+  margin-inline-start: 0.4rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}

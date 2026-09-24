@@ -8,7 +8,7 @@
  */
 import type { ContentBundle } from '@/types';
 import { normalizeArabic } from '@/services/srs/tashkil';
-import { lineId } from './items';
+import { lineId, writeItemIds, writeTasks } from './items';
 
 export interface UnitSection {
   /** 1-based, equals the dialogue number within the unit. */
@@ -19,6 +19,8 @@ export interface UnitSection {
   wordIds: string[];
   /** Speaking items: the dialogue's lines. */
   lineIds: string[];
+  /** Writing items: the section's words and lines across all writing exercises. */
+  writeIds: string[];
 }
 
 const PREFIXES = ['وال', 'فال', 'بال', 'كال', 'لل', 'ال', 'و', 'ف', 'ب', 'ل', 'ك'];
@@ -87,6 +89,7 @@ export function dialogueSections(
     title: d.titel,
     wordIds: [],
     lineIds: d.zeilen.map((_, line) => lineId(d.id, line)),
+    writeIds: [],
   }));
   const texts = dialogues.map((d) => d.zeilen.map((z) => z.ar).join(' '));
   const unplaced: string[] = [];
@@ -101,6 +104,9 @@ export function dialogueSections(
       b.wordIds.length < a.wordIds.length ? b : a
     );
     smallest.wordIds.push(id);
+  }
+  for (const [i, section] of sections.entries()) {
+    section.writeIds = writeItemIds(writeTasks([dialogues[i]!], section.wordIds));
   }
   return sections;
 }

@@ -173,15 +173,17 @@ function sectionStations(
       done: count(words, input.wordStarted),
       total: words.length,
     });
-    const written = count(words, (id) => input.practised('write', id));
+  }
+  if (section.writeIds.length > 0) {
+    const written = count(section.writeIds, (id) => input.practised('write', id));
     drafts.push({
       id: `u${u}-s${section.no}-write`,
       kind: 'write',
-      label: 'Wörter schreiben',
-      detail: `${written} von ${words.length} Wörtern geschrieben`,
+      label: 'Schreiben',
+      detail: `${written} von ${section.writeIds.length} Aufgaben · Abschreiben bis Übersetzen`,
       to: `/units/${u}/write?${q}`,
       done: written,
-      total: words.length,
+      total: section.writeIds.length,
     });
   }
   if (section.lineIds.length > 0) {

@@ -25,6 +25,8 @@ export interface UnitPracticeScope {
   dialogIds?: readonly string[];
   /** Inside a section: only these words (writing). */
   wordIds?: readonly string[];
+  /** Has this item been done before? Lets a module continue where the learner left off. */
+  isPractised?(itemId: string): boolean;
   /** Called with the item id after a successful answer or finished item. */
   onPractised(itemId: string): void;
 }

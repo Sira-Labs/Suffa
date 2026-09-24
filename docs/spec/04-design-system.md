@@ -92,6 +92,12 @@ be reopened; later sections show only "folgt danach". A closing section ("Abschl
 publisher's remaining lessons, own words, verbs and the unit test. Station pages and the focus
 review take `?section=k` and offer only that section's items.
 
+**Writing inside a unit** is a guided sequence of five steps (Abschreiben, Diktat, Umschrift →
+Schrift, Satzbau, Übersetzen), each with its own count. A step works through the open tasks in
+order, never repeats a solved one, moves on after a correct answer and continues where the
+learner left off when switching steps. Every first correct answer shows "+2 XP" at once; all
+five steps count toward the unit (copying keeps the bare word id, so earlier progress stays).
+
 ## Feedback moments
 
 - **Celebration toast** (`CelebrationToast`): "+5 XP · Dialog gehört" with a medal and a small

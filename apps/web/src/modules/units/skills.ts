@@ -22,8 +22,8 @@ export const STATION_META: Record<
   write: {
     label: 'Schreiben',
     icon: 'write',
-    hint: 'Jedes Wort der Einheit einmal richtig schreiben',
-    sectionHint: 'Jedes Wort dieses Dialogs einmal richtig schreiben',
+    hint: 'Fünf Übungen nacheinander: Abschreiben, Diktat, Umschrift, Satzbau, Übersetzen',
+    sectionHint: 'Fünf Übungen zu diesem Dialog – jede richtige Antwort zählt',
   },
   speak: {
     label: 'Sprechen',

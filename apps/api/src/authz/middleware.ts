@@ -4,7 +4,7 @@
  * runs, and the handler reads the actor from the context.
  */
 import type { MiddlewareHandler } from 'hono';
-import { can, type Action, type Actor } from './policies.js';
+import { can, needsSecondFactor, type Action, type Actor } from './policies.js';
 
 export type ActorEnv<A extends Actor = Actor> = { Variables: { actor: A } };
 
@@ -31,6 +31,9 @@ export function authorize<A extends Actor = Actor>(
         'authz.denied'
       );
       return c.json({ error: 'forbidden' }, 403);
+    }
+    if (needsSecondFactor(actor, action)) {
+      return c.json({ error: 'second_factor_required' }, 403);
     }
     c.set('actor', actor);
     await next();

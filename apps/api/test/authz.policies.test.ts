@@ -13,6 +13,7 @@ const EXPECTED: Record<Action, readonly Role[]> = {
   'class:progress:read': ['admin'], // without a class scope only admins
   'admin:users:read': ['admin'],
   'admin:users:write': ['admin'],
+  'admin:audit:read': ['admin'],
 };
 
 describe('authz policies', () => {

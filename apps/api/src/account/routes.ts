@@ -5,6 +5,9 @@
  *   DELETE /sessions/:id            → 204 (404 when it is not one of yours)
  *   POST   /sessions/revoke-others  → { revoked }
  *   PATCH  /settings   { timeZone } → 204
+ *   GET    /2fa                     → { enabled, confirmed }
+ *   POST   /2fa/setup               → { uri, secret }  (409 when already enabled)
+ *   POST   /2fa/confirm  { code }   → 204; enables a pending setup, confirms this session
  *
  * Sessions live in the database and are checked on every request (no cookie cache), so an
  * ended session fails on its very next request.
@@ -19,9 +22,18 @@ import {
   type AuthorizeLog,
 } from '../authz/middleware.js';
 import type { AccountRepository } from './repository.js';
+import type { SecondFactorService } from './secondFactor.js';
 
 export interface AccountRouteDeps {
   repo: AccountRepository;
+  /** TOTP second factor (admins need it for admin actions). */
+  secondFactor?: SecondFactorService;
+  /** Records privileged account changes (second factor enabled). */
+  audit?: (entry: {
+    actorId: string;
+    action: string;
+    ip: string | null;
+  }) => Promise<void>;
   /** Resolves the signed-in user together with the session of the request. */
   sessions: ActorSource<SessionActor>;
   log: AuthorizeLog & { info(obj: object, msg: string): void };
@@ -107,6 +119,62 @@ export function createAccountRoutes(
     }
     return c.body(null, 204);
   });
+
+  const secondFactor = deps.secondFactor;
+  if (secondFactor) {
+    app.get('/2fa', read, async (c) => {
+      const actor = c.get('actor');
+      c.header('Cache-Control', 'no-store');
+      return c.json({
+        ...(await secondFactor.status(actor.id)),
+        confirmed: actor.secondFactor === true,
+      });
+    });
+
+    app.post('/2fa/setup', write, async (c) => {
+      const actor = c.get('actor');
+      const setup = await secondFactor.setup(actor.id, actor.email);
+      if (!setup) return c.json({ error: 'already_enabled' }, 409);
+      c.header('Cache-Control', 'no-store');
+      return c.json(setup);
+    });
+
+    app.post('/2fa/confirm', write, async (c) => {
+      const actor = c.get('actor');
+      let body: unknown;
+      try {
+        body = await c.req.json();
+      } catch {
+        return c.json({ error: 'invalid_json' }, 400);
+      }
+      const parsed = z
+        .object({ code: z.string().max(20) })
+        .strict()
+        .safeParse(body);
+      if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+      const result = await secondFactor.confirm(
+        actor.id,
+        actor.sessionId,
+        parsed.data.code
+      );
+      if (!result.ok) {
+        deps.log.warn(
+          { userId: actor.id, reason: result.reason },
+          'account.2fa_rejected'
+        );
+        const status = result.reason === 'locked' ? 429 : 400;
+        return c.json({ error: result.reason }, status);
+      }
+      if (result.newlyEnabled) {
+        await deps.audit?.({
+          actorId: actor.id,
+          action: 'account.2fa_enabled',
+          ip: c.req.header('x-real-ip') ?? null,
+        });
+      }
+      return c.body(null, 204);
+    });
+  }
 
   return app;
 }

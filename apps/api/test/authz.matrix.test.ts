@@ -7,20 +7,32 @@ import { describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 import type { AccountRepository } from '../src/account/repository.js';
 import type { AdminRepository } from '../src/admin/repository.js';
+import { SecondFactorService } from '../src/account/secondFactor.js';
+import { SecretBox } from '../src/security/secretBox.js';
 import type { Me } from '../src/auth/betterAuth.js';
 import type { AuthResolver } from '../src/auth/resolver.js';
-import { can, ROLES, type Role } from '../src/authz/policies.js';
+import { can, ROLES, SECOND_FACTOR_ACTIONS, type Role } from '../src/authz/policies.js';
 import { PROTECTED_ROUTES, PUBLIC_ROUTES } from '../src/authz/routes.js';
 import type { SyncRepository } from '../src/sync/repository.js';
 
 const USER_ID = '33333333-3333-4333-8333-333333333333';
 const quiet = { info: () => {}, warn: () => {}, error: () => {} };
 
-/** The test picks the caller's role with a header; no header means anonymous. */
-function actorFrom(headers: Headers): Me | null {
+/**
+ * The test picks the caller's role with a header; no header means anonymous. Sessions have
+ * confirmed their second factor unless `x-test-2fa: no`.
+ */
+function actorFrom(headers: Headers): (Me & { secondFactor: boolean }) | null {
   const role = headers.get('x-test-role') as Role | null;
   return role
-    ? { id: USER_ID, email: 'x@example.org', name: null, role, timeZone: null }
+    ? {
+        id: USER_ID,
+        email: 'x@example.org',
+        name: null,
+        role,
+        timeZone: null,
+        secondFactor: headers.get('x-test-2fa') !== 'no',
+      }
     : null;
 }
 const resolver: AuthResolver = { actor: async (h) => actorFrom(h) };
@@ -29,7 +41,20 @@ const syncRepo: SyncRepository = {
   upsert: async (_u, _t, records) => records.length,
   pull: async () => ({ records: [], next: null, watermark: null }),
 };
-const adminRepo: AdminRepository = { listUsers: async () => ({ users: [], next: null }) };
+const adminRepo: AdminRepository = {
+  listUsers: async () => ({ users: [], next: null }),
+  updateUser: async () => null,
+  listAudit: async () => ({ entries: [], next: null }),
+};
+const secondFactor = new SecondFactorService(
+  {
+    get: async () => null,
+    savePending: async () => true,
+    confirm: async () => ({ accepted: true, newlyEnabled: false }),
+    recordFailure: async () => {},
+  },
+  new SecretBox('s'.repeat(40), 'totp')
+);
 const accountRepo: AccountRepository = {
   listSessions: async () => [],
   revokeSession: async () => true,
@@ -39,7 +64,15 @@ const accountRepo: AccountRepository = {
 const sessionActors = {
   actor: async (h: Headers) => {
     const me = actorFrom(h);
-    return me ? { id: me.id, role: me.role, sessionId: 'session-1' } : null;
+    return me
+      ? {
+          id: me.id,
+          role: me.role,
+          sessionId: 'session-1',
+          email: me.email,
+          secondFactor: me.secondFactor,
+        }
+      : null;
   },
 };
 
@@ -53,7 +86,7 @@ function buildApp() {
     },
     sync: { repo: syncRepo, auth: resolver, log: quiet },
     admin: { repo: adminRepo, auth: resolver, log: quiet },
-    account: { repo: accountRepo, sessions: sessionActors, log: quiet },
+    account: { repo: accountRepo, sessions: sessionActors, secondFactor, log: quiet },
     auth: {
       handler: async () => Response.json({ ok: true }),
       me: async (h) => actorFrom(h),
@@ -106,6 +139,18 @@ describe('route × role matrix', () => {
       });
     }
   }
+
+  it('admin actions also need a confirmed second factor in this session', async () => {
+    for (const route of PROTECTED_ROUTES.filter((r) =>
+      SECOND_FACTOR_ACTIONS.has(r.action)
+    )) {
+      const request = requestFor(route, 'admin');
+      request.headers.set('x-test-2fa', 'no');
+      const response = await app.request(request);
+      expect(response.status, route.path).toBe(403);
+      expect(await response.json()).toEqual({ error: 'second_factor_required' });
+    }
+  });
 
   it('/me returns the profile of the signed-in user', async () => {
     const response = await app.request(

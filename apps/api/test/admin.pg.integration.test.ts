@@ -81,6 +81,7 @@ describe.skipIf(!url)('PgAdminRepository', () => {
       name: 'Chef',
       role: 'admin',
       emailVerified: false,
+      disabled: false,
       createdAt: '2026-09-01T10:03:00.000Z',
     });
   });

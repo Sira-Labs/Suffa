@@ -12,6 +12,13 @@ import { loadMigrations, migrate } from '../src/migrate.js';
 import { PgSyncRepository } from '../src/sync/repository.js';
 import { PgAdminRepository } from '../src/admin/repository.js';
 import { PgAccountRepository } from '../src/account/repository.js';
+import {
+  PgSecondFactorRepository,
+  SecondFactorService,
+} from '../src/account/secondFactor.js';
+import { writeAudit } from '../src/audit/log.js';
+import { SecretBox } from '../src/security/secretBox.js';
+import { base32Decode, stepAt, totpAt } from '../src/security/totp.js';
 
 const url = process.env.SUFFA_TEST_DATABASE_URL;
 const PUBLIC_URL = 'http://localhost:5173';
@@ -40,7 +47,7 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
   });
 
   beforeEach(async () => {
-    await pool.query('truncate users, rate_limits, verifications cascade');
+    await pool.query('truncate users, rate_limits, verifications, audit_log cascade');
     mailer = new CapturingMailer();
     const auth = createAuth({
       pool,
@@ -68,6 +75,18 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       account: {
         repo: new PgAccountRepository(pool),
         sessions: { actor: (h) => sessions.sessionActor(h) },
+        secondFactor: new SecondFactorService(
+          new PgSecondFactorRepository(pool),
+          new SecretBox('test-secret-0123456789-abcdefghijklmnop', 'totp')
+        ),
+        audit: ({ actorId, action, ip }) =>
+          writeAudit(pool, {
+            actorId,
+            action,
+            targetType: 'user',
+            targetId: actorId,
+            ipAddress: ip,
+          }),
         log: quiet,
       },
       allowedOrigin: PUBLIC_URL,
@@ -225,23 +244,28 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
   it('applies a role change on the next request (no stale role in the cookie)', async () => {
     await requestLink('lehrer@example.org');
     const { cookie } = await openLink(mailer.links[0]!.url);
+    const role = async () =>
+      (
+        (await (await app.request('/api/v1/me', { headers: { cookie } })).json()) as {
+          role: string;
+        }
+      ).role;
     const users = () => app.request('/api/v1/admin/users', { headers: { cookie } });
-    expect((await users()).status).toBe(403);
+    expect(await role()).toBe('student');
+    expect(await (await users()).json()).toEqual({ error: 'forbidden' });
 
     await pool.query(
       "update users set role = 'admin' where email = 'lehrer@example.org'"
     );
-    const response = await users();
-    expect(response.status).toBe(200);
-    const body = (await response.json()) as { users: { email: string; role: string }[] };
-    expect(body.users).toEqual([
-      expect.objectContaining({ email: 'lehrer@example.org', role: 'admin' }),
-    ]);
+    expect(await role()).toBe('admin');
+    // Now an admin – the admin area still asks for the second factor, not for the role.
+    expect(await (await users()).json()).toEqual({ error: 'second_factor_required' });
 
     await pool.query(
       "update users set role = 'student' where email = 'lehrer@example.org'"
     );
-    expect((await users()).status).toBe(403);
+    expect(await role()).toBe('student');
+    expect(await (await users()).json()).toEqual({ error: 'forbidden' });
   });
 
   /** Signs in once more as the same person, like a second device. */
@@ -319,5 +343,106 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       const response = await app.request(`/api/v1/auth${path}`, { headers: { cookie } });
       expect(response.status, path).toBe(404);
     }
+  });
+
+  /** Signs in as admin and confirms the second factor; returns the cookie. */
+  const signInAdmin = async (email: string, ip: string) => {
+    const cookie = await signInDevice(email, ip);
+    await pool.query("update users set role = 'admin' where email = $1", [email]);
+    const post = (path: string, body?: unknown) =>
+      app.request(`/api/v1/account/2fa${path}`, {
+        method: 'POST',
+        headers: { cookie, origin: PUBLIC_URL, 'content-type': 'application/json' },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+    const { secret } = (await (await post('/setup')).json()) as { secret: string };
+    const code = totpAt(base32Decode(secret), stepAt(Date.now()));
+    expect((await post('/confirm', { code })).status).toBe(204);
+    return { cookie, post, code };
+  };
+
+  it('admin area needs the second factor; a used code does not work twice (story 4.2)', async () => {
+    const cookie = await signInDevice('chef@example.org', '203.0.113.70');
+    await pool.query("update users set role = 'admin' where email = 'chef@example.org'");
+    const users = () => app.request('/api/v1/admin/users', { headers: { cookie } });
+    const blocked = await users();
+    expect(blocked.status).toBe(403);
+    expect(await blocked.json()).toEqual({ error: 'second_factor_required' });
+
+    const post = (path: string, body?: unknown) =>
+      app.request(`/api/v1/account/2fa${path}`, {
+        method: 'POST',
+        headers: { cookie, origin: PUBLIC_URL, 'content-type': 'application/json' },
+        body: body === undefined ? undefined : JSON.stringify(body),
+      });
+    const setup = (await (await post('/setup')).json()) as {
+      uri: string;
+      secret: string;
+    };
+    expect(setup.uri).toMatch(/^otpauth:\/\/totp\/Suffa%3Achef%40example\.org/);
+    const stored = await pool.query('select secret_enc from user_totp');
+    expect(JSON.stringify(stored.rows)).not.toContain(setup.secret);
+
+    expect((await post('/confirm', { code: '000000' })).status).toBe(400);
+    const code = totpAt(base32Decode(setup.secret), stepAt(Date.now()));
+    expect((await post('/confirm', { code })).status).toBe(204);
+    expect((await users()).status).toBe(200);
+    expect((await post('/confirm', { code })).status).toBe(400);
+
+    const audit = await pool.query('select action from audit_log');
+    expect(audit.rows.map((r) => r.action)).toEqual(['account.2fa_enabled']);
+  });
+
+  it('disabling a user ends their sessions at once and is audit-logged', async () => {
+    const { cookie: admin } = await signInAdmin('leitung@example.org', '203.0.113.80');
+    const student = await signInDevice('schueler@example.org', '203.0.113.81');
+    const { rows } = await pool.query<{ id: string }>(
+      "select id from users where email = 'schueler@example.org'"
+    );
+    const patch = (body: unknown) =>
+      app.request(`/api/v1/admin/users/${rows[0]!.id}`, {
+        method: 'PATCH',
+        headers: {
+          cookie: admin,
+          origin: PUBLIC_URL,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+    const disabled = await patch({ disabled: true, role: 'teacher' });
+    expect(await disabled.json()).toMatchObject({ disabled: true, role: 'teacher' });
+    expect(
+      (await app.request('/api/v1/me', { headers: { cookie: student } })).status
+    ).toBe(401);
+    // Signing in again does not help while disabled.
+    const again = await signInDevice('schueler@example.org', '203.0.113.82');
+    expect((await app.request('/api/v1/me', { headers: { cookie: again } })).status).toBe(
+      401
+    );
+
+    await patch({ disabled: false });
+    const back = await signInDevice('schueler@example.org', '203.0.113.83');
+    expect((await app.request('/api/v1/me', { headers: { cookie: back } })).status).toBe(
+      200
+    );
+
+    const audit = await app.request('/api/v1/admin/audit', {
+      headers: { cookie: admin },
+    });
+    const { entries } = (await audit.json()) as {
+      entries: { action: string; actorEmail: string; details: Record<string, unknown> }[];
+    };
+    expect(entries.map((e) => e.action)).toEqual([
+      'user.enabled',
+      'user.disabled',
+      'user.role_changed',
+      'account.2fa_enabled',
+    ]);
+    expect(entries[1]).toMatchObject({
+      actorEmail: 'leitung@example.org',
+      details: { endedSessions: 1 },
+    });
+    expect(entries[2]!.details).toEqual({ from: 'student', to: 'teacher' });
   });
 });

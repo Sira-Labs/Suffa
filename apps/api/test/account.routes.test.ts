@@ -30,7 +30,12 @@ function setup() {
   const app = createAccountRoutes({
     repo,
     sessions: {
-      actor: async () => ({ id: USER, role: 'student', sessionId: 'this-device' }),
+      actor: async () => ({
+        id: USER,
+        role: 'student',
+        sessionId: 'this-device',
+        email: 'amina@example.org',
+      }),
     },
     log: { info: () => {}, warn: () => {} },
   });

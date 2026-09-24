@@ -24,6 +24,11 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   { method: 'POST', path: '/api/v1/sync/:table/push', action: 'sync:own' },
   { method: 'GET', path: '/api/v1/sync/:table/pull', action: 'sync:own' },
   { method: 'GET', path: '/api/v1/admin/users', action: 'admin:users:read' },
+  { method: 'PATCH', path: '/api/v1/admin/users/:id', action: 'admin:users:write' },
+  { method: 'GET', path: '/api/v1/admin/audit', action: 'admin:audit:read' },
+  { method: 'GET', path: '/api/v1/account/2fa', action: 'profile:read' },
+  { method: 'POST', path: '/api/v1/account/2fa/setup', action: 'profile:write' },
+  { method: 'POST', path: '/api/v1/account/2fa/confirm', action: 'profile:write' },
 ];
 
 /**

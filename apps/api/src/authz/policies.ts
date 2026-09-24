@@ -17,6 +17,8 @@ export type Role = (typeof ROLES)[number];
 export interface Actor {
   id: string;
   role: Role;
+  /** This session confirmed the second factor recently (see SECOND_FACTOR_TTL_MS). */
+  secondFactor?: boolean;
 }
 
 /** How the actor relates to a class (loaded by the route, never sent by the client). */
@@ -41,12 +43,29 @@ export const RBAC_MATRIX = {
   'class:progress:read': ['teacher', 'admin'],
   /** List and search users in the admin area. */
   'admin:users:read': ['admin'],
-  /** Change a user's role or disable them (Sprint 4, audit-logged). */
+  /** Change a user's role or disable them (audit-logged). */
   'admin:users:write': ['admin'],
+  /** Read the audit log. */
+  'admin:audit:read': ['admin'],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Action = keyof typeof RBAC_MATRIX;
 export const ACTIONS = Object.keys(RBAC_MATRIX) as Action[];
+
+/**
+ * Actions that also need a confirmed second factor in this session (ADR-0009: admin 2FA).
+ * A stolen session cookie or mailbox alone cannot reach the admin area.
+ */
+export const SECOND_FACTOR_ACTIONS: ReadonlySet<Action> = new Set<Action>([
+  'admin:users:read',
+  'admin:users:write',
+  'admin:audit:read',
+]);
+
+/** Allowed by role, but the session still has to confirm the second factor. */
+export function needsSecondFactor(actor: Actor, action: Action): boolean {
+  return SECOND_FACTOR_ACTIONS.has(action) && actor.secondFactor !== true;
+}
 
 export function isRole(value: unknown): value is Role {
   return typeof value === 'string' && (ROLES as readonly string[]).includes(value);

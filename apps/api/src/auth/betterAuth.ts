@@ -59,6 +59,13 @@ export function createAuth(options: AuthOptions) {
           input: false,
           fieldName: 'time_zone',
         },
+        // Set by an admin (story 4.2); a disabled user has no working session.
+        disabledAt: {
+          type: 'date',
+          required: false,
+          input: false,
+          fieldName: 'disabled_at',
+        },
       },
     },
     session: {
@@ -72,6 +79,15 @@ export function createAuth(options: AuthOptions) {
       },
       expiresIn: SESSION_TTL_SEC,
       updateAge: SESSION_REFRESH_SEC,
+      additionalFields: {
+        // When this session last confirmed the second factor (admins, story 4.2).
+        secondFactorAt: {
+          type: 'date',
+          required: false,
+          input: false,
+          fieldName: 'second_factor_at',
+        },
+      },
     },
     account: {
       modelName: 'accounts',
@@ -196,7 +212,11 @@ export interface Me {
 /** The signed-in user plus the session of this request (to mark "this device"). */
 export interface SessionActor extends Actor {
   sessionId: string;
+  email: string;
 }
+
+/** A confirmed second factor counts this long for admin actions. */
+export const SECOND_FACTOR_TTL_MS = 12 * 60 * 60 * 1000;
 
 /** Session lookup for other routes (sync, /me): the session cookie identifies the user. */
 export class SessionResolver implements AuthResolver {
@@ -210,21 +230,38 @@ export class SessionResolver implements AuthResolver {
   async sessionActor(headers: Headers): Promise<SessionActor | null> {
     const current = await this.current(headers);
     return current
-      ? { id: current.me.id, role: current.me.role, sessionId: current.sessionId }
+      ? {
+          id: current.me.id,
+          role: current.me.role,
+          sessionId: current.sessionId,
+          email: current.me.email,
+          secondFactor: current.secondFactor,
+        }
       : null;
   }
 
-  private async current(headers: Headers): Promise<{ me: Me; sessionId: string } | null> {
+  private async current(
+    headers: Headers
+  ): Promise<{ me: Me; sessionId: string; secondFactor: boolean } | null> {
     const session = await this.auth.api.getSession({ headers });
     if (!session) return null;
     const user = session.user as typeof session.user & {
       role?: string;
       timeZone?: string;
+      disabledAt?: Date | string | null;
     };
+    // A disabled user is signed out everywhere, even with a session that is still valid.
+    if (user.disabledAt) return null;
+    const confirmed = (session.session as { secondFactorAt?: Date | string | null })
+      .secondFactorAt;
+    const secondFactor =
+      confirmed != null &&
+      Date.now() - new Date(confirmed).getTime() < SECOND_FACTOR_TTL_MS;
     // An unknown value in the database never grants more than a student has.
     const role = isRole(user.role) ? user.role : 'student';
     return {
       sessionId: session.session.id,
+      secondFactor,
       me: {
         id: user.id,
         email: user.email,
@@ -236,8 +273,7 @@ export class SessionResolver implements AuthResolver {
   }
 
   async actor(headers: Headers): Promise<Actor | null> {
-    const me = await this.me(headers);
-    return me ? { id: me.id, role: me.role } : null;
+    return this.sessionActor(headers);
   }
 }
 

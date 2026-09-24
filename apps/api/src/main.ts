@@ -22,6 +22,9 @@ import { PgSyncRepository } from './sync/repository.js';
 import { PgAdminRepository } from './admin/repository.js';
 import { PgAccountRepository } from './account/repository.js';
 import type { AccountRouteDeps } from './account/routes.js';
+import { PgSecondFactorRepository, SecondFactorService } from './account/secondFactor.js';
+import { writeAudit } from './audit/log.js';
+import { SecretBox } from './security/secretBox.js';
 import { ConfigError, loadConfig, redactDatabaseUrl } from './config.js';
 import {
   currentRevision,
@@ -152,6 +155,18 @@ async function main(): Promise<void> {
     accountRoutes = {
       repo: new PgAccountRepository(pool),
       sessions: { actor: (h) => sessions.sessionActor(h) },
+      secondFactor: new SecondFactorService(
+        new PgSecondFactorRepository(pool),
+        new SecretBox(config.authSecret, 'totp')
+      ),
+      audit: ({ actorId, action, ip }) =>
+        writeAudit(pool, {
+          actorId,
+          action,
+          targetType: 'user',
+          targetId: actorId,
+          ipAddress: ip,
+        }),
       log,
     };
     authRoutes = {

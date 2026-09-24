@@ -30,6 +30,7 @@ parts of **P2 Engagement** forward; what is left for P2 is server-side (see the 
 | Unit room (v2)   | Start a unit with a pace (3/2/1 weeks), countdown and one extension; next unit unlocks with the unit test (≥ 80 %); level 1 = Book 1 in two stages with stage tests, badges and a milestone screen; curated "Entdecken" media library.                                                                                  |
 | Focused units    | One section per dialogue (listen, read, its words, write, speak), later sections closed; a closing section with the publisher's exercises, verbs and the unit test.                                                                                                                                                     |
 | Guided writing   | Five counted steps (copy, dictation, transliteration, sentence building, translation) that continue where the learner left off and never repeat a solved task.                                                                                                                                                          |
+| Cloze & library  | Cloze station per dialogue section from the example sentences; "Entdecken" pins started videos to "Weiterschauen" (last opened first, unpin anytime).                                                                                                                                                                   |
 | Scoped training  | Training and free practice offer only the units reached so far; new SRS cards come only from those units (due reviews untouched).                                                                                                                                                                                       |
 | "Heute"          | Opens with "Deine Einheit" (section, next station, deadline, "Fortsetzen"); level card with stage and total XP; daily check-in on the word of the day (+10 XP); wobbly words (last rated "Schwer"/"Nochmal") with an on-demand practice session; progress tiles explained; forgetting curve only after a broken streak. |
 | XP (local)       | Reviews, heard tracks and lessons, practised items (+2 each, shown at once), unit on time (+50), stage (+250), daily check-in (+10).                                                                                                                                                                                    |
@@ -37,10 +38,10 @@ parts of **P2 Engagement** forward; what is left for P2 is server-side (see the 
 
 **Next on the device side** (before or alongside P1):
 
-1. Teacher reviews the content drafts (words, dialogues, examples) — marks units as checked.
-2. Cloze exercises from the example sentences, one per dialogue section.
-3. Grammar points per unit and an alphabet course for absolute beginners.
-4. Open P0 story 2.6 (browser router instead of hash URLs).
+1. Grammar points per unit and an alphabet course for absolute beginners.
+2. Open P0 story 2.6 (browser router instead of hash URLs).
+3. Teacher reviews the content drafts (words, dialogues, examples) — deferred: we continue
+   without it for now and mark units as checked once he has looked at them.
 
 ## Why this order
 

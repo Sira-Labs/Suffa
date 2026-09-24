@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
+import type { Vokabel } from '@/types';
 import { ArabicText } from '@/components';
 import { wurzelFamilien } from '@/content';
+import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { speakArabic } from '@/services/speech';
 
 /**
@@ -9,13 +11,21 @@ import { speakArabic } from '@/services/speech';
  * and offers the "Gleiche Wurzel?" (same root?) exercise.
  */
 export function RootExplorer() {
+  const { keep } = useReachedUnits();
+  // Only words and verbs of the units reached so far.
   const families = useMemo(
     () =>
-      [...wurzelFamilien.values()].filter((f) => f.vokabeln.length + f.verben.length > 0),
-    []
+      [...wurzelFamilien.values()]
+        .map((f) => ({
+          ...f,
+          vokabeln: f.vokabeln.filter(keep),
+          verben: f.verben.filter(keep),
+        }))
+        .filter((f) => f.vokabeln.length + f.verben.length > 0),
+    [keep]
   );
   const [selected, setSelected] = useState(families[0]?.wurzel ?? '');
-  const active = wurzelFamilien.get(selected);
+  const active = families.find((f) => f.wurzel === selected);
 
   return (
     <div className="stack">
@@ -89,17 +99,13 @@ export function RootExplorer() {
         </div>
       )}
 
-      <SameRootDrill />
+      <SameRootDrill words={families.flatMap((f) => f.vokabeln)} />
     </div>
   );
 }
 
 /** "Gleiche Wurzel?" exercise – two words, same root or not. */
-function SameRootDrill() {
-  const allVocab = useMemo(
-    () => [...wurzelFamilien.values()].flatMap((f) => f.vokabeln),
-    []
-  );
+function SameRootDrill({ words: allVocab }: { words: Vokabel[] }) {
   const [pair, setPair] = useState(() => makePair(allVocab));
   const [result, setResult] = useState<string | null>(null);
 

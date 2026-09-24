@@ -7,6 +7,7 @@ import { speakArabic } from '@/services/speech';
 import { examRepo, cardRepo } from '@/services/storage';
 import { cardId, createCard } from '@/services/srs';
 import { unitInfos } from '@/content';
+import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import {
   useCelebrationStore,
   useEnrollmentStore,
@@ -66,13 +67,15 @@ export function Exam() {
   const requestedUnit = Number(params.get('unit'));
   // ?stage=n (stage test from the level map) covers every unit of the stage with content.
   const stageTest = STAGES.find((s) => s.id === Number(params.get('stage')));
+  // Free practice tests cover the units reached so far.
+  const { units: reached } = useReachedUnits();
   const [selectedUnits, setSelectedUnits] = useState<number[]>(() => {
     if (stageTest) {
       return unitInfos.map((u) => u.einheit).filter((u) => stageTest.units.includes(u));
     }
     return unitInfos.some((u) => u.einheit === requestedUnit)
       ? [requestedUnit]
-      : unitInfos.map((u) => u.einheit);
+      : unitInfos.map((u) => u.einheit).filter((u) => reached.includes(u));
   });
   const [count, setCount] = useState(10);
   const [speed, setSpeed] = useState(false);
@@ -101,6 +104,7 @@ export function Exam() {
         setSelectedFormats={setSelectedFormats}
         selectedUnits={selectedUnits}
         setSelectedUnits={setSelectedUnits}
+        reachedUnits={reached}
         count={count}
         setCount={setCount}
         onStart={start}
@@ -139,6 +143,8 @@ function ExamConfig(props: {
   setSelectedFormats: (f: ExamFormat[]) => void;
   selectedUnits: number[];
   setSelectedUnits: (u: number[]) => void;
+  /** Units offered for a free test (the ones the learner reached). */
+  reachedUnits: number[];
   count: number;
   setCount: (n: number) => void;
   onStart: (f: ExamFormat[], u: number[], n: number, speed: boolean) => void;
@@ -183,15 +189,17 @@ function ExamConfig(props: {
         <div className="card stack">
           <strong>Einheiten (gemischte Kapitelprüfung)</strong>
           <div className="row">
-            {unitInfos.map((u) => (
-              <button
-                key={u.einheit}
-                className={`btn ${props.selectedUnits.includes(u.einheit) ? 'btn-accent' : ''}`}
-                onClick={() => toggleUnit(u.einheit)}
-              >
-                E{u.einheit}
-              </button>
-            ))}
+            {unitInfos
+              .filter((u) => props.reachedUnits.includes(u.einheit))
+              .map((u) => (
+                <button
+                  key={u.einheit}
+                  className={`btn ${props.selectedUnits.includes(u.einheit) ? 'btn-accent' : ''}`}
+                  onClick={() => toggleUnit(u.einheit)}
+                >
+                  E{u.einheit}
+                </button>
+              ))}
           </div>
           <p className="muted" style={{ margin: 0 }}>
             Beispiel echte Prüfung: „Kapitel 1 → Kapitel 3 Dialog 1“ – wähle E1–E3.

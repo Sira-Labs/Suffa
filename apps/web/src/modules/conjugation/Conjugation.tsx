@@ -3,6 +3,7 @@ import type { ConjugationTable, MadiPerson, UnitPracticeScope, Verb } from '@/ty
 import { PERSON_LABELS, AMR_LABELS } from '@/types';
 import { ArabicText, Feedback, RecallInput } from '@/components';
 import { content } from '@/content';
+import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { diffArabic, gradeAnswer, type AnswerVerdict } from '@/services/srs';
 import { speakArabic } from '@/services/speech';
 
@@ -38,10 +39,14 @@ export const FORMS_PER_VERB = 5;
  * introduces; a verb counts once FORMS_PER_VERB forms were written correctly.
  */
 export function Conjugation({ scope }: { scope?: UnitPracticeScope } = {}) {
+  const { keep } = useReachedUnits();
+  // Outside a unit: the verbs of every unit reached so far.
   const verbs = useMemo(
     () =>
-      scope ? content.verben.filter((v) => v.einheit === scope.unit) : content.verben,
-    [scope]
+      scope
+        ? content.verben.filter((v) => v.einheit === scope.unit)
+        : content.verben.filter(keep),
+    [scope, keep]
   );
   const [verbId, setVerbId] = useState<string | undefined>(verbs[0]?.id);
   const [tense, setTense] = useState<Tense>('madi');

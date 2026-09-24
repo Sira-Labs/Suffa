@@ -7,3 +7,4 @@ export * from './practice';
 export * from './enrollment';
 export * from './discover';
 export * from './examples';
+export * from './checkin';

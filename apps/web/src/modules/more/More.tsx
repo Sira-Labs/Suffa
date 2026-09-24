@@ -13,12 +13,12 @@ export function More() {
   );
 }
 
-/** "Training": practice across all units (the unit room covers one unit at a time). */
+/** "Training": practice across the units reached so far (the unit room covers one at a time). */
 export function Training() {
   return (
     <HubPage
       title="Training"
-      intro="Üben über alle Einheiten hinweg – ergänzend zu deiner aktuellen Einheit."
+      intro="Üben mit allem aus den Einheiten, die du schon erreicht hast – neue Einheiten kommen mit jedem bestandenen Test dazu."
       listLabel="Trainingsbereiche"
       items={NAV_ITEMS.filter((item) => item.tier === 'training')}
     />

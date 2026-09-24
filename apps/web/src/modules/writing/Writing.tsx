@@ -4,6 +4,7 @@ import type { DialogZeile, UnitPracticeScope, Vokabel } from '@/types';
 import { ArabicText, Feedback, RecallInput } from '@/components';
 import { Icon } from '@/components/Icon';
 import { content } from '@/content';
+import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import {
   lineId,
   scopedDialogues,
@@ -32,13 +33,16 @@ const EXERCISE_LABELS: Record<WriteExercise, string> = {
  * lines and reports every solved task, so all steps count toward the unit.
  */
 export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
+  const { keep } = useReachedUnits();
+  // Outside a unit: the words and dialogues of every unit reached so far.
   const words = useMemo(
-    () => (scope ? scopedWords(content.vokabeln, scope) : content.vokabeln),
-    [scope]
+    () => (scope ? scopedWords(content.vokabeln, scope) : content.vokabeln.filter(keep)),
+    [scope, keep]
   );
   const dialogues = useMemo(
-    () => (scope ? scopedDialogues(content.dialoge, scope) : content.dialoge),
-    [scope]
+    () =>
+      scope ? scopedDialogues(content.dialoge, scope) : content.dialoge.filter(keep),
+    [scope, keep]
   );
   const tasks = useMemo(
     () =>

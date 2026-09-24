@@ -11,6 +11,7 @@ import {
   TRAINING_PATH,
 } from './navigation';
 import { logger } from './services/logger';
+import { useTrainingScope } from './modules/units/useReachedUnits';
 import {
   useContentStore,
   useListenStore,
@@ -35,6 +36,8 @@ export function App() {
   const loadListening = useListenStore((s) => s.load);
   const loadPractice = usePracticeStore((s) => s.load);
   const loadEnrollments = useEnrollmentStore((s) => s.load);
+  // New cards and training content come only from the units the learner reached.
+  useTrainingScope();
 
   useEffect(() => {
     let cancelled = false;

@@ -6,6 +6,7 @@ import {
   enrollmentStatus,
   isUnlocked,
   passedTest,
+  reachedUnits,
   stageState,
   targetDate,
 } from './rules';
@@ -92,5 +93,17 @@ describe('enrollment rules', () => {
     expect(isUnlocked(9, [...units1to8, stageTest])).toBe(true);
     // A stage test is never mistaken for a unit test.
     expect(passedTest([{ ...stageTest, units: [1] } as ExamResult], 1)).toBeNull();
+  });
+});
+
+describe('reached units', () => {
+  it('reaches unit 1 first and one more unit per passed test', () => {
+    expect(reachedUnits([])).toEqual([1]);
+    expect(
+      reachedUnits([
+        exam(1, 9, '2026-09-20T10:00:00Z'),
+        exam(2, 8, '2026-09-22T10:00:00Z'),
+      ])
+    ).toEqual([1, 2, 3]);
   });
 });

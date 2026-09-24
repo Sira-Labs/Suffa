@@ -234,3 +234,27 @@ describe('SRS queue: contentRefs', () => {
     ]);
   });
 });
+
+describe('SRS scope: only reached content introduces new cards', () => {
+  const reached = (ref: string) => ref === 'v-a';
+  const card = (id: string, contentRef: string) =>
+    createCard({ id, contentRef, kind: 'vocab_ar_de', now: NOW });
+
+  it('introduces new cards only from reachable content', () => {
+    const cards = [card('a', 'v-a'), card('b', 'v-b')];
+    const q = buildQueue(cards, { now: NOW, canIntroduce: reached });
+    expect(q.map((c) => c.id)).toEqual(['a']);
+  });
+
+  it('keeps due reviews of any content', () => {
+    const learned = { ...card('b', 'v-b'), reps: 2, due: '2026-06-01T00:00:00.000Z' };
+    const q = buildQueue([learned], { now: NOW, canIntroduce: reached });
+    expect(q.map((c) => c.id)).toEqual(['b']);
+  });
+
+  it('counts only reachable new cards as open', () => {
+    const cards = [card('a', 'v-a'), card('b', 'v-b')];
+    expect(summarizeDue(cards, NOW, reached).newCount).toBe(1);
+    expect(summarizeDue(cards, NOW).newCount).toBe(2);
+  });
+});

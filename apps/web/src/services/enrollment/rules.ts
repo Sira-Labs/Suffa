@@ -129,6 +129,14 @@ export function stageState(stage: Stage, exams: readonly ExamResult[]): StageSta
     : { state: 'running', unitsPassed };
 }
 
+/** Units of Book 1. */
+export const BOOK_UNITS = 16;
+
+/** Units the learner has reached (unlocked): training draws on these only. */
+export function reachedUnits(exams: readonly ExamResult[]): number[] {
+  return range(1, BOOK_UNITS).filter((unit) => isUnlocked(unit, exams));
+}
+
 /**
  * Unit 1 is always open; every further unit opens with the previous unit's test, and the
  * first unit of a stage also needs the previous stage's test.

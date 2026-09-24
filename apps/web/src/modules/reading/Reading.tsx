@@ -3,6 +3,7 @@ import type { Dialog, UnitPracticeScope } from '@/types';
 import { TashkilToggle } from '@/components';
 import { applyTashkilLevel } from '@/components/ArabicText';
 import { content } from '@/content';
+import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { scopedDialogues } from '@/services/practice';
 import { normalizeArabic } from '@/services/srs';
 import { speakArabic } from '@/services/speech';
@@ -19,9 +20,12 @@ for (const v of content.vokabeln) {
  * a dialogue counts as read once its comprehension question is answered correctly.
  */
 export function Reading({ scope }: { scope?: UnitPracticeScope } = {}) {
+  const { keep } = useReachedUnits();
+  // Outside a unit: the dialogues of every unit reached so far.
   const dialoge = useMemo(
-    () => (scope ? scopedDialogues(content.dialoge, scope) : content.dialoge),
-    [scope]
+    () =>
+      scope ? scopedDialogues(content.dialoge, scope) : content.dialoge.filter(keep),
+    [scope, keep]
   );
   const [selected, setSelected] = useState<Dialog | undefined>(dialoge[0]);
   const [showTranslation, setShowTranslation] = useState(true);

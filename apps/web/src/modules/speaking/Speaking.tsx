@@ -3,6 +3,7 @@ import type { UnitPracticeScope } from '@/types';
 import { lineId, scopedDialogues } from '@/services/practice';
 import { ArabicText } from '@/components';
 import { content } from '@/content';
+import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { speakArabic, isTtsSupported } from '@/services/speech';
 import {
   isRecognitionSupported,
@@ -27,12 +28,15 @@ type Tab = 'shadowing' | 'phonologie';
  */
 export function Speaking({ scope }: { scope?: UnitPracticeScope } = {}) {
   const [tab, setTab] = useState<Tab>('shadowing');
+  const { keep } = useReachedUnits();
+  // Outside a unit: the dialogue lines of every unit reached so far.
   const lines = useMemo(
     () =>
-      (scope ? scopedDialogues(content.dialoge, scope) : content.dialoge).flatMap((d) =>
-        d.zeilen.map((z, i) => ({ ...z, id: lineId(d.id, i) }))
-      ),
-    [scope]
+      (scope
+        ? scopedDialogues(content.dialoge, scope)
+        : content.dialoge.filter(keep)
+      ).flatMap((d) => d.zeilen.map((z, i) => ({ ...z, id: lineId(d.id, i) }))),
+    [scope, keep]
   );
   return (
     <div className="stack">

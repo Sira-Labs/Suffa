@@ -25,6 +25,11 @@ export interface QueueOptions {
   newKinds?: CardKind[];
   /** Restrict to cards about these content items (e.g. the words of one unit). */
   contentRefs?: string[];
+  /**
+   * May a new card about this content item be introduced? (Only units the learner reached;
+   * due reviews are unaffected, so nothing already learned is lost.)
+   */
+  canIntroduce?: (contentRef: string) => boolean;
 }
 
 export interface DueSummary {
@@ -93,7 +98,12 @@ export function buildQueue(cards: SrsCard[], options: QueueOptions = {}): SrsCar
 
   const newKindFilter = options.newKinds ? new Set(options.newKinds) : null;
   const newCards = pool
-    .filter((c) => isNew(c) && (!newKindFilter || newKindFilter.has(c.kind)))
+    .filter(
+      (c) =>
+        isNew(c) &&
+        (!newKindFilter || newKindFilter.has(c.kind)) &&
+        (!options.canIntroduce || options.canIntroduce(c.contentRef))
+    )
     .slice(0, newLimit);
 
   const interleavedReviews = interleaveByKind(dueReviews);
@@ -117,10 +127,16 @@ export function buildQueue(cards: SrsCard[], options: QueueOptions = {}): SrsCar
   return merged.slice(0, maxCards);
 }
 
-export function summarizeDue(cards: SrsCard[], now: Date = new Date()): DueSummary {
+export function summarizeDue(
+  cards: SrsCard[],
+  now: Date = new Date(),
+  canIntroduce?: (contentRef: string) => boolean
+): DueSummary {
   const summary: DueSummary = { dueCount: 0, newCount: 0, leechCount: 0, byKind: {} };
   for (const c of cards) {
     if (c.deleted) continue;
+    // New cards the learner cannot reach yet are not "open".
+    if (isNew(c) && canIntroduce && !canIntroduce(c.contentRef)) continue;
     if (isNew(c)) summary.newCount++;
     else if (isDue(c, now)) summary.dueCount++;
     if (c.leech) summary.leechCount++;

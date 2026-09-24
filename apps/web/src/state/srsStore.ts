@@ -27,6 +27,9 @@ interface SrsState {
     contentRefs?: string[]
   ): SrsCard[];
   summary(): DueSummary;
+  /** Content items new cards may come from (reached units); null = everything. */
+  introducible: ReadonlySet<string> | null;
+  setIntroducible(refs: ReadonlySet<string> | null): void;
 }
 
 export const useSrsStore = create<SrsState>((set, get) => ({
@@ -71,10 +74,27 @@ export const useSrsStore = create<SrsState>((set, get) => ({
   },
 
   getQueue(kinds, newLimit, newKinds, contentRefs) {
-    return buildQueue(get().cards, { kinds, newLimit, newKinds, contentRefs });
+    return buildQueue(get().cards, {
+      kinds,
+      newLimit,
+      newKinds,
+      contentRefs,
+      canIntroduce: introducer(get().introducible),
+    });
   },
 
   summary() {
-    return summarizeDue(get().cards);
+    return summarizeDue(get().cards, new Date(), introducer(get().introducible));
+  },
+
+  introducible: null,
+  setIntroducible(refs) {
+    set({ introducible: refs });
   },
 }));
+
+function introducer(
+  refs: ReadonlySet<string> | null
+): ((contentRef: string) => boolean) | undefined {
+  return refs ? (ref) => refs.has(ref) : undefined;
+}

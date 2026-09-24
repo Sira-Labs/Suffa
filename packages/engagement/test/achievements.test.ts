@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { BADGES, evaluateAchievements, type AchievementFacts } from '../src/index.js';
+import {
+  BADGES,
+  badgeProgress,
+  evaluateAchievements,
+  type AchievementFacts,
+} from '../src/index.js';
 import { empty, exam, practice, review, track, TZ } from './fixtures.js';
 
 const noFacts: AchievementFacts = {
@@ -93,5 +98,32 @@ describe('achievements', () => {
       'najm:bronze',
       'stage-1:bronze',
     ]);
+  });
+
+  it('reports progress towards the next tier', () => {
+    const days = Array.from(
+      { length: 12 },
+      (_, i) => `2026-09-${String(i + 1).padStart(2, '0')}`
+    );
+    const progress = badgeProgress(
+      empty(),
+      { streakReachedOn: days, weeklyGoalsMetOn: [], allQuestsOn: [] },
+      TZ
+    );
+    expect(progress.find((p) => p.badge.id === 'mudawim')).toMatchObject({
+      count: 12,
+      next: 30,
+      unlocks: [{ tier: 'bronze' }],
+    });
+    expect(progress.find((p) => p.badge.id === 'talib')).toMatchObject({
+      count: 0,
+      next: 4,
+    });
+    const done = badgeProgress(
+      empty(),
+      { streakReachedOn: [], weeklyGoalsMetOn: [], allQuestsOn: [] },
+      TZ
+    ).find((p) => p.badge.id === 'stage-1');
+    expect(done?.next).toBe(1);
   });
 });

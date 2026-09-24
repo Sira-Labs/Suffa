@@ -1,8 +1,11 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { arabicNumber, splitUnitTitle } from '@/services/units';
 import { STAGES, stageState, type Stage, type StageState } from '@/services/enrollment';
-import { useEnrollmentStore } from '@/state';
+import { content } from '@/content';
+import { unitMastery } from '@/services/stats';
+import { useEnrollmentStore, useSrsStore } from '@/state';
 import { unitToContinue, useBookProgress, type UnitOverview } from './useBookProgress';
 
 /**
@@ -12,6 +15,8 @@ import { unitToContinue, useBookProgress, type UnitOverview } from './useBookPro
 export function Units() {
   const { units } = useBookProgress();
   const exams = useEnrollmentStore((s) => s.exams);
+  const cards = useSrsStore((s) => s.cards);
+  const mastery = useMemo(() => unitMastery(cards, content.vokabeln), [cards]);
   if (units.length === 0) return <p className="muted">Lade Einheiten …</p>;
   // The unit to continue: the first open one whose test is not passed yet.
   const current = unitToContinue(units)!;
@@ -57,6 +62,7 @@ export function Units() {
           state={stageState(stage, exams)}
           units={units.filter((u) => stage.units.includes(u.unit.unit))}
           currentUnit={current.unit.unit}
+          mastery={mastery}
         />
       ))}
     </div>
@@ -115,11 +121,14 @@ function StageCard({
   state,
   units: stageUnits,
   currentUnit,
+  mastery,
 }: {
   stage: Stage;
   state: StageState;
   units: UnitOverview[];
   currentUnit: number;
+  /** Unit → % of its words with a mature card. */
+  mastery: ReadonlyMap<number, number>;
 }) {
   const first = stage.units[0];
   const last = stage.units[stage.units.length - 1];
@@ -140,10 +149,13 @@ function StageCard({
             <Link
               to={`/units/${unit.unit}`}
               className={`unit-tile${unit.unit === currentUnit ? ' unit-tile-current' : ''}${status.state === 'completed' ? ' unit-tile-done' : ''}${unlocked ? '' : ' unit-tile-locked'}`}
-              aria-label={`Einheit ${unit.unit}${title ? `, ${title}` : ''}, ${unlocked ? `${progress.percent} % erledigt` : 'gesperrt'}`}
+              aria-label={`Einheit ${unit.unit}${title ? `, ${title}` : ''}, ${unlocked ? `${progress.percent} % erledigt, ${mastery.get(unit.unit) ?? 0} % gefestigt` : 'gesperrt'}`}
             >
-              <span className="unit-tile-number arabic-display" aria-hidden>
-                {arabicNumber(unit.unit)}
+              <span className="unit-tile-top">
+                <span className="unit-tile-number arabic-display" aria-hidden>
+                  {arabicNumber(unit.unit)}
+                </span>
+                {unlocked && <MasteryRing percent={mastery.get(unit.unit) ?? 0} />}
               </span>
               <span className="unit-tile-label">
                 {status.state === 'completed' && (
@@ -192,5 +204,42 @@ function StageTestRow({ stage, state }: { stage: Stage; state: StageState }) {
           : `öffnet nach allen Einheitstests (${state.unitsPassed} von ${stage.units.length})`}
       </span>
     </p>
+  );
+}
+
+/**
+ * Share of the unit's words with a mature card (≥ 21 days): the true progress measure
+ * (story 5.3), next to the bar of practice done.
+ */
+function MasteryRing({ percent }: { percent: number }) {
+  const r = 14;
+  const circumference = 2 * Math.PI * r;
+  return (
+    <svg className="mastery-ring" width={36} height={36} viewBox="0 0 36 36" aria-hidden>
+      <title>{`${percent} % der Wörter gefestigt`}</title>
+      <circle
+        className="mastery-ring-track"
+        cx={18}
+        cy={18}
+        r={r}
+        fill="none"
+        strokeWidth={4}
+      />
+      <circle
+        className="mastery-ring-value"
+        cx={18}
+        cy={18}
+        r={r}
+        fill="none"
+        strokeWidth={4}
+        strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={circumference * (1 - percent / 100)}
+        transform="rotate(-90 18 18)"
+      />
+      <text x={18} y={22} textAnchor="middle" fontSize={10} fill="currentColor">
+        {percent}
+      </text>
+    </svg>
   );
 }

@@ -94,6 +94,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     tier: 'training',
   },
   {
+    to: '/badges',
+    label: 'Abzeichen',
+    icon: 'award',
+    description: 'Deine Erfolge und der Weg zur nächsten Stufe',
+    tier: 'secondary',
+  },
+  {
     to: '/classes',
     label: 'Klassen',
     icon: 'path',

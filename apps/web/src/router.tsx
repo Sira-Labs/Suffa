@@ -1,3 +1,4 @@
+import { Badges } from './modules/engagement/Badges';
 import { createBrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { migrateLegacyHashUrl } from './services/legacyHashUrl';
@@ -47,6 +48,7 @@ export const router = createBrowserRouter([
       { path: 'settings', element: <Settings /> },
       { path: 'admin', element: <Admin /> },
       { path: 'classes', element: <Classes /> },
+      { path: 'badges', element: <Badges /> },
       { path: 'join/:token', element: <Join /> },
       { path: 'more', element: <More /> },
       { path: 'training', element: <Training /> },

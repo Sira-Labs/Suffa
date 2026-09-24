@@ -166,3 +166,29 @@ export function nextRecommendation(
   }
   return { text: 'Alles erledigt – probier eine Kapitelprüfung.', to: '/exam' };
 }
+
+/**
+ * Mastery ring per unit (engagement plan §2): the share of a unit's words with a mature card
+ * (interval ≥ 21 days). This is the true progress measure; XP only rewards the work.
+ */
+export function unitMastery(
+  cards: readonly SrsCard[],
+  words: readonly { id: string; einheit: number }[]
+): Map<number, number> {
+  const mature = new Set(
+    cards.filter((c) => !c.deleted && c.interval >= 21).map((c) => c.contentRef)
+  );
+  const perUnit = new Map<number, { total: number; mature: number }>();
+  for (const word of words) {
+    const entry = perUnit.get(word.einheit) ?? { total: 0, mature: 0 };
+    entry.total++;
+    if (mature.has(word.id)) entry.mature++;
+    perUnit.set(word.einheit, entry);
+  }
+  return new Map(
+    [...perUnit].map(([unit, { total, mature: m }]) => [
+      unit,
+      Math.round((m / total) * 100),
+    ])
+  );
+}

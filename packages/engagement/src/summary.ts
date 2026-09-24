@@ -3,7 +3,7 @@
  * XP (with quest XP), level, today's quests, streak, weekly goal and badges. The app runs it
  * right after an action (offline); the server runs the same function on synced data.
  */
-import { evaluateAchievements, type Unlock } from './achievements.js';
+import { badgeProgress, type BadgeProgress, type Unlock } from './achievements.js';
 import { addDays, dayKey, weekStart } from './day.js';
 import { levelFor, type Level } from './levels.js';
 import {
@@ -52,6 +52,7 @@ export interface EngagementSummary {
   streak: Streak;
   weekly: WeeklyProgress;
   achievements: Unlock[];
+  badges: BadgeProgress[];
 }
 
 export function summarize(
@@ -83,7 +84,7 @@ export function summarize(
     .filter((e) => dayKey(e.at, timeZone) <= today)
     .sort((a, b) => a.at.localeCompare(b.at));
   const total = totalXp(xpEvents);
-  const achievements = evaluateAchievements(
+  const badges = badgeProgress(
     input,
     {
       streakReachedOn: streak.reachedOn,
@@ -103,7 +104,8 @@ export function summarize(
     questDays,
     streak,
     weekly,
-    achievements,
+    achievements: badges.flatMap((b) => b.unlocks),
+    badges,
   };
 }
 

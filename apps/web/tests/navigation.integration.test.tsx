@@ -51,6 +51,14 @@ describe('navigation', () => {
       within(list)
         .getAllByRole('link')
         .map((a) => a.getAttribute('href'))
-    ).toEqual(['/classes', '/library', '/reading', '/writing', '/speaking', '/settings']);
+    ).toEqual([
+      '/badges',
+      '/classes',
+      '/library',
+      '/reading',
+      '/writing',
+      '/speaking',
+      '/settings',
+    ]);
   });
 });

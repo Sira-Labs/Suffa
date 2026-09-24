@@ -198,20 +198,44 @@ function steps(input: EngagementInput, facts: AchievementFacts, timeZone: string
   return result;
 }
 
+/** A badge with how far the learner got: count, tiers reached, next threshold. */
+export interface BadgeProgress {
+  badge: BadgeDef;
+  count: number;
+  unlocks: Unlock[];
+  /** Threshold of the next tier, or null when every tier is reached. */
+  next: number | null;
+}
+
+/** Every badge with its progress (the gallery). */
+export function badgeProgress(
+  input: EngagementInput,
+  facts: AchievementFacts,
+  timeZone: string
+): BadgeProgress[] {
+  const measured = steps(input, facts, timeZone);
+  return BADGES.map((badge) => {
+    const times = measured[badge.id] as string[];
+    const unlocks = badge.thresholds.flatMap((threshold, i) => {
+      const at = times[threshold - 1];
+      return at === undefined
+        ? []
+        : [{ badgeId: badge.id, tier: TIERS[i] as Tier, threshold, unlockedAt: at }];
+    });
+    return {
+      badge,
+      count: times.length,
+      unlocks,
+      next: badge.thresholds[unlocks.length] ?? null,
+    };
+  });
+}
+
 /** Every badge tier reached, with when it was reached. */
 export function evaluateAchievements(
   input: EngagementInput,
   facts: AchievementFacts,
   timeZone: string
 ): Unlock[] {
-  const measured = steps(input, facts, timeZone);
-  return BADGES.flatMap((badge) => {
-    const times = measured[badge.id] as string[];
-    return badge.thresholds.flatMap((threshold, i) => {
-      const at = times[threshold - 1];
-      return at === undefined
-        ? []
-        : [{ badgeId: badge.id, tier: TIERS[i] as Tier, threshold, unlockedAt: at }];
-    });
-  });
+  return badgeProgress(input, facts, timeZone).flatMap((b) => b.unlocks);
 }

@@ -35,11 +35,16 @@ CapRover with our Postgres. The PWA must keep working offline with a cached iden
 - **Mail:** SMTP via `SUFFA_SMTP_*` through the **Google Workspace SMTP relay**
   (`smtp-relay.gmail.com`), the same setup as Tabayyun: the server is allowed by IP and/or SMTP
   authentication, mails go out from an address of the own domain (up to 10,000 a day).
-  STARTTLS is enforced on ports other than 465; the server greets with the host of
+  STARTTLS is enforced on ports other than 465 (default 587; many hosts block outgoing 465); the server greets with the host of
   `SUFFA_PUBLIC_URL`. Without SMTP the api still starts in prod but sign-in stays off; outside
   prod the link can go to the log for local testing.
 - **Rate limits** (database storage): 5 sign-in mails per 10 minutes and client, 10 link
-  openings per minute, 60 requests per minute on other auth routes.
+  openings per minute, 60 requests per minute on other auth routes. The client is identified
+  by `X-Real-IP`, which Caddy sets from nginx's `X-Forwarded-For` (right-most untrusted
+  entry) and always overwrites; the client-controlled first hop is never used.
+- **Surface:** only `POST /sign-in/magic-link`, `GET /magic-link/verify` and `POST /sign-out`
+  of Better Auth are reachable. Devices and settings go through `/api/v1/account`, which never
+  returns a session token (security review 2026-09, `docs/security/`).
 - **Redirect guard:** Better Auth's own origin check is skipped under `NODE_ENV=test`, and we
   do not rely on it: every `callbackURL`, `errorCallbackURL` and `newUserCallbackURL` must be a
   path inside the app, in the request body and in the link (400 otherwise).

@@ -63,12 +63,10 @@ jobs:
           file: ${{ matrix.dockerfile }}
           load: true
           tags: smoke/suffa-${{ matrix.name }}:test
-          # web: public values compiled into the PWA (anon key is protected by RLS); empty = offline build.
+          # web: sync settings compiled into the PWA (VITE_SYNC_BACKEND=off = offline build).
           # api: version string reported by /api/version.
           build-args: |
-            VITE_SUPABASE_URL=${{ vars.VITE_SUPABASE_URL }}
             VITE_SYNC_BACKEND=${{ vars.VITE_SYNC_BACKEND }}
-            VITE_SUPABASE_ANON_KEY=${{ vars.VITE_SUPABASE_ANON_KEY }}
             VITE_SYNC_ENABLED=${{ vars.VITE_SYNC_ENABLED || 'true' }}
             SUFFA_VERSION=${{ steps.tag.outputs.tag }}
           cache-from: type=gha,scope=${{ matrix.name }}
@@ -147,9 +145,7 @@ jobs:
             ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:${{ steps.tag.outputs.tag }}
             ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:latest
           build-args: |
-            VITE_SUPABASE_URL=${{ vars.VITE_SUPABASE_URL }}
             VITE_SYNC_BACKEND=${{ vars.VITE_SYNC_BACKEND }}
-            VITE_SUPABASE_ANON_KEY=${{ vars.VITE_SUPABASE_ANON_KEY }}
             VITE_SYNC_ENABLED=${{ vars.VITE_SYNC_ENABLED || 'true' }}
             SUFFA_VERSION=${{ steps.tag.outputs.tag }}
           cache-from: type=gha,scope=${{ matrix.name }}

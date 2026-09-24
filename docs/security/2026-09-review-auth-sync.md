@@ -40,6 +40,5 @@
 | Admin 2FA and audit log               | Needs the admin write routes of story 4.2; reading the user list is admin-only already.                                                                           | 4      |
 | Sign-up policy                        | Anyone with an email address can create an account (rate-limited per client). Class invite links (Sprint 4) decide whether sign-up stays open or needs an invite. | 4      |
 | Account deletion and data export      | GDPR story.                                                                                                                                                       | 4      |
-| Remove Supabase from the CSP          | `connect-src` still allows `*.supabase.co` until the data migration (story 4.1) is done.                                                                          | 4      |
 | Rate limit for sync and `/api/errors` | Authenticated sync is bounded per request; a per-user budget and a limit on the error tunnel follow with the pilot load test.                                     | 5      |
 | Magic-link token in proxy access logs | nginx may log the verify URL. The token is single-use and expires in 15 minutes; switching the link to a POST confirmation page would remove it from URLs.        | 5      |

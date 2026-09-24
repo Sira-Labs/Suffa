@@ -84,7 +84,6 @@ export default defineConfig({
         manualChunks: {
           react: ['react', 'react-dom', 'react-router-dom'],
           charts: ['recharts'],
-          supabase: ['@supabase/supabase-js'],
           db: ['dexie'],
           // The wrapper must go into the chunk too, otherwise it lands in the main bundle and
           // pulls Sentry in statically (modulepreload for everyone, even without error tracking).

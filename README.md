@@ -186,8 +186,7 @@ through the own API (`/api/v1/sync`), offline-first as before.
 - **Locally:** start Postgres and the api (`SUFFA_ENV=dev`, no SMTP needed: the sign-in link is
   written to the api log), then `npm run dev`; Vite proxies `/api` to `SUFFA_API_URL`
   (default `http://localhost:8000`).
-- **Supabase** remains selectable with `VITE_SYNC_BACKEND=supabase` until the data migration
-  (story 4.1); see `.env.example`.
+- **Offline build:** `VITE_SYNC_BACKEND=off` builds the app without sync; see `.env.example`.
 
 No secrets live in the code; they are set as environment variables only.
 
@@ -206,7 +205,6 @@ apps/web/       PWA (@suffa/web)
 apps/api/       suffa-api / suffa-worker (@suffa/api: Hono, Postgres, migrations)
 tools/content/  scripts that build the video index and find Tatoeba examples
 infra/          Dockerfiles, Caddyfile, CapRover templates
-supabase/       schema + row-level security (current sync backend)
 docs/           specs, ADRs, roadmap, sprint/engagement/content/cost plans, ops runbook
 apps/web/public/brand/   logo (SVG)
 ```

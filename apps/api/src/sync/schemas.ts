@@ -3,8 +3,7 @@
  * records) and the column list the SQL is built from. Column names only ever come from
  * this file, never from request data, so the dynamic SQL in the repository is injection-safe.
  *
- * Mirrors `apps/web/src/types/*.ts` (camelCase columns); the first five tables also exist in
- * `supabase/schema.sql`, the progress tables (migration 0006) only here.
+ * Mirrors `apps/web/src/types/*.ts` (camelCase columns).
  */
 import { z } from 'zod';
 

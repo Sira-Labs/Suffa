@@ -1,6 +1,6 @@
 /**
  * Devices and time zone of the signed-in account (story 3.4). Only shown with Suffa's own
- * API; the old Supabase backend has no device management.
+ * API (not in offline mode).
  */
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';

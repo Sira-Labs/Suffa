@@ -4,16 +4,10 @@
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
 
-# Supabase settings are compiled into the bundle by Vite (public anon key, protected by RLS).
-# Leave them empty to build the pure offline variant (NoopSyncProvider).
-ARG VITE_SUPABASE_URL=""
-ARG VITE_SUPABASE_ANON_KEY=""
+# Sync goes to suffa-api on the same origin; `off` builds the pure offline variant.
 ARG VITE_SYNC_ENABLED="true"
-# api | supabase | off; empty = Supabase while its keys are set, else the own API.
 ARG VITE_SYNC_BACKEND=""
-ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
-    VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY \
-    VITE_SYNC_ENABLED=$VITE_SYNC_ENABLED \
+ENV VITE_SYNC_ENABLED=$VITE_SYNC_ENABLED \
     VITE_SYNC_BACKEND=$VITE_SYNC_BACKEND
 
 # Manifests first for layer caching; every workspace manifest is needed for `npm ci`.

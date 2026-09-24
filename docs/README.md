@@ -24,7 +24,7 @@
 | [0004](adr/0004-sync-provider-abstraction.md)                     | SyncProvider interface                                        | accepted, default provider changed by 0007 |
 | [0005](adr/0005-platform-name-suffa.md)                           | Platform name "Suffa", AI persona "al-Muʿallim"               | proposed                                   |
 | [0006](adr/0006-monorepo-npm-workspaces.md)                       | Monorepo with npm workspaces                                  | proposed                                   |
-| [0007](adr/0007-self-hosted-backend-on-caprover.md)               | Self-hosted API + Postgres on CapRover (Supabase exit)        | proposed                                   |
+| [0007](adr/0007-self-hosted-backend-on-caprover.md)               | Self-hosted API + Postgres on CapRover (Supabase exit)        | accepted                                   |
 | [0008](adr/0008-authentication-better-auth.md)                    | Authentication with Better Auth                               | proposed                                   |
 | [0009](adr/0009-rbac-roles-and-classes.md)                        | RBAC: platform roles + class roles                            | proposed                                   |
 | [0010](adr/0010-llm-provider-abstraction.md)                      | LLM gateway: Anthropic SDK, OpenRouter, Hugging Face          | proposed                                   |

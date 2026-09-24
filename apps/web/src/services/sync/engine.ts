@@ -151,11 +151,7 @@ export class SyncEngine {
       totals.conflictsResolved += partial.conflictsResolved;
     };
     try {
-      for (const table of SYNC_TABLES) {
-        // A backend that does not know a table yet (Supabase) keeps it local; outbox stays.
-        if (this.provider.supportsTable?.(table) === false) continue;
-        add(await this.syncTable(table));
-      }
+      for (const table of SYNC_TABLES) add(await this.syncTable(table));
       // Review logs of all devices are now here: bring cards up to them and push the result.
       totals.repaired = await this.repairCards();
       if (totals.repaired > 0) add(await this.syncTable('srs_cards'));

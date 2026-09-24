@@ -4,7 +4,7 @@
  * one origin (Caddy proxies /api), so there are no tokens in the browser's storage.
  *
  * Better Auth's field names are mapped onto our snake_case tables (migration 0003); user ids
- * are UUIDs, so records keep working with the sync tables and the Supabase migration.
+ * are UUIDs, so records keep working with the sync tables.
  */
 import { randomUUID } from 'node:crypto';
 import { betterAuth } from 'better-auth';

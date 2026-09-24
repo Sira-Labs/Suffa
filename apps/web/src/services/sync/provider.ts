@@ -1,9 +1,8 @@
 /**
  * SyncProvider interface (dependency injection).
  *
- * The backend is encapsulated behind this interface so it stays replaceable
- * (Supabase today, e.g. PocketBase/self-hosting for data sovereignty later).
- * Concrete implementations: SupabaseSyncProvider, NoopSyncProvider.
+ * The backend is encapsulated behind this interface so it stays replaceable and testable.
+ * Concrete implementations: ApiSyncProvider (Suffa's own API), NoopSyncProvider (offline).
  */
 import type { SyncTable } from '@/types';
 
@@ -48,12 +47,6 @@ export interface SyncProvider {
   /** `returnTo`: in-app path the link leads back to (backends may ignore it). */
   signInWithEmail(email: string, returnTo?: string): Promise<Result<void>>;
   signOut(): Promise<Result<void>>;
-
-  /**
-   * Does the backend store this table? Omitted = every table. The engine skips the others and
-   * keeps their outbox for a backend that does.
-   */
-  supportsTable?(table: SyncTable): boolean;
 
   /** Upload a table's changed records (upsert). */
   push(table: SyncTable, records: SyncableRecord[]): Promise<Result<void>>;

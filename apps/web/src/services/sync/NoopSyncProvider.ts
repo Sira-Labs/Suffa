@@ -2,7 +2,7 @@
  * NoopSyncProvider – pure offline mode without login.
  *
  * Implements the SyncProvider interface but does nothing: no network, no account.
- * This keeps the app fully usable without a Supabase configuration; a later
+ * This keeps the app fully usable without a sync backend; a later
  * "sign in & upload" is possible by setting a real provider.
  */
 import type { SyncTable } from '@/types';

@@ -1,6 +1,6 @@
 # ADR-0009: Role-based access control — platform roles + class roles
 
-- Status: proposed
+- Status: accepted (policies and middleware in place since story 3.2; classes follow in Sprint 4)
 - Date: 2026-09-23
 
 ## Context
@@ -33,3 +33,17 @@ RLS `user_id = auth.uid()`.
 
 A single RBAC matrix (actions × roles) documented in code and covered by a table-driven
 integration test that runs every route against every role.
+
+## Implementation (story 3.2)
+
+- `apps/api/src/authz/policies.ts`: `RBAC_MATRIX` (action → roles) and `can(actor, action, scope)`.
+  Class-scoped actions need the platform role **and** the class role (`class:progress:read`:
+  admin, or teacher of that class); a missing scope is denied.
+- `apps/api/src/authz/middleware.ts`: `authorize(resolver, action)` answers 401 without a
+  session, 403 without permission (logged as `authz.denied`), and puts the actor on the context.
+- `apps/api/src/authz/routes.ts`: every route with its action, plus the public routes. The
+  matrix test (`test/authz.matrix.test.ts`) compares this list with the routes the app
+  registers and runs each protected route against anonymous, student, teacher and admin.
+- The role is read from `users` on every request (no role in the cookie), so a change applies
+  at once. Unknown values in the database fall back to `student`.
+- Dev tokens (outside prod only) always act as students.

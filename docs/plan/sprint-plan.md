@@ -24,7 +24,7 @@ gantt
   S2 Operable (6/6)                  :done, s2, after s1, 14d
   G0 met                             :milestone, done, g0, 2026-09-23, 0d
   section P1 Identity
-  S3 Who are you?                    :s3, after s2, 14d
+  S3 Who are you? (3/5)              :active, s3, after s2, 14d
   S4 Classes & admin                 :s4, after s3, 14d
   section P2 Engagement
   S5 Every day counts               :s5, after s4, 14d
@@ -39,20 +39,24 @@ pie showData
   "Open" : 2
 ```
 
-| Story                   | Status | Notes                                                                                                                                          |
-| ----------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                          |
-| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                        |
-| 1.3 api skeleton        | ✅     |                                                                                                                                                |
-| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                               |
-| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                             |
-| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                    |
-| 2.1 release workflow    | ✅     |                                                                                                                                                |
-| 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                   |
-| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open |
-| 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                 |
-| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                            |
-| 2.6 browser router      | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline   |
+| Story                   | Status | Notes                                                                                                                                            |
+| ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                            |
+| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                          |
+| 1.3 api skeleton        | ✅     |                                                                                                                                                  |
+| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                 |
+| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                               |
+| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                      |
+| 2.1 release workflow    | ✅     |                                                                                                                                                  |
+| 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                     |
+| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open   |
+| 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                   |
+| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                              |
+| 2.6 browser router      | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline     |
+| 3.1 Better Auth         | ✅     | magic link only, Google Workspace SMTP relay (port 587); rate limits in Postgres; httpOnly session cookie; open-redirect guard                   |
+| 3.2 authz               | ✅     | `authz/` policies + `authorize()` middleware; route × role matrix test fails on any route without a policy; first admin route `GET /admin/users` |
+| 3.3 ApiSyncProvider     | ✅     | same-origin cookie sync; `VITE_SYNC_BACKEND=api\|supabase\|off`                                                                                  |
+| 3.4 account UI          | 🟡     | sign-in and sign-out done; session list, "sign out others" and time zone open                                                                    |
 
 ## P0 — Foundation
 

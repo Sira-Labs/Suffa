@@ -24,6 +24,7 @@ import { CurrentUnitCard, currentUnit } from './CurrentUnitCard';
 import { LevelCard } from './LevelCard';
 import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { TodayQuests } from '@/modules/engagement/TodayQuests';
+import { TodayClassCard } from '@/modules/classes/TodayClassCard';
 import { useEngagement } from '@/modules/engagement/useEngagement';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
@@ -119,6 +120,7 @@ export function Dashboard() {
 
       <CurrentUnitCard />
       <TodayQuests summary={engagement} unit={activeUnit ?? 1} />
+      <TodayClassCard />
       <ForgettingReminder cards={cards} logs={logs} />
 
       <div className="today-grid">

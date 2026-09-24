@@ -1,3 +1,4 @@
+import { ClassPage } from './modules/classes/ClassPage';
 import { Badges } from './modules/engagement/Badges';
 import { createBrowserRouter } from 'react-router-dom';
 import { App } from './App';
@@ -48,6 +49,7 @@ export const router = createBrowserRouter([
       { path: 'settings', element: <Settings /> },
       { path: 'admin', element: <Admin /> },
       { path: 'classes', element: <Classes /> },
+      { path: 'classes/:id', element: <ClassPage /> },
       { path: 'badges', element: <Badges /> },
       { path: 'join/:token', element: <Join /> },
       { path: 'more', element: <More /> },

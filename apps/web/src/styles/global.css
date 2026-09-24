@@ -1933,3 +1933,94 @@ textarea.input {
   stroke: var(--good);
   transition: stroke-dashoffset 0.4s ease;
 }
+
+/* ---------- Class pages (Sprint 6) ---------- */
+.class-link {
+  color: inherit;
+  text-decoration: none;
+}
+.class-link:hover,
+.class-link:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+}
+.table-scroll {
+  overflow-x: auto;
+  padding: 0;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.data-table th,
+.data-table td {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+.data-table thead th {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.row-inactive th,
+.row-inactive td {
+  color: var(--warn);
+}
+.mastery-bars {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.mastery-bars li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr 3rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+.mastery-bars .review-progress > span,
+.class-challenge .review-progress > span {
+  border-radius: 999px;
+  background: var(--accent-2);
+}
+.tab-list {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  padding: 0.6rem 0.9rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tab[aria-selected='true'] {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.feed-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.feed-item {
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  background: var(--bg-elev-2);
+}
+.feed-item-you {
+  outline: 2px solid color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.btn-small {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.85rem;
+}

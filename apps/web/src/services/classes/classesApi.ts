@@ -23,6 +23,87 @@ export interface Member {
   joinedAt: string;
 }
 
+/** Class dashboard (story 6.1): aggregates of the active learners, last 7 days. */
+export interface StudentProgress {
+  userId: string;
+  name: string | null;
+  email: string | null;
+  lastActiveAt: string | null;
+  streak: number;
+  totalXp: number;
+  xpWeek: number;
+  questsWeek: number;
+  activeDaysWeek: number;
+  matureWords: number;
+  currentUnit: number | null;
+}
+
+export interface ClassProgress {
+  since: string;
+  students: StudentProgress[];
+  matureByRef: Record<string, number>;
+  leeches: { contentRef: string; learners: number }[];
+}
+
+export type ChallengeTemplate = 'reviews' | 'quests' | 'xp' | 'active-days';
+
+export interface Challenge {
+  id: string;
+  template: ChallengeTemplate;
+  target: number;
+  weekStart: string;
+  progress: number;
+  reached: boolean;
+  contributors: number;
+  yours: number | null;
+}
+
+export const BADGE_ICONS = [
+  'award',
+  'flame',
+  'read',
+  'write',
+  'speak',
+  'listen',
+  'roots',
+  'check',
+] as const;
+export type BadgeIcon = (typeof BADGE_ICONS)[number];
+
+export interface TeacherBadge {
+  id: string;
+  name: string;
+  icon: BadgeIcon;
+  message: string;
+  awards: { userId: string; name: string | null; you: boolean; awardedAt: string }[];
+}
+
+export interface Shoutout {
+  id: string;
+  message: string;
+  author: string | null;
+  to: string | null;
+  toYou: boolean;
+  createdAt: string;
+}
+
+export interface ClassFeed {
+  challenge: Challenge | null;
+  shoutouts: Shoutout[];
+  badges: TeacherBadge[];
+}
+
+/** Challenge templates in words (German). */
+export const CHALLENGE_LABELS: Record<
+  ChallengeTemplate,
+  { title: string; unit: string; suggested: number }
+> = {
+  reviews: { title: 'Karten wiederholen', unit: 'Karten', suggested: 1000 },
+  quests: { title: 'Tagesaufgaben schaffen', unit: 'Aufgaben', suggested: 100 },
+  xp: { title: 'XP sammeln', unit: 'XP', suggested: 3000 },
+  'active-days': { title: 'Lerntage sammeln', unit: 'Lerntage', suggested: 60 },
+};
+
 const MESSAGES: Record<string, string> = {
   invalid_invite:
     'Dieser Einladungslink ist abgelaufen oder ungültig. Bitte frag nach einem neuen.',
@@ -86,6 +167,63 @@ export class ClassesApi {
       `/api/v1/invites/${encodeURIComponent(token)}/join`,
       { method: 'POST' }
     );
+  }
+
+  progress(classId: string) {
+    return this.call<ClassProgress>(`${this.base(classId)}/progress`);
+  }
+
+  feed(classId: string) {
+    return this.call<ClassFeed>(`${this.base(classId)}/feed`);
+  }
+
+  setChallenge(
+    classId: string,
+    challenge: { template: ChallengeTemplate; target: number; timeZone: string }
+  ) {
+    return this.call<Challenge>(`${this.base(classId)}/challenge`, {
+      method: 'PUT',
+      body: JSON.stringify(challenge),
+    });
+  }
+
+  removeChallenge(classId: string) {
+    return this.call<void>(`${this.base(classId)}/challenge`, { method: 'DELETE' });
+  }
+
+  createBadge(
+    classId: string,
+    badge: { name: string; icon: BadgeIcon; message: string }
+  ) {
+    return this.call<TeacherBadge>(`${this.base(classId)}/badges`, {
+      method: 'POST',
+      body: JSON.stringify(badge),
+    });
+  }
+
+  award(classId: string, badgeId: string, userId: string) {
+    return this.call<void>(
+      `${this.base(classId)}/badges/${encodeURIComponent(badgeId)}/awards`,
+      { method: 'POST', body: JSON.stringify({ userId }) }
+    );
+  }
+
+  shoutout(classId: string, message: string, userId: string | null) {
+    return this.call<Shoutout>(`${this.base(classId)}/shoutouts`, {
+      method: 'POST',
+      body: JSON.stringify({ message, userId }),
+    });
+  }
+
+  removeShoutout(classId: string, shoutoutId: string) {
+    return this.call<void>(
+      `${this.base(classId)}/shoutouts/${encodeURIComponent(shoutoutId)}`,
+      { method: 'DELETE' }
+    );
+  }
+
+  private base(classId: string) {
+    return `/api/v1/classes/${encodeURIComponent(classId)}`;
   }
 
   private call<T>(path: string, init: RequestInit = {}) {

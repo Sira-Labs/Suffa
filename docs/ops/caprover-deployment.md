@@ -113,10 +113,10 @@ Env (App Configs → Environment variables):
 | `SUFFA_ERROR_DSN`                                                           | DSN of the GlitchTip project `suffa-api` (§9); unset = no error reporting                               | S2          |
 | `SUFFA_WEB_ERROR_DSN`                                                       | DSN of the GlitchTip project `suffa-web` (§9), handed to the PWA via `/api/client-config`               | S2          |
 | `SUFFA_SYNC_DEV_TOKENS`                                                     | **never in prod** (the api refuses to start): `token=userUuid;…` for local/test sync before Better Auth | dev only    |
-| `SUFFA_SMTP_HOST`, `SUFFA_SMTP_PORT`                                        | `smtp.gmail.com`, `465` during development (§ Sign-in mails)                                            | S3          |
-| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD`                                    | the mail account and, for Gmail, an **app password**; all SMTP variables or none                        | S3          |
+| `SUFFA_SMTP_HOST`, `SUFFA_SMTP_PORT`                                        | `smtp-relay.gmail.com`, `465` – Google Workspace SMTP relay (§ Sign-in mails)                           | S3          |
+| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD`                                    | optional, only if the relay requires SMTP authentication (Workspace user + app password)                | S3          |
 | `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                              | S7          |
-| `SUFFA_MAIL_FROM`                                                           | `Suffa <address@gmail.com>` (Gmail sends only as the account itself)                                    | S3          |
+| `SUFFA_MAIL_FROM`                                                           | `Suffa <noreply@<domain>>` – any address of the Workspace domain                                        | S3          |
 | `SUFFA_S3_ENDPOINT`                                                         | `http://srv-captain--rustfs:9000`                                                                       | S7          |
 | `SUFFA_S3_ALLOW_HTTP`                                                       | `true` (internal endpoint only)                                                                         | S7          |
 | `SUFFA_S3_ACCESS_KEY_ID` / `SUFFA_S3_SECRET_ACCESS_KEY`                     | the `suffa-app` key                                                                                     | S7          |
@@ -411,17 +411,34 @@ GlitchTip adds about 300–500 MB RAM (app + its Postgres) and a little disk for
 ## Sign-in mails (magic link)
 
 Suffa signs people in with a link by email only (ADR-0008); there are no passwords. The api
-sends the mails over SMTP. During development we use a Gmail account, like Tabayyun:
+sends the mails through the **Google Workspace SMTP relay**, the same setup as Tabayyun.
 
-1. In the Google account: **Security → 2-Step Verification** must be on.
-2. **Security → App passwords** → create one named "Suffa" and copy the 16 characters.
-3. In CapRover (`suffa-api` → App Configs → Environment variables) set `SUFFA_SMTP_HOST=smtp.gmail.com`,
-   `SUFFA_SMTP_PORT=465`, `SUFFA_SMTP_USER=<address>@gmail.com`, `SUFFA_SMTP_PASSWORD=<app password>`
-   and `SUFFA_MAIL_FROM=Suffa <address@gmail.com>`, then restart the app.
-4. The log shows `auth.enabled` with `mail: smtp`. Without SMTP it logs `auth.disabled` and the
-   app keeps working offline, only sign-in and sync stay off.
+**1. Relay in the Workspace admin console** (admin.google.com → Apps → Google Workspace →
+Gmail → Routing → **SMTP relay service** → Add another / edit the Tabayyun rule):
 
-Gmail allows about 500 mails a day and marks many identical mails as spam; before the pilot the
-sender moves to a transactional provider (Brevo, Postmark) with the same variables. Secrets
-live only in CapRover, never in the repository. Outside prod the api may run without SMTP: the
+- _Allowed senders:_ "Only addresses in my domains".
+- _Authentication:_ "Only accept mail from the specified IP addresses" with the public IP of the
+  CapRover server, and/or "Require SMTP Authentication" (then a Workspace user with an app
+  password is needed).
+- _Encryption:_ "Require TLS encryption".
+
+If Tabayyun's rule already allows the server's IP, Suffa can use it as is (same server).
+
+**2. Environment of `suffa-api`** (App Configs → Environment variables):
+
+| Name                                     | Value                                                                     |
+| ---------------------------------------- | ------------------------------------------------------------------------- |
+| `SUFFA_SMTP_HOST`                        | `smtp-relay.gmail.com`                                                    |
+| `SUFFA_SMTP_PORT`                        | `465` (implicit TLS) or `587` (STARTTLS, enforced)                        |
+| `SUFFA_MAIL_FROM`                        | `Suffa <noreply@your-domain>` – any address of the Workspace domain       |
+| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD` | only with "Require SMTP Authentication": the user and its app password    |
+| `SUFFA_PUBLIC_URL`                       | `https://suffa.<domain>`; its host name is also the relay greeting (EHLO) |
+
+**3. Restart** the app. The log shows `auth.enabled` with `mail: smtp`. Without host and sender
+it logs `auth.disabled`; the app keeps working offline, only sign-in and sync stay off.
+
+The relay answers `550 5.7.0 Mail relay denied` when neither the IP rule nor authentication
+matches, and `421 4.7.0 Try again later, closing connection. (EHLO)` when the server greets with
+a name Google does not accept – Suffa greets with the host of `SUFFA_PUBLIC_URL`. Secrets live
+only in CapRover, never in the repository. Outside prod the api may run without SMTP: the
 sign-in link is then written to the log (`auth.magic_link_logged`) for local testing.

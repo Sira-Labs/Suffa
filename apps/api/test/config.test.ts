@@ -34,20 +34,43 @@ describe('loadConfig', () => {
     const config = loadConfig({
       ...prodApi,
       SUFFA_PUBLIC_URL: 'https://suffa.example.org/',
-      SUFFA_SMTP_HOST: 'smtp.gmail.com',
-      SUFFA_SMTP_USER: 'someone@gmail.com',
+      SUFFA_SMTP_HOST: 'smtp-relay.gmail.com',
+      SUFFA_SMTP_USER: 'noreply@example.org',
       SUFFA_SMTP_PASSWORD: 'app-password-from-env',
-      SUFFA_MAIL_FROM: 'Suffa <someone@gmail.com>',
+      SUFFA_MAIL_FROM: 'Suffa <noreply@example.org>',
     });
     expect(config.publicUrl).toBe('https://suffa.example.org');
-    expect(config.smtp).toMatchObject({ host: 'smtp.gmail.com', port: 465 });
+    expect(config.smtp).toMatchObject({
+      host: 'smtp-relay.gmail.com',
+      port: 465,
+      auth: { user: 'noreply@example.org' },
+      clientName: 'suffa.example.org',
+    });
   });
 
   it('refuses half an SMTP configuration', () => {
     expect(() =>
-      loadConfig({ SUFFA_DATABASE_URL: GOOD_DB, SUFFA_SMTP_HOST: 'smtp.gmail.com' })
-    ).toThrow(/go together/);
+      loadConfig({ SUFFA_DATABASE_URL: GOOD_DB, SUFFA_SMTP_HOST: 'smtp-relay.gmail.com' })
+    ).toThrow(/SUFFA_SMTP_HOST and SUFFA_MAIL_FROM go together/);
+    expect(() =>
+      loadConfig({
+        SUFFA_DATABASE_URL: GOOD_DB,
+        SUFFA_SMTP_HOST: 'smtp-relay.gmail.com',
+        SUFFA_MAIL_FROM: 'Suffa <noreply@example.org>',
+        SUFFA_SMTP_USER: 'noreply@example.org',
+      })
+    ).toThrow(/SUFFA_SMTP_USER and SUFFA_SMTP_PASSWORD go together/);
     expect(loadConfig({ SUFFA_DATABASE_URL: GOOD_DB }).smtp).toBeUndefined();
+  });
+
+  it('accepts the Workspace relay without credentials (allowed by server IP)', () => {
+    const config = loadConfig({
+      SUFFA_DATABASE_URL: GOOD_DB,
+      SUFFA_SMTP_HOST: 'smtp-relay.gmail.com',
+      SUFFA_SMTP_PORT: '587',
+      SUFFA_MAIL_FROM: 'Suffa <noreply@example.org>',
+    });
+    expect(config.smtp).toMatchObject({ port: 587, auth: undefined });
   });
 
   it('accepts an optional error-tracking DSN and treats blank as unset', () => {

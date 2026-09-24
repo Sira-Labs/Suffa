@@ -32,10 +32,12 @@ CapRover with our Postgres. The PWA must keep working offline with a cached iden
   Links are valid 15 minutes, work once and are stored hashed. Better Auth runs at
   `/api/v1/auth/*`; its field names are mapped onto our snake_case tables (migration 0003),
   user ids stay UUIDs.
-- **Mail:** SMTP via `SUFFA_SMTP_*`; during development a Gmail account with an app password
-  (the same approach Tabayyun uses). A transactional provider follows before the pilot.
-  Without SMTP the api still starts in prod but sign-in stays off; outside prod the link can
-  go to the log for local testing.
+- **Mail:** SMTP via `SUFFA_SMTP_*` through the **Google Workspace SMTP relay**
+  (`smtp-relay.gmail.com`), the same setup as Tabayyun: the server is allowed by IP and/or SMTP
+  authentication, mails go out from an address of the own domain (up to 10,000 a day).
+  STARTTLS is enforced on ports other than 465; the server greets with the host of
+  `SUFFA_PUBLIC_URL`. Without SMTP the api still starts in prod but sign-in stays off; outside
+  prod the link can go to the log for local testing.
 - **Rate limits** (database storage): 5 sign-in mails per 10 minutes and client, 10 link
   openings per minute, 60 requests per minute on other auth routes.
 - **Redirect guard:** Better Auth's own origin check is skipped under `NODE_ENV=test`, and we

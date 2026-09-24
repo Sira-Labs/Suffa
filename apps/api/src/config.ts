@@ -57,7 +57,7 @@ const RawEnvSchema = z.object({
     .transform((value) => value || undefined)
     .pipe(z.string().url('SUFFA_PUBLIC_URL must be a URL').optional())
     .optional(),
-  /** SMTP for sign-in mails (Gmail with an app password during development). */
+  /** SMTP for sign-in mails: the Google Workspace relay (smtp-relay.gmail.com). */
   SUFFA_SMTP_HOST: z.string().trim().optional(),
   SUFFA_SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(465),
   SUFFA_SMTP_USER: z.string().trim().optional(),
@@ -170,17 +170,14 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       );
     }
   }
-  const smtpParts = [
-    raw.SUFFA_SMTP_HOST,
-    raw.SUFFA_SMTP_USER,
-    raw.SUFFA_SMTP_PASSWORD,
-    raw.SUFFA_MAIL_FROM,
-  ];
-  const smtpComplete = smtpParts.every(Boolean);
-  if (smtpParts.some(Boolean) && !smtpComplete) {
-    issues.push(
-      'SUFFA_SMTP_HOST, SUFFA_SMTP_USER, SUFFA_SMTP_PASSWORD and SUFFA_MAIL_FROM go together'
-    );
+  // Host and sender go together; user and password are optional (the Workspace relay can
+  // allow the server by IP) but also only together.
+  const smtpComplete = Boolean(raw.SUFFA_SMTP_HOST && raw.SUFFA_MAIL_FROM);
+  if (Boolean(raw.SUFFA_SMTP_HOST) !== Boolean(raw.SUFFA_MAIL_FROM)) {
+    issues.push('SUFFA_SMTP_HOST and SUFFA_MAIL_FROM go together');
+  }
+  if (Boolean(raw.SUFFA_SMTP_USER) !== Boolean(raw.SUFFA_SMTP_PASSWORD)) {
+    issues.push('SUFFA_SMTP_USER and SUFFA_SMTP_PASSWORD go together');
   }
   // Only the api signs people in; the worker needs neither mail nor the public URL.
   if (raw.SUFFA_ENV === 'prod' && raw.SUFFA_ROLE === 'api') {
@@ -217,9 +214,14 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       ? {
           host: raw.SUFFA_SMTP_HOST!,
           port: raw.SUFFA_SMTP_PORT,
-          user: raw.SUFFA_SMTP_USER!,
-          password: raw.SUFFA_SMTP_PASSWORD!,
+          auth:
+            raw.SUFFA_SMTP_USER && raw.SUFFA_SMTP_PASSWORD
+              ? { user: raw.SUFFA_SMTP_USER, password: raw.SUFFA_SMTP_PASSWORD }
+              : undefined,
           from: raw.SUFFA_MAIL_FROM!,
+          clientName: raw.SUFFA_PUBLIC_URL
+            ? new URL(raw.SUFFA_PUBLIC_URL).hostname
+            : undefined,
         }
       : undefined,
     webErrorDsn: raw.SUFFA_WEB_ERROR_DSN,

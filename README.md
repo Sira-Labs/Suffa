@@ -180,7 +180,7 @@ link and are signed in on that device with an httpOnly session cookie. Learning 
 through the own API (`/api/v1/sync`), offline-first as before.
 
 - **Server:** set `SUFFA_AUTH_SECRET`, `SUFFA_PUBLIC_URL` and the SMTP variables on `suffa-api`
-  (Gmail with an app password during development) — see
+  (the Google Workspace SMTP relay, as for Tabayyun) — see
   [docs/ops/caprover-deployment.md](docs/ops/caprover-deployment.md#sign-in-mails-magic-link).
   Without SMTP the api runs and the app stays in offline mode.
 - **Locally:** start Postgres and the api (`SUFFA_ENV=dev`, no SMTP needed: the sign-in link is

@@ -151,7 +151,9 @@ async function main(): Promise<void> {
     };
     log.info({ mail: config.smtp ? 'smtp' : 'log' }, 'auth.enabled');
   } else if (!canMail) {
-    log.error('auth.disabled: SMTP is not configured (SUFFA_SMTP_* and SUFFA_MAIL_FROM)');
+    log.error(
+      'auth.disabled: SMTP is not configured (SUFFA_SMTP_HOST and SUFFA_MAIL_FROM)'
+    );
   } else {
     log.warn('auth.disabled (set SUFFA_AUTH_SECRET and SUFFA_PUBLIC_URL)');
   }

@@ -1,7 +1,8 @@
 /**
- * Sends the sign-in emails. SMTP in every real environment (Gmail with an app password during
- * development, a transactional provider later); outside prod the link may instead be written
- * to the log, so a developer can sign in without a mail account.
+ * Sends the sign-in emails. SMTP in every real environment: the Google Workspace SMTP relay
+ * (smtp-relay.gmail.com, like Tabayyun), which accepts the server by its IP address and/or SMTP
+ * credentials; outside prod the link may instead be written to the log, so a developer can
+ * sign in without a mail account.
  */
 import nodemailer, { type Transporter } from 'nodemailer';
 
@@ -12,9 +13,11 @@ export interface Mailer {
 export interface SmtpSettings {
   host: string;
   port: number;
-  user: string;
-  password: string;
+  /** Optional: the Workspace relay can allow the server by IP address alone. */
+  auth: { user: string; password: string } | undefined;
   from: string;
+  /** Name the server greets with (EHLO); Google's relay rejects container names. */
+  clientName: string | undefined;
 }
 
 /** Subject and bodies of the sign-in mail (German, like the app). */
@@ -45,12 +48,17 @@ export class SmtpMailer implements Mailer {
   private readonly transport: Transporter;
 
   constructor(private readonly settings: SmtpSettings) {
+    const implicitTls = settings.port === 465;
     this.transport = nodemailer.createTransport({
       host: settings.host,
       port: settings.port,
-      // 465 is implicit TLS (Gmail); other ports upgrade with STARTTLS.
-      secure: settings.port === 465,
-      auth: { user: settings.user, pass: settings.password },
+      // 465 is implicit TLS; other ports must upgrade with STARTTLS, never send in clear.
+      secure: implicitTls,
+      requireTLS: !implicitTls,
+      name: settings.clientName,
+      auth: settings.auth
+        ? { user: settings.auth.user, pass: settings.auth.password }
+        : undefined,
     });
   }
 

@@ -7,6 +7,7 @@
  */
 import type { SyncTable } from '@/types';
 import type {
+  PullResult,
   AuthListener,
   AuthState,
   Result,
@@ -48,10 +49,7 @@ export class NoopSyncProvider implements SyncProvider {
     return { ok: true, value: undefined };
   }
 
-  async pull(
-    _table: SyncTable,
-    _since: string | null
-  ): Promise<Result<SyncableRecord[]>> {
-    return { ok: true, value: [] };
+  async pull(_table: SyncTable, _since: string | null): Promise<Result<PullResult>> {
+    return { ok: true, value: { records: [], watermark: null } };
   }
 }

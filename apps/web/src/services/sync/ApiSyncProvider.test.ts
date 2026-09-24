@@ -79,16 +79,20 @@ describe('ApiSyncProvider', () => {
       if (!path.includes('afterId')) {
         return json({
           records: [{ id: 'a', updated_at: '2026-09-24T10:00:00.000Z', deleted: false }],
-          next: { since: '2026-09-24T10:00:00.000Z', afterId: 'a' },
+          next: { since: '2026-10-01T10:00:00.000Z', afterId: 'a' },
+          watermark: '2026-10-01T10:00:00.000Z',
         });
       }
       return json({
         records: [{ id: 'b', updated_at: '2026-09-24T10:00:00.000Z', deleted: false }],
         next: null,
+        watermark: '2026-10-01T10:00:05.000Z',
       });
     });
     const result = await provider.pull('srs_cards', '2026-09-01T00:00:00.000Z');
-    expect(result.ok && result.value.map((r) => r.id)).toEqual(['a', 'b']);
+    expect(result.ok && result.value.records.map((r) => r.id)).toEqual(['a', 'b']);
+    // The watermark is the server's time of the last record, not a record timestamp.
+    expect(result.ok && result.value.watermark).toBe('2026-10-01T10:00:05.000Z');
     expect(calls[0]!.path).toBe(
       '/api/v1/sync/srs_cards/pull?since=2026-09-01T00%3A00%3A00.000Z'
     );

@@ -63,3 +63,16 @@ merges as a union and XP counts each item once. Listening progress keeps a finis
 finished (`listeningPrecedence`, same rule in the API). Dexie schema version 7 queues what a
 device already had, once, so existing progress reaches the account on the first sync. The
 legacy Supabase backend keeps these tables local (`supportsTable`).
+
+## Update 2026-09-24: pull by server time, sync automatically
+
+The pull watermark was the newest `updated_at` a device had seen. A device that uploads its
+existing data later (e.g. after the progress tables joined sync) pushes old `updated_at`
+values, and devices that had pulled before never received them. Now the server stamps every
+insert and update with its own time (`synced_at`, API migration 0007) and pulls page by
+`(synced_at, id)`; the response carries that time as `watermark`, and devices pull from it
+with a two-minute overlap for writes in flight. The old watermarks were dropped, so every
+device pulls everything once.
+
+The app also syncs by itself: when it returns to the foreground, every five minutes while
+visible, and within a minute of local changes (at most every 30 s; `autoSync.ts`).

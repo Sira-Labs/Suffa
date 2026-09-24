@@ -18,9 +18,14 @@ import type { Result, SyncProvider, SyncableRecord } from './provider';
 
 type Row = SyncableRecord & { lastReviewed?: string | null };
 
-/** In-memory server with the same acceptance rule as the API's upsert. */
+/**
+ * In-memory server with the API's acceptance rule and its server-time watermark: every stored
+ * record gets the server's own change time (synced_at), and pulls go by that time.
+ */
 class FakeServer {
   tables = new Map<SyncTable, Map<string, Row>>();
+  private syncedAt = new Map<string, number>();
+  private clock = Date.parse('2026-10-01T00:00:00.000Z');
 
   private table(name: SyncTable) {
     let t = this.tables.get(name);
@@ -40,14 +45,29 @@ class FakeServer {
           ? reviewed(incoming) > reviewed(stored) ||
             (reviewed(incoming) === reviewed(stored) && newer)
           : newer;
-      if (accept) t.set(incoming.id, { ...incoming });
+      if (accept) {
+        t.set(incoming.id, { ...incoming });
+        // Server time moves on by a minute per write, far beyond the pull overlap.
+        this.clock += 60 * 60 * 1000;
+        this.syncedAt.set(`${name}/${incoming.id}`, this.clock);
+      }
     }
   }
 
-  pull(name: SyncTable, since: string | null): Row[] {
-    return [...this.table(name).values()]
-      .filter((r) => !since || r.updated_at > since)
-      .map((r) => ({ ...r }));
+  pull(
+    name: SyncTable,
+    since: string | null
+  ): { records: Row[]; watermark: string | null } {
+    const after = since ? Date.parse(since) : -Infinity;
+    const rows = [...this.table(name).values()]
+      .map((r) => ({ r, at: this.syncedAt.get(`${name}/${r.id}`)! }))
+      .filter(({ at }) => at > after)
+      .sort((a, b) => a.at - b.at);
+    const last = rows.at(-1);
+    return {
+      records: rows.map(({ r }) => ({ ...r })),
+      watermark: last ? new Date(last.at).toISOString() : null,
+    };
   }
 
   card(id: string) {
@@ -190,5 +210,40 @@ describe('SyncEngine across two devices', () => {
     // Absent optional fields stay absent (the server answers them as null).
     expect(pinned).toMatchObject({ id: 'yt/abc', pinned: true });
     expect('positionSec' in pinned!).toBe(false);
+  });
+
+  it('pulls what another device uploads later, however old its timestamps', async () => {
+    const server = new FakeServer();
+    const phone = newDatabase('phone');
+    const desktop = newDatabase('desktop');
+    const practised = (id: string, at: string) => ({
+      id,
+      unit: 1,
+      skill: 'read' as const,
+      itemId: id,
+      practisedAt: at,
+      updated_at: '',
+      deleted: false,
+    });
+    await practiceRepo.put(practised('1:read:phone', '2026-09-24T14:00:00.000Z'), phone);
+    await new SyncEngine(device(server), phone).sync();
+
+    // The desktop's record is from last week, uploaded only now.
+    await desktop.practice_progress.put({
+      ...practised('1:read:desktop', '2026-09-17T09:00:00.000Z'),
+      updated_at: '2026-09-17T09:00:00.000Z',
+    });
+    await desktop.outbox.add({
+      table: 'practice_progress',
+      recordId: '1:read:desktop',
+      queuedAt: '2026-09-17T09:00:00.000Z',
+    });
+    await new SyncEngine(device(server), desktop).sync();
+
+    await new SyncEngine(device(server), phone).sync();
+    expect((await practiceRepo.all(phone)).map((p) => p.id).sort()).toEqual([
+      '1:read:desktop',
+      '1:read:phone',
+    ]);
   });
 });

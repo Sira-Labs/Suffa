@@ -1,8 +1,10 @@
 /**
  * Sync store: holds provider, auth state, sync status and pending count.
- * Triggers a sync on login, manually and on reconnect (online event).
+ * Triggers a sync on login, on reconnect, when the app returns to the foreground, every few
+ * minutes and soon after local changes (autoSync.ts), and manually.
  */
 import { create } from 'zustand';
+import { startAutoSync } from '@/services/sync/autoSync';
 import {
   createSyncProvider,
   SyncEngine,
@@ -74,6 +76,12 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     if (typeof window !== 'undefined') {
       window.addEventListener('online', () => void get().syncNow());
       window.addEventListener('offline', () => set({ status: 'offline' }));
+      // Foreground, every few minutes and soon after local changes (see autoSync.ts).
+      startAutoSync({
+        sync: () => get().syncNow(),
+        isSignedIn: () => get().auth.status === 'signed-in',
+        pending: () => get().engine.pendingCount(),
+      });
     }
 
     void get().refreshPending();

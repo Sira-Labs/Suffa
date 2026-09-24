@@ -13,6 +13,7 @@
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js';
 import type { SyncTable } from '@/types';
 import type {
+  PullResult,
   AuthListener,
   AuthState,
   Result,
@@ -154,7 +155,7 @@ export class SupabaseSyncProvider implements SyncProvider {
     }
   }
 
-  async pull(table: SyncTable, since: string | null): Promise<Result<SyncableRecord[]>> {
+  async pull(table: SyncTable, since: string | null): Promise<Result<PullResult>> {
     try {
       let query = this.client.from(table).select('*');
       if (since) {
@@ -172,7 +173,13 @@ export class SupabaseSyncProvider implements SyncProvider {
           error: { code: error.code ?? 'pull-failed', message: error.message },
         };
       }
-      return { ok: true, value: (data ?? []) as SyncableRecord[] };
+      const records = (data ?? []) as SyncableRecord[];
+      // Legacy backend: no server time, the newest updated_at is the best watermark it has.
+      const watermark = records.reduce<string | null>(
+        (acc, r) => (acc === null || r.updated_at > acc ? r.updated_at : acc),
+        null
+      );
+      return { ok: true, value: { records, watermark } };
     } catch (cause) {
       const message = cause instanceof Error ? cause.message : 'Unknown pull error';
       log.error('pull exception', { table, message });

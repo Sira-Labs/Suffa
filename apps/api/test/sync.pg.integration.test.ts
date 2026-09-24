@@ -179,6 +179,16 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
     }
   });
 
+  const practice = (id: string, at: string): SyncRecord => ({
+    id,
+    updated_at: at,
+    deleted: false,
+    unit: 1,
+    skill: 'read',
+    itemId: id,
+    practisedAt: at,
+  });
+
   it('is last-write-wins: newer replaces, older is ignored', async () => {
     await repo.upsert(ALICE, 'srs_cards', [card('c1', '2026-09-23T10:00:00.000Z', 1)]);
     expect(
@@ -300,16 +310,45 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
     expect(seen).toEqual(['a', 'b', 'c', 'd', 'e', 'f']);
   });
 
-  it('pulls only changes after `since` and syncs tombstones', async () => {
+  it('pulls only what the server stored after the watermark, and tombstones', async () => {
     await repo.upsert(ALICE, 'srs_cards', [card('old', '2026-09-23T08:00:00.000Z')]);
+    const first = await repo.pull(ALICE, 'srs_cards', {
+      since: null,
+      afterId: null,
+      limit: 10,
+    });
+    expect(first.watermark).not.toBeNull();
     await repo.upsert(ALICE, 'srs_cards', [
       { ...card('gone', '2026-09-23T12:00:00.000Z'), deleted: true },
     ]);
     const page = await repo.pull(ALICE, 'srs_cards', {
-      since: '2026-09-23T09:00:00.000Z',
+      since: first.watermark,
       afterId: null,
       limit: 10,
     });
     expect(page.records.map((r) => [r.id, r.deleted])).toEqual([['gone', true]]);
+  });
+
+  it('pulls data another device uploads late, however old its updated_at', async () => {
+    // Phone syncs today and remembers the watermark.
+    await repo.upsert(ALICE, 'practice_progress', [
+      practice('p-today', '2026-09-24T14:00:00.000Z'),
+    ]);
+    const phone = await repo.pull(ALICE, 'practice_progress', {
+      since: null,
+      afterId: null,
+      limit: 10,
+    });
+    // Desktop uploads what it practised last week, for the first time.
+    await repo.upsert(ALICE, 'practice_progress', [
+      practice('d-last-week', '2026-09-17T09:00:00.000Z'),
+    ]);
+    const next = await repo.pull(ALICE, 'practice_progress', {
+      since: phone.watermark,
+      afterId: null,
+      limit: 10,
+    });
+    expect(next.records.map((r) => r.id)).toEqual(['d-last-week']);
+    expect(next.records[0]).not.toHaveProperty('synced_at');
   });
 });

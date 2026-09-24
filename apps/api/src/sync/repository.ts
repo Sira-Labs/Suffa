@@ -16,7 +16,10 @@ import {
 } from './schemas.js';
 
 export interface PullCursor {
-  /** ISO timestamp: return records with updated_at after it (or equal, when afterId is set). */
+  /**
+   * Server time (synced_at) of the last record the device has: return records the server
+   * stored after it (or at it, with a greater id, when afterId is set).
+   */
   since: string | null;
   /** Tie-breaker for records sharing `since`. */
   afterId: string | null;
@@ -27,7 +30,12 @@ export interface PullPage {
   records: SyncRecord[];
   /** Cursor for the next page, or null when this was the last one. */
   next: { since: string; afterId: string } | null;
+  /** Server time of the last record in this page; the device's `since` for its next pull. */
+  watermark: string | null;
 }
+
+/** The server's own change time; never sent as a record field. */
+const SYNCED_AT = 'synced_at';
 
 export interface SyncRepository {
   /** Upserts records for one user; returns how many rows were inserted or replaced. */
@@ -63,7 +71,7 @@ export function newestPerId(records: SyncRecord[]): SyncRecord[] {
 }
 
 function toWire(row: Record<string, unknown>): SyncRecord {
-  const { user_id: _userId, ...rest } = row;
+  const { user_id: _userId, synced_at: _syncedAt, ...rest } = row;
   for (const [key, value] of Object.entries(rest)) {
     if (value instanceof Date) rest[key] = value.toISOString();
   }
@@ -123,10 +131,12 @@ export class PgSyncRepository implements SyncRepository {
       });
       return `(${placeholders.join(', ')})`;
     });
-    const updates = columns
-      .filter((column) => column !== 'id')
-      .map((column) => `${quote(column)} = excluded.${quote(column)}`)
-      .join(', ');
+    const updates = [
+      ...columns
+        .filter((column) => column !== 'id')
+        .map((column) => `${quote(column)} = excluded.${quote(column)}`),
+      `${quote(SYNCED_AT)} = date_trunc('milliseconds', clock_timestamp())`,
+    ].join(', ');
     const t = quote(table);
     const sql = `insert into ${t} (${insertColumns}) values ${rows.join(', ')}
       on conflict ("user_id", "id") do update set ${updates}
@@ -143,23 +153,28 @@ export class PgSyncRepository implements SyncRepository {
   ): Promise<PullPage> {
     const params: unknown[] = [userId];
     let filter = '';
+    const s = quote(SYNCED_AT);
     if (cursor.since && cursor.afterId) {
       params.push(cursor.since, cursor.afterId);
-      filter = `and ("updated_at" > $2 or ("updated_at" = $2 and "id" > $3))`;
+      filter = `and (${s} > $2 or (${s} = $2 and "id" > $3))`;
     } else if (cursor.since) {
       params.push(cursor.since);
-      filter = `and "updated_at" > $2`;
+      filter = `and ${s} > $2`;
     }
     params.push(cursor.limit + 1);
     const sql = `select * from ${quote(table)} where "user_id" = $1 ${filter}
-      order by "updated_at", "id" limit $${params.length}`;
-    const { rows } = await this.db.query(sql, params);
+      order by ${s}, "id" limit $${params.length}`;
+    const { rows } = await this.db.query<Record<string, unknown>>(sql, params);
+    const page = rows.slice(0, cursor.limit);
     const hasMore = rows.length > cursor.limit;
-    const records = rows.slice(0, cursor.limit).map(toWire);
-    const last = records[records.length - 1];
+    const lastRow = page.at(-1);
+    const watermark = lastRow ? (lastRow[SYNCED_AT] as Date).toISOString() : null;
+    const records = page.map(toWire);
+    const last = records.at(-1);
     return {
       records,
-      next: hasMore && last ? { since: last.updated_at, afterId: last.id } : null,
+      next: hasMore && last && watermark ? { since: watermark, afterId: last.id } : null,
+      watermark,
     };
   }
 }

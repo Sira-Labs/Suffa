@@ -27,7 +27,7 @@ const resolver: AuthResolver = { actor: async (h) => actorFrom(h) };
 
 const syncRepo: SyncRepository = {
   upsert: async (_u, _t, records) => records.length,
-  pull: async () => ({ records: [], next: null }),
+  pull: async () => ({ records: [], next: null, watermark: null }),
 };
 const adminRepo: AdminRepository = { listUsers: async () => ({ users: [], next: null }) };
 const accountRepo: AccountRepository = {

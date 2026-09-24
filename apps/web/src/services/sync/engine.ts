@@ -92,8 +92,25 @@ function fromServer(table: SyncTable, record: SyncRecordOf): SyncRecordOf {
 
 const EMPTY: SyncResult = { pushed: 0, pulled: 0, conflictsResolved: 0, repaired: 0 };
 
+/**
+ * Where the last pull of a table ended (the backend's watermark). The key changed from
+ * `lastPull:` when watermarks became server time: the old values were record timestamps and
+ * are dropped, so every device pulls everything once.
+ */
 function lastPullKey(table: SyncTable): string {
-  return `lastPull:${table}`;
+  return `pull:${table}`;
+}
+
+/**
+ * Pull a little before the watermark: a write that was in flight on the server while the
+ * last pull ran may carry a slightly earlier server time. Re-pulled records merge as equal.
+ */
+export const PULL_OVERLAP_MS = 2 * 60 * 1000;
+
+function withOverlap(watermark: string | null): string | null {
+  if (!watermark) return null;
+  const t = Date.parse(watermark);
+  return Number.isNaN(t) ? null : new Date(t - PULL_OVERLAP_MS).toISOString();
 }
 
 export class SyncEngine {
@@ -172,12 +189,14 @@ export class SyncEngine {
     //    newer remote state (push would otherwise upsert blindly).
     const sinceMeta = await this.database.sync_meta.get(lastPullKey(table));
     const since = sinceMeta?.value ?? null;
-    const pullResult = await this.provider.pull(table, since);
+    const pullResult = await this.provider.pull(table, withOverlap(since));
     if (!pullResult.ok) {
       log.warn('pull failed', { table, error: pullResult.error.message });
       return { ...EMPTY };
     }
-    const remotes = (pullResult.value as SyncRecordOf[]).map((r) => fromServer(table, r));
+    const remotes = (pullResult.value.records as SyncRecordOf[]).map((r) =>
+      fromServer(table, r)
+    );
 
     // 2. RECONCILE: local input set = dirty (outbox) ∪ current local versions
     //    of the pulled IDs. This way conflicts are resolved correctly via LWW.
@@ -232,13 +251,10 @@ export class SyncEngine {
     // replaced by a newer remote state. Both are the case here.
     await this.clearOutbox(outboxEntries);
 
-    // Advance the pull watermark.
-    const newest = remotes.reduce<string>(
-      (acc, r) => (r.updated_at > acc ? r.updated_at : acc),
-      since ?? ''
-    );
-    if (newest) {
-      await this.database.sync_meta.put({ key: lastPullKey(table), value: newest });
+    // Advance the pull watermark (backend time; never moves backwards).
+    const watermark = pullResult.value.watermark;
+    if (watermark && (!since || watermark > since)) {
+      await this.database.sync_meta.put({ key: lastPullKey(table), value: watermark });
     }
 
     return {

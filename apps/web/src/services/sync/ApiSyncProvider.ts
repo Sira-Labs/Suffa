@@ -9,6 +9,7 @@
 import type { SyncTable } from '@/types';
 import { logger } from '@/services/logger';
 import type {
+  PullResult,
   AuthListener,
   AuthState,
   Result,
@@ -46,6 +47,8 @@ export interface DeviceSession {
 interface PullPage {
   records: SyncableRecord[];
   next: { since: string; afterId: string } | null;
+  /** Server time of the page's last record. */
+  watermark: string | null;
 }
 
 type Fetch = typeof fetch;
@@ -174,8 +177,9 @@ export class ApiSyncProvider implements SyncProvider {
     return { ok: true, value: undefined };
   }
 
-  async pull(table: SyncTable, since: string | null): Promise<Result<SyncableRecord[]>> {
+  async pull(table: SyncTable, since: string | null): Promise<Result<PullResult>> {
     const all: SyncableRecord[] = [];
+    let watermark: string | null = null;
     let cursor: PullPage['next'] = since ? { since, afterId: '' } : null;
     // Keyset pagination: follow `next` until the API says this was the last page.
     for (;;) {
@@ -186,7 +190,8 @@ export class ApiSyncProvider implements SyncProvider {
       const page = await this.send<PullPage>(`/api/v1/sync/${table}/pull${suffix}`);
       if (!page.ok) return page;
       all.push(...page.value.records);
-      if (!page.value.next) return { ok: true, value: all };
+      watermark = page.value.watermark ?? watermark;
+      if (!page.value.next) return { ok: true, value: { records: all, watermark } };
       cursor = page.value.next;
     }
   }

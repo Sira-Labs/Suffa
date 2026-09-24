@@ -4,6 +4,7 @@ import { SyncEngine } from '@/services/sync';
 import type {
   AuthListener,
   AuthState,
+  PullResult,
   Result,
   SyncProvider,
   SyncableRecord,
@@ -19,6 +20,14 @@ import { createCard } from '@/services/srs';
 class FakeProvider implements SyncProvider {
   readonly name = 'fake';
   store: Record<string, Map<string, SyncableRecord>> = {};
+  /** Server time of each stored record (the backend's watermark), an hour per write. */
+  private stored = new Map<string, number>();
+  private clock = Date.parse('2026-10-01T00:00:00.000Z');
+
+  private stamp(table: SyncTable, id: string) {
+    this.clock += 60 * 60 * 1000;
+    this.stored.set(`${table}/${id}`, this.clock);
+  }
 
   isConfigured(): boolean {
     return true;
@@ -37,19 +46,31 @@ class FakeProvider implements SyncProvider {
   }
   async push(table: SyncTable, records: SyncableRecord[]): Promise<Result<void>> {
     const bucket = (this.store[table] ??= new Map());
-    for (const r of records) bucket.set(r.id, { ...r });
+    for (const r of records) {
+      bucket.set(r.id, { ...r });
+      this.stamp(table, r.id);
+    }
     return { ok: true, value: undefined };
   }
-  async pull(table: SyncTable, since: string | null): Promise<Result<SyncableRecord[]>> {
-    const bucket = this.store[table] ?? new Map();
-    const all = [...bucket.values()];
-    const filtered = since ? all.filter((r) => r.updated_at > since) : all;
-    return { ok: true, value: filtered };
+  async pull(table: SyncTable, since: string | null): Promise<Result<PullResult>> {
+    const bucket = this.store[table] ?? new Map<string, SyncableRecord>();
+    const after = since ? Date.parse(since) : -Infinity;
+    const at = (r: SyncableRecord) => this.stored.get(`${table}/${r.id}`)!;
+    const records = [...bucket.values()].filter((r) => at(r) > after);
+    const newest = Math.max(...records.map(at));
+    return {
+      ok: true,
+      value: {
+        records,
+        watermark: records.length > 0 ? new Date(newest).toISOString() : null,
+      },
+    };
   }
 
   /** Test helper: a record directly in the backend (another device). */
   seed(table: SyncTable, record: SyncableRecord) {
     (this.store[table] ??= new Map()).set(record.id, record);
+    this.stamp(table, record.id);
   }
 }
 

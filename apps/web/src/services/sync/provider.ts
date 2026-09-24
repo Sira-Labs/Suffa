@@ -57,6 +57,14 @@ export interface SyncProvider {
   /** Upload a table's changed records (upsert). */
   push(table: SyncTable, records: SyncableRecord[]): Promise<Result<void>>;
 
-  /** Fetch records changed after `since` (ISO). */
-  pull(table: SyncTable, since: string | null): Promise<Result<SyncableRecord[]>>;
+  /**
+   * Fetch records the backend stored after `since` – a watermark from an earlier pull, not a
+   * record timestamp – and the watermark to continue from next time (null: keep the old one).
+   */
+  pull(table: SyncTable, since: string | null): Promise<Result<PullResult>>;
+}
+
+export interface PullResult {
+  records: SyncableRecord[];
+  watermark: string | null;
 }

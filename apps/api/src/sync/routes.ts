@@ -2,7 +2,10 @@
  * Sync endpoints, mounted at /api/v1/sync (same contract as the PWA's SyncProvider):
  *
  *   POST /:table/push   body { records: [...] }          → { received, applied }
- *   GET  /:table/pull   ?since=ISO&afterId=&limit=      → { records, next }
+ *   GET  /:table/pull   ?since=ISO&afterId=&limit=      → { records, next, watermark }
+ *
+ * `since` is server time: the `watermark` of the device's previous pull. It does not depend
+ * on the records' own updated_at, so data another device uploads late is still pulled.
  *
  * Every request needs the `sync:own` permission (authz middleware); `user_id` is the signed-in
  * actor's and any `user_id` in the payload is ignored (the schemas strip unknown fields).

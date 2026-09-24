@@ -29,7 +29,7 @@ class FakeRepo implements SyncRepository {
       .filter(([k]) => k.startsWith(`${userId}|${table}|`))
       .map(([, r]) => r)
       .slice(0, cursor.limit);
-    return { records, next: null };
+    return { records, next: null, watermark: null };
   }
 }
 

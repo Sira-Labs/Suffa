@@ -21,7 +21,7 @@ export function SyncBadge() {
       type="button"
       className="badge"
       onClick={() => void syncNow()}
-      title="Jetzt synchronisieren"
+      title="Automatischer Abgleich – tippen zum sofortigen Abgleichen"
       style={{ cursor: 'pointer' }}
     >
       <span

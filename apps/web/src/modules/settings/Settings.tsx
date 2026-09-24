@@ -112,14 +112,22 @@ function AccountPanel() {
         <span>
           Angemeldet als <strong>{auth.user.email ?? auth.user.id}</strong>
         </span>
-        {lastSyncAt && (
-          <span className="muted">
-            Letzter Sync: {new Date(lastSyncAt).toLocaleString('de-DE')}
-          </span>
-        )}
+        <span className="muted">
+          Dein Lernstand wird automatisch abgeglichen: beim Öffnen der App, alle paar
+          Minuten und kurz nach jeder Übung.
+          {lastSyncAt &&
+            ` Zuletzt: ${new Date(lastSyncAt).toLocaleString('de-DE', {
+              dateStyle: 'short',
+              timeStyle: 'short',
+            })}.`}
+        </span>
         <div className="row">
-          <button className="btn btn-primary" onClick={() => void syncNow()}>
-            Jetzt synchronisieren
+          <button
+            className="btn"
+            onClick={() => void syncNow()}
+            title="Nur nötig, wenn du sofort auf ein anderes Gerät wechselst"
+          >
+            Sofort abgleichen
           </button>
           <button className="btn" onClick={() => void signOut()}>
             Abmelden

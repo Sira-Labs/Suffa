@@ -292,5 +292,134 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-8-1",
+      "einheit": 8,
+      "abschnitt": 1,
+      "titel": "Personalpronomen im Plural",
+      "regel": "نَحْنُ wir · أَنْتُمْ ihr · هُمْ sie (Pl.)",
+      "erklaerung": [
+        "نَحْنُ gilt für Männer und Frauen. أَنْتُمْ und هُمْ stehen für gemischte oder männliche Gruppen; für reine Frauengruppen gibt es أَنْتُنَّ und هُنَّ.",
+        "Wie im Singular brauchen sie kein „sein“: نَحْنُ مُهَنْدِسونَ – Wir sind Ingenieure."
+      ],
+      "beispiele": [
+        {
+          "ar": "نَحْنُ طُلّابٌ.",
+          "de": "Wir sind Studenten."
+        },
+        {
+          "ar": "أَيْنَ تَعْمَلونَ؟",
+          "de": "Wo arbeitet ihr?"
+        },
+        {
+          "ar": "هُمْ في الْمَزْرَعَةِ.",
+          "de": "Sie sind auf dem Bauernhof."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-8-1#0",
+          "frage": "„Wir arbeiten im Krankenhaus.“",
+          "ar": "… نَعْمَلُ في الْمُسْتَشْفى.",
+          "antwort": "نَحْنُ",
+          "ablenker": ["هُمْ", "أَنْتُمْ", "أَنا"]
+        },
+        {
+          "id": "g-8-1#1",
+          "frage": "Was bedeutet هُمْ?",
+          "ar": null,
+          "antwort": "sie (Plural)",
+          "ablenker": ["sie (eine Frau)", "ihr", "wir"]
+        }
+      ]
+    },
+    {
+      "id": "g-8-2",
+      "einheit": 8,
+      "abschnitt": 2,
+      "titel": "Die Nisba-Endung",
+      "regel": "مِصْرُ → مِصْرِيٌّ / مِصْرِيَّةٌ",
+      "erklaerung": [
+        "Mit ـِيٌّ (m) bzw. ـِيَّةٌ (f) wird aus einem Land, Ort oder Fach ein Adjektiv der Herkunft oder Zugehörigkeit.",
+        "Ein ة oder Artikel des Grundworts fällt weg: السُّعودِيَّةُ → سُعودِيٌّ, الزِّراعَةُ → زِراعِيٌّ."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَنا مِصْرِيٌّ.",
+          "de": "Ich bin Ägypter."
+        },
+        {
+          "ar": "هِيَ طَبيبَةٌ سورِيَّةٌ.",
+          "de": "Sie ist eine syrische Ärztin."
+        },
+        {
+          "ar": "عَمَلٌ زِراعِيٌّ",
+          "de": "landwirtschaftliche Arbeit"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-8-2#0",
+          "frage": "„Sie ist Deutsche.“",
+          "ar": null,
+          "antwort": "هِيَ أَلْمانِيَّةٌ.",
+          "ablenker": ["هِيَ أَلْمانِيٌّ.", "هِيَ أَلْمانِيا.", "هِيَ الْأَلْمانِيُّ."]
+        },
+        {
+          "id": "g-8-2#1",
+          "frage": "Nisba von لُبْنانُ (m)",
+          "ar": null,
+          "antwort": "لُبْنانِيٌّ",
+          "ablenker": ["لُبْنانِيَّةٌ", "لُبْنانُ", "اللُّبْنانُ"]
+        }
+      ]
+    },
+    {
+      "id": "g-8-3",
+      "einheit": 8,
+      "abschnitt": 3,
+      "titel": "„Haben“ mit عِنْدَ",
+      "regel": "عِنْدي = ich habe · عِنْدَكَ = du hast",
+      "erklaerung": [
+        "Das Arabische hat kein Verb „haben“. Man sagt „bei mir ist …“: عِنْدي سَيّارَةٌ – Ich habe ein Auto.",
+        "عِنْدَ nimmt die Possessivendungen: عِنْدَهُ, عِنْدَها, عِنْدَنا."
+      ],
+      "beispiele": [
+        {
+          "ar": "عِنْدي عَمَلٌ كَثيرٌ.",
+          "de": "Ich habe viel Arbeit."
+        },
+        {
+          "ar": "هَلْ عِنْدَكَ وَقْتٌ؟",
+          "de": "Hast du Zeit?"
+        },
+        {
+          "ar": "عِنْدَها عِيادَةٌ.",
+          "de": "Sie hat eine Praxis."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-8-3#0",
+          "frage": "„Wir haben eine Farm.“",
+          "ar": null,
+          "antwort": "عِنْدَنا مَزْرَعَةٌ.",
+          "ablenker": [
+            "عِنْدي مَزْرَعَةٌ.",
+            "نَحْنُ مَزْرَعَةٌ.",
+            "عِنْدَهُمْ مَزْرَعَةٌ."
+          ]
+        },
+        {
+          "id": "g-8-3#1",
+          "frage": "„Er hat ein Büro.“",
+          "ar": null,
+          "antwort": "عِنْدَهُ مَكْتَبٌ.",
+          "ablenker": ["عِنْدَها مَكْتَبٌ.", "هُوَ مَكْتَبٌ.", "عِنْدَكَ مَكْتَبٌ."]
+        }
+      ]
+    }
   ]
 }

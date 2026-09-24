@@ -331,5 +331,138 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-10-1",
+      "einheit": 10,
+      "abschnitt": 1,
+      "titel": "Der Vergleich: أَكْبَرُ مِنْ",
+      "regel": "أَفْعَلُ مِنْ = …er als",
+      "erklaerung": [
+        "Der Komparativ hat die Form أَفْعَلُ und ändert sich nicht nach Geschlecht: كَبير → أَكْبَرُ, بارِد → أَبْرَدُ.",
+        "„als“ heißt مِنْ: الشِّتاءُ أَبْرَدُ مِنَ الْخَريفِ."
+      ],
+      "beispiele": [
+        {
+          "ar": "الصَّيْفُ أَحَرُّ مِنَ الرَّبيعِ.",
+          "de": "Der Sommer ist heißer als der Frühling."
+        },
+        {
+          "ar": "الْيَوْمُ أَبْرَدُ مِنْ أَمْسِ.",
+          "de": "Heute ist es kälter als gestern."
+        },
+        {
+          "ar": "مَكَّةُ أَحَرُّ مِنْ بَرْلينَ.",
+          "de": "Mekka ist heißer als Berlin."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-10-1#0",
+          "frage": "Komparativ von صَغيرٌ",
+          "ar": null,
+          "antwort": "أَصْغَرُ",
+          "ablenker": ["صُغْرى", "صَغيرَةٌ", "مُصَغَّرٌ"]
+        },
+        {
+          "id": "g-10-1#1",
+          "frage": "„Sie ist größer als ich.“",
+          "ar": null,
+          "antwort": "هِيَ أَكْبَرُ مِنّي.",
+          "ablenker": [
+            "هِيَ كُبْرى مِنّي.",
+            "هِيَ أَكْبَرُ مِنْ أَنا.",
+            "هِيَ كَبيرَةٌ مِنّي."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g-10-2",
+      "einheit": 10,
+      "abschnitt": 2,
+      "titel": "Welcher? – أَيُّ",
+      "regel": "أَيُّ + Nomen im Genitiv, unbestimmt: أَيُّ فَصْلٍ؟",
+      "erklaerung": [
+        "أَيُّ bildet eine Genitivverbindung mit einem unbestimmten Nomen: أَيُّ يَوْمٍ؟ أَيُّ لَوْنٍ؟",
+        "Die Antwort nennt das Gemeinte: أُحِبُّ الرَّبيعَ – Ich mag den Frühling."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَيُّ فَصْلٍ تُحِبُّ؟",
+          "de": "Welche Jahreszeit magst du?"
+        },
+        {
+          "ar": "في أَيِّ شَهْرٍ؟",
+          "de": "In welchem Monat?"
+        },
+        {
+          "ar": "أَيُّ يَوْمٍ الْيَوْمَ؟",
+          "de": "Welcher Tag ist heute?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-10-2#0",
+          "frage": "„Welche Stadt?“",
+          "ar": null,
+          "antwort": "أَيُّ مَدينَةٍ؟",
+          "ablenker": ["أَيُّ الْمَدينَةُ؟", "أَيُّ مَدينَةٌ؟", "ما مَدينَةٍ؟"]
+        },
+        {
+          "id": "g-10-2#1",
+          "frage": "In welcher Form steht das Nomen nach أَيُّ?",
+          "ar": null,
+          "antwort": "unbestimmt, Genitiv",
+          "ablenker": ["bestimmt, Nominativ", "Plural", "Akkusativ"]
+        }
+      ]
+    },
+    {
+      "id": "g-10-3",
+      "einheit": 10,
+      "abschnitt": 3,
+      "titel": "كانَ – war",
+      "regel": "كانَ + Prädikat im Akkusativ: كانَ الْجَوُّ بارِداً",
+      "erklaerung": [
+        "كانَ macht einen Nominalsatz zur Vergangenheit. Das Prädikat steht dann im Akkusativ (-an).",
+        "Es wird konjugiert wie ein Perfekt: كُنْتُ, كُنْتَ, كانَتْ."
+      ],
+      "beispiele": [
+        {
+          "ar": "كانَ الْجَوُّ جَميلاً.",
+          "de": "Das Wetter war schön."
+        },
+        {
+          "ar": "كانَتِ السَّماءُ صافِيَةً.",
+          "de": "Der Himmel war klar."
+        },
+        {
+          "ar": "كُنْتُ مَريضاً أَمْسِ.",
+          "de": "Ich war gestern krank."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-10-3#0",
+          "frage": "„Es war kalt.“ (der Tag)",
+          "ar": null,
+          "antwort": "كانَ الْيَوْمُ بارِداً.",
+          "ablenker": [
+            "كانَ الْيَوْمُ بارِدٌ.",
+            "الْيَوْمُ كانَ بارِدٌ.",
+            "كانَتِ الْيَوْمُ بارِدَةً."
+          ]
+        },
+        {
+          "id": "g-10-3#1",
+          "frage": "„Ich war beschäftigt.“ (m)",
+          "ar": null,
+          "antwort": "كُنْتُ مَشْغولاً.",
+          "ablenker": ["كانَ مَشْغولٌ.", "كُنْتُ مَشْغولٌ.", "أَنا كانَ مَشْغولاً."]
+        }
+      ]
+    }
   ]
 }

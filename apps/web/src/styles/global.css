@@ -1642,3 +1642,54 @@ textarea.input {
   border-color: var(--bad);
   opacity: 0.6;
 }
+
+/* Grammar: rule card with examples, then the questions. */
+.grammar-rule-line {
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border-inline-start: 3px solid var(--accent);
+  background: var(--bg-elev-2);
+  border-radius: var(--radius);
+  font-weight: 600;
+}
+.grammar-examples {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.grammar-example {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  text-align: start;
+}
+.grammar-example .muted {
+  align-self: flex-start;
+  font-size: 0.9rem;
+}
+.grammar-question-ar {
+  margin: 0;
+  font-size: 1.4rem;
+  text-align: right;
+}
+.grammar-options {
+  display: grid;
+  gap: 0.5rem;
+}
+.grammar-option {
+  justify-content: center;
+  text-align: center;
+}
+.grammar-option.arabic-inline {
+  font-size: 1.25rem;
+}

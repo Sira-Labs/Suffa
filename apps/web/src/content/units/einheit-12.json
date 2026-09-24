@@ -293,5 +293,134 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-12-1",
+      "einheit": 12,
+      "abschnitt": 1,
+      "titel": "Mögen + Verbalnomen",
+      "regel": "أُحِبُّ الْقِراءَةَ = ich lese gern",
+      "erklaerung": [
+        "Nach أُحِبُّ steht oft das Verbalnomen (Maṣdar) mit ال: الْقِراءَةُ das Lesen, السِّباحَةُ das Schwimmen, الرَّسْمُ das Malen.",
+        "Es steht als Objekt im Akkusativ: أُحِبُّ السِّباحَةَ."
+      ],
+      "beispiele": [
+        {
+          "ar": "أُحِبُّ الْقِراءَةَ.",
+          "de": "Ich lese gern."
+        },
+        {
+          "ar": "هِوايَتي الرَّسْمُ.",
+          "de": "Mein Hobby ist das Malen."
+        },
+        {
+          "ar": "هَلْ تُحِبُّ السِّباحَةَ؟",
+          "de": "Schwimmst du gern?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-12-1#0",
+          "frage": "„Ich schreibe gern.“",
+          "ar": null,
+          "antwort": "أُحِبُّ الْكِتابَةَ.",
+          "ablenker": ["أُحِبُّ الْكِتابَ.", "أُحِبُّ كَتَبَ.", "أُحِبُّ الْكاتِبَ."]
+        },
+        {
+          "id": "g-12-1#1",
+          "frage": "Wie heißt das Verbalnomen zu قَرَأَ?",
+          "ar": null,
+          "antwort": "قِراءَةٌ",
+          "ablenker": ["قارِئٌ", "مَقْروءٌ", "قُرْآنٌ"]
+        }
+      ]
+    },
+    {
+      "id": "g-12-2",
+      "einheit": 12,
+      "abschnitt": 2,
+      "titel": "Wie oft?",
+      "regel": "دائِماً immer · أَحْياناً manchmal · كُلَّ يَوْمٍ jeden Tag · أَبَداً nie (mit Verneinung)",
+      "erklaerung": [
+        "Zeitangaben dieser Art stehen im Akkusativ (-an bzw. -a): كُلَّ أُسْبوعٍ, صَباحاً.",
+        "أَبَداً steht mit einer Verneinung: لا أَسْبَحُ أَبَداً – Ich schwimme nie."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَقْرَأُ كُلَّ يَوْمٍ.",
+          "de": "Ich lese jeden Tag."
+        },
+        {
+          "ar": "أَلْعَبُ كُرَةَ الْقَدَمِ أَحْياناً.",
+          "de": "Manchmal spiele ich Fußball."
+        },
+        {
+          "ar": "لا أُشاهِدُ التِّلْفازَ أَبَداً.",
+          "de": "Ich sehe nie fern."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-12-2#0",
+          "frage": "„immer“",
+          "ar": null,
+          "antwort": "دائِماً",
+          "ablenker": ["أَحْياناً", "أَبَداً", "قَليلاً"]
+        },
+        {
+          "id": "g-12-2#1",
+          "frage": "„Ich zeichne jede Woche.“",
+          "ar": null,
+          "antwort": "أَرْسُمُ كُلَّ أُسْبوعٍ.",
+          "ablenker": [
+            "أَرْسُمُ كُلُّ أُسْبوعٍ.",
+            "أَرْسُمُ كُلِّ أُسْبوعٍ.",
+            "أَرْسُمُ الْأُسْبوعَ كُلٌّ."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g-12-3",
+      "einheit": 12,
+      "abschnitt": 3,
+      "titel": "Relativpronomen الَّذي und الَّتي",
+      "regel": "الَّذي (m) · الَّتي (f) = der/die/das (welcher)",
+      "erklaerung": [
+        "Nach einem bestimmten Nomen verbindet الَّذي/الَّتي es mit einem Nebensatz: الْقِصَّةُ الَّتي قَرَأْتُها.",
+        "Nach einem unbestimmten Nomen fällt das Relativpronomen weg: قِصَّةٌ قَرَأْتُها – eine Geschichte, die ich gelesen habe."
+      ],
+      "beispiele": [
+        {
+          "ar": "الْكِتابُ الَّذي أَقْرَأُهُ مُمْتِعٌ.",
+          "de": "Das Buch, das ich lese, ist spannend."
+        },
+        {
+          "ar": "الْبِنْتُ الَّتي تَرْسُمُ أُخْتي.",
+          "de": "Das Mädchen, das malt, ist meine Schwester."
+        },
+        {
+          "ar": "قِصَّةٌ قَرَأْتُها أَمْسِ",
+          "de": "eine Geschichte, die ich gestern gelesen habe"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-12-3#0",
+          "frage": "„die Geschichte, die …“",
+          "ar": "الْقِصَّةُ … قَرَأْتُها",
+          "antwort": "الَّتي",
+          "ablenker": ["الَّذي", "الَّذينَ", "ما"]
+        },
+        {
+          "id": "g-12-3#1",
+          "frage": "„der Film, den …“",
+          "ar": "الْفيلْمُ … شاهَدْتُهُ",
+          "antwort": "الَّذي",
+          "ablenker": ["الَّتي", "مَنْ", "الَّذينَ"]
+        }
+      ]
+    }
   ]
 }

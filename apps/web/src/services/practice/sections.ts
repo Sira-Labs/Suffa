@@ -8,7 +8,7 @@
  */
 import type { ContentBundle } from '@/types';
 import { normalizeArabic } from '@/services/srs/tashkil';
-import { lineId, writeItemIds, writeTasks } from './items';
+import { grammarItems, lineId, writeItemIds, writeTasks } from './items';
 
 export interface UnitSection {
   /** 1-based, equals the dialogue number within the unit. */
@@ -21,6 +21,8 @@ export interface UnitSection {
   lineIds: string[];
   /** Writing items: the section's words and lines across all writing exercises. */
   writeIds: string[];
+  /** Grammar quiz questions of the section's grammar points. */
+  grammarIds: string[];
 }
 
 const PREFIXES = ['وال', 'فال', 'بال', 'كال', 'لل', 'ال', 'و', 'ف', 'ب', 'ل', 'ك'];
@@ -76,7 +78,8 @@ export function wordOccurs(word: string, text: string): boolean {
 }
 
 export function dialogueSections(
-  bundle: Pick<ContentBundle, 'dialoge' | 'vokabeln'>,
+  bundle: Pick<ContentBundle, 'dialoge' | 'vokabeln'> &
+    Partial<Pick<ContentBundle, 'grammatik'>>,
   unit: number
 ): UnitSection[] {
   const dialogues = bundle.dialoge
@@ -90,6 +93,7 @@ export function dialogueSections(
     wordIds: [],
     lineIds: d.zeilen.map((_, line) => lineId(d.id, line)),
     writeIds: [],
+    grammarIds: grammarItems(bundle.grammatik ?? [], unit, i + 1),
   }));
   const texts = dialogues.map((d) => d.zeilen.map((z) => z.ar).join(' '));
   const unplaced: string[] = [];

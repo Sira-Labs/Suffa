@@ -19,6 +19,12 @@ export const STATION_META: Record<
     icon: 'read',
     hint: 'Dialog lesen, Wörter antippen, Verständnisfrage beantworten',
   },
+  grammar: {
+    label: 'Grammatik',
+    icon: 'roots',
+    hint: 'Eine Regel pro Dialog – erklärt, mit Beispielen und zwei Fragen',
+    sectionHint: 'Die Regel zu diesem Dialog – lesen, anhören, zwei Fragen',
+  },
   cloze: {
     label: 'Lückentext',
     icon: 'read',

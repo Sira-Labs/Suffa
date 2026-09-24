@@ -340,5 +340,138 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-9-1",
+      "einheit": 9,
+      "abschnitt": 1,
+      "titel": "هٰذا الْكِتابُ oder هٰذا كِتابٌ?",
+      "regel": "هٰذا كِتابٌ = das ist ein Buch · هٰذا الْكِتابُ = dieses Buch",
+      "erklaerung": [
+        "Folgt auf هٰذا/هٰذِهِ ein unbestimmtes Nomen, entsteht ein Satz. Folgt ein bestimmtes Nomen, heißt es „dieser/diese …“.",
+        "So: هٰذا الْقَميصُ جَميلٌ – Dieses Hemd ist schön."
+      ],
+      "beispiele": [
+        {
+          "ar": "هٰذا قَميصٌ.",
+          "de": "Das ist ein Hemd."
+        },
+        {
+          "ar": "هٰذا الْقَميصُ غالٍ.",
+          "de": "Dieses Hemd ist teuer."
+        },
+        {
+          "ar": "بِكَمْ هٰذِهِ الْحَقيبَةُ؟",
+          "de": "Wie viel kostet diese Tasche?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-9-1#0",
+          "frage": "„Diese Tasche ist schön.“",
+          "ar": null,
+          "antwort": "هٰذِهِ الْحَقيبَةُ جَميلَةٌ.",
+          "ablenker": [
+            "هٰذِهِ حَقيبَةٌ جَميلَةٌ.",
+            "هٰذا الْحَقيبَةُ جَميلٌ.",
+            "الْحَقيبَةُ هٰذِهِ الْجَميلَةُ."
+          ]
+        },
+        {
+          "id": "g-9-1#1",
+          "frage": "Was bedeutet هٰذا كِتابٌ?",
+          "ar": null,
+          "antwort": "Das ist ein Buch.",
+          "ablenker": ["dieses Buch", "Das Buch ist hier.", "mein Buch"]
+        }
+      ]
+    },
+    {
+      "id": "g-9-2",
+      "einheit": 9,
+      "abschnitt": 2,
+      "titel": "Wollen: أُريدُ أَنْ …",
+      "regel": "أُريدُ أَنْ أَشْتَرِيَ = ich möchte kaufen",
+      "erklaerung": [
+        "Nach أَنْ steht das Präsens mit der Endung -a (Subjunktiv): أَشْتَري → أَنْ أَشْتَرِيَ, أَذْهَبُ → أَنْ أَذْهَبَ.",
+        "Mit einem Nomen reicht أُريدُ allein: أُريدُ هٰذا – Ich möchte das."
+      ],
+      "beispiele": [
+        {
+          "ar": "أُريدُ أَنْ أَشْتَرِيَ هَدِيَّةً.",
+          "de": "Ich möchte ein Geschenk kaufen."
+        },
+        {
+          "ar": "هَلْ تُريدُ أَنْ تَذْهَبَ مَعي؟",
+          "de": "Willst du mit mir gehen?"
+        },
+        {
+          "ar": "أُريدُ كيلو تُفّاحٍ.",
+          "de": "Ich möchte ein Kilo Äpfel."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-9-2#0",
+          "frage": "„Ich möchte gehen.“",
+          "ar": null,
+          "antwort": "أُريدُ أَنْ أَذْهَبَ.",
+          "ablenker": [
+            "أُريدُ أَنْ أَذْهَبُ.",
+            "أُريدُ ذَهَبْتُ.",
+            "أُريدُ أَذْهَبَ أَنْ."
+          ]
+        },
+        {
+          "id": "g-9-2#1",
+          "frage": "Welche Endung bekommt das Verb nach أَنْ?",
+          "ar": null,
+          "antwort": "-a (Subjunktiv)",
+          "ablenker": ["-u", "keine Änderung", "-i"]
+        }
+      ]
+    },
+    {
+      "id": "g-9-3",
+      "einheit": 9,
+      "abschnitt": 3,
+      "titel": "Farben",
+      "regel": "أَحْمَرُ rot (m) · حَمْراءُ rot (f)",
+      "erklaerung": [
+        "Farben haben eine eigene Form: maskulin أَفْعَلُ, feminin فَعْلاءُ – أَبْيَضُ/بَيْضاءُ, أَسْوَدُ/سَوْداءُ, أَخْضَرُ/خَضْراءُ.",
+        "Sie folgen dem Nomen wie jedes Adjektiv: سَيّارَةٌ بَيْضاءُ – ein weißes Auto."
+      ],
+      "beispiele": [
+        {
+          "ar": "قَميصٌ أَزْرَقُ",
+          "de": "ein blaues Hemd"
+        },
+        {
+          "ar": "حَقيبَةٌ سَوْداءُ",
+          "de": "eine schwarze Tasche"
+        },
+        {
+          "ar": "الْوَرْدَةُ الْحَمْراءُ",
+          "de": "die rote Rose"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-9-3#0",
+          "frage": "„eine grüne Tasche“",
+          "ar": null,
+          "antwort": "حَقيبَةٌ خَضْراءُ",
+          "ablenker": ["حَقيبَةٌ أَخْضَرُ", "حَقيبَةٌ خَضْراءٌ", "خَضْراءُ حَقيبَةٌ"]
+        },
+        {
+          "id": "g-9-3#1",
+          "frage": "Feminin von أَبْيَضُ",
+          "ar": null,
+          "antwort": "بَيْضاءُ",
+          "ablenker": ["أَبْيَضَةٌ", "بَيْضَةٌ", "بيضٌ"]
+        }
+      ]
+    }
   ]
 }

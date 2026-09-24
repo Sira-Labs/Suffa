@@ -499,5 +499,130 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-1-1",
+      "einheit": 1,
+      "abschnitt": 1,
+      "titel": "Personalpronomen im Singular",
+      "regel": "أَنا ich · أَنْتَ du (m) · أَنْتِ du (f) · هُوَ er · هِيَ sie",
+      "erklaerung": [
+        "Das Arabische unterscheidet beim „du“ zwischen Mann und Frau: أَنْتَ spricht einen Mann an, أَنْتِ eine Frau.",
+        "Die Pronomen stehen am Satzanfang und brauchen kein „sein“: أَنا طالِبٌ heißt „ich bin Student“."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَنا يوسُفُ.",
+          "de": "Ich bin Yūsuf."
+        },
+        {
+          "ar": "مَنْ أَنْتَ؟",
+          "de": "Wer bist du? (zu einem Mann)"
+        },
+        {
+          "ar": "هِيَ مَرْيَمُ.",
+          "de": "Sie ist Maryam."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-1-1#0",
+          "frage": "Wie fragst du eine Frau „Wer bist du?“",
+          "ar": "مَنْ … ؟",
+          "antwort": "أَنْتِ",
+          "ablenker": ["أَنْتَ", "هُوَ", "أَنا"]
+        },
+        {
+          "id": "g-1-1#1",
+          "frage": "Welches Pronomen passt? „… Student.“ (er)",
+          "ar": "… طالِبٌ.",
+          "antwort": "هُوَ",
+          "ablenker": ["هِيَ", "أَنْتِ", "أَنا"]
+        }
+      ]
+    },
+    {
+      "id": "g-1-2",
+      "einheit": 1,
+      "abschnitt": 2,
+      "titel": "Fragewörter",
+      "regel": "مَنْ؟ wer · ما؟ was · مِنْ أَيْنَ؟ woher · كَيْفَ؟ wie · هَلْ ja/nein",
+      "erklaerung": [
+        "Fragewörter stehen am Anfang des Satzes; die Wortstellung ändert sich nicht.",
+        "هَلْ macht aus einer Aussage eine Ja/Nein-Frage: هَلْ أَنْتِ طالِبَةٌ؟ – Bist du Studentin?"
+      ],
+      "beispiele": [
+        {
+          "ar": "ما اسْمُكِ؟",
+          "de": "Wie heißt du? (wörtlich: Was ist dein Name?)"
+        },
+        {
+          "ar": "مِنْ أَيْنَ أَنْتَ؟",
+          "de": "Woher kommst du?"
+        },
+        {
+          "ar": "هَلْ أَنْتِ عَرَبِيَّةٌ؟",
+          "de": "Bist du Araberin?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-1-2#0",
+          "frage": "Welches Fragewort fragt nach der Herkunft?",
+          "ar": "… أَنْتَ؟",
+          "antwort": "مِنْ أَيْنَ",
+          "ablenker": ["مَنْ", "كَيْفَ", "ما"]
+        },
+        {
+          "id": "g-1-2#1",
+          "frage": "Wie wird aus „Du bist Lehrer.“ eine Ja/Nein-Frage?",
+          "ar": "… أَنْتَ مُدَرِّسٌ؟",
+          "antwort": "هَلْ",
+          "ablenker": ["ما", "مَنْ", "أَيْنَ"]
+        }
+      ]
+    },
+    {
+      "id": "g-1-3",
+      "einheit": 1,
+      "abschnitt": 3,
+      "titel": "Der Nominalsatz: ohne „sein“",
+      "regel": "أَنا مُدَرِّسٌ = ich (bin) Lehrer",
+      "erklaerung": [
+        "Im Präsens gibt es kein Wort für „sein“. Subjekt und Prädikat stehen einfach nebeneinander.",
+        "Das Prädikat ist meist unbestimmt und trägt Tanwīn: طالِبٌ, مُدَرِّسٌ, جَديدٌ."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَنا مُدَرِّسٌ.",
+          "de": "Ich bin Lehrer."
+        },
+        {
+          "ar": "هُوَ طالِبٌ جَديدٌ.",
+          "de": "Er ist ein neuer Student."
+        },
+        {
+          "ar": "أَنا بِخَيْرٍ.",
+          "de": "Mir geht es gut."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-1-3#0",
+          "frage": "Was bedeutet هِيَ طالِبَةٌ?",
+          "ar": null,
+          "antwort": "Sie ist Studentin.",
+          "ablenker": ["Sie war Studentin.", "Ist sie Studentin?", "Die Studentin"]
+        },
+        {
+          "id": "g-1-3#1",
+          "frage": "Wie sagst du „Ich bin Lehrer“?",
+          "ar": null,
+          "antwort": "أَنا مُدَرِّسٌ.",
+          "ablenker": ["أَنا الْمُدَرِّسِ.", "مُدَرِّسٌ أَنْتَ.", "هُوَ مُدَرِّسٌ."]
+        }
+      ]
+    }
   ]
 }

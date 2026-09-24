@@ -38,7 +38,7 @@ parts of **P2 Engagement** forward; what is left for P2 is server-side (see the 
 
 **Next on the device side** (before or alongside P1):
 
-1. Grammar points per unit and an alphabet course for absolute beginners.
+1. Alphabet course for absolute beginners (grammar points per unit shipped).
 2. Open P0 story 2.6 (browser router instead of hash URLs).
 3. Teacher reviews the content drafts (words, dialogues, examples) — deferred: we continue
    without it for now and mark units as checked once he has looked at them.

@@ -379,5 +379,134 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-5-1",
+      "einheit": 5,
+      "abschnitt": 1,
+      "titel": "ماذا und ما",
+      "regel": "ماذا + Verb · ما + Nomen",
+      "erklaerung": [
+        "Beide heißen „was?“. Vor einem Verb steht ماذا: ماذا تَأْكُلُ؟ Vor einem Nomen ما: ما هٰذا؟",
+        "Die Antwort wiederholt meist das Verb: آكُلُ الْخُبْزَ."
+      ],
+      "beispiele": [
+        {
+          "ar": "ماذا تَشْرَبُ؟",
+          "de": "Was trinkst du?"
+        },
+        {
+          "ar": "ما هٰذا؟",
+          "de": "Was ist das?"
+        },
+        {
+          "ar": "ماذا تَأْكُلُ في الْفُطورِ؟",
+          "de": "Was isst du zum Frühstück?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-5-1#0",
+          "frage": "Was passt? „… تُريدُ؟“ (Was möchtest du?)",
+          "ar": "… تُريدُ؟",
+          "antwort": "ماذا",
+          "ablenker": ["ما", "مَنْ", "أَيْنَ"]
+        },
+        {
+          "id": "g-5-1#1",
+          "frage": "Was passt? „… اسْمُكَ؟“",
+          "ar": "… اسْمُكَ؟",
+          "antwort": "ما",
+          "ablenker": ["ماذا", "مَتى", "هَلْ"]
+        }
+      ]
+    },
+    {
+      "id": "g-5-2",
+      "einheit": 5,
+      "abschnitt": 2,
+      "titel": "Verneinung im Präsens mit لا",
+      "regel": "لا + Präsens: لا أَشْرَبُ = ich trinke nicht",
+      "erklaerung": [
+        "لا steht direkt vor dem Verb; das Verb ändert sich nicht.",
+        "لا allein heißt auch „nein“: هَلْ تُحِبُّ الْقَهْوَةَ؟ – لا."
+      ],
+      "beispiele": [
+        {
+          "ar": "لا آكُلُ اللَّحْمَ.",
+          "de": "Ich esse kein Fleisch."
+        },
+        {
+          "ar": "هِيَ لا تَشْرَبُ الْقَهْوَةَ.",
+          "de": "Sie trinkt keinen Kaffee."
+        },
+        {
+          "ar": "لا، شُكْراً.",
+          "de": "Nein, danke."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-5-2#0",
+          "frage": "„Ich mag keinen Fisch.“",
+          "ar": "… أُحِبُّ السَّمَكَ.",
+          "antwort": "لا",
+          "ablenker": ["ما", "لَمْ", "لَيْسَ"]
+        },
+        {
+          "id": "g-5-2#1",
+          "frage": "Wo steht لا?",
+          "ar": null,
+          "antwort": "direkt vor dem Verb",
+          "ablenker": ["am Satzende", "nach dem Verb", "vor dem Subjekt"]
+        }
+      ]
+    },
+    {
+      "id": "g-5-3",
+      "einheit": 5,
+      "abschnitt": 3,
+      "titel": "Das Adjektiv richtet sich nach dem Nomen",
+      "regel": "طَعامٌ لَذيذٌ · الْقَهْوَةُ الْحُلْوَةُ",
+      "erklaerung": [
+        "Das Adjektiv steht nach dem Nomen und übernimmt Geschlecht, Bestimmtheit und Kasus: الْمَطْعَمُ الْجَديدُ – das neue Restaurant.",
+        "Steht das Adjektiv ohne ال nach einem bestimmten Nomen, ist es ein Satz: الطَّعامُ لَذيذٌ – Das Essen ist lecker."
+      ],
+      "beispiele": [
+        {
+          "ar": "طَعامٌ لَذيذٌ",
+          "de": "ein leckeres Essen"
+        },
+        {
+          "ar": "الطَّعامُ لَذيذٌ.",
+          "de": "Das Essen ist lecker."
+        },
+        {
+          "ar": "الْقَهْوَةُ الْعَرَبِيَّةُ",
+          "de": "der arabische Kaffee"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-5-3#0",
+          "frage": "„das große Restaurant“",
+          "ar": null,
+          "antwort": "الْمَطْعَمُ الْكَبيرُ",
+          "ablenker": [
+            "الْمَطْعَمُ كَبيرٌ",
+            "مَطْعَمٌ الْكَبيرُ",
+            "الْكَبيرُ الْمَطْعَمُ"
+          ]
+        },
+        {
+          "id": "g-5-3#1",
+          "frage": "„Der Saft ist kalt.“",
+          "ar": null,
+          "antwort": "الْعَصيرُ بارِدٌ.",
+          "ablenker": ["الْعَصيرُ الْبارِدُ", "عَصيرٌ بارِدٌ", "بارِدٌ عَصيرٌ"]
+        }
+      ]
+    }
   ]
 }

@@ -349,5 +349,130 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-7-1",
+      "einheit": 7,
+      "abschnitt": 1,
+      "titel": "Die Zukunft mit سَـ und سَوْفَ",
+      "regel": "سَـ + Präsens: سَأَدْرُسُ = ich werde lernen",
+      "erklaerung": [
+        "سَـ wird direkt vor das Präsens geschrieben; سَوْفَ steht als eigenes Wort davor und klingt etwas ferner.",
+        "Beispiel: الِامْتِحانُ غَداً، سَأَدْرُسُ الْيَوْمَ."
+      ],
+      "beispiele": [
+        {
+          "ar": "سَأَذْهَبُ إِلى الْمَكْتَبَةِ.",
+          "de": "Ich werde in die Bibliothek gehen."
+        },
+        {
+          "ar": "سَوْفَ نَدْرُسُ مَعاً.",
+          "de": "Wir werden zusammen lernen."
+        },
+        {
+          "ar": "مَتى سَتَبْدَأُ الْمُحاضَرَةُ؟",
+          "de": "Wann wird die Vorlesung beginnen?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-7-1#0",
+          "frage": "„Ich werde schreiben.“",
+          "ar": null,
+          "antwort": "سَأَكْتُبُ",
+          "ablenker": ["كَتَبْتُ", "أَكْتُبُ", "سَكَتَبَ"]
+        },
+        {
+          "id": "g-7-1#1",
+          "frage": "Wo steht سَـ?",
+          "ar": null,
+          "antwort": "direkt vor dem Präsens",
+          "ablenker": ["nach dem Verb", "vor dem Perfekt", "am Satzende"]
+        }
+      ]
+    },
+    {
+      "id": "g-7-2",
+      "einheit": 7,
+      "abschnitt": 2,
+      "titel": "Der gesunde Plural",
+      "regel": "مُدَرِّسونَ Lehrer (m, Pl.) · طالِباتٌ Studentinnen",
+      "erklaerung": [
+        "Viele Personen-Nomen bilden den Plural mit ـونَ (Maskulin; nach Präpositionen ـينَ): مُدَرِّسونَ, مَعَ الْمُدَرِّسينَ.",
+        "Feminine Nomen auf ة bilden den Plural mit ـاتٌ: طالِبَةٌ → طالِباتٌ."
+      ],
+      "beispiele": [
+        {
+          "ar": "الْمُدَرِّسونَ في الْفَصْلِ.",
+          "de": "Die Lehrer sind im Klassenraum."
+        },
+        {
+          "ar": "الطّالِباتُ في الْمَكْتَبَةِ.",
+          "de": "Die Studentinnen sind in der Bibliothek."
+        },
+        {
+          "ar": "تَكَلَّمْتُ مَعَ الْمُهَنْدِسينَ.",
+          "de": "Ich sprach mit den Ingenieuren."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-7-2#0",
+          "frage": "Plural von مُدَرِّسَةٌ",
+          "ar": null,
+          "antwort": "مُدَرِّساتٌ",
+          "ablenker": ["مُدَرِّسونَ", "مُدَرِّسَتانِ", "مَدارِسُ"]
+        },
+        {
+          "id": "g-7-2#1",
+          "frage": "Plural von مُسْلِمٌ (Nominativ)",
+          "ar": null,
+          "antwort": "مُسْلِمونَ",
+          "ablenker": ["مُسْلِماتٌ", "مُسْلِمَيْنِ", "مَساليمُ"]
+        }
+      ]
+    },
+    {
+      "id": "g-7-3",
+      "einheit": 7,
+      "abschnitt": 3,
+      "titel": "Verneinung der Vergangenheit mit ما",
+      "regel": "ما + Perfekt: ما ذَهَبْتُ = ich bin nicht gegangen",
+      "erklaerung": [
+        "ما vor dem Perfekt verneint eine vergangene Handlung; das Verb bleibt unverändert.",
+        "In Einheit 16 kommt die zweite, häufigere Form hinzu: لَمْ + Präsens (Jussiv)."
+      ],
+      "beispiele": [
+        {
+          "ar": "ما دَرَسْتُ أَمْسِ.",
+          "de": "Ich habe gestern nicht gelernt."
+        },
+        {
+          "ar": "ما فَهِمْتُ السُّؤالَ.",
+          "de": "Ich habe die Frage nicht verstanden."
+        },
+        {
+          "ar": "ما كَتَبَ الْواجِبَ.",
+          "de": "Er hat die Hausaufgabe nicht geschrieben."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-7-3#0",
+          "frage": "„Ich habe nicht geschlafen.“",
+          "ar": null,
+          "antwort": "ما نِمْتُ.",
+          "ablenker": ["لا نِمْتُ.", "ما أَنامُ.", "لا أَنامُ."]
+        },
+        {
+          "id": "g-7-3#1",
+          "frage": "Welche Verneinung passt zum Perfekt?",
+          "ar": null,
+          "antwort": "ما",
+          "ablenker": ["لا", "لَيْسَ", "لَنْ"]
+        }
+      ]
+    }
   ]
 }

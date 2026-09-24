@@ -14,6 +14,7 @@
 | Verbs with full tables   | 51                       | ≈ 60–80                      |
 | Grammar points           | none as learnable items  | ≈ 3–4 per unit               |
 | Example sentences        | 471 (all 401 words)      | 1–2 per word                 |
+| Grammar points           | 48 (3 per unit)          | 2 questions each             |
 | Audio                    | links to publisher audio | per word + per dialogue line |
 | Alphabet / pronunciation | minimal pairs only       | a short course for beginners |
 

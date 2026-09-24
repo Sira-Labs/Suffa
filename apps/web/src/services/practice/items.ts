@@ -5,6 +5,7 @@
 import type {
   ContentBundle,
   Dialog,
+  GrammatikPunkt,
   PracticeRecord,
   PracticeSkill,
   UnitPracticeScope,
@@ -12,6 +13,7 @@ import type {
 
 export const PRACTICE_SKILLS: readonly PracticeSkill[] = [
   'read',
+  'grammar',
   'cloze',
   'write',
   'speak',
@@ -78,13 +80,15 @@ export function writeItemIds(tasks: Record<WriteExercise, string[]>): string[] {
  * `clozeIds` are the words that have one; without it the unit has no cloze items yet.
  */
 export function unitPracticeItems(
-  bundle: Pick<ContentBundle, 'dialoge' | 'vokabeln' | 'verben'>,
+  bundle: Pick<ContentBundle, 'dialoge' | 'vokabeln' | 'verben'> &
+    Partial<Pick<ContentBundle, 'grammatik'>>,
   unit: number,
   clozeIds?: ReadonlySet<string>
 ): Record<PracticeSkill, string[]> {
   const dialogues = bundle.dialoge.filter((d) => d.einheit === unit);
   return {
     read: dialogues.map((d) => d.id),
+    grammar: grammarItems(bundle.grammatik ?? [], unit),
     cloze: bundle.vokabeln
       .filter((v) => v.einheit === unit && clozeIds?.has(v.id))
       .map((v) => v.id),
@@ -132,4 +136,17 @@ export function scopedWords<W extends { id: string; einheit: number }>(
   return words.filter(
     (w) => w.einheit === scope.unit && (!scope.wordIds || scope.wordIds.includes(w.id))
   );
+}
+
+/** Quiz question ids of a unit's grammar points (optionally one section only). */
+export function grammarItems(
+  points: readonly Pick<GrammatikPunkt, 'einheit' | 'abschnitt' | 'fragen'>[],
+  unit: number,
+  section?: number
+): string[] {
+  return points
+    .filter(
+      (p) => p.einheit === unit && (section === undefined || p.abschnitt === section)
+    )
+    .flatMap((p) => p.fragen.map((q) => q.id));
 }

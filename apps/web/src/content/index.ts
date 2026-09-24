@@ -9,6 +9,7 @@ import type {
   ContentBundle,
   ContentMeta,
   Dialog,
+  GrammatikPunkt,
   Minimalpaar,
   NisbaEintrag,
   Quelle,
@@ -25,6 +26,7 @@ interface UnitFile {
   kulturnotiz?: string;
   vokabeln: Vokabel[];
   dialoge: Dialog[];
+  grammatik?: GrammatikPunkt[];
 }
 
 interface MetaFile {
@@ -65,6 +67,7 @@ export const content: ContentBundle = {
   phonologie_minimalpaare: metaTyped.phonologie_minimalpaare,
   vokabeln,
   dialoge,
+  grammatik: units.flatMap((u) => u.grammatik ?? []),
 };
 
 export const unitInfos: UnitInfo[] = units.map((u) => ({

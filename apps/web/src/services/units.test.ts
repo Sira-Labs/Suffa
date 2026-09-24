@@ -19,6 +19,7 @@ const sections: UnitSection[] = [1, 2, 3].map((no) => ({
   wordIds: [`w${no}a`, `w${no}b`],
   lineIds: [`d-1-${no}#0`, `d-1-${no}#1`],
   writeIds: [`w${no}a`, `diktat:w${no}a`],
+  grammarIds: no === 1 ? ['g-1-1#0', 'g-1-1#1'] : [],
 }));
 
 function input(overrides: Partial<UnitPathInput> = {}): UnitPathInput {
@@ -64,15 +65,21 @@ describe('unitPath', () => {
     expect(path[0]!.stations.map((s) => s.label)).toEqual([
       'Dialog hören',
       'Dialog lesen',
+      'Grammatik',
       'Wörter lernen',
       'Schreiben',
       'Nachsprechen',
     ]);
+    expect(path[0]!.stations[2]).toMatchObject({
+      kind: 'grammar',
+      to: '/units/1/grammar?section=1',
+      total: 2,
+    });
     expect(path[0]!.stations[0]).toMatchObject({
       state: 'current',
       to: '/units/1/listen?lesson=1&section=1',
     });
-    expect(path[0]!.stations[2]).toMatchObject({
+    expect(path[0]!.stations[3]).toMatchObject({
       to: '/review?unit=1&section=1',
       total: 2,
     });
@@ -84,12 +91,13 @@ describe('unitPath', () => {
     expect(path[0]!.stations.map((s) => s.label)).toEqual([
       'Dialog hören',
       'Dialog lesen',
+      'Grammatik',
       'Wörter lernen',
       'Lückentext',
       'Schreiben',
       'Nachsprechen',
     ]);
-    expect(path[0]!.stations[3]).toMatchObject({
+    expect(path[0]!.stations[4]).toMatchObject({
       to: '/units/1/cloze?section=1',
       total: 1,
     });

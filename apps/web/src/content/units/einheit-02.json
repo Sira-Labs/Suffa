@@ -406,5 +406,130 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-2-1",
+      "einheit": 2,
+      "abschnitt": 1,
+      "titel": "هٰذا und هٰذِهِ – dieser, diese",
+      "regel": "هٰذا für maskuline, هٰذِهِ für feminine Nomen",
+      "erklaerung": [
+        "Fast alle femininen Nomen enden auf ة (tāʾ marbūṭa): أُمٌّ ist eine Ausnahme, sie ist natürlich feminin.",
+        "هٰذا أَبي heißt „Das ist mein Vater“, هٰذِهِ أُمّي „Das ist meine Mutter“."
+      ],
+      "beispiele": [
+        {
+          "ar": "هٰذا أَخي.",
+          "de": "Das ist mein Bruder."
+        },
+        {
+          "ar": "هٰذِهِ أُخْتي.",
+          "de": "Das ist meine Schwester."
+        },
+        {
+          "ar": "هٰذِهِ صورَةُ الْأُسْرَةِ.",
+          "de": "Das ist das Familienfoto."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-2-1#0",
+          "frage": "Was passt? „… جَدَّتي.“",
+          "ar": "… جَدَّتي.",
+          "antwort": "هٰذِهِ",
+          "ablenker": ["هٰذا", "هُوَ", "أَنا"]
+        },
+        {
+          "id": "g-2-1#1",
+          "frage": "Was passt? „… بَيْتٌ كَبيرٌ.“",
+          "ar": "… بَيْتٌ كَبيرٌ.",
+          "antwort": "هٰذا",
+          "ablenker": ["هٰذِهِ", "هِيَ", "أَنْتِ"]
+        }
+      ]
+    },
+    {
+      "id": "g-2-2",
+      "einheit": 2,
+      "abschnitt": 2,
+      "titel": "Possessivendungen",
+      "regel": "ـي mein · ـكَ dein (m) · ـكِ dein (f) · ـهُ sein · ـها ihr",
+      "erklaerung": [
+        "Besitz wird als Endung an das Nomen gehängt; der Artikel ال fällt dann weg: بَيْت → بَيْتي.",
+        "Bei Wörtern auf ة wird vor der Endung ein ت gesprochen und geschrieben: أُسْرَة → أُسْرَتي."
+      ],
+      "beispiele": [
+        {
+          "ar": "أُسْرَتي كَبيرَةٌ.",
+          "de": "Meine Familie ist groß."
+        },
+        {
+          "ar": "ما اسْمُكَ؟",
+          "de": "Wie heißt du? (m)"
+        },
+        {
+          "ar": "أَبوها مُهَنْدِسٌ.",
+          "de": "Ihr Vater ist Ingenieur."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-2-2#0",
+          "frage": "Wie heißt „meine Schwester“?",
+          "ar": null,
+          "antwort": "أُخْتي",
+          "ablenker": ["أُخْتُكَ", "أُخْتُها", "الْأُخْتي"]
+        },
+        {
+          "id": "g-2-2#1",
+          "frage": "Wie heißt „ihr Haus“ (von ihr)?",
+          "ar": null,
+          "antwort": "بَيْتُها",
+          "ablenker": ["بَيْتُهُ", "بَيْتي", "بَيْتُكِ"]
+        }
+      ]
+    },
+    {
+      "id": "g-2-3",
+      "einheit": 2,
+      "abschnitt": 3,
+      "titel": "Die Genitivverbindung (Iḍāfa)",
+      "regel": "صورَةُ الْأُسْرَةِ = das Foto der Familie",
+      "erklaerung": [
+        "Zwei Nomen hintereinander bilden eine Genitivverbindung: das erste hat nie ال und nie Tanwīn, das zweite steht im Genitiv (-i).",
+        "Die ganze Verbindung ist bestimmt, wenn das zweite Wort bestimmt ist: بَيْتُ جَدّي – das Haus meines Großvaters."
+      ],
+      "beispiele": [
+        {
+          "ar": "صورَةُ الْأُسْرَةِ",
+          "de": "das Foto der Familie"
+        },
+        {
+          "ar": "بَيْتُ جَدّي",
+          "de": "das Haus meines Großvaters"
+        },
+        {
+          "ar": "اسْمُ الْمُدَرِّسِ",
+          "de": "der Name des Lehrers"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-2-3#0",
+          "frage": "Welche Form ist richtig für „das Auto des Vaters“?",
+          "ar": null,
+          "antwort": "سَيّارَةُ الْأَبِ",
+          "ablenker": ["السَّيّارَةُ الْأَبِ", "سَيّارَةٌ الْأَبُ", "سَيّارَةُ الْأَبُ"]
+        },
+        {
+          "id": "g-2-3#1",
+          "frage": "Welcher Kasus steht beim zweiten Wort einer Iḍāfa?",
+          "ar": null,
+          "antwort": "Genitiv (-i)",
+          "ablenker": ["Nominativ (-u)", "Akkusativ (-a)", "kein Kasus"]
+        }
+      ]
+    }
   ]
 }

@@ -104,6 +104,35 @@ export interface Minimalpaar {
   de: string;
 }
 
+/** One quiz question on a grammar point: the answer and three distractors. */
+export interface GrammatikFrage {
+  /** `${pointId}#${index}` */
+  id: string;
+  /** Prompt (German). */
+  frage: string;
+  /** Optional Arabic context with … for the gap. */
+  ar: string | null;
+  antwort: string;
+  ablenker: string[];
+}
+
+/**
+ * A grammar point of a unit, placed in one dialogue section. Own explanations written for
+ * Suffa (general MSA grammar), not taken from the book.
+ */
+export interface GrammatikPunkt {
+  id: string;
+  einheit: number;
+  /** Dialogue section (1-based) the point belongs to. */
+  abschnitt: number;
+  titel: string;
+  /** The rule in one line. */
+  regel: string;
+  erklaerung: string[];
+  beispiele: { ar: string; de: string }[];
+  fragen: GrammatikFrage[];
+}
+
 export interface ContentBundle {
   meta: ContentMeta;
   quellen: Quelle[];
@@ -112,6 +141,7 @@ export interface ContentBundle {
   dialoge: Dialog[];
   verben: Verb[];
   phonologie_minimalpaare: Minimalpaar[];
+  grammatik: GrammatikPunkt[];
 }
 
 /** Person labels for the UI (German + Arabic pronoun). */

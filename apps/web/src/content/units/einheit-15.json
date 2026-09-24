@@ -299,5 +299,138 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-15-1",
+      "einheit": 15,
+      "abschnitt": 1,
+      "titel": "Objektendungen am Verb",
+      "regel": "يُؤْلِمُني = es tut mir weh · ساعِدْني = hilf mir",
+      "erklaerung": [
+        "Das Objekt „mich“ wird als ـني an das Verb gehängt; die übrigen Objektendungen gleichen den Possessivendungen: ـكَ, ـهُ, ـها.",
+        "Schmerzen: يُؤْلِمُني رَأْسي – Mein Kopf tut mir weh."
+      ],
+      "beispiele": [
+        {
+          "ar": "يُؤْلِمُني رَأْسي.",
+          "de": "Mein Kopf tut mir weh."
+        },
+        {
+          "ar": "فَحَصَني الطَّبيبُ.",
+          "de": "Der Arzt hat mich untersucht."
+        },
+        {
+          "ar": "سَأَزورُكَ غَداً.",
+          "de": "Ich werde dich morgen besuchen."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-15-1#0",
+          "frage": "„Der Arzt hat ihn untersucht.“",
+          "ar": null,
+          "antwort": "فَحَصَهُ الطَّبيبُ.",
+          "ablenker": [
+            "فَحَصَني الطَّبيبُ.",
+            "فَحَصَها الطَّبيبُ.",
+            "فَحَصَ هُوَ الطَّبيبُ."
+          ]
+        },
+        {
+          "id": "g-15-1#1",
+          "frage": "Welche Endung heißt „mich“ am Verb?",
+          "ar": null,
+          "antwort": "ـني",
+          "ablenker": ["ـي", "ـكَ", "ـنا"]
+        }
+      ]
+    },
+    {
+      "id": "g-15-2",
+      "einheit": 15,
+      "abschnitt": 2,
+      "titel": "Müssen: يَجِبُ أَنْ",
+      "regel": "يَجِبُ أَنْ تَرْتاحَ = du musst dich ausruhen",
+      "erklaerung": [
+        "يَجِبُ bleibt unverändert; die Person steckt im Verb nach أَنْ, das im Subjunktiv (-a) steht.",
+        "Mit عَلى geht es auch: يَجِبُ عَلَيْكَ أَنْ تَشْرَبَ الْماءَ."
+      ],
+      "beispiele": [
+        {
+          "ar": "يَجِبُ أَنْ تَشْرَبَ ماءً كَثيراً.",
+          "de": "Du musst viel Wasser trinken."
+        },
+        {
+          "ar": "يَجِبُ أَنْ أَذْهَبَ إِلى الطَّبيبِ.",
+          "de": "Ich muss zum Arzt gehen."
+        },
+        {
+          "ar": "يَجِبُ عَلَيْها أَنْ تَرْتاحَ.",
+          "de": "Sie muss sich ausruhen."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-15-2#0",
+          "frage": "„Ich muss schlafen.“",
+          "ar": null,
+          "antwort": "يَجِبُ أَنْ أَنامَ.",
+          "ablenker": [
+            "يَجِبُ أَنا أَنامُ.",
+            "أَجِبُ أَنْ أَنامَ.",
+            "يَجِبُ أَنْ نِمْتُ."
+          ]
+        },
+        {
+          "id": "g-15-2#1",
+          "frage": "Was ändert sich in يَجِبُ أَنْ …?",
+          "ar": null,
+          "antwort": "das Verb nach أَنْ",
+          "ablenker": ["يَجِبُ", "أَنْ", "nichts"]
+        }
+      ]
+    },
+    {
+      "id": "g-15-3",
+      "einheit": 15,
+      "abschnitt": 3,
+      "titel": "Der verneinte Imperativ",
+      "regel": "لا + Jussiv: لا تَأْكُلْ = iss nicht!",
+      "erklaerung": [
+        "Verbote bildet man mit لا und der Präsensform ohne Endvokal (Jussiv): تَأْكُلُ → لا تَأْكُلْ.",
+        "Zu einer Frau: لا تَأْكُلي; zu mehreren: لا تَأْكُلوا."
+      ],
+      "beispiele": [
+        {
+          "ar": "لا تَأْكُلْ كَثيراً.",
+          "de": "Iss nicht zu viel!"
+        },
+        {
+          "ar": "لا تَنامي مُتَأَخِّرَةً.",
+          "de": "Geh nicht spät schlafen! (f)"
+        },
+        {
+          "ar": "لا تَقْلَقْ.",
+          "de": "Mach dir keine Sorgen."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-15-3#0",
+          "frage": "„Rauch nicht!“ (m)",
+          "ar": null,
+          "antwort": "لا تُدَخِّنْ.",
+          "ablenker": ["لا تُدَخِّنُ.", "ما دَخَّنْتَ.", "لا دَخِّنْ."]
+        },
+        {
+          "id": "g-15-3#1",
+          "frage": "„Trink nicht!“ zu einer Frau",
+          "ar": null,
+          "antwort": "لا تَشْرَبي.",
+          "ablenker": ["لا تَشْرَبْ.", "لا تَشْرَبينَ.", "ما شَرِبْتِ."]
+        }
+      ]
+    }
   ]
 }

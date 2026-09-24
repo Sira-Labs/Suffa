@@ -20,6 +20,7 @@ import { Writing } from '@/modules/writing';
 import { Speaking } from '@/modules/speaking';
 import { Conjugation } from '@/modules/conjugation';
 import { Cloze } from '@/modules/cloze';
+import { Grammar } from '@/modules/grammar';
 import { useClozeIds } from './useClozeIds';
 import { isStationKey, STATION_META } from './skills';
 
@@ -168,6 +169,7 @@ export function UnitStation() {
       {station === 'read' && scope && <Reading scope={scope} />}
       {station === 'write' && scope && <Writing scope={scope} />}
       {station === 'speak' && scope && <Speaking scope={scope} />}
+      {station === 'grammar' && scope && <Grammar scope={scope} section={section?.no} />}
       {station === 'cloze' && scope && <Cloze scope={scope} />}
       {station === 'verbs' && scope && <Conjugation scope={scope} />}
     </div>
@@ -182,6 +184,7 @@ function sectionItems(
   if (!section) return all;
   return {
     read: [section.dialogId],
+    grammar: section.grammarIds,
     cloze: all.cloze.filter((id) => section.wordIds.includes(id)),
     write: section.writeIds,
     speak: section.lineIds,

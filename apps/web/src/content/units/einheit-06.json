@@ -332,5 +332,130 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-6-1",
+      "einheit": 6,
+      "abschnitt": 1,
+      "titel": "Wie viele? – كَمْ",
+      "regel": "كَمْ + Nomen im Singular, Akkusativ: كَمْ رَكْعَةً؟",
+      "erklaerung": [
+        "Nach كَمْ steht das Nomen im Singular mit der Endung -an: كَمْ صَلاةً؟ كَمْ طالِباً؟",
+        "Die Antwort nennt die Zahl: أَرْبَعُ رَكَعاتٍ – vier Gebetseinheiten."
+      ],
+      "beispiele": [
+        {
+          "ar": "كَمْ رَكْعَةً في صَلاةِ الْفَجْرِ؟",
+          "de": "Wie viele Gebetseinheiten hat das Morgengebet?"
+        },
+        {
+          "ar": "رَكْعَتانِ.",
+          "de": "Zwei."
+        },
+        {
+          "ar": "كَمْ صَلاةً في الْيَوْمِ؟",
+          "de": "Wie viele Gebete am Tag?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-6-1#0",
+          "frage": "„Wie viele Bücher?“",
+          "ar": null,
+          "antwort": "كَمْ كِتاباً؟",
+          "ablenker": ["كَمْ كُتُبٌ؟", "كَمِ الْكِتابُ؟", "كَمْ كِتابٌ؟"]
+        },
+        {
+          "id": "g-6-1#1",
+          "frage": "In welcher Form steht das Nomen nach كَمْ?",
+          "ar": null,
+          "antwort": "Singular, Akkusativ (-an)",
+          "ablenker": ["Plural, Nominativ", "Dual", "Singular, Genitiv"]
+        }
+      ]
+    },
+    {
+      "id": "g-6-2",
+      "einheit": 6,
+      "abschnitt": 2,
+      "titel": "Vorher und nachher – قَبْلَ und بَعْدَ",
+      "regel": "قَبْلَ / بَعْدَ + Genitiv",
+      "erklaerung": [
+        "قَبْلَ heißt „vor“, بَعْدَ „nach“ (zeitlich). Das folgende Nomen steht im Genitiv: قَبْلَ الصَّلاةِ.",
+        "Mit einer Endung: قَبْلَهُ – davor, بَعْدَها – danach."
+      ],
+      "beispiele": [
+        {
+          "ar": "الْوُضوءُ قَبْلَ الصَّلاةِ.",
+          "de": "Die Waschung ist vor dem Gebet."
+        },
+        {
+          "ar": "نَأْكُلُ بَعْدَ صَلاةِ الْمَغْرِبِ.",
+          "de": "Wir essen nach dem Abendgebet."
+        },
+        {
+          "ar": "بَعْدَ الظُّهْرِ",
+          "de": "am Nachmittag"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-6-2#0",
+          "frage": "„nach dem Unterricht“",
+          "ar": null,
+          "antwort": "بَعْدَ الدَّرْسِ",
+          "ablenker": ["قَبْلَ الدَّرْسِ", "بَعْدَ الدَّرْسُ", "في الدَّرْسِ"]
+        },
+        {
+          "id": "g-6-2#1",
+          "frage": "Was bedeutet قَبْلَ?",
+          "ar": null,
+          "antwort": "vor (zeitlich)",
+          "ablenker": ["nach", "während", "mit"]
+        }
+      ]
+    },
+    {
+      "id": "g-6-3",
+      "einheit": 6,
+      "abschnitt": 3,
+      "titel": "Der Imperativ",
+      "regel": "اِجْلِسْ setz dich (m) · اِجْلِسي setz dich (f) · اِقْرَأْ lies",
+      "erklaerung": [
+        "Der Imperativ entsteht aus dem Präsens: تَجْلِسُ → اِجْلِسْ. Am Anfang steht ein Hilfsvokal (اِ oder اُ).",
+        "Zu einer Frau hängt man ـي an: اُكْتُبي, تَوَضَّئي."
+      ],
+      "beispiele": [
+        {
+          "ar": "اِقْرَأْ!",
+          "de": "Lies!"
+        },
+        {
+          "ar": "اُكْتُبي اسْمَكِ.",
+          "de": "Schreib deinen Namen! (f)"
+        },
+        {
+          "ar": "تَوَضَّأْ قَبْلَ الصَّلاةِ.",
+          "de": "Mach die Waschung vor dem Gebet!"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-6-3#0",
+          "frage": "„Setz dich!“ zu einer Frau",
+          "ar": null,
+          "antwort": "اِجْلِسي",
+          "ablenker": ["اِجْلِسْ", "تَجْلِسُ", "جَلَسَتْ"]
+        },
+        {
+          "id": "g-6-3#1",
+          "frage": "„Schreib!“ zu einem Mann",
+          "ar": null,
+          "antwort": "اُكْتُبْ",
+          "ablenker": ["اُكْتُبي", "يَكْتُبُ", "كَتَبَ"]
+        }
+      ]
+    }
   ]
 }

@@ -60,6 +60,7 @@ publisher's exercises, the verbs and the unit test.
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | 🎧 Dialog hören      | The publisher's official audio for this dialogue (streamed from the publisher); page videos as an optional extra.      |
 | 📖 Dialog lesen      | Our own vocalised dialogue with tap-a-word glosses and a comprehension question.                                       |
+| 🌳 Grammatik         | One rule per dialogue: explanation, examples to listen to, two questions.                                              |
 | 🗂️ Wörter lernen     | The dialogue's words as spaced-repetition cards (AR→DE, DE→AR), tolerant checking.                                     |
 | 🧩 Lückentext        | Real example sentences with the word blanked out; pick it from four words of the unit.                                 |
 | ✍️ Schreiben         | Five counted steps: copy, dictation, transliteration → script, sentence building, translation. Resumes where you left. |
@@ -102,7 +103,7 @@ The interface is in **German**; learning content is MSA with full vocalisation.
 | Interactive YouTube        | Mar 2027        | Muhammad al-Andalusi's lessons with checkpoints                                     |
 | iOS & Android apps         | Apr 2027        | Capacitor apps, native reminders and push                                           |
 
-Next on the device: grammar points per unit and an alphabet course for absolute beginners.
+Next on the device: an alphabet course for absolute beginners.
 Details: [roadmap](docs/plan/roadmap.md) · [sprint plan](docs/plan/sprint-plan.md) ·
 [engagement plan](docs/plan/engagement-plan.md) · [content plan](docs/plan/content-plan.md) ·
 [cost plan](docs/plan/cost-plan.md).

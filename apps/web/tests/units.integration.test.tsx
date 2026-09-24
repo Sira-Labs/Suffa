@@ -203,6 +203,23 @@ describe('Units (integration)', () => {
     expect(screen.getByText(words[1]!.ar)).toBeInTheDocument();
   });
 
+  it('explains the grammar of a section and counts each answered question', async () => {
+    const user = userEvent.setup();
+    const point = content.grammatik.find((p) => p.einheit === 1 && p.abschnitt === 1)!;
+    renderAt('/units/1/grammar?section=1');
+    expect(await screen.findByRole('heading', { name: point.titel })).toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Beispiele' })).toBeInTheDocument();
+    const progress = screen.getByRole('progressbar', { name: 'Fortschritt Grammatik' });
+    expect(progress).toHaveAttribute('aria-valuemax', String(point.fragen.length));
+    const first = point.fragen[0]!;
+    const answers = screen.getByRole('group', { name: 'Antworten' });
+    await user.click(within(answers).getByRole('button', { name: first.ablenker[0] }));
+    expect(progress).toHaveAttribute('aria-valuenow', '0');
+    await user.click(within(answers).getByRole('button', { name: first.antwort }));
+    await waitFor(() => expect(progress).toHaveAttribute('aria-valuenow', '1'));
+    expect(useCelebrationStore.getState().current).toMatchObject({ title: 'Richtig' });
+  });
+
   it('fills gaps in real sentences inside a section and counts each sentence', async () => {
     const user = userEvent.setup();
     const [first] = dialogueSections(content, 1);

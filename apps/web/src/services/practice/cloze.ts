@@ -94,6 +94,15 @@ export function clozeChoices<W extends { id: string }>(word: W, pool: readonly W
   return [...picks, word].sort((a, b) => rank(a) - rank(b));
 }
 
+/** A fixed order for `items` that depends on `seed` only (answers do not move on reload). */
+export function stableShuffle<T>(
+  items: readonly T[],
+  seed: string,
+  key: (item: T) => string
+): T[] {
+  return [...items].sort((a, b) => hash(`${seed}|${key(a)}`) - hash(`${seed}|${key(b)}`));
+}
+
 function hash(text: string): number {
   let h = 0;
   for (const ch of text) h = (h * 31 + ch.charCodeAt(0)) >>> 0;

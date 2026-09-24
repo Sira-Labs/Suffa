@@ -321,5 +321,130 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-11-1",
+      "einheit": 11,
+      "abschnitt": 1,
+      "titel": "Der Dual",
+      "regel": "كِتابٌ → كِتابانِ (zwei Bücher)",
+      "erklaerung": [
+        "Für genau zwei hängt man ـانِ an (nach Präpositionen ـَيْنِ): كِتابانِ, في مَدينَتَيْنِ.",
+        "Bei ة wird vor der Endung ت gesprochen: مَدينَة → مَدينَتانِ."
+      ],
+      "beispiele": [
+        {
+          "ar": "عِنْدي أَخَوانِ.",
+          "de": "Ich habe zwei Brüder."
+        },
+        {
+          "ar": "زُرْتُ مَدينَتَيْنِ.",
+          "de": "Ich habe zwei Städte besucht."
+        },
+        {
+          "ar": "الطّالِبانِ مِنْ تونِسَ.",
+          "de": "Die zwei Studenten sind aus Tunesien."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-11-1#0",
+          "frage": "„zwei Karten“ (Nominativ)",
+          "ar": null,
+          "antwort": "خَريطَتانِ",
+          "ablenker": ["خَرائِطُ", "خَريطَةٌ", "خَريطاتٌ"]
+        },
+        {
+          "id": "g-11-1#1",
+          "frage": "Welche Endung hat der Dual nach einer Präposition?",
+          "ar": null,
+          "antwort": "ـَيْنِ",
+          "ablenker": ["ـانِ", "ـونَ", "ـاتٌ"]
+        }
+      ]
+    },
+    {
+      "id": "g-11-2",
+      "einheit": 11,
+      "abschnitt": 2,
+      "titel": "Richtung: مِنْ … إِلى",
+      "regel": "مِنْ von · إِلى nach/zu",
+      "erklaerung": [
+        "مِنْ gibt den Ausgangspunkt an, إِلى das Ziel; beide verlangen den Genitiv.",
+        "Beispiel: سافَرْتُ مِنَ الْقاهِرَةِ إِلى عَمّانَ."
+      ],
+      "beispiele": [
+        {
+          "ar": "نَمْشي إِلى الْمَتْحَفِ.",
+          "de": "Wir gehen zu Fuß zum Museum."
+        },
+        {
+          "ar": "مِنْ هُنا إِلى هُناكَ",
+          "de": "von hier nach dort"
+        },
+        {
+          "ar": "جاءَ مِنَ الْمَغْرِبِ.",
+          "de": "Er kam aus Marokko."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-11-2#0",
+          "frage": "„Ich gehe zur Moschee.“",
+          "ar": "أَذْهَبُ … الْمَسْجِدِ.",
+          "antwort": "إِلى",
+          "ablenker": ["مِنْ", "في", "عَلى"]
+        },
+        {
+          "id": "g-11-2#1",
+          "frage": "„aus Kairo“",
+          "ar": null,
+          "antwort": "مِنَ الْقاهِرَةِ",
+          "ablenker": ["إِلى الْقاهِرَةِ", "مِنْ الْقاهِرَةُ", "في الْقاهِرَةِ"]
+        }
+      ]
+    },
+    {
+      "id": "g-11-3",
+      "einheit": 11,
+      "abschnitt": 3,
+      "titel": "Der gebrochene Plural",
+      "regel": "بَيْتٌ → بُيوتٌ · كِتابٌ → كُتُبٌ · مَدينَةٌ → مُدُنٌ",
+      "erklaerung": [
+        "Viele Nomen bilden den Plural durch Umbau im Wortinneren; die Wurzel bleibt gleich. Diese Formen lernt man am besten mit dem Wort zusammen.",
+        "Gebrochene Plurale von Dingen gelten grammatisch als feminin Singular: الْمُدُنُ كَبيرَةٌ – Die Städte sind groß."
+      ],
+      "beispiele": [
+        {
+          "ar": "مُدُنٌ كَبيرَةٌ",
+          "de": "große Städte"
+        },
+        {
+          "ar": "الْبُيوتُ قَديمَةٌ.",
+          "de": "Die Häuser sind alt."
+        },
+        {
+          "ar": "عِنْدي كُتُبٌ كَثيرَةٌ.",
+          "de": "Ich habe viele Bücher."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-11-3#0",
+          "frage": "Plural von بَلَدٌ",
+          "ar": null,
+          "antwort": "بِلادٌ",
+          "ablenker": ["بَلَدونَ", "بَلَداتٌ", "بَلَدانِ"]
+        },
+        {
+          "id": "g-11-3#1",
+          "frage": "„Die Häuser sind neu.“",
+          "ar": null,
+          "antwort": "الْبُيوتُ جَديدَةٌ.",
+          "ablenker": ["الْبُيوتُ جُدُدٌ.", "الْبُيوتُ جَديدونَ.", "الْبُيوتُ جَديدٌ."]
+        }
+      ]
+    }
   ]
 }

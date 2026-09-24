@@ -300,5 +300,134 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-13-1",
+      "einheit": 13,
+      "abschnitt": 1,
+      "titel": "Verkehrsmittel mit بِـ",
+      "regel": "بِالْقِطارِ mit dem Zug · بِالطّائِرَةِ mit dem Flugzeug",
+      "erklaerung": [
+        "بِـ wird direkt an das Nomen geschrieben und verlangt den Genitiv: بِالسَّيّارَةِ, بِالْحافِلَةِ.",
+        "„zu Fuß“ heißt dagegen مَشْياً oder عَلى الْأَقْدامِ."
+      ],
+      "beispiele": [
+        {
+          "ar": "سافَرْنا بِالْقِطارِ.",
+          "de": "Wir sind mit dem Zug gereist."
+        },
+        {
+          "ar": "أَذْهَبُ إِلى الْعَمَلِ بِالسَّيّارَةِ.",
+          "de": "Ich fahre mit dem Auto zur Arbeit."
+        },
+        {
+          "ar": "كَيْفَ سافَرْتَ؟ – بِالطّائِرَةِ.",
+          "de": "Wie bist du gereist? – Mit dem Flugzeug."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-13-1#0",
+          "frage": "„mit dem Bus“",
+          "ar": null,
+          "antwort": "بِالْحافِلَةِ",
+          "ablenker": ["في الْحافِلَةُ", "بِالْحافِلَةُ", "مَعَ حافِلَةٍ"]
+        },
+        {
+          "id": "g-13-1#1",
+          "frage": "Welcher Kasus folgt auf بِـ?",
+          "ar": null,
+          "antwort": "Genitiv",
+          "ablenker": ["Nominativ", "Akkusativ", "keiner"]
+        }
+      ]
+    },
+    {
+      "id": "g-13-2",
+      "einheit": 13,
+      "abschnitt": 2,
+      "titel": "Der Superlativ",
+      "regel": "أَكْبَرُ مَدينَةٍ = die größte Stadt",
+      "erklaerung": [
+        "Der Superlativ nutzt die Form أَفْعَلُ vor einem unbestimmten Nomen im Genitiv: أَجْمَلُ فُنْدُقٍ – das schönste Hotel.",
+        "Mit ال und nach dem Nomen geht es auch: الْفُنْدُقُ الْأَكْبَرُ."
+      ],
+      "beispiele": [
+        {
+          "ar": "الْقاهِرَةُ أَكْبَرُ مَدينَةٍ في مِصْرَ.",
+          "de": "Kairo ist die größte Stadt in Ägypten."
+        },
+        {
+          "ar": "هٰذا أَرْخَصُ فُنْدُقٍ.",
+          "de": "Das ist das billigste Hotel."
+        },
+        {
+          "ar": "أَسْرَعُ قِطارٍ",
+          "de": "der schnellste Zug"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-13-2#0",
+          "frage": "„das schönste Land“",
+          "ar": null,
+          "antwort": "أَجْمَلُ بَلَدٍ",
+          "ablenker": ["أَجْمَلُ الْبَلَدُ", "بَلَدٌ أَجْمَلُ", "جَميلُ بَلَدٍ"]
+        },
+        {
+          "id": "g-13-2#1",
+          "frage": "„der schnellste Zug“",
+          "ar": null,
+          "antwort": "أَسْرَعُ قِطارٍ",
+          "ablenker": ["أَسْرَعُ قِطارٌ", "سَريعُ الْقِطارِ", "الْقِطارُ أَسْرَعُ"]
+        }
+      ]
+    },
+    {
+      "id": "g-13-3",
+      "einheit": 13,
+      "abschnitt": 3,
+      "titel": "Der Verbalsatz: Verb zuerst",
+      "regel": "سافَرَ الطُّلّابُ = die Studenten reisten",
+      "erklaerung": [
+        "Im Verbalsatz steht das Verb vorne und bleibt im Singular, auch wenn das Subjekt im Plural steht: وَصَلَ الْمُسافِرونَ.",
+        "Das Geschlecht passt sich an: وَصَلَتِ الطّائِرَةُ – das Flugzeug (f) ist gelandet."
+      ],
+      "beispiele": [
+        {
+          "ar": "وَصَلَتِ الطّائِرَةُ.",
+          "de": "Das Flugzeug ist angekommen."
+        },
+        {
+          "ar": "سافَرَ الطُّلّابُ أَمْسِ.",
+          "de": "Die Studenten sind gestern gereist."
+        },
+        {
+          "ar": "يَنْتَظِرُ الْمُسافِرونَ.",
+          "de": "Die Reisenden warten."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-13-3#0",
+          "frage": "„Die Reisenden kamen an.“",
+          "ar": null,
+          "antwort": "وَصَلَ الْمُسافِرونَ.",
+          "ablenker": [
+            "وَصَلوا الْمُسافِرونَ.",
+            "وَصَلَتِ الْمُسافِرونَ.",
+            "الْمُسافِرونَ وَصَلَ."
+          ]
+        },
+        {
+          "id": "g-13-3#1",
+          "frage": "„Der Zug fuhr ab.“ – Welche Form?",
+          "ar": "… الْقِطارُ.",
+          "antwort": "غادَرَ",
+          "ablenker": ["غادَرَتْ", "غادَروا", "يُغادِرونَ"]
+        }
+      ]
+    }
   ]
 }

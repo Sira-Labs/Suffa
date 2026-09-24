@@ -164,6 +164,18 @@ function sectionStations(
     done: read,
     total: 1,
   });
+  if (section.grammarIds.length > 0) {
+    const answered = count(section.grammarIds, (id) => input.practised('grammar', id));
+    drafts.push({
+      id: `u${u}-s${section.no}-grammar`,
+      kind: 'grammar',
+      label: 'Grammatik',
+      detail: `${answered} von ${section.grammarIds.length} Fragen richtig`,
+      to: `/units/${u}/grammar?${q}`,
+      done: answered,
+      total: section.grammarIds.length,
+    });
+  }
   const words = section.wordIds;
   if (words.length > 0) {
     drafts.push({

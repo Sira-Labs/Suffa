@@ -117,6 +117,11 @@ can be retried. Words whose sentences only contain phrases or other forms get no
 401 words have one). The example sentences load on demand, so the station appears once they
 are there.
 
+**Grammatik.** Each dialogue section has one grammar point (48 in all, own explanations of
+general MSA grammar): a one-line rule, two short paragraphs with Arabic set in the Arabic font,
+examples to tap and hear, then two multiple-choice questions. The station sits right after
+reading the dialogue; each question counts on the first correct answer (+2 XP).
+
 ## Feedback moments
 
 - **Celebration toast** (`CelebrationToast`): "+5 XP · Dialog gehört" with a medal and a small

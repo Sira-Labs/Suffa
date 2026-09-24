@@ -360,5 +360,134 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-4-1",
+      "einheit": 4,
+      "abschnitt": 1,
+      "titel": "Das Präsens (Muḍāriʿ) im Singular",
+      "regel": "أَذْهَبُ ich gehe · تَذْهَبُ du gehst / sie geht · يَذْهَبُ er geht · تَذْهَبينَ du gehst (f)",
+      "erklaerung": [
+        "Das Präsens wird mit Vorsilben gebildet: أَ für ich, تَ für du und sie, يَ für er.",
+        "Zu einer Frau sagt man تَذْهَبينَ – mit der Endung ـينَ."
+      ],
+      "beispiele": [
+        {
+          "ar": "أَسْتَيْقِظُ في الصَّباحِ.",
+          "de": "Ich wache morgens auf."
+        },
+        {
+          "ar": "يَذْهَبُ عُمَرُ إِلى الْجامِعَةِ.",
+          "de": "ʿUmar geht zur Universität."
+        },
+        {
+          "ar": "مَتى تَنامينَ؟",
+          "de": "Wann schläfst du? (f)"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-4-1#0",
+          "frage": "„Ich trinke Tee.“ – Welche Form?",
+          "ar": "… الشّايَ.",
+          "antwort": "أَشْرَبُ",
+          "ablenker": ["يَشْرَبُ", "تَشْرَبُ", "شَرِبَ"]
+        },
+        {
+          "id": "g-4-1#1",
+          "frage": "„Er schreibt.“ – Welche Form?",
+          "ar": null,
+          "antwort": "يَكْتُبُ",
+          "ablenker": ["أَكْتُبُ", "تَكْتُبينَ", "كَتَبْتُ"]
+        }
+      ]
+    },
+    {
+      "id": "g-4-2",
+      "einheit": 4,
+      "abschnitt": 2,
+      "titel": "Das Perfekt (Māḍī) im Singular",
+      "regel": "ذَهَبْتُ ich ging · ذَهَبْتَ du gingst · ذَهَبَ er ging · ذَهَبَتْ sie ging",
+      "erklaerung": [
+        "Das Perfekt beschreibt Abgeschlossenes und wird mit Endungen gebildet: ـتُ ich, ـتَ du (m), ـتِ du (f), ـَتْ sie.",
+        "Die Grundform (er) ist die Form, unter der Verben im Wörterbuch stehen: ذَهَبَ, كَتَبَ, صَلّى."
+      ],
+      "beispiele": [
+        {
+          "ar": "صَلَّيْتُ الْفَجْرَ.",
+          "de": "Ich habe das Morgengebet gebetet."
+        },
+        {
+          "ar": "مَتى نِمْتَ؟",
+          "de": "Wann hast du geschlafen?"
+        },
+        {
+          "ar": "ذَهَبَتْ إِلى السّوقِ.",
+          "de": "Sie ging zum Markt."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-4-2#0",
+          "frage": "„Ich habe geschrieben.“",
+          "ar": null,
+          "antwort": "كَتَبْتُ",
+          "ablenker": ["كَتَبَ", "أَكْتُبُ", "كَتَبَتْ"]
+        },
+        {
+          "id": "g-4-2#1",
+          "frage": "„Sie ging.“",
+          "ar": null,
+          "antwort": "ذَهَبَتْ",
+          "ablenker": ["ذَهَبْتُ", "تَذْهَبُ", "ذَهَبَ"]
+        }
+      ]
+    },
+    {
+      "id": "g-4-3",
+      "einheit": 4,
+      "abschnitt": 3,
+      "titel": "Die Uhrzeit",
+      "regel": "السّاعَةُ الْخامِسَةُ = es ist fünf Uhr",
+      "erklaerung": [
+        "Die Uhrzeit nutzt feminine Ordnungszahlen: الثّانِيَةُ, الثّالِثَةُ, الرّابِعَةُ … Nur „ein Uhr“ heißt الْواحِدَةُ.",
+        "مَتى؟ fragt „wann?“, كَمِ السّاعَةُ؟ „wie spät ist es?“."
+      ],
+      "beispiele": [
+        {
+          "ar": "كَمِ السّاعَةُ؟",
+          "de": "Wie spät ist es?"
+        },
+        {
+          "ar": "السّاعَةُ الثّالِثَةُ.",
+          "de": "Es ist drei Uhr."
+        },
+        {
+          "ar": "أَنامُ في السّاعَةِ الْعاشِرَةِ.",
+          "de": "Ich schlafe um zehn Uhr."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-4-3#0",
+          "frage": "„Es ist vier Uhr.“",
+          "ar": null,
+          "antwort": "السّاعَةُ الرّابِعَةُ.",
+          "ablenker": [
+            "السّاعَةُ أَرْبَعَةٌ.",
+            "أَرْبَعُ ساعاتٍ.",
+            "السّاعَةُ الرّابِعُ."
+          ]
+        },
+        {
+          "id": "g-4-3#1",
+          "frage": "Wie fragst du „Wann?“",
+          "ar": null,
+          "antwort": "مَتى؟",
+          "ablenker": ["كَمْ؟", "أَيْنَ؟", "مَنْ؟"]
+        }
+      ]
+    }
   ]
 }

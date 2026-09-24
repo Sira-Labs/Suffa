@@ -264,5 +264,130 @@
         }
       ]
     }
+  ],
+  "grammatik": [
+    {
+      "id": "g-16-1",
+      "einheit": 16,
+      "abschnitt": 1,
+      "titel": "Pläne: سَـ mit wir",
+      "regel": "سَنُسافِرُ = wir werden reisen",
+      "erklaerung": [
+        "„wir“ im Präsens beginnt mit نَـ: نُسافِرُ, نَزورُ. Mit سَـ wird daraus die Zukunft: سَنَزورُ.",
+        "Zeitangaben für Pläne: غَداً morgen, الْأُسْبوعَ الْقادِمَ nächste Woche, في الصَّيْفِ im Sommer."
+      ],
+      "beispiele": [
+        {
+          "ar": "سَنُسافِرُ إِلى الْبَحْرِ.",
+          "de": "Wir werden ans Meer fahren."
+        },
+        {
+          "ar": "سَنَبْقى أُسْبوعَيْنِ.",
+          "de": "Wir werden zwei Wochen bleiben."
+        },
+        {
+          "ar": "ماذا سَتَفْعَلونَ في الْإِجازَةِ؟",
+          "de": "Was werdet ihr in den Ferien machen?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-16-1#0",
+          "frage": "„Wir werden besuchen.“",
+          "ar": null,
+          "antwort": "سَنَزورُ",
+          "ablenker": ["سَأَزورُ", "زُرْنا", "سَيَزورونَ"]
+        },
+        {
+          "id": "g-16-1#1",
+          "frage": "Mit welchem Buchstaben beginnt das Präsens für „wir“?",
+          "ar": null,
+          "antwort": "نَـ",
+          "ablenker": ["أَ", "يَـ", "تَـ"]
+        }
+      ]
+    },
+    {
+      "id": "g-16-2",
+      "einheit": 16,
+      "abschnitt": 2,
+      "titel": "Verneinte Vergangenheit mit لَمْ",
+      "regel": "لَمْ + Jussiv: لَمْ أَذْهَبْ = ich bin nicht gegangen",
+      "erklaerung": [
+        "لَمْ verneint die Vergangenheit, steht aber vor der Präsensform ohne Endvokal: ذَهَبْتُ → لَمْ أَذْهَبْ.",
+        "In Texten ist لَمْ häufiger als ما + Perfekt (Einheit 7); beide bedeuten dasselbe."
+      ],
+      "beispiele": [
+        {
+          "ar": "لَمْ أُسافِرْ هٰذا الْعامَ.",
+          "de": "Ich bin dieses Jahr nicht gereist."
+        },
+        {
+          "ar": "لَمْ نَسْبَحْ في الْبَحْرِ.",
+          "de": "Wir sind nicht im Meer geschwommen."
+        },
+        {
+          "ar": "لِماذا لَمْ تَتَّصِلْ؟",
+          "de": "Warum hast du nicht angerufen?"
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-16-2#0",
+          "frage": "„Er hat nicht geschrieben.“",
+          "ar": null,
+          "antwort": "لَمْ يَكْتُبْ.",
+          "ablenker": ["لَمْ كَتَبَ.", "لا يَكْتُبُ.", "لَمْ يَكْتُبُ."]
+        },
+        {
+          "id": "g-16-2#1",
+          "frage": "Welche Verbform folgt auf لَمْ?",
+          "ar": null,
+          "antwort": "Präsens ohne Endvokal (Jussiv)",
+          "ablenker": ["Perfekt", "Präsens mit -u", "Imperativ"]
+        }
+      ]
+    },
+    {
+      "id": "g-16-3",
+      "einheit": 16,
+      "abschnitt": 3,
+      "titel": "Als, wenn – عِنْدَما",
+      "regel": "عِنْدَما وَصَلْنا … = als wir ankamen …",
+      "erklaerung": [
+        "عِنْدَما leitet einen Zeitsatz ein: mit Perfekt „als“, mit Präsens „wenn/immer wenn“.",
+        "Beispiel: عِنْدَما أَكونُ في الْإِجازَةِ أَنامُ كَثيراً – Wenn ich in den Ferien bin, schlafe ich viel."
+      ],
+      "beispiele": [
+        {
+          "ar": "عِنْدَما وَصَلْنا، كانَ الْجَوُّ حارّاً.",
+          "de": "Als wir ankamen, war es heiß."
+        },
+        {
+          "ar": "عِنْدَما أُسافِرُ آخُذُ كِتاباً.",
+          "de": "Wenn ich reise, nehme ich ein Buch mit."
+        },
+        {
+          "ar": "اِتَّصِلْ بي عِنْدَما تَصِلُ.",
+          "de": "Ruf mich an, wenn du ankommst."
+        }
+      ],
+      "fragen": [
+        {
+          "id": "g-16-3#0",
+          "frage": "Was bedeutet عِنْدَما mit Perfekt?",
+          "ar": null,
+          "antwort": "als",
+          "ablenker": ["weil", "obwohl", "bevor"]
+        },
+        {
+          "id": "g-16-3#1",
+          "frage": "„Als ich ankam …“",
+          "ar": null,
+          "antwort": "عِنْدَما وَصَلْتُ …",
+          "ablenker": ["عِنْدي وَصَلْتُ …", "عِنْدَما أَصِلُ …", "مَتى وَصَلْتُ …"]
+        }
+      ]
+    }
   ]
 }

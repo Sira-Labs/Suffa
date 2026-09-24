@@ -28,6 +28,8 @@ export interface AuthOptions {
   secret: string;
   /** Public URL of the app, e.g. https://suffa.example.org (links in mails point here). */
   publicUrl: string;
+  /** Every origin the app is served from (the public URL's included). */
+  trustedOrigins?: readonly string[];
   mailer: Mailer;
   /** Secure cookies and rate limits on (prod); tests may switch rate limits on explicitly. */
   production: boolean;
@@ -42,7 +44,7 @@ export function createAuth(options: AuthOptions) {
     secret: options.secret,
     baseURL: options.publicUrl,
     basePath: AUTH_BASE_PATH,
-    trustedOrigins: [options.publicUrl],
+    trustedOrigins: [options.publicUrl, ...(options.trustedOrigins ?? [])],
     database: options.pool,
     // Magic link is the only way in (no passwords to forget or leak).
     emailAndPassword: { enabled: false },

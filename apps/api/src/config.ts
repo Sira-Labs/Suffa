@@ -57,6 +57,11 @@ const RawEnvSchema = z.object({
     .transform((value) => value || undefined)
     .pipe(z.string().url('SUFFA_PUBLIC_URL must be a URL').optional())
     .optional(),
+  /**
+   * More origins the app is served from besides SUFFA_PUBLIC_URL (comma-separated), e.g. the
+   * old domain while moving to a new one. Sign-in mails always link to SUFFA_PUBLIC_URL.
+   */
+  SUFFA_TRUSTED_ORIGINS: z.string().trim().optional(),
   /** SMTP for sign-in mails: the Google Workspace relay (smtp-relay.gmail.com). */
   SUFFA_SMTP_HOST: z.string().trim().optional(),
   SUFFA_SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
@@ -124,6 +129,8 @@ export interface Config {
   errorDsn: string | undefined;
   /** Public URL of the app; sign-in is off without it (and without an auth secret). */
   publicUrl: string | undefined;
+  /** Origins browsers may send (SUFFA_PUBLIC_URL first, then SUFFA_TRUSTED_ORIGINS). */
+  trustedOrigins: string[];
   /** SMTP for sign-in mails; outside prod the link may go to the log instead. */
   smtp: SmtpSettings | undefined;
   /** Public DSN of the web project; undefined disables browser error reporting. */
@@ -195,7 +202,15 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       syncDevTokens = parsed.tokens;
     }
   }
+  const extraOrigins = parseOrigins(raw.SUFFA_TRUSTED_ORIGINS);
+  issues.push(...extraOrigins.issues);
   if (issues.length > 0) throw new ConfigError(issues);
+  const trustedOrigins = [
+    ...new Set([
+      ...(raw.SUFFA_PUBLIC_URL ? [new URL(raw.SUFFA_PUBLIC_URL).origin] : []),
+      ...extraOrigins.origins,
+    ]),
+  ];
 
   return {
     env: raw.SUFFA_ENV,
@@ -210,6 +225,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     syncDevTokens,
     errorDsn: raw.SUFFA_ERROR_DSN,
     publicUrl: raw.SUFFA_PUBLIC_URL?.replace(/\/$/, ''),
+    trustedOrigins,
     smtp: smtpComplete
       ? {
           host: raw.SUFFA_SMTP_HOST!,
@@ -237,4 +253,36 @@ export function redactDatabaseUrl(url: string): string {
   } catch {
     return '<unparseable database url>';
   }
+}
+
+/**
+ * "https://a.example,https://b.example" → origins. Only bare http(s) origins are accepted,
+ * so a typo (a path, a stray character) is reported instead of silently never matching.
+ */
+export function parseOrigins(value: string | undefined): {
+  origins: string[];
+  issues: string[];
+} {
+  const origins: string[] = [];
+  const issues: string[] = [];
+  for (const entry of (value ?? '').split(',').map((part) => part.trim())) {
+    if (!entry) continue;
+    let url: URL | null = null;
+    try {
+      url = new URL(entry);
+    } catch (error) {
+      if (!(error instanceof TypeError)) throw error;
+    }
+    const bare = url !== null && entry.replace(/\/$/, '') === url.origin;
+    // URL() accepts characters like ")" in host names; real host names never have them.
+    const plainHost = url !== null && /^[a-z0-9.-]+$/.test(url.hostname);
+    if (!url || !bare || !plainHost || !/^https?:$/.test(url.protocol)) {
+      issues.push(
+        `SUFFA_TRUSTED_ORIGINS: "${entry}" is not an origin like https://suffa.example.org`
+      );
+    } else {
+      origins.push(url.origin);
+    }
+  }
+  return { origins, issues };
 }

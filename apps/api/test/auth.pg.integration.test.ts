@@ -23,6 +23,7 @@ import { base32Decode, stepAt, totpAt } from '../src/security/totp.js';
 
 const url = process.env.SUFFA_TEST_DATABASE_URL;
 const PUBLIC_URL = 'http://localhost:5173';
+const OLD_URL = 'https://old.example.org';
 const quiet = { info: () => undefined, warn: () => undefined, error: () => undefined };
 
 class CapturingMailer implements Mailer {
@@ -54,6 +55,7 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       pool,
       secret: 'test-secret-0123456789-abcdefghijklmnop',
       publicUrl: PUBLIC_URL,
+      trustedOrigins: [OLD_URL],
       mailer,
       production: false,
       rateLimit: true,
@@ -91,7 +93,7 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
           }),
         log: quiet,
       },
-      allowedOrigin: PUBLIC_URL,
+      allowedOrigin: [PUBLIC_URL, OLD_URL],
     });
   });
 
@@ -328,6 +330,27 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       email: 'zeit@example.org',
       timeZone: 'Asia/Riyadh',
     });
+  });
+
+  it('accepts sign-in and writes from the old domain while moving', async () => {
+    const response = await app.request('/api/v1/auth/sign-in/magic-link', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: OLD_URL,
+        'x-real-ip': '203.0.113.70',
+      },
+      body: JSON.stringify({ email: 'umzug@example.org', callbackURL: '/settings' }),
+    });
+    expect(response.status).toBe(200);
+    // The mail still links to the public URL (the new domain).
+    expect(new URL(mailer.links[0]!.url).origin).toBe(PUBLIC_URL);
+    const cookie = await signInDevice('umzug2@example.org', '203.0.113.71');
+    const write = await app.request('/api/v1/account/sessions/revoke-others', {
+      method: 'POST',
+      headers: { cookie, origin: OLD_URL },
+    });
+    expect(write.status).toBe(200);
   });
 
   it('refuses a cross-site write even with a valid session cookie', async () => {

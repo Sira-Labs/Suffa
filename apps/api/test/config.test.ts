@@ -126,6 +126,36 @@ describe('loadConfig', () => {
   });
 });
 
+describe('SUFFA_TRUSTED_ORIGINS', () => {
+  const base = {
+    SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db',
+    SUFFA_PUBLIC_URL: 'https://suffa.siralabs.org/',
+  };
+
+  it('trusts the public URL first, then the extra origins', () => {
+    expect(loadConfig(base).trustedOrigins).toEqual(['https://suffa.siralabs.org']);
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRUSTED_ORIGINS:
+          'https://suffa.siralabs.org, https://suffa-web.apps.example.ch/',
+      }).trustedOrigins
+    ).toEqual(['https://suffa.siralabs.org', 'https://suffa-web.apps.example.ch']);
+  });
+
+  it('reports entries that are not bare origins', () => {
+    for (const bad of [
+      'https://a.example.ch)',
+      'https://a.example/app',
+      'suffa.example',
+    ]) {
+      expect(() => loadConfig({ ...base, SUFFA_TRUSTED_ORIGINS: bad })).toThrow(
+        /is not an origin/
+      );
+    }
+  });
+});
+
 describe('SUFFA_SYNC_DEV_TOKENS', () => {
   const UUID = '11111111-1111-4111-8111-111111111111';
 

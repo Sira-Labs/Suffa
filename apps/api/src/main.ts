@@ -149,6 +149,7 @@ async function main(): Promise<void> {
       pool,
       secret: config.authSecret,
       publicUrl: config.publicUrl,
+      trustedOrigins: config.trustedOrigins,
       mailer: config.smtp ? new SmtpMailer(config.smtp, log) : new LogMailer(log),
       production: config.env === 'prod',
     });
@@ -178,7 +179,7 @@ async function main(): Promise<void> {
     };
     // The origin is what browsers must send; a mismatch answers 403 INVALID_ORIGIN.
     log.info(
-      { mail: config.smtp ? 'smtp' : 'log', origin: new URL(config.publicUrl).origin },
+      { mail: config.smtp ? 'smtp' : 'log', origins: config.trustedOrigins },
       'auth.enabled'
     );
   } else if (!canMail) {
@@ -221,7 +222,7 @@ async function main(): Promise<void> {
     authzLog: log,
     auth: authRoutes,
     account: accountRoutes,
-    allowedOrigin: config.publicUrl ? new URL(config.publicUrl).origin : undefined,
+    allowedOrigin: config.trustedOrigins,
     errorTunnel: { webDsn: config.webErrorDsn, log },
     onUnhandledError: (error, path) => {
       log.error({ err: error, path }, 'http.unhandled_error');

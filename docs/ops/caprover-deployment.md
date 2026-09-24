@@ -435,6 +435,7 @@ If Tabayyun's rule already allows the server's IP, Suffa can use it as is (same 
 | `SUFFA_MAIL_FROM`                        | `Suffa <noreply@your-domain>` – any address of the Workspace domain                        |
 | `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD` | only with "Require SMTP Authentication": the user and its app password                     |
 | `SUFFA_PUBLIC_URL`                       | `https://suffa.<domain>`; its host name is also the relay greeting (EHLO)                  |
+| `SUFFA_TRUSTED_ORIGINS`                  | optional: more addresses the app is served from, comma-separated (e.g. the old domain)     |
 
 **3. Restart** the app. The log shows `auth.enabled` with `mail: smtp`. Without host and sender
 it logs `auth.disabled`; the app keeps working offline, only sign-in and sync stay off.
@@ -445,6 +446,10 @@ a name Google does not accept – Suffa greets with the host of `SUFFA_PUBLIC_UR
 are logged as `mail.send_failed` with host, port and the SMTP answer; `ETIMEDOUT` or `ESOCKET`
 there means the outgoing port is blocked by the host (common for 465 and 25) – use `587`. A
 sign-in request answered with `403 INVALID_ORIGIN` means `SUFFA_PUBLIC_URL` differs from the
-address in the browser; `auth.enabled` logs the origin the api expects. Secrets live
+address in the browser (or is missing from `SUFFA_TRUSTED_ORIGINS`); `auth.enabled` logs the
+origins the api accepts. **Moving to a new domain:** set `SUFFA_PUBLIC_URL` to the new address
+(sign-in mails and invite links point there) and list the old one in `SUFFA_TRUSTED_ORIGINS`
+until nobody uses it. Browsers keep data and sign-in per domain: on the new address learners
+sign in once more, and sync brings their progress over. Secrets live
 only in CapRover, never in the repository. Outside prod the api may run without SMTP: the
 sign-in link is then written to the log (`auth.magic_link_logged`) for local testing.

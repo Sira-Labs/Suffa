@@ -45,10 +45,10 @@ export interface AppDeps {
   /** Account self-service (sessions, settings) for the signed-in user. */
   account?: AccountRouteDeps;
   /**
-   * Origin of the web app (SUFFA_PUBLIC_URL). When set, state-changing API requests that a
+   * Origins of the web app (SUFFA_PUBLIC_URL, SUFFA_TRUSTED_ORIGINS). When set, state-changing API requests that a
    * browser marks as coming from another site are refused (403).
    */
-  allowedOrigin?: string;
+  allowedOrigin?: string | readonly string[];
   /** Classes, invites and membership approval. */
   classes?: ClassRouteDeps;
   /** Admin area (users); every route needs an admin. */
@@ -92,7 +92,7 @@ export function createApp(deps: AppDeps): Hono {
     }
   };
 
-  if (deps.allowedOrigin) app.use('/api/*', sameOriginOnly(deps.allowedOrigin));
+  if (deps.allowedOrigin?.length) app.use('/api/*', sameOriginOnly(deps.allowedOrigin));
 
   app.get('/healthz', healthHandler);
   app.get('/api/healthz', healthHandler);

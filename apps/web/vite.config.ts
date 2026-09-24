@@ -63,6 +63,11 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    // Local development: the api runs on :8000 (npm start -w @suffa/api); same-origin like
+    // production, so the session cookie works without CORS.
+    proxy: { '/api': process.env.SUFFA_API_URL ?? 'http://localhost:8000' },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

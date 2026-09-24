@@ -4,3 +4,4 @@ export * from './engine';
 export * from './factory';
 export { NoopSyncProvider } from './NoopSyncProvider';
 export { SupabaseSyncProvider } from './SupabaseSyncProvider';
+export { ApiSyncProvider } from './ApiSyncProvider';

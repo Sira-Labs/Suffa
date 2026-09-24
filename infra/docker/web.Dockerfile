@@ -9,9 +9,12 @@ WORKDIR /app
 ARG VITE_SUPABASE_URL=""
 ARG VITE_SUPABASE_ANON_KEY=""
 ARG VITE_SYNC_ENABLED="true"
+# api | supabase | off; empty = Supabase while its keys are set, else the own API.
+ARG VITE_SYNC_BACKEND=""
 ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
     VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY \
-    VITE_SYNC_ENABLED=$VITE_SYNC_ENABLED
+    VITE_SYNC_ENABLED=$VITE_SYNC_ENABLED \
+    VITE_SYNC_BACKEND=$VITE_SYNC_BACKEND
 
 # Manifests first for layer caching; every workspace manifest is needed for `npm ci`.
 COPY package.json package-lock.json ./

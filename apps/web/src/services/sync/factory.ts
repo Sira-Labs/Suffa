@@ -4,24 +4,37 @@
  * (pure offline mode) is created. No secrets in code – only `.env`.
  */
 import { logger } from '@/services/logger';
+import { ApiSyncProvider } from './ApiSyncProvider';
 import { NoopSyncProvider } from './NoopSyncProvider';
 import { SupabaseSyncProvider } from './SupabaseSyncProvider';
 import type { SyncProvider } from './provider';
 
 const log = logger.child('sync:factory');
 
+/**
+ * VITE_SYNC_BACKEND picks the backend: `api` (Suffa's own API, same origin), `supabase` or
+ * `off`. Without it: Supabase while its keys are set (until the migration, story 4.1),
+ * otherwise the own API; the API provider falls back to offline mode by itself when the
+ * server has no sign-in.
+ */
 export function createSyncProvider(): SyncProvider {
   const url = import.meta.env.VITE_SUPABASE_URL;
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   const enabled = import.meta.env.VITE_SYNC_ENABLED !== 'false';
+  const backend = import.meta.env.VITE_SYNC_BACKEND as string | undefined;
 
-  if (!enabled) {
-    log.info('Sync disabled via VITE_SYNC_ENABLED=false → offline mode');
+  if (!enabled || backend === 'off') {
+    log.info('Sync disabled → offline mode');
     return new NoopSyncProvider();
   }
 
+  if (backend === 'api' || (backend !== 'supabase' && (!url || !anonKey))) {
+    log.info('Sync via the Suffa API (magic-link sign-in)');
+    return new ApiSyncProvider();
+  }
+
   if (!url || !anonKey) {
-    log.info('No Supabase configuration found → offline mode (noop)');
+    log.info('VITE_SYNC_BACKEND=supabase without Supabase configuration → offline mode');
     return new NoopSyncProvider();
   }
 

@@ -67,6 +67,7 @@ jobs:
           # api: version string reported by /api/version.
           build-args: |
             VITE_SUPABASE_URL=${{ vars.VITE_SUPABASE_URL }}
+            VITE_SYNC_BACKEND=${{ vars.VITE_SYNC_BACKEND }}
             VITE_SUPABASE_ANON_KEY=${{ vars.VITE_SUPABASE_ANON_KEY }}
             VITE_SYNC_ENABLED=${{ vars.VITE_SYNC_ENABLED || 'true' }}
             SUFFA_VERSION=${{ steps.tag.outputs.tag }}
@@ -147,6 +148,7 @@ jobs:
             ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:latest
           build-args: |
             VITE_SUPABASE_URL=${{ vars.VITE_SUPABASE_URL }}
+            VITE_SYNC_BACKEND=${{ vars.VITE_SYNC_BACKEND }}
             VITE_SUPABASE_ANON_KEY=${{ vars.VITE_SUPABASE_ANON_KEY }}
             VITE_SYNC_ENABLED=${{ vars.VITE_SYNC_ENABLED || 'true' }}
             SUFFA_VERSION=${{ steps.tag.outputs.tag }}

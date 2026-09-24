@@ -173,16 +173,23 @@ backups to RustFS) and [`glitchtip.yml`](infra/caprover/one-click/glitchtip.yml)
 and uptime checks, no Redis).
 Step-by-step guide, env vars and troubleshooting: [docs/ops/caprover-deployment.md](docs/ops/caprover-deployment.md).
 
-## Device sync with Supabase (current)
+## Sign-in and device sync
 
-Until the own API takes over (ADR-0007), sync uses Supabase:
+Learners sign in by **magic link only** (no passwords, ADR-0008): they enter their email, get a
+link and are signed in on that device with an httpOnly session cookie. Learning data then syncs
+through the own API (`/api/v1/sync`), offline-first as before.
 
-1. Create a Supabase project; run `supabase/schema.sql`, then `supabase/policies.sql`.
-2. Enable email magic links and allow your app URL as a redirect.
-3. `cp .env.example .env` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
-4. Sign in under **Einstellungen → Konto** on each device.
+- **Server:** set `SUFFA_AUTH_SECRET`, `SUFFA_PUBLIC_URL` and the SMTP variables on `suffa-api`
+  (Gmail with an app password during development) — see
+  [docs/ops/caprover-deployment.md](docs/ops/caprover-deployment.md#sign-in-mails-magic-link).
+  Without SMTP the api runs and the app stays in offline mode.
+- **Locally:** start Postgres and the api (`SUFFA_ENV=dev`, no SMTP needed: the sign-in link is
+  written to the api log), then `npm run dev`; Vite proxies `/api` to `SUFFA_API_URL`
+  (default `http://localhost:8000`).
+- **Supabase** remains selectable with `VITE_SYNC_BACKEND=supabase` until the data migration
+  (story 4.1); see `.env.example`.
 
-No secrets live in the code. The anon key is public by design; row-level security protects the data.
+No secrets live in the code; they are set as environment variables only.
 
 ## Project structure
 

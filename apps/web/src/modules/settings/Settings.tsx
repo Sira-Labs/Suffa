@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { TashkilToggle } from '@/components';
 import { useSettingsStore, useSyncStore } from '@/state';
@@ -84,13 +85,15 @@ function AccountPanel() {
   const lastSyncAt = useSyncStore((s) => s.lastSyncAt);
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState<string | null>(null);
+  // Back from the magic link (/settings?angemeldet=1): confirm once.
+  const [params] = useSearchParams();
+  const justSignedIn = params.get('angemeldet') === '1';
 
   if (!provider.isConfigured()) {
     return (
       <p className="muted">
-        Reiner Offline-Modus (keine Supabase-Konfiguration). Alle Daten liegen lokal auf
-        diesem Gerät. Für die Geräte-Synchronisation `.env` mit
-        <code> VITE_SUPABASE_URL</code> und <code> VITE_SUPABASE_ANON_KEY</code> setzen.
+        Offline-Modus: Alle Daten liegen lokal auf diesem Gerät. Die Anmeldung für den
+        Abgleich zwischen Geräten ist auf diesem Server noch nicht eingerichtet.
       </p>
     );
   }
@@ -98,6 +101,11 @@ function AccountPanel() {
   if (auth.status === 'signed-in') {
     return (
       <div className="stack">
+        {justSignedIn && (
+          <span className="feedback-good">
+            ✓ Du bist angemeldet. Dein Lernstand wird abgeglichen.
+          </span>
+        )}
         <span>
           Angemeldet als <strong>{auth.user.email ?? auth.user.id}</strong>
         </span>
@@ -124,7 +132,7 @@ function AccountPanel() {
     const result = await signIn(email);
     setMessage(
       result.ok
-        ? '✓ Magic-Link gesendet. Prüfe deine E-Mails und öffne den Link auf diesem Gerät.'
+        ? '✓ Link gesendet. Öffne die E-Mail auf diesem Gerät und tippe auf „Bei Suffa anmelden“ – der Link gilt 15 Minuten.'
         : `Fehler: ${result.message}`
     );
   };
@@ -132,8 +140,8 @@ function AccountPanel() {
   return (
     <form className="stack" onSubmit={submit}>
       <p className="muted">
-        Melde dich per Magic-Link an. Dasselbe Konto auf Handy und Desktop ⇒ automatischer
-        Abgleich des Lernstands.
+        Anmelden ohne Passwort: Du bekommst einen Link per E-Mail. Mit demselben Konto auf
+        Handy und Computer wird dein Lernstand automatisch abgeglichen.
       </p>
       <div className="row">
         <input
@@ -145,7 +153,7 @@ function AccountPanel() {
           required
         />
         <button className="btn btn-primary" type="submit">
-          Magic-Link senden
+          Link senden
         </button>
       </div>
       {message && (

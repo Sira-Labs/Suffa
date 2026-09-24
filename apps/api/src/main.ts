@@ -7,7 +7,9 @@ import { fileURLToPath } from 'node:url';
 import { serve } from '@hono/node-server';
 import pg from 'pg';
 import { pino } from 'pino';
-import { createApp } from './app.js';
+import { createApp, type AuthRouteDeps } from './app.js';
+import { ChainResolver, createAuth, SessionResolver } from './auth/betterAuth.js';
+import { LogMailer, SmtpMailer } from './auth/mailer.js';
 import { registerMaintenance } from './jobs/maintenance.js';
 import { queueDepth, startBoss } from './jobs/queue.js';
 import {
@@ -128,17 +130,42 @@ async function main(): Promise<void> {
     onError: (error) => errors.capture(error, { source: 'pg-boss' }),
   });
 
-  // Until Better Auth (Sprint 3) sync is closed, except for dev tokens outside prod.
-  let auth: AuthResolver = new DenyAllResolver();
+  // Sign-in (magic link) needs a secret and the public URL; prod config enforces both.
+  const resolvers: AuthResolver[] = [];
+  let authRoutes: AuthRouteDeps | undefined;
+  // In prod the link is never written to the log: without SMTP there is no sign-in.
+  const canMail = Boolean(config.smtp) || config.env !== 'prod';
+  if (config.authSecret && config.publicUrl && canMail) {
+    const betterAuth = createAuth({
+      pool,
+      secret: config.authSecret,
+      publicUrl: config.publicUrl,
+      mailer: config.smtp ? new SmtpMailer(config.smtp) : new LogMailer(log),
+      production: config.env === 'prod',
+    });
+    const sessions = new SessionResolver(betterAuth);
+    resolvers.push(sessions);
+    authRoutes = {
+      handler: (request) => betterAuth.handler(request),
+      me: (h) => sessions.me(h),
+    };
+    log.info({ mail: config.smtp ? 'smtp' : 'log' }, 'auth.enabled');
+  } else if (!canMail) {
+    log.error('auth.disabled: SMTP is not configured (SUFFA_SMTP_* and SUFFA_MAIL_FROM)');
+  } else {
+    log.warn('auth.disabled (set SUFFA_AUTH_SECRET and SUFFA_PUBLIC_URL)');
+  }
   if (config.syncDevTokens.size > 0) {
     const userIds = [...new Set(config.syncDevTokens.values())];
     await pool.query(
       'insert into users (id) select unnest($1::uuid[]) on conflict (id) do nothing',
       [userIds]
     );
-    auth = new DevTokenResolver(config.syncDevTokens);
+    resolvers.push(new DevTokenResolver(config.syncDevTokens));
     log.warn({ users: userIds.length }, 'sync.dev_tokens_enabled');
   }
+  const auth: AuthResolver =
+    resolvers.length > 0 ? new ChainResolver(resolvers) : new DenyAllResolver();
 
   const app = createApp({
     version: config.version,
@@ -149,6 +176,7 @@ async function main(): Promise<void> {
     },
     onProbeError: (error) => log.warn({ err: error }, 'health.db_unreachable'),
     sync: { repo: new PgSyncRepository(pool), auth, log },
+    auth: authRoutes,
     errorTunnel: { webDsn: config.webErrorDsn, log },
     onUnhandledError: (error, path) => {
       log.error({ err: error, path }, 'http.unhandled_error');

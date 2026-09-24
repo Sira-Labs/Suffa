@@ -20,6 +20,36 @@ describe('loadConfig', () => {
     expect(config.role).toBe('worker');
   });
 
+  it('requires the public URL for the prod api and reads SMTP settings', () => {
+    const prodApi = {
+      SUFFA_ENV: 'prod',
+      SUFFA_DATABASE_URL: GOOD_DB,
+      SUFFA_AUTH_SECRET: GOOD_SECRET,
+    };
+    expect(() => loadConfig(prodApi)).toThrow(/SUFFA_PUBLIC_URL is required/);
+    // Without SMTP the api still starts; sign-in stays off (main.ts logs it).
+    expect(
+      loadConfig({ ...prodApi, SUFFA_PUBLIC_URL: 'https://suffa.example.org' }).smtp
+    ).toBeUndefined();
+    const config = loadConfig({
+      ...prodApi,
+      SUFFA_PUBLIC_URL: 'https://suffa.example.org/',
+      SUFFA_SMTP_HOST: 'smtp.gmail.com',
+      SUFFA_SMTP_USER: 'someone@gmail.com',
+      SUFFA_SMTP_PASSWORD: 'app-password-from-env',
+      SUFFA_MAIL_FROM: 'Suffa <someone@gmail.com>',
+    });
+    expect(config.publicUrl).toBe('https://suffa.example.org');
+    expect(config.smtp).toMatchObject({ host: 'smtp.gmail.com', port: 465 });
+  });
+
+  it('refuses half an SMTP configuration', () => {
+    expect(() =>
+      loadConfig({ SUFFA_DATABASE_URL: GOOD_DB, SUFFA_SMTP_HOST: 'smtp.gmail.com' })
+    ).toThrow(/go together/);
+    expect(loadConfig({ SUFFA_DATABASE_URL: GOOD_DB }).smtp).toBeUndefined();
+  });
+
   it('accepts an optional error-tracking DSN and treats blank as unset', () => {
     const dsn = 'https://0123abcd@glitchtip.apps.example.com/1';
     expect(

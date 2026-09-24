@@ -16,13 +16,16 @@
   "dependencies": {
     "@hono/node-server": "^1.19.17",
     "@sentry/core": "^11.0.0",
+    "better-auth": "^1.7.5",
     "hono": "^4.13.8",
+    "nodemailer": "^10.0.10",
     "pg": "^8.23.0",
     "pg-boss": "^12.33.7",
     "pino": "^9.14.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.23.1",
     "vitest": "^2.1.9"
   }

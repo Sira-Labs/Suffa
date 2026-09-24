@@ -86,7 +86,7 @@ pie showData
 
 | #   | Story                                                                          | Pts | Acceptance                                            |
 | --- | ------------------------------------------------------------------------------ | --- | ----------------------------------------------------- |
-| 3.1 | Better Auth: magic link, password, passkeys; SMTP; auth rate limits (ADR-0008) | 5   | Sign-in on two devices; tokens never in localStorage. |
+| 3.1 | Better Auth: magic link only; SMTP (Gmail in dev); auth rate limits (ADR-0008) | 5   | Sign-in on two devices; tokens never in localStorage. |
 | 3.2 | `authz/` policies + route middleware (ADR-0009)                                | 5   | Route × role matrix test green.                       |
 | 3.3 | `ApiSyncProvider` + env selection                                              | 5   | Sync suite green; user bound to session.              |
 | 3.4 | Account UI: methods, sessions, sign out others; time-zone setting              | 3   | Revoked session fails within 60 s.                    |

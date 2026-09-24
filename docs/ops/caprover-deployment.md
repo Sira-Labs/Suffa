@@ -113,9 +113,10 @@ Env (App Configs → Environment variables):
 | `SUFFA_ERROR_DSN`                                                           | DSN of the GlitchTip project `suffa-api` (§9); unset = no error reporting                               | S2          |
 | `SUFFA_WEB_ERROR_DSN`                                                       | DSN of the GlitchTip project `suffa-web` (§9), handed to the PWA via `/api/client-config`               | S2          |
 | `SUFFA_SYNC_DEV_TOKENS`                                                     | **never in prod** (the api refuses to start): `token=userUuid;…` for local/test sync before Better Auth | dev only    |
+| `SUFFA_SMTP_HOST`, `SUFFA_SMTP_PORT`                                        | `smtp.gmail.com`, `465` during development (§ Sign-in mails)                                            | S3          |
+| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD`                                    | the mail account and, for Gmail, an **app password**; all SMTP variables or none                        | S3          |
 | `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                              | S7          |
-| `SUFFA_SMTP_URL`                                                            | `smtps://user:pass@smtp.provider:465`                                                                   | S3          |
-| `SUFFA_MAIL_FROM`                                                           | `Suffa <noreply@<domain>>`                                                                              | S3          |
+| `SUFFA_MAIL_FROM`                                                           | `Suffa <address@gmail.com>` (Gmail sends only as the account itself)                                    | S3          |
 | `SUFFA_S3_ENDPOINT`                                                         | `http://srv-captain--rustfs:9000`                                                                       | S7          |
 | `SUFFA_S3_ALLOW_HTTP`                                                       | `true` (internal endpoint only)                                                                         | S7          |
 | `SUFFA_S3_ACCESS_KEY_ID` / `SUFFA_S3_SECRET_ACCESS_KEY`                     | the `suffa-app` key                                                                                     | S7          |
@@ -406,3 +407,21 @@ GlitchTip adds about 300–500 MB RAM (app + its Postgres) and a little disk for
 | Browser errors missing, server errors arrive          | `SUFFA_WEB_ERROR_DSN` unset or the DSN of the wrong project         | `https://<suffa>/api/client-config` must show the suffa-web DSN                           |
 | GlitchTip log `redis:6379` connection refused         | empty `VALKEY_URL` was dropped                                      | Add `VALKEY_URL` with an empty value, **Save & Update**                                   |
 | API refuses to start in prod                          | placeholder or short secret                                         | Generate secrets as above, **Save & Update**                                              |
+
+## Sign-in mails (magic link)
+
+Suffa signs people in with a link by email only (ADR-0008); there are no passwords. The api
+sends the mails over SMTP. During development we use a Gmail account, like Tabayyun:
+
+1. In the Google account: **Security → 2-Step Verification** must be on.
+2. **Security → App passwords** → create one named "Suffa" and copy the 16 characters.
+3. In CapRover (`suffa-api` → App Configs → Environment variables) set `SUFFA_SMTP_HOST=smtp.gmail.com`,
+   `SUFFA_SMTP_PORT=465`, `SUFFA_SMTP_USER=<address>@gmail.com`, `SUFFA_SMTP_PASSWORD=<app password>`
+   and `SUFFA_MAIL_FROM=Suffa <address@gmail.com>`, then restart the app.
+4. The log shows `auth.enabled` with `mail: smtp`. Without SMTP it logs `auth.disabled` and the
+   app keeps working offline, only sign-in and sync stay off.
+
+Gmail allows about 500 mails a day and marks many identical mails as spam; before the pilot the
+sender moves to a transactional provider (Brevo, Postmark) with the same variables. Secrets
+live only in CapRover, never in the repository. Outside prod the api may run without SMTP: the
+sign-in link is then written to the log (`auth.magic_link_logged`) for local testing.

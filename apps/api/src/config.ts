@@ -6,6 +6,7 @@
  * instead of running insecurely (same policy as Tabayyun).
  */
 import { z } from 'zod';
+import type { SmtpSettings } from './auth/mailer.js';
 
 const PLACEHOLDER_VALUES = new Set([
   'change-me',
@@ -49,6 +50,19 @@ const RawEnvSchema = z.object({
     .regex(/^postgres(ql)?:\/\/.+/, 'SUFFA_DATABASE_URL must be a postgres:// URL'),
   SUFFA_DB_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
   SUFFA_AUTH_SECRET: z.string().optional(),
+  /** Public URL of the app (links in sign-in mails point here), e.g. https://suffa.example.org */
+  SUFFA_PUBLIC_URL: z
+    .string()
+    .trim()
+    .transform((value) => value || undefined)
+    .pipe(z.string().url('SUFFA_PUBLIC_URL must be a URL').optional())
+    .optional(),
+  /** SMTP for sign-in mails (Gmail with an app password during development). */
+  SUFFA_SMTP_HOST: z.string().trim().optional(),
+  SUFFA_SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(465),
+  SUFFA_SMTP_USER: z.string().trim().optional(),
+  SUFFA_SMTP_PASSWORD: z.string().optional(),
+  SUFFA_MAIL_FROM: z.string().trim().optional(),
   SUFFA_LOG_LEVEL: z
     .enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace'])
     .default('info'),
@@ -108,6 +122,10 @@ export interface Config {
   syncDevTokens: Map<string, string>;
   /** Error reporting (GlitchTip) DSN; undefined disables it. */
   errorDsn: string | undefined;
+  /** Public URL of the app; sign-in is off without it (and without an auth secret). */
+  publicUrl: string | undefined;
+  /** SMTP for sign-in mails; outside prod the link may go to the log instead. */
+  smtp: SmtpSettings | undefined;
   /** Public DSN of the web project; undefined disables browser error reporting. */
   webErrorDsn: string | undefined;
 }
@@ -152,6 +170,24 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       );
     }
   }
+  const smtpParts = [
+    raw.SUFFA_SMTP_HOST,
+    raw.SUFFA_SMTP_USER,
+    raw.SUFFA_SMTP_PASSWORD,
+    raw.SUFFA_MAIL_FROM,
+  ];
+  const smtpComplete = smtpParts.every(Boolean);
+  if (smtpParts.some(Boolean) && !smtpComplete) {
+    issues.push(
+      'SUFFA_SMTP_HOST, SUFFA_SMTP_USER, SUFFA_SMTP_PASSWORD and SUFFA_MAIL_FROM go together'
+    );
+  }
+  // Only the api signs people in; the worker needs neither mail nor the public URL.
+  if (raw.SUFFA_ENV === 'prod' && raw.SUFFA_ROLE === 'api') {
+    if (!raw.SUFFA_PUBLIC_URL) issues.push('SUFFA_PUBLIC_URL is required in prod');
+    // Missing SMTP does not stop the service (existing deployments keep running); sign-in
+    // simply stays off until it is configured, and the api logs that loudly.
+  }
   let syncDevTokens = new Map<string, string>();
   if (raw.SUFFA_SYNC_DEV_TOKENS) {
     if (raw.SUFFA_ENV === 'prod') {
@@ -176,6 +212,16 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     workerHeartbeatMs: raw.SUFFA_WORKER_HEARTBEAT_MS,
     syncDevTokens,
     errorDsn: raw.SUFFA_ERROR_DSN,
+    publicUrl: raw.SUFFA_PUBLIC_URL?.replace(/\/$/, ''),
+    smtp: smtpComplete
+      ? {
+          host: raw.SUFFA_SMTP_HOST!,
+          port: raw.SUFFA_SMTP_PORT,
+          user: raw.SUFFA_SMTP_USER!,
+          password: raw.SUFFA_SMTP_PASSWORD!,
+          from: raw.SUFFA_MAIL_FROM!,
+        }
+      : undefined,
     webErrorDsn: raw.SUFFA_WEB_ERROR_DSN,
   };
 }

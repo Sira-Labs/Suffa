@@ -1,6 +1,6 @@
 # ADR-0008: Authentication with Better Auth (self-hosted)
 
-- Status: proposed
+- Status: accepted (2026-09-24: magic link only)
 - Date: 2026-09-23
 
 ## Context
@@ -25,6 +25,25 @@ CapRover with our Postgres. The PWA must keep working offline with a cached iden
 - **Shared identity with Tabayyun (later, optional):** Tabayyun plans Keycloak/Zitadel (its
   ADR-0006). If that IdP goes live, Suffa adds it as an OIDC provider (Better Auth generic
   OAuth) for single sign-on for admins and teachers, without changing student login.
+
+## Update 2026-09-24: magic link only
+
+- **Sign-in is by magic link only** (product decision): no passwords, no passkeys for now.
+  Links are valid 15 minutes, work once and are stored hashed. Better Auth runs at
+  `/api/v1/auth/*`; its field names are mapped onto our snake_case tables (migration 0003),
+  user ids stay UUIDs.
+- **Mail:** SMTP via `SUFFA_SMTP_*`; during development a Gmail account with an app password
+  (the same approach Tabayyun uses). A transactional provider follows before the pilot.
+  Without SMTP the api still starts in prod but sign-in stays off; outside prod the link can
+  go to the log for local testing.
+- **Rate limits** (database storage): 5 sign-in mails per 10 minutes and client, 10 link
+  openings per minute, 60 requests per minute on other auth routes.
+- **Redirect guard:** Better Auth's own origin check is skipped under `NODE_ENV=test`, and we
+  do not rely on it: every `callbackURL`, `errorCallbackURL` and `newUserCallbackURL` must be a
+  path inside the app, in the request body and in the link (400 otherwise).
+- **Keycloak:** Tabayyun already runs Keycloak. It has no built-in magic link, so Suffa keeps
+  its own sign-in; single sign-on for teachers and admins via Keycloak (OIDC, generic OAuth)
+  stays an option for later without changing student sign-in.
 
 ## Alternatives
 

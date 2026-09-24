@@ -30,6 +30,13 @@ services:
       SUFFA_PUBLIC_URL: https://$$cap_domain
       SUFFA_DATABASE_URL: postgres://suffa:$$cap_db_password@srv-captain--$$cap_appname-db:5432/suffa
       SUFFA_AUTH_SECRET: $$cap_auth_secret
+      # Sign-in mails (magic link). Gmail during development: smtp.gmail.com, port 465 and
+      # an app password. Left empty, the api runs without sign-in.
+      SUFFA_SMTP_HOST: $$cap_smtp_host
+      SUFFA_SMTP_PORT: '465'
+      SUFFA_SMTP_USER: $$cap_smtp_user
+      SUFFA_SMTP_PASSWORD: $$cap_smtp_password
+      SUFFA_MAIL_FROM: $$cap_mail_from
       SUFFA_ENCRYPTION_KEY: $$cap_encryption_key
       SUFFA_S3_ENDPOINT: http://srv-captain--$$cap_rustfs_app:9000
       SUFFA_S3_ALLOW_HTTP: 'true'
@@ -103,6 +110,22 @@ caproverOneClickApp:
       defaultValue: $$cap_gen_random_hex(64)
       description: Generated (32 bytes as hex). Encrypts Google Drive tokens later.
       validRegex: /^[a-f0-9]{64}$/
+    - id: $$cap_smtp_host
+      label: SMTP host (sign-in mails)
+      defaultValue: smtp.gmail.com
+      description: Gmail during development; any SMTP server with TLS on port 465 works.
+    - id: $$cap_smtp_user
+      label: SMTP user
+      defaultValue: ''
+      description: The mail account, e.g. your Gmail address. Empty = no sign-in yet.
+    - id: $$cap_smtp_password
+      label: SMTP password
+      defaultValue: ''
+      description: For Gmail an app password (Google account → Security → App passwords), never the account password.
+    - id: $$cap_mail_from
+      label: Sender
+      defaultValue: ''
+      description: 'e.g. Suffa <your.address@gmail.com> (Gmail only sends as the account itself).'
     - id: $$cap_rustfs_app
       label: Existing RustFS app name
       defaultValue: rustfs

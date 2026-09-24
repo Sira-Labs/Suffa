@@ -6,6 +6,13 @@ import { Hono } from 'hono';
 import type { QueueDepth } from './jobs/queue.js';
 import { createErrorTunnel, type ErrorTunnelDeps } from './observability/tunnel.js';
 import { createSyncRoutes, type SyncRouteDeps } from './sync/routes.js';
+import { AUTH_BASE_PATH, rejectUnsafeRedirect, type Me } from './auth/betterAuth.js';
+
+export interface AuthRouteDeps {
+  /** Better Auth's request handler for everything under AUTH_BASE_PATH. */
+  handler(request: Request): Promise<Response>;
+  me(headers: Headers): Promise<Me | null>;
+}
 
 export interface HealthProbe {
   /** Resolves with the current schema revision; rejects when the database is unreachable. */
@@ -23,6 +30,8 @@ export interface AppDeps {
   sync?: SyncRouteDeps;
   /** Browser error reporting: /api/client-config and the /api/errors tunnel. */
   errorTunnel?: ErrorTunnelDeps;
+  /** Sign-in (Better Auth) and the signed-in user; omitted when sign-in is not configured. */
+  auth?: AuthRouteDeps;
   /** Called for unhandled errors; the client only sees a generic 500. */
   onUnhandledError?: (error: unknown, path: string) => void;
 }
@@ -69,6 +78,18 @@ export function createApp(deps: AppDeps): Hono {
       schemaRevision: deps.expectedRevision,
     })
   );
+  if (deps.auth) {
+    const auth = deps.auth;
+    app.on(['GET', 'POST'], `${AUTH_BASE_PATH}/*`, async (c) => {
+      const rejected = await rejectUnsafeRedirect(c.req.raw);
+      return rejected ?? auth.handler(c.req.raw);
+    });
+    app.get('/api/v1/me', async (c) => {
+      const me = await auth.me(c.req.raw.headers);
+      c.header('Cache-Control', 'no-store');
+      return me ? c.json(me) : c.json({ error: 'unauthenticated' }, 401);
+    });
+  }
   if (deps.sync) app.route('/api/v1/sync', createSyncRoutes(deps.sync));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));

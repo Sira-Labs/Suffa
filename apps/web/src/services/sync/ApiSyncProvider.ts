@@ -28,6 +28,19 @@ export interface ApiUser {
   email: string;
   name: string | null;
   role: 'student' | 'teacher' | 'admin';
+  /** IANA time zone of the account, null until set. */
+  timeZone: string | null;
+}
+
+/** A signed-in device as the account page lists it (story 3.4). */
+export interface DeviceSession {
+  id: string;
+  createdAt: string;
+  lastActiveAt: string;
+  expiresAt: string;
+  userAgent: string | null;
+  /** The session of this browser. */
+  current: boolean;
 }
 
 interface PullPage {
@@ -178,6 +191,41 @@ export class ApiSyncProvider implements SyncProvider {
     }
   }
 
+  /** The signed-in devices of this account. */
+  async listSessions(): Promise<Result<DeviceSession[]>> {
+    const result = await this.send<{ sessions: DeviceSession[] }>(
+      '/api/v1/account/sessions'
+    );
+    return result.ok ? { ok: true, value: result.value.sessions } : result;
+  }
+
+  /** Signs out one other device. */
+  async revokeSession(id: string): Promise<Result<void>> {
+    return this.send<void>(`/api/v1/account/sessions/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  }
+
+  /** Signs out every device except this one; returns how many were signed out. */
+  async revokeOtherSessions(): Promise<Result<number>> {
+    const result = await this.send<{ revoked: number }>(
+      '/api/v1/account/sessions/revoke-others',
+      { method: 'POST' }
+    );
+    return result.ok ? { ok: true, value: result.value.revoked } : result;
+  }
+
+  /** Stores the account's time zone (IANA name, e.g. "Europe/Zurich"). */
+  async setTimeZone(timeZone: string): Promise<Result<void>> {
+    const result = await this.send<void>('/api/v1/account/settings', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ timeZone }),
+    });
+    if (result.ok && this.me) this.me = { ...this.me, timeZone };
+    return result;
+  }
+
   private async send<T>(path: string, init?: RequestInit): Promise<Result<T>> {
     let response: Response;
     try {
@@ -194,6 +242,8 @@ export class ApiSyncProvider implements SyncProvider {
       log.warn('sync request failed', { path, status: response.status });
       return fail(`http-${response.status}`, `Serverfehler (${response.status}).`);
     }
+    // 204 No Content (settings, revoke) has no body to parse.
+    if (response.status === 204) return { ok: true, value: undefined as T };
     return { ok: true, value: (await response.json()) as T };
   }
 

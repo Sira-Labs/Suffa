@@ -2,6 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { TashkilToggle } from '@/components';
 import { useSettingsStore, useSyncStore } from '@/state';
+import { AccountDevices } from './AccountDevices';
 
 export function Settings() {
   const settings = useSettingsStore((s) => s.settings);
@@ -124,6 +125,7 @@ function AccountPanel() {
             Abmelden
           </button>
         </div>
+        <AccountDevices />
       </div>
     );
   }

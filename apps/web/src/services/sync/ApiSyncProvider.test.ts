@@ -14,7 +14,13 @@ function fakeApi(handler: Handler) {
 }
 
 const json = (body: unknown, status = 200) => Response.json(body, { status });
-const ME = { id: 'u-1', email: 'amina@example.org', name: null, role: 'student' };
+const ME = {
+  id: 'u-1',
+  email: 'amina@example.org',
+  name: null,
+  role: 'student',
+  timeZone: null,
+};
 
 describe('ApiSyncProvider', () => {
   it('reports itself unavailable when the server has no sign-in', async () => {
@@ -112,5 +118,35 @@ describe('ApiSyncProvider', () => {
     const result = await provider.pull('srs_cards', null);
     expect(result).toMatchObject({ ok: false, error: { code: 'not-authenticated' } });
     expect(provider.getAuthState().status).toBe('signed-out');
+  });
+
+  it('lists devices and signs out the others', async () => {
+    const { provider, calls } = fakeApi((path, init) => {
+      if (path === '/api/v1/account/sessions') {
+        return json({
+          sessions: [
+            { id: 's1', current: true },
+            { id: 's2', current: false },
+          ],
+        });
+      }
+      if (init?.method === 'POST') return json({ revoked: 1 });
+      return new Response(null, { status: 204 });
+    });
+    const sessions = await provider.listSessions();
+    expect(sessions.ok && sessions.value.map((s) => s.id)).toEqual(['s1', 's2']);
+    expect(await provider.revokeOtherSessions()).toEqual({ ok: true, value: 1 });
+    expect((await provider.revokeSession('a/b')).ok).toBe(true);
+    expect(calls.at(-1)!.path).toBe('/api/v1/account/sessions/a%2Fb');
+    expect(calls.at(-1)!.init!.method).toBe('DELETE');
+  });
+
+  it('saves the time zone', async () => {
+    const { provider, calls } = fakeApi(() => new Response(null, { status: 204 }));
+    expect((await provider.setTimeZone('Europe/Zurich')).ok).toBe(true);
+    expect(calls[0]!.init!.method).toBe('PATCH');
+    expect(JSON.parse(String(calls[0]!.init!.body))).toEqual({
+      timeZone: 'Europe/Zurich',
+    });
   });
 });

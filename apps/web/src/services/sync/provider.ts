@@ -48,6 +48,12 @@ export interface SyncProvider {
   signInWithEmail(email: string): Promise<Result<void>>;
   signOut(): Promise<Result<void>>;
 
+  /**
+   * Does the backend store this table? Omitted = every table. The engine skips the others and
+   * keeps their outbox for a backend that does.
+   */
+  supportsTable?(table: SyncTable): boolean;
+
   /** Upload a table's changed records (upsert). */
   push(table: SyncTable, records: SyncableRecord[]): Promise<Result<void>>;
 

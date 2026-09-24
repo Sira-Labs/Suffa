@@ -3,7 +3,8 @@
  * records) and the column list the SQL is built from. Column names only ever come from
  * this file, never from request data, so the dynamic SQL in the repository is injection-safe.
  *
- * Mirrors `apps/web/src/types/srs.ts` and `supabase/schema.sql` (camelCase columns).
+ * Mirrors `apps/web/src/types/*.ts` (camelCase columns); the first five tables also exist in
+ * `supabase/schema.sql`, the progress tables (migration 0006) only here.
  */
 import { z } from 'zod';
 
@@ -80,6 +81,46 @@ export const SYNC_SCHEMAS = {
     plural: shortText.nullish(),
     einheit: z.number().int().min(0).max(1000),
     hinweis: z.string().max(2000).nullish(),
+  }),
+  // Progress (units, XP, streak, media): the app derives unlocked units and XP from these.
+  practice_progress: z.object({
+    ...base,
+    unit: z.number().int().min(0).max(1000),
+    skill: z.enum(['read', 'grammar', 'cloze', 'write', 'speak', 'verbs', 'letters']),
+    itemId: shortText.min(1),
+    practisedAt: isoTimestamp,
+  }),
+  unit_enrollments: z.object({
+    ...base,
+    book: z.number().int().min(1).max(100),
+    unit: z.number().int().min(0).max(1000),
+    pace: z.enum(['relaxed', 'normal', 'intensive']),
+    startedAt: isoTimestamp,
+    dueAt: isoTimestamp,
+    extended: z.boolean(),
+  }),
+  daily_checkins: z.object({
+    ...base,
+    wordId: shortText.min(1),
+    checkedAt: isoTimestamp,
+  }),
+  discover_progress: z.object({
+    ...base,
+    startedAt: isoTimestamp.nullable(),
+    openedAt: isoTimestamp,
+    pinned: z.boolean(),
+    positionSec: z.number().min(0).max(1_000_000).nullish(),
+    playlistIndex: z.number().int().min(0).max(10_000).nullish(),
+    durationSec: z.number().min(0).max(1_000_000).nullish(),
+  }),
+  media_progress: z.object({
+    ...base,
+    source: z.enum(['publisher-audio', 'discover-video']),
+    ref: z.string().min(1).max(2000),
+    lessonKey: shortText,
+    durationSec: z.number().min(0).max(1_000_000),
+    listenedSec: z.number().min(0).max(1_000_000),
+    completedAt: isoTimestamp.nullable(),
   }),
 } as const;
 

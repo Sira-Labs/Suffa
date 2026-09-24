@@ -8,7 +8,12 @@ import pg from 'pg';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { loadMigrations, migrate } from '../src/migrate.js';
 import { PgSyncRepository } from '../src/sync/repository.js';
-import type { SyncRecord } from '../src/sync/schemas.js';
+import {
+  SYNC_SCHEMAS,
+  SYNC_TABLES,
+  type SyncRecord,
+  type SyncTableName,
+} from '../src/sync/schemas.js';
 
 const url = process.env.SUFFA_TEST_DATABASE_URL;
 const ALICE = '11111111-1111-4111-8111-111111111111';
@@ -106,8 +111,63 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
         einheit: 2,
         hinweis: null,
       },
+      practice_progress: {
+        id: '3:write:w-3-1',
+        updated_at: '2026-09-23T10:00:00.000Z',
+        deleted: false,
+        unit: 3,
+        skill: 'write',
+        itemId: 'w-3-1',
+        practisedAt: '2026-09-23T10:00:00.000Z',
+      },
+      unit_enrollments: {
+        id: 'b1-u3',
+        updated_at: '2026-09-23T10:00:00.000Z',
+        deleted: false,
+        book: 1,
+        unit: 3,
+        pace: 'normal',
+        startedAt: '2026-09-20T08:00:00.000Z',
+        dueAt: '2026-10-04T21:59:59.999Z',
+        extended: false,
+      },
+      daily_checkins: {
+        id: '2026-09-23',
+        updated_at: '2026-09-23T10:00:00.000Z',
+        deleted: false,
+        wordId: 'v-balad',
+        checkedAt: '2026-09-23T07:30:00.000Z',
+      },
+      discover_progress: {
+        id: 'yt/abc123',
+        updated_at: '2026-09-23T10:00:00.000Z',
+        deleted: false,
+        startedAt: null,
+        openedAt: '2026-09-23T10:00:00.000Z',
+        pinned: true,
+        positionSec: 83.5,
+        playlistIndex: null,
+        durationSec: 600,
+      },
+      media_progress: {
+        id: 'b1/unit01/lesson01/01',
+        updated_at: '2026-09-23T10:00:00.000Z',
+        deleted: false,
+        source: 'publisher-audio',
+        ref: 'https://old.arabicforall.net/audio/1.mp3',
+        lessonKey: 'b1/u1/l1',
+        durationSec: 95.2,
+        listenedSec: 95.2,
+        completedAt: '2026-09-23T10:00:00.000Z',
+      },
     };
+    // Every synced table must be covered, so a new table cannot ship without a column check.
+    expect(Object.keys(records).sort()).toEqual([...SYNC_TABLES].sort());
     for (const [table, record] of Object.entries(records)) {
+      // The wire schema must accept what the app sends, too.
+      expect(SYNC_SCHEMAS[table as SyncTableName].safeParse(record).success, table).toBe(
+        true
+      );
       expect(await repo.upsert(ALICE, table as never, [record])).toBe(1);
       const page = await repo.pull(ALICE, table as never, {
         since: null,
@@ -160,6 +220,42 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
       limit: 10,
     });
     expect(records[0]).toMatchObject({ reps: 6, leech: true });
+  });
+
+  it('never lets an unfinished listen replace a finished one', async () => {
+    const track = (
+      updated_at: string,
+      listenedSec: number,
+      completedAt: string | null
+    ) => ({
+      id: 't1',
+      updated_at,
+      deleted: false,
+      source: 'publisher-audio',
+      ref: 'https://old.arabicforall.net/audio/1.mp3',
+      lessonKey: 'b1/u1/l1',
+      durationSec: 100,
+      listenedSec,
+      completedAt,
+    });
+    await repo.upsert(ALICE, 'media_progress', [
+      track('2026-09-23T10:00:00.000Z', 100, '2026-09-23T10:00:00.000Z'),
+    ]);
+    // Another device started the track again later: newer, but not finished.
+    expect(
+      await repo.upsert(ALICE, 'media_progress', [
+        track('2026-09-24T10:00:00.000Z', 20, null),
+      ])
+    ).toBe(0);
+    await repo.upsert(ALICE, 'media_progress', [
+      { ...track('2026-09-24T10:00:00.000Z', 30, null), id: 't2' },
+    ]);
+    // Unfinished against unfinished: more listening wins even when older.
+    expect(
+      await repo.upsert(ALICE, 'media_progress', [
+        { ...track('2026-09-23T09:00:00.000Z', 60, null), id: 't2' },
+      ])
+    ).toBe(1);
   });
 
   it('keeps identical card ids of different users apart', async () => {

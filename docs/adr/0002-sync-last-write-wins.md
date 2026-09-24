@@ -52,3 +52,14 @@ had merely created beat the same card reviewed earlier. Now:
   card whose logs are ahead of it is rebuilt by replaying them (scheduling has no fuzz, so
   the result is identical on every device) and pushed.
 - All other tables keep plain last-write-wins.
+
+## Update 2026-09-24: progress is synced too
+
+Unit practice (`practice_progress`, which unlocks units and earns XP), started units
+(`unit_enrollments`), daily check-ins, "Entdecken" progress and listening progress
+(`media_progress`) are synced like the original five tables (API migration 0006). Their ids
+are deterministic (e.g. `unit:skill:item`, the day, the track), so two devices' progress
+merges as a union and XP counts each item once. Listening progress keeps a finished track
+finished (`listeningPrecedence`, same rule in the API). Dexie schema version 7 queues what a
+device already had, once, so existing progress reaches the account on the first sync. The
+legacy Supabase backend keeps these tables local (`supportsTable`).

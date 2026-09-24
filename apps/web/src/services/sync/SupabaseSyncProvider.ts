@@ -35,8 +35,21 @@ export interface SupabaseConfig {
   redirectTo?: string;
 }
 
+const SUPABASE_TABLES: ReadonlySet<SyncTable> = new Set<SyncTable>([
+  'srs_cards',
+  'review_logs',
+  'exam_results',
+  'settings',
+  'user_vocab',
+]);
+
 export class SupabaseSyncProvider implements SyncProvider {
   readonly name = 'supabase';
+
+  /** The legacy Supabase schema has only the original five tables (supabase/schema.sql). */
+  supportsTable(table: SyncTable): boolean {
+    return SUPABASE_TABLES.has(table);
+  }
   private readonly client: SupabaseClient;
   private readonly redirectTo: string | undefined;
 

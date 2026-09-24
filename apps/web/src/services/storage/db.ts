@@ -45,11 +45,11 @@ export class AppDatabase extends Dexie {
   user_vocab!: Table<UserVocab, string>;
   outbox!: Table<OutboxEntry, number>;
   sync_meta!: Table<SyncMeta, string>;
-  /** Local-only until the server has the table (not part of syncableTables yet). */
+  /** Heard publisher audio and seen videos. */
   media_progress!: Table<MediaProgress, string>;
-  /** Local-only like media_progress: practised items of the unit skills. */
+  /** Practised items of the unit skills (unlocks units, earns XP). */
   practice_progress!: Table<PracticeRecord, string>;
-  /** Local-only for now: started units with pace and target date. */
+  /** Started units with pace and target date. */
   unit_enrollments!: Table<UnitEnrollment, string>;
   daily_checkins!: Table<DailyCheckIn, string>;
   discover_progress!: Table<DiscoverProgress, string>;
@@ -86,8 +86,30 @@ export class AppDatabase extends Dexie {
     this.version(6).stores({
       discover_progress: 'id, openedAt, updated_at, deleted',
     });
+    // Progress tables join sync: queue what this device already has, once, so it reaches
+    // the account (and the learner's other devices) on the next sync.
+    this.version(7)
+      .stores({})
+      .upgrade(async (tx) => {
+        const queuedAt = new Date().toISOString();
+        for (const table of PROGRESS_TABLES) {
+          const ids = (await tx.table(table).toCollection().primaryKeys()) as string[];
+          await tx
+            .table('outbox')
+            .bulkAdd(ids.map((recordId) => ({ table, recordId, queuedAt })));
+        }
+      });
   }
 }
+
+/** Progress tables that joined sync in schema version 7 (story: sync units and XP). */
+export const PROGRESS_TABLES = [
+  'practice_progress',
+  'unit_enrollments',
+  'daily_checkins',
+  'discover_progress',
+  'media_progress',
+] as const satisfies readonly SyncTable[];
 
 export const db = new AppDatabase();
 
@@ -104,5 +126,10 @@ export function syncableTables(
     exam_results: database.exam_results,
     settings: database.settings,
     user_vocab: database.user_vocab,
+    practice_progress: database.practice_progress,
+    unit_enrollments: database.unit_enrollments,
+    daily_checkins: database.daily_checkins,
+    discover_progress: database.discover_progress,
+    media_progress: database.media_progress,
   };
 }

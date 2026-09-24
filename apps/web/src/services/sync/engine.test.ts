@@ -5,7 +5,13 @@
  */
 import { afterEach, describe, expect, it } from 'vitest';
 import type { SrsCard, SyncTable } from '@/types';
-import { AppDatabase, cardRepo, reviewLogRepo } from '@/services/storage';
+import {
+  AppDatabase,
+  cardRepo,
+  discoverRepo,
+  practiceRepo,
+  reviewLogRepo,
+} from '@/services/storage';
 import { createCard, schedule } from '@/services/srs';
 import { SyncEngine } from './engine';
 import type { Result, SyncProvider, SyncableRecord } from './provider';
@@ -146,5 +152,43 @@ describe('SyncEngine across two devices', () => {
     expect(server.card(ID)?.reps).toBe(2);
     // A second sync has nothing left to repair.
     expect((await new SyncEngine(device(server), phone).sync()).repaired).toBe(0);
+  });
+
+  it('brings unit practice and "Entdecken" progress to the other device', async () => {
+    const server = new FakeServer();
+    const phone = newDatabase('phone');
+    const desktop = newDatabase('desktop');
+    await practiceRepo.put(
+      {
+        id: '4:write:w-4-2',
+        unit: 4,
+        skill: 'write',
+        itemId: 'w-4-2',
+        practisedAt: '2026-09-23T18:00:00.000Z',
+        updated_at: '',
+        deleted: false,
+      },
+      phone
+    );
+    await discoverRepo.put(
+      {
+        id: 'yt/abc',
+        startedAt: null,
+        openedAt: '2026-09-23T18:00:00.000Z',
+        pinned: true,
+        updated_at: '',
+        deleted: false,
+      },
+      phone
+    );
+
+    await new SyncEngine(device(server), phone).sync();
+    await new SyncEngine(device(server), desktop).sync();
+
+    expect((await practiceRepo.all(desktop)).map((p) => p.id)).toEqual(['4:write:w-4-2']);
+    const [pinned] = await discoverRepo.all(desktop);
+    // Absent optional fields stay absent (the server answers them as null).
+    expect(pinned).toMatchObject({ id: 'yt/abc', pinned: true });
+    expect('positionSec' in pinned!).toBe(false);
   });
 });

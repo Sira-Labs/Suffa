@@ -134,4 +134,9 @@ export type SyncTable =
   | 'review_logs'
   | 'exam_results'
   | 'settings'
-  | 'user_vocab';
+  | 'user_vocab'
+  | 'practice_progress'
+  | 'unit_enrollments'
+  | 'daily_checkins'
+  | 'discover_progress'
+  | 'media_progress';

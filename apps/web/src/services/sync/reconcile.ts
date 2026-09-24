@@ -124,3 +124,21 @@ export function mergeRecords<T extends Reconcilable>(
 
   return { merged, toWriteLocal, toPushRemote };
 }
+
+interface Listening extends Reconcilable {
+  completedAt: string | null;
+  listenedSec: number;
+}
+
+/**
+ * Listening progress: a track heard to the end stays heard (it earned its XP), whichever
+ * device played it last; between two unfinished versions, more listening wins, then LWW.
+ */
+export function listeningPrecedence<T extends Listening>(l: T, r: T): ReconcileDecision {
+  if (l.completedAt && !r.completedAt) return 'keep-local';
+  if (r.completedAt && !l.completedAt) return 'take-remote';
+  if (!l.completedAt && !r.completedAt && l.listenedSec !== r.listenedSec) {
+    return l.listenedSec > r.listenedSec ? 'keep-local' : 'take-remote';
+  }
+  return lastWriteWins(l, r);
+}

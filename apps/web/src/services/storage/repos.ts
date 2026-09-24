@@ -184,68 +184,90 @@ export const userVocabRepo = {
 
 /* ----------------------------- Listening progress ----------------------------- */
 
-/** Local-only for now: no outbox entry until the server has a media_progress table. */
-// TODO(2026-12-13): sync media_progress with the engagement sprint (S5, ADR-0016).
 export const mediaProgressRepo = {
   async all(database: AppDatabase = db): Promise<MediaProgress[]> {
     return database.media_progress.filter((m) => !m.deleted).toArray();
   },
   async put(record: MediaProgress, database: AppDatabase = db): Promise<MediaProgress> {
     const stamped = stamp(record);
-    await database.media_progress.put(stamped);
+    await database.transaction(
+      'rw',
+      database.media_progress,
+      database.outbox,
+      async () => {
+        await database.media_progress.put(stamped);
+        await enqueue('media_progress', stamped.id, database);
+      }
+    );
     return stamped;
   },
 };
 
 /* ------------------------------- Unit practice -------------------------------- */
 
-/** Local-only like mediaProgressRepo; joins sync with it. */
-// TODO(2026-12-13): sync practice_progress with the engagement sprint (S5, ADR-0016).
 export const practiceRepo = {
   async all(database: AppDatabase = db): Promise<PracticeRecord[]> {
     return database.practice_progress.filter((p) => !p.deleted).toArray();
   },
   async put(record: PracticeRecord, database: AppDatabase = db): Promise<PracticeRecord> {
     const stamped = stamp(record);
-    await database.practice_progress.put(stamped);
+    await database.transaction(
+      'rw',
+      database.practice_progress,
+      database.outbox,
+      async () => {
+        await database.practice_progress.put(stamped);
+        await enqueue('practice_progress', stamped.id, database);
+      }
+    );
     return stamped;
   },
 };
 
 /* ------------------------------ Unit enrollments ------------------------------ */
 
-/** Local-only like the other engagement tables; joins sync with them. */
-// TODO(2026-12-13): sync unit_enrollments with the engagement sprint (S5, ADR-0016).
 export const enrollmentRepo = {
   async all(database: AppDatabase = db): Promise<UnitEnrollment[]> {
     return database.unit_enrollments.filter((e) => !e.deleted).toArray();
   },
   async put(record: UnitEnrollment, database: AppDatabase = db): Promise<UnitEnrollment> {
     const stamped = stamp(record);
-    await database.unit_enrollments.put(stamped);
+    await database.transaction(
+      'rw',
+      database.unit_enrollments,
+      database.outbox,
+      async () => {
+        await database.unit_enrollments.put(stamped);
+        await enqueue('unit_enrollments', stamped.id, database);
+      }
+    );
     return stamped;
   },
 };
 
 /* ------------------------------- Daily check-in -------------------------------- */
 
-/** Local-only like the other engagement tables; joins sync with them. */
-// TODO(2026-12-13): sync daily_checkins with the engagement sprint (S5, ADR-0016).
 export const checkInRepo = {
   async all(database: AppDatabase = db): Promise<DailyCheckIn[]> {
     return database.daily_checkins.filter((c) => !c.deleted).toArray();
   },
   async put(record: DailyCheckIn, database: AppDatabase = db): Promise<DailyCheckIn> {
     const stamped = stamp(record);
-    await database.daily_checkins.put(stamped);
+    await database.transaction(
+      'rw',
+      database.daily_checkins,
+      database.outbox,
+      async () => {
+        await database.daily_checkins.put(stamped);
+        await enqueue('daily_checkins', stamped.id, database);
+      }
+    );
     return stamped;
   },
 };
 
 /* ----------------------------- Discover progress ------------------------------ */
 
-/** Local-only like the other engagement tables; joins sync with them. */
-// TODO(2026-12-13): sync discover_progress with the engagement sprint (S5, ADR-0016).
 export const discoverRepo = {
   async all(database: AppDatabase = db): Promise<DiscoverProgress[]> {
     return database.discover_progress.filter((p) => !p.deleted).toArray();
@@ -255,7 +277,15 @@ export const discoverRepo = {
     database: AppDatabase = db
   ): Promise<DiscoverProgress> {
     const stamped = stamp(record);
-    await database.discover_progress.put(stamped);
+    await database.transaction(
+      'rw',
+      database.discover_progress,
+      database.outbox,
+      async () => {
+        await database.discover_progress.put(stamped);
+        await enqueue('discover_progress', stamped.id, database);
+      }
+    );
     return stamped;
   },
 };

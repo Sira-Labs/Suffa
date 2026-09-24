@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { cardPrecedence, decide, mergeRecords, type Reconcilable } from './reconcile';
+import {
+  cardPrecedence,
+  decide,
+  listeningPrecedence,
+  mergeRecords,
+  type Reconcilable,
+} from './reconcile';
 
 function rec(id: string, updated_at: string, deleted = false): Reconcilable {
   return { id, updated_at, deleted };
@@ -122,5 +128,32 @@ describe('cardPrecedence (SRS cards)', () => {
     const b = cardAt('2026-09-21T11:00:00.000Z', '2026-09-21T09:00:00.000Z');
     expect(decide(a, b, cardPrecedence)).toBe('take-remote');
     expect(mergeRecords([a], [b], cardPrecedence).toWriteLocal).toEqual([b]);
+  });
+});
+
+describe('listeningPrecedence (media progress)', () => {
+  const track = (
+    updated_at: string,
+    listenedSec: number,
+    completedAt: string | null
+  ) => ({
+    id: 't',
+    updated_at,
+    deleted: false,
+    listenedSec,
+    completedAt,
+  });
+
+  it('keeps a finished track finished, whichever device played last', () => {
+    const heard = track('2026-09-20T10:00:00.000Z', 100, '2026-09-20T10:00:00.000Z');
+    const restarted = track('2026-09-24T10:00:00.000Z', 10, null);
+    expect(decide(heard, restarted, listeningPrecedence)).toBe('keep-local');
+    expect(decide(restarted, heard, listeningPrecedence)).toBe('take-remote');
+  });
+
+  it('prefers more listening between unfinished versions', () => {
+    const more = track('2026-09-20T10:00:00.000Z', 60, null);
+    const less = track('2026-09-24T10:00:00.000Z', 20, null);
+    expect(decide(more, less, listeningPrecedence)).toBe('keep-local');
   });
 });

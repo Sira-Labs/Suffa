@@ -10,7 +10,26 @@ import {
   type SyncProvider,
 } from '@/services/sync';
 import { logger } from '@/services/logger';
+import { useCheckInStore } from './checkInStore';
+import { useDiscoverStore } from './discoverStore';
+import { useEnrollmentStore } from './enrollmentStore';
+import { useListenStore } from './listenStore';
+import { usePracticeStore } from './practiceStore';
+import { useSettingsStore } from './settingsStore';
 import { useSrsStore } from './srsStore';
+
+/** Everything a sync can change underneath the screen. */
+async function reloadSyncedStores(): Promise<void> {
+  await Promise.all([
+    useSrsStore.getState().load(),
+    usePracticeStore.getState().load(),
+    useEnrollmentStore.getState().load(),
+    useCheckInStore.getState().load(),
+    useDiscoverStore.getState().load(),
+    useListenStore.getState().load(),
+    useSettingsStore.getState().load(),
+  ]);
+}
 
 const log = logger.child('state:sync');
 
@@ -90,8 +109,8 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     set({ status: 'syncing', errorMessage: null });
     try {
       const result = await engine.sync();
-      // Cards changed underneath the screen (other device, repair): show them right away.
-      if (result.pulled > 0 || result.repaired > 0) await useSrsStore.getState().load();
+      // Data changed underneath the screen (other device, repair): show it right away.
+      if (result.pulled > 0 || result.repaired > 0) await reloadSyncedStores();
       const lastSyncAt = await engine.lastSyncAt();
       await get().refreshPending();
       set({ status: 'idle', lastSyncAt });

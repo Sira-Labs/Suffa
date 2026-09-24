@@ -78,10 +78,24 @@ function toWire(row: Record<string, unknown>): SyncRecord {
  */
 function acceptIncoming(table: SyncTableName, t: string): string {
   const newer = `${t}."updated_at" < excluded."updated_at"`;
-  if (table !== 'srs_cards') return newer;
-  const reviewed = (source: string) => `coalesce(${source}."lastReviewed", '-infinity')`;
-  return `(${reviewed('excluded')} > ${reviewed(t)}
+  switch (table) {
+    case 'srs_cards': {
+      const reviewed = (source: string) =>
+        `coalesce(${source}."lastReviewed", '-infinity')`;
+      return `(${reviewed('excluded')} > ${reviewed(t)}
         or (${reviewed('excluded')} = ${reviewed(t)} and ${newer}))`;
+    }
+    case 'media_progress':
+      // A track heard to the end stays heard; unfinished: more listening wins, then LWW
+      // (same rule as the app's listeningPrecedence).
+      return `((excluded."completedAt" is not null and ${t}."completedAt" is null)
+        or (excluded."completedAt" is not null and ${t}."completedAt" is not null and ${newer})
+        or (excluded."completedAt" is null and ${t}."completedAt" is null
+            and (excluded."listenedSec" > ${t}."listenedSec"
+                 or (excluded."listenedSec" = ${t}."listenedSec" and ${newer}))))`;
+    default:
+      return newer;
+  }
 }
 
 export class PgSyncRepository implements SyncRepository {

@@ -26,6 +26,7 @@ import { logger } from '@/services/logger';
 import {
   cardPrecedence,
   lastWriteWins,
+  listeningPrecedence,
   mergeRecords,
   type Precedence,
   type Reconcilable,
@@ -41,6 +42,11 @@ const SYNC_TABLES: SyncTable[] = [
   'exam_results',
   'settings',
   'user_vocab',
+  'practice_progress',
+  'unit_enrollments',
+  'daily_checkins',
+  'discover_progress',
+  'media_progress',
 ];
 
 export type SyncStatus =
@@ -61,9 +67,27 @@ type SyncRecordOf = Reconcilable & SyncableRecord;
 
 /** How two versions of a record are weighed, per table (default: last-write-wins). */
 function precedenceFor(table: SyncTable): Precedence<SyncRecordOf> {
-  return table === 'srs_cards'
-    ? (cardPrecedence as unknown as Precedence<SyncRecordOf>)
-    : lastWriteWins;
+  switch (table) {
+    case 'srs_cards':
+      return cardPrecedence as unknown as Precedence<SyncRecordOf>;
+    case 'media_progress':
+      return listeningPrecedence as unknown as Precedence<SyncRecordOf>;
+    default:
+      return lastWriteWins;
+  }
+}
+
+/** Optional fields the server returns as null; the app models them as absent. */
+const OPTIONAL_FIELDS: Partial<Record<SyncTable, readonly string[]>> = {
+  discover_progress: ['positionSec', 'playlistIndex', 'durationSec'],
+};
+
+function fromServer(table: SyncTable, record: SyncRecordOf): SyncRecordOf {
+  const optional = OPTIONAL_FIELDS[table];
+  if (!optional) return record;
+  const copy: Record<string, unknown> = { ...record };
+  for (const field of optional) if (copy[field] === null) delete copy[field];
+  return copy as SyncRecordOf;
 }
 
 const EMPTY: SyncResult = { pushed: 0, pulled: 0, conflictsResolved: 0, repaired: 0 };
@@ -110,7 +134,11 @@ export class SyncEngine {
       totals.conflictsResolved += partial.conflictsResolved;
     };
     try {
-      for (const table of SYNC_TABLES) add(await this.syncTable(table));
+      for (const table of SYNC_TABLES) {
+        // A backend that does not know a table yet (Supabase) keeps it local; outbox stays.
+        if (this.provider.supportsTable?.(table) === false) continue;
+        add(await this.syncTable(table));
+      }
       // Review logs of all devices are now here: bring cards up to them and push the result.
       totals.repaired = await this.repairCards();
       if (totals.repaired > 0) add(await this.syncTable('srs_cards'));
@@ -149,7 +177,7 @@ export class SyncEngine {
       log.warn('pull failed', { table, error: pullResult.error.message });
       return { ...EMPTY };
     }
-    const remotes = pullResult.value as (Reconcilable & SyncableRecord)[];
+    const remotes = (pullResult.value as SyncRecordOf[]).map((r) => fromServer(table, r));
 
     // 2. RECONCILE: local input set = dirty (outbox) ∪ current local versions
     //    of the pulled IDs. This way conflicts are resolved correctly via LWW.

@@ -264,6 +264,34 @@
           "de": "Mein Hobby ist Lesen. Ich lese spannende Geschichten."
         }
       ]
+    },
+    {
+      "id": "d-12-3",
+      "einheit": 12,
+      "dialog": 3,
+      "titel": "قِصَّةٌ مُمْتِعَةٌ",
+      "zeilen": [
+        {
+          "sp": "الْأَب",
+          "ar": "ماذا تَقْرَأُ يا يوسُفُ؟",
+          "de": "Was liest du, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "أَقْرَأُ قِصَّةً عَنْ رِحْلَةٍ في الصَّحْراءِ.",
+          "de": "Ich lese eine Geschichte über eine Reise in der Wüste."
+        },
+        {
+          "sp": "الْأَب",
+          "ar": "هَلْ هِيَ مُمْتِعَةٌ؟",
+          "de": "Ist sie spannend?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، جِدّاً. أَقْرَأُ كُلَّ يَوْمٍ قَبْلَ النَّوْمِ.",
+          "de": "Ja, sehr. Ich lese jeden Tag vor dem Schlafengehen."
+        }
+      ]
     }
   ]
 }

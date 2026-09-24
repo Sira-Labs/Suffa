@@ -266,6 +266,39 @@
           "de": "Ausgezeichnet!"
         }
       ]
+    },
+    {
+      "id": "d-13-3",
+      "einheit": 13,
+      "dialog": 3,
+      "titel": "في الْفُنْدُقِ",
+      "zeilen": [
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "أَهْلاً وَسَهْلاً! هَلْ عِنْدَكَ حَجْزٌ؟",
+          "de": "Herzlich willkommen! Haben Sie eine Reservierung?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "نَعَمْ، حَجَزْتُ غُرْفَةً لِثَلاثَةِ أَيّامٍ. أُسافِرُ بَعْدَ ذٰلِكَ إِلى الْمَدينَةِ.",
+          "de": "Ja, ich habe ein Zimmer für drei Tage gebucht. Danach reise ich nach Medina."
+        },
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "هٰذا مِفْتاحُ الْغُرْفَةِ، في الطّابِقِ الرّابِعِ.",
+          "de": "Hier ist der Zimmerschlüssel, im vierten Stock."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "شُكْراً. مَتى الْفُطورُ؟",
+          "de": "Danke. Wann gibt es Frühstück?"
+        },
+        {
+          "sp": "الْمُوَظَّف",
+          "ar": "مِنَ السّاعَةِ السّادِسَةِ إِلى السّاعَةِ الْعاشِرَةِ.",
+          "de": "Von sechs bis zehn Uhr."
+        }
+      ]
     }
   ]
 }

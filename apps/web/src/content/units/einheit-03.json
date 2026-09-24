@@ -352,6 +352,39 @@
           "de": "Ja, danke, Yūsuf."
         }
       ]
+    },
+    {
+      "id": "d-3-3",
+      "einheit": 3,
+      "dialog": 3,
+      "titel": "جارٌ جَديدٌ",
+      "zeilen": [
+        {
+          "sp": "الْجار",
+          "ar": "السَّلامُ عَلَيْكُمْ. أَنا جارُكُمُ الْجَديدُ.",
+          "de": "Friede sei mit euch. Ich bin euer neuer Nachbar."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "وَعَلَيْكُمُ السَّلامُ، أَهْلاً وَسَهْلاً! أَيْنَ تَسْكُنُ؟",
+          "de": "Und mit euch sei der Friede, willkommen! Wo wohnst du?"
+        },
+        {
+          "sp": "الْجار",
+          "ar": "أَسْكُنُ في الطّابِقِ الثّاني.",
+          "de": "Ich wohne im zweiten Stock."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "هَلِ الشَّقَّةُ واسِعَةٌ؟",
+          "de": "Ist die Wohnung geräumig?"
+        },
+        {
+          "sp": "الْجار",
+          "ar": "نَعَمْ، وَفيها نافِذَةٌ كَبيرَةٌ أَمامَ الْحَديقَةِ.",
+          "de": "Ja, und sie hat ein großes Fenster zum Garten."
+        }
+      ]
     }
   ]
 }

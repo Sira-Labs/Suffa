@@ -263,6 +263,34 @@
           "de": "Ja, sie öffnet die Praxis jeden Tag früh."
         }
       ]
+    },
+    {
+      "id": "d-8-3",
+      "einheit": 8,
+      "dialog": 3,
+      "titel": "في الْمَزْرَعَةِ",
+      "zeilen": [
+        {
+          "sp": "يوسُف",
+          "ar": "أَيْنَ يَعْمَلُ جَدُّكَ يا عُمَرُ؟",
+          "de": "Wo arbeitet dein Großvater, ʿUmar?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "جَدّي فَلّاحٌ. يَعْمَلُ في مَزْرَعَةٍ في الْقَرْيَةِ.",
+          "de": "Mein Großvater ist Bauer. Er arbeitet auf einem Hof im Dorf."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "هَلْ عَمَلُهُ صَعْبٌ؟",
+          "de": "Ist seine Arbeit schwer?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "نَعَمْ، لٰكِنَّهُ نَشيطٌ جِدّاً. يَحْضُرُ إِلى الْمَزْرَعَةِ بَعْدَ الْفَجْرِ.",
+          "de": "Ja, aber er ist sehr tatkräftig. Er ist schon nach dem Morgengebet auf dem Hof."
+        }
+      ]
     }
   ]
 }

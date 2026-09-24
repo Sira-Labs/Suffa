@@ -230,6 +230,39 @@
           "de": "Schön, dass du gut zurück bist!"
         }
       ]
+    },
+    {
+      "id": "d-16-3",
+      "einheit": 16,
+      "dialog": 3,
+      "titel": "مِنَ الشّاطِئِ",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "أَهْلاً يا سارَةُ! أَيْنَ أَنْتِ الْآنَ؟",
+          "de": "Hallo Sāra! Wo bist du jetzt?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أَنا عَلى الشّاطِئِ. الْمَنْظَرُ جَميلٌ جِدّاً!",
+          "de": "Ich bin am Strand. Die Aussicht ist wunderschön!"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "كَيْفَ كانَ السَّفَرُ؟",
+          "de": "Wie war die Reise?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "كانَ طَويلاً، لٰكِنَّنا فَرِحْنا كَثيراً.",
+          "de": "Sie war lang, aber wir haben uns sehr gefreut."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "أَرْسِلي لي صُوَراً!",
+          "de": "Schick mir Fotos!"
+        }
+      ]
     }
   ]
 }

@@ -298,6 +298,39 @@
           "de": "Möge Gott es dir vergelten!"
         }
       ]
+    },
+    {
+      "id": "d-6-3",
+      "einheit": 6,
+      "dialog": 3,
+      "titel": "الْوُضوءُ قَبْلَ الصَّلاةِ",
+      "zeilen": [
+        {
+          "sp": "الطِّفْل",
+          "ar": "يا أَبي، هَلْ نُصَلّي الْآنَ؟",
+          "de": "Papa, beten wir jetzt?"
+        },
+        {
+          "sp": "الْأَب",
+          "ar": "نَعَمْ، وَلٰكِنِ الْوُضوءُ قَبْلَ الصَّلاةِ.",
+          "de": "Ja, aber vor dem Gebet kommt die Waschung."
+        },
+        {
+          "sp": "الطِّفْل",
+          "ar": "أَيْنَ الْقِبْلَةُ؟",
+          "de": "Wo ist die Gebetsrichtung?"
+        },
+        {
+          "sp": "الْأَب",
+          "ar": "الْقِبْلَةُ هُناكَ. ضَعِ السَّجّادَةَ هُنا.",
+          "de": "Die Qibla ist dort. Leg den Gebetsteppich hierhin."
+        },
+        {
+          "sp": "الطِّفْل",
+          "ar": "اللهُ أَكْبَرُ!",
+          "de": "Allāhu akbar!"
+        }
+      ]
     }
   ]
 }

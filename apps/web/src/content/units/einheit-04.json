@@ -326,6 +326,39 @@
           "de": "Ja, danach kommen wir zum Frühstück zurück."
         }
       ]
+    },
+    {
+      "id": "d-4-3",
+      "einheit": 4,
+      "dialog": 3,
+      "titel": "مَتى نِمْتَ؟",
+      "zeilen": [
+        {
+          "sp": "الْأُمّ",
+          "ar": "مَتى نِمْتَ أَمْسِ يا يوسُفُ؟",
+          "de": "Wann bist du gestern schlafen gegangen, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نِمْتُ السّاعَةَ الْعاشِرَةَ.",
+          "de": "Ich bin um zehn Uhr schlafen gegangen."
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "وَمَتى اسْتَيْقَظْتَ؟",
+          "de": "Und wann bist du aufgewacht?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "اِسْتَيْقَظْتُ مُبَكِّراً لِصَلاةِ الْفَجْرِ.",
+          "de": "Ich bin früh zum Morgengebet aufgewacht."
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "أَحْسَنْتَ!",
+          "de": "Gut gemacht!"
+        }
+      ]
     }
   ]
 }

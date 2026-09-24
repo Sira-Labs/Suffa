@@ -10,8 +10,8 @@
 | ------------------------ | ------------------------ | ---------------------------- |
 | Units                    | 16 (own drafts)          | 16                           |
 | Vocabulary               | 401 words                | ≈ 800–1,000 words            |
-| Dialogues                | 33 (own, 2–3 per unit)   | ≈ 3 per unit (≈ 48)          |
-| Verbs with full tables   | 36                       | ≈ 60–80                      |
+| Dialogues                | 48 (own, 3 per unit)     | ≈ 3 per unit (≈ 48)          |
+| Verbs with full tables   | 51                       | ≈ 60–80                      |
 | Grammar points           | none as learnable items  | ≈ 3–4 per unit               |
 | Example sentences        | none                     | 1–2 per word                 |
 | Audio                    | links to publisher audio | per word + per dialogue line |

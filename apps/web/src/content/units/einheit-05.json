@@ -345,6 +345,39 @@
           "de": "Wie schön, das Essen ist lecker!"
         }
       ]
+    },
+    {
+      "id": "d-5-3",
+      "einheit": 5,
+      "dialog": 3,
+      "titel": "ماذا تَأْكُلُ في الْفُطورِ؟",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "ماذا تَأْكُلُ في الْفُطورِ يا عُمَرُ؟",
+          "de": "Was isst du zum Frühstück, ʿUmar?"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "آكُلُ خُبْزاً وَبَيْضاً، وَأَشْرَبُ حَليباً.",
+          "de": "Ich esse Brot und Eier und trinke Milch."
+        },
+        {
+          "sp": "سارَة",
+          "ar": "أَنا آكُلُ تَمْراً وَأَشْرَبُ قَهْوَةً.",
+          "de": "Ich esse Datteln und trinke Kaffee."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "قَهْوَةٌ في الصَّباحِ؟",
+          "de": "Kaffee am Morgen?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "نَعَمْ، دائِماً!",
+          "de": "Ja, immer!"
+        }
+      ]
     }
   ]
 }

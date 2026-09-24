@@ -263,6 +263,39 @@
           "de": "Und er hat Zamzam-Wasser für uns mitgebracht."
         }
       ]
+    },
+    {
+      "id": "d-14-3",
+      "einheit": 14,
+      "dialog": 3,
+      "titel": "يَوْمُ عَرَفَةَ",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "أَيْنَ الْحُجّاجُ الْيَوْمَ؟",
+          "de": "Wo sind die Pilger heute?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "الْيَوْمَ يَوْمُ عَرَفَةَ. الْحُجّاجُ في عَرَفاتٍ.",
+          "de": "Heute ist der Tag von ʿArafa. Die Pilger sind in ʿArafāt."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "ماذا يَفْعَلونَ هُناكَ؟",
+          "de": "Was machen sie dort?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "يَدْعونَ اللهَ وَيَذْكُرونَهُ.",
+          "de": "Sie bitten Gott und gedenken seiner."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "وَنَحْنُ نَصومُ هٰذا الْيَوْمَ، إِنْ شاءَ اللهُ.",
+          "de": "Und wir fasten an diesem Tag, so Gott will."
+        }
+      ]
     }
   ]
 }

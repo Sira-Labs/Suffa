@@ -302,6 +302,34 @@
           "de": "Weil in meinem Land im Winter Schnee fällt."
         }
       ]
+    },
+    {
+      "id": "d-10-3",
+      "einheit": 10,
+      "dialog": 3,
+      "titel": "الْبَرْدُ",
+      "zeilen": [
+        {
+          "sp": "عُمَر",
+          "ar": "الْجَوُّ بارِدٌ الْيَوْمَ!",
+          "de": "Heute ist es kalt!"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، وَالرّيحُ شَديدَةٌ.",
+          "de": "Ja, und der Wind ist stark."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "أَنا لا أُحِبُّ الْبَرْدَ.",
+          "de": "Ich mag die Kälte nicht."
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "وَأَنا أُحِبُّهُ! الْجَوُّ في الصَّيْفِ حارٌّ جِدّاً.",
+          "de": "Und ich mag sie! Im Sommer ist es sehr heiß."
+        }
+      ]
     }
   ]
 }

@@ -292,6 +292,34 @@
           "de": "Gut gemacht!"
         }
       ]
+    },
+    {
+      "id": "d-11-3",
+      "einheit": 11,
+      "dialog": 3,
+      "titel": "نَمْشي إِلى الْمَتْحَفِ",
+      "zeilen": [
+        {
+          "sp": "سارَة",
+          "ar": "هَلْ نَمْشي إِلى الْمَتْحَفِ؟",
+          "de": "Gehen wir zu Fuß zum Museum?"
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "هَلْ هُوَ قَريبٌ؟",
+          "de": "Ist es nah?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "نَعَمْ، هُوَ في شارِعٍ قَريبٍ، أَمامَ الْمَسْجِدِ الْقَديمِ.",
+          "de": "Ja, es liegt in einer Straße in der Nähe, vor der alten Moschee."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "طَيِّبٌ، نَمْشي. الْجَوُّ جَميلٌ.",
+          "de": "Gut, wir gehen zu Fuß. Das Wetter ist schön."
+        }
+      ]
     }
   ]
 }

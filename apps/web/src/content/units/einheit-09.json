@@ -306,6 +306,39 @@
           "de": "Gut, ich nehme sie mit."
         }
       ]
+    },
+    {
+      "id": "d-9-3",
+      "einheit": 9,
+      "dialog": 3,
+      "titel": "ماذا نَشْتَري؟",
+      "zeilen": [
+        {
+          "sp": "الْأُمّ",
+          "ar": "ماذا نَشْتَري الْيَوْمَ يا سارَةُ؟",
+          "de": "Was kaufen wir heute, Sāra?"
+        },
+        {
+          "sp": "سارَة",
+          "ar": "نَشْتَري خُضاراً وَفاكِهَةً وَخُبْزاً.",
+          "de": "Wir kaufen Gemüse, Obst und Brot."
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "بِكَمْ كيلو التُّفّاحِ؟",
+          "de": "Wie viel kostet ein Kilo Äpfel?"
+        },
+        {
+          "sp": "الْبائِع",
+          "ar": "بِعَشَرَةِ رِيالاتٍ.",
+          "de": "Zehn Riyal."
+        },
+        {
+          "sp": "الْأُمّ",
+          "ar": "طَيِّبٌ، نَشْتَري كيلو واحِداً.",
+          "de": "Gut, wir kaufen ein Kilo."
+        }
+      ]
     }
   ]
 }

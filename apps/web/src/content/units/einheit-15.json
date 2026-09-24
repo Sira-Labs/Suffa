@@ -265,6 +265,39 @@
           "de": "Sag ihr: Gute Besserung."
         }
       ]
+    },
+    {
+      "id": "d-15-3",
+      "einheit": 15,
+      "dialog": 3,
+      "titel": "في الصَّيْدَلِيَّةِ",
+      "zeilen": [
+        {
+          "sp": "عُمَر",
+          "ar": "السَّلامُ عَلَيْكُمْ. أُريدُ هٰذا الدَّواءَ، مِنْ فَضْلِكَ.",
+          "de": "Friede sei mit euch. Ich möchte dieses Medikament, bitte."
+        },
+        {
+          "sp": "الصَّيْدَلِيّ",
+          "ar": "هٰذا دَواءٌ لِلزُّكامِ. خُذْهُ بَعْدَ الطَّعامِ.",
+          "de": "Das ist ein Mittel gegen Erkältung. Nimm es nach dem Essen."
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "كَمْ مَرَّةً في الْيَوْمِ؟",
+          "de": "Wie oft am Tag?"
+        },
+        {
+          "sp": "الصَّيْدَلِيّ",
+          "ar": "ثَلاثَ مَرّاتٍ. شِفاءً عاجِلاً!",
+          "de": "Dreimal. Gute Besserung!"
+        },
+        {
+          "sp": "عُمَر",
+          "ar": "شُكْراً جَزيلاً.",
+          "de": "Vielen Dank."
+        }
+      ]
     }
   ]
 }

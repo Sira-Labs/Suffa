@@ -372,6 +372,39 @@
           "de": "Meine Familie ist klein: ich, mein Vater und meine Mutter."
         }
       ]
+    },
+    {
+      "id": "d-2-3",
+      "einheit": 2,
+      "dialog": 3,
+      "titel": "جَدّي وَجَدَّتي",
+      "zeilen": [
+        {
+          "sp": "مَرْيَم",
+          "ar": "هَلْ جَدُّكَ في الْبَيْتِ يا يوسُفُ؟",
+          "de": "Ist dein Großvater zu Hause, Yūsuf?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "نَعَمْ، جَدّي وَجَدَّتي في الْبَيْتِ.",
+          "de": "Ja, mein Großvater und meine Großmutter sind zu Hause."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "كَمْ وَلَداً عِنْدَ عَمِّكَ؟",
+          "de": "Wie viele Kinder hat dein Onkel?"
+        },
+        {
+          "sp": "يوسُف",
+          "ar": "عِنْدَهُ ثَلاثَةُ أَوْلادٍ وَبِنْتٌ واحِدَةٌ.",
+          "de": "Er hat drei Söhne und eine Tochter."
+        },
+        {
+          "sp": "مَرْيَم",
+          "ar": "ما شاءَ اللهُ!",
+          "de": "Wie schön!"
+        }
+      ]
     }
   ]
 }

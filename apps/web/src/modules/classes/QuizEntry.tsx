@@ -14,9 +14,9 @@ export function QuizEntry({ classId, teacher }: { classId: string; teacher: bool
     if (teacher) return;
     let cancelled = false;
     void api.view(classId).then((r) => {
-      if (!cancelled && r.ok) {
-        setRunning(r.value.quiz !== null && r.value.quiz.status !== 'finished');
-      }
+      // An empty answer (older server, no quiz support) counts as "no quiz".
+      const quiz = r.ok ? r.value?.quiz : null;
+      if (!cancelled) setRunning(Boolean(quiz) && quiz!.status !== 'finished');
     });
     return () => {
       cancelled = true;

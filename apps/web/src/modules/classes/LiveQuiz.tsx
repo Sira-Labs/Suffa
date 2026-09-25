@@ -61,7 +61,7 @@ function useQuizState(api: QuizApi, classId: string, enabled: boolean) {
     if (!enabled) return;
     const abort = new AbortController();
     void api.view(classId).then((r) => {
-      if (r.ok && !abort.signal.aborted) setQuiz(r.value.quiz);
+      if (r.ok && !abort.signal.aborted) setQuiz(r.value?.quiz ?? null);
     });
     void (async () => {
       for await (const view of api.events(classId, abort.signal)) setQuiz(view);

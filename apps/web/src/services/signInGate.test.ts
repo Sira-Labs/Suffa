@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   loginRedirect,
   needsSignIn,
@@ -82,5 +82,15 @@ describe('"ohne Konto weiter"', () => {
     expect(signInSkipped()).toBe(true);
     setSignInSkipped(false);
     expect(signInSkipped()).toBe(false);
+  });
+
+  it('holds for this session when browser storage is blocked', () => {
+    const blocked = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('blocked', 'SecurityError');
+    });
+    setSignInSkipped(true);
+    expect(localStorage.getItem('suffa.signIn.skipped')).toBeNull();
+    expect(signInSkipped()).toBe(true);
+    blocked.mockRestore();
   });
 });

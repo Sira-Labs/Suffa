@@ -9,6 +9,8 @@ export const LOGIN_PATH = '/login';
 export const SIGNED_IN_FLAG = 'angemeldet';
 
 const SKIP_KEY = 'suffa.signIn.skipped';
+/** The choice for this session, also when browser storage is blocked. */
+let skippedThisSession = false;
 
 /** Pages reachable without an account: the sign-in page and invitations (own sign-in). */
 const OPEN_PATHS = [LOGIN_PATH, '/join'];
@@ -77,6 +79,7 @@ function storage(): Storage | null {
 }
 
 export function signInSkipped(): boolean {
+  if (skippedThisSession) return true;
   try {
     return storage()?.getItem(SKIP_KEY) === '1';
   } catch (error) {
@@ -87,6 +90,7 @@ export function signInSkipped(): boolean {
 
 /** Remembers "ohne Konto weiter" on this device, or forgets it (`false`). */
 export function setSignInSkipped(skipped: boolean): void {
+  skippedThisSession = skipped;
   try {
     const store = storage();
     if (skipped) store?.setItem(SKIP_KEY, '1');

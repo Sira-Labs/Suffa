@@ -109,7 +109,12 @@ export function FocusReview() {
  * (due or not) and another batch of new words. Both count as reviews for the quests.
  */
 function KeepPractising({ weakCount }: { weakCount: number }) {
-  const newCount = useSrsStore((s) => s.summary)().newCount;
+  // The same selection the session makes (new vocabulary cards the learner may reach).
+  const newCount = useSrsStore((s) => s.getQueue)(
+    NEW_KINDS,
+    NEW_PER_DAY,
+    NEW_KINDS
+  ).length;
   return (
     <>
       <p className="muted" style={{ margin: 0 }}>

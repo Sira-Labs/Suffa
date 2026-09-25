@@ -46,6 +46,15 @@ import { AiGateway } from './ai/gateway.js';
 import { buildProviders } from './ai/providers.js';
 import { PgAiRepository } from './ai/repository.js';
 import { ModelRouter, type ProviderId } from '@suffa/llm';
+import { ContentCatalog } from './tutor/content.js';
+import { PgLearnerState } from './tutor/learner.js';
+import { ClassMediaAccess } from './tutor/media.js';
+import { PgTutorRepository } from './tutor/repository.js';
+import { PgTutorSettings } from './tutor/routes.js';
+import { TUTOR_TASK, TutorService } from './tutor/service.js';
+
+/** The course content the app bundles (copied into the image at the same relative place). */
+const CONTENT_DIR = fileURLToPath(new URL('../../web/src/content', import.meta.url));
 import { PgClassRepository } from './classes/repository.js';
 import { PgPrivacyRepository } from './privacy/repository.js';
 import { PgAccountRepository } from './account/repository.js';
@@ -298,6 +307,7 @@ async function main(): Promise<void> {
   const auth: AuthResolver =
     resolvers.length > 0 ? new ChainResolver(resolvers) : new DenyAllResolver();
 
+  const ai = aiParts(config, pool, log, auth);
   const app = createApp({
     version: config.version,
     expectedRevision: expected,
@@ -377,7 +387,8 @@ async function main(): Promise<void> {
       log,
     },
     admin: { repo: new PgAdminRepository(pool), auth, log },
-    aiAdmin: aiParts(config, pool, log, auth),
+    aiAdmin: ai,
+    tutor: await tutorParts(ai, pool, log, auth, config),
     classes: config.publicUrl
       ? {
           repo: new PgClassRepository(pool),
@@ -441,6 +452,46 @@ function driveParts(config: Config) {
  * AI gateway (ADR-0010): providers from their keys, routes from Postgres. Without any key the
  * admin page still shows routes and spend, and every call answers "unavailable".
  */
+async function tutorParts(
+  ai: ReturnType<typeof aiParts>,
+  pool: pg.Pool,
+  log: Pick<Logger, 'info' | 'warn'>,
+  auth: AuthResolver,
+  config: Config
+) {
+  let catalog: ContentCatalog;
+  try {
+    catalog = await ContentCatalog.load(CONTENT_DIR);
+  } catch (error) {
+    // Without the course content the tutor could not stay grounded: leave it off.
+    log.warn({ err: error, dir: CONTENT_DIR }, 'tutor.content_missing');
+    return undefined;
+  }
+  const repo = new PgTutorRepository(pool);
+  return {
+    service: new TutorService({
+      gateway: ai.gateway,
+      repo,
+      catalog,
+      learner: new PgLearnerState(pool, catalog),
+      media: config.storage
+        ? new ClassMediaAccess(
+            new PgMediaRepository(pool),
+            new PgClassRepository(pool),
+            new PgInteractiveRepository(pool)
+          )
+        : null,
+      log,
+    }),
+    repo,
+    settings: new PgTutorSettings(pool),
+    available: async () =>
+      (await ai.router.plan(TUTOR_TASK, { requires: ['streaming', 'tools'] })).length > 0,
+    auth,
+    log,
+  };
+}
+
 function aiParts(
   config: Config,
   pool: pg.Pool,

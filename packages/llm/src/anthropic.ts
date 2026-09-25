@@ -7,11 +7,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { LlmError, kindForStatus } from './errors.js';
 import type {
+  LlmMessage,
   LlmProvider,
   LlmRequest,
   LlmResult,
   LlmStopReason,
   LlmStreamEvent,
+  ToolCall,
 } from './types.js';
 
 export interface AnthropicOptions {
@@ -52,7 +54,7 @@ export class AnthropicProvider implements LlmProvider {
 
   async complete(request: LlmRequest): Promise<LlmResult> {
     try {
-      const message = await this.client.messages.create(this.params(request), {
+      const message = await this.client.messages.create(this.params(request, false), {
         signal: request.signal,
       });
       return this.result(message);
@@ -63,7 +65,7 @@ export class AnthropicProvider implements LlmProvider {
 
   async *stream(request: LlmRequest): AsyncIterable<LlmStreamEvent> {
     try {
-      const stream = this.client.messages.stream(this.params(request), {
+      const stream = this.client.messages.stream(this.params(request, true), {
         signal: request.signal,
       });
       for await (const event of stream) {
@@ -77,7 +79,10 @@ export class AnthropicProvider implements LlmProvider {
     }
   }
 
-  private params(request: LlmRequest): Anthropic.MessageCreateParamsNonStreaming {
+  private params(
+    request: LlmRequest,
+    streaming: boolean
+  ): Anthropic.MessageCreateParamsNonStreaming {
     const system = request.system ?? [];
     const lastCached = system.map((p) => Boolean(p.cache)).lastIndexOf(true);
     const outputConfig: Anthropic.OutputConfig = {};
@@ -100,7 +105,20 @@ export class AnthropicProvider implements LlmProvider {
             ),
           }
         : {}),
-      messages: request.messages.map((m) => ({ role: m.role, content: m.content })),
+      messages: request.messages.map(toParam),
+      ...(request.tools?.length
+        ? {
+            tools: request.tools.map(
+              (t): Anthropic.Tool => ({
+                name: t.name,
+                description: t.description,
+                input_schema: t.inputSchema as Anthropic.Tool.InputSchema,
+                // Stream tool input as it is generated; the caller validates every input.
+                ...(streaming ? { eager_input_streaming: true } : {}),
+              })
+            ),
+          }
+        : {}),
       ...(Object.keys(outputConfig).length > 0 ? { output_config: outputConfig } : {}),
     };
   }
@@ -109,11 +127,23 @@ export class AnthropicProvider implements LlmProvider {
     const text = message.content
       .map((block) => (block.type === 'text' ? block.text : ''))
       .join('');
+    const stopReason = (message.stop_reason && STOP[message.stop_reason]) || 'other';
+    // A turn cut off by max_tokens or a refusal may hold a truncated tool input: never run it.
+    const toolCalls: ToolCall[] =
+      stopReason === 'tool_use'
+        ? message.content.flatMap((block) =>
+            block.type === 'tool_use'
+              ? [{ id: block.id, name: block.name, input: block.input ?? null }]
+              : []
+          )
+        : [];
     return {
       provider: this.id,
       model: message.model,
       text,
-      stopReason: (message.stop_reason && STOP[message.stop_reason]) || 'other',
+      stopReason,
+      toolCalls,
+      replay: { provider: this.id, content: message.content },
       usage: {
         inputTokens: message.usage.input_tokens,
         outputTokens: message.usage.output_tokens,
@@ -122,6 +152,44 @@ export class AnthropicProvider implements LlmProvider {
       },
     };
   }
+}
+
+/**
+ * One neutral message as a Messages API param. An assistant turn produced by Anthropic is sent
+ * back exactly as received (thinking blocks included), as the tool loop requires.
+ */
+function toParam(message: LlmMessage): Anthropic.MessageParam {
+  if (message.role === 'user') return { role: 'user', content: message.content };
+  if (message.role === 'tool') {
+    return {
+      role: 'user',
+      content: message.results.map((r) => ({
+        type: 'tool_result',
+        tool_use_id: r.callId,
+        content: r.content,
+        ...(r.isError ? { is_error: true } : {}),
+      })),
+    };
+  }
+  if (message.replay?.provider === 'anthropic') {
+    return {
+      role: 'assistant',
+      content: message.replay.content as Anthropic.ContentBlockParam[],
+    };
+  }
+  if (!message.toolCalls?.length) return { role: 'assistant', content: message.content };
+  return {
+    role: 'assistant',
+    content: [
+      ...(message.content ? [{ type: 'text' as const, text: message.content }] : []),
+      ...message.toolCalls.map((call) => ({
+        type: 'tool_use' as const,
+        id: call.id,
+        name: call.name,
+        input: call.input ?? {},
+      })),
+    ],
+  };
 }
 
 /** Most specific SDK class first: timeouts and aborts are subclasses of the generic errors. */

@@ -16,10 +16,45 @@ export const CAPABILITIES: readonly Capability[] = [
 
 export type Effort = 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 
-export interface LlmMessage {
-  role: 'user' | 'assistant';
-  content: string;
+/** A tool the model may call; the caller executes it and answers with a `tool` message. */
+export interface ToolSpec {
+  name: string;
+  description: string;
+  /** JSON schema of the input object. */
+  inputSchema: Record<string, unknown>;
 }
+
+export interface ToolCall {
+  id: string;
+  name: string;
+  /** Parsed input; null when the provider sent input that is not JSON. Validate before use. */
+  input: unknown;
+}
+
+export interface ToolResult {
+  callId: string;
+  content: string;
+  isError?: boolean;
+}
+
+/**
+ * The provider's own form of an assistant turn (e.g. Anthropic thinking + tool_use blocks). A
+ * tool loop must hand it back unchanged to the same provider; other providers ignore it.
+ */
+export interface ProviderReplay {
+  provider: ProviderId;
+  content: unknown;
+}
+
+export type LlmMessage =
+  | { role: 'user'; content: string }
+  | {
+      role: 'assistant';
+      content: string;
+      toolCalls?: ToolCall[];
+      replay?: ProviderReplay;
+    }
+  | { role: 'tool'; results: ToolResult[] };
 
 /**
  * One part of the system prompt. Parts marked `cache` form the stable prefix (persona,
@@ -39,6 +74,7 @@ export interface LlmRequest {
   effort?: Effort;
   /** JSON schema the answer must follow (structured output). */
   jsonSchema?: Record<string, unknown>;
+  tools?: ToolSpec[];
   signal?: AbortSignal;
 }
 
@@ -58,13 +94,16 @@ export interface LlmResult {
   text: string;
   stopReason: LlmStopReason;
   usage: LlmUsage;
+  /** Tool calls to execute (stop reason `tool_use`); empty otherwise. */
+  toolCalls: ToolCall[];
+  /** The assistant turn in the provider's own form, for the next request of a tool loop. */
+  replay?: ProviderReplay;
 }
 
 export type LlmStreamEvent =
   | { type: 'text'; text: string }
   | { type: 'done'; result: LlmResult };
 
-// TODO(2026-09-25): tool calls (al-Muʿallim tools, Sprint 10) extend request and result.
 export interface LlmProvider {
   readonly id: ProviderId;
   complete(request: LlmRequest): Promise<LlmResult>;

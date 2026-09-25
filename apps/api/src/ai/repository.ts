@@ -32,6 +32,8 @@ export interface CallRecord {
   costMicro: number;
   latencyMs: number;
   attempts: unknown[];
+  /** Counts as a learner turn (the first call of a turn that a model answered). */
+  turn: boolean;
 }
 
 export interface TaskUsage {
@@ -256,15 +258,16 @@ export class PgAiRepository implements AiRepository {
           [monthStart(now), call.costMicro]
         );
       }
-      // A turn counts when a model answered; failed attempts cost the learner nothing.
+      // Tokens and cost of every answered call; a turn only once per learner turn. Failed
+      // attempts cost the learner nothing.
       if (call.userId && call.provider) {
         await db.query(
           `insert into ai_usage_daily (user_id, day, turns, tokens, cost_micro)
            select u.id, ($2::timestamptz at time zone coalesce(u.time_zone, 'UTC'))::date,
-                  1, $3, $4
+                  $5, $3, $4
              from users u where u.id = $1
            on conflict (user_id, day) do update
-             set turns = ai_usage_daily.turns + 1,
+             set turns = ai_usage_daily.turns + excluded.turns,
                  tokens = ai_usage_daily.tokens + excluded.tokens,
                  cost_micro = ai_usage_daily.cost_micro + excluded.cost_micro`,
           [
@@ -275,6 +278,7 @@ export class PgAiRepository implements AiRepository {
               call.cacheReadTokens +
               call.cacheWriteTokens,
             call.costMicro,
+            call.turn ? 1 : 0,
           ]
         );
       }

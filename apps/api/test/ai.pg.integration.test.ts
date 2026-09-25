@@ -39,6 +39,7 @@ class FakeProvider implements LlmProvider {
       model: request.model,
       text: `${request.model}: أهلا`,
       stopReason: 'end',
+      toolCalls: [],
       usage: {
         inputTokens: 1000,
         outputTokens: 200,

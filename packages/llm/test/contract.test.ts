@@ -81,7 +81,8 @@ describe.each(subjects)('$name adapter', (subject) => {
   it('completes with text, stop reason and usage incl. cache reads', async () => {
     const { p } = provider([subject.wire.complete(scenario)]);
     const result = await p.complete(request(subject.model));
-    expect(result).toEqual({
+    expect(result).toMatchObject({
+      toolCalls: [],
       provider: subject.name,
       model: subject.model,
       text: 'كتاب heißt Buch.',

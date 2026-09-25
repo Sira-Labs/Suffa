@@ -40,6 +40,15 @@ export function budgetMode(spent: number, settings: AiSettings): BudgetMode {
   return 'normal';
 }
 
+export interface CallOptions {
+  requires?: Capability[];
+  /**
+   * A further model call within the same learner turn (a tool loop): the quota was checked at
+   * the start of the turn and the turn is counted once.
+   */
+  continuation?: boolean;
+}
+
 export interface AiGatewayDeps {
   router: ModelRouter;
   repo: AiRepository;
@@ -70,12 +79,15 @@ export class AiGateway {
     actor: Actor,
     task: string,
     input: TaskInput,
-    requires: Capability[] = []
+    options: CallOptions = {}
   ): Promise<RoutedResult> {
-    const mode = await this.admit(actor, task);
+    const mode = await this.admit(actor, task, options);
     try {
-      const result = await this.deps.router.complete(task, input, { mode, requires });
-      await this.meter(actor, task, result);
+      const result = await this.deps.router.complete(task, input, {
+        mode,
+        requires: options.requires,
+      });
+      await this.meter(actor, task, result, !options.continuation);
       return result;
     } catch (error) {
       await this.meterFailure(actor, task, error);
@@ -87,15 +99,17 @@ export class AiGateway {
     actor: Actor,
     task: string,
     input: TaskInput,
-    requires: Capability[] = []
+    options: CallOptions = {}
   ): AsyncIterable<RoutedStreamEvent> {
-    const mode = await this.admit(actor, task);
+    const mode = await this.admit(actor, task, options);
     try {
       for await (const event of this.deps.router.stream(task, input, {
         mode,
-        requires,
+        requires: options.requires,
       })) {
-        if (event.type === 'done') await this.meter(actor, task, event.result);
+        if (event.type === 'done') {
+          await this.meter(actor, task, event.result, !options.continuation);
+        }
         yield event;
       }
     } catch (error) {
@@ -105,10 +119,14 @@ export class AiGateway {
   }
 
   /** Quota first (per learner), then the budget; returns the routing mode. */
-  private async admit(actor: Actor, task: string): Promise<BudgetMode> {
+  private async admit(
+    actor: Actor,
+    task: string,
+    options: CallOptions
+  ): Promise<BudgetMode> {
     const settings = await this.deps.repo.settings();
     const limit = settings.dailyTurns[actor.role];
-    if (limit !== null) {
+    if (limit !== null && !options.continuation) {
       const used = await this.deps.repo.turnsToday(actor.id);
       if (used >= limit) {
         this.deps.log.info({ userId: actor.id, task, used, limit }, 'ai.quota_reached');
@@ -124,7 +142,7 @@ export class AiGateway {
     return mode;
   }
 
-  private async meter(actor: Actor, task: string, result: RoutedResult) {
+  private async meter(actor: Actor, task: string, result: RoutedResult, turn: boolean) {
     if (result.costMicroUsd === null) {
       this.deps.log.warn({ model: result.route.model, task }, 'ai.unpriced_model');
     }
@@ -141,6 +159,7 @@ export class AiGateway {
       costMicro: result.costMicroUsd ?? 0,
       latencyMs: result.latencyMs,
       attempts: result.attempts,
+      turn,
     });
   }
 
@@ -165,6 +184,7 @@ export class AiGateway {
       costMicro: 0,
       latencyMs: 0,
       attempts: [],
+      turn: false,
     };
   }
 

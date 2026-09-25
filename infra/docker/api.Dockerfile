@@ -46,6 +46,9 @@ COPY --from=build /app/packages/llm/package.json /app/packages/llm/
 COPY --from=build /app/packages/llm/dist /app/packages/llm/dist
 COPY apps/api/package.json ./
 COPY apps/api/migrations ./migrations
+# Course content for al-Muʿallim's grounding (the same files the web app bundles).
+COPY apps/web/src/content/meta.json /app/apps/web/src/content/meta.json
+COPY apps/web/src/content/units /app/apps/web/src/content/units
 ARG SUFFA_VERSION=dev
 ENV SUFFA_VERSION=$SUFFA_VERSION
 USER node

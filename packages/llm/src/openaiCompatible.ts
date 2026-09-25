@@ -5,6 +5,7 @@
 import { LlmError, kindForStatus } from './errors.js';
 import { readSse } from './sse.js';
 import type {
+  LlmMessage,
   LlmProvider,
   LlmRequest,
   LlmResult,
@@ -12,6 +13,7 @@ import type {
   LlmStreamEvent,
   LlmUsage,
   ProviderId,
+  ToolCall,
 } from './types.js';
 
 export interface OpenAiCompatibleOptions {
@@ -29,9 +31,15 @@ interface ChatUsage {
   prompt_tokens_details?: { cached_tokens?: number } | null;
 }
 
+interface WireToolCall {
+  index?: number;
+  id?: string;
+  function?: { name?: string; arguments?: string };
+}
+
 interface ChatChoice {
-  message?: { content?: string | null };
-  delta?: { content?: string | null };
+  message?: { content?: string | null; tool_calls?: WireToolCall[] | null };
+  delta?: { content?: string | null; tool_calls?: WireToolCall[] | null };
   finish_reason?: string | null;
 }
 
@@ -59,6 +67,49 @@ function usageOf(usage: ChatUsage | null | undefined): LlmUsage {
   };
 }
 
+function parseArguments(raw: string | undefined): unknown {
+  try {
+    return JSON.parse(raw || '{}');
+  } catch (error) {
+    if (error instanceof SyntaxError) return null;
+    throw error;
+  }
+}
+
+function toolCallsOf(wire: WireToolCall[] | null | undefined): ToolCall[] {
+  return (wire ?? []).map((c, i) => ({
+    id: c.id ?? `call_${i}`,
+    name: c.function?.name ?? '',
+    input: parseArguments(c.function?.arguments),
+  }));
+}
+
+/** Neutral messages in chat-completions form (tool results become `tool` messages). */
+function wireMessages(messages: LlmMessage[]): unknown[] {
+  return messages.flatMap((m): unknown[] => {
+    if (m.role === 'user') return [{ role: 'user', content: m.content }];
+    if (m.role === 'tool') {
+      return m.results.map((r) => ({
+        role: 'tool',
+        tool_call_id: r.callId,
+        content: r.content,
+      }));
+    }
+    if (!m.toolCalls?.length) return [{ role: 'assistant', content: m.content }];
+    return [
+      {
+        role: 'assistant',
+        content: m.content || null,
+        tool_calls: m.toolCalls.map((c) => ({
+          id: c.id,
+          type: 'function',
+          function: { name: c.name, arguments: JSON.stringify(c.input ?? {}) },
+        })),
+      },
+    ];
+  });
+}
+
 export class OpenAiCompatibleProvider implements LlmProvider {
   private readonly fetchImpl: typeof fetch;
 
@@ -73,12 +124,15 @@ export class OpenAiCompatibleProvider implements LlmProvider {
     const response = await this.post(request, false);
     const body = (await response.json()) as ChatChunk;
     const choice = body.choices?.[0];
+    const stopReason = STOP[choice?.finish_reason ?? ''] ?? 'other';
     return {
       provider: this.id,
       model: body.model ?? request.model,
       text: choice?.message?.content ?? '',
-      stopReason: STOP[choice?.finish_reason ?? ''] ?? 'other',
+      stopReason,
       usage: usageOf(body.usage),
+      toolCalls:
+        stopReason === 'tool_use' ? toolCallsOf(choice?.message?.tool_calls) : [],
     };
   }
 
@@ -88,6 +142,11 @@ export class OpenAiCompatibleProvider implements LlmProvider {
     let model = request.model;
     let finish = '';
     let usage: ChatUsage | null | undefined;
+    // Tool calls arrive in pieces keyed by index: id and name first, arguments in fragments.
+    const calls = new Map<
+      number,
+      Required<Pick<WireToolCall, 'id'>> & { name: string; args: string }
+    >();
     try {
       for await (const data of readSse(response.body!)) {
         if (data === '[DONE]') break;
@@ -96,6 +155,14 @@ export class OpenAiCompatibleProvider implements LlmProvider {
         usage = chunk.usage ?? usage;
         const choice = chunk.choices?.[0];
         finish = choice?.finish_reason ?? finish;
+        for (const piece of choice?.delta?.tool_calls ?? []) {
+          const index = piece.index ?? 0;
+          const call = calls.get(index) ?? { id: `call_${index}`, name: '', args: '' };
+          if (piece.id) call.id = piece.id;
+          call.name += piece.function?.name ?? '';
+          call.args += piece.function?.arguments ?? '';
+          calls.set(index, call);
+        }
         const delta = choice?.delta?.content;
         if (delta) {
           text += delta;
@@ -105,14 +172,25 @@ export class OpenAiCompatibleProvider implements LlmProvider {
     } catch (error) {
       throw this.transportError(error, request.signal);
     }
+    const stopReason = STOP[finish] ?? 'other';
     yield {
       type: 'done',
       result: {
         provider: this.id,
         model,
         text,
-        stopReason: STOP[finish] ?? 'other',
+        stopReason,
         usage: usageOf(usage),
+        toolCalls:
+          stopReason === 'tool_use'
+            ? [...calls.entries()]
+                .sort(([a], [b]) => a - b)
+                .map(([, c]) => ({
+                  id: c.id,
+                  name: c.name,
+                  input: parseArguments(c.args),
+                }))
+            : [],
       },
     };
   }
@@ -124,8 +202,20 @@ export class OpenAiCompatibleProvider implements LlmProvider {
       max_tokens: request.maxTokens,
       messages: [
         ...(system ? [{ role: 'system', content: system }] : []),
-        ...request.messages,
+        ...wireMessages(request.messages),
       ],
+      ...(request.tools?.length
+        ? {
+            tools: request.tools.map((t) => ({
+              type: 'function',
+              function: {
+                name: t.name,
+                description: t.description,
+                parameters: t.inputSchema,
+              },
+            })),
+          }
+        : {}),
       ...(request.jsonSchema
         ? {
             response_format: {

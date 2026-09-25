@@ -207,6 +207,7 @@ export class ModelRouter {
       throw new RouteUnavailableError(task, 'budget_exhausted');
     const requires = new Set(options.requires ?? []);
     if (input.jsonSchema) requires.add('structuredOutput');
+    if (input.tools?.length) requires.add('tools');
     const routes = await this.plan(task, { ...options, requires: [...requires] });
     if (routes.length === 0) throw new RouteUnavailableError(task, 'no_route');
     return routes;

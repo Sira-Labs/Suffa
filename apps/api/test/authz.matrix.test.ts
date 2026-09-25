@@ -9,6 +9,7 @@ import type { AccountRepository } from '../src/account/repository.js';
 import { ModelRouter } from '@suffa/llm';
 import type { AdminRepository } from '../src/admin/repository.js';
 import { AiGateway } from '../src/ai/gateway.js';
+import type { TutorService } from '../src/tutor/service.js';
 import type { AiRepository } from '../src/ai/repository.js';
 import type { ClassRepository } from '../src/classes/repository.js';
 import type { PrivacyRepository } from '../src/privacy/repository.js';
@@ -59,6 +60,7 @@ const privacyRepo: PrivacyRepository = {
     sessions: [],
     classes: [],
     learningData: {} as never,
+    tutor: { conversations: [], messages: [], usage: [] },
     engagement: { state: null, xpLedger: [], quests: [], achievements: [] },
     classRecognition: { badges: [], shoutouts: [], challenges: [] },
     notifications: { prefs: null, devices: [], recaps: [] },
@@ -244,6 +246,22 @@ function buildApp() {
       log: quiet,
     },
     admin: { repo: adminRepo, auth: resolver, log: quiet },
+    tutor: {
+      service: { turn: async function* () {} } as unknown as TutorService,
+      repo: {
+        create: async () => {},
+        get: async () => null,
+        list: async () => [],
+        messages: async () => [],
+        add: async () => {},
+        rate: async () => false,
+        remove: async () => false,
+      },
+      settings: { language: async () => 'de', setLanguage: async () => {} },
+      available: async () => false,
+      auth: resolver,
+      log: quiet,
+    },
     aiAdmin: (() => {
       const repo: AiRepository = {
         load: async () => [],

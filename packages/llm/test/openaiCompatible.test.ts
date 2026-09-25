@@ -122,6 +122,7 @@ describe('OpenAI-compatible stream errors', () => {
             cacheReadTokens: 0,
             cacheWriteTokens: 0,
           },
+          toolCalls: [],
         },
       },
     ]);

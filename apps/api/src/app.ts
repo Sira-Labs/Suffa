@@ -35,6 +35,7 @@ import {
 import { sameOriginOnly } from './http/sameOrigin.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
 import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
+import { createTutorRoutes, type TutorRouteDeps } from './tutor/routes.js';
 import { createEngagementRoutes, type EngagementRouteDeps } from './engagement/routes.js';
 import { authorize, type AuthorizeLog } from './authz/middleware.js';
 
@@ -87,6 +88,8 @@ export interface AppDeps {
   classes?: ClassRouteDeps;
   /** Admin area (users); every route needs an admin. */
   admin?: AdminRouteDeps;
+  /** al-Muʿallim, the AI teacher (ADR-0011). */
+  tutor?: TutorRouteDeps;
   /** Admin AI page: routes, budget, spend (ADR-0010). */
   aiAdmin?: AiAdminDeps;
   /** Where denied requests are logged (authz.denied). */
@@ -170,6 +173,7 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.notifications) {
     app.route('/api/v1', createNotificationRoutes(deps.notifications));
   }
+  if (deps.tutor) app.route('/api/v1', createTutorRoutes(deps.tutor));
   if (deps.aiAdmin) app.route('/api/v1/admin/ai', createAiAdminRoutes(deps.aiAdmin));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));

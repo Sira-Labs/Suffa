@@ -37,6 +37,12 @@ export interface AccountExport {
     shoutouts: Record<string, unknown>[];
     challenges: Record<string, unknown>[];
   };
+  /** al-Muʿallim: conversations (kept 90 days) and AI usage per day. */
+  tutor: {
+    conversations: Record<string, unknown>[];
+    messages: Record<string, unknown>[];
+    usage: Record<string, unknown>[];
+  };
   auditLog: Record<string, unknown>[];
 }
 
@@ -62,7 +68,8 @@ export class PgPrivacyRepository implements PrivacyRepository {
         iso(r as Record<string, unknown>)
       );
     const [profile] = await q(
-      `select id, email, name, role, time_zone, email_verified, created_at, updated_at
+      `select id, email, name, role, time_zone, tutor_language, email_verified, created_at,
+              updated_at
          from users where id = $1`
     );
     const learningData = {} as Record<SyncTableName, Record<string, unknown>[]>;
@@ -148,6 +155,21 @@ export class PgPrivacyRepository implements PrivacyRepository {
              join class_challenges ch on ch.id = cc.challenge_id
              join classes c on c.id = ch.class_id
             where cc.user_id = $1 order by ch.week_start`
+        ),
+      },
+      tutor: {
+        conversations: await q(
+          `select id, title, context, created_at, updated_at from ai_conversations
+            where user_id = $1 order by created_at`
+        ),
+        messages: await q(
+          `select m.conversation_id, m.role, m.content, m.rating, m.created_at
+             from ai_messages m join ai_conversations c on c.id = m.conversation_id
+            where c.user_id = $1 order by m.created_at, m.id`
+        ),
+        usage: await q(
+          `select day::text, turns, tokens, cost_micro from ai_usage_daily
+            where user_id = $1 order by day`
         ),
       },
       auditLog: await q(

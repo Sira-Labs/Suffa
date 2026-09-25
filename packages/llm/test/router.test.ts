@@ -32,6 +32,7 @@ class ScriptedProvider implements LlmProvider {
       model: request.model,
       text: `${request.model} says hi`,
       stopReason: outcome,
+      toolCalls: [],
       usage: {
         inputTokens: 1000,
         outputTokens: 100,

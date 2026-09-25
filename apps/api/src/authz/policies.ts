@@ -47,6 +47,8 @@ export const RBAC_MATRIX = {
   'class:read': ['student', 'teacher', 'admin'],
   /** Read aggregated progress of a class; additionally scoped by class role. */
   'class:progress:read': ['teacher', 'admin'],
+  /** Talk to al-Muʿallim; every learner reaches only their own conversations. */
+  'tutor:use': ['student', 'teacher', 'admin'],
   /** List and search users in the admin area. */
   'admin:users:read': ['admin'],
   /** Change a user's role or disable them (audit-logged). */

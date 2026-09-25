@@ -3,6 +3,7 @@
  *
  * Every redeploy starts containers with new hostnames, so `service_heartbeats` gains a row per
  * instance that is never updated again; `prune-heartbeats` removes rows older than a week.
+ * `prune-conversations` deletes tutor conversations untouched for 90 days (ADR-0011 privacy).
  */
 import type { PgBoss, Job } from 'pg-boss';
 import type { Logger } from 'pino';
@@ -14,15 +15,20 @@ import type { QueueName } from './queue.js';
 export const MAINTENANCE_QUEUE: QueueName = 'maintenance';
 
 const HEARTBEAT_RETENTION_DAYS = 7;
+export const CONVERSATION_RETENTION_DAYS = 90;
 
 export const MaintenanceJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('prune-heartbeats') }),
+  z.object({ task: z.literal('prune-conversations') }),
 ]);
 export type MaintenanceJob = z.infer<typeof MaintenanceJob>;
 
 /** Cron schedules (UTC), keyed so re-registering on every start just updates them. */
 export const MAINTENANCE_SCHEDULES: ReadonlyArray<{ cron: string; job: MaintenanceJob }> =
-  [{ cron: '17 3 * * *', job: { task: 'prune-heartbeats' } }];
+  [
+    { cron: '17 3 * * *', job: { task: 'prune-heartbeats' } },
+    { cron: '27 3 * * *', job: { task: 'prune-conversations' } },
+  ];
 
 export async function pruneHeartbeats(pool: SqlPool): Promise<number> {
   const client = await pool.connect();
@@ -32,6 +38,20 @@ export async function pruneHeartbeats(pool: SqlPool): Promise<number> {
        where beat_at < now() - make_interval(days => $1)
        returning role`,
       [HEARTBEAT_RETENTION_DAYS]
+    );
+    return rows.length;
+  } finally {
+    client.release();
+  }
+}
+
+export async function pruneConversations(pool: SqlPool): Promise<number> {
+  const client = await pool.connect();
+  try {
+    const { rows } = await client.query(
+      `delete from ai_conversations where updated_at < now() - make_interval(days => $1)
+       returning id`,
+      [CONVERSATION_RETENTION_DAYS]
     );
     return rows.length;
   } finally {
@@ -49,6 +69,11 @@ export async function runMaintenance(
   switch (job.task) {
     case 'prune-heartbeats': {
       const removed = await pruneHeartbeats(pool);
+      log.info({ task: job.task, removed }, 'maintenance.done');
+      return;
+    }
+    case 'prune-conversations': {
+      const removed = await pruneConversations(pool);
       log.info({ task: job.task, removed }, 'maintenance.done');
       return;
     }

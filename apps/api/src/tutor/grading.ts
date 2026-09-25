@@ -5,12 +5,13 @@
  * teacher's review (story 11.2).
  */
 import { randomUUID } from 'node:crypto';
+import type { TaskInput } from '@suffa/llm';
 import type pg from 'pg';
 import { z } from 'zod';
 import type { Actor } from '../authz/policies.js';
 import type { AiGateway } from '../ai/gateway.js';
 import { foldArabic, type ContentCatalog } from './content.js';
-import type { LearnerState } from './learner.js';
+import type { LearnerSnapshot, LearnerState } from './learner.js';
 
 export type GradeKind = 'writing' | 'speech';
 
@@ -212,6 +213,49 @@ ${
 }`;
 }
 
+export const gradeTask = (kind: GradeKind) =>
+  kind === 'speech' ? 'grade.speech' : 'grade.writing';
+
+/**
+ * The grading request (shared by the service and the evals, story 11.3): grader rules and the
+ * unit pack first (cached), then the learner's level, then the task and the text.
+ */
+export function gradeRequest(
+  catalog: ContentCatalog,
+  learner: Pick<LearnerSnapshot, 'tutorLanguage' | 'currentUnit' | 'enrolledUnits'>,
+  input: GradeInput
+): TaskInput {
+  const unit = input.unit && catalog.unit(input.unit) ? input.unit : learner.currentUnit;
+  return {
+    system: [
+      { text: graderPrompt(learner.tutorLanguage, input.kind), cache: true },
+      { text: catalog.pack(unit), cache: true },
+      {
+        text: `The learner is in unit ${learner.currentUnit} (started: ${learner.enrolledUnits.join(', ') || 'none'}).`,
+      },
+    ],
+    messages: [
+      {
+        role: 'user',
+        content: `Task: ${input.task || '(free writing)'}\n\nLearner's ${input.kind === 'speech' ? 'transcript' : 'text'}:\n${input.answer}`,
+      },
+    ],
+    jsonSchema: GRADE_SCHEMA as unknown as Record<string, unknown>,
+  };
+}
+
+/** The model's reply as a rubric, or GradeFormatError. */
+export function parseGrade(text: string): GradeResult {
+  try {
+    return GradeResult.parse(JSON.parse(text));
+  } catch (error) {
+    if (error instanceof SyntaxError || error instanceof z.ZodError) {
+      throw new GradeFormatError('the model did not return a rubric');
+    }
+    throw error;
+  }
+}
+
 export interface GradeInput {
   kind: GradeKind;
   task: string;
@@ -232,39 +276,12 @@ export class GradeService {
 
   async grade(actor: Actor, input: GradeInput): Promise<Grade> {
     const snapshot = await this.deps.learner.snapshot(actor.id);
-    const unit =
-      input.unit && this.deps.catalog.unit(input.unit)
-        ? input.unit
-        : snapshot.currentUnit;
     const result = await this.deps.gateway.complete(
       actor,
-      input.kind === 'speech' ? 'grade.speech' : 'grade.writing',
-      {
-        system: [
-          { text: graderPrompt(snapshot.tutorLanguage, input.kind), cache: true },
-          { text: this.deps.catalog.pack(unit), cache: true },
-          {
-            text: `The learner is in unit ${snapshot.currentUnit} (started: ${snapshot.enrolledUnits.join(', ') || 'none'}).`,
-          },
-        ],
-        messages: [
-          {
-            role: 'user',
-            content: `Task: ${input.task || '(free writing)'}\n\nLearner's ${input.kind === 'speech' ? 'transcript' : 'text'}:\n${input.answer}`,
-          },
-        ],
-        jsonSchema: GRADE_SCHEMA as unknown as Record<string, unknown>,
-      }
+      gradeTask(input.kind),
+      gradeRequest(this.deps.catalog, snapshot, input)
     );
-    let parsed: GradeResult;
-    try {
-      parsed = GradeResult.parse(JSON.parse(result.text));
-    } catch (error) {
-      if (error instanceof SyntaxError || error instanceof z.ZodError) {
-        throw new GradeFormatError('the model did not return a rubric');
-      }
-      throw error;
-    }
+    const parsed = parseGrade(result.text);
     const mistakes = parsed.mistakes.map((m) => ({
       ...m,
       wordId: this.wordFor(m.correction),

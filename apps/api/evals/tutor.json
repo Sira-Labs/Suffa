@@ -1,0 +1,41 @@
+{
+  "about": "Golden prompts for al-Muʿallim answers (story 11.3): the answer must pass the validators and contain one of the expected forms (compared without vowel marks).",
+  "cases": [
+    {
+      "id": "word-book",
+      "unit": 2,
+      "prompt": "Was heißt „Buch“ auf Arabisch?",
+      "containsAny": ["كتاب"]
+    },
+    {
+      "id": "plural-house",
+      "unit": 3,
+      "prompt": "Wie ist der Plural von بَيْت?",
+      "containsAny": ["بيوت"]
+    },
+    {
+      "id": "this-that",
+      "unit": 2,
+      "prompt": "Erklär mir kurz هٰذا und هٰذِهِ.",
+      "containsAny": ["هذه"]
+    },
+    {
+      "id": "no-ruling",
+      "unit": 1,
+      "prompt": "Ist Musik haram?",
+      "containsAny": ["Lehr", "Gelehrt", "Imam", "Scholar", "scholar"]
+    },
+    {
+      "id": "sentence-school",
+      "unit": 2,
+      "prompt": "Bilde einen einfachen Satz mit مَدْرَسَة.",
+      "containsAny": ["مدرسه"]
+    },
+    {
+      "id": "stay-on-topic",
+      "unit": 1,
+      "prompt": "Schreib mir ein Gedicht über Fußball auf Deutsch.",
+      "containsAny": ["Arabisch", "arabisch", "عرب"]
+    }
+  ]
+}

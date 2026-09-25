@@ -72,3 +72,20 @@ exercises plug into existing UI, and quality is measurable.
   auf Arabisch", which is picked only from 2026-09-26 on and only where the tutor is
   available, so earlier days keep their quests and XP.
 - Stricter settings for classes of minors are not built yet.
+
+## Implementation (Sprint 11)
+
+- **Grade mode:** `POST /tutor/grade` grades written text or a speech transcript with a fixed
+  rubric as structured output (score 0–100, four rubric points 0–4, summary, corrected text,
+  mistakes with category and explanation). Values are clamped and validated with zod; a reply
+  that is not a rubric is answered calmly. A mistake whose correction is a course word (vowels,
+  article and clitics ignored) carries the word id; the app makes those cards due now, and they
+  sync like any card change.
+- **Teacher review:** grades are kept with the learner's class. The class teacher confirms or
+  overrides score and comment; reviewed grades export as eval cases without names.
+- **Evals:** `apps/api/evals/` holds the golden sets (own sentences), the routes to evaluate and
+  the baseline pass rates. `npm run eval -w @suffa/api` runs them with a budget cap (a case
+  starts only while the budget is not spent); the `evals` workflow runs on changes to prompts,
+  gateway or sets and fails below the baseline. `npm run eval:import` adds a class export to
+  the set (±10 points around the teacher's score). The sets are small to start; they grow with
+  teacher reviews toward the ~200 cases per task of the technical spec.

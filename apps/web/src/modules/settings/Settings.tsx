@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { TashkilToggle } from '@/components';
 import { useSettingsStore, useSyncStore } from '@/state';
 import { AccountDevices } from './AccountDevices';
+import { RemindersCard } from './RemindersCard';
 import { PrivacyCard } from './PrivacyCard';
 
 export function Settings() {
@@ -158,6 +159,7 @@ function AccountPanel() {
           </button>
         </div>
         <AccountDevices />
+        <RemindersCard />
       </div>
     );
   }

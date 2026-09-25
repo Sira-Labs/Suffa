@@ -47,6 +47,8 @@ export default defineConfig({
           '**/*-{cyrillic,cyrillic-ext,greek,vietnamese}-*.woff2',
         ],
         navigateFallback: 'index.html',
+        // Push notifications (story 6.3): handlers live in public/push-sw.js.
+        importScripts: ['push-sw.js'],
         // Server routes are never answered with the app shell.
         navigateFallbackDenylist: [/^\/api\//, /^\/healthz/, /^\/media\//],
         runtimeCaching: [

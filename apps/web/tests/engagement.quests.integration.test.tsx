@@ -80,7 +80,11 @@ describe('Daily quests (integration)', () => {
     const today = dayKey(new Date(), browserTimeZone());
     const [reviewQuest] = dailyQuests(today);
     // 25 good first reviews finish any review quest (≤ 20 cards).
-    await db.review_logs.bulkAdd(goodReviews(25, new Date(Date.now() - 60 * 60_000)));
+    // Today, whatever the time: from local midnight on (never yesterday, never the future).
+    const midnight = new Date();
+    midnight.setHours(0, 0, 0, 0);
+    const start = Math.max(midnight.getTime(), Date.now() - 60 * 60_000);
+    await db.review_logs.bulkAdd(goodReviews(25, new Date(start)));
     renderHome();
     const card = await screen.findByRole('region', { name: 'Tagesaufgaben' });
     // Logs load after the first render; the quest turns done then.
@@ -95,7 +99,10 @@ describe('Daily quests (integration)', () => {
     await screen.findByRole('region', { name: 'Tagesaufgaben' });
     expect(useCelebrationStore.getState().current).toBeNull();
     await act(async () => {
-      await db.review_logs.bulkAdd(goodReviews(25, new Date(Date.now() - 60_000)));
+      const midnight = new Date();
+      midnight.setHours(0, 0, 0, 0);
+      const start = Math.max(midnight.getTime(), Date.now() - 60_000);
+      await db.review_logs.bulkAdd(goodReviews(25, new Date(start)));
       await useEngagementStore.getState().refresh();
     });
     expect(useCelebrationStore.getState().current?.title).toMatch(

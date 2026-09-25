@@ -36,6 +36,7 @@ gantt
   section P4 AI teacher
   S9 Gateway (5/5)                  :done, s9, after s8, 14d
   S10 al-Muʿallim speaks (4/4)      :done, s10, after s9, 14d
+  S11 Grading & evals (4/4)         :done, s11, after s10, 14d
 ```
 
 ```mermaid
@@ -228,6 +229,12 @@ Status (Sprint 10): all four stories done. Tutor API with SSE, grounded prompt (
 | 11.2 | Teacher review queue with overrides → eval cases                          | 5   | Overrides exported.                  |
 | 11.3 | Eval harness in CI with budget cap                                        | 5   | Regression fails the job.            |
 | 11.4 | AI-suggested chapters/vocab/checkpoints for recordings (teacher approves) | 5   | Never auto-published.                |
+
+Status (Sprint 11): all four stories done. Grade mode with a structured rubric for writing and
+speech transcripts, mistakes brought up as due cards; teacher review with confirm/override and
+an export as eval cases; golden sets with a budget-capped eval harness (`evals` workflow, needs
+the `SUFFA_EVAL_ANTHROPIC_API_KEY` secret); AI chapter and checkpoint suggestions for
+recordings that the teacher accepts one by one.
 
 **Gate G4.**
 

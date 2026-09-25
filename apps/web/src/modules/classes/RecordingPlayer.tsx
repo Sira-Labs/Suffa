@@ -25,6 +25,8 @@ import {
 import { formatDuration } from './ClassRecordings';
 import { CheckpointDialog } from './player/CheckpointDialog';
 import { CheckpointEditor, TranscriptEditor } from './player/RecordingEditors';
+import { ChapterList } from './player/ChapterList';
+import { SuggestionsEditor } from './player/SuggestionsEditor';
 import { TranscriptPanel } from './player/TranscriptPanel';
 
 /** Save played time at least this often. */
@@ -270,6 +272,17 @@ export function RecordingPlayer() {
           {media.checkpoints.length} Checkpoints · {done.size} erledigt
         </span>
       )}
+      <ChapterList
+        chapters={media.interactive?.chapters ?? []}
+        time={time}
+        onSeek={seek}
+        onRemove={
+          teacher
+            ? (chapter) =>
+                void api.removeChapter(id, mediaId, chapter.id).then(() => load())
+            : undefined
+        }
+      />
       <TranscriptPanel cues={media.cues} time={time} onSeek={seek} />
       {teacher && media.interactive && (
         <>
@@ -281,6 +294,14 @@ export function RecordingPlayer() {
             currentTime={() => element.current?.currentTime ?? 0}
             onChange={() => void load()}
           />
+          {media.interactive.canSuggest && media.cues.length > 0 && (
+            <SuggestionsEditor
+              api={api}
+              classId={id}
+              mediaId={mediaId}
+              onChange={() => void load()}
+            />
+          )}
           <TranscriptEditor
             key={media.interactive.transcript?.updatedAt ?? 'none'}
             api={api}

@@ -75,3 +75,15 @@ fine for one teacher, up to 100 test users; production verification for `drive.f
   `SUFFA_ENCRYPTION_KEY`. The Picker runs in the teacher's browser with a short-lived access
   token; the worker streams picked files from Drive into storage.
 - Transcription, AI suggestions and offline downloads follow in Sprint 8.
+
+## Implementation (Sprint 11): AI suggestions
+
+- A teacher can ask for suggestions on a transcribed recording. The worker sends the transcript
+  (with timestamps, about an hour at most) to the `recording.suggest` route (Haiku first,
+  structured output) and stores chapters and checkpoints (word cards linked to course words,
+  questions, dictations) as pending suggestions. Anything outside the recording or not a valid
+  checkpoint is dropped.
+- Nothing is published on its own: accepting a suggestion creates the chapter or checkpoint,
+  dismissing it removes it. The class AI switch is checked when queueing and in the worker.
+- Chapters appear in the player (tap to jump, current part highlighted); teachers can remove
+  them.

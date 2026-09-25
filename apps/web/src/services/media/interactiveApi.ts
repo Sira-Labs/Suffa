@@ -10,12 +10,31 @@ export interface Transcript {
   updatedAt: string;
 }
 
+export interface Chapter {
+  id: string;
+  atSec: number;
+  title: string;
+}
+
 export interface Interactive {
   transcript: Transcript | null;
   checkpoints: Checkpoint[];
+  /** Parts of the lesson (accepted from AI suggestions, story 11.4). */
+  chapters: Chapter[];
   /** The viewer teaches this class (edits checkpoints and the transcript). */
   canEdit: boolean;
   canGenerate: boolean;
+  /** AI suggestions can be requested (a model is configured). */
+  canSuggest: boolean;
+}
+
+export type Suggestion =
+  | { id: string; kind: 'chapter'; atSec: number; data: { title: string } }
+  | { id: string; kind: 'checkpoint'; atSec: number; data: CheckpointData };
+
+export interface SuggestionState {
+  run: { status: 'queued' | 'running' | 'ready' | 'failed'; error: string | null } | null;
+  suggestions: Suggestion[];
 }
 
 export interface Assignment {
@@ -33,6 +52,8 @@ const MESSAGES: Record<string, string> = {
   transcription_unavailable:
     'Automatische Transkripte sind auf diesem Server nicht eingerichtet.',
   ai_disabled: 'KI ist für diese Klasse ausgeschaltet (Klassen-Einstellungen).',
+  no_transcript: 'Für Vorschläge braucht die Aufnahme zuerst ein Transkript.',
+  ai_unavailable: 'Auf diesem Server ist kein KI-Modell eingerichtet.',
 };
 
 export class InteractiveApi {
@@ -65,6 +86,30 @@ export class InteractiveApi {
   removeCheckpoint(classId: string, mediaId: string, id: string) {
     return this.call<void>(
       `${this.media(classId, mediaId)}/checkpoints/${encodeURIComponent(id)}`,
+      { method: 'DELETE' }
+    );
+  }
+
+  requestSuggestions(classId: string, mediaId: string) {
+    return this.call<void>(`${this.media(classId, mediaId)}/suggestions`, {
+      method: 'POST',
+    });
+  }
+
+  suggestions(classId: string, mediaId: string) {
+    return this.call<SuggestionState>(`${this.media(classId, mediaId)}/suggestions`);
+  }
+
+  decide(classId: string, mediaId: string, id: string, decision: 'accept' | 'dismiss') {
+    return this.call<void>(
+      `${this.media(classId, mediaId)}/suggestions/${encodeURIComponent(id)}`,
+      { method: 'PUT', body: JSON.stringify({ decision }) }
+    );
+  }
+
+  removeChapter(classId: string, mediaId: string, id: string) {
+    return this.call<void>(
+      `${this.media(classId, mediaId)}/chapters/${encodeURIComponent(id)}`,
       { method: 'DELETE' }
     );
   }

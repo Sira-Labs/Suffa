@@ -9,6 +9,8 @@ export interface TrackRef {
   lessonKey: string;
   /** Number of tracks in the lesson (for the lesson bonus). */
   lessonSize: number;
+  /** Publisher audio unless stated (class recordings, Sprint 7). */
+  source?: MediaProgress['source'];
 }
 
 export interface ListenOutcome {
@@ -71,7 +73,7 @@ export const useListenStore = create<ListenState>((set, get) => ({
     const justHeard = !existing?.completedAt && listened / duration >= HEARD_THRESHOLD;
     const next: MediaProgress = {
       id: track.id,
-      source: 'publisher-audio',
+      source: track.source ?? 'publisher-audio',
       ref: track.url,
       lessonKey: track.lessonKey,
       durationSec: duration,

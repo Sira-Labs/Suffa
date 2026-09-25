@@ -1,3 +1,4 @@
+import { RecordingPlayer } from './modules/classes/RecordingPlayer';
 import { ClassPage } from './modules/classes/ClassPage';
 import { Badges } from './modules/engagement/Badges';
 import { createBrowserRouter } from 'react-router-dom';
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
       { path: 'admin', element: <Admin /> },
       { path: 'classes', element: <Classes /> },
       { path: 'classes/:id', element: <ClassPage /> },
+      { path: 'classes/:id/recordings/:mediaId', element: <RecordingPlayer /> },
       { path: 'badges', element: <Badges /> },
       { path: 'join/:token', element: <Join /> },
       { path: 'more', element: <More /> },

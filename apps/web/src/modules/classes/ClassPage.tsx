@@ -9,12 +9,14 @@ import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { useSyncStore } from '@/state';
 import { ClassLife } from './ClassLife';
 import { ClassMembers } from './ClassMembers';
+import { ClassRecordings } from './ClassRecordings';
 import { ClassProgressView } from './ClassProgressView';
 
-type Tab = 'progress' | 'life' | 'members';
+type Tab = 'progress' | 'life' | 'recordings' | 'members';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'progress', label: 'Fortschritt' },
   { id: 'life', label: 'Klassenleben' },
+  { id: 'recordings', label: 'Aufnahmen' },
   { id: 'members', label: 'Mitglieder' },
 ];
 
@@ -81,13 +83,22 @@ export function ClassPage() {
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
             {tab === 'progress' && <ClassProgressView api={api} classId={summary.id} />}
             {tab === 'life' && <ClassLife api={api} classId={summary.id} teacher />}
+            {tab === 'recordings' && <ClassRecordings classId={summary.id} teacher />}
             {tab === 'members' && (
               <ClassMembers api={api} summary={summary} onChange={load} />
             )}
           </div>
         </>
       ) : (
-        <ClassLife api={api} classId={summary.id} teacher={false} />
+        <>
+          <ClassLife api={api} classId={summary.id} teacher={false} />
+          <section className="stack" aria-labelledby="recordings-title">
+            <h2 id="recordings-title" className="eyebrow">
+              Aufnahmen
+            </h2>
+            <ClassRecordings classId={summary.id} teacher={false} />
+          </section>
+        </>
       )}
     </div>
   );

@@ -30,6 +30,8 @@ gantt
   S5 Every day counts (5/5)         :done, s5, after s4, 14d
   S6 Class spirit (4/4)             :done, s6, after s5, 14d
   Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
+  section P3 Teacher recordings
+  S7 Bring the sessions in (5/5)    :done, s7, after s6, 14d
 ```
 
 ```mermaid
@@ -72,6 +74,11 @@ pie showData
 | 6.2 class spirit        | ✅     | weekly challenge (reviews/quests/XP/learning days, one shared target), teacher badges, shout-outs; reached challenge → "Rūḥ al-Faṣl" badge          |
 | 6.3 web push            | ✅     | `Notifier` + Web Push (VAPID env); reminder time, quiet hours; ≤ 1 reminder/day, skipped when a quest is done; expired devices dropped              |
 | 6.4 weekly recap        | ✅     | Sunday from 18:00 local: XP, quests, learning days, words matured, best day, badges; card on "Heute" + one push                                     |
+| 7.1 object storage      | ✅     | `ObjectStorage` on S3 (RustFS); presigned GET/PUT/part URLs as same-origin `/media/…` via Caddy; range requests tested (moto in CI)                 |
+| 7.2 Google Drive        | ✅     | OAuth `drive.file`, state bound to the teacher, refresh token sealed; Picker in the browser; import job copies into storage, then transcode         |
+| 7.3 multipart upload    | ✅     | 32 MB parts via presigned URLs, retries with back-off, resume by picking the same file again (server lists stored parts)                            |
+| 7.4 transcode           | ✅     | ffmpeg in the api image: mono AAC for everyone, 720p fast-start MP4 for video; one job at a time, nice'd, progress on the item                      |
+| 7.5 player + progress   | ✅     | class recordings list, publish with consent, player counts played time into `media_progress` (source `recording`) → XP and sync                     |
 
 ## P0 — Foundation
 

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import type { BadgeProgress, Tier } from '@suffa/engagement';
 import { Icon } from '@/components/Icon';
 import { useEngagement } from './useEngagement';
+import { MyCertificates } from './MyCertificates';
 
 const TIER_LABEL: Record<Tier, string> = {
   bronze: 'Bronze',
@@ -40,6 +41,7 @@ export function Badges() {
           <BadgeCard key={b.badge.id} progress={b} />
         ))}
       </ul>
+      <MyCertificates />
       <p className="muted" style={{ margin: 0 }}>
         Abzeichen gehen nie verloren. Sie ergeben sich aus deinem Lernverlauf und kommen
         nach einer Neuinstallation mit der Synchronisierung zurück.{' '}

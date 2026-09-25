@@ -108,12 +108,39 @@ const MESSAGES: Record<string, string> = {
   invalid_invite:
     'Dieser Einladungslink ist abgelaufen oder ungültig. Bitte frag nach einem neuen.',
   forbidden: 'Das darf nur die Lehrkraft dieser Klasse.',
-  not_a_learner: 'An der Liga nehmen nur Lernende der Klasse teil.',
+  not_a_learner: 'Das geht nur für Lernende der Klasse.',
+  not_eligible: 'Die Meisterschaft der Einheit liegt noch unter 90 %.',
+  exists: 'Für diese Einheit gibt es schon ein Zertifikat.',
+  unknown_unit: 'Diese Einheit gibt es nicht.',
 };
 
 /** The token of an invite URL `…/join/<token>`, or null. */
 export function inviteToken(url: string): string | null {
   return /\/join\/([A-Za-z0-9_-]{20,64})$/.exec(url)?.[1] ?? null;
+}
+
+export interface Certificate {
+  id: string;
+  userId: string;
+  learnerName: string | null;
+  unit: number;
+  unitTitle: string;
+  mastery: number;
+  className: string;
+  teacherName: string | null;
+  awardedAt: string;
+}
+
+export interface ClassCertificates {
+  threshold: number;
+  eligible: {
+    userId: string;
+    name: string | null;
+    unit: number;
+    unitTitle: string;
+    mastery: number;
+  }[];
+  awarded: Certificate[];
 }
 
 export interface LeagueSettings {
@@ -235,6 +262,30 @@ export class ClassesApi {
       `${this.base(classId)}/shoutouts/${encodeURIComponent(shoutoutId)}`,
       { method: 'DELETE' }
     );
+  }
+
+  /** Unit certificates (story 14.3): eligible learners and those awarded. */
+  certificates(classId: string) {
+    return this.call<ClassCertificates>(`${this.base(classId)}/certificates`);
+  }
+
+  awardCertificate(classId: string, userId: string, unit: number) {
+    return this.call<Certificate>(`${this.base(classId)}/certificates`, {
+      method: 'POST',
+      body: JSON.stringify({ userId, unit }),
+    });
+  }
+
+  revokeCertificate(classId: string, certificateId: string) {
+    return this.call<void>(
+      `${this.base(classId)}/certificates/${encodeURIComponent(certificateId)}`,
+      { method: 'DELETE' }
+    );
+  }
+
+  /** The signed-in learner's own certificates. */
+  myCertificates() {
+    return this.call<{ certificates: Certificate[] }>('/api/v1/certificates');
   }
 
   /** The weekly league (story 14.2). */

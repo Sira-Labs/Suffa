@@ -296,6 +296,10 @@ Status (Sprint 14, in progress): 14.2 built — the teacher switches the weekly 
 class (off by default; marking a class of minors switches it off and shortens names to first
 names); each learner opts in. Ranked by % of the own weekly goal, ties share a place, only the
 top three are named with a title, everyone else sees only their own week.
+14.3 built — the class tab "Zertifikate" lists learners at ≥ 90 % unit mastery (mature cards);
+the server re-checks on award, one certificate per learner and unit, audit-logged and
+withdrawable. Learners find them under "Abzeichen"; both sides print an A4 certificate or save
+it as PDF through the print dialog (Arabic script and fonts intact). In the privacy export.
 
 **Gate G5.**
 

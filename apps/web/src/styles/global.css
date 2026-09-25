@@ -2212,3 +2212,97 @@ textarea.input {
   cursor: pointer;
   border-bottom: 1px dotted var(--text-muted);
 }
+
+/* Unit certificate (story 14.3): only visible while printing; A4 landscape. */
+.certificate-print {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+
+  body.printing-certificate > *:not(.certificate-print) {
+    display: none !important;
+  }
+
+  body.printing-certificate {
+    background: #fff !important;
+  }
+
+  body.printing-certificate .certificate-print {
+    display: block;
+  }
+}
+
+.certificate {
+  box-sizing: border-box;
+  min-height: 180mm;
+  padding: 18mm 22mm;
+  border: 3px double #8a5a12;
+  outline: 1px solid #8a5a12;
+  outline-offset: -8mm;
+  color: #1f1a12;
+  background: #fffdf7;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5mm;
+  font-family: var(--font-ui);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.certificate-brand {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 14pt;
+  letter-spacing: 0.08em;
+  color: #8a5a12;
+}
+
+.certificate-brand [lang='ar'] {
+  font-family: var(--font-arabic);
+}
+
+.certificate-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 40pt;
+  color: #1f1a12;
+}
+
+.certificate-lead {
+  margin: 0;
+  font-size: 14pt;
+}
+
+.certificate-name {
+  margin: 2mm 0;
+  font-family: var(--font-display);
+  font-size: 30pt;
+  border-bottom: 1px solid #8a5a12;
+  align-self: center;
+  padding: 0 12mm 2mm;
+}
+
+.certificate-detail {
+  margin: 0;
+  font-size: 11pt;
+  color: #5b5145;
+}
+
+.certificate-footer {
+  margin-top: 8mm;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10pt;
+  color: #5b5145;
+}
+
+.certificate-id {
+  font-variant-numeric: tabular-nums;
+}

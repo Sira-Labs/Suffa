@@ -85,7 +85,13 @@ describe.skipIf(!url)('Privacy: export and delete (Postgres)', () => {
       quests: [],
       achievements: [],
     });
-    expect(data.classRecognition).toEqual({ badges: [], shoutouts: [], challenges: [] });
+    expect(data.classRecognition).toEqual({
+      badges: [],
+      shoutouts: [],
+      challenges: [],
+      certificates: [],
+      leagues: [],
+    });
     expect(data.notifications).toEqual({ prefs: null, devices: [], recaps: [] });
     expect(data.tutor).toEqual({
       conversations: [],

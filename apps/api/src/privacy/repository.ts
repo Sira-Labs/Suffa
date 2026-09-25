@@ -36,6 +36,9 @@ export interface AccountExport {
     badges: Record<string, unknown>[];
     shoutouts: Record<string, unknown>[];
     challenges: Record<string, unknown>[];
+    /** Unit certificates (story 14.3) and the weekly league choice per class (14.2). */
+    certificates: Record<string, unknown>[];
+    leagues: Record<string, unknown>[];
   };
   /** al-Muʿallim: conversations (kept 90 days) and AI usage per day. */
   tutor: {
@@ -156,6 +159,15 @@ export class PgPrivacyRepository implements PrivacyRepository {
              join class_challenges ch on ch.id = cc.challenge_id
              join classes c on c.id = ch.class_id
             where cc.user_id = $1 order by ch.week_start`
+        ),
+        certificates: await q(
+          `select unit, mastery, class_name as class, teacher_name as teacher, awarded_at
+             from certificates where user_id = $1 order by unit`
+        ),
+        leagues: await q(
+          `select c.name as class, cm.league_opt_in as opted_in
+             from class_members cm join classes c on c.id = cm.class_id
+            where cm.user_id = $1 order by c.name`
         ),
       },
       tutor: {

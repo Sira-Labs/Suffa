@@ -29,6 +29,7 @@ import { disabledNotifier, WebPushNotifier } from './notifications/notifier.js';
 import { PgRecapRepository } from './notifications/recap.js';
 import { PgNotificationRepository } from './notifications/repository.js';
 import { PgClassProgressRepository } from './classes/progress.js';
+import { PgCertificateRepository } from './classes/certificates.js';
 import { PgClassLeagueRepository } from './classes/league.js';
 import { PgClassSpiritRepository } from './classes/spirit.js';
 import { registerEngagement, requestRecompute } from './engagement/jobs.js';
@@ -455,6 +456,7 @@ async function main(): Promise<void> {
       auth,
       log,
     },
+    certificates: await certificateDeps(pool, auth, log),
     classSpirit: {
       classes: new PgClassRepository(pool),
       progress: new PgClassProgressRepository(pool),
@@ -603,6 +605,32 @@ function aiParts(
     router,
     gateway: new AiGateway({ router, repo, log }),
     configured: Object.keys(providers) as ProviderId[],
+    auth,
+    log,
+  };
+}
+
+/** Certificates need the course's words per unit; without the content they stay off. */
+async function certificateDeps(
+  pool: pg.Pool,
+  auth: AuthResolver,
+  log: Pick<Logger, 'info' | 'warn'>
+) {
+  let catalog: ContentCatalog;
+  try {
+    catalog = await ContentCatalog.load(CONTENT_DIR);
+  } catch (error) {
+    log.warn({ err: error, dir: CONTENT_DIR }, 'certificates.content_missing');
+    return undefined;
+  }
+  const units = catalog.units.map((u) => ({
+    unit: u.einheit,
+    title: u.titel,
+    wordIds: u.vokabeln.map((w) => w.id),
+  }));
+  return {
+    classes: new PgClassRepository(pool),
+    certificates: new PgCertificateRepository(pool, units),
     auth,
     log,
   };

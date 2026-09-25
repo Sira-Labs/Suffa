@@ -253,15 +253,18 @@ nginx configurations).
    - smoke-tests and scans each image;
    - pushes **exactly that image** as `sha-<short>`.
 2. **deploy-staging:** resolves the tags to digests and deploys them to the staging apps (api
-   first, it migrates; then worker, backup, web).
+   first, it migrates; then worker, backup, web). All four apps or none: a partly configured
+   staging fails the run, so production is only offered a release staging ran in full.
 3. **verify-staging:** waits until staging's `/healthz` and `/healthz-web` report the new
    `sha-…`.
 4. **deploy-production:** waits for the owner's approval, then deploys the **same digests** to
    production and checks its `/healthz` and `/healthz-web` the same way.
    - The job refuses to run in these cases:
      - the environment has no required reviewer;
-     - production is only partly configured;
-     - its server is the staging server.
+     - production is only partly configured, or `SUFFA_PRODUCTION_URL` is missing;
+     - its server is the staging server;
+     - staging no longer runs this release. A newer push replaced it while the run waited for
+       approval; approve the newest run instead.
    - Before production exists, it only leaves a notice.
 
 **Repository** (Settings → Secrets and variables → Actions): **staging**
@@ -286,6 +289,14 @@ nginx configurations).
 | variable | `SUFFA_PRODUCTION_URL`                                                        | `https://suffa.siralabs.org` once it points there |
 | variable | `CAPROVER_APP_API_PROD` / `_WORKER_PROD` / `_WEB_PROD` / `_BACKUP_PROD`       | only to override `suffa-api` / … (defaults)       |
 | secret   | `CAPROVER_APP_TOKEN_API_PROD` / `_WORKER_PROD` / `_WEB_PROD` / `_BACKUP_PROD` | app tokens of the production apps (all four)      |
+
+**Image pulls on the production server:** CapRover pulls the images itself, and the workflow's
+GHCR login does not reach it. Keep the packages `suffa-web`, `suffa-api` and `suffa-backup`
+**public**, as on staging. If they are private, add the registry on the production CapRover
+(Cluster → Docker Registry Configuration → Add Remote Registry: `ghcr.io`, a GitHub user, and a
+token with only `read:packages`). Before the first promotion, deploy one digest by hand on the
+production server (Deploy via ImageName, `ghcr.io/sira-labs/suffa-web@sha256:…`) to see the
+pull work.
 
 To promote: open the run in Actions → **Review deployments** → `production` → Approve. Only the
 newest waiting run deploys; an older one still waiting is replaced. **Rolling back:** re-run

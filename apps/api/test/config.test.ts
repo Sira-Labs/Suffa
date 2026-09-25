@@ -151,16 +151,21 @@ describe('object storage', () => {
     });
   });
 
-  it('rejects half a configuration', () => {
-    expect(() =>
-      loadConfig({ ...base, SUFFA_S3_ENDPOINT: 'http://srv-captain--rustfs:9000' })
-    ).toThrow(/go together/);
+  it('turns storage off with a warning when half configured, instead of failing', () => {
+    const config = loadConfig({
+      ...base,
+      SUFFA_S3_ENDPOINT: 'http://srv-captain--rustfs:9000',
+    });
+    expect(config.storage).toBeUndefined();
+    expect(config.warnings).toEqual([
+      'SUFFA_S3_ENDPOINT, SUFFA_S3_ACCESS_KEY_ID and SUFFA_S3_SECRET_ACCESS_KEY go together',
+    ]);
   });
 });
 
 describe('Google Drive import', () => {
   const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
-  it('is off without settings, on with all four, and refuses a partial setup', () => {
+  it('is off without settings, on with all four, and off with a warning when partial', () => {
     expect(loadConfig(base).google).toBeUndefined();
     const all = {
       SUFFA_GOOGLE_CLIENT_ID: 'id.apps.googleusercontent.com',
@@ -169,9 +174,12 @@ describe('Google Drive import', () => {
       SUFFA_GOOGLE_APP_ID: '123456789',
     };
     expect(loadConfig({ ...base, ...all }).google).toMatchObject({ appId: '123456789' });
-    expect(() =>
-      loadConfig({ ...base, SUFFA_GOOGLE_CLIENT_ID: all.SUFFA_GOOGLE_CLIENT_ID })
-    ).toThrow(/go together/);
+    const partial = loadConfig({
+      ...base,
+      SUFFA_GOOGLE_CLIENT_ID: all.SUFFA_GOOGLE_CLIENT_ID,
+    });
+    expect(partial.google).toBeUndefined();
+    expect(partial.warnings[0]).toMatch(/go together/);
   });
 });
 
@@ -192,13 +200,17 @@ describe('Web Push keys', () => {
     });
   });
 
-  it('rejects half a configuration and a subject that is no contact', () => {
-    expect(() => loadConfig({ ...base, SUFFA_VAPID_PUBLIC_KEY: 'BPublic' })).toThrow(
-      /go together/
-    );
-    expect(() =>
-      loadConfig({ ...base, ...keys, SUFFA_VAPID_SUBJECT: 'ops@example.org' })
-    ).toThrow(/mailto:/);
+  it('turns push off with a warning when half configured or the subject is no contact', () => {
+    const half = loadConfig({ ...base, SUFFA_VAPID_PUBLIC_KEY: 'BPublic' });
+    expect(half.vapid).toBeUndefined();
+    expect(half.warnings[0]).toMatch(/go together/);
+    const noContact = loadConfig({
+      ...base,
+      ...keys,
+      SUFFA_VAPID_SUBJECT: 'ops@example.org',
+    });
+    expect(noContact.vapid).toBeUndefined();
+    expect(noContact.warnings[0]).toMatch(/mailto:/);
   });
 });
 

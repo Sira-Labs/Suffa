@@ -110,6 +110,8 @@ async function main(): Promise<void> {
     level: config.logLevel,
     base: { service: 'suffa', role: config.role },
   });
+  // Incomplete optional features are off; say so loudly so the setting gets fixed.
+  for (const warning of config.warnings) log.error({ warning }, 'config.feature_off');
   errors = createErrorReporter({
     dsn: config.errorDsn,
     release: config.version,

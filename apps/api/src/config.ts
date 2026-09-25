@@ -230,6 +230,8 @@ export interface Config {
   google:
     | { clientId: string; clientSecret: string; apiKey: string; appId: string }
     | undefined;
+  /** Optional features switched off because their settings are incomplete (logged at start). */
+  warnings: string[];
   /** Web Push keys; undefined turns push reminders off. */
   vapid: { publicKey: string; privateKey: string; subject: string } | undefined;
 }
@@ -258,6 +260,9 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
   }
   const raw = parsed.data;
   const issues: string[] = [];
+  // An optional feature set up only in part stays off instead of stopping the service:
+  // sign-in and sync must not go down because of, say, a missing storage key.
+  const warnings: string[] = [];
 
   if (raw.SUFFA_ENV === 'prod') {
     const secret = raw.SUFFA_AUTH_SECRET;
@@ -306,7 +311,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
   ];
   const s3Complete = s3Parts.every(Boolean);
   if (s3Parts.some(Boolean) && !s3Complete) {
-    issues.push(
+    warnings.push(
       'SUFFA_S3_ENDPOINT, SUFFA_S3_ACCESS_KEY_ID and SUFFA_S3_SECRET_ACCESS_KEY go together'
     );
   }
@@ -318,7 +323,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
   ];
   const googleComplete = googleParts.every(Boolean);
   if (googleParts.some(Boolean) && !googleComplete) {
-    issues.push(
+    warnings.push(
       'SUFFA_GOOGLE_CLIENT_ID, SUFFA_GOOGLE_CLIENT_SECRET, SUFFA_GOOGLE_API_KEY and SUFFA_GOOGLE_APP_ID go together'
     );
   }
@@ -327,14 +332,15 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     raw.SUFFA_VAPID_PRIVATE_KEY,
     raw.SUFFA_VAPID_SUBJECT,
   ];
-  const vapidComplete = vapidParts.every(Boolean);
+  let vapidComplete = vapidParts.every(Boolean);
   if (vapidParts.some(Boolean) && !vapidComplete) {
-    issues.push(
+    warnings.push(
       'SUFFA_VAPID_PUBLIC_KEY, SUFFA_VAPID_PRIVATE_KEY and SUFFA_VAPID_SUBJECT go together'
     );
   }
   if (vapidComplete && !/^(mailto:|https:\/\/)/.test(raw.SUFFA_VAPID_SUBJECT!)) {
-    issues.push('SUFFA_VAPID_SUBJECT must start with mailto: or https://');
+    warnings.push('SUFFA_VAPID_SUBJECT must start with mailto: or https://');
+    vapidComplete = false;
   }
   const extraOrigins = parseOrigins(raw.SUFFA_TRUSTED_ORIGINS);
   issues.push(...extraOrigins.issues);
@@ -349,9 +355,9 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     }
   }
   const android = parseAndroidAppLinks(raw.SUFFA_ANDROID_APP_LINKS);
-  issues.push(...android.issues);
+  warnings.push(...android.issues);
   const fcm = parseServiceAccount(raw.SUFFA_FCM_SERVICE_ACCOUNT);
-  issues.push(...fcm.issues);
+  warnings.push(...fcm.issues);
   if (issues.length > 0) throw new ConfigError(issues);
   const trustedOrigins = [
     ...new Set([
@@ -433,6 +439,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
           appId: raw.SUFFA_GOOGLE_APP_ID!,
         }
       : undefined,
+    warnings,
     vapid: vapidComplete
       ? {
           publicKey: raw.SUFFA_VAPID_PUBLIC_KEY!,

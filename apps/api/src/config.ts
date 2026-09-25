@@ -130,6 +130,8 @@ const RawEnvSchema = z.object({
     .transform((value) => value || undefined)
     .pipe(z.string().url('SUFFA_HF_ENDPOINT_URL must be a URL').optional())
     .optional(),
+  /** YouTube Data API v3 key for the video catalog import (server side, ADR-0012). */
+  SUFFA_YOUTUBE_API_KEY: z.string().trim().optional(),
   SUFFA_GOOGLE_CLIENT_ID: z.string().trim().optional(),
   SUFFA_GOOGLE_CLIENT_SECRET: z.string().trim().optional(),
   SUFFA_GOOGLE_API_KEY: z.string().trim().optional(),
@@ -202,6 +204,8 @@ export interface Config {
     huggingFaceKey: string | undefined;
     huggingFaceEndpoint: string | undefined;
   };
+  /** YouTube Data API key; undefined turns the catalog import off. */
+  youtubeApiKey: string | undefined;
   /** Google Drive import; undefined turns it off. */
   google:
     | { clientId: string; clientSecret: string; apiKey: string; appId: string }
@@ -377,6 +381,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       huggingFaceKey: raw.SUFFA_HF_API_KEY || undefined,
       huggingFaceEndpoint: raw.SUFFA_HF_ENDPOINT_URL,
     },
+    youtubeApiKey: raw.SUFFA_YOUTUBE_API_KEY || undefined,
     google: googleComplete
       ? {
           clientId: raw.SUFFA_GOOGLE_CLIENT_ID!,

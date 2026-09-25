@@ -37,6 +37,7 @@ import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
 import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
 import { createTutorRoutes, type TutorRouteDeps } from './tutor/routes.js';
 import { createReviewRoutes, type ReviewRouteDeps } from './tutor/reviewRoutes.js';
+import { createVideoRoutes, type VideoRouteDeps } from './videos/routes.js';
 import {
   createSuggestionRoutes,
   type SuggestionRouteDeps,
@@ -97,6 +98,8 @@ export interface AppDeps {
   tutor?: TutorRouteDeps;
   /** Teacher review of AI grades (story 11.2). */
   reviews?: ReviewRouteDeps;
+  /** Video lessons: public catalog and the admin's catalog tools (Sprint 12). */
+  videos?: VideoRouteDeps;
   /** AI chapter and checkpoint suggestions for recordings (story 11.4). */
   suggestions?: SuggestionRouteDeps;
   /** Admin AI page: routes, budget, spend (ADR-0010). */
@@ -186,6 +189,7 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.reviews) app.route('/api/v1', createReviewRoutes(deps.reviews));
   if (deps.suggestions) app.route('/api/v1', createSuggestionRoutes(deps.suggestions));
   if (deps.aiAdmin) app.route('/api/v1/admin/ai', createAiAdminRoutes(deps.aiAdmin));
+  if (deps.videos) app.route('/api/v1', createVideoRoutes(deps.videos));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));

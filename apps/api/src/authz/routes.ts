@@ -66,6 +66,30 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   { method: 'PUT', path: '/api/v1/admin/ai/routes/:task', action: 'admin:ai:write' },
   { method: 'PUT', path: '/api/v1/admin/ai/settings', action: 'admin:ai:write' },
   { method: 'POST', path: '/api/v1/admin/ai/try', action: 'admin:ai:write' },
+  { method: 'GET', path: '/api/v1/admin/videos', action: 'admin:videos' },
+  { method: 'POST', path: '/api/v1/admin/videos/channels', action: 'admin:videos' },
+  { method: 'PATCH', path: '/api/v1/admin/videos/channels/:id', action: 'admin:videos' },
+  {
+    method: 'POST',
+    path: '/api/v1/admin/videos/channels/:id/import',
+    action: 'admin:videos',
+  },
+  { method: 'PATCH', path: '/api/v1/admin/videos/:videoId', action: 'admin:videos' },
+  {
+    method: 'PUT',
+    path: '/api/v1/admin/videos/:videoId/transcript',
+    action: 'admin:videos',
+  },
+  {
+    method: 'POST',
+    path: '/api/v1/admin/videos/:videoId/checkpoints',
+    action: 'admin:videos',
+  },
+  {
+    method: 'DELETE',
+    path: '/api/v1/admin/videos/:videoId/checkpoints/:cpId',
+    action: 'admin:videos',
+  },
   { method: 'GET', path: '/api/v1/classes', action: 'class:join' },
   { method: 'POST', path: '/api/v1/classes', action: 'class:create' },
   { method: 'POST', path: '/api/v1/classes/:id/invite', action: 'class:manage' },
@@ -202,4 +226,7 @@ export const PUBLIC_ROUTES: readonly string[] = [
   'POST /api/errors',
   'GET /api/v1/auth/*',
   'POST /api/v1/auth/*',
+  // The video catalog is public (ADR-0012); interactive parts depend on the creator's permission.
+  'GET /api/v1/videos',
+  'GET /api/v1/videos/:id',
 ];

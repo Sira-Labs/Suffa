@@ -10,6 +10,7 @@ import { ModelRouter } from '@suffa/llm';
 import type { AdminRepository } from '../src/admin/repository.js';
 import { AiGateway } from '../src/ai/gateway.js';
 import type { GradeService } from '../src/tutor/grading.js';
+import type { PgVideoRepository } from '../src/videos/repository.js';
 import type { TutorService } from '../src/tutor/service.js';
 import type { AiRepository } from '../src/ai/repository.js';
 import type { ClassRepository } from '../src/classes/repository.js';
@@ -268,6 +269,23 @@ function buildApp() {
           listOwn: async () => [],
         },
       },
+      auth: resolver,
+      log: quiet,
+    },
+    videos: {
+      videos: {
+        channels: async () => [],
+        adminVideos: async () => [],
+        channel: async () => null,
+        publicVideos: async () => [],
+        publicVideo: async () => null,
+        createChannel: async () => 'x',
+        updateChannel: async () => false,
+        updateVideo: async () => false,
+        saveTranscript: async () => {},
+        addCheckpoint: async () => ({}) as never,
+        removeCheckpoint: async () => false,
+      } as unknown as PgVideoRepository,
       auth: resolver,
       log: quiet,
     },

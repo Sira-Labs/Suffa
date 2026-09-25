@@ -53,6 +53,9 @@ import { buildProviders } from './ai/providers.js';
 import { PgAiRepository } from './ai/repository.js';
 import { ModelRouter, type ProviderId } from '@suffa/llm';
 import { ContentCatalog } from './tutor/content.js';
+import { enqueueChannelImport, registerImports } from './videos/jobs.js';
+import { PgVideoRepository } from './videos/repository.js';
+import { YouTubeClient } from './videos/youtube.js';
 import { PgLearnerState } from './tutor/learner.js';
 import { ClassMediaAccess } from './tutor/media.js';
 import { GradeService, PgGradeRepository } from './tutor/grading.js';
@@ -148,6 +151,17 @@ async function main(): Promise<void> {
             onError: (error) => errors.capture(error, { source: 'pg-boss' }),
           });
           await registerMaintenance(boss, pool, log, errors);
+          if (config.youtubeApiKey) {
+            await registerImports(
+              boss,
+              {
+                videos: new PgVideoRepository(pool),
+                youtube: new YouTubeClient(config.youtubeApiKey),
+                log,
+              },
+              errors
+            );
+          }
           const tutorRouter = new ModelRouter({
             providers: buildProviders(config),
             source: new PgAiRepository(pool),
@@ -442,6 +456,12 @@ async function main(): Promise<void> {
     },
     admin: { repo: new PgAdminRepository(pool), auth, log },
     aiAdmin: ai,
+    videos: {
+      videos: new PgVideoRepository(pool),
+      enqueueImport: config.youtubeApiKey ? enqueueChannelImport(boss) : undefined,
+      auth,
+      log,
+    },
     tutor: await tutorParts(ai, pool, log, auth, config),
     reviews: {
       classes: new PgClassRepository(pool),

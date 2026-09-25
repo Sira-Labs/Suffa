@@ -189,6 +189,7 @@ jobs:
       group: deploy-staging
       cancel-in-progress: false
     outputs:
+      deployed: ${{ steps.gate.outputs.deployed }}
       api: ${{ steps.digests.outputs.api }}
       web: ${{ steps.digests.outputs.web }}
       backup: ${{ steps.digests.outputs.backup }}
@@ -214,19 +215,29 @@ jobs:
             echo "$name=$IMAGE_PREFIX-$name@$digest" >> "$GITHUB_OUTPUT"
             echo "$name: $IMAGE_PREFIX-$name@$digest"
           done
-      - name: which apps are configured?
+      # All four apps or none: production is only offered a release that staging ran in full.
+      - name: staging is set up
         id: gate
         env:
-          API_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_API }}
-          WORKER_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
-          BACKUP_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
+          API: ${{ secrets.CAPROVER_APP_TOKEN_API }}
+          WORKER: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
+          BACKUP: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
+          WEB: ${{ secrets.CAPROVER_APP_TOKEN_WEB }}
         run: |
-          echo "api=$([ -n "$API_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          echo "worker=$([ -n "$WORKER_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          echo "backup=$([ -n "$BACKUP_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          count=0
+          for token in "$API" "$WORKER" "$BACKUP" "$WEB"; do [ -n "$token" ] && count=$((count + 1)); done
+          if [ "$count" -eq 0 ]; then
+            echo "deployed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No staging app tokens set; skipping the staging deploy"
+          elif [ "$count" -eq 4 ]; then
+            echo "deployed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Staging is partly configured: set all four CAPROVER_APP_TOKEN_API/_WORKER/_BACKUP/_WEB, or none"
+            exit 1
+          fi
       # Order matters: the api migrates the schema; the worker waits for it (exit code 3).
       - name: deploy api
-        if: steps.gate.outputs.api == 'true'
+        if: steps.gate.outputs.deployed == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
@@ -234,7 +245,7 @@ jobs:
           token: ${{ secrets.CAPROVER_APP_TOKEN_API }}
           image: ${{ steps.digests.outputs.api }}
       - name: deploy worker
-        if: steps.gate.outputs.worker == 'true'
+        if: steps.gate.outputs.deployed == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
@@ -242,7 +253,7 @@ jobs:
           token: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
           image: ${{ steps.digests.outputs.api }}
       - name: deploy backup
-        if: steps.gate.outputs.backup == 'true'
+        if: steps.gate.outputs.deployed == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
@@ -250,6 +261,7 @@ jobs:
           token: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
           image: ${{ steps.digests.outputs.backup }}
       - name: deploy web
+        if: steps.gate.outputs.deployed == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
@@ -262,7 +274,7 @@ jobs:
     name: verify staging
     needs: [images, deploy-staging]
     runs-on: ubuntu-latest
-    if: ${{ vars.SUFFA_STAGING_URL != '' }}
+    if: ${{ needs.deploy-staging.outputs.deployed == 'true' && vars.SUFFA_STAGING_URL != '' }}
     timeout-minutes: 12
     steps:
       - name: staging reports the new version
@@ -311,6 +323,9 @@ jobs:
           WORKER: ${{ secrets.CAPROVER_APP_TOKEN_WORKER_PROD }}
           BACKUP: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP_PROD }}
           WEB: ${{ secrets.CAPROVER_APP_TOKEN_WEB_PROD }}
+          PROD_URL: ${{ vars.SUFFA_PRODUCTION_URL }}
+          STAGING_URL: ${{ vars.SUFFA_STAGING_URL }}
+          TAG: ${{ needs.images.outputs.tag }}
           GH_TOKEN: ${{ github.token }}
         run: |
           count=0
@@ -325,6 +340,10 @@ jobs:
             echo "::error::Production is partly configured: set CAPROVER_SERVER_PROD and all four CAPROVER_APP_TOKEN_*_PROD in the environment 'production'"
             exit 1
           fi
+          if [ -z "$PROD_URL" ]; then
+            echo "::error::Set SUFFA_PRODUCTION_URL in the environment 'production': every deploy is checked there"
+            exit 1
+          fi
           if [ "$SERVER" = "$STAGING_SERVER" ]; then
             echo "::error::CAPROVER_SERVER_PROD is the staging server; production runs on its own server (ADR-0024)"
             exit 1
@@ -336,6 +355,12 @@ jobs:
             echo "::error::The environment 'production' has no required reviewer; add the owner before deploying"
             exit 1 ;;
           esac
+          # Approval can come long after the run started: promote only what staging still runs.
+          # A newer push has replaced this release on staging; approve that run instead.
+          if ! curl -fsS "$STAGING_URL/healthz" | grep -q "\"version\":\"$TAG\""; then
+            echo "::error::Staging no longer runs $TAG (a newer release replaced it); promote the newest run instead"
+            exit 1
+          fi
           echo "deploy=true" >> "$GITHUB_OUTPUT"
       - name: deploy api
         if: steps.gate.outputs.deploy == 'true'
@@ -370,7 +395,7 @@ jobs:
           token: ${{ secrets.CAPROVER_APP_TOKEN_WEB_PROD }}
           image: ${{ needs.deploy-staging.outputs.web }}
       - name: production reports the new version
-        if: steps.gate.outputs.deploy == 'true' && vars.SUFFA_PRODUCTION_URL != ''
+        if: steps.gate.outputs.deploy == 'true'
         env:
           URL: ${{ vars.SUFFA_PRODUCTION_URL }}
           TAG: ${{ needs.images.outputs.tag }}

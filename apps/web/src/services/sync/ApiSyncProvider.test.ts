@@ -189,3 +189,22 @@ describe('ApiSyncProvider', () => {
     });
   });
 });
+
+describe('ApiSyncProvider during a server outage', () => {
+  it('keeps sign-in configured and the last state when the API answers 502', async () => {
+    let status = 200;
+    const { provider } = fakeApi(() =>
+      status === 200 ? json(ME) : new Response('Bad Gateway', { status })
+    );
+    await provider.refresh();
+    expect(provider.getAuthState().status).toBe('signed-in');
+    status = 502;
+    await provider.refresh();
+    expect(provider.isConfigured()).toBe(true);
+    expect(provider.isServerDown()).toBe(true);
+    expect(provider.getAuthState().status).toBe('signed-in');
+    status = 200;
+    await provider.refresh();
+    expect(provider.isServerDown()).toBe(false);
+  });
+});

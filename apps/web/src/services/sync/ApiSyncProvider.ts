@@ -75,14 +75,20 @@ export class ApiSyncProvider implements SyncProvider {
 
   private state: AuthState = SIGNED_OUT;
   private me: ApiUser | null = null;
-  /** null = not probed yet; false = the API has no sign-in (or is unreachable). */
+  /** null = not probed yet; false = the API has no sign-in. */
   private available: boolean | null = null;
+  private down = false;
   private readonly listeners = new Set<AuthListener>();
 
   constructor(
     private readonly baseUrl = '',
     private readonly fetchImpl: Fetch = (...args) => fetch(...args)
   ) {}
+
+  /** The API answered the last probe with a server error (temporarily unavailable). */
+  isServerDown(): boolean {
+    return this.down;
+  }
 
   isConfigured(): boolean {
     // Until the first probe answers we assume yes, so the account card does not flicker.
@@ -116,9 +122,19 @@ export class ApiSyncProvider implements SyncProvider {
       });
       return this.state;
     }
+    // A server error (e.g. 502 while the API restarts) is an outage, not a server without
+    // sign-in: keep the last known state, like offline, and let the page say so.
+    if (response.status >= 500) {
+      this.down = true;
+      log.warn('API answers with a server error, keeping the last auth state', {
+        status: response.status,
+      });
+      return this.state;
+    }
+    this.down = false;
     const isJson = response.headers.get('content-type')?.includes('application/json');
-    // 404, a gateway error or an HTML page (SPA fallback, dev server): no sign-in here.
-    if (response.status === 404 || response.status >= 502 || !isJson) {
+    // 404 or an HTML page (SPA fallback, dev server): no sign-in here.
+    if (response.status === 404 || !isJson) {
       this.available = false;
       this.setUser(null);
     } else if (response.ok) {

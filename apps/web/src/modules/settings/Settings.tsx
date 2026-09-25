@@ -2,6 +2,7 @@ import { WEEKLY_GOALS } from '@suffa/engagement';
 import { useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { TashkilToggle } from '@/components';
+import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { useSettingsStore, useSyncStore } from '@/state';
 import { AccountDevices } from './AccountDevices';
 import { RemindersCard } from './RemindersCard';
@@ -116,6 +117,15 @@ function AccountPanel() {
   const justSignedIn = params.get('angemeldet') === '1';
   // A failed link comes back to the same page with ?error=… (expired, already used).
   const linkError = signInLinkError(params.get('error'));
+
+  if (provider instanceof ApiSyncProvider && provider.isServerDown()) {
+    return (
+      <p className="muted" role="status">
+        Der Server ist gerade nicht erreichbar. Dein Lernstand bleibt auf diesem Gerät und
+        wird abgeglichen, sobald er wieder da ist – du bleibst angemeldet.
+      </p>
+    );
+  }
 
   if (!provider.isConfigured()) {
     return (

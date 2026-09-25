@@ -126,6 +126,38 @@ describe('loadConfig', () => {
   });
 });
 
+describe('object storage', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+
+  it('is off without settings and complete with endpoint and key', () => {
+    expect(loadConfig(base).storage).toBeUndefined();
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_S3_ENDPOINT: 'http://srv-captain--rustfs:9000/',
+        SUFFA_S3_ACCESS_KEY_ID: 'suffa-app',
+        SUFFA_S3_SECRET_ACCESS_KEY: 'secret-from-env',
+      }).storage
+    ).toEqual({
+      endpoint: 'http://srv-captain--rustfs:9000',
+      region: 'us-east-1',
+      accessKeyId: 'suffa-app',
+      secretAccessKey: 'secret-from-env',
+      buckets: {
+        media: 'suffa-media',
+        uploads: 'suffa-uploads',
+        content: 'suffa-content',
+      },
+    });
+  });
+
+  it('rejects half a configuration', () => {
+    expect(() =>
+      loadConfig({ ...base, SUFFA_S3_ENDPOINT: 'http://srv-captain--rustfs:9000' })
+    ).toThrow(/go together/);
+  });
+});
+
 describe('Web Push keys', () => {
   const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
   const keys = {

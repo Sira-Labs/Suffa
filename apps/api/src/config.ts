@@ -5,6 +5,7 @@
  * placeholder secrets, so a half-configured CapRover app fails fast with a clear log line
  * instead of running insecurely (same policy as Tabayyun).
  */
+import type { S3Settings } from './storage/s3Storage.js';
 import { z } from 'zod';
 import type { SmtpSettings } from './auth/mailer.js';
 
@@ -85,6 +86,22 @@ const RawEnvSchema = z.object({
   SUFFA_VAPID_PUBLIC_KEY: z.string().trim().optional(),
   SUFFA_VAPID_PRIVATE_KEY: z.string().trim().optional(),
   SUFFA_VAPID_SUBJECT: z.string().trim().optional(),
+  /**
+   * Object storage (ADR-0017): the S3 endpoint of the shared RustFS (internal, e.g.
+   * http://srv-captain--rustfs:9000) and the `suffa-app` key. Recordings stay off without it.
+   */
+  SUFFA_S3_ENDPOINT: z
+    .string()
+    .trim()
+    .transform((value) => value || undefined)
+    .pipe(z.string().url('SUFFA_S3_ENDPOINT must be a URL').optional())
+    .optional(),
+  SUFFA_S3_REGION: z.string().trim().default('us-east-1'),
+  SUFFA_S3_ACCESS_KEY_ID: z.string().trim().optional(),
+  SUFFA_S3_SECRET_ACCESS_KEY: z.string().optional(),
+  SUFFA_S3_BUCKET_MEDIA: z.string().trim().default('suffa-media'),
+  SUFFA_S3_BUCKET_UPLOADS: z.string().trim().default('suffa-uploads'),
+  SUFFA_S3_BUCKET_CONTENT: z.string().trim().default('suffa-content'),
 });
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -142,6 +159,8 @@ export interface Config {
   smtp: SmtpSettings | undefined;
   /** Public DSN of the web project; undefined disables browser error reporting. */
   webErrorDsn: string | undefined;
+  /** Object storage; undefined turns recordings and uploads off. */
+  storage: S3Settings | undefined;
   /** Web Push keys; undefined turns push reminders off. */
   vapid: { publicKey: string; privateKey: string; subject: string } | undefined;
 }
@@ -211,6 +230,17 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       syncDevTokens = parsed.tokens;
     }
   }
+  const s3Parts = [
+    raw.SUFFA_S3_ENDPOINT,
+    raw.SUFFA_S3_ACCESS_KEY_ID,
+    raw.SUFFA_S3_SECRET_ACCESS_KEY,
+  ];
+  const s3Complete = s3Parts.every(Boolean);
+  if (s3Parts.some(Boolean) && !s3Complete) {
+    issues.push(
+      'SUFFA_S3_ENDPOINT, SUFFA_S3_ACCESS_KEY_ID and SUFFA_S3_SECRET_ACCESS_KEY go together'
+    );
+  }
   const vapidParts = [
     raw.SUFFA_VAPID_PUBLIC_KEY,
     raw.SUFFA_VAPID_PRIVATE_KEY,
@@ -264,6 +294,19 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
         }
       : undefined,
     webErrorDsn: raw.SUFFA_WEB_ERROR_DSN,
+    storage: s3Complete
+      ? {
+          endpoint: raw.SUFFA_S3_ENDPOINT!.replace(/\/$/, ''),
+          region: raw.SUFFA_S3_REGION,
+          accessKeyId: raw.SUFFA_S3_ACCESS_KEY_ID!,
+          secretAccessKey: raw.SUFFA_S3_SECRET_ACCESS_KEY!,
+          buckets: {
+            media: raw.SUFFA_S3_BUCKET_MEDIA,
+            uploads: raw.SUFFA_S3_BUCKET_UPLOADS,
+            content: raw.SUFFA_S3_BUCKET_CONTENT,
+          },
+        }
+      : undefined,
     vapid: vapidComplete
       ? {
           publicKey: raw.SUFFA_VAPID_PUBLIC_KEY!,

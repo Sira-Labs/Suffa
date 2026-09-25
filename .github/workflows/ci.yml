@@ -56,5 +56,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck -w @suffa/api
+      # S3 API for the object storage tests (ADR-0017), in place of RustFS.
+      - run: |
+          pip install --quiet "moto[server]"
+          moto_server -p 5055 > /tmp/moto.log 2>&1 &
       - run: npm test -w @suffa/api
+        env:
+          SUFFA_TEST_S3_ENDPOINT: http://127.0.0.1:5055
       - run: npm run build -w @suffa/api

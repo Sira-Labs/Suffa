@@ -16,6 +16,8 @@
     "pretypecheck": "npm run build -w @suffa/engagement"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1140.0",
+    "@aws-sdk/s3-request-presigner": "^3.1140.0",
     "@hono/node-server": "^1.19.17",
     "@sentry/core": "^11.0.0",
     "@suffa/engagement": "0.1.0",

@@ -7,6 +7,7 @@ import { PgAssignmentRepository } from './classes/assignments.js';
 import {
   enqueueImport,
   enqueueTranscode,
+  enqueueSuggest,
   enqueueTranscribe,
   registerMedia,
 } from './media/jobs.js';
@@ -15,6 +16,11 @@ import { OpenAiCompatibleTranscriber } from './media/transcribe.js';
 import { HttpGoogleClient } from './drive/google.js';
 import { DriveService, importFromDrive, PgDriveConnections } from './drive/service.js';
 import { PgMediaRepository } from './media/repository.js';
+import {
+  PgSuggestionRepository,
+  SUGGEST_TASK,
+  suggestForRecording,
+} from './media/suggestions.js';
 import { ffmpegTranscoder, MediaService } from './media/service.js';
 import { S3ObjectStorage } from './storage/s3Storage.js';
 import { registerNotifications } from './notifications/jobs.js';
@@ -211,6 +217,22 @@ async function main(): Promise<void> {
                       }
                     }
                   : undefined,
+                suggest: async (mediaId) =>
+                  suggestForRecording(
+                    {
+                      gateway: new AiGateway({
+                        router: tutorRouter,
+                        repo: new PgAiRepository(pool),
+                        log,
+                      }),
+                      suggestions: new PgSuggestionRepository(pool),
+                      media: repo,
+                      interactive: new PgInteractiveRepository(pool),
+                      catalog: await ContentCatalog.load(CONTENT_DIR).catch(() => null),
+                      log,
+                    },
+                    mediaId
+                  ),
               },
               errors
             );
@@ -324,6 +346,8 @@ async function main(): Promise<void> {
     resolvers.length > 0 ? new ChainResolver(resolvers) : new DenyAllResolver();
 
   const ai = aiParts(config, pool, log, auth);
+  const suggestAvailable = async () =>
+    (await ai.router.plan(SUGGEST_TASK, { requires: ['structuredOutput'] })).length > 0;
   const app = createApp({
     version: config.version,
     expectedRevision: expected,
@@ -365,6 +389,20 @@ async function main(): Promise<void> {
           media: new PgMediaRepository(pool),
           interactive: new PgInteractiveRepository(pool),
           transcribe: config.transcribe ? enqueueTranscribe(boss) : undefined,
+          chapters: new PgSuggestionRepository(pool),
+          canSuggest: suggestAvailable,
+          auth,
+          log,
+        }
+      : undefined,
+    suggestions: config.storage
+      ? {
+          classes: new PgClassRepository(pool),
+          media: new PgMediaRepository(pool),
+          interactive: new PgInteractiveRepository(pool),
+          suggestions: new PgSuggestionRepository(pool),
+          enqueue: enqueueSuggest(boss),
+          available: suggestAvailable,
           auth,
           log,
         }

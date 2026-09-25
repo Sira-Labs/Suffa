@@ -20,11 +20,12 @@ export const MediaJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('transcode'), mediaId: z.string().uuid() }),
   z.object({ task: z.literal('import'), mediaId: z.string().uuid() }),
   z.object({ task: z.literal('transcribe'), mediaId: z.string().uuid() }),
+  z.object({ task: z.literal('suggest'), mediaId: z.string().uuid() }),
 ]);
 
 function enqueue(
   boss: Pick<PgBoss, 'send'>,
-  task: 'transcode' | 'import' | 'transcribe'
+  task: 'transcode' | 'import' | 'transcribe' | 'suggest'
 ) {
   return async (mediaId: string) => {
     await boss.send(
@@ -42,6 +43,8 @@ export const enqueueImport = (boss: Pick<PgBoss, 'send'>) => enqueue(boss, 'impo
 /** Transcription of a ready recording (story 8.1). */
 export const enqueueTranscribe = (boss: Pick<PgBoss, 'send'>) =>
   enqueue(boss, 'transcribe');
+/** AI chapter and checkpoint suggestions from the transcript (story 11.4). */
+export const enqueueSuggest = (boss: Pick<PgBoss, 'send'>) => enqueue(boss, 'suggest');
 
 export interface MediaJobDeps {
   repo: MediaRepository;
@@ -54,10 +57,17 @@ export interface MediaJobDeps {
   transcribe?: (mediaId: string) => Promise<void>;
   /** Called when a recording became ready (queues its transcription). */
   onReady?: (mediaId: string) => Promise<void>;
+  /** Suggests chapters and checkpoints; absent when no model is configured. */
+  suggest?: (mediaId: string) => Promise<void>;
 }
 
 export async function runMediaJob(deps: MediaJobDeps, raw: unknown): Promise<void> {
   const task = MediaJob.parse(raw);
+  if (task.task === 'suggest') {
+    if (!deps.suggest) throw new Error('no model is configured for suggestions');
+    await deps.suggest(task.mediaId);
+    return;
+  }
   if (task.task === 'transcribe') {
     if (!deps.transcribe) throw new Error('no transcription service is configured');
     await deps.transcribe(task.mediaId);

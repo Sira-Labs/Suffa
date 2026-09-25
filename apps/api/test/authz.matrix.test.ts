@@ -271,6 +271,29 @@ function buildApp() {
       auth: resolver,
       log: quiet,
     },
+    suggestions: {
+      classes: classRepo,
+      media: { get: async () => null },
+      interactive: {
+        transcript: async () => null,
+        aiEnabled: async () => false,
+        addCheckpoint: async () => ({}) as never,
+      },
+      suggestions: {
+        run: async () => null,
+        setRun: async () => {},
+        replacePending: async () => {},
+        pending: async () => [],
+        decide: async () => null,
+        chapters: async () => [],
+        addChapter: async () => ({}) as never,
+        removeChapter: async () => false,
+      },
+      enqueue: async () => {},
+      available: async () => false,
+      auth: resolver,
+      log: quiet,
+    },
     reviews: {
       classes: classRepo,
       reviews: {

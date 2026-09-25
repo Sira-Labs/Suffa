@@ -39,6 +39,26 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     action: 'class:progress:read',
   },
   { method: 'PUT', path: '/api/v1/classes/:id/grades/:gradeId', action: 'class:manage' },
+  {
+    method: 'POST',
+    path: '/api/v1/classes/:id/media/:mediaId/suggestions',
+    action: 'class:manage',
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/classes/:id/media/:mediaId/suggestions',
+    action: 'class:manage',
+  },
+  {
+    method: 'PUT',
+    path: '/api/v1/classes/:id/media/:mediaId/suggestions/:sid',
+    action: 'class:manage',
+  },
+  {
+    method: 'DELETE',
+    path: '/api/v1/classes/:id/media/:mediaId/chapters/:chapterId',
+    action: 'class:manage',
+  },
   { method: 'GET', path: '/api/v1/admin/users', action: 'admin:users:read' },
   { method: 'PATCH', path: '/api/v1/admin/users/:id', action: 'admin:users:write' },
   { method: 'GET', path: '/api/v1/admin/audit', action: 'admin:audit:read' },

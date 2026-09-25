@@ -1,7 +1,8 @@
 /**
  * Transcript, checkpoints and the class AI switch (stories 8.1, 8.2), mounted at /api/v1:
  *
- *   GET    /classes/:id/media/:mediaId/interactive  → { transcript, checkpoints } (class:read)
+ *   GET    /classes/:id/media/:mediaId/interactive  → { transcript, checkpoints, chapters }
+ *                                                                           (class:read)
  *   PUT    /classes/:id/media/:mediaId/transcript  { cues }  → 204          (class:manage)
  *   POST   /classes/:id/media/:mediaId/transcript/generate → 202            (class:manage)
  *   POST   /classes/:id/media/:mediaId/checkpoints { atSec, data } → 201    (class:manage)
@@ -23,6 +24,12 @@ export interface InteractiveRouteDeps {
   interactive: InteractiveRepository;
   /** Queues a transcription; absent when no service is configured. */
   transcribe?: (mediaId: string) => Promise<void>;
+  /** Chapters accepted from AI suggestions (story 11.4). */
+  chapters?: {
+    chapters(mediaId: string): Promise<{ id: string; atSec: number; title: string }[]>;
+  };
+  /** Whether AI suggestions can be requested (a model is configured). */
+  canSuggest?: () => Promise<boolean>;
   auth: AuthResolver;
   log: AuthorizeLog;
 }
@@ -69,16 +76,20 @@ export function createInteractiveRoutes(deps: InteractiveRouteDeps): Hono<ActorE
       (await deps.classes.scope(c.req.param('id'), actor.id)).classRole === 'teacher';
     if (!item || (!item.publishedAt && !manager))
       return c.json({ error: 'not_found' }, 404);
-    const [transcript, checkpoints] = await Promise.all([
+    const [transcript, checkpoints, chapters, canSuggest] = await Promise.all([
       deps.interactive.transcript(item.id),
       deps.interactive.checkpoints(item.id),
+      deps.chapters?.chapters(item.id) ?? [],
+      manager && deps.canSuggest ? deps.canSuggest() : false,
     ]);
     c.header('Cache-Control', 'no-store');
     return c.json({
       transcript,
       checkpoints,
+      chapters,
       canEdit: manager,
       canGenerate: manager && Boolean(deps.transcribe),
+      canSuggest,
     });
   });
 

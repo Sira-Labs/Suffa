@@ -34,6 +34,7 @@ import {
 } from './classes/spiritRoutes.js';
 import { sameOriginOnly } from './http/sameOrigin.js';
 import { appCors } from './http/appCors.js';
+import { withoutSessionToken } from './http/withoutSessionToken.js';
 import { createAppLinkRoutes, type AppLinks } from './apps/links.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
 import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
@@ -181,7 +182,11 @@ export function createApp(deps: AppDeps): Hono {
         return c.json({ error: 'not_found' }, 404);
       }
       const rejected = await rejectUnsafeRedirect(c.req.raw);
-      return rejected ?? auth.handler(c.req.raw);
+      if (rejected) return rejected;
+      const response = await auth.handler(c.req.raw);
+      return c.req.path === `${AUTH_BASE_PATH}/sign-in/email-otp`
+        ? withoutSessionToken(response, c.req.header('origin'), deps.appOrigins ?? [])
+        : response;
     });
     // The profile doubles as the actor: one session lookup per request.
     const profiles = { actor: (headers: Headers) => auth.me(headers) };

@@ -28,14 +28,17 @@ describe('redirect guard', () => {
 });
 
 describe('sign-in mail', () => {
-  it('contains the link and escapes it in HTML', () => {
+  it('contains the link and the code, and escapes the link in HTML', () => {
     const mail = magicLinkMail(
-      'https://suffa.example.org/api/v1/auth/magic-link/verify?token=a&b="c"'
+      'https://suffa.example.org/api/v1/auth/magic-link/verify?token=a&b="c"',
+      '042917'
     );
     expect(mail.subject).toBe('Dein Anmeldelink für Suffa');
     expect(mail.text).toContain('token=a&b="c"');
     expect(mail.html).toContain('token=a&amp;b=&quot;c&quot;');
     expect(mail.text).toContain('15 Minuten');
+    expect(mail.text).toContain('042917');
+    expect(mail.html).toContain('>042917</p>');
   });
 });
 
@@ -61,7 +64,8 @@ describe('SMTP mailer', () => {
     await expect(
       mailer.sendMagicLink(
         'amina@example.org',
-        'https://suffa.example.org/t?token=secret'
+        'https://suffa.example.org/t?token=secret',
+        '123456'
       )
     ).rejects.toThrow();
     expect(logged).toHaveLength(1);
@@ -69,6 +73,6 @@ describe('SMTP mailer', () => {
       msg: 'mail.send_failed',
       obj: { host: '127.0.0.1', port, code: 'ESOCKET' },
     });
-    expect(JSON.stringify(logged)).not.toMatch(/amina|token=secret/);
+    expect(JSON.stringify(logged)).not.toMatch(/amina|token=secret|123456/);
   });
 });

@@ -36,6 +36,8 @@ export function FocusReview() {
   const [weak, setWeak] = useState<SrsCard[] | null>(null);
   const [params] = useSearchParams();
   const weakOnly = params.get('focus') === 'weak';
+  // ?more=1 (offered when nothing is due): another batch of new words beyond today's plan.
+  const more = params.get('more') === '1';
   const unit = Number(params.get('unit')) || null;
   const userVocab = useContentStore((s) => s.userVocab);
   const section = params.get('section');
@@ -56,13 +58,15 @@ export function FocusReview() {
     let cancelled = false;
     void reviewLogRepo.all().then((logs) => {
       if (cancelled) return;
-      setNewLimit(Math.max(0, NEW_PER_DAY - reviewsToday(logs).newLearned));
+      setNewLimit(
+        more ? NEW_PER_DAY : Math.max(0, NEW_PER_DAY - reviewsToday(logs).newLearned)
+      );
       setWeak(weakCards(useSrsStore.getState().cards, logs).slice(0, WEAK_SESSION_CARDS));
     });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [more, weakOnly]);
 
   return (
     <div className="focus-page">
@@ -75,6 +79,8 @@ export function FocusReview() {
       </Link>
       {newLimit !== null && (
         <ReviewSession
+          // A new mode (wobbly words, more new words) starts a fresh session.
+          key={`${weakOnly}-${more}-${unit}-${section}-${newLimit}`}
           kinds={ALL_KINDS}
           newKinds={NEW_KINDS}
           newLimit={
@@ -87,9 +93,58 @@ export function FocusReview() {
           title={title}
           variant="focus"
           allowRecognitionAid
+          emptyActions={
+            unit ? undefined : (
+              <KeepPractising weakCount={weakOnly ? 0 : (weak?.length ?? 0)} />
+            )
+          }
         />
       )}
     </div>
+  );
+}
+
+/**
+ * Nothing due, but the day's review quest may still ask for cards: offer the wobbly words
+ * (due or not) and another batch of new words. Both count as reviews for the quests.
+ */
+function KeepPractising({ weakCount }: { weakCount: number }) {
+  // The same selection the session makes (new vocabulary cards the learner may reach).
+  const newCount = useSrsStore((s) => s.getQueue)(
+    NEW_KINDS,
+    NEW_PER_DAY,
+    NEW_KINDS
+  ).length;
+  return (
+    <>
+      <p className="muted" style={{ margin: 0 }}>
+        Für heute ist alles wiederholt. Weiterüben zählt trotzdem für deine Tagesaufgaben.
+      </p>
+      <div className="row" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
+        {weakCount > 0 && (
+          <Link className="btn btn-primary" to="/review?focus=weak" replace>
+            Wackelige Wörter üben ({weakCount})
+          </Link>
+        )}
+        {newCount > 0 && (
+          <Link
+            className={weakCount > 0 ? 'btn' : 'btn btn-primary'}
+            to="/review?more=1"
+            replace
+          >
+            {Math.min(NEW_PER_DAY, newCount)} weitere neue Wörter
+          </Link>
+        )}
+        {weakCount === 0 && newCount === 0 && (
+          <Link className="btn btn-primary" to="/units">
+            Dialog hören
+          </Link>
+        )}
+        <Link className="btn" to="/">
+          Zu Heute
+        </Link>
+      </div>
+    </>
   );
 }
 

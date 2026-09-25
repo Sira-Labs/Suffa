@@ -74,6 +74,46 @@ describe('ApiSyncProvider', () => {
     expect(invalid).toMatchObject({ ok: false, error: { code: 'invalid-email' } });
   });
 
+  it('signs in with the code from the mail and explains each refusal', async () => {
+    const answers = [
+      json({ ok: true }),
+      json({
+        id: 'u1',
+        email: 'amina@example.org',
+        name: null,
+        role: 'student',
+        timeZone: 'UTC',
+      }),
+    ];
+    const { provider, calls } = fakeApi(() => answers.shift() ?? json({}, 500));
+    expect(await provider.signInWithCode(' amina@example.org ', '042 917')).toEqual({
+      ok: true,
+      value: undefined,
+    });
+    expect(calls[0]!.path).toBe('/api/v1/auth/sign-in/email-otp');
+    expect(JSON.parse(String(calls[0]!.init!.body))).toEqual({
+      email: 'amina@example.org',
+      otp: '042917',
+    });
+    // Signed in right away: the session is asked for at once.
+    expect(provider.getAuthState()).toMatchObject({ status: 'signed-in' });
+
+    const refused = (status: number, body: object) =>
+      fakeApi(() => json(body, status)).provider.signInWithCode('a@b.de', '123456');
+    expect(await refused(400, { code: 'INVALID_OTP' })).toMatchObject({
+      error: { code: 'invalid-code' },
+    });
+    expect(await refused(400, { code: 'OTP_EXPIRED' })).toMatchObject({
+      error: { code: 'code-expired' },
+    });
+    expect(await refused(403, { code: 'TOO_MANY_ATTEMPTS' })).toMatchObject({
+      error: { code: 'too-many-attempts' },
+    });
+    expect(await provider.signInWithCode('a@b.de', '12ab')).toMatchObject({
+      error: { code: 'invalid-code' },
+    });
+  });
+
   it('pulls page by page until the API has no next cursor', async () => {
     const { provider, calls } = fakeApi((path) => {
       if (!path.includes('afterId')) {

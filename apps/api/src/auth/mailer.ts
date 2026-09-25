@@ -9,7 +9,11 @@ import { join } from 'node:path';
 import nodemailer, { type Transporter } from 'nodemailer';
 
 export interface Mailer {
-  sendMagicLink(email: string, url: string): Promise<void>;
+  /**
+   * The sign-in mail: the link, and the same sign-in as a six-digit code for another browser
+   * (a mail app's built-in browser keeps the session to itself).
+   */
+  sendMagicLink(email: string, url: string, code: string): Promise<void>;
 }
 
 export interface SmtpSettings {
@@ -23,7 +27,10 @@ export interface SmtpSettings {
 }
 
 /** Subject and bodies of the sign-in mail (German, like the app). */
-export function magicLinkMail(url: string): {
+export function magicLinkMail(
+  url: string,
+  code: string
+): {
   subject: string;
   text: string;
   html: string;
@@ -35,14 +42,19 @@ export function magicLinkMail(url: string): {
     'mit diesem Link meldest du dich bei Suffa an:',
     url,
     '',
-    'Der Link ist 15 Minuten gültig und funktioniert nur einmal.',
+    `Oder gib diesen Code auf der Anmeldeseite ein: ${code}`,
+    '(praktisch, wenn deine Mail-App den Link nicht in deinem Browser öffnet)',
+    '',
+    'Link und Code sind 15 Minuten gültig und funktionieren nur einmal.',
     'Wenn du dich nicht anmelden wolltest, kannst du diese Mail ignorieren.',
   ].join('\n');
   const safe = url.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   const html = `<p>Assalamu alaikum,</p>
 <p>mit diesem Link meldest du dich bei Suffa an:</p>
 <p><a href="${safe}" style="display:inline-block;padding:12px 20px;background:#0f766e;color:#fff;border-radius:8px;text-decoration:none">Bei Suffa anmelden</a></p>
-<p style="color:#555">Der Link ist 15 Minuten gültig und funktioniert nur einmal. Wenn du dich nicht anmelden wolltest, kannst du diese Mail ignorieren.</p>`;
+<p>Oder gib diesen Code auf der Anmeldeseite ein – praktisch, wenn deine Mail-App den Link nicht in deinem Browser öffnet:</p>
+<p style="font-size:28px;font-weight:700;letter-spacing:6px;font-family:monospace">${code.replace(/\D/g, '')}</p>
+<p style="color:#555">Link und Code sind 15 Minuten gültig und funktionieren nur einmal. Wenn du dich nicht anmelden wolltest, kannst du diese Mail ignorieren.</p>`;
   return { subject, text, html };
 }
 
@@ -80,12 +92,12 @@ export class SmtpMailer implements Mailer {
     });
   }
 
-  async sendMagicLink(email: string, url: string): Promise<void> {
+  async sendMagicLink(email: string, url: string, code: string): Promise<void> {
     try {
       await this.transport.sendMail({
         from: this.settings.from,
         to: email,
-        ...magicLinkMail(url),
+        ...magicLinkMail(url, code),
       });
     } catch (error) {
       // Never log the link or the address: host, port and the SMTP answer are enough to act on.
@@ -113,25 +125,26 @@ export class SmtpMailer implements Mailer {
 export class LogMailer implements Mailer {
   constructor(private readonly log: { warn(obj: object, msg: string): void }) {}
 
-  async sendMagicLink(email: string, url: string): Promise<void> {
-    this.log.warn({ email, url }, 'auth.magic_link_logged');
+  async sendMagicLink(email: string, url: string, code: string): Promise<void> {
+    this.log.warn({ email, url, code }, 'auth.magic_link_logged');
   }
 }
 
 /**
  * Browser tests only (never in prod, enforced by the config): the latest link per address is
- * written to `<dir>/<email>.txt`, where the end-to-end tests pick it up.
+ * written to `<dir>/<email>.txt` (link on the first line, code on the second), where the
+ * end-to-end tests pick it up.
  */
 export class FileMailer implements Mailer {
   constructor(private readonly dir: string) {}
 
-  async sendMagicLink(email: string, url: string): Promise<void> {
+  async sendMagicLink(email: string, url: string, code: string): Promise<void> {
     await mkdir(this.dir, { recursive: true });
     const name = email.toLowerCase().replace(/[^a-z0-9@._-]/g, '_');
     // Written aside and renamed, so a reader never sees a half-written (or empty) file.
     const target = join(this.dir, `${name}.txt`);
     const temp = `${target}.${process.pid}.tmp`;
-    await writeFile(temp, url, 'utf8');
+    await writeFile(temp, `${url}\n${code}\n`, 'utf8');
     await rename(temp, target);
   }
 }

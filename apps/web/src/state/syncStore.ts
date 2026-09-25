@@ -60,6 +60,8 @@ interface SyncState {
   errorMessage: string | null;
   init(): void;
   signIn(email: string, returnTo?: string): Promise<{ ok: boolean; message?: string }>;
+  /** The code from the sign-in mail, entered in this browser (see ApiSyncProvider). */
+  signInWithCode(email: string, code: string): Promise<{ ok: boolean; message?: string }>;
   signOut(): Promise<void>;
   syncNow(): Promise<void>;
   refreshPending(): Promise<void>;
@@ -111,6 +113,15 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       return { ok: false, message: result.error.message };
     }
     return { ok: true };
+  },
+
+  async signInWithCode(email, code) {
+    const p = get().provider;
+    if (!(p instanceof ApiSyncProvider)) {
+      return { ok: false, message: 'Anmelden ist hier nicht eingerichtet.' };
+    }
+    const result = await p.signInWithCode(email, code);
+    return result.ok ? { ok: true } : { ok: false, message: result.error.message };
   },
 
   async signOut() {

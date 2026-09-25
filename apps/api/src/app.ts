@@ -14,8 +14,42 @@ import {
 } from './auth/betterAuth.js';
 import { createAccountRoutes, type AccountRouteDeps } from './account/routes.js';
 import { createClassRoutes, type ClassRouteDeps } from './classes/routes.js';
+import {
+  createAssignmentRoutes,
+  type AssignmentRouteDeps,
+} from './classes/assignments.js';
+import { createMediaRoutes, type MediaRouteDeps } from './media/routes.js';
+import {
+  createInteractiveRoutes,
+  type InteractiveRouteDeps,
+} from './media/interactiveRoutes.js';
+import { createDriveRoutes, type DriveRouteDeps } from './drive/routes.js';
+import {
+  createNotificationRoutes,
+  type NotificationRouteDeps,
+} from './notifications/routes.js';
+import {
+  createClassSpiritRoutes,
+  type ClassSpiritRouteDeps,
+} from './classes/spiritRoutes.js';
 import { sameOriginOnly } from './http/sameOrigin.js';
+import { appCors } from './http/appCors.js';
+import { createAppLinkRoutes, type AppLinks } from './apps/links.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
+import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
+import { createTutorRoutes, type TutorRouteDeps } from './tutor/routes.js';
+import { createReviewRoutes, type ReviewRouteDeps } from './tutor/reviewRoutes.js';
+import { createVideoRoutes, type VideoRouteDeps } from './videos/routes.js';
+import { createQuizRoutes, type QuizRouteDeps } from './classes/quizRoutes.js';
+import {
+  createCertificateRoutes,
+  type CertificateRouteDeps,
+} from './classes/certificateRoutes.js';
+import {
+  createSuggestionRoutes,
+  type SuggestionRouteDeps,
+} from './media/suggestionRoutes.js';
+import { createEngagementRoutes, type EngagementRouteDeps } from './engagement/routes.js';
 import { authorize, type AuthorizeLog } from './authz/middleware.js';
 
 export interface AuthRouteDeps {
@@ -38,6 +72,22 @@ export interface AppDeps {
   onProbeError?: (error: unknown) => void;
   /** Sync endpoints; omitted in tests that only exercise health/version. */
   sync?: SyncRouteDeps;
+  /** Class assignments with due dates (story 8.5). */
+  assignments?: AssignmentRouteDeps;
+  /** Transcripts, checkpoints and the class AI switch (Sprint 8). */
+  interactive?: InteractiveRouteDeps;
+  /** Google Drive import of recordings (story 7.2). */
+  drive?: DriveRouteDeps;
+  /** Class recordings: upload, transcode status, playback (Sprint 7). */
+  media?: MediaRouteDeps;
+  /** Push reminders, their preferences and the weekly recap (stories 6.3, 6.4). */
+  notifications?: NotificationRouteDeps;
+  /** Class dashboard, challenge, teacher badges and shout-outs (Sprint 6). */
+  classSpirit?: ClassSpiritRouteDeps;
+  certificates?: CertificateRouteDeps;
+  quiz?: QuizRouteDeps;
+  /** The server's copy of XP, streak and badges (story 5.4). */
+  engagement?: EngagementRouteDeps;
   /** Browser error reporting: /api/client-config and the /api/errors tunnel. */
   errorTunnel?: ErrorTunnelDeps;
   /** Sign-in (Better Auth) and the signed-in user; omitted when sign-in is not configured. */
@@ -45,14 +95,28 @@ export interface AppDeps {
   /** Account self-service (sessions, settings) for the signed-in user. */
   account?: AccountRouteDeps;
   /**
-   * Origin of the web app (SUFFA_PUBLIC_URL). When set, state-changing API requests that a
+   * Origins of the web app (SUFFA_PUBLIC_URL, SUFFA_TRUSTED_ORIGINS). When set, state-changing API requests that a
    * browser marks as coming from another site are refused (403).
    */
-  allowedOrigin?: string;
+  allowedOrigin?: string | readonly string[];
+  /** Native app web view origins: CORS without credentials, bearer tokens (ADR-0019). */
+  appOrigins?: readonly string[];
+  /** Universal Links / App Links files. */
+  appLinks?: AppLinks;
   /** Classes, invites and membership approval. */
   classes?: ClassRouteDeps;
   /** Admin area (users); every route needs an admin. */
   admin?: AdminRouteDeps;
+  /** al-Muʿallim, the AI teacher (ADR-0011). */
+  tutor?: TutorRouteDeps;
+  /** Teacher review of AI grades (story 11.2). */
+  reviews?: ReviewRouteDeps;
+  /** Video lessons: public catalog and the admin's catalog tools (Sprint 12). */
+  videos?: VideoRouteDeps;
+  /** AI chapter and checkpoint suggestions for recordings (story 11.4). */
+  suggestions?: SuggestionRouteDeps;
+  /** Admin AI page: routes, budget, spend (ADR-0010). */
+  aiAdmin?: AiAdminDeps;
   /** Where denied requests are logged (authz.denied). */
   authzLog?: AuthorizeLog;
   /** Called for unhandled errors; the client only sees a generic 500. */
@@ -92,7 +156,13 @@ export function createApp(deps: AppDeps): Hono {
     }
   };
 
-  if (deps.allowedOrigin) app.use('/api/*', sameOriginOnly(deps.allowedOrigin));
+  if (deps.appOrigins?.length) app.use('/api/*', appCors(deps.appOrigins));
+  if (deps.allowedOrigin?.length) {
+    const own =
+      typeof deps.allowedOrigin === 'string' ? [deps.allowedOrigin] : deps.allowedOrigin;
+    app.use('/api/*', sameOriginOnly([...own, ...(deps.appOrigins ?? [])]));
+  }
+  if (deps.appLinks) app.route('/api/v1', createAppLinkRoutes(deps.appLinks));
 
   app.get('/healthz', healthHandler);
   app.get('/api/healthz', healthHandler);
@@ -121,8 +191,28 @@ export function createApp(deps: AppDeps): Hono {
     });
   }
   if (deps.sync) app.route('/api/v1/sync', createSyncRoutes(deps.sync));
+  if (deps.engagement) {
+    app.route('/api/v1/engagement', createEngagementRoutes(deps.engagement));
+  }
   if (deps.account) app.route('/api/v1/account', createAccountRoutes(deps.account));
   if (deps.classes) app.route('/api/v1', createClassRoutes(deps.classes));
+  if (deps.classSpirit) app.route('/api/v1', createClassSpiritRoutes(deps.classSpirit));
+  if (deps.certificates) {
+    app.route('/api/v1', createCertificateRoutes(deps.certificates));
+  }
+  if (deps.quiz) app.route('/api/v1', createQuizRoutes(deps.quiz));
+  if (deps.media) app.route('/api/v1', createMediaRoutes(deps.media));
+  if (deps.drive) app.route('/api/v1', createDriveRoutes(deps.drive));
+  if (deps.interactive) app.route('/api/v1', createInteractiveRoutes(deps.interactive));
+  if (deps.assignments) app.route('/api/v1', createAssignmentRoutes(deps.assignments));
+  if (deps.notifications) {
+    app.route('/api/v1', createNotificationRoutes(deps.notifications));
+  }
+  if (deps.tutor) app.route('/api/v1', createTutorRoutes(deps.tutor));
+  if (deps.reviews) app.route('/api/v1', createReviewRoutes(deps.reviews));
+  if (deps.suggestions) app.route('/api/v1', createSuggestionRoutes(deps.suggestions));
+  if (deps.aiAdmin) app.route('/api/v1/admin/ai', createAiAdminRoutes(deps.aiAdmin));
+  if (deps.videos) app.route('/api/v1', createVideoRoutes(deps.videos));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));

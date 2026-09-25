@@ -1,0 +1,41 @@
+{
+  "about": "Routes the evals run against: the defaults of migration 0016 for the evaluated tasks. Change them together with the admin defaults.",
+  "routes": [
+    {
+      "task": "grade.writing",
+      "position": 0,
+      "provider": "anthropic",
+      "model": "claude-sonnet-5",
+      "effort": "medium",
+      "maxTokens": 1500,
+      "capabilities": ["tools", "structuredOutput", "vision", "streaming"],
+      "premium": true,
+      "enabled": true,
+      "price": null
+    },
+    {
+      "task": "grade.speech",
+      "position": 0,
+      "provider": "anthropic",
+      "model": "claude-sonnet-5",
+      "effort": "medium",
+      "maxTokens": 1500,
+      "capabilities": ["tools", "structuredOutput", "vision", "streaming"],
+      "premium": true,
+      "enabled": true,
+      "price": null
+    },
+    {
+      "task": "tutor.converse",
+      "position": 0,
+      "provider": "anthropic",
+      "model": "claude-sonnet-5",
+      "effort": "low",
+      "maxTokens": 1024,
+      "capabilities": ["tools", "structuredOutput", "vision", "streaming"],
+      "premium": true,
+      "enabled": true,
+      "price": null
+    }
+  ]
+}

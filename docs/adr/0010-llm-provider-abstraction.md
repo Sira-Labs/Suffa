@@ -1,6 +1,6 @@
 # ADR-0010: Provider-agnostic LLM gateway (Anthropic SDK, OpenRouter, Hugging Face)
 
-- Status: proposed
+- Status: accepted (implemented in Sprint 9)
 - Date: 2026-09-23
 
 ## Context
@@ -45,3 +45,27 @@ controlled per user, per role and globally.
 
 Model choice becomes an admin setting, not a deploy. Adapters need contract tests with
 recorded fixtures. Quality differs across models — evals (ADR-0011) gate route changes.
+
+## Implementation (Sprint 9)
+
+- `packages/llm`: `LlmProvider` (`complete`, `stream`), typed `LlmError` kinds that say
+  whether another route may succeed, a price list in USD per MTok (= µ$ per token).
+  `AnthropicProvider` sets one cache breakpoint after the last stable system part, sends
+  `output_config.effort` only to models that take it and structured output as
+  `output_config.format`. OpenRouter and Hugging Face share one OpenAI-compatible adapter.
+  A contract suite runs all adapters against recorded wire fixtures; a live prompt-cache
+  check runs only with `SUFFA_LLM_LIVE_ANTHROPIC_KEY`.
+- `ModelRouter`: routes per task from `ai_model_routes` (cached 60 s, the last table kept
+  when a reload fails), filtered by configured provider, `enabled` and capabilities (a JSON
+  schema implies `structuredOutput`, streaming implies `streaming`). A fallbackable error or
+  a refusal moves to the next route; a stream falls back only before its first token.
+- Budget: `ai_settings` (monthly budget, downgrade %, daily turns per role, admins
+  unlimited by default). Economy mode skips routes marked `premium`; at 100 % calls stop
+  with `ai_paused`. The learner's day follows their time zone.
+- Metering: every call (also failures and pauses) is one `ai_calls` row with tokens incl.
+  cache reads/writes, cost, latency and all attempts; `ai_usage_daily` and
+  `ai_spend_monthly` are updated in the same transaction, so the checks read exact counters.
+- Admin: `/api/v1/admin/ai` (admin + second factor) shows providers, routes, budget and the
+  last 30 days by task/model; routes per task and the budget are editable (audit-logged),
+  and a route can be tried with a prompt.
+- Tool calls, embeddings and speech-to-text routes follow with al-Muʿallim (Sprint 10).

@@ -94,6 +94,27 @@ export const NAV_ITEMS: readonly NavItem[] = [
     tier: 'training',
   },
   {
+    to: '/videos',
+    label: 'Videolektionen',
+    icon: 'play',
+    description: 'Lektionen zum Buch auf YouTube, mit Fragen zwischendurch',
+    tier: 'secondary',
+  },
+  {
+    to: '/tutor',
+    label: 'al-Muʿallim',
+    icon: 'chat',
+    description: 'Dein KI-Lehrer: fragen, üben, erklären lassen',
+    tier: 'secondary',
+  },
+  {
+    to: '/badges',
+    label: 'Abzeichen',
+    icon: 'award',
+    description: 'Deine Erfolge und der Weg zur nächsten Stufe',
+    tier: 'secondary',
+  },
+  {
     to: '/classes',
     label: 'Klassen',
     icon: 'path',

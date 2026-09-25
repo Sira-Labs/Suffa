@@ -31,9 +31,11 @@ Apps/Databases → `>> TEMPLATE <<`**, paste the file, enter the app name (**`su
 | `glitchtip.yml`    | `glitchtip`, `glitchtip-db`                          | Error tracking and uptime checks (§9)                                        |
 
 The images are built by `.github/workflows/release.yml` on every push to `main` and
-published **publicly** on GHCR (`ghcr.io/thedatadudech/suffa-web`, `suffa-api`), so CapRover
+published **publicly** on GHCR (`ghcr.io/sira-labs/suffa-web`, `suffa-api`), so CapRover
 needs no registry credentials. If a pull ever fails with `unauthorized`, open the package on
-GitHub (Packages → suffa-web / suffa-api → Package settings) and set its visibility to public.
+GitHub (Packages → suffa-web / suffa-api / suffa-backup → Package settings) and set its
+visibility to public. In a GitHub organization new packages start **private**: after the
+first release there, make all three public once.
 For deploying without GHCR, the root `captain-definition` builds the same image on the server
 (method 3 in Tabayyun's guide).
 
@@ -42,9 +44,9 @@ For deploying without GHCR, the root `captain-definition` builds the same image 
 | #   | CapRover app          | Image                                          | Persistent data                                   | Public domain                   | Notes                                                                                |
 | --- | --------------------- | ---------------------------------------------- | ------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
 | 1   | `suffa-db`            | `pgvector/pgvector:<pinned>-pg17`              | `/var/lib/postgresql/data` (label `suffa-pgdata`) | no                              | Plain app, not a one-click DB (needs pgvector). No host port.                        |
-| 2   | `suffa-api`           | `ghcr.io/thedatadudech/suffa-api:<sha>`        | none                                              | optional                        | Runs DB migrations on start; refuses to start on placeholder secrets. Port **8000**. |
+| 2   | `suffa-api`           | `ghcr.io/sira-labs/suffa-api:<sha>`            | none                                              | optional                        | Runs DB migrations on start; refuses to start on placeholder secrets. Port **8000**. |
 | 3   | `suffa-worker`        | same image as api                              | `/data/tmp` (scratch for transcodes)              | no                              | `SUFFA_ROLE=worker`. Has `ffmpeg`. Exits with code 3 until the api has migrated.     |
-| 4   | `suffa-web`           | `ghcr.io/thedatadudech/suffa-web:<sha>`        | none                                              | **yes** (e.g. `suffa.<domain>`) | Caddy + PWA; proxies `/api`, `/healthz`, `/media`. Port **80**.                      |
+| 4   | `suffa-web`           | `ghcr.io/sira-labs/suffa-web:<sha>`            | none                                              | **yes** (e.g. `suffa.<domain>`) | Caddy + PWA; proxies `/api`, `/healthz`, `/media`. Port **80**.                      |
 | —   | `rustfs` (**exists**) | `rustfs/rustfs:1.0.0` (as pinned for Tabayyun) | existing                                          | no                              | Add buckets + a Suffa-only key (below).                                              |
 
 Separate `suffa-db` rather than a second database inside `tabayyun-db`: the two apps then
@@ -104,29 +106,45 @@ In the RustFS console (open port 9001 temporarily or via SSH tunnel, as for Taba
 
 Env (App Configs → Environment variables):
 
-| Name                                                                        | Value                                                                                                   | From sprint |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ----------- |
-| `SUFFA_ENV`                                                                 | `prod`                                                                                                  | S1          |
-| `SUFFA_PUBLIC_URL`                                                          | `https://suffa.<domain>`                                                                                | S1          |
-| `SUFFA_DATABASE_URL`                                                        | `postgres://suffa:<password>@srv-captain--suffa-db:5432/suffa`                                          | S1          |
-| `SUFFA_AUTH_SECRET`                                                         | `openssl rand -base64 48`                                                                               | S3          |
-| `SUFFA_ERROR_DSN`                                                           | DSN of the GlitchTip project `suffa-api` (§9); unset = no error reporting                               | S2          |
-| `SUFFA_WEB_ERROR_DSN`                                                       | DSN of the GlitchTip project `suffa-web` (§9), handed to the PWA via `/api/client-config`               | S2          |
-| `SUFFA_SYNC_DEV_TOKENS`                                                     | **never in prod** (the api refuses to start): `token=userUuid;…` for local/test sync before Better Auth | dev only    |
-| `SUFFA_SMTP_HOST`, `SUFFA_SMTP_PORT`                                        | `smtp-relay.gmail.com`, `587` – Google Workspace SMTP relay (§ Sign-in mails)                           | S3          |
-| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD`                                    | optional, only if the relay requires SMTP authentication (Workspace user + app password)                | S3          |
-| `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                              | S7          |
-| `SUFFA_MAIL_FROM`                                                           | `Suffa <noreply@<domain>>` – any address of the Workspace domain                                        | S3          |
-| `SUFFA_S3_ENDPOINT`                                                         | `http://srv-captain--rustfs:9000`                                                                       | S7          |
-| `SUFFA_S3_ALLOW_HTTP`                                                       | `true` (internal endpoint only)                                                                         | S7          |
-| `SUFFA_S3_ACCESS_KEY_ID` / `SUFFA_S3_SECRET_ACCESS_KEY`                     | the `suffa-app` key                                                                                     | S7          |
-| `SUFFA_S3_BUCKET_MEDIA` / `_UPLOADS` / `_CONTENT`                           | `suffa-media` / `suffa-uploads` / `suffa-content`                                                       | S7          |
-| `SUFFA_MEDIA_PUBLIC_PREFIX`                                                 | `/media` (presigned URLs are rewritten to this same-origin path)                                        | S7          |
-| `SUFFA_VAPID_PUBLIC_KEY` / `_PRIVATE_KEY` / `_SUBJECT`                      | `npx web-push generate-vapid-keys`; subject `mailto:you@<domain>`                                       | S6          |
-| `SUFFA_GOOGLE_CLIENT_ID` / `_CLIENT_SECRET` / `SUFFA_GOOGLE_PICKER_API_KEY` | Google Cloud project (Drive API + Picker)                                                               | S7          |
-| `SUFFA_YOUTUBE_API_KEY`                                                     | Google Cloud project (YouTube Data API v3)                                                              | S12         |
-| `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`                       | provider keys                                                                                           | S9          |
-| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | Firebase service-account JSON (base64)                                                                  | S13         |
+| Name                                                                        | Value                                                                                                               | From sprint |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `SUFFA_ENV`                                                                 | `prod`                                                                                                              | S1          |
+| `SUFFA_PUBLIC_URL`                                                          | `https://suffa.<domain>`                                                                                            | S1          |
+| `SUFFA_DATABASE_URL`                                                        | `postgres://suffa:<password>@srv-captain--suffa-db:5432/suffa`                                                      | S1          |
+| `SUFFA_AUTH_SECRET`                                                         | `openssl rand -base64 48`                                                                                           | S3          |
+| `SUFFA_ERROR_DSN`                                                           | DSN of the GlitchTip project `suffa-api` (§9); unset = no error reporting                                           | S2          |
+| `SUFFA_WEB_ERROR_DSN`                                                       | DSN of the GlitchTip project `suffa-web` (§9), handed to the PWA via `/api/client-config`                           | S2          |
+| `SUFFA_SYNC_DEV_TOKENS`                                                     | **never in prod** (the api refuses to start): `token=userUuid;…` for local/test sync before Better Auth             | dev only    |
+| `SUFFA_SMTP_HOST`, `SUFFA_SMTP_PORT`                                        | `smtp-relay.gmail.com`, `587` – Google Workspace SMTP relay (§ Sign-in mails)                                       | S3          |
+| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD`                                    | optional, only if the relay requires SMTP authentication (Workspace user + app password)                            | S3          |
+| `SUFFA_TRUSTED_ORIGINS`                                                     | optional: further addresses the app is served from (e.g. the old domain), comma-separated                           | S5          |
+| `SUFFA_VAPID_PUBLIC_KEY`, `SUFFA_VAPID_PRIVATE_KEY`                         | `npx web-push generate-vapid-keys` (once; keep them, new keys cancel every device's reminders)                      | S6          |
+| `SUFFA_VAPID_SUBJECT`                                                       | `mailto:<ops address>` – contact for push services; reminders stay off until all three are set                      | S6          |
+| `SUFFA_TRANSCRIBE_URL`                                                      | optional: OpenAI-compatible `/v1/audio/transcriptions` (OpenAI, Groq, self-hosted faster-whisper)                   | S8          |
+| `SUFFA_TRANSCRIBE_TOKEN`, `SUFFA_TRANSCRIBE_MODEL`                          | API token (if the service needs one) and model, default `whisper-1`                                                 | S8          |
+| `SUFFA_APP_ORIGINS`                                                         | native app web view origins for bearer-token API access; default `capacitor://localhost,https://localhost`          | S13         |
+| `SUFFA_IOS_APP_IDS`                                                         | optional: `TEAMID.org.siralabs.suffa` for Universal Links (`/.well-known/apple-app-site-association`)               | S13         |
+| `SUFFA_ANDROID_APP_LINKS`                                                   | optional: `org.siralabs.suffa:<SHA-256 of the signing key>` for App Links (`/.well-known/assetlinks.json`)          | S13         |
+| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | optional: Firebase service account JSON, base64; push to the native apps (worker)                                   | S13         |
+| `SUFFA_YOUTUBE_API_KEY`                                                     | optional: YouTube Data API v3 key (restrict it to the server IP) for the video catalog import; worker               | S12         |
+| `SUFFA_ANTHROPIC_API_KEY`                                                   | optional: turns on Anthropic routes (AI gateway, ADR-0010); api and worker                                          | S9          |
+| `SUFFA_OPENROUTER_API_KEY`                                                  | optional: turns on OpenRouter routes (open-weight models)                                                           | S9          |
+| `SUFFA_HF_API_KEY`, `SUFFA_HF_ENDPOINT_URL`                                 | optional: Hugging Face token; endpoint URL for a dedicated Inference Endpoint (router otherwise)                    | S9          |
+| GitHub secret `SUFFA_EVAL_ANTHROPIC_API_KEY`                                | optional, CI only: runs the AI evals (`.github/workflows/evals.yml`, ≤ $0.30 per run); use a key with a spend limit | S11         |
+| `SUFFA_GOOGLE_CLIENT_ID`, `SUFFA_GOOGLE_CLIENT_SECRET`                      | OAuth web client (Google Cloud), redirect URI `https://<app>/api/v1/drive/callback`, scope `drive.file`             | S7          |
+| `SUFFA_GOOGLE_API_KEY`, `SUFFA_GOOGLE_APP_ID`                               | browser API key (Picker API, restricted to the app's domain) and the project number                                 | S7          |
+| `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                                          | S7          |
+| `SUFFA_MAIL_FROM`                                                           | `Suffa <noreply@<domain>>` – any address of the Workspace domain                                                    | S3          |
+| `SUFFA_S3_ENDPOINT`                                                         | `http://srv-captain--rustfs:9000`                                                                                   | S7          |
+| `SUFFA_S3_ALLOW_HTTP`                                                       | `true` (internal endpoint only)                                                                                     | S7          |
+| `SUFFA_S3_ACCESS_KEY_ID` / `SUFFA_S3_SECRET_ACCESS_KEY`                     | the `suffa-app` key                                                                                                 | S7          |
+| `SUFFA_S3_BUCKET_MEDIA` / `_UPLOADS` / `_CONTENT`                           | `suffa-media` / `suffa-uploads` / `suffa-content`                                                                   | S7          |
+| `SUFFA_MEDIA_PUBLIC_PREFIX`                                                 | `/media` (presigned URLs are rewritten to this same-origin path)                                                    | S7          |
+| `SUFFA_VAPID_PUBLIC_KEY` / `_PRIVATE_KEY` / `_SUBJECT`                      | `npx web-push generate-vapid-keys`; subject `mailto:you@<domain>`                                                   | S6          |
+| `SUFFA_GOOGLE_CLIENT_ID` / `_CLIENT_SECRET` / `SUFFA_GOOGLE_PICKER_API_KEY` | Google Cloud project (Drive API + Picker)                                                                           | S7          |
+| `SUFFA_YOUTUBE_API_KEY`                                                     | Google Cloud project (YouTube Data API v3)                                                                          | S12         |
+| `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`                       | provider keys                                                                                                       | S9          |
+| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | Firebase service-account JSON (base64)                                                                              | S13         |
 
 - Container HTTP port `8000`. HTTP settings: no public domain needed.
 - Deployment tab → **Enable App Token** → GitHub secret `CAPROVER_APP_TOKEN_API`.
@@ -207,7 +225,7 @@ to GHCR, and deploys with `caprover/deploy-from-github@v2`. Every step is skippe
 
 Every night a small app takes a `pg_dump` of `suffa-db`, checks that it can be read back
 (`pg_restore --list`), uploads it to the RustFS bucket `suffa` and checks the uploaded size.
-Image: `ghcr.io/thedatadudech/suffa-backup` (scripts in `infra/backup/`).
+Image: `ghcr.io/sira-labs/suffa-backup` (scripts in `infra/backup/`).
 
 ```
 suffa/postgres/daily/YYYY/MM/suffa-<timestamp>.dump     every night
@@ -397,16 +415,17 @@ GlitchTip adds about 300–500 MB RAM (app + its Postgres) and a little disk for
 
 ## Troubleshooting
 
-| Symptom                                               | Cause                                                               | Fix                                                                                       |
-| ----------------------------------------------------- | ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Web log `lookup srv-captain--suffa-api: no such host` | app name/upstream mismatch                                          | `SUFFA_API_UPSTREAM=srv-captain--<api app>:8000` (two dashes)                             |
-| Media URLs return `SignatureDoesNotMatch`             | Host header not rewritten or endpoint differs between API and Caddy | Same value for `SUFFA_S3_ENDPOINT` host and `SUFFA_MEDIA_UPSTREAM`; keep `header_up Host` |
-| Media `AccessDenied`                                  | key policy misses a bucket or `ListBucket`                          | Re-check policy in §2                                                                     |
-| Worker exits code 3 repeatedly                        | api not yet migrated / version mismatch                             | Deploy api first; never run two api versions against one DB                               |
-| No events in GlitchTip                                | DSN missing/wrong, or HTTPS not enabled on `glitchtip`              | Start log shows `"errorTracking":true`; run `node dist/error-test.js`; check the DSN      |
-| Browser errors missing, server errors arrive          | `SUFFA_WEB_ERROR_DSN` unset or the DSN of the wrong project         | `https://<suffa>/api/client-config` must show the suffa-web DSN                           |
-| GlitchTip log `redis:6379` connection refused         | empty `VALKEY_URL` was dropped                                      | Add `VALKEY_URL` with an empty value, **Save & Update**                                   |
-| API refuses to start in prod                          | placeholder or short secret                                         | Generate secrets as above, **Save & Update**                                              |
+| Symptom                                               | Cause                                                                                                         | Fix                                                                                       |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| API log `config.feature_off`                          | an optional feature (S3, Google, VAPID, FCM, app links) is only partly configured; it stays off, the API runs | set all variables of that group, or remove the partial ones                               |
+| Web log `lookup srv-captain--suffa-api: no such host` | app name/upstream mismatch                                                                                    | `SUFFA_API_UPSTREAM=srv-captain--<api app>:8000` (two dashes)                             |
+| Media URLs return `SignatureDoesNotMatch`             | Host header not rewritten or endpoint differs between API and Caddy                                           | Same value for `SUFFA_S3_ENDPOINT` host and `SUFFA_MEDIA_UPSTREAM`; keep `header_up Host` |
+| Media `AccessDenied`                                  | key policy misses a bucket or `ListBucket`                                                                    | Re-check policy in §2                                                                     |
+| Worker exits code 3 repeatedly                        | api not yet migrated / version mismatch                                                                       | Deploy api first; never run two api versions against one DB                               |
+| No events in GlitchTip                                | DSN missing/wrong, or HTTPS not enabled on `glitchtip`                                                        | Start log shows `"errorTracking":true`; run `node dist/error-test.js`; check the DSN      |
+| Browser errors missing, server errors arrive          | `SUFFA_WEB_ERROR_DSN` unset or the DSN of the wrong project                                                   | `https://<suffa>/api/client-config` must show the suffa-web DSN                           |
+| GlitchTip log `redis:6379` connection refused         | empty `VALKEY_URL` was dropped                                                                                | Add `VALKEY_URL` with an empty value, **Save & Update**                                   |
+| API refuses to start in prod                          | placeholder or short secret                                                                                   | Generate secrets as above, **Save & Update**                                              |
 
 ## Sign-in mails (magic link)
 
@@ -433,6 +452,7 @@ If Tabayyun's rule already allows the server's IP, Suffa can use it as is (same 
 | `SUFFA_MAIL_FROM`                        | `Suffa <noreply@your-domain>` – any address of the Workspace domain                        |
 | `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD` | only with "Require SMTP Authentication": the user and its app password                     |
 | `SUFFA_PUBLIC_URL`                       | `https://suffa.<domain>`; its host name is also the relay greeting (EHLO)                  |
+| `SUFFA_TRUSTED_ORIGINS`                  | optional: more addresses the app is served from, comma-separated (e.g. the old domain)     |
 
 **3. Restart** the app. The log shows `auth.enabled` with `mail: smtp`. Without host and sender
 it logs `auth.disabled`; the app keeps working offline, only sign-in and sync stay off.
@@ -443,6 +463,10 @@ a name Google does not accept – Suffa greets with the host of `SUFFA_PUBLIC_UR
 are logged as `mail.send_failed` with host, port and the SMTP answer; `ETIMEDOUT` or `ESOCKET`
 there means the outgoing port is blocked by the host (common for 465 and 25) – use `587`. A
 sign-in request answered with `403 INVALID_ORIGIN` means `SUFFA_PUBLIC_URL` differs from the
-address in the browser; `auth.enabled` logs the origin the api expects. Secrets live
+address in the browser (or is missing from `SUFFA_TRUSTED_ORIGINS`); `auth.enabled` logs the
+origins the api accepts. **Moving to a new domain:** set `SUFFA_PUBLIC_URL` to the new address
+(sign-in mails and invite links point there) and list the old one in `SUFFA_TRUSTED_ORIGINS`
+until nobody uses it. Browsers keep data and sign-in per domain: on the new address learners
+sign in once more, and sync brings their progress over. Secrets live
 only in CapRover, never in the repository. Outside prod the api may run without SMTP: the
 sign-in link is then written to the log (`auth.magic_link_logged`) for local testing.

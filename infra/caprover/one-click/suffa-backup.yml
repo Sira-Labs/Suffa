@@ -7,7 +7,7 @@
 captainVersion: 4
 services:
   $$cap_appname-backup:
-    image: ghcr.io/thedatadudech/suffa-backup:$$cap_tag
+    image: ghcr.io/sira-labs/suffa-backup:$$cap_tag
     restart: always
     environment:
       SUFFA_BACKUP_DATABASE_URL: postgres://suffa:$$cap_db_password@srv-captain--$$cap_appname-db:5432/suffa
@@ -70,4 +70,4 @@ caproverOneClickApp:
   displayName: Suffa backup (Postgres → RustFS)
   isOfficial: false
   description: Nightly verified pg_dump of the Suffa database into an object-locked bucket.
-  documentation: https://github.com/thedatadudech/suffa/blob/main/docs/ops/caprover-deployment.md
+  documentation: https://github.com/Sira-Labs/Suffa/blob/main/docs/ops/caprover-deployment.md

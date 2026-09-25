@@ -13,9 +13,14 @@ const EXPECTED: Record<Action, readonly Role[]> = {
   'class:manage': ['admin'], // without a class scope only admins
   'class:join': ['student', 'teacher', 'admin'],
   'class:progress:read': ['admin'], // without a class scope only admins
+  'class:read': ['admin'], // without a class scope only admins
+  'tutor:use': ['student', 'teacher', 'admin'],
   'admin:users:read': ['admin'],
   'admin:users:write': ['admin'],
   'admin:audit:read': ['admin'],
+  'admin:ai:read': ['admin'],
+  'admin:ai:write': ['admin'],
+  'admin:videos': ['admin'],
 };
 
 describe('authz policies', () => {
@@ -47,5 +52,13 @@ describe('authz policies', () => {
     // Platform role gates the capability first; a stale class row cannot widen it.
     const student = { id: 's', role: 'student' } as const;
     expect(can(student, 'class:progress:read', { classRole: 'teacher' })).toBe(false);
+  });
+
+  it('lets active members of a class, and only them, read its feed', () => {
+    const student = { id: 's', role: 'student' } as const;
+    expect(can(student, 'class:read', { classRole: 'student' })).toBe(true);
+    expect(can(student, 'class:read', { classRole: 'teacher' })).toBe(true);
+    expect(can(student, 'class:read', { classRole: null })).toBe(false);
+    expect(can(student, 'class:read')).toBe(false);
   });
 });

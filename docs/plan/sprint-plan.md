@@ -27,9 +27,21 @@ gantt
   S3 Who are you? (5/5)              :done, s3, after s2, 14d
   S4 Classes & admin (4/5)          :active, s4, after s3, 14d
   section P2 Engagement
-  S5 Every day counts               :s5, after s4, 14d
-  S6 Class spirit                    :s6, after s5, 14d
+  S5 Every day counts (5/5)         :done, s5, after s4, 14d
+  S6 Class spirit (4/4)             :done, s6, after s5, 14d
   Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
+  section P3 Teacher recordings
+  S7 Bring the sessions in (5/5)    :done, s7, after s6, 14d
+  S8 Make them interactive (5/5)    :done, s8, after s7, 14d
+  section P4 AI teacher
+  S9 Gateway (5/5)                  :done, s9, after s8, 14d
+  S10 al-Muʿallim speaks (4/4)      :done, s10, after s9, 14d
+  S11 Grading & evals (4/4)         :done, s11, after s10, 14d
+  section P5 Interactive YouTube
+  S12 Video lessons (5/5)           :done, s12, after s11, 14d
+  section P6 Mobile apps
+  S13 In their pocket (3/5)         :active, s13, after s12, 14d
+  S14 Celebrate (3/4)               :active, s14, after s13, 14d
 ```
 
 ```mermaid
@@ -39,30 +51,49 @@ pie showData
   "Open" : 2
 ```
 
-| Story                   | Status | Notes                                                                                                                                            |
-| ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                            |
-| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                          |
-| 1.3 api skeleton        | ✅     |                                                                                                                                                  |
-| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                 |
-| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                               |
-| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                      |
-| 2.1 release workflow    | ✅     |                                                                                                                                                  |
-| 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                     |
-| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open   |
-| 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                   |
-| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                              |
-| 2.6 browser router      | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline     |
-| 3.1 Better Auth         | ✅     | magic link only, Google Workspace SMTP relay (port 587); rate limits in Postgres; httpOnly session cookie; open-redirect guard                   |
-| 3.2 authz               | ✅     | `authz/` policies + `authorize()` middleware; route × role matrix test fails on any route without a policy; first admin route `GET /admin/users` |
-| 3.3 ApiSyncProvider     | ✅     | same-origin cookie sync; `VITE_SYNC_BACKEND=off` for an offline build                                                                            |
-| 3.4 account UI          | ✅     | devices (browser, last activity), sign out one or all others, time zone; an ended session fails on its next request                              |
-| 3.5 security review     | ✅     | `docs/security/2026-09-review-auth-sync.md`: shared rate-limit bucket (proxy IP) and token-leaking Better Auth endpoints fixed; rest ticketed    |
-| 4.1 Supabase migration  | ✅     | nothing to migrate (only the PO's data, already synced to the API by the devices); Supabase removed from app, CSP and repo                       |
-| 4.2 admin area          | ✅     | users (search, role, disable), audit log; admin actions need a TOTP second factor confirmed within 12 h                                          |
-| 4.3 classes             | ✅     | create, invite link + QR (14 days, token hashed), join from a signed-out phone, teacher approval; scoped `class:manage`                          |
-| 4.4 GDPR                | ✅     | JSON export of all data; account deletion cascades (checked over every table with `user_id`), sole-teacher classes archived                      |
-| 4.5 pilot kick-off      | 📋     | interview guide and records in `docs/pilot/kickoff-interview.md`; the conversation itself is the PO's                                            |
+| Story                   | Status | Notes                                                                                                                                               |
+| ----------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                               |
+| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                             |
+| 1.3 api skeleton        | ✅     |                                                                                                                                                     |
+| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                    |
+| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                                  |
+| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                         |
+| 2.1 release workflow    | ✅     |                                                                                                                                                     |
+| 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                        |
+| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open      |
+| 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                      |
+| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                                 |
+| 2.6 browser router      | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline        |
+| 3.1 Better Auth         | ✅     | magic link only, Google Workspace SMTP relay (port 587); rate limits in Postgres; httpOnly session cookie; open-redirect guard                      |
+| 3.2 authz               | ✅     | `authz/` policies + `authorize()` middleware; route × role matrix test fails on any route without a policy; first admin route `GET /admin/users`    |
+| 3.3 ApiSyncProvider     | ✅     | same-origin cookie sync; `VITE_SYNC_BACKEND=off` for an offline build                                                                               |
+| 3.4 account UI          | ✅     | devices (browser, last activity), sign out one or all others, time zone; an ended session fails on its next request                                 |
+| 3.5 security review     | ✅     | `docs/security/2026-09-review-auth-sync.md`: shared rate-limit bucket (proxy IP) and token-leaking Better Auth endpoints fixed; rest ticketed       |
+| 4.1 Supabase migration  | ✅     | nothing to migrate (only the PO's data, already synced to the API by the devices); Supabase removed from app, CSP and repo                          |
+| 4.2 admin area          | ✅     | users (search, role, disable), audit log; admin actions need a TOTP second factor confirmed within 12 h                                             |
+| 4.3 classes             | ✅     | create, invite link + QR (14 days, token hashed), join from a signed-out phone, teacher approval; scoped `class:manage`                             |
+| 4.4 GDPR                | ✅     | JSON export of all data; account deletion cascades (checked over every table with `user_id`), sole-teacher classes archived                         |
+| 4.5 pilot kick-off      | 📋     | interview guide and records in `docs/pilot/kickoff-interview.md`; the conversation itself is the PO's                                               |
+| 5.1 engagement package  | ✅     | `packages/engagement`: XP, units/stages, days in the learner's zone, quests, streak + shields, weekly goal, badges, levels; 100 % branch coverage   |
+| 5.2 Today card          | ✅     | "Tagesaufgaben": 3 quests per day (same on every device), bonus, streak, shields, weekly goal; toasts for quests and badges; offline                |
+| 5.3 badges + level      | ✅     | "Abzeichen" gallery (10 badges × tiers + stages), XP level on "Heute", mastery ring (mature words) on every unit tile                               |
+| 5.4 server recompute    | ✅     | debounced worker job after each push; plausibility checks; `xp_ledger`, `quest_progress`, `achievement_unlocks`, `engagement_state`; app reconciles |
+| 5.5 weekly goal         | ✅     | 3/5/7 active days (synced setting); weekly streak; a missed day never breaks a met week                                                             |
+| 6.1 class dashboard     | ✅     | per class page: activity, learning days, quests, XP (7 days), streak, mature words, class mastery per unit, leech words; aggregates only            |
+| 6.2 class spirit        | ✅     | weekly challenge (reviews/quests/XP/learning days, one shared target), teacher badges, shout-outs; reached challenge → "Rūḥ al-Faṣl" badge          |
+| 6.3 web push            | ✅     | `Notifier` + Web Push (VAPID env); reminder time, quiet hours; ≤ 1 reminder/day, skipped when a quest is done; expired devices dropped              |
+| 6.4 weekly recap        | ✅     | Sunday from 18:00 local: XP, quests, learning days, words matured, best day, badges; card on "Heute" + one push                                     |
+| 7.1 object storage      | ✅     | `ObjectStorage` on S3 (RustFS); presigned GET/PUT/part URLs as same-origin `/media/…` via Caddy; range requests tested (moto in CI)                 |
+| 7.2 Google Drive        | ✅     | OAuth `drive.file`, state bound to the teacher, refresh token sealed; Picker in the browser; import job copies into storage, then transcode         |
+| 7.3 multipart upload    | ✅     | 32 MB parts via presigned URLs, retries with back-off, resume by picking the same file again (server lists stored parts)                            |
+| 7.4 transcode           | ✅     | ffmpeg in the api image: mono AAC for everyone, 720p fast-start MP4 for video; one job at a time, nice'd, progress on the item                      |
+| 7.5 player + progress   | ✅     | class recordings list, publish with consent, player counts played time into `media_progress` (source `recording`) → XP and sync                     |
+| 8.1 transcription       | ✅     | OpenAI-compatible STT (self-hosted faster-whisper possible), 10-min pieces; per-class AI switch checked again in the worker; cue editor             |
+| 8.2 checkpoints         | ✅     | mcq, dictation (compared without tashkīl), vocab_flash; pause within ±0.5 s when played across, never on seeking; right answer = practice XP        |
+| 8.3 publish + consent   | ✅     | (Sprint 7) teacher confirms consent; members only see published recordings                                                                          |
+| 8.4 offline audio       | ✅     | audio + transcript + checkpoints in Cache Storage; the player falls back to the saved copy without network                                          |
+| 8.5 assignments         | ✅     | unit test or recording with due date; done derived from synced exams/listening; teacher sees x/y done; learners see open ones on "Heute"            |
 
 ## P0 — Foundation
 
@@ -173,6 +204,12 @@ pie showData
 | 9.4 | Metering + quotas in Postgres + budget downgrade                                                  | 5   | Over-quota → friendly 429; spend within ±5 % of provider. |
 | 9.5 | Admin AI page v1 (routes, spend)                                                                  | 2   | Model per task editable.                                  |
 
+Status (Sprint 9): all five stories done. `packages/llm` with the three adapters and a shared
+contract suite on recorded fixtures (the live cache check runs with a key only); routing table
+`ai_model_routes` with 60-s cache; quotas, 80 % downgrade, 100 % pause and metering in
+Postgres; admin tab "KI" with budget, quotas, models per task, a test call and 30-day spend.
+Keys: `SUFFA_ANTHROPIC_API_KEY`, `SUFFA_OPENROUTER_API_KEY`, `SUFFA_HF_API_KEY`.
+
 ### Sprint 10 (Feb 8 – Feb 21) — _"al-Muʿallim speaks"_
 
 | #    | Story                                                                                      | Pts | Acceptance                                 |
@@ -182,6 +219,13 @@ pie showData
 | 10.3 | Tutor UI module; "ask about this minute" in recordings                                     | 5   | RTL + tashkīl level correct; 👍/👎 stored. |
 | 10.4 | Validators + repair retry; tutor produce-quests                                            | 5   | Fixture-tested.                            |
 
+Status (Sprint 10): all four stories done. Tutor API with SSE, grounded prompt (curriculum pack
+
+- learner snapshot, de/en), four authz-checked tools, validators with one repair retry, 👍/👎,
+  90-day retention; the app's al-Muʿallim page and "ask about this minute" in recordings; the
+  tutor quest from 2026-09-26. The first-token latency target is to be measured once a key is
+  set in production (the prompt prefix is cached).
+
 ### Sprint 11 (Feb 22 – Mar 7) — _"Grading & evals"_
 
 | #    | Story                                                                     | Pts | Acceptance                           |
@@ -190,6 +234,12 @@ pie showData
 | 11.2 | Teacher review queue with overrides → eval cases                          | 5   | Overrides exported.                  |
 | 11.3 | Eval harness in CI with budget cap                                        | 5   | Regression fails the job.            |
 | 11.4 | AI-suggested chapters/vocab/checkpoints for recordings (teacher approves) | 5   | Never auto-published.                |
+
+Status (Sprint 11): all four stories done. Grade mode with a structured rubric for writing and
+speech transcripts, mistakes brought up as due cards; teacher review with confirm/override and
+an export as eval cases; golden sets with a budget-capped eval harness (`evals` workflow, needs
+the `SUFFA_EVAL_ANTHROPIC_API_KEY` secret); AI chapter and checkpoint suggestions for
+recordings that the teacher accepts one by one.
 
 **Gate G4.**
 
@@ -205,6 +255,13 @@ pie showData
 | 12.4 | Outreach + permission tracking (PO)                                                | 1   | Status recorded.                 |
 | 12.5 | Lesson quests from YouTube lessons                                                 | 2   | Count toward daily quests.       |
 
+Status (Sprint 12): all five stories built. Catalog + YouTube import (needs
+`SUFFA_YOUTUBE_API_KEY`), admin tab "Videos" with unit mapping and the permission record,
+lesson player with checkpoints (IFrame API, inline on phones), transcript with tap-to-gloss
+when permission is granted, and the video lesson quest. Open for the PO: contact Muhammad
+al-Andalusi and record the answer (12.4); checkpoints on real iOS/Android devices to be
+confirmed in the pilot.
+
 ## P6 — Mobile apps
 
 ### Sprint 13 (Mar 22 – Apr 4) — _"In their pocket"_
@@ -217,6 +274,16 @@ pie showData
 | 13.4 | TestFlight + Play internal testing with the class                                  | 3   | ≥ 10 students on test builds.         |
 | 13.5 | Store assets, privacy labels, age rating                                           | 2   | Submitted for review.                 |
 
+Status (Sprint 13): 13.1–13.3 built as far as they can be without devices. Server: bearer
+tokens for the app (signed only), CORS for the app origins without cookies, Universal Links /
+App Links files, FCM HTTP v1 beside web push. Web: the app shell bridge in
+`apps/web/src/native/` (token in Keychain/Keystore, server paths to the API, sign-in and
+invitation links, device-planned reminders when the server has no FCM, FCM registration),
+lock-screen controls via Media Session. The Capacitor project is configuration in `mobile/`
+(outside the npm workspaces). Open for the PO: store and Firebase accounts, signing keys,
+`cap add ios/android` on a Mac, device tests (flight-mode reminder, lock screen), 13.4 and
+13.5.
+
 ### Sprint 14 (Apr 5 – Apr 18) — _"Celebrate"_
 
 | #    | Story                                       | Pts | Acceptance                        |
@@ -225,6 +292,21 @@ pie showData
 | 14.2 | Opt-in weekly leagues (by % of weekly goal) | 5   | Off by default for minors.        |
 | 14.3 | Unit certificates (PDF)                     | 3   | Teacher can award/print.          |
 | 14.4 | Live class quiz (teacher-led, leech words)  | 5   | Works for 30 concurrent students. |
+
+Status (Sprint 14, in progress): 14.2 built — the teacher switches the weekly league on per
+class (off by default; marking a class of minors switches it off and shortens names to first
+names); each learner opts in. Ranked by % of the own weekly goal, ties share a place, only the
+top three are named with a title, everyone else sees only their own week.
+14.3 built — the class tab "Zertifikate" lists learners at ≥ 90 % unit mastery (mature cards);
+the server re-checks on award, one certificate per learner and unit, audit-logged and
+withdrawable. Learners find them under "Abzeichen"; both sides print an A4 certificate or save
+it as PDF through the print dialog (Arabic script and fonts intact). In the privacy export.
+14.4 built — "Live-Quiz" on the class page: the teacher's projector view (start, reveal, next,
+end) with questions from the class's leech words, topped up from the units reached; learners
+answer on their phones (four meanings, 20 s, points for right and quick), every change pushed
+through an event stream; only the top five are shown. Missed words become due cards at once.
+Tested with 30 learners answering at the same moment. Abandoned quizzes end after 12 h,
+results are deleted after 30 days. Open for the PO: 14.1 store release, 14.5 store assets.
 
 **Gate G5.**
 

@@ -5,6 +5,7 @@
   "description": "Suffa (الصُّفَّة) – offline-first Arabic learning platform (MSA, Al-Arabiyya bayna Yadayk) with SRS, classes and multi-device sync.",
   "type": "module",
   "workspaces": [
+    "packages/*",
     "apps/*"
   ],
   "scripts": {
@@ -17,7 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm test --workspaces --if-present && npm run test:tools",
-    "test:coverage": "npm run test:coverage -w @suffa/web",
+    "test:coverage": "npm run test:coverage -w @suffa/web && npm run test:coverage -w @suffa/engagement",
     "test:tools": "node --test \"tools/**/*.test.mjs\""
   },
   "devDependencies": {

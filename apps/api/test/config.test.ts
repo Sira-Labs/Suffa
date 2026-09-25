@@ -126,6 +126,124 @@ describe('loadConfig', () => {
   });
 });
 
+describe('object storage', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+
+  it('is off without settings and complete with endpoint and key', () => {
+    expect(loadConfig(base).storage).toBeUndefined();
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_S3_ENDPOINT: 'http://srv-captain--rustfs:9000/',
+        SUFFA_S3_ACCESS_KEY_ID: 'suffa-app',
+        SUFFA_S3_SECRET_ACCESS_KEY: 'secret-from-env',
+      }).storage
+    ).toEqual({
+      endpoint: 'http://srv-captain--rustfs:9000',
+      region: 'us-east-1',
+      accessKeyId: 'suffa-app',
+      secretAccessKey: 'secret-from-env',
+      buckets: {
+        media: 'suffa-media',
+        uploads: 'suffa-uploads',
+        content: 'suffa-content',
+      },
+    });
+  });
+
+  it('turns storage off with a warning when half configured, instead of failing', () => {
+    const config = loadConfig({
+      ...base,
+      SUFFA_S3_ENDPOINT: 'http://srv-captain--rustfs:9000',
+    });
+    expect(config.storage).toBeUndefined();
+    expect(config.warnings).toEqual([
+      'SUFFA_S3_ENDPOINT, SUFFA_S3_ACCESS_KEY_ID and SUFFA_S3_SECRET_ACCESS_KEY go together',
+    ]);
+  });
+});
+
+describe('Google Drive import', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+  it('is off without settings, on with all four, and off with a warning when partial', () => {
+    expect(loadConfig(base).google).toBeUndefined();
+    const all = {
+      SUFFA_GOOGLE_CLIENT_ID: 'id.apps.googleusercontent.com',
+      SUFFA_GOOGLE_CLIENT_SECRET: 'secret-from-env',
+      SUFFA_GOOGLE_API_KEY: 'browser-key',
+      SUFFA_GOOGLE_APP_ID: '123456789',
+    };
+    expect(loadConfig({ ...base, ...all }).google).toMatchObject({ appId: '123456789' });
+    const partial = loadConfig({
+      ...base,
+      SUFFA_GOOGLE_CLIENT_ID: all.SUFFA_GOOGLE_CLIENT_ID,
+    });
+    expect(partial.google).toBeUndefined();
+    expect(partial.warnings[0]).toMatch(/go together/);
+  });
+});
+
+describe('Web Push keys', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+  const keys = {
+    SUFFA_VAPID_PUBLIC_KEY: 'BPublic',
+    SUFFA_VAPID_PRIVATE_KEY: 'private-from-env',
+    SUFFA_VAPID_SUBJECT: 'mailto:ops@example.org',
+  };
+
+  it('is off without keys and on with all three', () => {
+    expect(loadConfig(base).vapid).toBeUndefined();
+    expect(loadConfig({ ...base, ...keys }).vapid).toEqual({
+      publicKey: 'BPublic',
+      privateKey: 'private-from-env',
+      subject: 'mailto:ops@example.org',
+    });
+  });
+
+  it('turns push off with a warning when half configured or the subject is no contact', () => {
+    const half = loadConfig({ ...base, SUFFA_VAPID_PUBLIC_KEY: 'BPublic' });
+    expect(half.vapid).toBeUndefined();
+    expect(half.warnings[0]).toMatch(/go together/);
+    const noContact = loadConfig({
+      ...base,
+      ...keys,
+      SUFFA_VAPID_SUBJECT: 'ops@example.org',
+    });
+    expect(noContact.vapid).toBeUndefined();
+    expect(noContact.warnings[0]).toMatch(/mailto:/);
+  });
+});
+
+describe('SUFFA_TRUSTED_ORIGINS', () => {
+  const base = {
+    SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db',
+    SUFFA_PUBLIC_URL: 'https://suffa.siralabs.org/',
+  };
+
+  it('trusts the public URL first, then the extra origins', () => {
+    expect(loadConfig(base).trustedOrigins).toEqual(['https://suffa.siralabs.org']);
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRUSTED_ORIGINS:
+          'https://suffa.siralabs.org, https://suffa-web.apps.example.ch/',
+      }).trustedOrigins
+    ).toEqual(['https://suffa.siralabs.org', 'https://suffa-web.apps.example.ch']);
+  });
+
+  it('reports entries that are not bare origins', () => {
+    for (const bad of [
+      'https://a.example.ch)',
+      'https://a.example/app',
+      'suffa.example',
+    ]) {
+      expect(() => loadConfig({ ...base, SUFFA_TRUSTED_ORIGINS: bad })).toThrow(
+        /is not an origin/
+      );
+    }
+  });
+});
+
 describe('SUFFA_SYNC_DEV_TOKENS', () => {
   const UUID = '11111111-1111-4111-8111-111111111111';
 
@@ -159,5 +277,24 @@ describe('SUFFA_SYNC_DEV_TOKENS', () => {
         SUFFA_SYNC_DEV_TOKENS: spec,
       })
     ).toThrow(ConfigError);
+  });
+});
+
+describe('SUFFA_MAIL_DIR (browser tests)', () => {
+  it('is taken outside prod and refused in prod', () => {
+    expect(
+      loadConfig({
+        SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db',
+        SUFFA_MAIL_DIR: '/tmp/suffa-mail',
+      }).mailDir
+    ).toBe('/tmp/suffa-mail');
+    expect(() =>
+      loadConfig({
+        SUFFA_ENV: 'prod',
+        SUFFA_DATABASE_URL: GOOD_DB,
+        SUFFA_AUTH_SECRET: GOOD_SECRET,
+        SUFFA_MAIL_DIR: '/tmp/suffa-mail',
+      })
+    ).toThrow(/SUFFA_MAIL_DIR must not be set in prod/);
   });
 });

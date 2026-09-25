@@ -47,6 +47,8 @@ export default defineConfig({
           '**/*-{cyrillic,cyrillic-ext,greek,vietnamese}-*.woff2',
         ],
         navigateFallback: 'index.html',
+        // Push notifications (story 6.3): handlers live in public/push-sw.js.
+        importScripts: ['push-sw.js'],
         // Server routes are never answered with the app shell.
         navigateFallbackDenylist: [/^\/api\//, /^\/healthz/, /^\/media\//],
         runtimeCaching: [
@@ -72,6 +74,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      // The shared rules are used from source: no build step for the app, one copy of the code.
+      '@suffa/engagement': fileURLToPath(
+        new URL('../../packages/engagement/src/index.ts', import.meta.url)
+      ),
     },
   },
   build: {

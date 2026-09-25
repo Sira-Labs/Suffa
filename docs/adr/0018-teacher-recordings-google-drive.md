@@ -1,6 +1,6 @@
 # ADR-0018: Teacher session recordings — Google Drive import and hosted media lessons
 
-- Status: proposed
+- Status: accepted (implemented in Sprint 7)
 - Date: 2026-09-24
 - Amends: ADR-0012 (checkpoint engine becomes source-agnostic)
 
@@ -61,3 +61,29 @@ interactivity planned for YouTube lessons (checkpoints, transcript, add-to-SRS, 
 One interactive-lesson engine for YouTube and own recordings. Storage and CPU grow with
 recordings (see cost plan). Google Cloud project + OAuth consent screen (in "testing" mode is
 fine for one teacher, up to 100 test users; production verification for `drive.file` is light).
+
+## Implementation (Sprint 7)
+
+- `media_items` (migration 0013) per class; statuses uploading → processing → ready (or
+  importing first for Drive, failed on errors). Publishing requires the teacher's consent
+  confirmation; members only see published, ready items.
+- Transcode: mono AAC 64 kbps (Opus left out: Safari/iOS play AAC everywhere) and 720p H.264
+  for video, `nice -n 10`, two threads, one job per worker.
+- Drive: OAuth web flow with `drive.file`, `prompt=consent` for a refresh token, state
+  HMAC-signed and bound to the signed-in teacher; the refresh token is sealed with
+  AES-256-GCM (key derived from `SUFFA_AUTH_SECRET`, purpose "drive") instead of a separate
+  `SUFFA_ENCRYPTION_KEY`. The Picker runs in the teacher's browser with a short-lived access
+  token; the worker streams picked files from Drive into storage.
+- Transcription, AI suggestions and offline downloads follow in Sprint 8.
+
+## Implementation (Sprint 11): AI suggestions
+
+- A teacher can ask for suggestions on a transcribed recording. The worker sends the transcript
+  (with timestamps, about an hour at most) to the `recording.suggest` route (Haiku first,
+  structured output) and stores chapters and checkpoints (word cards linked to course words,
+  questions, dictations) as pending suggestions. Anything outside the recording or not a valid
+  checkpoint is dropped.
+- Nothing is published on its own: accepting a suggestion creates the chapter or checkpoint,
+  dismissing it removes it. The class AI switch is checked when queueing and in the worker.
+- Chapters appear in the player (tap to jump, current part highlighted); teachers can remove
+  them.

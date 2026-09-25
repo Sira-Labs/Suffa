@@ -95,6 +95,22 @@ export function describeAudit(entry: AuditEntry): string {
       return 'Konto entsperrt';
     case 'account.2fa_enabled':
       return 'Zwei-Faktor-Anmeldung eingerichtet';
+    case 'ai.routes.replace':
+      return `KI-Modelle für ${entry.targetId} geändert`;
+    case 'ai.settings.update':
+      return 'KI-Budget und Kontingente geändert';
+    case 'video.channel_created':
+      return `Videokanal angelegt: ${String(d.name ?? '')}`;
+    case 'video.permission_changed':
+      return `Erlaubnis des Videokanals: ${String(d.from ?? '')} → ${String(d.permissionStatus ?? '')}`;
+    case 'video.channel_updated':
+      return 'Videokanal geändert';
+    case 'certificate.awarded':
+      return `Zertifikat Einheit ${String(d.unit ?? '')} vergeben (${String(d.mastery ?? '')} %)`;
+    case 'certificate.revoked':
+      return `Zertifikat Einheit ${String(d.unit ?? '')} zurückgenommen`;
+    case 'class.league.settings':
+      return `Wochenliga ${d.enabled ? 'eingeschaltet' : 'ausgeschaltet'}${d.minors ? ' (Klasse mit Minderjährigen)' : ''}`;
     default:
       return entry.action;
   }

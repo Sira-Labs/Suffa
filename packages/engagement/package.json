@@ -1,0 +1,19 @@
+{
+  "name": "@suffa/engagement",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Engagement rules (XP, daily quests, streaks, weekly goal, achievements, levels), pure and shared by web and api (ADR-0016).",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  }
+}

@@ -43,14 +43,24 @@ export const RBAC_MATRIX = {
   'class:manage': ['teacher', 'admin'],
   /** See one's classes and join one with an invite. */
   'class:join': ['student', 'teacher', 'admin'],
+  /** Read a class's feed (challenge, shout-outs, badges); scoped: active member of it. */
+  'class:read': ['student', 'teacher', 'admin'],
   /** Read aggregated progress of a class; additionally scoped by class role. */
   'class:progress:read': ['teacher', 'admin'],
+  /** Talk to al-Muʿallim; every learner reaches only their own conversations. */
+  'tutor:use': ['student', 'teacher', 'admin'],
   /** List and search users in the admin area. */
   'admin:users:read': ['admin'],
   /** Change a user's role or disable them (audit-logged). */
   'admin:users:write': ['admin'],
   /** Read the audit log. */
   'admin:audit:read': ['admin'],
+  /** See AI routes, budget and spend. */
+  'admin:ai:read': ['admin'],
+  /** Change AI routes, budget and quotas; try a route (audit-logged, costs money). */
+  'admin:ai:write': ['admin'],
+  /** Manage the video catalog: channels, permission, import, units, checkpoints. */
+  'admin:videos': ['admin'],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Action = keyof typeof RBAC_MATRIX;
@@ -64,6 +74,9 @@ export const SECOND_FACTOR_ACTIONS: ReadonlySet<Action> = new Set<Action>([
   'admin:users:read',
   'admin:users:write',
   'admin:audit:read',
+  'admin:ai:read',
+  'admin:ai:write',
+  'admin:videos',
 ]);
 
 /** Allowed by role, but the session still has to confirm the second factor. */
@@ -88,6 +101,9 @@ export function can(actor: Actor | null, action: Action, scope?: ClassScope): bo
     case 'class:manage':
       // Admins oversee every class; teachers only classes they teach.
       return actor.role === 'admin' || scope?.classRole === 'teacher';
+    case 'class:read':
+      // Any active member of the class (pending learners wait for approval first).
+      return actor.role === 'admin' || (scope?.classRole ?? null) !== null;
     default:
       return true;
   }

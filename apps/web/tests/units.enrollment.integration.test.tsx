@@ -75,7 +75,7 @@ describe('Unit enrollment (integration)', () => {
       within(grid).getByRole('link', { name: /^Einheit 2.*gesperrt$/ })
     ).toBeTruthy();
     expect(
-      within(grid).getByRole('link', { name: /^Einheit 1.*erledigt$/ })
+      within(grid).getByRole('link', { name: /^Einheit 1.*erledigt, 0 % gefestigt$/ })
     ).toBeTruthy();
   });
 

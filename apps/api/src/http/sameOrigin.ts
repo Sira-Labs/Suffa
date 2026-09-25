@@ -8,13 +8,15 @@ import type { MiddlewareHandler } from 'hono';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-export function sameOriginOnly(allowedOrigin: string): MiddlewareHandler {
+export function sameOriginOnly(allowed: string | readonly string[]): MiddlewareHandler {
+  // More than one while the app moves to a new domain (SUFFA_TRUSTED_ORIGINS).
+  const origins = new Set(typeof allowed === 'string' ? [allowed] : allowed);
   return async (c, next) => {
     if (SAFE_METHODS.has(c.req.method)) return next();
     const origin = c.req.header('origin');
     const site = c.req.header('sec-fetch-site');
     const foreign =
-      (origin !== undefined && origin !== allowedOrigin) ||
+      (origin !== undefined && !origins.has(origin)) ||
       (origin === undefined &&
         site !== undefined &&
         site !== 'same-origin' &&

@@ -22,7 +22,11 @@ import {
   youtubeUrl,
   type ResumeAt,
 } from '@/services/discover';
-import { loadYouTubeApi, type YouTubePlayer } from '@/services/discover/youtubeApi';
+import {
+  attachPlayer,
+  loadYouTubeApi,
+  type YouTubePlayer,
+} from '@/services/discover/youtubeApi';
 import { XP_RULES } from '@/services/engagement/xp';
 import { useCelebrationStore, useDiscoverStore, useListenStore } from '@/state';
 
@@ -260,14 +264,9 @@ function ResumablePlayer({ entry }: { entry: DiscoverEntry }) {
     loadYouTubeApi()
       .then((YT) => {
         if (cancelled || !frameRef.current) return;
-        player = new YT.Player(frameRef.current, {
-          events: {
-            onStateChange: ({ data }) => {
-              if (data === YT.PlayerState.PAUSED) save();
-              // Finished: 100 %; the next play starts from the beginning again.
-              if (data === YT.PlayerState.ENDED) save();
-            },
-          },
+        player = attachPlayer(YT, frameRef.current, (state) => {
+          // Finished (ENDED): 100 %; the next play starts from the beginning again.
+          if (state === YT.PlayerState.PAUSED || state === YT.PlayerState.ENDED) save();
         });
         timer = window.setInterval(save, SAVE_EVERY_MS);
       })

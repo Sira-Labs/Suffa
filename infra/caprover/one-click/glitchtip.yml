@@ -88,4 +88,4 @@ caproverOneClickApp:
   displayName: GlitchTip (error tracking and uptime)
   isOfficial: false
   description: Sentry-compatible error tracking and uptime monitoring, Postgres only.
-  documentation: https://github.com/thedatadudech/suffa/blob/main/docs/ops/caprover-deployment.md
+  documentation: https://github.com/Sira-Labs/Suffa/blob/main/docs/ops/caprover-deployment.md

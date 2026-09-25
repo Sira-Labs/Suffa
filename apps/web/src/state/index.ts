@@ -8,3 +8,4 @@ export * from './practiceStore';
 export * from './enrollmentStore';
 export * from './checkInStore';
 export * from './discoverStore';
+export * from './engagementStore';

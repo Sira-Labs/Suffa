@@ -6,7 +6,13 @@
 import { describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 import type { AccountRepository } from '../src/account/repository.js';
+import { ModelRouter } from '@suffa/llm';
 import type { AdminRepository } from '../src/admin/repository.js';
+import { AiGateway } from '../src/ai/gateway.js';
+import type { GradeService } from '../src/tutor/grading.js';
+import type { PgVideoRepository } from '../src/videos/repository.js';
+import type { TutorService } from '../src/tutor/service.js';
+import type { AiRepository } from '../src/ai/repository.js';
 import type { ClassRepository } from '../src/classes/repository.js';
 import type { PrivacyRepository } from '../src/privacy/repository.js';
 import { SecondFactorService } from '../src/account/secondFactor.js';
@@ -56,6 +62,17 @@ const privacyRepo: PrivacyRepository = {
     sessions: [],
     classes: [],
     learningData: {} as never,
+    tutor: { conversations: [], messages: [], usage: [], grades: [] },
+    engagement: { state: null, xpLedger: [], quests: [], achievements: [] },
+    classRecognition: {
+      badges: [],
+      shoutouts: [],
+      challenges: [],
+      certificates: [],
+      leagues: [],
+      quizzes: [],
+    },
+    notifications: { prefs: null, devices: [], recaps: [] },
     auditLog: [],
   }),
   delete: async () => true,
@@ -120,7 +137,262 @@ function buildApp() {
       queueDepth: async () => ({ waiting: 0, active: 0, failed: 0, deadLetter: 0 }),
     },
     sync: { repo: syncRepo, auth: resolver, log: quiet },
+    media: {
+      classes: classRepo,
+      repo: {
+        create: async () => ({}) as never,
+        get: async () => null,
+        byId: async () => null,
+        creator: async () => null,
+        list: async () => [],
+        classBytes: async () => 0,
+        update: async () => {},
+        publish: async () => {},
+        remove: async () => {},
+      },
+      media: {
+        start: async () => ({ ok: false, reason: 'unsupported_type' }),
+        partUrls: async () => ({}),
+        uploadedParts: async () => [],
+        complete: async () => false,
+        remove: async () => {},
+        playUrls: async () => ({ audio: '', video: null }),
+      },
+      audit: { query: async () => ({}) } as never,
+      auth: resolver,
+      log: quiet,
+    },
+    drive: {
+      drive: {
+        connected: async () => false,
+        accessToken: async () => null,
+        disconnect: async () => false,
+        connect: async () => {},
+        import: async () => ({ ok: false, reason: 'not_connected' }),
+      } as never,
+      google: { authUrl: () => 'https://accounts.google.com/o/oauth2/v2/auth' },
+      classes: classRepo,
+      picker: { apiKey: 'k', appId: '1' },
+      stateSecret: 's'.repeat(40),
+      auth: resolver,
+      log: quiet,
+    },
+    assignments: {
+      classes: classRepo,
+      repo: { list: async () => [], create: async () => null, remove: async () => false },
+      auth: resolver,
+      log: quiet,
+    },
+    interactive: {
+      classes: classRepo,
+      media: {
+        create: async () => ({}) as never,
+        get: async () => null,
+        byId: async () => null,
+        creator: async () => null,
+        list: async () => [],
+        classBytes: async () => 0,
+        update: async () => {},
+        publish: async () => {},
+        remove: async () => {},
+      },
+      interactive: {
+        transcript: async () => null,
+        saveTranscript: async () => {},
+        checkpoints: async () => [],
+        addCheckpoint: async () => ({}) as never,
+        removeCheckpoint: async () => false,
+        aiEnabled: async () => true,
+        setAiEnabled: async () => {},
+      },
+      auth: resolver,
+      log: quiet,
+    },
+    notifications: {
+      repo: {
+        subscribe: async () => {},
+        unsubscribe: async () => true,
+        prefs: async () => ({
+          reminderEnabled: false,
+          reminderTime: '18:00',
+          quietStart: '22:00',
+          quietEnd: '07:00',
+          weeklyRecap: true,
+          devices: 0,
+        }),
+        savePrefs: async () => {},
+        recipients: async () => [],
+        targets: async () => [],
+        doneOn: async () => false,
+        claim: async () => true,
+        delivered: async () => {},
+      },
+      recaps: { latest: async () => null },
+      publicKey: 'BPublic',
+      auth: resolver,
+      log: quiet,
+    },
+    quiz: {
+      classes: classRepo,
+      quiz: {
+        create: async () => ({ ok: false, reason: 'no_words' }),
+        next: async () => ({ ok: false, reason: 'no_quiz' }),
+        reveal: async () => ({ ok: false, reason: 'no_quiz' }),
+        finish: async () => ({ ok: false, reason: 'no_quiz' }),
+        join: async () => ({ ok: false, reason: 'no_quiz' }),
+        answer: async () => ({ ok: false, reason: 'no_quiz' }),
+        view: async () => null,
+        version: async () => null,
+      },
+      auth: resolver,
+      log: quiet,
+    },
+    certificates: {
+      classes: classRepo,
+      certificates: {
+        forClass: async () => ({ threshold: 90, eligible: [], awarded: [] }),
+        award: async () => ({ ok: false, reason: 'not_eligible' }),
+        revoke: async () => false,
+        mine: async () => [],
+      },
+      auth: resolver,
+      log: quiet,
+    },
+    classSpirit: {
+      classes: classRepo,
+      progress: {
+        progress: async () => ({ since: '', students: [], matureByRef: {}, leeches: [] }),
+      },
+      spirit: {
+        feed: async () => ({ challenge: null, shoutouts: [], badges: [] }),
+        setChallenge: async () => ({}) as never,
+        removeChallenge: async () => false,
+        createBadge: async () => ({}) as never,
+        award: async () => false,
+        shoutout: async () => null,
+        removeShoutout: async () => false,
+      },
+      league: {
+        view: async () => ({
+          enabled: false,
+          minors: false,
+          optedIn: null,
+          participants: 0,
+          podium: [],
+          you: null,
+        }),
+        settings: async () => ({ enabled: false, minors: false }),
+        updateSettings: async () => {},
+        setOptIn: async () => false,
+      },
+      auth: resolver,
+      log: quiet,
+    },
+    engagement: {
+      repo: { load: async () => null, save: async () => {}, state: async () => null },
+      auth: resolver,
+      log: quiet,
+    },
     admin: { repo: adminRepo, auth: resolver, log: quiet },
+    tutor: {
+      service: { turn: async function* () {} } as unknown as TutorService,
+      repo: {
+        create: async () => {},
+        get: async () => null,
+        list: async () => [],
+        messages: async () => [],
+        add: async () => {},
+        rate: async () => false,
+        remove: async () => false,
+      },
+      settings: { language: async () => 'de', setLanguage: async () => {} },
+      available: async () => false,
+      grading: {
+        service: { grade: async () => ({}) } as unknown as GradeService,
+        repo: {
+          studentClass: async () => null,
+          save: async () => {},
+          listOwn: async () => [],
+        },
+      },
+      auth: resolver,
+      log: quiet,
+    },
+    videos: {
+      videos: {
+        channels: async () => [],
+        adminVideos: async () => [],
+        channel: async () => null,
+        publicVideos: async () => [],
+        publicVideo: async () => null,
+        createChannel: async () => 'x',
+        updateChannel: async () => false,
+        updateVideo: async () => false,
+        saveTranscript: async () => {},
+        addCheckpoint: async () => ({}) as never,
+        removeCheckpoint: async () => false,
+      } as unknown as PgVideoRepository,
+      auth: resolver,
+      log: quiet,
+    },
+    suggestions: {
+      classes: classRepo,
+      media: { get: async () => null },
+      interactive: {
+        transcript: async () => null,
+        aiEnabled: async () => false,
+        addCheckpoint: async () => ({}) as never,
+      },
+      suggestions: {
+        run: async () => null,
+        setRun: async () => {},
+        replacePending: async () => {},
+        pending: async () => [],
+        decide: async () => null,
+        chapters: async () => [],
+        addChapter: async () => ({}) as never,
+        removeChapter: async () => false,
+      },
+      enqueue: async () => {},
+      available: async () => false,
+      auth: resolver,
+      log: quiet,
+    },
+    reviews: {
+      classes: classRepo,
+      reviews: {
+        queue: async () => [],
+        review: async () => false,
+        evalCases: async () => [],
+      },
+      auth: resolver,
+      log: quiet,
+    },
+    aiAdmin: (() => {
+      const repo: AiRepository = {
+        load: async () => [],
+        replaceRoutes: async () => {},
+        settings: async () => ({
+          monthlyBudgetMicro: 1,
+          downgradePercent: 80,
+          dailyTurns: { student: 1, teacher: 1, admin: null },
+        }),
+        updateSettings: async () => {},
+        monthSpend: async () => 0,
+        turnsToday: async () => 0,
+        record: async () => {},
+        usageByTask: async () => [],
+      };
+      const router = new ModelRouter({ providers: {}, source: repo });
+      return {
+        repo,
+        router,
+        gateway: new AiGateway({ router, repo, log: quiet }),
+        configured: [],
+        auth: resolver,
+        log: quiet,
+      };
+    })(),
     classes: {
       repo: classRepo,
       auth: resolver,
@@ -139,6 +411,7 @@ function buildApp() {
       me: async (h) => actorFrom(h),
     },
     errorTunnel: { webDsn: undefined, log: quiet },
+    appLinks: { iosAppIds: [], android: undefined },
     authzLog: quiet,
   });
 }
@@ -156,7 +429,9 @@ function requestFor(route: { method: string; path: string }, role: Role | null) 
         ? JSON.stringify(
             route.method === 'POST' ? { records: [], name: 'x' } : { timeZone: 'UTC' }
           )
-        : undefined,
+        : route.method === 'PUT'
+          ? JSON.stringify({ template: 'xp', target: 100, timeZone: 'UTC' })
+          : undefined,
   });
 }
 

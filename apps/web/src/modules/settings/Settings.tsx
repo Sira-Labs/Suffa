@@ -1,8 +1,11 @@
+import { WEEKLY_GOALS } from '@suffa/engagement';
 import { useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { TashkilToggle } from '@/components';
+import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { useSettingsStore, useSyncStore } from '@/state';
 import { AccountDevices } from './AccountDevices';
+import { RemindersCard } from './RemindersCard';
 import { PrivacyCard } from './PrivacyCard';
 
 export function Settings() {
@@ -71,6 +74,26 @@ export function Settings() {
             style={{ width: 100 }}
           />
         </label>
+        <label className="row" style={{ justifyContent: 'space-between' }}>
+          <span className="stack" style={{ gap: 0 }}>
+            <span>Wochenziel</span>
+            <span className="muted" style={{ fontSize: '0.85rem' }}>
+              Lerntage pro Woche – ein freier Tag bricht das Ziel nicht
+            </span>
+          </span>
+          <select
+            className="input"
+            value={settings.weeklyGoal ?? 5}
+            onChange={(e) => void update({ weeklyGoal: Number(e.target.value) })}
+            style={{ width: 130 }}
+          >
+            {WEEKLY_GOALS.map((goal) => (
+              <option key={goal} value={goal}>
+                {goal} Tage
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <PrivacyCard />
@@ -94,6 +117,15 @@ function AccountPanel() {
   const justSignedIn = params.get('angemeldet') === '1';
   // A failed link comes back to the same page with ?error=… (expired, already used).
   const linkError = signInLinkError(params.get('error'));
+
+  if (provider instanceof ApiSyncProvider && provider.isServerDown()) {
+    return (
+      <p className="muted" role="status">
+        Der Server ist gerade nicht erreichbar. Dein Lernstand bleibt auf diesem Gerät und
+        wird abgeglichen, sobald er wieder da ist – du bleibst angemeldet.
+      </p>
+    );
+  }
 
   if (!provider.isConfigured()) {
     return (
@@ -137,6 +169,7 @@ function AccountPanel() {
           </button>
         </div>
         <AccountDevices />
+        <RemindersCard />
       </div>
     );
   }
@@ -164,6 +197,7 @@ function AccountPanel() {
           className="input"
           type="email"
           placeholder="du@example.com"
+          aria-label="E-Mail-Adresse"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required

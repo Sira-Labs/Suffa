@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { ReviewLog, SrsCard } from '@/types';
-import { daysSinceLastReview, forgettingCurve, isStreakBroken, weakCards } from './stats';
+import {
+  daysSinceLastReview,
+  forgettingCurve,
+  isStreakBroken,
+  unitMastery,
+  weakCards,
+} from './stats';
 
 const log = (reviewedAt: string) => ({ reviewedAt, deleted: false }) as ReviewLog;
 const now = new Date(2026, 8, 23, 10, 0);
@@ -55,5 +61,26 @@ describe('weakCards', () => {
       log('c', 'good', '2026-09-24T10:00:00Z'),
     ];
     expect(weakCards(cards, logs).map((c) => c.id)).toEqual(['b', 'a', 'd']);
+  });
+});
+
+describe('unitMastery', () => {
+  const card = (contentRef: string, interval: number, deleted = false) =>
+    ({ id: `${contentRef}-${interval}`, contentRef, interval, deleted }) as SrsCard;
+
+  it('is the share of a unit’s words with a mature card', () => {
+    const words = [
+      { id: 'a', einheit: 1 },
+      { id: 'b', einheit: 1 },
+      { id: 'c', einheit: 1 },
+      { id: 'd', einheit: 2 },
+    ];
+    const mastery = unitMastery(
+      [card('a', 30), card('a', 25), card('b', 5), card('c', 40, true), card('d', 21)],
+      words
+    );
+    expect(mastery.get(1)).toBe(33);
+    expect(mastery.get(2)).toBe(100);
+    expect(mastery.get(3)).toBeUndefined();
   });
 });

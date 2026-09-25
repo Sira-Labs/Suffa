@@ -23,6 +23,12 @@ jobs:
       - run: npm ci
       - run: npm run format:check
       - run: npm run lint
+      - run: npm run typecheck -w @suffa/engagement
+      # The shared rules decide rewards everywhere: every branch must be covered.
+      - run: npm run test:coverage -w @suffa/engagement
+      - run: npm run typecheck -w @suffa/llm
+      # Adapter contract suite on recorded fixtures (no network, no keys).
+      - run: npm run test:coverage -w @suffa/llm
       - run: npm run typecheck -w @suffa/web
       - run: npm test -w @suffa/web
       - run: npm run test:tools
@@ -40,8 +46,12 @@ jobs:
           POSTGRES_DB: suffa_test
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U suffa" --health-interval 2s --health-timeout 5s
-          --health-retries 20
+          --health-cmd "pg_isready -U suffa -d suffa_test" --health-interval 2s
+          --health-timeout 5s --health-retries 20
+      # S3 API for the object storage tests (ADR-0017), in place of RustFS.
+      moto:
+        image: motoserver/moto:5.2.3
+        ports: ['5055:5000']
     env:
       # Throwaway database: the integration tests wipe it.
       SUFFA_TEST_DATABASE_URL: postgres://suffa:ci0123456789abcdef@127.0.0.1:5432/suffa_test
@@ -53,5 +63,49 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run typecheck -w @suffa/api
+      # ffmpeg for the recording transcode tests (story 7.4).
+      - run: command -v ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
       - run: npm test -w @suffa/api
+        env:
+          SUFFA_TEST_S3_ENDPOINT: http://127.0.0.1:5055
       - run: npm run build -w @suffa/api
+
+  e2e:
+    name: e2e (browser tests, desktop + phone)
+    runs-on: ubuntu-latest
+    # A fresh database the browser tests may wipe (the name must end in _e2e).
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: suffa
+          POSTGRES_PASSWORD: ci0123456789abcdef
+          POSTGRES_DB: suffa_e2e
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U suffa -d suffa_e2e" --health-interval 2s
+          --health-timeout 5s --health-retries 20
+    env:
+      E2E_DATABASE_URL: postgres://suffa:ci0123456789abcdef@127.0.0.1:5432/suffa_e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck -w @suffa/e2e
+      - run: npm run build -w @suffa/api
+      - run: npm run build -w @suffa/web
+      - run: npx playwright install --with-deps chromium
+        working-directory: apps/e2e
+      - run: npm run e2e -w @suffa/e2e
+      # On failure: screenshots, traces and the HTML report to look at.
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-report
+          path: |
+            apps/e2e/playwright-report
+            apps/e2e/test-results
+          retention-days: 7

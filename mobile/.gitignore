@@ -1,0 +1,4 @@
+node_modules/
+# Firebase configuration of the build machine (FCM); never committed.
+google-services.json
+GoogleService-Info.plist

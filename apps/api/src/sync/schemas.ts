@@ -67,6 +67,8 @@ export const SYNC_SCHEMAS = {
     theme: z.enum(['dark', 'light']),
     arabicFontScale: z.number().min(0.5).max(3),
     dailyGoal: z.number().int().min(1).max(1000),
+    // Active days per week (story 5.5); older app versions do not send it yet.
+    weeklyGoal: z.union([z.literal(3), z.literal(5), z.literal(7)]).default(5),
     showTransliteration: z.boolean(),
     dialectNotes: z.boolean(),
   }),
@@ -85,7 +87,17 @@ export const SYNC_SCHEMAS = {
   practice_progress: z.object({
     ...base,
     unit: z.number().int().min(0).max(1000),
-    skill: z.enum(['read', 'grammar', 'cloze', 'write', 'speak', 'verbs', 'letters']),
+    skill: z.enum([
+      'read',
+      'grammar',
+      'cloze',
+      'write',
+      'speak',
+      'verbs',
+      'letters',
+      'checkpoint',
+      'tutor',
+    ]),
     itemId: shortText.min(1),
     practisedAt: isoTimestamp,
   }),
@@ -114,7 +126,7 @@ export const SYNC_SCHEMAS = {
   }),
   media_progress: z.object({
     ...base,
-    source: z.enum(['publisher-audio', 'discover-video']),
+    source: z.enum(['publisher-audio', 'discover-video', 'recording', 'video-lesson']),
     ref: z.string().min(1).max(2000),
     lessonKey: shortText,
     durationSec: z.number().min(0).max(1_000_000),

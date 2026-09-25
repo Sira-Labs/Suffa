@@ -1,0 +1,5 @@
+{
+  "about": "Minimum pass rates; a run below them fails the CI job (story 11.3). Raise them as the prompts get better, never lower them silently.",
+  "grading": { "minPassRate": 0.75 },
+  "tutor": { "minPassRate": 0.8 }
+}

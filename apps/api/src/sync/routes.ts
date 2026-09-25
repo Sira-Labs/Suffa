@@ -30,6 +30,8 @@ export interface SyncRouteDeps {
   repo: SyncRepository;
   auth: AuthResolver;
   log: Pick<Logger, 'info' | 'warn' | 'error'>;
+  /** Called after records were applied (queues the engagement recompute). */
+  onPushed?: (userId: string) => Promise<void>;
 }
 
 const MAX_BODY_BYTES = 2 * 1024 * 1024;
@@ -91,6 +93,14 @@ export function createSyncRoutes(deps: SyncRouteDeps): Hono<ActorEnv> {
       const userId = c.get('actor').id;
       const applied = await deps.repo.upsert(userId, table, records);
       deps.log.info({ table, userId, received: records.length, applied }, 'sync.push');
+      if (applied > 0 && deps.onPushed) {
+        // The push succeeded either way; a lost recompute is redone by the next push.
+        await deps
+          .onPushed(userId)
+          .catch((error: unknown) =>
+            deps.log.warn({ err: error, userId }, 'engagement.enqueue_failed')
+          );
+      }
       return c.json({ received: records.length, applied });
     }
   );

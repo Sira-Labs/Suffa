@@ -18,6 +18,37 @@ export interface AccountExport {
   sessions: Record<string, unknown>[];
   classes: Record<string, unknown>[];
   learningData: Record<SyncTableName, Record<string, unknown>[]>;
+  /** What the server derived from the learning data: XP, daily quests, badges (story 5.4). */
+  engagement: {
+    state: Record<string, unknown> | null;
+    xpLedger: Record<string, unknown>[];
+    quests: Record<string, unknown>[];
+    achievements: Record<string, unknown>[];
+  };
+  /** Reminder settings, devices with push (without their keys) and weekly recaps. */
+  notifications: {
+    prefs: Record<string, unknown> | null;
+    devices: Record<string, unknown>[];
+    recaps: Record<string, unknown>[];
+  };
+  /** Recognition inside classes: badges and shout-outs received, challenges helped. */
+  classRecognition: {
+    badges: Record<string, unknown>[];
+    shoutouts: Record<string, unknown>[];
+    challenges: Record<string, unknown>[];
+    /** Unit certificates (story 14.3) and the weekly league choice per class (14.2). */
+    certificates: Record<string, unknown>[];
+    leagues: Record<string, unknown>[];
+    /** Live quiz answers (kept 30 days after the quiz, story 14.4). */
+    quizzes: Record<string, unknown>[];
+  };
+  /** al-Muʿallim: conversations (kept 90 days) and AI usage per day. */
+  tutor: {
+    conversations: Record<string, unknown>[];
+    messages: Record<string, unknown>[];
+    usage: Record<string, unknown>[];
+    grades: Record<string, unknown>[];
+  };
   auditLog: Record<string, unknown>[];
 }
 
@@ -43,7 +74,8 @@ export class PgPrivacyRepository implements PrivacyRepository {
         iso(r as Record<string, unknown>)
       );
     const [profile] = await q(
-      `select id, email, name, role, time_zone, email_verified, created_at, updated_at
+      `select id, email, name, role, time_zone, tutor_language, email_verified, created_at,
+              updated_at
          from users where id = $1`
     );
     const learningData = {} as Record<SyncTableName, Record<string, unknown>[]>;
@@ -70,6 +102,102 @@ export class PgPrivacyRepository implements PrivacyRepository {
           where m.user_id = $1 order by m.joined_at`
       ),
       learningData,
+      engagement: {
+        state:
+          (
+            await q(
+              `select total_xp, level, streak_current, streak_longest, shields,
+                      rules_version, rejected, computed_at
+                 from engagement_state where user_id = $1`
+            )
+          )[0] ?? null,
+        xpLedger: await q(
+          `select event_key, kind, points, earned_at, rules_version
+             from xp_ledger where user_id = $1 order by earned_at, event_key`
+        ),
+        quests: await q(
+          `select day::text, quest_id, progress, target, completed_at
+             from quest_progress where user_id = $1 order by day, quest_id`
+        ),
+        achievements: await q(
+          `select badge_id, tier, unlocked_at
+             from achievement_unlocks where user_id = $1 order by unlocked_at, badge_id`
+        ),
+      },
+      notifications: {
+        prefs:
+          (
+            await q(
+              `select reminder_enabled, reminder_time, quiet_start, quiet_end, weekly_recap,
+                      updated_at
+                 from notification_prefs where user_id = $1`
+            )
+          )[0] ?? null,
+        devices: await q(
+          `select user_agent, created_at, last_success_at
+             from push_subscriptions where user_id = $1 order by created_at`
+        ),
+        recaps: await q(
+          `select week_start::text, data from weekly_recaps
+            where user_id = $1 order by week_start`
+        ),
+      },
+      classRecognition: {
+        badges: await q(
+          `select c.name as class, b.name, b.message, a.awarded_at
+             from teacher_badge_awards a
+             join teacher_badges b on b.id = a.badge_id
+             join classes c on c.id = b.class_id
+            where a.user_id = $1 order by a.awarded_at`
+        ),
+        shoutouts: await q(
+          `select c.name as class, s.message, s.created_at
+             from class_shoutouts s join classes c on c.id = s.class_id
+            where s.user_id = $1 order by s.created_at`
+        ),
+        challenges: await q(
+          `select c.name as class, ch.week_start::text, ch.template, ch.target, ch.reached_at
+             from class_challenge_contributors cc
+             join class_challenges ch on ch.id = cc.challenge_id
+             join classes c on c.id = ch.class_id
+            where cc.user_id = $1 order by ch.week_start`
+        ),
+        certificates: await q(
+          `select unit, mastery, class_name as class, teacher_name as teacher, awarded_at
+             from certificates where user_id = $1 order by unit`
+        ),
+        leagues: await q(
+          `select c.name as class, cm.league_opt_in as opted_in
+             from class_members cm join classes c on c.id = cm.class_id
+            where cm.user_id = $1 order by c.name`
+        ),
+        quizzes: await q(
+          `select c.name as class, a.question, a.choice, a.correct, a.points, a.answered_at
+             from live_quiz_answers a
+             join live_quizzes z on z.id = a.quiz_id
+             join classes c on c.id = z.class_id
+            where a.user_id = $1 order by a.answered_at`
+        ),
+      },
+      tutor: {
+        conversations: await q(
+          `select id, title, context, created_at, updated_at from ai_conversations
+            where user_id = $1 order by created_at`
+        ),
+        messages: await q(
+          `select m.conversation_id, m.role, m.content, m.rating, m.created_at
+             from ai_messages m join ai_conversations c on c.id = m.conversation_id
+            where c.user_id = $1 order by m.created_at, m.id`
+        ),
+        usage: await q(
+          `select day::text, turns, tokens, cost_micro from ai_usage_daily
+            where user_id = $1 order by day`
+        ),
+        grades: await q(
+          `select kind, task, answer, result, status, override, created_at, reviewed_at
+             from ai_grades where user_id = $1 order by created_at`
+        ),
+      },
       auditLog: await q(
         `select action, target_type, target_id, details, created_at,
                 (actor_id = $1) as by_you

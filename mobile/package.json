@@ -1,0 +1,25 @@
+{
+  "name": "@suffa/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Suffa for iOS and Android: the web build in a Capacitor shell (ADR-0019).",
+  "scripts": {
+    "build:web": "npm --prefix .. run build -w @suffa/web",
+    "sync": "npm run build:web && cap sync",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.5.2",
+    "@capacitor/ios": "^8.5.2",
+    "@capacitor/local-notifications": "^8.0.0",
+    "@capacitor/preferences": "^8.0.0",
+    "@capacitor/push-notifications": "^8.0.0",
+    "capacitor-secure-storage-plugin": "^0.13.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.2"
+  }
+}

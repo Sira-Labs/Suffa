@@ -107,6 +107,8 @@ export interface SettingsRecord extends Syncable {
   theme: 'dark' | 'light';
   arabicFontScale: number;
   dailyGoal: number;
+  /** Active days per week the learner aims for: 3, 5 or 7 (story 5.5). */
+  weeklyGoal: number;
   showTransliteration: boolean;
   dialectNotes: boolean;
 }

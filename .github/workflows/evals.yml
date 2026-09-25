@@ -1,0 +1,39 @@
+# AI evals (story 11.3, ADR-0011): the golden sets run against the real models whenever the
+# prompts, the gateway or the sets change. A drop below evals/baseline.json fails the job.
+# Needs the repository secret SUFFA_EVAL_ANTHROPIC_API_KEY (use a key with a low spend limit);
+# without it the job passes with a notice. Each run spends at most SUFFA_EVAL_BUDGET_USD.
+name: evals
+
+on:
+  pull_request:
+    paths:
+      - 'apps/api/src/tutor/**'
+      - 'apps/api/src/evals/**'
+      - 'apps/api/evals/**'
+      - 'packages/llm/src/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: evals-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evals:
+    name: evals (grading + tutor, budget-capped)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUFFA_EVAL_ANTHROPIC_API_KEY: ${{ secrets.SUFFA_EVAL_ANTHROPIC_API_KEY }}
+      SUFFA_EVAL_BUDGET_USD: '0.30'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build -w @suffa/api
+      - run: npm run eval -w @suffa/api

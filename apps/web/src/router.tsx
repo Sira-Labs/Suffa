@@ -1,3 +1,7 @@
+import { RecordingPlayer } from './modules/classes/RecordingPlayer';
+import { LiveQuiz } from './modules/classes/LiveQuiz';
+import { ClassPage } from './modules/classes/ClassPage';
+import { Badges } from './modules/engagement/Badges';
 import { createBrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { migrateLegacyHashUrl } from './services/legacyHashUrl';
@@ -19,6 +23,8 @@ import { FocusReview } from './modules/review';
 import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
 import { Admin } from './modules/admin';
 import { Classes, Join } from './modules/classes';
+import { Tutor } from './modules/tutor';
+import { VideoLesson, VideoLessons } from './modules/videos';
 
 /**
  * Normal paths (story 2.6, ADR-0013): Caddy answers unknown paths with index.html and the
@@ -47,6 +53,13 @@ export const router = createBrowserRouter([
       { path: 'settings', element: <Settings /> },
       { path: 'admin', element: <Admin /> },
       { path: 'classes', element: <Classes /> },
+      { path: 'classes/:id', element: <ClassPage /> },
+      { path: 'classes/:id/recordings/:mediaId', element: <RecordingPlayer /> },
+      { path: 'classes/:id/quiz', element: <LiveQuiz /> },
+      { path: 'tutor', element: <Tutor /> },
+      { path: 'videos', element: <VideoLessons /> },
+      { path: 'videos/:id', element: <VideoLesson /> },
+      { path: 'badges', element: <Badges /> },
       { path: 'join/:token', element: <Join /> },
       { path: 'more', element: <More /> },
       { path: 'training', element: <Training /> },

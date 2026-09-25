@@ -30,8 +30,13 @@ export default tseslint.config(
     },
   },
   {
+    // Service worker additions (push), plain JS in the PWA's public folder.
+    files: ['apps/web/public/**/*.js'],
+    languageOptions: { ecmaVersion: 2022, globals: globals.serviceworker },
+  },
+  {
     // Node scripts for maintainers (content tooling).
-    files: ['tools/**/*.mjs'],
+    files: ['tools/**/*.mjs', 'apps/e2e/**/*.mjs'],
     languageOptions: { ecmaVersion: 2023, globals: globals.node },
   },
   {

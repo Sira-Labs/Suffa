@@ -1,0 +1,112 @@
+{
+  "about": "Golden set for grade mode (story 11.3). Own sentences, no book text. Teacher exports can be added with `npm run eval:import -w @suffa/api -- <file>`.",
+  "cases": [
+    {
+      "id": "intro-good",
+      "kind": "writing",
+      "unit": 1,
+      "task": "Stell dich vor: Name, Herkunft, Wohnort.",
+      "answer": "اِسْمي سارَةُ. أَنا مِنْ أَلْمانيا. أَسْكُنُ في بَرْلين.",
+      "score": [80, 100],
+      "maxMistakes": 1
+    },
+    {
+      "id": "intro-no-hamza",
+      "kind": "writing",
+      "unit": 1,
+      "task": "Stell dich vor: Name, Herkunft, Wohnort.",
+      "answer": "اسمي سارة. انا من المانيا. اسكن في برلين.",
+      "score": [50, 92],
+      "mustFlag": ["spelling"]
+    },
+    {
+      "id": "gender-this-school",
+      "kind": "writing",
+      "unit": 2,
+      "task": "Beschreibe deine Schule in einem Satz.",
+      "answer": "هذا مدرسة كبير.",
+      "score": [0, 65],
+      "mustFlag": ["grammar"]
+    },
+    {
+      "id": "gender-she-student",
+      "kind": "writing",
+      "unit": 1,
+      "task": "Wer bist du, wer ist sie?",
+      "answer": "أنا طالب. هي طالب.",
+      "score": [25, 80],
+      "mustFlag": ["grammar"]
+    },
+    {
+      "id": "gender-this-book",
+      "kind": "writing",
+      "unit": 2,
+      "task": "Was ist das?",
+      "answer": "هذه كتاب.",
+      "score": [0, 65],
+      "mustFlag": ["grammar"]
+    },
+    {
+      "id": "house-family-good",
+      "kind": "writing",
+      "unit": 3,
+      "task": "Wo wohnst du?",
+      "answer": "أَنا أَسْكُنُ في بَيْتٍ كَبيرٍ مَعَ أُسْرَتي.",
+      "score": [78, 100],
+      "maxMistakes": 1
+    },
+    {
+      "id": "not-arabic",
+      "kind": "writing",
+      "unit": 1,
+      "task": "Stell dich vor: Name, Herkunft, Wohnort.",
+      "answer": "Ich heiße Sara und komme aus Deutschland.",
+      "score": [0, 30]
+    },
+    {
+      "id": "pen-on-desk-good",
+      "kind": "writing",
+      "unit": 2,
+      "task": "Wo ist der Stift?",
+      "answer": "الْقَلَمُ عَلى الْمَكْتَبِ.",
+      "score": [78, 100],
+      "maxMistakes": 1
+    },
+    {
+      "id": "question-answer-good",
+      "kind": "writing",
+      "unit": 1,
+      "task": "Frage und Antwort: Bist du Student?",
+      "answer": "هَلْ أَنْتَ طالِبٌ؟ نَعَمْ، أَنا طالِبٌ.",
+      "score": [80, 100],
+      "maxMistakes": 1
+    },
+    {
+      "id": "dual-case",
+      "kind": "writing",
+      "unit": 4,
+      "task": "Was ist im Zimmer?",
+      "answer": "في الغرفة كرسيين.",
+      "score": [25, 88],
+      "mustFlag": ["grammar"]
+    },
+    {
+      "id": "speech-intro",
+      "kind": "speech",
+      "unit": 1,
+      "task": "Stell dich vor.",
+      "answer": "انا اسمي محمد انا من سوريا",
+      "score": [65, 100],
+      "maxMistakes": 2
+    },
+    {
+      "id": "speech-wrong-gender",
+      "kind": "speech",
+      "unit": 2,
+      "task": "Beschreibe deine Mutter.",
+      "answer": "امي طويل وجميل",
+      "score": [15, 75],
+      "mustFlag": ["grammar"]
+    }
+  ]
+}

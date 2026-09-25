@@ -38,3 +38,7 @@ coverage
 
 # TypeScript incremental build info (local build state)
 *.tsbuildinfo
+
+# Playwright (apps/e2e)
+test-results/
+playwright-report/

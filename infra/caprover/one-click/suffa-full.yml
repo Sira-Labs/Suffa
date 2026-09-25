@@ -21,7 +21,7 @@ services:
 
   # Runs DB migrations on start, then serves /healthz and /api/* on port 8000.
   $$cap_appname-api:
-    image: ghcr.io/thedatadudech/suffa-api:$$cap_tag
+    image: ghcr.io/sira-labs/suffa-api:$$cap_tag
     restart: always
     depends_on:
       - $$cap_appname-db
@@ -49,7 +49,7 @@ services:
 
   # Same image in worker mode. Exits with code 3 until the api has migrated; CapRover restarts it.
   $$cap_appname-worker:
-    image: ghcr.io/thedatadudech/suffa-api:$$cap_tag
+    image: ghcr.io/sira-labs/suffa-api:$$cap_tag
     restart: always
     depends_on:
       - $$cap_appname-api
@@ -68,7 +68,7 @@ services:
       notExposeAsWebApp: 'true'
 
   $$cap_appname-web:
-    image: ghcr.io/thedatadudech/suffa-web:$$cap_tag
+    image: ghcr.io/sira-labs/suffa-web:$$cap_tag
     restart: always
     depends_on:
       - $$cap_appname-api
@@ -146,4 +146,4 @@ caproverOneClickApp:
   displayName: Suffa (full stack)
   isOfficial: false
   description: Offline-first Arabic learning platform (الصُّفَّة) — database, api, worker and web.
-  documentation: https://github.com/thedatadudech/suffa/blob/main/docs/ops/caprover-deployment.md
+  documentation: https://github.com/Sira-Labs/Suffa/blob/main/docs/ops/caprover-deployment.md

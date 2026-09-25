@@ -21,7 +21,7 @@ services:
       notExposeAsWebApp: 'true'
 
   $$cap_appname-web:
-    image: ghcr.io/thedatadudech/suffa-web:$$cap_tag
+    image: ghcr.io/sira-labs/suffa-web:$$cap_tag
     restart: always
     environment:
       # Until suffa-api exists, /api answers 502; the offline app is unaffected.
@@ -67,4 +67,4 @@ caproverOneClickApp:
   displayName: Suffa (web + db)
   isOfficial: false
   description: Offline-first Arabic learning platform (الصُّفَّة) — web app and database.
-  documentation: https://github.com/thedatadudech/suffa/blob/main/docs/ops/caprover-deployment.md
+  documentation: https://github.com/Sira-Labs/Suffa/blob/main/docs/ops/caprover-deployment.md

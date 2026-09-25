@@ -9,6 +9,7 @@ import { MediaApi, type MediaItem } from '@/services/media/mediaApi';
 import { putPart, uploadRecording } from '@/services/media/uploader';
 import { useListenStore } from '@/state';
 import { DriveImport } from './DriveImport';
+import { InteractiveApi } from '@/services/media/interactiveApi';
 
 const STATUS: Record<MediaItem['status'], string> = {
   uploading: 'Upload läuft',
@@ -68,6 +69,7 @@ export function ClassRecordings({
     <div className="stack" style={{ gap: '1rem' }}>
       {teacher && <UploadForm api={api} classId={classId} onDone={load} />}
       {teacher && <DriveImport classId={classId} onImported={() => void load()} />}
+      {teacher && <AiSwitch classId={classId} />}
       {message && <p className="feedback-bad">{message}</p>}
       {items.length === 0 ? (
         <p className="muted">
@@ -275,5 +277,33 @@ function UploadForm({
       </div>
       {message && <span className="muted">{message}</span>}
     </form>
+  );
+}
+
+/** Per-class AI switch (ADR-0018): off = recordings are never sent for transcription. */
+function AiSwitch({ classId }: { classId: string }) {
+  const api = useMemo(() => new InteractiveApi(), []);
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+  useEffect(() => {
+    void api.settings(classId).then((r) => r.ok && setEnabled(r.value.aiEnabled));
+  }, [api, classId]);
+  if (enabled === null) return null;
+  return (
+    <label className="card row" style={{ justifyContent: 'space-between' }}>
+      <span className="stack" style={{ gap: 0 }}>
+        <strong>KI für Transkripte</strong>
+        <span className="muted" style={{ fontSize: '0.85rem' }}>
+          Aus: Aufnahmen dieser Klasse werden nie an einen Transkriptionsdienst geschickt.
+        </span>
+      </span>
+      <input
+        type="checkbox"
+        checked={enabled}
+        onChange={(e) => {
+          const next = e.target.checked;
+          void api.setAiEnabled(classId, next).then((r) => r.ok && setEnabled(next));
+        }}
+      />
+    </label>
   );
 }

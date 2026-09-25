@@ -92,6 +92,8 @@ async function signIn(role: 'teacher' | 'student', classRole: 'teacher' | 'stude
     }
     if (path.endsWith('/feed')) return Response.json(feed);
     if (path.endsWith('/media')) return Response.json({ items: [] });
+    if (path.endsWith('/assignments')) return Response.json({ assignments: [] });
+    if (path.endsWith('/settings')) return Response.json({ aiEnabled: true });
     if (path.endsWith('/members')) {
       return Response.json({
         members: [

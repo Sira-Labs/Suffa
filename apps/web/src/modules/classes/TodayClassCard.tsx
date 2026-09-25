@@ -5,8 +5,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ClassesApi, type ClassFeed } from '@/services/classes/classesApi';
+import { InteractiveApi, type Assignment } from '@/services/media/interactiveApi';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { useSyncStore } from '@/state';
+import { OpenAssignments } from './Assignments';
 import { ChallengeCard } from './ClassLife';
 
 export function TodayClassCard() {
@@ -14,7 +16,11 @@ export function TodayClassCard() {
   const auth = useSyncStore((s) => s.auth);
   const lastSyncAt = useSyncStore((s) => s.lastSyncAt);
   const api = useMemo(() => new ClassesApi(), []);
-  const [state, setState] = useState<{ id: string; feed: ClassFeed } | null>(null);
+  const [state, setState] = useState<{
+    id: string;
+    feed: ClassFeed;
+    assignments: Assignment[];
+  } | null>(null);
   const online = provider instanceof ApiSyncProvider && auth.status === 'signed-in';
 
   useEffect(() => {
@@ -28,8 +34,17 @@ export function TodayClassCard() {
           )
         : undefined;
       if (!mine) return;
-      const feed = await api.feed(mine.id);
-      if (!cancelled && feed.ok) setState({ id: mine.id, feed: feed.value });
+      const [feed, assignments] = await Promise.all([
+        api.feed(mine.id),
+        new InteractiveApi().assignments(mine.id),
+      ]);
+      if (!cancelled && feed.ok) {
+        setState({
+          id: mine.id,
+          feed: feed.value,
+          assignments: assignments.ok ? assignments.value.assignments : [],
+        });
+      }
     })();
     return () => {
       cancelled = true;
@@ -37,23 +52,28 @@ export function TodayClassCard() {
     // Refreshed after each sync: the challenge counts synced progress.
   }, [api, online, lastSyncAt]);
 
-  if (!online || !state?.feed.challenge) return null;
+  if (!online || !state) return null;
   const shout = state.feed.shoutouts.find((s) => s.toYou);
   return (
-    <Link
-      to={`/classes/${state.id}`}
-      className="class-link stack"
-      style={{ gap: '0.5rem' }}
-    >
-      <ChallengeCard challenge={state.feed.challenge} />
-      {shout && (
-        <p className="feed-item feed-item-you" style={{ margin: 0 }}>
-          <span className="muted" style={{ fontSize: '0.85rem' }}>
-            {shout.author ?? 'Deine Lehrkraft'} an dich:{' '}
-          </span>
-          {shout.message}
-        </p>
+    <>
+      <OpenAssignments classId={state.id} items={state.assignments} />
+      {state.feed.challenge && (
+        <Link
+          to={`/classes/${state.id}`}
+          className="class-link stack"
+          style={{ gap: '0.5rem' }}
+        >
+          <ChallengeCard challenge={state.feed.challenge} />
+          {shout && (
+            <p className="feed-item feed-item-you" style={{ margin: 0 }}>
+              <span className="muted" style={{ fontSize: '0.85rem' }}>
+                {shout.author ?? 'Deine Lehrkraft'} an dich:{' '}
+              </span>
+              {shout.message}
+            </p>
+          )}
+        </Link>
       )}
-    </Link>
+    </>
   );
 }

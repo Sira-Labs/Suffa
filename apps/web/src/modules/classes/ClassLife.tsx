@@ -15,6 +15,7 @@ import {
   type Member,
 } from '@/services/classes/classesApi';
 import { useLearnerTimeZone } from '@/modules/engagement/useEngagement';
+import { Assignments } from './Assignments';
 
 const DATE = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short' });
 
@@ -64,6 +65,7 @@ export function ClassLife({
     <div className="stack" style={{ gap: '1rem' }}>
       {message && <p className="feedback-bad">{message}</p>}
       <ChallengeCard challenge={feed.challenge} />
+      <Assignments classId={classId} teacher={teacher} />
       {teacher && (
         <ChallengeEditor
           current={feed.challenge}

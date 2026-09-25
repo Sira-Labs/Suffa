@@ -32,6 +32,7 @@ gantt
   Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
   section P3 Teacher recordings
   S7 Bring the sessions in (5/5)    :done, s7, after s6, 14d
+  S8 Make them interactive (5/5)    :done, s8, after s7, 14d
 ```
 
 ```mermaid
@@ -79,6 +80,11 @@ pie showData
 | 7.3 multipart upload    | ✅     | 32 MB parts via presigned URLs, retries with back-off, resume by picking the same file again (server lists stored parts)                            |
 | 7.4 transcode           | ✅     | ffmpeg in the api image: mono AAC for everyone, 720p fast-start MP4 for video; one job at a time, nice'd, progress on the item                      |
 | 7.5 player + progress   | ✅     | class recordings list, publish with consent, player counts played time into `media_progress` (source `recording`) → XP and sync                     |
+| 8.1 transcription       | ✅     | OpenAI-compatible STT (self-hosted faster-whisper possible), 10-min pieces; per-class AI switch checked again in the worker; cue editor             |
+| 8.2 checkpoints         | ✅     | mcq, dictation (compared without tashkīl), vocab_flash; pause within ±0.5 s when played across, never on seeking; right answer = practice XP        |
+| 8.3 publish + consent   | ✅     | (Sprint 7) teacher confirms consent; members only see published recordings                                                                          |
+| 8.4 offline audio       | ✅     | audio + transcript + checkpoints in Cache Storage; the player falls back to the saved copy without network                                          |
+| 8.5 assignments         | ✅     | unit test or recording with due date; done derived from synced exams/listening; teacher sees x/y done; learners see open ones on "Heute"            |
 
 ## P0 — Foundation
 

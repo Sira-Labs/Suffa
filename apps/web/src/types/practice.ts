@@ -3,8 +3,11 @@ import type { Syncable } from './srs';
 /** Skills practised inside a unit, besides listening and vocabulary cards. */
 export type PracticeSkill = 'read' | 'grammar' | 'cloze' | 'write' | 'speak' | 'verbs';
 
-/** Practice outside the units: the alphabet course (stored under unit 0). */
-export type CourseSkill = 'letters';
+/**
+ * Practice outside the units (stored under unit 0): the alphabet course, and checkpoints
+ * answered correctly in class recordings (Sprint 8).
+ */
+export type CourseSkill = 'letters' | 'checkpoint';
 
 /**
  * One practised item of a unit skill (a dialogue read, a word written correctly, a dialogue

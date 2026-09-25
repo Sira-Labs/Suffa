@@ -87,7 +87,16 @@ export const SYNC_SCHEMAS = {
   practice_progress: z.object({
     ...base,
     unit: z.number().int().min(0).max(1000),
-    skill: z.enum(['read', 'grammar', 'cloze', 'write', 'speak', 'verbs', 'letters']),
+    skill: z.enum([
+      'read',
+      'grammar',
+      'cloze',
+      'write',
+      'speak',
+      'verbs',
+      'letters',
+      'checkpoint',
+    ]),
     itemId: shortText.min(1),
     practisedAt: isoTimestamp,
   }),

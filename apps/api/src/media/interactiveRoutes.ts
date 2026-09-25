@@ -77,6 +77,7 @@ export function createInteractiveRoutes(deps: InteractiveRouteDeps): Hono<ActorE
     return c.json({
       transcript,
       checkpoints,
+      canEdit: manager,
       canGenerate: manager && Boolean(deps.transcribe),
     });
   });

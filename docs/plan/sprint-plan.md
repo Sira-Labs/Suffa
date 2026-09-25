@@ -33,6 +33,8 @@ gantt
   section P3 Teacher recordings
   S7 Bring the sessions in (5/5)    :done, s7, after s6, 14d
   S8 Make them interactive (5/5)    :done, s8, after s7, 14d
+  section P4 AI teacher
+  S9 Gateway (5/5)                  :done, s9, after s8, 14d
 ```
 
 ```mermaid
@@ -194,6 +196,12 @@ pie showData
 | 9.3 | `ModelRouter` + `ai_model_routes` + capability checks + fallbacks                                 | 3   | Route change live in ≤ 60 s.                              |
 | 9.4 | Metering + quotas in Postgres + budget downgrade                                                  | 5   | Over-quota → friendly 429; spend within ±5 % of provider. |
 | 9.5 | Admin AI page v1 (routes, spend)                                                                  | 2   | Model per task editable.                                  |
+
+Status (Sprint 9): all five stories done. `packages/llm` with the three adapters and a shared
+contract suite on recorded fixtures (the live cache check runs with a key only); routing table
+`ai_model_routes` with 60-s cache; quotas, 80 % downgrade, 100 % pause and metering in
+Postgres; admin tab "KI" with budget, quotas, models per task, a test call and 30-day spend.
+Keys: `SUFFA_ANTHROPIC_API_KEY`, `SUFFA_OPENROUTER_API_KEY`, `SUFFA_HF_API_KEY`.
 
 ### Sprint 10 (Feb 8 – Feb 21) — _"al-Muʿallim speaks"_
 

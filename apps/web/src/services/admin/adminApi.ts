@@ -95,6 +95,10 @@ export function describeAudit(entry: AuditEntry): string {
       return 'Konto entsperrt';
     case 'account.2fa_enabled':
       return 'Zwei-Faktor-Anmeldung eingerichtet';
+    case 'ai.routes.replace':
+      return `KI-Modelle für ${entry.targetId} geändert`;
+    case 'ai.settings.update':
+      return 'KI-Budget und Kontingente geändert';
     default:
       return entry.action;
   }

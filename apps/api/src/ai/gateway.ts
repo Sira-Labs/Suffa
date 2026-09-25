@@ -127,7 +127,7 @@ export class AiGateway {
     const settings = await this.deps.repo.settings();
     const limit = settings.dailyTurns[actor.role];
     if (limit !== null && !options.continuation) {
-      const used = await this.deps.repo.turnsToday(actor.id);
+      const used = await this.deps.repo.turnsToday(actor.id, this.now());
       if (used >= limit) {
         this.deps.log.info({ userId: actor.id, task, used, limit }, 'ai.quota_reached');
         throw new AiQuotaError(used, limit);

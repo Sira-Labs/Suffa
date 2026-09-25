@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom';
 import { useSyncStore } from '@/state';
+import { LOGIN_PATH } from '@/services/signInGate';
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
   idle: { label: 'Synchron', color: 'var(--good)' },
@@ -14,7 +16,17 @@ export function SyncBadge() {
   const pending = useSyncStore((s) => s.pending);
   const auth = useSyncStore((s) => s.auth);
   const syncNow = useSyncStore((s) => s.syncNow);
+  const provider = useSyncStore((s) => s.provider);
   const meta = STATUS_META[status] ?? STATUS_META.idle!;
+
+  // Not signed in on a server with sign-in: nothing is synced yet, so offer the sign-in.
+  if (provider.isConfigured() && auth.status !== 'signed-in') {
+    return (
+      <Link to={LOGIN_PATH} className="badge" style={{ whiteSpace: 'nowrap' }}>
+        Anmelden
+      </Link>
+    );
+  }
 
   return (
     <button

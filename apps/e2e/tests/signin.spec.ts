@@ -25,3 +25,18 @@ test('explains an invalid sign-in link', async ({ page }) => {
     page.getByText(/abgelaufen oder wurde schon benutzt|hat nicht geklappt/)
   ).toBeVisible();
 });
+
+test('shows the sign-in page first, and lets a learner go on without an account @mobile', async ({
+  page,
+}) => {
+  await page.goto('/vocab');
+  await expect(page).toHaveURL(/\/login\?next=%2Fvocab$/);
+  await expect(page.getByRole('heading', { name: 'Bei Suffa anmelden' })).toBeVisible();
+
+  await page.getByRole('button', { name: /Ohne Konto weiter/ }).click();
+  await expect(page).toHaveURL(/\/vocab$/);
+  // Remembered on this device; the header still offers the sign-in.
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('link', { name: 'Anmelden' }).first()).toBeVisible();
+});

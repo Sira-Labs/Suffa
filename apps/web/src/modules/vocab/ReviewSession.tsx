@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import type { CardKind, ReviewRating, SrsCard } from '@/types';
 import { Link } from 'react-router-dom';
 import {
@@ -36,6 +36,8 @@ interface ReviewSessionProps {
   contentRefs?: string[];
   /** A fixed set of cards to practise, due or not (e.g. the wobbly words). */
   cards?: SrsCard[];
+  /** What to offer when nothing is left (default: a dialogue or back to "Heute"). */
+  emptyActions?: ReactNode;
 }
 
 type Phase = 'prompt' | 'graded';
@@ -54,6 +56,7 @@ export function ReviewSession({
   newKinds,
   contentRefs,
   cards,
+  emptyActions,
 }: ReviewSessionProps) {
   const focus = variant === 'focus';
   const userVocab = useContentStore((s) => s.userVocab);
@@ -105,18 +108,22 @@ export function ReviewSession({
           <p style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>
             Keine fälligen Karten{done > 0 ? ` – ${done} bearbeitet` : ''}.
           </p>
-          <p className="muted" style={{ margin: 0 }}>
-            Die nächste Wiederholung plant Suffa automatisch. Wie wäre es mit einem
-            Dialog?
-          </p>
-          <div className="row" style={{ justifyContent: 'center' }}>
-            <Link className="btn btn-primary" to="/units">
-              Dialog hören
-            </Link>
-            <Link className="btn" to="/">
-              Zu Heute
-            </Link>
-          </div>
+          {emptyActions ?? (
+            <>
+              <p className="muted" style={{ margin: 0 }}>
+                Die nächste Wiederholung plant Suffa automatisch. Wie wäre es mit einem
+                Dialog?
+              </p>
+              <div className="row" style={{ justifyContent: 'center' }}>
+                <Link className="btn btn-primary" to="/units">
+                  Dialog hören
+                </Link>
+                <Link className="btn" to="/">
+                  Zu Heute
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );

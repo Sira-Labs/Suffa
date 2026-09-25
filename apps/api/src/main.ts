@@ -3,6 +3,10 @@
  * Exit codes: 1 = invalid configuration / fatal error, 3 = schema revision mismatch
  * (worker started before the api migrated; CapRover restarts it).
  */
+import { registerNotifications } from './notifications/jobs.js';
+import { disabledNotifier, WebPushNotifier } from './notifications/notifier.js';
+import { PgRecapRepository } from './notifications/recap.js';
+import { PgNotificationRepository } from './notifications/repository.js';
 import { PgClassProgressRepository } from './classes/progress.js';
 import { PgClassSpiritRepository } from './classes/spirit.js';
 import { registerEngagement, requestRecompute } from './engagement/jobs.js';
@@ -110,6 +114,18 @@ async function main(): Promise<void> {
           });
           await registerMaintenance(boss, pool, log, errors);
           await registerEngagement(boss, new PgEngagementRepository(pool), log, errors);
+          await registerNotifications(
+            boss,
+            {
+              notifications: new PgNotificationRepository(pool),
+              recaps: new PgRecapRepository(pool),
+              notifier: config.vapid
+                ? new WebPushNotifier(config.vapid)
+                : disabledNotifier,
+              log,
+            },
+            errors
+          );
           return () => boss.stop({ graceful: true, timeout: JOB_DRAIN_TIMEOUT_MS });
         },
         expectedRevision: expected,
@@ -221,6 +237,13 @@ async function main(): Promise<void> {
       onPushed: requestRecompute(boss),
     },
     engagement: { repo: new PgEngagementRepository(pool), auth, log },
+    notifications: {
+      repo: new PgNotificationRepository(pool),
+      recaps: new PgRecapRepository(pool),
+      publicKey: config.vapid?.publicKey ?? null,
+      auth,
+      log,
+    },
     classSpirit: {
       classes: new PgClassRepository(pool),
       progress: new PgClassProgressRepository(pool),

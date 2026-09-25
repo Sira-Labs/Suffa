@@ -58,6 +58,7 @@ const privacyRepo: PrivacyRepository = {
     learningData: {} as never,
     engagement: { state: null, xpLedger: [], quests: [], achievements: [] },
     classRecognition: { badges: [], shoutouts: [], challenges: [] },
+    notifications: { prefs: null, devices: [], recaps: [] },
     auditLog: [],
   }),
   delete: async () => true,
@@ -122,6 +123,30 @@ function buildApp() {
       queueDepth: async () => ({ waiting: 0, active: 0, failed: 0, deadLetter: 0 }),
     },
     sync: { repo: syncRepo, auth: resolver, log: quiet },
+    notifications: {
+      repo: {
+        subscribe: async () => {},
+        unsubscribe: async () => true,
+        prefs: async () => ({
+          reminderEnabled: false,
+          reminderTime: '18:00',
+          quietStart: '22:00',
+          quietEnd: '07:00',
+          weeklyRecap: true,
+          devices: 0,
+        }),
+        savePrefs: async () => {},
+        recipients: async () => [],
+        targets: async () => [],
+        doneOn: async () => false,
+        claim: async () => true,
+        delivered: async () => {},
+      },
+      recaps: { latest: async () => null },
+      publicKey: 'BPublic',
+      auth: resolver,
+      log: quiet,
+    },
     classSpirit: {
       classes: classRepo,
       progress: {

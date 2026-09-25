@@ -15,6 +15,10 @@ import {
 import { createAccountRoutes, type AccountRouteDeps } from './account/routes.js';
 import { createClassRoutes, type ClassRouteDeps } from './classes/routes.js';
 import {
+  createNotificationRoutes,
+  type NotificationRouteDeps,
+} from './notifications/routes.js';
+import {
   createClassSpiritRoutes,
   type ClassSpiritRouteDeps,
 } from './classes/spiritRoutes.js';
@@ -43,6 +47,8 @@ export interface AppDeps {
   onProbeError?: (error: unknown) => void;
   /** Sync endpoints; omitted in tests that only exercise health/version. */
   sync?: SyncRouteDeps;
+  /** Push reminders, their preferences and the weekly recap (stories 6.3, 6.4). */
+  notifications?: NotificationRouteDeps;
   /** Class dashboard, challenge, teacher badges and shout-outs (Sprint 6). */
   classSpirit?: ClassSpiritRouteDeps;
   /** The server's copy of XP, streak and badges (story 5.4). */
@@ -136,6 +142,9 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.account) app.route('/api/v1/account', createAccountRoutes(deps.account));
   if (deps.classes) app.route('/api/v1', createClassRoutes(deps.classes));
   if (deps.classSpirit) app.route('/api/v1', createClassSpiritRoutes(deps.classSpirit));
+  if (deps.notifications) {
+    app.route('/api/v1', createNotificationRoutes(deps.notifications));
+  }
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));

@@ -25,6 +25,12 @@ export interface AccountExport {
     quests: Record<string, unknown>[];
     achievements: Record<string, unknown>[];
   };
+  /** Reminder settings, devices with push (without their keys) and weekly recaps. */
+  notifications: {
+    prefs: Record<string, unknown> | null;
+    devices: Record<string, unknown>[];
+    recaps: Record<string, unknown>[];
+  };
   /** Recognition inside classes: badges and shout-outs received, challenges helped. */
   classRecognition: {
     badges: Record<string, unknown>[];
@@ -103,6 +109,24 @@ export class PgPrivacyRepository implements PrivacyRepository {
         achievements: await q(
           `select badge_id, tier, unlocked_at
              from achievement_unlocks where user_id = $1 order by unlocked_at, badge_id`
+        ),
+      },
+      notifications: {
+        prefs:
+          (
+            await q(
+              `select reminder_enabled, reminder_time, quiet_start, quiet_end, weekly_recap,
+                      updated_at
+                 from notification_prefs where user_id = $1`
+            )
+          )[0] ?? null,
+        devices: await q(
+          `select user_agent, created_at, last_success_at
+             from push_subscriptions where user_id = $1 order by created_at`
+        ),
+        recaps: await q(
+          `select week_start::text, data from weekly_recaps
+            where user_id = $1 order by week_start`
         ),
       },
       classRecognition: {

@@ -78,6 +78,13 @@ const RawEnvSchema = z.object({
   SUFFA_ERROR_DSN: optionalDsn('SUFFA_ERROR_DSN'),
   /** DSN of the suffa-web project, handed to the PWA and used by the /api/errors tunnel. */
   SUFFA_WEB_ERROR_DSN: optionalDsn('SUFFA_WEB_ERROR_DSN'),
+  /**
+   * Web Push (story 6.3): a VAPID key pair (`npx web-push generate-vapid-keys`) and a
+   * contact (mailto: or https:). Reminders stay off until all three are set.
+   */
+  SUFFA_VAPID_PUBLIC_KEY: z.string().trim().optional(),
+  SUFFA_VAPID_PRIVATE_KEY: z.string().trim().optional(),
+  SUFFA_VAPID_SUBJECT: z.string().trim().optional(),
 });
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -135,6 +142,8 @@ export interface Config {
   smtp: SmtpSettings | undefined;
   /** Public DSN of the web project; undefined disables browser error reporting. */
   webErrorDsn: string | undefined;
+  /** Web Push keys; undefined turns push reminders off. */
+  vapid: { publicKey: string; privateKey: string; subject: string } | undefined;
 }
 
 function isPlaceholder(value: string): boolean {
@@ -202,6 +211,20 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       syncDevTokens = parsed.tokens;
     }
   }
+  const vapidParts = [
+    raw.SUFFA_VAPID_PUBLIC_KEY,
+    raw.SUFFA_VAPID_PRIVATE_KEY,
+    raw.SUFFA_VAPID_SUBJECT,
+  ];
+  const vapidComplete = vapidParts.every(Boolean);
+  if (vapidParts.some(Boolean) && !vapidComplete) {
+    issues.push(
+      'SUFFA_VAPID_PUBLIC_KEY, SUFFA_VAPID_PRIVATE_KEY and SUFFA_VAPID_SUBJECT go together'
+    );
+  }
+  if (vapidComplete && !/^(mailto:|https:\/\/)/.test(raw.SUFFA_VAPID_SUBJECT!)) {
+    issues.push('SUFFA_VAPID_SUBJECT must start with mailto: or https://');
+  }
   const extraOrigins = parseOrigins(raw.SUFFA_TRUSTED_ORIGINS);
   issues.push(...extraOrigins.issues);
   if (issues.length > 0) throw new ConfigError(issues);
@@ -241,6 +264,13 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
         }
       : undefined,
     webErrorDsn: raw.SUFFA_WEB_ERROR_DSN,
+    vapid: vapidComplete
+      ? {
+          publicKey: raw.SUFFA_VAPID_PUBLIC_KEY!,
+          privateKey: raw.SUFFA_VAPID_PRIVATE_KEY!,
+          subject: raw.SUFFA_VAPID_SUBJECT!,
+        }
+      : undefined,
   };
 }
 

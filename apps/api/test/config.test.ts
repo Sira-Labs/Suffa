@@ -126,6 +126,33 @@ describe('loadConfig', () => {
   });
 });
 
+describe('Web Push keys', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+  const keys = {
+    SUFFA_VAPID_PUBLIC_KEY: 'BPublic',
+    SUFFA_VAPID_PRIVATE_KEY: 'private-from-env',
+    SUFFA_VAPID_SUBJECT: 'mailto:ops@example.org',
+  };
+
+  it('is off without keys and on with all three', () => {
+    expect(loadConfig(base).vapid).toBeUndefined();
+    expect(loadConfig({ ...base, ...keys }).vapid).toEqual({
+      publicKey: 'BPublic',
+      privateKey: 'private-from-env',
+      subject: 'mailto:ops@example.org',
+    });
+  });
+
+  it('rejects half a configuration and a subject that is no contact', () => {
+    expect(() => loadConfig({ ...base, SUFFA_VAPID_PUBLIC_KEY: 'BPublic' })).toThrow(
+      /go together/
+    );
+    expect(() =>
+      loadConfig({ ...base, ...keys, SUFFA_VAPID_SUBJECT: 'ops@example.org' })
+    ).toThrow(/mailto:/);
+  });
+});
+
 describe('SUFFA_TRUSTED_ORIGINS', () => {
   const base = {
     SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db',

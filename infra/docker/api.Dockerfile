@@ -25,8 +25,13 @@ COPY packages/engagement/package.json packages/engagement/
 COPY packages/llm/package.json packages/llm/
 # npm nests packages it cannot hoist (e.g. better-auth) under the workspace; keep that
 # directory even when it is empty so the runtime stage can always copy it.
+# --omit=optional keeps test tooling out of the image: better-auth names vitest as an optional
+# peer, so the lockfile marks vitest (and vite, esbuild, rollup) "devOptional" and --omit=dev
+# alone would still install them (critical CVEs, image scan). The only other package dropped is
+# pg-cloudflare (pg's Cloudflare Workers socket), which Node never loads.
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit=dev --workspace @suffa/api --include-workspace-root=false --no-audit --no-fund \
+    npm ci --omit=dev --omit=optional --workspace @suffa/api --include-workspace-root=false \
+      --no-audit --no-fund \
     && mkdir -p apps/api/node_modules
 
 FROM node:22-bookworm-slim AS runtime

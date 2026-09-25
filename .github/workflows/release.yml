@@ -1,8 +1,9 @@
 name: release
 
 # Runs the CI checks, builds the suffa-web and suffa-api images, smoke-tests each image in a
-# real container, publishes them to GHCR and (optionally) deploys them to CapRover.
-# Nothing is pushed or deployed unless the checks and the smoke tests pass.
+# real container, scans it for critical vulnerabilities (Trivy), publishes them to GHCR and
+# (optionally) deploys them to CapRover.
+# Nothing is pushed or deployed unless the checks, the smoke tests and the scan pass.
 # The feature branch is included until it is merged, so images exist for the first deploy.
 # TODO(2026-10-05): remove the feature branch trigger once it is merged into main.
 on:
@@ -103,6 +104,16 @@ jobs:
           # Without SMTP the api runs, but sign-in stays off (ADR-0008) and says so in the log.
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/v1/me)" = 404
           docker logs api 2>&1 | grep -q 'auth.disabled' || { docker logs api; exit 1; }
+          # With SMTP set, sign-in (Better Auth and its plugins) loads from the slim install:
+          # no session is 401, not 404. Test tooling must not be in the image.
+          run -d --name api-auth -e SUFFA_PORT=8001 -e SUFFA_SMTP_HOST=127.0.0.1 \
+            -e SUFFA_MAIL_FROM=smoke@example.org smoke/suffa-api:test
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8001/healthz >/dev/null && break; sleep 1; done
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8001/api/v1/me)" = 401 \
+            || { docker logs api-auth; exit 1; }
+          docker logs api-auth 2>&1 | grep -q 'auth.enabled' || { docker logs api-auth; exit 1; }
+          docker run --rm --entrypoint sh smoke/suffa-api:test -c \
+            'for m in vitest vite esbuild rollup; do test ! -e /app/node_modules/$m || { echo "$m in image"; exit 1; }; done'
           run -d --name worker -e SUFFA_ROLE=worker smoke/suffa-api:test
           sleep 3
           docker logs worker 2>&1 | grep -q 'worker.start' || { docker logs worker; exit 1; }
@@ -130,6 +141,17 @@ jobs:
           run --entrypoint /opt/suffa-backup/restore.sh -e SUFFA_BACKUP_DATABASE_URL="$DB" \
             -e SUFFA_RESTORE_DATABASE_URL="${DB%/suffa}/restore_smoke" smoke/suffa-backup:test latest
           test "$(psql "${DB%/suffa}/restore_smoke" -tAc 'select word from smoke where id = 1')" = 'بَلَد'
+      # Known critical vulnerabilities with a fix available stop the release before anything
+      # is published; accepted exceptions (with their reason) live in .trivyignore.
+      - name: scan image (Trivy, critical and fixable)
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: smoke/suffa-${{ matrix.name }}:test
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+          format: table
+          trivyignores: .trivyignore
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io

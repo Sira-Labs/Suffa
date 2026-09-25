@@ -144,7 +144,7 @@ jobs:
       # Known critical vulnerabilities with a fix available stop the release before anything
       # is published; accepted exceptions (with their reason) live in .trivyignore.
       - name: scan image (Trivy, critical and fixable)
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: smoke/suffa-${{ matrix.name }}:test
           severity: CRITICAL

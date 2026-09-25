@@ -1,6 +1,7 @@
 /**
- * `media` queue (ADR-0020): transcoding recordings. One job at a time per worker and long
- * expiry (a lesson of an hour takes minutes), so the shared server stays responsive.
+ * `media` queue (ADR-0020): transcoding recordings and importing them from Google Drive.
+ * One job at a time per worker and long expiry (a lesson of an hour takes minutes), so the
+ * shared server stays responsive.
  */
 import type { Job, PgBoss } from 'pg-boss';
 import type { Logger } from 'pino';
@@ -15,29 +16,54 @@ export const MEDIA_QUEUE: QueueName = 'media';
 /** A job may run this long before pg-boss considers it stuck. */
 export const TRANSCODE_EXPIRE_SECONDS = 4 * 60 * 60;
 
-export const MediaJob = z.object({
-  task: z.literal('transcode'),
-  mediaId: z.string().uuid(),
-});
+export const MediaJob = z.discriminatedUnion('task', [
+  z.object({ task: z.literal('transcode'), mediaId: z.string().uuid() }),
+  z.object({ task: z.literal('import'), mediaId: z.string().uuid() }),
+]);
 
-export function enqueueTranscode(boss: Pick<PgBoss, 'send'>) {
+function enqueue(boss: Pick<PgBoss, 'send'>, task: 'transcode' | 'import') {
   return async (mediaId: string) => {
     await boss.send(
       MEDIA_QUEUE,
-      { task: 'transcode', mediaId },
+      { task, mediaId },
       { expireInSeconds: TRANSCODE_EXPIRE_SECONDS, singletonKey: mediaId }
     );
   };
 }
 
+export const enqueueTranscode = (boss: Pick<PgBoss, 'send'>) =>
+  enqueue(boss, 'transcode');
+/** Drive import: copy from Drive, then transcode, in one job (story 7.2). */
+export const enqueueImport = (boss: Pick<PgBoss, 'send'>) => enqueue(boss, 'import');
+
+export interface MediaJobDeps {
+  repo: MediaRepository;
+  storage: ObjectStorage;
+  transcoder: Transcoder;
+  log: Pick<Logger, 'info' | 'warn'>;
+  /** Runs a Drive import; absent when Drive is not configured. */
+  importFromDrive?: (mediaId: string) => Promise<void>;
+}
+
+export async function runMediaJob(deps: MediaJobDeps, raw: unknown): Promise<void> {
+  const task = MediaJob.parse(raw);
+  if (task.task === 'import') {
+    if (!deps.importFromDrive) throw new Error('Google Drive is not configured');
+    await deps.importFromDrive(task.mediaId);
+    return;
+  }
+  await processRecording(
+    deps.repo,
+    deps.storage,
+    deps.transcoder,
+    task.mediaId,
+    deps.log
+  );
+}
+
 export async function registerMedia(
   boss: PgBoss,
-  deps: {
-    repo: MediaRepository;
-    storage: ObjectStorage;
-    transcoder: Transcoder;
-    log: Pick<Logger, 'info' | 'warn'>;
-  },
+  deps: MediaJobDeps,
   errors: ErrorReporter
 ): Promise<void> {
   await boss.work(
@@ -46,14 +72,7 @@ export async function registerMedia(
     async (jobs: Job<unknown>[]) => {
       for (const job of jobs) {
         try {
-          const { mediaId } = MediaJob.parse(job.data);
-          await processRecording(
-            deps.repo,
-            deps.storage,
-            deps.transcoder,
-            mediaId,
-            deps.log
-          );
+          await runMediaJob(deps, job.data);
         } catch (error) {
           errors.capture(error, { queue: MEDIA_QUEUE, jobId: job.id });
           throw error;

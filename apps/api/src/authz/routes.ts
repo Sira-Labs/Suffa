@@ -89,6 +89,12 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     path: '/api/v1/classes/:id/media/:mediaId/play',
     action: 'class:read',
   },
+  { method: 'GET', path: '/api/v1/drive', action: 'class:create' },
+  { method: 'GET', path: '/api/v1/drive/connect', action: 'class:create' },
+  { method: 'GET', path: '/api/v1/drive/callback', action: 'class:create' },
+  { method: 'POST', path: '/api/v1/drive/token', action: 'class:create' },
+  { method: 'DELETE', path: '/api/v1/drive', action: 'class:create' },
+  { method: 'POST', path: '/api/v1/classes/:id/media/drive', action: 'class:manage' },
   { method: 'GET', path: '/api/v1/notifications', action: 'profile:read' },
   { method: 'PUT', path: '/api/v1/notifications/preferences', action: 'profile:write' },
   {

@@ -158,6 +158,23 @@ describe('object storage', () => {
   });
 });
 
+describe('Google Drive import', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+  it('is off without settings, on with all four, and refuses a partial setup', () => {
+    expect(loadConfig(base).google).toBeUndefined();
+    const all = {
+      SUFFA_GOOGLE_CLIENT_ID: 'id.apps.googleusercontent.com',
+      SUFFA_GOOGLE_CLIENT_SECRET: 'secret-from-env',
+      SUFFA_GOOGLE_API_KEY: 'browser-key',
+      SUFFA_GOOGLE_APP_ID: '123456789',
+    };
+    expect(loadConfig({ ...base, ...all }).google).toMatchObject({ appId: '123456789' });
+    expect(() =>
+      loadConfig({ ...base, SUFFA_GOOGLE_CLIENT_ID: all.SUFFA_GOOGLE_CLIENT_ID })
+    ).toThrow(/go together/);
+  });
+});
+
 describe('Web Push keys', () => {
   const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
   const keys = {

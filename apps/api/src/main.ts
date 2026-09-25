@@ -3,7 +3,9 @@
  * Exit codes: 1 = invalid configuration / fatal error, 3 = schema revision mismatch
  * (worker started before the api migrated; CapRover restarts it).
  */
-import { enqueueTranscode, registerMedia } from './media/jobs.js';
+import { enqueueImport, enqueueTranscode, registerMedia } from './media/jobs.js';
+import { HttpGoogleClient } from './drive/google.js';
+import { DriveService, importFromDrive, PgDriveConnections } from './drive/service.js';
 import { PgMediaRepository } from './media/repository.js';
 import { ffmpegTranscoder, MediaService } from './media/service.js';
 import { S3ObjectStorage } from './storage/s3Storage.js';
@@ -39,7 +41,7 @@ import type { AccountRouteDeps } from './account/routes.js';
 import { PgSecondFactorRepository, SecondFactorService } from './account/secondFactor.js';
 import { writeAudit } from './audit/log.js';
 import { SecretBox } from './security/secretBox.js';
-import { ConfigError, loadConfig, redactDatabaseUrl } from './config.js';
+import { ConfigError, loadConfig, redactDatabaseUrl, type Config } from './config.js';
 import {
   currentRevision,
   expectedRevision,
@@ -119,13 +121,31 @@ async function main(): Promise<void> {
           await registerMaintenance(boss, pool, log, errors);
           await registerEngagement(boss, new PgEngagementRepository(pool), log, errors);
           if (config.storage) {
+            const repo = new PgMediaRepository(pool);
+            const storage = new S3ObjectStorage(config.storage);
+            const drive = driveParts(config);
             await registerMedia(
               boss,
               {
-                repo: new PgMediaRepository(pool),
-                storage: new S3ObjectStorage(config.storage),
+                repo,
+                storage,
                 transcoder: ffmpegTranscoder,
                 log,
+                importFromDrive: drive
+                  ? (mediaId) =>
+                      importFromDrive(
+                        {
+                          media: repo,
+                          storage,
+                          transcoder: ffmpegTranscoder,
+                          google: drive.google,
+                          connections: new PgDriveConnections(pool),
+                          box: drive.box,
+                          log,
+                        },
+                        mediaId
+                      )
+                  : undefined,
               },
               errors
             );
@@ -267,6 +287,25 @@ async function main(): Promise<void> {
           log,
         }
       : undefined,
+    drive: (() => {
+      const drive = driveParts(config);
+      if (!drive || !config.google) return undefined;
+      return {
+        drive: new DriveService(
+          drive.google,
+          new PgDriveConnections(pool),
+          drive.box,
+          new PgMediaRepository(pool),
+          enqueueImport(boss)
+        ),
+        google: drive.google,
+        classes: new PgClassRepository(pool),
+        picker: { apiKey: config.google.apiKey, appId: config.google.appId },
+        stateSecret: config.authSecret!,
+        auth,
+        log,
+      };
+    })(),
     notifications: {
       repo: new PgNotificationRepository(pool),
       recaps: new PgRecapRepository(pool),
@@ -322,3 +361,21 @@ main().catch(async (error: unknown) => {
   await errors.flush();
   process.exit(1);
 });
+
+/**
+ * Google Drive import needs Google credentials, object storage, the auth secret (seals the
+ * refresh tokens) and the public URL (OAuth redirect).
+ */
+function driveParts(config: Config) {
+  if (!config.google || !config.storage || !config.authSecret || !config.publicUrl) {
+    return undefined;
+  }
+  return {
+    google: new HttpGoogleClient({
+      clientId: config.google.clientId,
+      clientSecret: config.google.clientSecret,
+      redirectUri: `${new URL(config.publicUrl).origin}/api/v1/drive/callback`,
+    }),
+    box: new SecretBox(config.authSecret, 'drive'),
+  };
+}

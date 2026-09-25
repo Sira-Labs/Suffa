@@ -102,6 +102,15 @@ const RawEnvSchema = z.object({
   SUFFA_S3_BUCKET_MEDIA: z.string().trim().default('suffa-media'),
   SUFFA_S3_BUCKET_UPLOADS: z.string().trim().default('suffa-uploads'),
   SUFFA_S3_BUCKET_CONTENT: z.string().trim().default('suffa-content'),
+  /**
+   * Google Drive import (story 7.2, ADR-0018): an OAuth web client (redirect URI
+   * <public URL>/api/v1/drive/callback), a browser API key for the Picker and the project
+   * number as Picker app id. Drive import stays off until all four are set.
+   */
+  SUFFA_GOOGLE_CLIENT_ID: z.string().trim().optional(),
+  SUFFA_GOOGLE_CLIENT_SECRET: z.string().trim().optional(),
+  SUFFA_GOOGLE_API_KEY: z.string().trim().optional(),
+  SUFFA_GOOGLE_APP_ID: z.string().trim().optional(),
 });
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -161,6 +170,10 @@ export interface Config {
   webErrorDsn: string | undefined;
   /** Object storage; undefined turns recordings and uploads off. */
   storage: S3Settings | undefined;
+  /** Google Drive import; undefined turns it off. */
+  google:
+    | { clientId: string; clientSecret: string; apiKey: string; appId: string }
+    | undefined;
   /** Web Push keys; undefined turns push reminders off. */
   vapid: { publicKey: string; privateKey: string; subject: string } | undefined;
 }
@@ -241,6 +254,18 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       'SUFFA_S3_ENDPOINT, SUFFA_S3_ACCESS_KEY_ID and SUFFA_S3_SECRET_ACCESS_KEY go together'
     );
   }
+  const googleParts = [
+    raw.SUFFA_GOOGLE_CLIENT_ID,
+    raw.SUFFA_GOOGLE_CLIENT_SECRET,
+    raw.SUFFA_GOOGLE_API_KEY,
+    raw.SUFFA_GOOGLE_APP_ID,
+  ];
+  const googleComplete = googleParts.every(Boolean);
+  if (googleParts.some(Boolean) && !googleComplete) {
+    issues.push(
+      'SUFFA_GOOGLE_CLIENT_ID, SUFFA_GOOGLE_CLIENT_SECRET, SUFFA_GOOGLE_API_KEY and SUFFA_GOOGLE_APP_ID go together'
+    );
+  }
   const vapidParts = [
     raw.SUFFA_VAPID_PUBLIC_KEY,
     raw.SUFFA_VAPID_PRIVATE_KEY,
@@ -305,6 +330,14 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
             uploads: raw.SUFFA_S3_BUCKET_UPLOADS,
             content: raw.SUFFA_S3_BUCKET_CONTENT,
           },
+        }
+      : undefined,
+    google: googleComplete
+      ? {
+          clientId: raw.SUFFA_GOOGLE_CLIENT_ID!,
+          clientSecret: raw.SUFFA_GOOGLE_CLIENT_SECRET!,
+          apiKey: raw.SUFFA_GOOGLE_API_KEY!,
+          appId: raw.SUFFA_GOOGLE_APP_ID!,
         }
       : undefined,
     vapid: vapidComplete

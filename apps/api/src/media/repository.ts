@@ -43,6 +43,8 @@ export interface MediaRepository {
   create(item: NewMediaItem): Promise<MediaItem>;
   get(classId: string, id: string): Promise<MediaItem | null>;
   byId(id: string): Promise<MediaItem | null>;
+  /** Who started the recording (their Drive connection is used for imports). */
+  creator(id: string): Promise<string | null>;
   list(classId: string, publishedOnly: boolean): Promise<MediaItem[]>;
   /** Bytes of originals stored for a class (for the per-class cap). */
   classBytes(classId: string): Promise<number>;
@@ -139,6 +141,14 @@ export class PgMediaRepository implements MediaRepository {
       id,
     ]);
     return rows[0] ? toItem(rows[0]) : null;
+  }
+
+  async creator(id: string) {
+    const { rows } = await this.pool.query(
+      'select created_by from media_items where id = $1',
+      [id]
+    );
+    return (rows[0]?.created_by as string | null | undefined) ?? null;
   }
 
   async list(classId: string, publishedOnly: boolean) {

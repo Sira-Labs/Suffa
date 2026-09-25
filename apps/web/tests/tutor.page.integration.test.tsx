@@ -10,7 +10,7 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { Tutor } from '@/modules/tutor';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { readEvents, type TutorEvent } from '@/services/tutor/tutorApi';
-import { usePracticeStore, useSettingsStore, useSyncStore } from '@/state';
+import { usePracticeStore, useSettingsStore, useSrsStore, useSyncStore } from '@/state';
 
 function sse(events: TutorEvent[]): Response {
   const text = events
@@ -42,6 +42,7 @@ async function signIn(turn: TutorEvent[], available = true) {
       return Response.json({ available, tutorLanguage: 'de', conversations: [] });
     }
     if (path === '/api/v1/tutor/turn') return sse(turn);
+    if (path === '/api/v1/tutor/grade') return Response.json(GRADE);
     return new Response(null, { status: 204 });
   }) as unknown as typeof fetch;
   vi.stubGlobal('fetch', api);
@@ -50,6 +51,29 @@ async function signIn(turn: TutorEvent[], available = true) {
   useSyncStore.setState({ provider, auth: provider.getAuthState() });
   return requests;
 }
+
+const GRADE = {
+  id: 'g1',
+  kind: 'writing',
+  task: 'Stell dich vor: Name, Herkunft, Wohnort.',
+  answer: 'اسمي أمينة. أنا من زيورخ.',
+  score: 78,
+  rubric: { task: 4, grammar: 3, vocabulary: 3, spelling: 2 },
+  summary: 'Sehr schön! Achte auf die Hamza.',
+  corrected: 'اِسْمي أَمينَةُ. أَنا مِنْ زيوريخ.',
+  mistakes: [
+    {
+      original: 'اسمي',
+      correction: 'اِسْمي',
+      category: 'spelling',
+      explanation: 'Hier fehlt das Hamzat al-waṣl-Zeichen.',
+      wordId: 'v-ism',
+    },
+  ],
+  status: 'auto',
+  override: null,
+  createdAt: '2026-09-25T10:00:00.000Z',
+};
 
 function renderTutor(entry = '/tutor') {
   const router = createMemoryRouter([{ path: '/tutor', element: <Tutor /> }], {
@@ -201,5 +225,31 @@ describe('al-Muʿallim page', () => {
       { type: 'text', text: 'أ' },
       { type: 'done', messageId: 'x', flags: [] },
     ]);
+  });
+
+  it('grades a text, shows rubric, correction and mistakes, and brings the word up', async () => {
+    const requests = await signIn([]);
+    const prioritise = vi.fn(async () => 1);
+    useSrsStore.setState({ prioritise });
+    renderTutor();
+    await userEvent.click(await screen.findByRole('tab', { name: 'Text bewerten' }));
+    const text = screen.getByLabelText('Dein Text auf Arabisch');
+    expect(text.getAttribute('dir')).toBe('rtl');
+    await userEvent.type(text, 'اسمي أمينة. أنا من زيورخ.');
+    await userEvent.click(screen.getByRole('button', { name: 'Bewerten lassen' }));
+    const card = await screen.findByRole('region', { name: 'Bewertung' });
+    expect(within(card).getByLabelText('78 von 100 Punkten')).toBeTruthy();
+    expect(within(card).getByLabelText('Schreibung: 2 von 4')).toBeTruthy();
+    expect(within(card).getByText('Rechtschreibung')).toBeTruthy();
+    expect(requests.find((r) => r.path === '/api/v1/tutor/grade')?.body).toEqual({
+      kind: 'writing',
+      task: 'Stell dich vor: Name, Herkunft, Wohnort.',
+      answer: 'اسمي أمينة. أنا من زيورخ.',
+    });
+    await userEvent.click(
+      within(card).getByRole('button', { name: 'Dieses Wort jetzt wiederholen' })
+    );
+    expect(prioritise).toHaveBeenCalledWith(['v-ism']);
+    expect(await within(card).findByText('Die Karten sind jetzt fällig.')).toBeTruthy();
   });
 });

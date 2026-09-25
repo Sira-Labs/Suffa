@@ -2124,3 +2124,21 @@ textarea.input {
   justify-content: flex-start;
   text-align: start;
 }
+.grade-score {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  border: 3px solid var(--accent-2);
+  font-size: 1.6rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.grade-mistakes {
+  margin: 0;
+  padding-inline-start: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

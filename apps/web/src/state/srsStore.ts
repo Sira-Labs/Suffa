@@ -30,6 +30,12 @@ interface SrsState {
   /** Content items new cards may come from (reached units); null = everything. */
   introducible: ReadonlySet<string> | null;
   setIntroducible(refs: ReadonlySet<string> | null): void;
+  /**
+   * Brings the vocabulary cards of these words up now (mistakes from a graded text, story
+   * 11.1). Written like any card change, so they sync through the outbox. Returns how many
+   * cards were moved.
+   */
+  prioritise(contentRefs: readonly string[]): Promise<number>;
 }
 
 export const useSrsStore = create<SrsState>((set, get) => ({
@@ -90,6 +96,23 @@ export const useSrsStore = create<SrsState>((set, get) => ({
   introducible: null,
   setIntroducible(refs) {
     set({ introducible: refs });
+  },
+
+  async prioritise(contentRefs) {
+    const refs = new Set(contentRefs);
+    const now = new Date();
+    const iso = now.toISOString();
+    const moved = get().cards.filter(
+      (c) =>
+        refs.has(c.contentRef) &&
+        (c.kind === 'vocab_ar_de' || c.kind === 'vocab_de_ar') &&
+        !c.deleted &&
+        new Date(c.due) > now
+    );
+    for (const card of moved) await cardRepo.put({ ...card, due: iso, updated_at: iso });
+    const byId = new Map(moved.map((c) => [c.id, { ...c, due: iso, updated_at: iso }]));
+    set({ cards: get().cards.map((c) => byId.get(c.id) ?? c) });
+    return moved.length;
   },
 }));
 

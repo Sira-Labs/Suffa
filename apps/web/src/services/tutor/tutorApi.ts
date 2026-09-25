@@ -37,6 +37,11 @@ export type TutorEvent =
 
 const MESSAGES: Record<string, string> = {
   invalid_body: 'Die Nachricht ist leer oder zu lang (höchstens 2000 Zeichen).',
+  ai_quota:
+    'Für heute hast du alle Gespräche mit al-Muʿallim genutzt. Morgen geht es weiter.',
+  ai_paused: 'Die KI-Funktionen machen diesen Monat Pause.',
+  ai_unavailable:
+    'al-Muʿallim ist gerade nicht erreichbar. Versuche es gleich noch einmal.',
 };
 
 /** Splits an SSE byte stream into the JSON payloads of its `data:` lines. */
@@ -104,6 +109,17 @@ export class TutorApi {
     );
   }
 
+  grade(input: { kind: GradeKind; task: string; answer: string; unit?: number }) {
+    return this.call<Grade>('/api/v1/tutor/grade', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  grades() {
+    return this.call<{ grades: Grade[] }>('/api/v1/tutor/grades');
+  }
+
   /** Streams one turn; problems before the stream starts arrive as an `error` event too. */
   async *turn(
     input: { conversationId?: string; message: string; context?: TurnContext },
@@ -144,6 +160,46 @@ export class TutorApi {
     return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
   }
 }
+
+export type GradeKind = 'writing' | 'speech';
+
+export interface GradeMistake {
+  original: string;
+  correction: string;
+  category:
+    | 'spelling'
+    | 'grammar'
+    | 'vocabulary'
+    | 'word_order'
+    | 'vocalisation'
+    | 'other';
+  explanation: string;
+  wordId: string | null;
+}
+
+export interface Grade {
+  id: string;
+  kind: GradeKind;
+  task: string;
+  answer: string;
+  score: number;
+  rubric: { task: number; grammar: number; vocabulary: number; spelling: number };
+  summary: string;
+  corrected: string;
+  mistakes: GradeMistake[];
+  status: 'auto' | 'confirmed' | 'overridden';
+  override: { score: number; comment: string; corrected: string | null } | null;
+  createdAt: string;
+}
+
+export const MISTAKE_LABELS: Record<GradeMistake['category'], string> = {
+  spelling: 'Rechtschreibung',
+  grammar: 'Grammatik',
+  vocabulary: 'Wortschatz',
+  word_order: 'Satzstellung',
+  vocalisation: 'Vokalisierung',
+  other: 'Sonstiges',
+};
 
 /** Arabic letters in a text, for the "write Arabic to the tutor" quest. */
 export function countArabicLetters(text: string): number {

@@ -9,14 +9,16 @@ import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { useSyncStore } from '@/state';
 import { ClassLife } from './ClassLife';
 import { ClassMembers } from './ClassMembers';
+import { ClassGrades } from './ClassGrades';
 import { ClassRecordings } from './ClassRecordings';
 import { ClassProgressView } from './ClassProgressView';
 
-type Tab = 'progress' | 'life' | 'recordings' | 'members';
+type Tab = 'progress' | 'life' | 'recordings' | 'grades' | 'members';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'progress', label: 'Fortschritt' },
   { id: 'life', label: 'Klassenleben' },
   { id: 'recordings', label: 'Aufnahmen' },
+  { id: 'grades', label: 'Bewertungen' },
   { id: 'members', label: 'Mitglieder' },
 ];
 
@@ -84,6 +86,7 @@ export function ClassPage() {
             {tab === 'progress' && <ClassProgressView api={api} classId={summary.id} />}
             {tab === 'life' && <ClassLife api={api} classId={summary.id} teacher />}
             {tab === 'recordings' && <ClassRecordings classId={summary.id} teacher />}
+            {tab === 'grades' && <ClassGrades classId={summary.id} />}
             {tab === 'members' && (
               <ClassMembers api={api} summary={summary} onChange={load} />
             )}

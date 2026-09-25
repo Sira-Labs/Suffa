@@ -17,6 +17,7 @@ import {
   type TutorLanguage,
 } from '@/services/tutor/tutorApi';
 import { usePracticeStore, useSyncStore } from '@/state';
+import { GradePanel } from './GradePanel';
 import { TutorText } from './TutorText';
 
 interface ShownMessage {
@@ -71,6 +72,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
   );
   const [activity, setActivity] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState<'chat' | 'grade'>('chat');
   const abort = useRef<AbortController | null>(null);
   const bottom = useRef<HTMLDivElement>(null);
   const practise = usePracticeStore((s) => s.practise);
@@ -208,6 +210,25 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
         </label>
       </div>
 
+      <div className="row" role="tablist" style={{ gap: '0.5rem' }}>
+        <button
+          role="tab"
+          aria-selected={mode === 'chat'}
+          className={`btn ${mode === 'chat' ? 'btn-primary' : ''}`}
+          onClick={() => setMode('chat')}
+        >
+          Fragen
+        </button>
+        <button
+          role="tab"
+          aria-selected={mode === 'grade'}
+          className={`btn ${mode === 'grade' ? 'btn-primary' : ''}`}
+          onClick={() => setMode('grade')}
+        >
+          Text bewerten
+        </button>
+      </div>
+
       {available === false && (
         <p className="card muted">
           al-Muʿallim ist auf diesem Server noch nicht eingeschaltet. Alle anderen Übungen
@@ -215,7 +236,9 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
         </p>
       )}
 
-      {conversations.length > 0 && (
+      {mode === 'grade' && <GradePanel api={api} disabled={available === false} />}
+
+      {mode === 'chat' && conversations.length > 0 && (
         <details className="card">
           <summary>Frühere Gespräche ({conversations.length})</summary>
           <div className="stack" style={{ marginTop: '0.5rem' }}>
@@ -237,118 +260,126 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
         </details>
       )}
 
-      {context?.mediaId && !conversationId && (
+      {mode === 'chat' && context?.mediaId && !conversationId && (
         <p className="badge" style={{ alignSelf: 'flex-start' }}>
           Frage zur Aufnahme bei {clock(context.atSec ?? 0)}
         </p>
       )}
 
-      <div className="tutor-messages" aria-live="polite">
-        {messages.length === 0 && (
-          <div className="stack">
-            <p className="muted" style={{ margin: 0 }}>
-              Frag mich zu Wörtern, Grammatik oder deiner Einheit – gern auch auf
-              Arabisch.
-            </p>
-            <div className="row" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-              {SUGGESTIONS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  className="btn"
-                  disabled={available === false || busy}
-                  onClick={() => void send(s)}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-        {messages.map((m) => (
-          <div
-            key={m.key}
-            className={`tutor-message tutor-${m.role}${m.error ? ' tutor-error' : ''}`}
-          >
-            {m.role === 'user' ? (
-              <p dir="auto" className="tutor-paragraph">
-                {m.content}
-              </p>
-            ) : m.content ? (
-              <TutorText text={m.content} />
-            ) : (
-              <span className="muted">
-                {activity ? `al-Muʿallim ${activity} …` : '…'}
-              </span>
-            )}
-            {m.role === 'assistant' && m.id && !m.pending && (
-              <div className="row tutor-rating">
-                <button
-                  type="button"
-                  className={`btn ${m.rating === 1 ? 'btn-primary' : ''}`}
-                  aria-pressed={m.rating === 1}
-                  aria-label="Hilfreich"
-                  onClick={() => void rate(m, 1)}
-                >
-                  👍
-                </button>
-                <button
-                  type="button"
-                  className={`btn ${m.rating === -1 ? 'btn-primary' : ''}`}
-                  aria-pressed={m.rating === -1}
-                  aria-label="Nicht hilfreich"
-                  onClick={() => void rate(m, -1)}
-                >
-                  👎
-                </button>
+      {mode === 'chat' && (
+        <>
+          <div className="tutor-messages" aria-live="polite">
+            {messages.length === 0 && (
+              <div className="stack">
+                <p className="muted" style={{ margin: 0 }}>
+                  Frag mich zu Wörtern, Grammatik oder deiner Einheit – gern auch auf
+                  Arabisch.
+                </p>
+                <div className="row" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
+                  {SUGGESTIONS.map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      className="btn"
+                      disabled={available === false || busy}
+                      onClick={() => void send(s)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
+            {messages.map((m) => (
+              <div
+                key={m.key}
+                className={`tutor-message tutor-${m.role}${m.error ? ' tutor-error' : ''}`}
+              >
+                {m.role === 'user' ? (
+                  <p dir="auto" className="tutor-paragraph">
+                    {m.content}
+                  </p>
+                ) : m.content ? (
+                  <TutorText text={m.content} />
+                ) : (
+                  <span className="muted">
+                    {activity ? `al-Muʿallim ${activity} …` : '…'}
+                  </span>
+                )}
+                {m.role === 'assistant' && m.id && !m.pending && (
+                  <div className="row tutor-rating">
+                    <button
+                      type="button"
+                      className={`btn ${m.rating === 1 ? 'btn-primary' : ''}`}
+                      aria-pressed={m.rating === 1}
+                      aria-label="Hilfreich"
+                      onClick={() => void rate(m, 1)}
+                    >
+                      👍
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn ${m.rating === -1 ? 'btn-primary' : ''}`}
+                      aria-pressed={m.rating === -1}
+                      aria-label="Nicht hilfreich"
+                      onClick={() => void rate(m, -1)}
+                    >
+                      👎
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+            {activity && messages.at(-1)?.content && (
+              <span className="muted">al-Muʿallim {activity} …</span>
+            )}
+            <div ref={bottom} />
           </div>
-        ))}
-        {activity && messages.at(-1)?.content && (
-          <span className="muted">al-Muʿallim {activity} …</span>
-        )}
-        <div ref={bottom} />
-      </div>
 
-      <form
-        className="tutor-composer"
-        onSubmit={(e) => {
-          e.preventDefault();
-          void send(draft);
-        }}
-      >
-        <textarea
-          className="input"
-          dir="auto"
-          rows={2}
-          maxLength={2000}
-          placeholder="Deine Frage – Deutsch, English oder عَرَبِيّ"
-          aria-label="Deine Nachricht an al-Muʿallim"
-          value={draft}
-          disabled={available === false}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
+          <form
+            className="tutor-composer"
+            onSubmit={(e) => {
               e.preventDefault();
               void send(draft);
-            }
-          }}
-        />
-        {busy ? (
-          <button className="btn" type="button" onClick={() => abort.current?.abort()}>
-            Stopp
-          </button>
-        ) : (
-          <button
-            className="btn btn-primary"
-            type="submit"
-            disabled={!draft.trim() || available === false}
+            }}
           >
-            Senden
-          </button>
-        )}
-      </form>
+            <textarea
+              className="input"
+              dir="auto"
+              rows={2}
+              maxLength={2000}
+              placeholder="Deine Frage – Deutsch, English oder عَرَبِيّ"
+              aria-label="Deine Nachricht an al-Muʿallim"
+              value={draft}
+              disabled={available === false}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  void send(draft);
+                }
+              }}
+            />
+            {busy ? (
+              <button
+                className="btn"
+                type="button"
+                onClick={() => abort.current?.abort()}
+              >
+                Stopp
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary"
+                type="submit"
+                disabled={!draft.trim() || available === false}
+              >
+                Senden
+              </button>
+            )}
+          </form>
+        </>
+      )}
     </div>
   );
 }

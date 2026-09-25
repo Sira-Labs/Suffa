@@ -11,11 +11,39 @@ import { Icon, type IconName } from '@/components/Icon';
 export function questLink(quest: QuestDef, unit: number): string {
   const metric = quest.metric;
   if (metric.kind === 'tracks') return `/units/${unit}/listen`;
+  if (metric.kind === 'videos') return '/videos';
   if (metric.kind === 'practice') {
     const skill = metric.skills?.[0];
+    // A conversation with al-Muʿallim happens on the tutor page, not in a unit station.
+    if (skill === 'tutor') return '/tutor';
     return skill ? `/units/${unit}/${skill}` : `/units/${unit}`;
   }
   return '/review';
+}
+
+/** Rough minutes per remaining step of a quest, for the estimate on "Heute". */
+const MINUTES_PER_STEP: Record<QuestDef['metric']['kind'], number> = {
+  reviews: 0.4,
+  correct: 0.4,
+  'new-cards': 1,
+  tracks: 3,
+  videos: 6,
+  practice: 1,
+};
+
+/** Minutes the open quests still take (at least 1 while any is open, 0 when all are done). */
+export function questMinutes(quests: readonly QuestStatus[]): number {
+  const open = quests.filter((q) => !q.done);
+  if (open.length === 0) return 0;
+  const minutes = open.reduce((sum, q) => {
+    const left = Math.max(0, q.quest.target - q.progress);
+    const perStep =
+      q.quest.metric.kind === 'practice' && q.quest.metric.skills?.[0] === 'tutor'
+        ? 5
+        : MINUTES_PER_STEP[q.quest.metric.kind];
+    return sum + left * perStep;
+  }, 0);
+  return Math.max(1, Math.round(minutes));
 }
 
 const SLOT_ICON: Record<QuestDef['slot'], IconName> = {
@@ -26,7 +54,9 @@ const SLOT_ICON: Record<QuestDef['slot'], IconName> = {
 
 /**
  * "Tagesaufgaben" (story 5.2): the day's three quests with progress, the bonus for all
- * three, and how the streak and the weekly goal stand. Works fully offline.
+ * three, and how the streak and the weekly goal stand. The one plan for today: the
+ * "Weiterlernen" button opens the first open quest, with the minutes still to go. Works
+ * fully offline.
  */
 export function TodayQuests({
   summary,
@@ -37,6 +67,9 @@ export function TodayQuests({
 }) {
   const { quests, bonusAt } = summary.quests;
   const done = quests.filter((q) => q.done).length;
+  // The first open quest is today's next step; the button leads straight to it.
+  const next = quests.find((q) => !q.done);
+  const minutes = questMinutes(quests);
   const { streak, weekly } = summary;
   const weekLeft = Math.max(0, weekly.goal - weekly.activeDays);
 
@@ -55,9 +88,17 @@ export function TodayQuests({
           <QuestItem key={q.quest.id} status={q} to={questLink(q.quest, unit)} />
         ))}
       </ul>
-      {bonusAt && (
+      {next ? (
+        <Link className="btn btn-primary btn-lg" to={questLink(next.quest, unit)}>
+          Weiterlernen
+          <span className="muted-on-primary">· ≈ {minutes} Min.</span>
+          <Icon name="arrowRight" size={20} />
+        </Link>
+      ) : (
         <p className="feedback-good" style={{ margin: 0, fontWeight: 600 }}>
-          Alle drei geschafft – Bonus +{QUEST_XP.bonus} XP. Bārak Allāhu fīk!
+          {bonusAt
+            ? `Alle drei geschafft – Bonus +${QUEST_XP.bonus} XP. Bārak Allāhu fīk!`
+            : 'Alles erledigt für heute. Masha’Allah!'}
         </p>
       )}
       <div className="quest-meta">

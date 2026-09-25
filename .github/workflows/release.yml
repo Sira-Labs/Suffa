@@ -4,11 +4,9 @@ name: release
 # real container, scans it for critical vulnerabilities (Trivy), publishes them to GHCR and
 # (optionally) deploys them to CapRover.
 # Nothing is pushed or deployed unless the checks, the smoke tests and the scan pass.
-# The feature branch is included until it is merged, so images exist for the first deploy.
-# TODO(2026-10-05): remove the feature branch trigger once it is merged into main.
 on:
   push:
-    branches: [main, claude/ai-tutor-platform-spec-f7u0ar]
+    branches: [main]
   workflow_dispatch:
 
 permissions:

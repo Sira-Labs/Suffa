@@ -517,57 +517,6 @@ textarea.input {
   }
 }
 
-.today-steps {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-.today-step {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
-}
-.today-step-marker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  color: var(--text-muted);
-  font-weight: 700;
-}
-.today-step-done .today-step-marker {
-  background: var(--accent-2);
-  border-color: var(--accent-2);
-  color: var(--on-accent-2);
-}
-.today-step-current .today-step-marker {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-.today-step-upcoming {
-  opacity: 0.75;
-}
-.today-step-body {
-  display: flex;
-  flex-direction: column;
-  min-height: var(--tap);
-  justify-content: center;
-  flex-grow: 1;
-  color: var(--text);
-  text-decoration: none;
-  border-radius: var(--radius-sm);
-}
-.today-step-label {
-  font-weight: 600;
-}
-
 /* Round icon-only button (speak, close …); always give it an aria-label. */
 .icon-button {
   display: inline-flex;
@@ -2389,4 +2338,10 @@ button.quiz-option:disabled {
   justify-content: space-between;
   border: 2px solid var(--accent);
   text-decoration: none;
+}
+
+/* Minutes still to go, inside the primary "Weiterlernen" button. */
+.muted-on-primary {
+  font-weight: 500;
+  opacity: 0.8;
 }

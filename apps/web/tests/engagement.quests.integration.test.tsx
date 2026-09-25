@@ -5,7 +5,7 @@ import { dailyQuests, dayKey } from '@suffa/engagement';
 import type { ReviewLog } from '@/types';
 import { Dashboard } from '@/modules/dashboard';
 import { EngagementWatcher } from '@/modules/engagement/EngagementWatcher';
-import { questLink } from '@/modules/engagement/TodayQuests';
+import { questLink, questMinutes } from '@/modules/engagement/TodayQuests';
 import { browserTimeZone } from '@/modules/settings/devices';
 import { db } from '@/services/storage';
 import {
@@ -122,5 +122,42 @@ describe('Daily quests (integration)', () => {
       questLink({ ...produce!, metric: { kind: 'practice', skills: ['write'] } }, 3)
     ).toBe('/units/3/write');
     expect(questLink({ ...produce!, metric: { kind: 'practice' } }, 3)).toBe('/units/3');
+    // Video lessons and al-Muʿallim have their own pages.
+    expect(questLink({ ...learn!, metric: { kind: 'videos' } }, 3)).toBe('/videos');
+    expect(
+      questLink({ ...produce!, metric: { kind: 'practice', skills: ['tutor'] } }, 3)
+    ).toBe('/tutor');
+  });
+
+  it('estimates the minutes the open quests still take', () => {
+    const [review, learn, produce] = dailyQuests('2026-09-24');
+    const status = (quest: typeof review, progress: number, done = false) => ({
+      quest: quest!,
+      progress,
+      done,
+      doneAt: null,
+    });
+    const reviews = { ...review!, target: 10, metric: { kind: 'reviews' as const } };
+    const listen = { ...learn!, target: 1, metric: { kind: 'tracks' as const } };
+    const write = { ...produce!, target: 3, metric: { kind: 'practice' as const } };
+    // 10 × 0.4 + 1 × 3 + 3 × 1 = 10 minutes; progress counts down.
+    expect(questMinutes([status(reviews, 0), status(listen, 0), status(write, 0)])).toBe(
+      10
+    );
+    expect(
+      questMinutes([status(reviews, 5), status(listen, 1, true), status(write, 0)])
+    ).toBe(5);
+    expect(questMinutes([status(reviews, 10, true)])).toBe(0);
+  });
+
+  it('leads with one button to the first open quest, until all are done', async () => {
+    renderHome();
+    const card = await screen.findByRole('region', { name: 'Tagesaufgaben' });
+    const next = within(card).getByRole('link', { name: /Weiterlernen/ });
+    expect(next.textContent).toMatch(/≈ \d+ Min\./);
+    const [first] = dailyQuests(dayKey(new Date(), browserTimeZone()));
+    expect(next.getAttribute('href')).toBe(questLink(first!, 1));
+    // The old separate path card is gone.
+    expect(screen.queryByText('Dein Weg heute')).toBeNull();
   });
 });

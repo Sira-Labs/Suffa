@@ -3,7 +3,7 @@ name: ci
 on:
   pull_request:
   push:
-    branches: [main, claude/ai-tutor-platform-spec-f7u0ar]
+    branches: [main]
   # Called by release.yml so nothing is built or deployed unless these checks pass.
   workflow_call:
 

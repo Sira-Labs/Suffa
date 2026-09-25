@@ -1,9 +1,13 @@
 name: release
 
-# Runs the CI checks, builds the suffa-web and suffa-api images, smoke-tests each image in a
-# real container, scans it for critical vulnerabilities (Trivy), publishes them to GHCR and
-# (optionally) deploys them to CapRover.
-# Nothing is pushed or deployed unless the checks, the smoke tests and the scan pass.
+# Runs the CI checks, builds the suffa-web, suffa-api and suffa-backup images, smoke-tests each
+# image in a real container, scans it for critical vulnerabilities (Trivy) and publishes exactly
+# that image to GHCR. Nothing is pushed or deployed unless the checks, the smoke tests and the
+# scan pass.
+#
+# Two servers (ADR-0024): every push to main goes to the staging apps (`suffa-*-stg`) and is
+# verified there. Production is a separate job in the GitHub environment `production`: after the
+# owner approves, it deploys the same image digests staging runs. Nothing is rebuilt.
 on:
   push:
     branches: [main]
@@ -158,31 +162,58 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      # The image that passed the smoke tests and the scan is the one published: tagged and
+      # pushed, not rebuilt, so staging and production run exactly what was tested.
       - name: publish image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ${{ matrix.dockerfile }}
-          push: true
-          tags: |
-            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:${{ steps.tag.outputs.tag }}
-            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:latest
-          build-args: |
-            VITE_SYNC_BACKEND=${{ vars.VITE_SYNC_BACKEND }}
-            VITE_SYNC_ENABLED=${{ vars.VITE_SYNC_ENABLED || 'true' }}
-            SUFFA_VERSION=${{ steps.tag.outputs.tag }}
-          cache-from: type=gha,scope=${{ matrix.name }}
+        env:
+          IMAGE: ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          docker tag "smoke/suffa-${{ matrix.name }}:test" "$IMAGE:$TAG"
+          docker tag "smoke/suffa-${{ matrix.name }}:test" "$IMAGE:latest"
+          docker push "$IMAGE:$TAG"
+          docker push "$IMAGE:latest"
 
-  deploy-caprover:
-    name: deploy to CapRover
+  # Staging: the current CapRover server (ADR-0024). Deploys by digest, so the production job
+  # can promote exactly these images.
+  deploy-staging:
+    name: deploy to staging
     needs: images
     runs-on: ubuntu-latest
-    # Skipped until the repository variable CAPROVER_SERVER is set.
+    # Skipped until the repository variable CAPROVER_SERVER (the staging server) is set.
     if: ${{ github.ref == 'refs/heads/main' && vars.CAPROVER_SERVER != '' }}
+    permissions:
+      contents: read
+      packages: read
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    outputs:
+      api: ${{ steps.digests.outputs.api }}
+      web: ${{ steps.digests.outputs.web }}
+      backup: ${{ steps.digests.outputs.backup }}
     steps:
       # Image names must be lowercase; the owner (e.g. "Sira-Labs") may not be.
       - name: image prefix
         run: echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/suffa" >> "$GITHUB_ENV"
+      # New packages in an organization start private: read them with the workflow's token.
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # The published tag is resolved to its digest once; staging and production use the digest.
+      - name: image digests
+        id: digests
+        env:
+          TAG: ${{ needs.images.outputs.tag }}
+        run: |
+          for name in api web backup; do
+            digest=$(docker buildx imagetools inspect "$IMAGE_PREFIX-$name:$TAG" --format '{{.Manifest.Digest}}')
+            case "$digest" in sha256:*) ;; *) echo "::error::no digest for $name:$TAG"; exit 1 ;; esac
+            echo "$name=$IMAGE_PREFIX-$name@$digest" >> "$GITHUB_OUTPUT"
+            echo "$name: $IMAGE_PREFIX-$name@$digest"
+          done
       - name: which apps are configured?
         id: gate
         env:
@@ -199,29 +230,158 @@ jobs:
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
-          app: ${{ vars.CAPROVER_APP_API || 'suffa-api' }}
+          app: ${{ vars.CAPROVER_APP_API || 'suffa-api-stg' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_API }}
-          image: ${{ env.IMAGE_PREFIX }}-api:${{ needs.images.outputs.tag }}
+          image: ${{ steps.digests.outputs.api }}
       - name: deploy worker
         if: steps.gate.outputs.worker == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
-          app: ${{ vars.CAPROVER_APP_WORKER || 'suffa-worker' }}
+          app: ${{ vars.CAPROVER_APP_WORKER || 'suffa-worker-stg' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
-          image: ${{ env.IMAGE_PREFIX }}-api:${{ needs.images.outputs.tag }}
+          image: ${{ steps.digests.outputs.api }}
       - name: deploy backup
         if: steps.gate.outputs.backup == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
-          app: ${{ vars.CAPROVER_APP_BACKUP || 'suffa-backup' }}
+          app: ${{ vars.CAPROVER_APP_BACKUP || 'suffa-backup-stg' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
-          image: ${{ env.IMAGE_PREFIX }}-backup:${{ needs.images.outputs.tag }}
+          image: ${{ steps.digests.outputs.backup }}
       - name: deploy web
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
-          app: ${{ vars.CAPROVER_APP_WEB || 'suffa-web' }}
+          app: ${{ vars.CAPROVER_APP_WEB || 'suffa-web-stg' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_WEB }}
-          image: ${{ env.IMAGE_PREFIX }}-web:${{ needs.images.outputs.tag }}
+          image: ${{ steps.digests.outputs.web }}
+
+  # Staging must run the new images before production can be offered them.
+  verify-staging:
+    name: verify staging
+    needs: [images, deploy-staging]
+    runs-on: ubuntu-latest
+    if: ${{ vars.SUFFA_STAGING_URL != '' }}
+    timeout-minutes: 12
+    steps:
+      - name: staging reports the new version
+        env:
+          URL: ${{ vars.SUFFA_STAGING_URL }}
+          TAG: ${{ needs.images.outputs.tag }}
+        run: |
+          for i in $(seq 1 60); do
+            api=$(curl -fsS "$URL/healthz" || true)
+            web=$(curl -fsS "$URL/healthz-web" || true)
+            if echo "$api" | grep -q "\"version\":\"$TAG\"" && echo "$api" | grep -q '"status":"ok"' \
+              && echo "$web" | grep -q "\"version\":\"$TAG\""; then
+              echo "staging runs $TAG"; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::staging did not report $TAG within 10 minutes"; echo "$api"; echo "$web"; exit 1
+
+  # Production: its own server (ADR-0024). Waits for the owner's approval (required reviewer on
+  # the GitHub environment `production`), then deploys the digests staging runs. Its settings
+  # are environment secrets and variables with their own names, so a missing one can never fall
+  # back to a staging value.
+  deploy-production:
+    name: deploy to production
+    needs: [images, deploy-staging, verify-staging]
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.SUFFA_PRODUCTION_URL }}
+    # actions: read lets the gate check the environment's protection rules.
+    permissions:
+      contents: read
+      actions: read
+    # Only the newest approved run deploys; an older one still waiting is replaced.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    timeout-minutes: 20
+    steps:
+      - name: production is set up and gated
+        id: gate
+        env:
+          SERVER: ${{ vars.CAPROVER_SERVER_PROD }}
+          STAGING_SERVER: ${{ vars.CAPROVER_SERVER }}
+          API: ${{ secrets.CAPROVER_APP_TOKEN_API_PROD }}
+          WORKER: ${{ secrets.CAPROVER_APP_TOKEN_WORKER_PROD }}
+          BACKUP: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP_PROD }}
+          WEB: ${{ secrets.CAPROVER_APP_TOKEN_WEB_PROD }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count=0
+          for token in "$API" "$WORKER" "$BACKUP" "$WEB"; do [ -n "$token" ] && count=$((count + 1)); done
+          if [ -z "$SERVER" ] && [ "$count" -eq 0 ]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Production is not set up yet (environment 'production' has no CAPROVER_SERVER_PROD); skipping"
+            exit 0
+          fi
+          # All four apps or none: a partial deploy would leave production on mixed revisions.
+          if [ -z "$SERVER" ] || [ "$count" -ne 4 ]; then
+            echo "::error::Production is partly configured: set CAPROVER_SERVER_PROD and all four CAPROVER_APP_TOKEN_*_PROD in the environment 'production'"
+            exit 1
+          fi
+          if [ "$SERVER" = "$STAGING_SERVER" ]; then
+            echo "::error::CAPROVER_SERVER_PROD is the staging server; production runs on its own server (ADR-0024)"
+            exit 1
+          fi
+          # Never deploy without the owner's approval: the environment must have a required reviewer.
+          rules=$(curl -fsS -H "authorization: Bearer $GH_TOKEN" -H 'accept: application/vnd.github+json' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/environments/production" | jq -r '[.protection_rules[]?.type] | join(",")')
+          case ",$rules," in *,required_reviewers,*) ;; *)
+            echo "::error::The environment 'production' has no required reviewer; add the owner before deploying"
+            exit 1 ;;
+          esac
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+      - name: deploy api
+        if: steps.gate.outputs.deploy == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER_PROD }}
+          app: ${{ vars.CAPROVER_APP_API_PROD || 'suffa-api' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_API_PROD }}
+          image: ${{ needs.deploy-staging.outputs.api }}
+      - name: deploy worker
+        if: steps.gate.outputs.deploy == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER_PROD }}
+          app: ${{ vars.CAPROVER_APP_WORKER_PROD || 'suffa-worker' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_WORKER_PROD }}
+          image: ${{ needs.deploy-staging.outputs.api }}
+      - name: deploy backup
+        if: steps.gate.outputs.deploy == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER_PROD }}
+          app: ${{ vars.CAPROVER_APP_BACKUP_PROD || 'suffa-backup' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP_PROD }}
+          image: ${{ needs.deploy-staging.outputs.backup }}
+      - name: deploy web
+        if: steps.gate.outputs.deploy == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER_PROD }}
+          app: ${{ vars.CAPROVER_APP_WEB_PROD || 'suffa-web' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_WEB_PROD }}
+          image: ${{ needs.deploy-staging.outputs.web }}
+      - name: production reports the new version
+        if: steps.gate.outputs.deploy == 'true' && vars.SUFFA_PRODUCTION_URL != ''
+        env:
+          URL: ${{ vars.SUFFA_PRODUCTION_URL }}
+          TAG: ${{ needs.images.outputs.tag }}
+        run: |
+          for i in $(seq 1 60); do
+            api=$(curl -fsS "$URL/healthz" || true)
+            web=$(curl -fsS "$URL/healthz-web" || true)
+            if echo "$api" | grep -q "\"version\":\"$TAG\"" && echo "$api" | grep -q '"status":"ok"' \
+              && echo "$web" | grep -q "\"version\":\"$TAG\""; then
+              echo "production runs $TAG"; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::production did not report $TAG within 10 minutes"; echo "$api"; echo "$web"; exit 1

@@ -53,6 +53,10 @@ export const RBAC_MATRIX = {
   'admin:users:write': ['admin'],
   /** Read the audit log. */
   'admin:audit:read': ['admin'],
+  /** See AI routes, budget and spend. */
+  'admin:ai:read': ['admin'],
+  /** Change AI routes, budget and quotas; try a route (audit-logged, costs money). */
+  'admin:ai:write': ['admin'],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Action = keyof typeof RBAC_MATRIX;
@@ -66,6 +70,8 @@ export const SECOND_FACTOR_ACTIONS: ReadonlySet<Action> = new Set<Action>([
   'admin:users:read',
   'admin:users:write',
   'admin:audit:read',
+  'admin:ai:read',
+  'admin:ai:write',
 ]);
 
 /** Allowed by role, but the session still has to confirm the second factor. */

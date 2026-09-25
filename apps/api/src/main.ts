@@ -28,7 +28,7 @@ import { PgEngagementRepository } from './engagement/repository.js';
 import { fileURLToPath } from 'node:url';
 import { serve } from '@hono/node-server';
 import pg from 'pg';
-import { pino } from 'pino';
+import { pino, type Logger } from 'pino';
 import { createApp, type AuthRouteDeps } from './app.js';
 import { ChainResolver, createAuth, SessionResolver } from './auth/betterAuth.js';
 import { LogMailer, SmtpMailer } from './auth/mailer.js';
@@ -42,6 +42,10 @@ import {
 import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/resolver.js';
 import { PgSyncRepository } from './sync/repository.js';
 import { PgAdminRepository } from './admin/repository.js';
+import { AiGateway } from './ai/gateway.js';
+import { buildProviders } from './ai/providers.js';
+import { PgAiRepository } from './ai/repository.js';
+import { ModelRouter, type ProviderId } from '@suffa/llm';
 import { PgClassRepository } from './classes/repository.js';
 import { PgPrivacyRepository } from './privacy/repository.js';
 import { PgAccountRepository } from './account/repository.js';
@@ -373,6 +377,7 @@ async function main(): Promise<void> {
       log,
     },
     admin: { repo: new PgAdminRepository(pool), auth, log },
+    aiAdmin: aiParts(config, pool, log, auth),
     classes: config.publicUrl
       ? {
           repo: new PgClassRepository(pool),
@@ -429,5 +434,28 @@ function driveParts(config: Config) {
       redirectUri: `${new URL(config.publicUrl).origin}/api/v1/drive/callback`,
     }),
     box: new SecretBox(config.authSecret, 'drive'),
+  };
+}
+
+/**
+ * AI gateway (ADR-0010): providers from their keys, routes from Postgres. Without any key the
+ * admin page still shows routes and spend, and every call answers "unavailable".
+ */
+function aiParts(
+  config: Config,
+  pool: pg.Pool,
+  log: Pick<Logger, 'info' | 'warn'>,
+  auth: AuthResolver
+) {
+  const providers = buildProviders(config);
+  const repo = new PgAiRepository(pool);
+  const router = new ModelRouter({ providers, source: repo });
+  return {
+    repo,
+    router,
+    gateway: new AiGateway({ router, repo, log }),
+    configured: Object.keys(providers) as ProviderId[],
+    auth,
+    log,
   };
 }

@@ -6,7 +6,10 @@
 import { describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 import type { AccountRepository } from '../src/account/repository.js';
+import { ModelRouter } from '@suffa/llm';
 import type { AdminRepository } from '../src/admin/repository.js';
+import { AiGateway } from '../src/ai/gateway.js';
+import type { AiRepository } from '../src/ai/repository.js';
 import type { ClassRepository } from '../src/classes/repository.js';
 import type { PrivacyRepository } from '../src/privacy/repository.js';
 import { SecondFactorService } from '../src/account/secondFactor.js';
@@ -241,6 +244,31 @@ function buildApp() {
       log: quiet,
     },
     admin: { repo: adminRepo, auth: resolver, log: quiet },
+    aiAdmin: (() => {
+      const repo: AiRepository = {
+        load: async () => [],
+        replaceRoutes: async () => {},
+        settings: async () => ({
+          monthlyBudgetMicro: 1,
+          downgradePercent: 80,
+          dailyTurns: { student: 1, teacher: 1, admin: null },
+        }),
+        updateSettings: async () => {},
+        monthSpend: async () => 0,
+        turnsToday: async () => 0,
+        record: async () => {},
+        usageByTask: async () => [],
+      };
+      const router = new ModelRouter({ providers: {}, source: repo });
+      return {
+        repo,
+        router,
+        gateway: new AiGateway({ router, repo, log: quiet }),
+        configured: [],
+        auth: resolver,
+        log: quiet,
+      };
+    })(),
     classes: {
       repo: classRepo,
       auth: resolver,

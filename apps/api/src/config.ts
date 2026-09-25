@@ -119,6 +119,17 @@ const RawEnvSchema = z.object({
     .optional(),
   SUFFA_TRANSCRIBE_TOKEN: z.string().trim().optional(),
   SUFFA_TRANSCRIBE_MODEL: z.string().trim().default('whisper-1'),
+  // AI gateway (ADR-0010): each provider is on only with its key; keys stay on the server.
+  SUFFA_ANTHROPIC_API_KEY: z.string().trim().optional(),
+  SUFFA_OPENROUTER_API_KEY: z.string().trim().optional(),
+  SUFFA_HF_API_KEY: z.string().trim().optional(),
+  /** Dedicated Hugging Face Inference Endpoint; the shared router otherwise. */
+  SUFFA_HF_ENDPOINT_URL: z
+    .string()
+    .trim()
+    .transform((value) => value || undefined)
+    .pipe(z.string().url('SUFFA_HF_ENDPOINT_URL must be a URL').optional())
+    .optional(),
   SUFFA_GOOGLE_CLIENT_ID: z.string().trim().optional(),
   SUFFA_GOOGLE_CLIENT_SECRET: z.string().trim().optional(),
   SUFFA_GOOGLE_API_KEY: z.string().trim().optional(),
@@ -184,6 +195,13 @@ export interface Config {
   storage: S3Settings | undefined;
   /** Transcription service; undefined turns automatic transcripts off. */
   transcribe: { url: string; token: string | null; model: string } | undefined;
+  /** AI provider keys (ADR-0010); a provider without a key is simply not routed to. */
+  ai: {
+    anthropicKey: string | undefined;
+    openRouterKey: string | undefined;
+    huggingFaceKey: string | undefined;
+    huggingFaceEndpoint: string | undefined;
+  };
   /** Google Drive import; undefined turns it off. */
   google:
     | { clientId: string; clientSecret: string; apiKey: string; appId: string }
@@ -353,6 +371,12 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
           model: raw.SUFFA_TRANSCRIBE_MODEL,
         }
       : undefined,
+    ai: {
+      anthropicKey: raw.SUFFA_ANTHROPIC_API_KEY || undefined,
+      openRouterKey: raw.SUFFA_OPENROUTER_API_KEY || undefined,
+      huggingFaceKey: raw.SUFFA_HF_API_KEY || undefined,
+      huggingFaceEndpoint: raw.SUFFA_HF_ENDPOINT_URL,
+    },
     google: googleComplete
       ? {
           clientId: raw.SUFFA_GOOGLE_CLIENT_ID!,

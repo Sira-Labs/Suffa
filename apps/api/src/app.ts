@@ -34,6 +34,7 @@ import {
 } from './classes/spiritRoutes.js';
 import { sameOriginOnly } from './http/sameOrigin.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
+import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
 import { createEngagementRoutes, type EngagementRouteDeps } from './engagement/routes.js';
 import { authorize, type AuthorizeLog } from './authz/middleware.js';
 
@@ -86,6 +87,8 @@ export interface AppDeps {
   classes?: ClassRouteDeps;
   /** Admin area (users); every route needs an admin. */
   admin?: AdminRouteDeps;
+  /** Admin AI page: routes, budget, spend (ADR-0010). */
+  aiAdmin?: AiAdminDeps;
   /** Where denied requests are logged (authz.denied). */
   authzLog?: AuthorizeLog;
   /** Called for unhandled errors; the client only sees a generic 500. */
@@ -167,6 +170,7 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.notifications) {
     app.route('/api/v1', createNotificationRoutes(deps.notifications));
   }
+  if (deps.aiAdmin) app.route('/api/v1/admin/ai', createAiAdminRoutes(deps.aiAdmin));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));

@@ -8,6 +8,9 @@ export default defineConfig({
       '@suffa/engagement': fileURLToPath(
         new URL('../../packages/engagement/src/index.ts', import.meta.url)
       ),
+      '@suffa/llm': fileURLToPath(
+        new URL('../../packages/llm/src/index.ts', import.meta.url)
+      ),
     },
   },
   test: {

@@ -122,6 +122,9 @@ Env (App Configs → Environment variables):
 | `SUFFA_VAPID_SUBJECT`                                                       | `mailto:<ops address>` – contact for push services; reminders stay off until all three are set          | S6          |
 | `SUFFA_TRANSCRIBE_URL`                                                      | optional: OpenAI-compatible `/v1/audio/transcriptions` (OpenAI, Groq, self-hosted faster-whisper)       | S8          |
 | `SUFFA_TRANSCRIBE_TOKEN`, `SUFFA_TRANSCRIBE_MODEL`                          | API token (if the service needs one) and model, default `whisper-1`                                     | S8          |
+| `SUFFA_ANTHROPIC_API_KEY`                                                   | optional: turns on Anthropic routes (AI gateway, ADR-0010); api and worker                              | S9          |
+| `SUFFA_OPENROUTER_API_KEY`                                                  | optional: turns on OpenRouter routes (open-weight models)                                               | S9          |
+| `SUFFA_HF_API_KEY`, `SUFFA_HF_ENDPOINT_URL`                                 | optional: Hugging Face token; endpoint URL for a dedicated Inference Endpoint (router otherwise)        | S9          |
 | `SUFFA_GOOGLE_CLIENT_ID`, `SUFFA_GOOGLE_CLIENT_SECRET`                      | OAuth web client (Google Cloud), redirect URI `https://<app>/api/v1/drive/callback`, scope `drive.file` | S7          |
 | `SUFFA_GOOGLE_API_KEY`, `SUFFA_GOOGLE_APP_ID`                               | browser API key (Picker API, restricted to the app's domain) and the project number                     | S7          |
 | `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                              | S7          |

@@ -9,10 +9,19 @@ import {
   type NotificationConfig,
   type NotificationPrefs,
 } from '@/services/notifications/notificationsApi';
-import { disablePush, enablePush, pushSupported } from '@/services/notifications/push';
+import { nativeBridge } from '@/native/install';
+import {
+  appChannel,
+  webPushChannel,
+  type ReminderChannel,
+} from '@/services/notifications/channel';
 
 export function RemindersCard() {
   const api = useMemo(() => new NotificationsApi(), []);
+  const channel = useMemo<ReminderChannel>(() => {
+    const bridge = nativeBridge();
+    return bridge ? appChannel(bridge) : webPushChannel;
+  }, []);
   const [config, setConfig] = useState<NotificationConfig | null>(null);
   const [prefs, setPrefs] = useState<NotificationPrefs | null>(null);
   const [message, setMessage] = useState<{ text: string; good: boolean } | null>(null);
@@ -41,15 +50,15 @@ export function RemindersCard() {
       const wantsPush = next.reminderEnabled || next.weeklyRecap;
       if (
         wantsPush &&
-        config.publicKey &&
         (next.reminderEnabled !== prefs.reminderEnabled || config.devices === 0)
       ) {
-        const push = await enablePush(api, config.publicKey);
+        const push = await channel.enable(api, config);
         if (!push.ok) return setMessage({ text: push.message, good: false });
       }
-      if (!next.reminderEnabled && !next.weeklyRecap) await disablePush(api);
+      if (!wantsPush) await channel.disable(api, config);
       const result = await api.savePrefs(next);
       if (!result.ok) return setMessage({ text: result.message, good: false });
+      await channel.saved(next, config);
       setPrefs(next);
       const fresh = await api.config();
       if (fresh.ok) setConfig(fresh.value);
@@ -59,7 +68,7 @@ export function RemindersCard() {
     }
   };
 
-  if (!config.publicKey) {
+  if (!channel.available(config)) {
     return (
       <div className="card stack">
         <strong>Erinnerungen</strong>
@@ -80,12 +89,7 @@ export function RemindersCard() {
       }}
     >
       <strong id="reminders-title">Erinnerungen</strong>
-      {!pushSupported() && (
-        <span className="muted">
-          Dieses Gerät kann keine Mitteilungen empfangen. Auf iPhone/iPad: Suffa zum
-          Home-Bildschirm hinzufügen und von dort öffnen.
-        </span>
-      )}
+      {channel.hint() && <span className="muted">{channel.hint()}</span>}
       <label className="row" style={{ justifyContent: 'space-between' }}>
         <span className="stack" style={{ gap: 0 }}>
           <span>Tägliche Erinnerung</span>
@@ -150,9 +154,7 @@ export function RemindersCard() {
           Speichern
         </button>
         <span className="muted" style={{ fontSize: '0.85rem' }}>
-          {config.devices === 0
-            ? 'Noch kein Gerät angemeldet'
-            : `${config.devices} ${config.devices === 1 ? 'Gerät bekommt' : 'Geräte bekommen'} Mitteilungen`}
+          {channel.status(config)}
         </span>
       </div>
       {message && (

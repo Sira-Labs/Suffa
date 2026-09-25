@@ -110,6 +110,7 @@ describe.skipIf(!url)('Notifications (Postgres)', () => {
     expect(before).toMatchObject({
       publicKey: 'BPublicKey',
       devices: 0,
+      appPush: false,
       prefs: { reminderEnabled: false, reminderTime: '18:00' },
     });
     await enable('19:30');

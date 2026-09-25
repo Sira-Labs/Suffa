@@ -39,6 +39,8 @@ gantt
   S11 Grading & evals (4/4)         :done, s11, after s10, 14d
   section P5 Interactive YouTube
   S12 Video lessons (5/5)           :done, s12, after s11, 14d
+  section P6 Mobile apps
+  S13 In their pocket (3/5)         :active, s13, after s12, 14d
 ```
 
 ```mermaid
@@ -270,6 +272,16 @@ confirmed in the pilot.
 | 13.3 | Offline audio via filesystem, background playback                                  | 3   | Lock-screen controls.                 |
 | 13.4 | TestFlight + Play internal testing with the class                                  | 3   | ≥ 10 students on test builds.         |
 | 13.5 | Store assets, privacy labels, age rating                                           | 2   | Submitted for review.                 |
+
+Status (Sprint 13): 13.1–13.3 built as far as they can be without devices. Server: bearer
+tokens for the app (signed only), CORS for the app origins without cookies, Universal Links /
+App Links files, FCM HTTP v1 beside web push. Web: the app shell bridge in
+`apps/web/src/native/` (token in Keychain/Keystore, server paths to the API, sign-in and
+invitation links, device-planned reminders when the server has no FCM, FCM registration),
+lock-screen controls via Media Session. The Capacitor project is configuration in `mobile/`
+(outside the npm workspaces). Open for the PO: store and Firebase accounts, signing keys,
+`cap add ios/android` on a Mac, device tests (flight-mode reminder, lock screen), 13.4 and
+13.5.
 
 ### Sprint 14 (Apr 5 – Apr 18) — _"Celebrate"_
 

@@ -6,9 +6,13 @@ import {
   useSrsStore,
   useSyncStore,
 } from '@/state';
+import { nativeBridge } from '@/native/install';
+import { logger } from '@/services/logger';
 import { TutorApi } from '@/services/tutor/tutorApi';
 import { VideosApi } from '@/services/videos/videosApi';
 import { useLocalEngagement } from './useEngagement';
+
+const log = logger.child('engagement:watcher');
 
 const TIER_LABEL = { bronze: 'Bronze', silver: 'Silber', gold: 'Gold' } as const;
 
@@ -54,6 +58,18 @@ export function EngagementWatcher() {
       cancelled = true;
     };
   }, [setVideosAvailable]);
+
+  // In the app without server push: once something is learned today, today's device
+  // reminder is dropped (as the server skips it for web push).
+  const learnedToday = summary.quests.quests.some((q) => q.done);
+  useEffect(() => {
+    if (!learnedToday) return;
+    void nativeBridge()
+      ?.reminders?.replan({ doneToday: true })
+      .catch((error: unknown) =>
+        log.warn('reminders not re-planned', { error: String(error) })
+      );
+  }, [learnedToday, summary.today]);
 
   useEffect(() => {
     const quests = summary.quests.quests.filter((q) => q.done);

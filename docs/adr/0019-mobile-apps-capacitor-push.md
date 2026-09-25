@@ -1,6 +1,6 @@
 # ADR-0019: App-store apps with Capacitor; push and local notifications
 
-- Status: proposed
+- Status: accepted (implemented in Sprint 13)
 - Date: 2026-09-24
 - Revises: the "no native apps" non-goal in `01-product-spec.md`
 
@@ -42,3 +42,30 @@ downloads are more robust natively.
 Store accounts (Apple $99/year, Google $25 once), a Mac (or CI macOS runner) for iOS builds,
 and a Firebase project for FCM. Engagement features rely on the notification abstraction
 (`Notifier`: web-push | fcm | local) rather than a specific channel.
+
+## Implementation (Sprint 13)
+
+- **Where:** the shell is `mobile/` (Capacitor 8 configuration and build notes), kept outside
+  the npm workspaces so CI and server images never install native tooling. The web side is
+  `apps/web/src/native/`; plugins are reached through `window.Capacitor.Plugins` at run time,
+  so the web bundle has no native dependency and behaves as the PWA in a browser.
+- **Auth:** Better Auth's `bearer` plugin with `requireSignature` — the app only ever holds
+  the signed token the server issued in `set-auth-token`. The app fetch sends `/api/…` and
+  `/media/…` to `VITE_SUFFA_API_ORIGIN`, with `credentials: 'omit'` and the bearer header on
+  API calls only; a 401 or a sign-out forgets the token. The token is stored with
+  `capacitor-secure-storage-plugin` (Keychain / Keystore), falling back to Preferences.
+- **CORS:** only `SUFFA_APP_ORIGINS` (default `capacitor://localhost,https://localhost`),
+  without credentials; the same-origin write guard accepts these origins too. Cookies are
+  never accepted cross-origin, so the web's CSRF stance is unchanged.
+- **Links:** the API serves `/.well-known/apple-app-site-association` and
+  `/.well-known/assetlinks.json` from `SUFFA_IOS_APP_IDS` / `SUFFA_ANDROID_APP_LINKS` for the
+  sign-in path and `/join/*`. The app verifies the magic link itself, without the callback,
+  and then opens the in-app page the callback named (never another origin).
+- **Notifications:** the `Notifier` is a router: `fcm:<token>` devices go to FCM HTTP v1
+  (service-account JWT from `SUFFA_FCM_SERVICE_ACCOUNT`), all others to web push, so
+  reminders, recaps and dead-device clean-up are shared. Without FCM on the server the app
+  plans the daily reminder on the device, a week ahead, skipping today once something was
+  learned; `appPush` in `GET /notifications` tells the app which applies.
+- **Audio:** offline copies stay in IndexedDB (works in the web view); lock-screen controls
+  through the Media Session API. Background audio needs the iOS `audio` background mode
+  (see `mobile/README.md`).

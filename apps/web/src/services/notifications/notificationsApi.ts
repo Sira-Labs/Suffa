@@ -18,6 +18,8 @@ export interface NotificationConfig {
   prefs: NotificationPrefs;
   /** Devices of this account that receive push. */
   devices: number;
+  /** The server can push to the app (FCM); otherwise the app plans reminders itself. */
+  appPush: boolean;
 }
 
 export interface WeeklyRecap {
@@ -61,6 +63,21 @@ export class NotificationsApi {
     return this.call<void>('/api/v1/notifications/subscriptions', {
       method: 'DELETE',
       body: JSON.stringify({ endpoint }),
+    });
+  }
+
+  /** The app's FCM device token (ADR-0019). */
+  registerDevice(token: string, platform: 'ios' | 'android') {
+    return this.call<void>('/api/v1/notifications/devices', {
+      method: 'POST',
+      body: JSON.stringify({ token, platform }),
+    });
+  }
+
+  unregisterDevice(token: string) {
+    return this.call<void>('/api/v1/notifications/devices', {
+      method: 'DELETE',
+      body: JSON.stringify({ token }),
     });
   }
 

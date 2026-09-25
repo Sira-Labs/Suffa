@@ -1,7 +1,7 @@
 /**
  * Notifications of the signed-in user (stories 6.3, 6.4), mounted at /api/v1:
  *
- *   GET    /notifications              → { publicKey | null, prefs, devices }  (profile:read)
+ *   GET    /notifications              → { publicKey | null, prefs, devices, appPush } (profile:read)
  *   PUT    /notifications/preferences  { reminderEnabled, reminderTime, … }    (profile:write)
  *   POST   /notifications/subscriptions { endpoint, keys: { p256dh, auth } } (profile:write)
  *   DELETE /notifications/subscriptions { endpoint }                        (profile:write)
@@ -62,7 +62,12 @@ export function createNotificationRoutes(deps: NotificationRouteDeps): Hono<Acto
   app.get('/notifications', read, async (c) => {
     c.header('Cache-Control', 'no-store');
     const { devices, ...prefs } = await deps.repo.prefs(me(c));
-    return c.json({ publicKey: deps.publicKey, prefs, devices });
+    return c.json({
+      publicKey: deps.publicKey,
+      prefs,
+      devices,
+      appPush: deps.appPush === true,
+    });
   });
 
   app.put('/notifications/preferences', write, async (c) => {

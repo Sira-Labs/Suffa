@@ -6,9 +6,11 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { playableUrl } from '@/native/install';
 import { dueCheckpoint, type Checkpoint, type Cue } from '@/services/media/checkpoints';
 import { InteractiveApi, type Interactive } from '@/services/media/interactiveApi';
 import { MediaApi } from '@/services/media/mediaApi';
+import { useMediaSession } from '@/services/media/mediaSession';
 import {
   offlineAudioUrl,
   offlineMeta,
@@ -118,6 +120,8 @@ export function RecordingPlayer() {
     }
     return ids;
   }, [media, practised, mediaId]);
+
+  useMediaSession(media?.title, element);
 
   if (message) return <p className="feedback-bad">{message}</p>;
   if (!media) return <p className="muted">Lade Aufnahme …</p>;
@@ -231,7 +235,7 @@ export function RecordingPlayer() {
           controls
           playsInline
           preload="metadata"
-          src={media.video}
+          src={playableUrl(media.video)}
           style={{ width: '100%', borderRadius: 12, background: '#000' }}
           aria-label={media.title}
           {...handlers}
@@ -240,7 +244,7 @@ export function RecordingPlayer() {
         <audio
           controls
           preload="metadata"
-          src={media.audio}
+          src={playableUrl(media.audio)}
           style={{ width: '100%' }}
           aria-label={media.title}
           {...handlers}

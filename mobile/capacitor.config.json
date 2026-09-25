@@ -1,0 +1,17 @@
+{
+  "appId": "org.siralabs.suffa",
+  "appName": "Suffa",
+  "webDir": "../apps/web/dist",
+  "server": {
+    "iosScheme": "capacitor",
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_suffa"
+    }
+  }
+}

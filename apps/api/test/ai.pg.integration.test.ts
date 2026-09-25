@@ -254,7 +254,8 @@ describe.skipIf(!url)('AI gateway (Postgres)', () => {
             provider: 'anthropic',
             model: 'claude-haiku-4-5',
             outcome: 'server',
-            latencyMs: 0,
+            // Measured with the real clock: 0 ms locally, sometimes 1 ms on a CI runner.
+            latencyMs: expect.any(Number),
           },
         ],
       },

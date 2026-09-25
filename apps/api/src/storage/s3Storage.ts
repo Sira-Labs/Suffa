@@ -14,6 +14,10 @@ import {
   UploadPartCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { createReadStream, createWriteStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import {
   isSafeKey,
   PRESIGN_SECONDS,
@@ -88,6 +92,24 @@ export class S3ObjectStorage implements ObjectStorage {
 
   async delete(bucket: BucketRole, key: string) {
     await this.client.send(new DeleteObjectCommand(this.target(bucket, key)));
+  }
+
+  async download(bucket: BucketRole, key: string, filePath: string) {
+    const out = await this.client.send(new GetObjectCommand(this.target(bucket, key)));
+    if (!(out.Body instanceof Readable)) throw new Error('store returned no stream');
+    await pipeline(out.Body, createWriteStream(filePath));
+  }
+
+  async putFile(bucket: BucketRole, key: string, filePath: string, contentType: string) {
+    const { size } = await stat(filePath);
+    await this.client.send(
+      new PutObjectCommand({
+        ...this.target(bucket, key),
+        Body: createReadStream(filePath),
+        ContentLength: size,
+        ContentType: contentType,
+      })
+    );
   }
 
   async presignGet(bucket: BucketRole, key: string, seconds = PRESIGN_SECONDS) {

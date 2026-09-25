@@ -21,7 +21,7 @@ export interface AuditRecord extends Required<Omit<AuditEntry, 'details' | 'ipAd
   createdAt: string;
 }
 
-type Queryable = Pick<pg.PoolClient, 'query'>;
+export type Queryable = Pick<pg.PoolClient, 'query'>;
 
 /** Writes one entry; pass the transaction's client so the change and its record commit together. */
 export async function writeAudit(db: Queryable, entry: AuditEntry): Promise<void> {

@@ -14,6 +14,7 @@ import {
 } from './auth/betterAuth.js';
 import { createAccountRoutes, type AccountRouteDeps } from './account/routes.js';
 import { createClassRoutes, type ClassRouteDeps } from './classes/routes.js';
+import { createMediaRoutes, type MediaRouteDeps } from './media/routes.js';
 import {
   createNotificationRoutes,
   type NotificationRouteDeps,
@@ -47,6 +48,8 @@ export interface AppDeps {
   onProbeError?: (error: unknown) => void;
   /** Sync endpoints; omitted in tests that only exercise health/version. */
   sync?: SyncRouteDeps;
+  /** Class recordings: upload, transcode status, playback (Sprint 7). */
+  media?: MediaRouteDeps;
   /** Push reminders, their preferences and the weekly recap (stories 6.3, 6.4). */
   notifications?: NotificationRouteDeps;
   /** Class dashboard, challenge, teacher badges and shout-outs (Sprint 6). */
@@ -142,6 +145,7 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.account) app.route('/api/v1/account', createAccountRoutes(deps.account));
   if (deps.classes) app.route('/api/v1', createClassRoutes(deps.classes));
   if (deps.classSpirit) app.route('/api/v1', createClassSpiritRoutes(deps.classSpirit));
+  if (deps.media) app.route('/api/v1', createMediaRoutes(deps.media));
   if (deps.notifications) {
     app.route('/api/v1', createNotificationRoutes(deps.notifications));
   }

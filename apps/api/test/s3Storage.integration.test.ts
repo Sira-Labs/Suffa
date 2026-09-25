@@ -3,6 +3,9 @@
  * e.g. `moto_server -p 5055` and SUFFA_TEST_S3_ENDPOINT=http://localhost:5055.
  */
 import { CreateBucketCommand, S3Client } from '@aws-sdk/client-s3';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { S3ObjectStorage } from '../src/storage/s3Storage.js';
 
@@ -49,6 +52,22 @@ describe.skipIf(!endpoint)('S3ObjectStorage', () => {
     await expect(storage.put('uploads', '../escape', body, 'text/plain')).rejects.toThrow(
       /unsafe/
     );
+  });
+
+  it('streams large objects to and from files', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'suffa-s3-'));
+    const source = join(dir, 'in.bin');
+    await writeFile(source, new Uint8Array(3 * 1024 * 1024).fill(3));
+    await storage.putFile(
+      'media',
+      'rec/files/in.bin',
+      source,
+      'application/octet-stream'
+    );
+    const target = join(dir, 'out.bin');
+    await storage.download('media', 'rec/files/in.bin', target);
+    expect((await readFile(target)).length).toBe(3 * 1024 * 1024);
+    await rm(dir, { recursive: true });
   });
 
   it('hands out presigned same-origin URLs that work through the proxy', async () => {

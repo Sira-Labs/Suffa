@@ -116,7 +116,7 @@ export const SYNC_SCHEMAS = {
   }),
   media_progress: z.object({
     ...base,
-    source: z.enum(['publisher-audio', 'discover-video']),
+    source: z.enum(['publisher-audio', 'discover-video', 'recording']),
     ref: z.string().min(1).max(2000),
     lessonKey: shortText,
     durationSec: z.number().min(0).max(1_000_000),

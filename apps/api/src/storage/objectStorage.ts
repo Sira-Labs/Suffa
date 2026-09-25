@@ -27,6 +27,15 @@ export interface ObjectStorage {
   get(bucket: BucketRole, key: string): Promise<Uint8Array | null>;
   head(bucket: BucketRole, key: string): Promise<StoredObject | null>;
   delete(bucket: BucketRole, key: string): Promise<void>;
+  /** Streams an object into a local file (large media for the worker). */
+  download(bucket: BucketRole, key: string, filePath: string): Promise<void>;
+  /** Streams a local file into an object (up to 5 GB). */
+  putFile(
+    bucket: BucketRole,
+    key: string,
+    filePath: string,
+    contentType: string
+  ): Promise<void>;
   /** Same-origin URL to read an object for `seconds`. */
   presignGet(bucket: BucketRole, key: string, seconds?: number): Promise<string>;
   /** Same-origin URL to upload one object (up to a few hundred MB) with PUT. */

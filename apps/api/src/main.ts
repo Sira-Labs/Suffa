@@ -3,6 +3,10 @@
  * Exit codes: 1 = invalid configuration / fatal error, 3 = schema revision mismatch
  * (worker started before the api migrated; CapRover restarts it).
  */
+import { enqueueTranscode, registerMedia } from './media/jobs.js';
+import { PgMediaRepository } from './media/repository.js';
+import { ffmpegTranscoder, MediaService } from './media/service.js';
+import { S3ObjectStorage } from './storage/s3Storage.js';
 import { registerNotifications } from './notifications/jobs.js';
 import { disabledNotifier, WebPushNotifier } from './notifications/notifier.js';
 import { PgRecapRepository } from './notifications/recap.js';
@@ -114,6 +118,18 @@ async function main(): Promise<void> {
           });
           await registerMaintenance(boss, pool, log, errors);
           await registerEngagement(boss, new PgEngagementRepository(pool), log, errors);
+          if (config.storage) {
+            await registerMedia(
+              boss,
+              {
+                repo: new PgMediaRepository(pool),
+                storage: new S3ObjectStorage(config.storage),
+                transcoder: ffmpegTranscoder,
+                log,
+              },
+              errors
+            );
+          }
           await registerNotifications(
             boss,
             {
@@ -237,6 +253,20 @@ async function main(): Promise<void> {
       onPushed: requestRecompute(boss),
     },
     engagement: { repo: new PgEngagementRepository(pool), auth, log },
+    media: config.storage
+      ? {
+          classes: new PgClassRepository(pool),
+          repo: new PgMediaRepository(pool),
+          media: new MediaService(
+            new PgMediaRepository(pool),
+            new S3ObjectStorage(config.storage),
+            enqueueTranscode(boss)
+          ),
+          audit: pool,
+          auth,
+          log,
+        }
+      : undefined,
     notifications: {
       repo: new PgNotificationRepository(pool),
       recaps: new PgRecapRepository(pool),

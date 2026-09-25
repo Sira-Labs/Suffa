@@ -123,6 +123,30 @@ function buildApp() {
       queueDepth: async () => ({ waiting: 0, active: 0, failed: 0, deadLetter: 0 }),
     },
     sync: { repo: syncRepo, auth: resolver, log: quiet },
+    media: {
+      classes: classRepo,
+      repo: {
+        create: async () => ({}) as never,
+        get: async () => null,
+        byId: async () => null,
+        list: async () => [],
+        classBytes: async () => 0,
+        update: async () => {},
+        publish: async () => {},
+        remove: async () => {},
+      },
+      media: {
+        start: async () => ({ ok: false, reason: 'unsupported_type' }),
+        partUrls: async () => ({}),
+        uploadedParts: async () => [],
+        complete: async () => false,
+        remove: async () => {},
+        playUrls: async () => ({ audio: '', video: null }),
+      },
+      audit: { query: async () => ({}) } as never,
+      auth: resolver,
+      log: quiet,
+    },
     notifications: {
       repo: {
         subscribe: async () => {},

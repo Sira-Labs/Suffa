@@ -11,6 +11,7 @@ import {
   questXpEvents,
   ticksByDay,
   type DayQuests,
+  type QuestFeatures,
   type Tick,
 } from './quests.js';
 import type { EngagementInput } from './records.js';
@@ -37,6 +38,8 @@ export interface SummaryOptions {
   timeZone: string;
   weeklyGoal: WeeklyGoal;
   now?: Date;
+  /** Which feature-bound quests the learner can get (e.g. the AI tutor). */
+  features?: QuestFeatures;
 }
 
 export interface EngagementSummary {
@@ -57,16 +60,17 @@ export interface EngagementSummary {
 
 export function summarize(
   input: EngagementInput,
-  { timeZone, weeklyGoal, now = new Date() }: SummaryOptions
+  { timeZone, weeklyGoal, now = new Date(), features = {} }: SummaryOptions
 ): EngagementSummary {
   const today = dayKey(now, timeZone);
   const ticks = ticksByDay(input, timeZone);
   const questDays = [...ticks.keys()]
     .filter((day) => day <= today)
     .sort()
-    .map((day) => evaluateDay(day, ticks.get(day) as Tick[]));
+    .map((day) => evaluateDay(day, ticks.get(day) as Tick[], features));
   const quests =
-    questDays.find((d) => d.day === today) ?? evaluateDay(today, ticks.get(today) ?? []);
+    questDays.find((d) => d.day === today) ??
+    evaluateDay(today, ticks.get(today) ?? [], features);
   const activeDays = new Set(
     questDays.filter((d) => d.quests.some((q) => q.done)).map((d) => d.day)
   );

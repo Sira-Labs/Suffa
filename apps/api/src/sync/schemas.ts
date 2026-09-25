@@ -96,6 +96,7 @@ export const SYNC_SCHEMAS = {
       'verbs',
       'letters',
       'checkpoint',
+      'tutor',
     ]),
     itemId: shortText.min(1),
     practisedAt: isoTimestamp,

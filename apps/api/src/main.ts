@@ -140,7 +140,21 @@ async function main(): Promise<void> {
             onError: (error) => errors.capture(error, { source: 'pg-boss' }),
           });
           await registerMaintenance(boss, pool, log, errors);
-          await registerEngagement(boss, new PgEngagementRepository(pool), log, errors);
+          const tutorRouter = new ModelRouter({
+            providers: buildProviders(config),
+            source: new PgAiRepository(pool),
+          });
+          await registerEngagement(
+            boss,
+            new PgEngagementRepository(pool),
+            log,
+            errors,
+            async () => ({
+              tutor:
+                (await tutorRouter.plan(TUTOR_TASK, { requires: ['streaming', 'tools'] }))
+                  .length > 0,
+            })
+          );
           if (config.storage) {
             const repo = new PgMediaRepository(pool);
             const storage = new S3ObjectStorage(config.storage);

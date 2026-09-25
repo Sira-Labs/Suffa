@@ -23,15 +23,31 @@ export type QuestMetric =
   /** Unit practice items; only these skills, or any skill without a list. */
   | { kind: 'practice'; skills?: readonly string[] };
 
+/** Features a quest may need; without them it is never picked (e.g. no AI tutor). */
+export interface QuestFeatures {
+  tutor?: boolean;
+}
+
 export interface QuestDef {
   id: string;
   slot: QuestSlot;
+  /**
+   * First day (`YYYY-MM-DD`) the quest can be picked. Adding a quest changes which quest the
+   * hash picks, so new quests start on a later day and every earlier day keeps its quests (and
+   * the XP already earned for them).
+   */
+  since?: string;
+  /** Only picked when this feature is on for the learner. */
+  requires?: keyof QuestFeatures;
   /** Learner-facing (German). */
   title: string;
   target: number;
   xp: number;
   metric: QuestMetric;
 }
+
+/** The day the tutor quest joins the pool (Sprint 10). */
+export const TUTOR_QUESTS_SINCE = '2026-09-26';
 
 export const QUEST_XP: Record<QuestSlot, number> & { bonus: number } = {
   review: 30,
@@ -127,6 +143,16 @@ export const QUEST_POOL: Record<QuestSlot, readonly QuestDef[]> = {
       xp: QUEST_XP.produce,
       metric: { kind: 'practice' },
     },
+    {
+      id: 'tutor-ar-1',
+      slot: 'produce',
+      title: 'Schreib al-Muʿallim etwas auf Arabisch',
+      target: 1,
+      xp: QUEST_XP.produce,
+      metric: { kind: 'practice', skills: ['tutor'] },
+      since: TUTOR_QUESTS_SINCE,
+      requires: 'tutor',
+    },
   ],
 };
 
@@ -142,10 +168,13 @@ function hash(text: string): number {
   return h >>> 0;
 }
 
-/** The three quests of `day` (`YYYY-MM-DD`). */
-export function dailyQuests(day: string): QuestDef[] {
+/** The three quests of `day` (`YYYY-MM-DD`) for a learner with these features. */
+export function dailyQuests(day: string, features: QuestFeatures = {}): QuestDef[] {
   return SLOTS.map((slot) => {
-    const pool = QUEST_POOL[slot];
+    const pool = QUEST_POOL[slot].filter(
+      (q) =>
+        (!q.since || q.since <= day) && (!q.requires || features[q.requires] === true)
+    );
     return pool[hash(`${day}:${slot}`) % pool.length] as QuestDef;
   });
 }
@@ -248,8 +277,12 @@ export interface DayQuests {
 }
 
 /** The quests of `day` with their progress. */
-export function evaluateDay(day: string, ticks: readonly Tick[]): DayQuests {
-  const quests = dailyQuests(day).map((q) => questStatus(q, ticks));
+export function evaluateDay(
+  day: string,
+  ticks: readonly Tick[],
+  features: QuestFeatures = {}
+): DayQuests {
+  const quests = dailyQuests(day, features).map((q) => questStatus(q, ticks));
   const bonusAt = quests.every((q) => q.done)
     ? (quests
         .map((q) => q.doneAt as string)

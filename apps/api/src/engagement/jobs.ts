@@ -8,6 +8,7 @@ import type { Logger } from 'pino';
 import { z } from 'zod';
 import type { QueueName } from '../jobs/queue.js';
 import type { ErrorReporter } from '../observability/errors.js';
+import type { QuestFeatures } from '@suffa/engagement';
 import { recomputeEngagement } from './recompute.js';
 import type { EngagementRepository } from './repository.js';
 
@@ -35,13 +36,15 @@ export async function registerEngagement(
   boss: PgBoss,
   repo: EngagementRepository,
   log: Pick<Logger, 'info'>,
-  errors: ErrorReporter
+  errors: ErrorReporter,
+  /** Which feature-bound quests learners can get (the tutor quest needs a model). */
+  features: () => Promise<QuestFeatures> = async () => ({})
 ): Promise<void> {
   await boss.work(ENGAGEMENT_QUEUE, async (jobs: Job<unknown>[]) => {
     for (const job of jobs) {
       try {
         const { userId } = EngagementJob.parse(job.data);
-        await recomputeEngagement(repo, userId, log);
+        await recomputeEngagement(repo, userId, log, new Date(), await features());
       } catch (error) {
         // Reported on every attempt; pg-boss still retries and finally dead-letters it.
         errors.capture(error, { queue: ENGAGEMENT_QUEUE, jobId: job.id });

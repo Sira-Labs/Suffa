@@ -4,6 +4,7 @@ import {
   evaluateDay,
   QUEST_POOL,
   questStatus,
+  TUTOR_QUESTS_SINCE,
   questXpEvents,
   ticksByDay,
   type QuestDef,
@@ -38,8 +39,41 @@ describe('daily quests', () => {
         .flat()
         .map((q) => q.id)
     );
-    const all = Object.values(QUEST_POOL).flat();
+    const all = Object.values(QUEST_POOL)
+      .flat()
+      .filter((q) => !q.requires);
     expect(all.every((q) => seen.has(q.id))).toBe(true);
+  });
+
+  it('keeps the quests of every earlier day when a new quest joins the pool', () => {
+    const days = Array.from({ length: 120 }, (_, i) =>
+      new Date(Date.UTC(2026, 5, 1 + i)).toISOString().slice(0, 10)
+    ).filter((d) => d < TUTOR_QUESTS_SINCE);
+    for (const day of days) {
+      expect(dailyQuests(day, { tutor: true })).toEqual(dailyQuests(day));
+    }
+  });
+
+  it('offers the tutor quest only from its start day and only with the tutor', () => {
+    const later = Array.from({ length: 60 }, (_, i) =>
+      new Date(Date.UTC(2026, 8, 26 + i)).toISOString().slice(0, 10)
+    );
+    const withTutor = later.flatMap((d) =>
+      dailyQuests(d, { tutor: true }).map((q) => q.id)
+    );
+    const without = later.flatMap((d) => dailyQuests(d).map((q) => q.id));
+    expect(withTutor).toContain('tutor-ar-1');
+    expect(without).not.toContain('tutor-ar-1');
+    const tutorDay = later.find((d) =>
+      dailyQuests(d, { tutor: true }).some((q) => q.id === 'tutor-ar-1')
+    )!;
+    const ticks = [
+      tick(`${tutorDay}T09:00:00.000Z`, { kind: 'practice', skill: 'tutor' }),
+    ];
+    const done = evaluateDay(tutorDay, ticks, { tutor: true }).quests.find(
+      (q) => q.quest.id === 'tutor-ar-1'
+    );
+    expect(done).toMatchObject({ done: true, progress: 1 });
   });
 
   it('groups learning actions by local day and marks first successes', () => {

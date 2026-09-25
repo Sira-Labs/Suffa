@@ -41,7 +41,7 @@ import pg from 'pg';
 import { pino, type Logger } from 'pino';
 import { createApp, type AuthRouteDeps } from './app.js';
 import { ChainResolver, createAuth, SessionResolver } from './auth/betterAuth.js';
-import { LogMailer, SmtpMailer } from './auth/mailer.js';
+import { FileMailer, LogMailer, SmtpMailer } from './auth/mailer.js';
 import { registerMaintenance } from './jobs/maintenance.js';
 import { queueDepth, startBoss } from './jobs/queue.js';
 import {
@@ -317,7 +317,11 @@ async function main(): Promise<void> {
       secret: config.authSecret,
       publicUrl: config.publicUrl,
       trustedOrigins: [...config.trustedOrigins, ...config.appOrigins],
-      mailer: config.smtp ? new SmtpMailer(config.smtp, log) : new LogMailer(log),
+      mailer: config.smtp
+        ? new SmtpMailer(config.smtp, log)
+        : config.mailDir
+          ? new FileMailer(config.mailDir)
+          : new LogMailer(log),
       production: config.env === 'prod',
     });
     const sessions = new SessionResolver(betterAuth);

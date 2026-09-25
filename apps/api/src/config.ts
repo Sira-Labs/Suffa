@@ -86,6 +86,8 @@ const RawEnvSchema = z.object({
   SUFFA_VERSION: z.string().default('dev'),
   SUFFA_WORKER_HEARTBEAT_MS: z.coerce.number().int().min(1000).default(30_000),
   SUFFA_SYNC_DEV_TOKENS: z.string().optional(),
+  /** Browser tests: sign-in links are written to files in this directory (never in prod). */
+  SUFFA_MAIL_DIR: z.string().trim().optional(),
   /** GlitchTip/Sentry DSN of the suffa-api project; error reporting is off when unset. */
   SUFFA_ERROR_DSN: optionalDsn('SUFFA_ERROR_DSN'),
   /** DSN of the suffa-web project, handed to the PWA and used by the /api/errors tunnel. */
@@ -211,6 +213,8 @@ export interface Config {
   fcm: { projectId: string; clientEmail: string; privateKey: string } | undefined;
   /** SMTP for sign-in mails; outside prod the link may go to the log instead. */
   smtp: SmtpSettings | undefined;
+  /** Browser tests: where sign-in links are written instead of mailed (never in prod). */
+  mailDir: string | undefined;
   /** Public DSN of the web project; undefined disables browser error reporting. */
   webErrorDsn: string | undefined;
   /** Object storage; undefined turns recordings and uploads off. */
@@ -293,6 +297,9 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     if (!raw.SUFFA_PUBLIC_URL) issues.push('SUFFA_PUBLIC_URL is required in prod');
     // Missing SMTP does not stop the service (existing deployments keep running); sign-in
     // simply stays off until it is configured, and the api logs that loudly.
+  }
+  if (raw.SUFFA_MAIL_DIR && raw.SUFFA_ENV === 'prod') {
+    issues.push('SUFFA_MAIL_DIR must not be set in prod');
   }
   let syncDevTokens = new Map<string, string>();
   if (raw.SUFFA_SYNC_DEV_TOKENS) {
@@ -389,6 +396,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       android: android.value,
     },
     fcm: fcm.value,
+    mailDir: raw.SUFFA_MAIL_DIR || undefined,
     smtp: smtpComplete
       ? {
           host: raw.SUFFA_SMTP_HOST!,

@@ -197,6 +197,7 @@ function AccountPanel() {
           className="input"
           type="email"
           placeholder="du@example.com"
+          aria-label="E-Mail-Adresse"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required

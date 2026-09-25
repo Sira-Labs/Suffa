@@ -36,7 +36,7 @@ export default tseslint.config(
   },
   {
     // Node scripts for maintainers (content tooling).
-    files: ['tools/**/*.mjs'],
+    files: ['tools/**/*.mjs', 'apps/e2e/**/*.mjs'],
     languageOptions: { ecmaVersion: 2023, globals: globals.node },
   },
   {

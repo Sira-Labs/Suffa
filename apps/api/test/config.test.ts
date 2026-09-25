@@ -279,3 +279,22 @@ describe('SUFFA_SYNC_DEV_TOKENS', () => {
     ).toThrow(ConfigError);
   });
 });
+
+describe('SUFFA_MAIL_DIR (browser tests)', () => {
+  it('is taken outside prod and refused in prod', () => {
+    expect(
+      loadConfig({
+        SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db',
+        SUFFA_MAIL_DIR: '/tmp/suffa-mail',
+      }).mailDir
+    ).toBe('/tmp/suffa-mail');
+    expect(() =>
+      loadConfig({
+        SUFFA_ENV: 'prod',
+        SUFFA_DATABASE_URL: GOOD_DB,
+        SUFFA_AUTH_SECRET: GOOD_SECRET,
+        SUFFA_MAIL_DIR: '/tmp/suffa-mail',
+      })
+    ).toThrow(/SUFFA_MAIL_DIR must not be set in prod/);
+  });
+});

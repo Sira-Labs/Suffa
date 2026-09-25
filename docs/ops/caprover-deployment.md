@@ -299,9 +299,12 @@ production server (Deploy via ImageName, `ghcr.io/sira-labs/suffa-web@sha256:…
 pull work.
 
 To promote: open the run in Actions → **Review deployments** → `production` → Approve. Only the
-newest waiting run deploys; an older one still waiting is replaced. **Rolling back:** re-run
-the production job of an earlier successful run, which deploys that run's digests again.
-Schema migrations only go forward, so check the migration list before rolling back across one.
+newest waiting run deploys; an older one still waiting is replaced. **Rolling back:** Actions →
+**rollback production** → Run workflow (from `main`) → tag of the release to go back to
+(`sha-…`, as `/healthz` reported it). It resolves that tag's images to digests and deploys them
+through the same approval and checks, except that staging need not run that tag. Schema
+migrations only go forward, so check the migrations between the two releases
+(`apps/api/migrations/`) before rolling back across one.
 
 ## 7. Order of setup (first time)
 

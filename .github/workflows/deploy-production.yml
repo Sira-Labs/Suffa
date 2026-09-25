@@ -1,0 +1,146 @@
+name: deploy to production
+
+# Deploys given image digests to production (ADR-0024), after the owner's approval in the GitHub
+# environment `production`. Called by release.yml (promotion of what staging runs) and by
+# rollback-production.yml (an earlier release on purpose). Production settings are environment
+# secrets and variables with `_PROD` names, so a missing one never falls back to staging.
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag (sha-<short>) the digests belong to; production must report it.
+        type: string
+        required: true
+      api:
+        description: api image by digest (ghcr.io/…/suffa-api@sha256:…), also used for the worker.
+        type: string
+        required: true
+      web:
+        type: string
+        required: true
+      backup:
+        type: string
+        required: true
+      require-staging:
+        description: Refuse unless staging still runs this tag (promotion); false for a rollback.
+        type: boolean
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: deploy ${{ inputs.tag }} to production
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.SUFFA_PRODUCTION_URL }}
+    # actions: read lets the gate check the environment's protection rules.
+    permissions:
+      contents: read
+      actions: read
+    # Only the newest approved run deploys; an older one still waiting is replaced.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    timeout-minutes: 20
+    steps:
+      - name: production is set up and gated
+        id: gate
+        env:
+          SERVER: ${{ vars.CAPROVER_SERVER_PROD }}
+          STAGING_SERVER: ${{ vars.CAPROVER_SERVER }}
+          API: ${{ secrets.CAPROVER_APP_TOKEN_API_PROD }}
+          WORKER: ${{ secrets.CAPROVER_APP_TOKEN_WORKER_PROD }}
+          BACKUP: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP_PROD }}
+          WEB: ${{ secrets.CAPROVER_APP_TOKEN_WEB_PROD }}
+          PROD_URL: ${{ vars.SUFFA_PRODUCTION_URL }}
+          STAGING_URL: ${{ vars.SUFFA_STAGING_URL }}
+          TAG: ${{ inputs.tag }}
+          REQUIRE_STAGING: ${{ inputs.require-staging }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count=0
+          for token in "$API" "$WORKER" "$BACKUP" "$WEB"; do [ -n "$token" ] && count=$((count + 1)); done
+          if [ -z "$SERVER" ] && [ "$count" -eq 0 ]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Production is not set up yet (environment 'production' has no CAPROVER_SERVER_PROD); skipping"
+            exit 0
+          fi
+          # All four apps or none: a partial deploy would leave production on mixed revisions.
+          if [ -z "$SERVER" ] || [ "$count" -ne 4 ]; then
+            echo "::error::Production is partly configured: set CAPROVER_SERVER_PROD and all four CAPROVER_APP_TOKEN_*_PROD in the environment 'production'"
+            exit 1
+          fi
+          if [ -z "$PROD_URL" ]; then
+            echo "::error::Set SUFFA_PRODUCTION_URL in the environment 'production': every deploy is checked there"
+            exit 1
+          fi
+          if [ "$SERVER" = "$STAGING_SERVER" ]; then
+            echo "::error::CAPROVER_SERVER_PROD is the staging server; production runs on its own server (ADR-0024)"
+            exit 1
+          fi
+          # Never deploy without the owner's approval: the environment must have a required reviewer.
+          rules=$(curl -fsS -H "authorization: Bearer $GH_TOKEN" -H 'accept: application/vnd.github+json' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/environments/production" | jq -r '[.protection_rules[]?.type] | join(",")')
+          case ",$rules," in *,required_reviewers,*) ;; *)
+            echo "::error::The environment 'production' has no required reviewer; add the owner before deploying"
+            exit 1 ;;
+          esac
+          # Promotion: approval can come long after the run started, so promote only what staging
+          # still runs; a newer push replaced it otherwise (approve that run instead). A rollback
+          # deploys an earlier release on purpose and skips this check.
+          if [ "$REQUIRE_STAGING" = true ] && ! curl -fsS "$STAGING_URL/healthz" | grep -q "\"version\":\"$TAG\""; then
+            echo "::error::Staging no longer runs $TAG (a newer release replaced it); promote the newest run instead"
+            exit 1
+          fi
+          echo "deploy=true" >> "$GITHUB_OUTPUT"
+      - name: deploy api
+        if: steps.gate.outputs.deploy == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER_PROD }}
+          app: ${{ vars.CAPROVER_APP_API_PROD || 'suffa-api' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_API_PROD }}
+          image: ${{ inputs.api }}
+      - name: deploy worker
+        if: steps.gate.outputs.deploy == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER_PROD }}
+          app: ${{ vars.CAPROVER_APP_WORKER_PROD || 'suffa-worker' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_WORKER_PROD }}
+          image: ${{ inputs.api }}
+      - name: deploy backup
+        if: steps.gate.outputs.deploy == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER_PROD }}
+          app: ${{ vars.CAPROVER_APP_BACKUP_PROD || 'suffa-backup' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP_PROD }}
+          image: ${{ inputs.backup }}
+      - name: deploy web
+        if: steps.gate.outputs.deploy == 'true'
+        uses: caprover/deploy-from-github@v2
+        with:
+          server: ${{ vars.CAPROVER_SERVER_PROD }}
+          app: ${{ vars.CAPROVER_APP_WEB_PROD || 'suffa-web' }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN_WEB_PROD }}
+          image: ${{ inputs.web }}
+      - name: production reports the new version
+        if: steps.gate.outputs.deploy == 'true'
+        env:
+          URL: ${{ vars.SUFFA_PRODUCTION_URL }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          for i in $(seq 1 60); do
+            api=$(curl -fsS "$URL/healthz" || true)
+            web=$(curl -fsS "$URL/healthz-web" || true)
+            if echo "$api" | grep -q "\"version\":\"$TAG\"" && echo "$api" | grep -q '"status":"ok"' \
+              && echo "$web" | grep -q "\"version\":\"$TAG\""; then
+              echo "production runs $TAG"; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::production did not report $TAG within 10 minutes"; echo "$api"; echo "$web"; exit 1

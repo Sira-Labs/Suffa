@@ -22,6 +22,7 @@ import { FocusReview } from './modules/review';
 import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
 import { Admin } from './modules/admin';
 import { Classes, Join } from './modules/classes';
+import { Tutor } from './modules/tutor';
 
 /**
  * Normal paths (story 2.6, ADR-0013): Caddy answers unknown paths with index.html and the
@@ -52,6 +53,7 @@ export const router = createBrowserRouter([
       { path: 'classes', element: <Classes /> },
       { path: 'classes/:id', element: <ClassPage /> },
       { path: 'classes/:id/recordings/:mediaId', element: <RecordingPlayer /> },
+      { path: 'tutor', element: <Tutor /> },
       { path: 'badges', element: <Badges /> },
       { path: 'join/:token', element: <Join /> },
       { path: 'more', element: <More /> },

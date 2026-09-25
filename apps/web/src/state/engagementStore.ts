@@ -10,13 +10,40 @@ import type { ServerEngagement } from '@/services/sync/ApiSyncProvider';
 interface EngagementState {
   logs: ReviewLog[];
   server: ServerEngagement | null;
+  /**
+   * al-Muʿallim can be used (signed in and a model configured): decides whether the tutor
+   * quest can be picked. Remembered per device so offline days pick the same quests.
+   */
+  tutorAvailable: boolean;
   refresh(): Promise<void>;
   setServer(server: ServerEngagement | null): void;
+  setTutorAvailable(available: boolean): void;
+}
+
+const TUTOR_KEY = 'suffa.tutorAvailable';
+
+function storedTutorAvailable(): boolean {
+  try {
+    return localStorage.getItem(TUTOR_KEY) === '1';
+  } catch {
+    // Storage blocked (private mode): quests without the tutor.
+    return false;
+  }
 }
 
 export const useEngagementStore = create<EngagementState>((set) => ({
   logs: [],
   server: null,
+  tutorAvailable: storedTutorAvailable(),
+
+  setTutorAvailable(available) {
+    try {
+      localStorage.setItem(TUTOR_KEY, available ? '1' : '0');
+    } catch {
+      // Not remembered; the next start asks the server again.
+    }
+    set({ tutorAvailable: available });
+  },
 
   async refresh() {
     set({ logs: await reviewLogRepo.all() });

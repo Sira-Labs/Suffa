@@ -35,6 +35,7 @@ gantt
   S8 Make them interactive (5/5)    :done, s8, after s7, 14d
   section P4 AI teacher
   S9 Gateway (5/5)                  :done, s9, after s8, 14d
+  S10 al-Muʿallim speaks (4/4)      :done, s10, after s9, 14d
 ```
 
 ```mermaid
@@ -211,6 +212,13 @@ Keys: `SUFFA_ANTHROPIC_API_KEY`, `SUFFA_OPENROUTER_API_KEY`, `SUFFA_HF_API_KEY`.
 | 10.2 | Tools: lookup_vocab, get_root_family, get_learner_state, get_media_segment (authz-checked) | 5   | No cross-user access (test).               |
 | 10.3 | Tutor UI module; "ask about this minute" in recordings                                     | 5   | RTL + tashkīl level correct; 👍/👎 stored. |
 | 10.4 | Validators + repair retry; tutor produce-quests                                            | 5   | Fixture-tested.                            |
+
+Status (Sprint 10): all four stories done. Tutor API with SSE, grounded prompt (curriculum pack
+
+- learner snapshot, de/en), four authz-checked tools, validators with one repair retry, 👍/👎,
+  90-day retention; the app's al-Muʿallim page and "ask about this minute" in recordings; the
+  tutor quest from 2026-09-26. The first-token latency target is to be measured once a key is
+  set in production (the prompt prefix is cached).
 
 ### Sprint 11 (Feb 22 – Mar 7) — _"Grading & evals"_
 

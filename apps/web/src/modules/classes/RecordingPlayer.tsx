@@ -16,7 +16,12 @@ import {
   removeOffline,
   saveOffline,
 } from '@/services/media/offline';
-import { useCelebrationStore, useListenStore, usePracticeStore } from '@/state';
+import {
+  useCelebrationStore,
+  useEngagementStore,
+  useListenStore,
+  usePracticeStore,
+} from '@/state';
 import { formatDuration } from './ClassRecordings';
 import { CheckpointDialog } from './player/CheckpointDialog';
 import { CheckpointEditor, TranscriptEditor } from './player/RecordingEditors';
@@ -24,6 +29,9 @@ import { TranscriptPanel } from './player/TranscriptPanel';
 
 /** Save played time at least this often. */
 const FLUSH_EVERY_SEC = 10;
+const formatClock = (sec: number) =>
+  `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
+
 /** A timeupdate step larger than this is a seek, not playing. */
 const MAX_NATURAL_STEP_SEC = 2;
 
@@ -45,6 +53,7 @@ export function RecordingPlayer() {
   const [media, setMedia] = useState<Loaded | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [time, setTime] = useState(0);
+  const tutorAvailable = useEngagementStore((s) => s.tutorAvailable);
   const [open, setOpen] = useState<Checkpoint | null>(null);
   const [saved, setSaved] = useState(false);
   const record = useListenStore((s) => s.record);
@@ -237,6 +246,15 @@ export function RecordingPlayer() {
       )}
       {open && (
         <CheckpointDialog checkpoint={open} onDone={(ok) => void answered(open, ok)} />
+      )}
+      {tutorAvailable && (
+        <Link
+          to={`/tutor?media=${encodeURIComponent(mediaId)}&t=${Math.floor(time)}`}
+          className="btn"
+          style={{ alignSelf: 'flex-start' }}
+        >
+          Frag al-Muʿallim zu dieser Minute ({formatClock(time)})
+        </Link>
       )}
       {offlineSupported() && !media.offline && (
         <button

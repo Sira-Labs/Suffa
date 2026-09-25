@@ -1,6 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { BADGES, QUEST_XP } from '@suffa/engagement';
-import { useCelebrationStore, useEngagementStore, useSrsStore } from '@/state';
+import {
+  useCelebrationStore,
+  useEngagementStore,
+  useSrsStore,
+  useSyncStore,
+} from '@/state';
+import { TutorApi } from '@/services/tutor/tutorApi';
 import { useLocalEngagement } from './useEngagement';
 
 const TIER_LABEL = { bronze: 'Bronze', silver: 'Silber', gold: 'Gold' } as const;
@@ -21,6 +27,20 @@ export function EngagementWatcher() {
   useEffect(() => {
     void refresh();
   }, [cards, refresh]);
+
+  // Whether the tutor quest can come up: asked once per sign-in, remembered for offline days.
+  const signedIn = useSyncStore((s) => s.auth.status === 'signed-in');
+  const setTutorAvailable = useEngagementStore((s) => s.setTutorAvailable);
+  useEffect(() => {
+    if (!signedIn) return;
+    let cancelled = false;
+    void new TutorApi().overview().then((result) => {
+      if (!cancelled && result.ok) setTutorAvailable(result.value.available);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [signedIn, setTutorAvailable]);
 
   useEffect(() => {
     const quests = summary.quests.quests.filter((q) => q.done);

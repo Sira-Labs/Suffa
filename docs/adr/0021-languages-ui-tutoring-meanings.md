@@ -1,6 +1,6 @@
 # ADR-0021: Learner languages — UI, tutoring and meaning language (German, English, later Arabic UI)
 
-- Status: proposed
+- Status: accepted (tutoring language implemented in Sprint 10; UI and meaning languages planned for Sprint 16)
 - Date: 2026-09-23
 - Related: ADR-0011 (al-Muʿallim), ADR-0014 (content CMS)
 

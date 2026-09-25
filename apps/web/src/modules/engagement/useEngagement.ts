@@ -42,6 +42,7 @@ export function useLocalEngagement(now?: Date): EngagementSummary {
   const exams = useEnrollmentStore((s) => s.exams);
   const checkIns = useCheckInStore((s) => s.checkIns);
   const goal = useSettingsStore((s) => s.settings.weeklyGoal);
+  const tutor = useEngagementStore((s) => s.tutorAvailable);
   const timeZone = useLearnerTimeZone();
   const minute = now ?? new Date();
   // Recomputed when data changes, and at least once per rendered minute (day change).
@@ -62,9 +63,10 @@ export function useLocalEngagement(now?: Date): EngagementSummary {
           timeZone,
           weeklyGoal: isWeeklyGoal(goal) ? goal : DEFAULT_WEEKLY_GOAL,
           now: new Date(stamp * 60_000),
+          features: { tutor },
         }
       ),
-    [logs, tracks, practice, checkIns, exams, enrollments, goal, timeZone, stamp]
+    [logs, tracks, practice, checkIns, exams, enrollments, goal, timeZone, stamp, tutor]
   );
 }
 

@@ -1,6 +1,6 @@
 # ADR-0011: al-Muʿallim — grounded, tool-using AI teacher
 
-- Status: proposed
+- Status: accepted (implemented in Sprint 10)
 - Date: 2026-09-23
 
 ## Context
@@ -40,3 +40,35 @@ results) and structured content (roots, patterns, conjugations).
 
 Higher implementation effort than a plain chat box, but answers are consistent with the book,
 exercises plug into existing UI, and quality is measurable.
+
+## Implementation (Sprint 10)
+
+- **Turn API:** `POST /api/v1/tutor/turn` streams server-sent events (`start`, `text`, `tool`,
+  `replace`, `done`, `error`). Up to four model calls per turn (tool rounds; the last one
+  without tools) count as one turn against the learner's quota.
+- **Grounding:** the course content is read on the server from the same JSON files the app
+  bundles (copied into the api image). Prompt order: persona in the tutoring language, the
+  unit's curriculum pack (vocabulary, verbs, grammar rules, dialogues; built once per unit so
+  the bytes stay identical for the prompt cache), then the learner snapshot (first name only,
+  current unit, due cards, often-forgotten words, last test, tashkīl setting) and where the
+  learner asks from (unit or a recording moment). Retrieval over all units and transcripts
+  (pgvector) is deferred; tools cover the lookups for now.
+- **Tools:** `lookup_vocab`, `get_root_family`, `get_learner_state`, `get_media_segment`.
+  Inputs are validated (zod); the user id always comes from the session; a recording is
+  readable only for active members of its class (students: published ones), and a forbidden
+  recording is answered like an unknown one. `make_exercise` and `propose_srs_cards` follow
+  with grading (Sprint 11).
+- **Validators:** Arabic letters only (no Persian/Urdu forms), vocalisation coverage when the
+  learner wants full tashkīl, no religious rulings (a judgement like "ist haram", not the
+  word itself), not empty. One repair call; if it still fails on a blocking check, a calm
+  fallback is shown. Findings are stored as `flags` with the answer.
+- **Storage and privacy:** only the learner's message and the shown answer are kept
+  (`ai_conversations`, `ai_messages`, with 👍/👎), deleted after 90 days of inactivity by
+  the maintenance job, part of the data export, deleted with the account.
+- **App:** "al-Muʿallim" under "Mehr": streamed answers, Arabic rendered with the learner's
+  tashkīl level, suggestions, earlier conversations, ratings; "Frag al-Muʿallim zu dieser
+  Minute" in the recording player. Writing Arabic to the tutor is a practice record
+  (`tutor/<day>`, once a day) and counts for the new daily quest "Schreib al-Muʿallim etwas
+  auf Arabisch", which is picked only from 2026-09-26 on and only where the tutor is
+  available, so earlier days keep their quests and XP.
+- Stricter settings for classes of minors are not built yet.

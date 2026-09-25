@@ -4,10 +4,11 @@ import type { Syncable } from './srs';
 export type PracticeSkill = 'read' | 'grammar' | 'cloze' | 'write' | 'speak' | 'verbs';
 
 /**
- * Practice outside the units (stored under unit 0): the alphabet course, and checkpoints
- * answered correctly in class recordings (Sprint 8).
+ * Practice outside the units (stored under unit 0): the alphabet course, checkpoints answered
+ * correctly in class recordings (Sprint 8), and writing Arabic to al-Muʿallim (Sprint 10, once
+ * a day: item `tutor/<day>`).
  */
-export type CourseSkill = 'letters' | 'checkpoint';
+export type CourseSkill = 'letters' | 'checkpoint' | 'tutor';
 
 /**
  * One practised item of a unit skill (a dialogue read, a word written correctly, a dialogue

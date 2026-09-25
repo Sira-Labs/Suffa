@@ -94,6 +94,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     tier: 'training',
   },
   {
+    to: '/tutor',
+    label: 'al-Muʿallim',
+    icon: 'chat',
+    description: 'Dein KI-Lehrer: fragen, üben, erklären lassen',
+    tier: 'secondary',
+  },
+  {
     to: '/badges',
     label: 'Abzeichen',
     icon: 'award',

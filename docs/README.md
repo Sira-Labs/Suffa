@@ -30,7 +30,7 @@
 | [0010](adr/0010-llm-provider-abstraction.md)                      | LLM gateway: Anthropic SDK, OpenRouter, Hugging Face          | proposed                                   |
 | [0011](adr/0011-ai-teacher-al-muallim.md)                         | al-Muʿallim: grounded, tool-using AI teacher                  | proposed                                   |
 | [0012](adr/0012-interactive-youtube-lessons.md)                   | Interactive YouTube lessons (Muhammad al-Andalusi)            | proposed, amended by 0018                  |
-| [0013](adr/0013-deployment-caprover-ci.md)                        | Deployment, CI/CD and ops on CapRover (Tabayyun pattern)      | proposed                                   |
+| [0013](adr/0013-deployment-caprover-ci.md)                        | Deployment, CI/CD and ops on CapRover (Tabayyun pattern)      | proposed, amended by 0024                  |
 | [0014](adr/0014-content-cms-and-offline-bundles.md)               | DB-backed content CMS + offline bundles                       | proposed                                   |
 | [0015](adr/0015-speech-and-pronunciation.md)                      | Server-side STT for pronunciation                             | proposed, extended by 0022                 |
 | [0016](adr/0016-engagement-xp-quests-achievements.md)             | Engagement: XP, daily quests, weekly challenges, achievements | proposed                                   |
@@ -41,3 +41,4 @@
 | [0021](adr/0021-languages-ui-tutoring-meanings.md)                | Learner languages: UI, tutoring and meaning language          | proposed                                   |
 | [0022](adr/0022-pronunciation-assessment-arabic-speech-models.md) | Pronunciation assessment with Arabic speech models            | proposed                                   |
 | [0023](adr/0023-content-sources-licensing-and-packs.md)           | Content sources, licensing and content packs                  | proposed                                   |
+| [0024](adr/0024-separate-production-server.md)                    | Separate production server; this host is staging and tools    | accepted                                   |

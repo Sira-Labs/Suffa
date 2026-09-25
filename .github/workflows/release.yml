@@ -20,6 +20,9 @@ jobs:
   images:
     name: build, smoke-test and publish ${{ matrix.name }}
     needs: checks
+    # Only main is published and deployed, also when started by hand ("Run workflow" offers
+    # every branch); on another branch the checks run and the rest is skipped.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -175,7 +178,7 @@ jobs:
     needs: images
     runs-on: ubuntu-latest
     # Skipped until the repository variable CAPROVER_SERVER is set.
-    if: ${{ vars.CAPROVER_SERVER != '' }}
+    if: ${{ github.ref == 'refs/heads/main' && vars.CAPROVER_SERVER != '' }}
     steps:
       # Image names must be lowercase; the owner (e.g. "Sira-Labs") may not be.
       - name: image prefix

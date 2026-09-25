@@ -6,9 +6,8 @@ import { ArabicText } from '@/components';
 import { Icon } from '@/components/Icon';
 import { isTtsSupported, speakArabic } from '@/services/speech';
 import { masteryBuckets, reviewHeatmap, weakCards } from '@/services/stats';
-import { buildTodayPlan, localDay, reviewsToday, wordOfTheDay } from '@/services/today';
+import { localDay, wordOfTheDay } from '@/services/today';
 import { XP_RULES } from '@/services/engagement/xp';
-import type { TodayStep } from '@/services/today';
 import { ForgettingReminder } from './ForgettingReminder';
 import {
   useCelebrationStore,
@@ -16,8 +15,6 @@ import {
   useContentStore,
   useEngagementStore,
   useEnrollmentStore,
-  useListenStore,
-  useSettingsStore,
   useSrsStore,
 } from '@/state';
 import { CurrentUnitCard, currentUnit } from './CurrentUnitCard';
@@ -34,14 +31,15 @@ const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
   month: 'long',
 });
 
-/** "Heute": today's path with one clear next step, the word of the day, then progress. */
+/**
+ * "Heute": the current unit, today's quests with one clear next step, the word of the day,
+ * then class news and progress.
+ */
 export function Dashboard() {
   const cards = useSrsStore((s) => s.cards);
   const summary = useSrsStore((s) => s.summary)();
-  const dailyGoal = useSettingsStore((s) => s.settings.dailyGoal);
   const logs = useEngagementStore((s) => s.logs);
   const refreshLogs = useEngagementStore((s) => s.refresh);
-  const listening = useListenStore((s) => s.progress);
   const enrollments = useEnrollmentStore((s) => s.enrollments);
   const exams = useEnrollmentStore((s) => s.exams);
   const activeUnit = currentUnit(enrollments, exams);
@@ -60,24 +58,8 @@ export function Dashboard() {
   const streak = engagement.streak.current;
   const heat = reviewHeatmap(logs);
   const maxHeat = Math.max(1, ...heat.map((h) => h.count));
-  const today = reviewsToday(logs);
-  const heard = Object.values(listening).filter((p) => p.completedAt);
   const todayKey = localDay(new Date());
-  const heardToday = heard.filter(
-    (p) => localDay(new Date(p.completedAt!)) === todayKey
-  ).length;
   const { weekXp, totalXp } = engagement;
-  const plan = buildTodayPlan({
-    dueCount: summary.dueCount,
-    newCount: summary.newCount,
-    leechCount: summary.leechCount,
-    dailyGoal,
-    reviewedToday: today.reviewed,
-    newLearnedToday: today.newLearned,
-    heardToday,
-    listenPath: activeUnit ? `/units/${activeUnit}/listen` : '/units',
-  });
-  const current = plan.steps.find((s) => s.state === 'current');
   // The word of the day comes from the units reached so far.
   const word = wordOfTheDay(content.vokabeln.filter(keep));
   const checkedIn = Boolean(checkIns[todayKey]);
@@ -120,41 +102,9 @@ export function Dashboard() {
       </header>
 
       <CurrentUnitCard />
-      <TodayQuests summary={engagement} unit={activeUnit ?? 1} />
-      <TodayClassCard />
-      <WeeklyRecapCard />
-      <ForgettingReminder cards={cards} logs={logs} />
 
       <div className="today-grid">
-        <section
-          className="card stack"
-          aria-labelledby="today-path"
-          style={{ gap: '1.25rem' }}
-        >
-          <div className="row" style={{ justifyContent: 'space-between' }}>
-            <h2 id="today-path" className="eyebrow">
-              Dein Weg heute
-            </h2>
-            <span className="muted" style={{ fontSize: '0.9rem' }}>
-              ≈ {plan.minutes} Min.
-            </span>
-          </div>
-          <ol className="today-steps">
-            {plan.steps.map((step, i) => (
-              <TodayStepItem key={step.id} step={step} index={i + 1} />
-            ))}
-          </ol>
-          {current ? (
-            <Link className="btn btn-primary btn-lg" to={current.to}>
-              Weiterlernen
-              <Icon name="arrowRight" size={20} />
-            </Link>
-          ) : (
-            <p className="feedback-good" style={{ margin: 0, fontWeight: 600 }}>
-              Alles erledigt für heute. Masha’Allah!
-            </p>
-          )}
-        </section>
+        <TodayQuests summary={engagement} unit={activeUnit ?? 1} />
 
         {word && (
           <section
@@ -206,6 +156,10 @@ export function Dashboard() {
           </section>
         )}
       </div>
+
+      <TodayClassCard />
+      <WeeklyRecapCard />
+      <ForgettingReminder cards={cards} logs={logs} />
 
       <section className="stack" aria-labelledby="progress" style={{ gap: '1rem' }}>
         <h2 id="progress" className="eyebrow">
@@ -268,35 +222,6 @@ export function Dashboard() {
         </div>
       </section>
     </div>
-  );
-}
-
-function TodayStepItem({ step, index }: { step: TodayStep; index: number }) {
-  const stateLabel =
-    step.state === 'done'
-      ? 'erledigt'
-      : step.state === 'current'
-        ? 'als Nächstes'
-        : 'danach';
-  return (
-    <li className={`today-step today-step-${step.state}`}>
-      <span className="today-step-marker" aria-hidden>
-        {step.state === 'done' ? (
-          <Icon name="check" size={18} strokeWidth={2.5} />
-        ) : (
-          index
-        )}
-      </span>
-      <Link to={step.to} className="today-step-body">
-        <span className="today-step-label">
-          {step.label}
-          <span className="visually-hidden"> ({stateLabel})</span>
-        </span>
-        <span className="muted" style={{ fontSize: '0.9rem' }}>
-          {step.detail}
-        </span>
-      </Link>
-    </li>
   );
 }
 

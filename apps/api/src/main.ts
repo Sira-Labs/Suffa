@@ -49,7 +49,9 @@ import { ModelRouter, type ProviderId } from '@suffa/llm';
 import { ContentCatalog } from './tutor/content.js';
 import { PgLearnerState } from './tutor/learner.js';
 import { ClassMediaAccess } from './tutor/media.js';
+import { GradeService, PgGradeRepository } from './tutor/grading.js';
 import { PgTutorRepository } from './tutor/repository.js';
+import { PgReviewRepository } from './tutor/review.js';
 import { PgTutorSettings } from './tutor/routes.js';
 import { TUTOR_TASK, TutorService } from './tutor/service.js';
 
@@ -403,6 +405,12 @@ async function main(): Promise<void> {
     admin: { repo: new PgAdminRepository(pool), auth, log },
     aiAdmin: ai,
     tutor: await tutorParts(ai, pool, log, auth, config),
+    reviews: {
+      classes: new PgClassRepository(pool),
+      reviews: new PgReviewRepository(pool),
+      auth,
+      log,
+    },
     classes: config.publicUrl
       ? {
           repo: new PgClassRepository(pool),
@@ -482,12 +490,18 @@ async function tutorParts(
     return undefined;
   }
   const repo = new PgTutorRepository(pool);
+  const learner = new PgLearnerState(pool, catalog);
+  const grades = new PgGradeRepository(pool);
   return {
+    grading: {
+      service: new GradeService({ gateway: ai.gateway, repo: grades, catalog, learner }),
+      repo: grades,
+    },
     service: new TutorService({
       gateway: ai.gateway,
       repo,
       catalog,
-      learner: new PgLearnerState(pool, catalog),
+      learner,
       media: config.storage
         ? new ClassMediaAccess(
             new PgMediaRepository(pool),

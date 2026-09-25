@@ -9,6 +9,7 @@ import type { AccountRepository } from '../src/account/repository.js';
 import { ModelRouter } from '@suffa/llm';
 import type { AdminRepository } from '../src/admin/repository.js';
 import { AiGateway } from '../src/ai/gateway.js';
+import type { GradeService } from '../src/tutor/grading.js';
 import type { TutorService } from '../src/tutor/service.js';
 import type { AiRepository } from '../src/ai/repository.js';
 import type { ClassRepository } from '../src/classes/repository.js';
@@ -60,7 +61,7 @@ const privacyRepo: PrivacyRepository = {
     sessions: [],
     classes: [],
     learningData: {} as never,
-    tutor: { conversations: [], messages: [], usage: [] },
+    tutor: { conversations: [], messages: [], usage: [], grades: [] },
     engagement: { state: null, xpLedger: [], quests: [], achievements: [] },
     classRecognition: { badges: [], shoutouts: [], challenges: [] },
     notifications: { prefs: null, devices: [], recaps: [] },
@@ -259,6 +260,24 @@ function buildApp() {
       },
       settings: { language: async () => 'de', setLanguage: async () => {} },
       available: async () => false,
+      grading: {
+        service: { grade: async () => ({}) } as unknown as GradeService,
+        repo: {
+          studentClass: async () => null,
+          save: async () => {},
+          listOwn: async () => [],
+        },
+      },
+      auth: resolver,
+      log: quiet,
+    },
+    reviews: {
+      classes: classRepo,
+      reviews: {
+        queue: async () => [],
+        review: async () => false,
+        evalCases: async () => [],
+      },
       auth: resolver,
       log: quiet,
     },

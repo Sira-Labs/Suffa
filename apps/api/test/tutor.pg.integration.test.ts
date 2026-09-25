@@ -21,7 +21,10 @@ import type { AuthResolver } from '../src/auth/resolver.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
 import { ContentCatalog } from '../src/tutor/content.js';
 import { PgLearnerState } from '../src/tutor/learner.js';
+import { PgClassRepository } from '../src/classes/repository.js';
+import { GradeService, PgGradeRepository } from '../src/tutor/grading.js';
 import { PgTutorRepository } from '../src/tutor/repository.js';
+import { PgReviewRepository } from '../src/tutor/review.js';
 import { PgTutorSettings } from '../src/tutor/routes.js';
 import { TutorService, type TutorEvent } from '../src/tutor/service.js';
 import type { MediaAccess } from '../src/tutor/tools.js';
@@ -30,6 +33,31 @@ const url = process.env.SUFFA_TEST_DATABASE_URL;
 const quiet = { info: () => undefined, warn: () => undefined, error: () => undefined };
 const AMINA = '00000000-0000-4000-8000-00000000000a';
 const BILAL = '00000000-0000-4000-8000-00000000000b';
+const TEACHER = '00000000-0000-4000-8000-00000000000c';
+const OTHER_TEACHER = '00000000-0000-4000-8000-00000000000d';
+const CLASS = '11111111-1111-4111-8111-111111111111';
+const OTHER_CLASS = '11111111-1111-4111-8111-222222222222';
+
+const RUBRIC = {
+  score: 72,
+  rubric: { task: 3, grammar: 2, vocabulary: 3, spelling: 5 },
+  summary: 'Gut verständlich! Achte auf das Genus.',
+  corrected: 'هٰذِهِ مَدْرَسَةٌ كَبيرَةٌ. أَنا أُحِبُّ الْكِتابَ.',
+  mistakes: [
+    {
+      original: 'هذا مدرسة',
+      correction: 'هٰذِهِ مَدْرَسَةٌ',
+      category: 'grammar',
+      explanation: 'مدرسة ist feminin, also هٰذِهِ.',
+    },
+    {
+      original: 'الكتب',
+      correction: 'الْكِتابَ',
+      category: 'vocabulary',
+      explanation: 'Gemeint ist das eine Buch.',
+    },
+  ],
+};
 const CONTENT = fileURLToPath(new URL('../../web/src/content', import.meta.url));
 
 type Step = { text: string; toolCalls?: ToolCall[] };
@@ -96,14 +124,26 @@ describe.skipIf(!url)('al-Muʿallim (Postgres)', () => {
 
   beforeEach(async () => {
     await pool.query(
-      'truncate ai_calls, ai_usage_daily, ai_spend_monthly, ai_conversations cascade'
+      'truncate ai_calls, ai_usage_daily, ai_spend_monthly, ai_conversations, ai_grades, classes cascade'
     );
     await pool.query('delete from users');
     await pool.query(
       `insert into users (id, email, name, role, time_zone) values
          ($1, 'amina@example.org', 'Amina Yilmaz', 'student', 'Europe/Zurich'),
-         ($2, 'bilal@example.org', 'Bilal', 'student', 'Europe/Zurich')`,
-      [AMINA, BILAL]
+         ($2, 'bilal@example.org', 'Bilal', 'student', 'Europe/Zurich'),
+         ($3, 'lehrerin@example.org', 'Frau Demir', 'teacher', 'Europe/Zurich'),
+         ($4, 'lehrer2@example.org', 'Herr Ali', 'teacher', 'Europe/Zurich')`,
+      [AMINA, BILAL, TEACHER, OTHER_TEACHER]
+    );
+    await pool.query(
+      `insert into classes (id, name, created_by) values ($1, 'Arabisch 1a', $3), ($2, 'Arabisch 2b', $4)`,
+      [CLASS, OTHER_CLASS, TEACHER, OTHER_TEACHER]
+    );
+    await pool.query(
+      `insert into class_members (class_id, user_id, class_role, status) values
+         ($1, $3, 'teacher', 'active'), ($1, $4, 'student', 'active'),
+         ($2, $5, 'teacher', 'active')`,
+      [CLASS, OTHER_CLASS, TEACHER, AMINA, OTHER_TEACHER]
     );
     await pool.query(
       `insert into unit_enrollments (user_id, id, book, unit, pace, "startedAt", "dueAt", updated_at)
@@ -120,6 +160,7 @@ describe.skipIf(!url)('al-Muʿallim (Postgres)', () => {
     const router = new ModelRouter({ providers: { anthropic: model }, source: repo });
     const gateway = new AiGateway({ router, repo, log: quiet });
     const tutorRepo = new PgTutorRepository(pool);
+    const grades = new PgGradeRepository(pool);
     const media: MediaAccess = {
       segment: async (actor, mediaId) => {
         mediaAsks.push(`${actor.id}:${mediaId}`);
@@ -129,11 +170,13 @@ describe.skipIf(!url)('al-Muʿallim (Postgres)', () => {
     const auth: AuthResolver = {
       actor: async (h) => {
         const who = h.get('x-test-user');
-        return who === 'amina'
-          ? { id: AMINA, role: 'student' }
-          : who === 'bilal'
-            ? { id: BILAL, role: 'student' }
-            : null;
+        const users: Record<string, { id: string; role: 'student' | 'teacher' }> = {
+          amina: { id: AMINA, role: 'student' },
+          bilal: { id: BILAL, role: 'student' },
+          teacher: { id: TEACHER, role: 'teacher' },
+          other: { id: OTHER_TEACHER, role: 'teacher' },
+        };
+        return users[who ?? ''] ?? null;
       },
     };
     app = createApp({
@@ -155,6 +198,21 @@ describe.skipIf(!url)('al-Muʿallim (Postgres)', () => {
         repo: tutorRepo,
         settings: new PgTutorSettings(pool),
         available: async () => true,
+        grading: {
+          service: new GradeService({
+            gateway,
+            repo: grades,
+            catalog,
+            learner: new PgLearnerState(pool, catalog),
+          }),
+          repo: grades,
+        },
+        auth,
+        log: quiet,
+      },
+      reviews: {
+        classes: new PgClassRepository(pool),
+        reviews: new PgReviewRepository(pool),
         auth,
         log: quiet,
       },
@@ -393,5 +451,145 @@ describe.skipIf(!url)('al-Muʿallim (Postgres)', () => {
     const events = await readSse(await call('POST', '/tutor/turn', { message: 'Hallo' }));
     expect(events.at(-1)).toMatchObject({ type: 'error', error: 'ai_quota' });
     await pool.query('update ai_settings set student_daily_turns = 30');
+  });
+
+  it('grades a text with a rubric, links mistakes to course words and keeps it for the teacher', async () => {
+    model.steps = [{ text: JSON.stringify(RUBRIC) }];
+    const response = await call('POST', '/tutor/grade', {
+      kind: 'writing',
+      task: 'Beschreibe deine Schule.',
+      answer: 'هذا مدرسة كبيرة. أنا أحب الكتب.',
+    });
+    expect(response.status).toBe(200);
+    const grade = (await response.json()) as {
+      id: string;
+      score: number;
+      rubric: Record<string, number>;
+      mistakes: { wordId: string | null }[];
+    };
+    // Clamped into the rubric range; the article is ignored when matching the course word.
+    expect(grade.score).toBe(72);
+    expect(grade.rubric.spelling).toBe(4);
+    expect(grade.mistakes.map((m) => m.wordId)).toEqual([null, 'v-kitab']);
+    const request = model.requests.at(-1)!;
+    expect(request.jsonSchema).toMatchObject({
+      required: ['score', 'rubric', 'summary', 'corrected', 'mistakes'],
+    });
+    expect(request.system?.[0]?.text).toContain('The text was typed');
+    const own = (await (await call('GET', '/tutor/grades')).json()) as {
+      grades: { id: string }[];
+    };
+    expect(own.grades.map((g) => g.id)).toEqual([grade.id]);
+    const usage = await pool.query(
+      'select turns from ai_usage_daily where user_id = $1',
+      [AMINA]
+    );
+    expect(usage.rows).toEqual([{ turns: 1 }]);
+
+    // The class teacher sees it, overrides it; the export has no names.
+    const queue = (await (
+      await call('GET', `/classes/${CLASS}/grades`, undefined, 'teacher')
+    ).json()) as {
+      grades: { id: string; learner: string }[];
+    };
+    expect(queue.grades).toMatchObject([{ id: grade.id, learner: 'Amina Yilmaz' }]);
+    expect(
+      (
+        await call(
+          'PUT',
+          `/classes/${CLASS}/grades/${grade.id}`,
+          { decision: 'override', score: 60, comment: 'Zwei Genusfehler, nicht einer.' },
+          'teacher'
+        )
+      ).status
+    ).toBe(204);
+    const open = (await (
+      await call('GET', `/classes/${CLASS}/grades`, undefined, 'teacher')
+    ).json()) as {
+      grades: unknown[];
+    };
+    expect(open.grades).toEqual([]);
+    const exported = await call(
+      'GET',
+      `/classes/${CLASS}/grades/export`,
+      undefined,
+      'teacher'
+    );
+    expect(exported.headers.get('content-disposition')).toContain('attachment');
+    const cases = (await exported.json()) as { cases: Record<string, unknown>[] };
+    expect(cases.cases).toEqual([
+      {
+        kind: 'writing',
+        task: 'Beschreibe deine Schule.',
+        answer: 'هذا مدرسة كبيرة. أنا أحب الكتب.',
+        expectedScore: 60,
+        modelScore: 72,
+        teacherComment: 'Zwei Genusfehler, nicht einer.',
+        corrected: null,
+      },
+    ]);
+    expect(JSON.stringify(cases)).not.toContain('Amina');
+  });
+
+  it('keeps grades inside the class: other teachers and learners cannot see or judge them', async () => {
+    model.steps = [{ text: JSON.stringify(RUBRIC) }];
+    const grade = (await (
+      await call('POST', '/tutor/grade', {
+        kind: 'speech',
+        task: '',
+        answer: 'أنا من زيورخ',
+      })
+    ).json()) as { id: string };
+    expect(model.requests.at(-1)!.system?.[0]?.text).toContain(
+      'automatic transcript of speech'
+    );
+    expect(
+      (await call('GET', `/classes/${CLASS}/grades`, undefined, 'other')).status
+    ).toBe(403);
+    expect(
+      (await call('GET', `/classes/${CLASS}/grades`, undefined, 'amina')).status
+    ).toBe(403);
+    expect(
+      (
+        await call(
+          'PUT',
+          `/classes/${OTHER_CLASS}/grades/${grade.id}`,
+          { decision: 'confirm' },
+          'other'
+        )
+      ).status
+    ).toBe(404);
+    expect(
+      (
+        await call(
+          'PUT',
+          `/classes/${CLASS}/grades/${grade.id}`,
+          { decision: 'nope' },
+          'teacher'
+        )
+      ).status
+    ).toBe(400);
+    const bilal = (await (
+      await call('GET', '/tutor/grades', undefined, 'bilal')
+    ).json()) as {
+      grades: unknown[];
+    };
+    expect(bilal.grades).toEqual([]);
+  });
+
+  it('answers a broken rubric and bad input calmly', async () => {
+    model.steps = [{ text: 'Sorry, no JSON today.' }];
+    const broken = await call('POST', '/tutor/grade', {
+      kind: 'writing',
+      answer: 'مرحبا',
+    });
+    expect(broken.status).toBe(503);
+    expect(await broken.json()).toMatchObject({ error: 'ai_unavailable' });
+    expect(
+      (await call('POST', '/tutor/grade', { kind: 'essay', answer: 'x' })).status
+    ).toBe(400);
+    expect(
+      (await call('POST', '/tutor/grade', { kind: 'writing', answer: '' })).status
+    ).toBe(400);
   });
 });

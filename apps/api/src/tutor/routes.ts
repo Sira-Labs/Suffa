@@ -8,6 +8,8 @@
  *   GET    /tutor/conversations/:id        → { conversation, messages }
  *   DELETE /tutor/conversations/:id        → 204
  *   PUT    /tutor/messages/:id/rating      { rating: 1 | -1 | null } → 204
+ *   POST   /tutor/grade                    { kind, task, answer, unit? } → the grade
+ *   GET    /tutor/grades                   → { grades }   (the learner's own, newest first)
  */
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
@@ -15,6 +17,8 @@ import type pg from 'pg';
 import { z } from 'zod';
 import type { AuthResolver } from '../auth/resolver.js';
 import { authorize, type ActorEnv, type AuthorizeLog } from '../authz/middleware.js';
+import { aiErrorResponse } from '../ai/errors.js';
+import { GradeFormatError, type GradeRepository, type GradeService } from './grading.js';
 import type { TutorRepository } from './repository.js';
 import type { TutorService } from './service.js';
 import { HISTORY_MESSAGES } from './service.js';
@@ -50,6 +54,8 @@ export interface TutorRouteDeps {
   settings: TutorSettingsStore;
   /** False when no provider can serve the tutor task (no key configured). */
   available: () => Promise<boolean>;
+  /** Grade mode (story 11.1). */
+  grading: { service: GradeService; repo: GradeRepository };
   auth: AuthResolver;
   log: AuthorizeLog;
 }
@@ -78,6 +84,14 @@ const Rating = z
   .strict();
 const Settings = z.object({ tutorLanguage: z.enum(['de', 'en']) }).strict();
 const Id = z.string().uuid();
+const GradeBody = z
+  .object({
+    kind: z.enum(['writing', 'speech']),
+    task: z.string().trim().max(500).default(''),
+    answer: z.string().trim().min(1).max(3000),
+    unit: z.number().int().min(1).max(100).optional(),
+  })
+  .strict();
 
 async function json(c: { req: { json(): Promise<unknown> } }): Promise<unknown> {
   try {
@@ -156,6 +170,32 @@ export function createTutorRoutes(deps: TutorRouteDeps): Hono<ActorEnv> {
     if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
     const ok = await deps.repo.rate(id.data, c.get('actor').id, parsed.data.rating);
     return ok ? c.body(null, 204) : c.json({ error: 'not_found' }, 404);
+  });
+
+  app.post('/tutor/grade', use, async (c) => {
+    const parsed = GradeBody.safeParse(await json(c));
+    if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+    try {
+      return c.json(await deps.grading.service.grade(c.get('actor'), parsed.data));
+    } catch (error) {
+      if (error instanceof GradeFormatError) {
+        return c.json(
+          {
+            error: 'ai_unavailable',
+            message: 'Die Bewertung hat nicht geklappt. Bitte noch einmal.',
+          },
+          503
+        );
+      }
+      const mapped = aiErrorResponse(error);
+      if (!mapped) throw error;
+      return c.json(mapped.body, mapped.status);
+    }
+  });
+
+  app.get('/tutor/grades', use, async (c) => {
+    c.header('Cache-Control', 'no-store');
+    return c.json({ grades: await deps.grading.repo.listOwn(c.get('actor').id, 20) });
   });
 
   return app;

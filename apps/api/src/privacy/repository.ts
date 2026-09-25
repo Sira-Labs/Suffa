@@ -42,6 +42,7 @@ export interface AccountExport {
     conversations: Record<string, unknown>[];
     messages: Record<string, unknown>[];
     usage: Record<string, unknown>[];
+    grades: Record<string, unknown>[];
   };
   auditLog: Record<string, unknown>[];
 }
@@ -170,6 +171,10 @@ export class PgPrivacyRepository implements PrivacyRepository {
         usage: await q(
           `select day::text, turns, tokens, cost_micro from ai_usage_daily
             where user_id = $1 order by day`
+        ),
+        grades: await q(
+          `select kind, task, answer, result, status, override, created_at, reviewed_at
+             from ai_grades where user_id = $1 order by created_at`
         ),
       },
       auditLog: await q(

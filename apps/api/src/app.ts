@@ -33,6 +33,8 @@ import {
   type ClassSpiritRouteDeps,
 } from './classes/spiritRoutes.js';
 import { sameOriginOnly } from './http/sameOrigin.js';
+import { appCors } from './http/appCors.js';
+import { createAppLinkRoutes, type AppLinks } from './apps/links.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
 import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
 import { createTutorRoutes, type TutorRouteDeps } from './tutor/routes.js';
@@ -90,6 +92,10 @@ export interface AppDeps {
    * browser marks as coming from another site are refused (403).
    */
   allowedOrigin?: string | readonly string[];
+  /** Native app web view origins: CORS without credentials, bearer tokens (ADR-0019). */
+  appOrigins?: readonly string[];
+  /** Universal Links / App Links files. */
+  appLinks?: AppLinks;
   /** Classes, invites and membership approval. */
   classes?: ClassRouteDeps;
   /** Admin area (users); every route needs an admin. */
@@ -143,7 +149,13 @@ export function createApp(deps: AppDeps): Hono {
     }
   };
 
-  if (deps.allowedOrigin?.length) app.use('/api/*', sameOriginOnly(deps.allowedOrigin));
+  if (deps.appOrigins?.length) app.use('/api/*', appCors(deps.appOrigins));
+  if (deps.allowedOrigin?.length) {
+    const own =
+      typeof deps.allowedOrigin === 'string' ? [deps.allowedOrigin] : deps.allowedOrigin;
+    app.use('/api/*', sameOriginOnly([...own, ...(deps.appOrigins ?? [])]));
+  }
+  if (deps.appLinks) app.route('/api/v1', createAppLinkRoutes(deps.appLinks));
 
   app.get('/healthz', healthHandler);
   app.get('/api/healthz', healthHandler);

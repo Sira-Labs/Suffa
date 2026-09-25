@@ -122,6 +122,10 @@ Env (App Configs → Environment variables):
 | `SUFFA_VAPID_SUBJECT`                                                       | `mailto:<ops address>` – contact for push services; reminders stay off until all three are set                      | S6          |
 | `SUFFA_TRANSCRIBE_URL`                                                      | optional: OpenAI-compatible `/v1/audio/transcriptions` (OpenAI, Groq, self-hosted faster-whisper)                   | S8          |
 | `SUFFA_TRANSCRIBE_TOKEN`, `SUFFA_TRANSCRIBE_MODEL`                          | API token (if the service needs one) and model, default `whisper-1`                                                 | S8          |
+| `SUFFA_APP_ORIGINS`                                                         | native app web view origins for bearer-token API access; default `capacitor://localhost,https://localhost`          | S13         |
+| `SUFFA_IOS_APP_IDS`                                                         | optional: `TEAMID.org.siralabs.suffa` for Universal Links (`/.well-known/apple-app-site-association`)               | S13         |
+| `SUFFA_ANDROID_APP_LINKS`                                                   | optional: `org.siralabs.suffa:<SHA-256 of the signing key>` for App Links (`/.well-known/assetlinks.json`)          | S13         |
+| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | optional: Firebase service account JSON, base64; push to the native apps (worker)                                   | S13         |
 | `SUFFA_YOUTUBE_API_KEY`                                                     | optional: YouTube Data API v3 key (restrict it to the server IP) for the video catalog import; worker               | S12         |
 | `SUFFA_ANTHROPIC_API_KEY`                                                   | optional: turns on Anthropic routes (AI gateway, ADR-0010); api and worker                                          | S9          |
 | `SUFFA_OPENROUTER_API_KEY`                                                  | optional: turns on OpenRouter routes (open-weight models)                                                           | S9          |

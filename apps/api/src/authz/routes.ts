@@ -204,6 +204,8 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     path: '/api/v1/notifications/subscriptions',
     action: 'profile:write',
   },
+  { method: 'POST', path: '/api/v1/notifications/devices', action: 'profile:write' },
+  { method: 'DELETE', path: '/api/v1/notifications/devices', action: 'profile:write' },
   { method: 'GET', path: '/api/v1/recaps/latest', action: 'profile:read' },
   { method: 'GET', path: '/api/v1/invites/:token', action: 'class:join' },
   { method: 'POST', path: '/api/v1/invites/:token/join', action: 'class:join' },
@@ -229,4 +231,7 @@ export const PUBLIC_ROUTES: readonly string[] = [
   // The video catalog is public (ADR-0012); interactive parts depend on the creator's permission.
   'GET /api/v1/videos',
   'GET /api/v1/videos/:id',
+  // Universal Links / App Links files for the native app (ADR-0019).
+  'GET /api/v1/app-links/apple-app-site-association',
+  'GET /api/v1/app-links/assetlinks.json',
 ];

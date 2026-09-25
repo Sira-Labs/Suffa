@@ -8,7 +8,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import { betterAuth } from 'better-auth';
-import { magicLink } from 'better-auth/plugins';
+import { bearer, magicLink } from 'better-auth/plugins';
 import type pg from 'pg';
 import { isRole, type Actor, type Role } from '../authz/policies.js';
 import type { AuthResolver } from './resolver.js';
@@ -132,6 +132,9 @@ export function createAuth(options: AuthOptions) {
       ipAddress: { ipAddressHeaders: ['x-real-ip'] },
     },
     plugins: [
+      // The native app keeps its session as a bearer token (ADR-0019); only tokens signed
+      // with the auth secret are accepted. The web keeps the httpOnly cookie.
+      bearer({ requireSignature: true }),
       magicLink({
         expiresIn: MAGIC_LINK_TTL_SEC,
         storeToken: 'hashed',

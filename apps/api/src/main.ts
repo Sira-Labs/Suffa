@@ -24,6 +24,7 @@ import {
 import { ffmpegTranscoder, MediaService } from './media/service.js';
 import { S3ObjectStorage } from './storage/s3Storage.js';
 import { registerNotifications } from './notifications/jobs.js';
+import { FcmNotifier, RoutingNotifier } from './notifications/fcm.js';
 import { disabledNotifier, WebPushNotifier } from './notifications/notifier.js';
 import { PgRecapRepository } from './notifications/recap.js';
 import { PgNotificationRepository } from './notifications/repository.js';
@@ -257,9 +258,11 @@ async function main(): Promise<void> {
             {
               notifications: new PgNotificationRepository(pool),
               recaps: new PgRecapRepository(pool),
-              notifier: config.vapid
-                ? new WebPushNotifier(config.vapid)
-                : disabledNotifier,
+              // Web push for browsers, FCM for the native apps (ADR-0019).
+              notifier: new RoutingNotifier(
+                config.vapid ? new WebPushNotifier(config.vapid) : disabledNotifier,
+                config.fcm ? new FcmNotifier(config.fcm) : disabledNotifier
+              ),
               log,
             },
             errors
@@ -308,7 +311,7 @@ async function main(): Promise<void> {
       pool,
       secret: config.authSecret,
       publicUrl: config.publicUrl,
-      trustedOrigins: config.trustedOrigins,
+      trustedOrigins: [...config.trustedOrigins, ...config.appOrigins],
       mailer: config.smtp ? new SmtpMailer(config.smtp, log) : new LogMailer(log),
       production: config.env === 'prod',
     });
@@ -445,6 +448,7 @@ async function main(): Promise<void> {
       repo: new PgNotificationRepository(pool),
       recaps: new PgRecapRepository(pool),
       publicKey: config.vapid?.publicKey ?? null,
+      appPush: Boolean(config.fcm),
       auth,
       log,
     },
@@ -482,6 +486,8 @@ async function main(): Promise<void> {
     auth: authRoutes,
     account: accountRoutes,
     allowedOrigin: config.trustedOrigins,
+    appOrigins: config.appOrigins,
+    appLinks: config.appLinks,
     errorTunnel: { webDsn: config.webErrorDsn, log },
     onUnhandledError: (error, path) => {
       log.error({ err: error, path }, 'http.unhandled_error');

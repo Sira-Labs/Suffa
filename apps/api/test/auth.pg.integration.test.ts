@@ -55,7 +55,7 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       pool,
       secret: 'test-secret-0123456789-abcdefghijklmnop',
       publicUrl: PUBLIC_URL,
-      trustedOrigins: [OLD_URL],
+      trustedOrigins: [OLD_URL, 'capacitor://localhost'],
       mailer,
       production: false,
       rateLimit: true,
@@ -94,6 +94,7 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
         log: quiet,
       },
       allowedOrigin: [PUBLIC_URL, OLD_URL],
+      appOrigins: ['capacitor://localhost'],
     });
   });
 
@@ -157,6 +158,57 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       body.id,
     ]);
     expect(stored.rows[0]).toEqual({ email_verified: true });
+  });
+
+  it('signs the native app in with a bearer token from the same mail link (ADR-0019)', async () => {
+    const APP = 'capacitor://localhost';
+    const requested = await app.request('/api/v1/auth/sign-in/magic-link', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin: APP,
+        'x-real-ip': '203.0.113.9',
+      },
+      body: JSON.stringify({ email: 'app@example.org', callbackURL: '/' }),
+    });
+    expect(requested.status).toBe(200);
+    expect(requested.headers.get('access-control-allow-origin')).toBe(APP);
+    // The app opens the link itself (Universal Link) without the callback: JSON, no redirect.
+    const link = new URL(mailer.links[0]!.url);
+    link.searchParams.delete('callbackURL');
+    const verified = await app.request(`${link.pathname}${link.search}`, {
+      headers: { origin: APP, 'x-real-ip': '203.0.113.9' },
+    });
+    expect(verified.status).toBe(200);
+    const token = verified.headers.get('set-auth-token');
+    expect(token).toMatch(/\./);
+    expect(verified.headers.get('access-control-expose-headers')).toContain(
+      'set-auth-token'
+    );
+
+    const me = await app.request('/api/v1/me', {
+      headers: { authorization: `Bearer ${token}`, origin: APP },
+    });
+    expect(me.status).toBe(200);
+    expect(((await me.json()) as { email: string }).email).toBe('app@example.org');
+    // Only signed tokens count: the bare session id is refused.
+    const bare = token!.split('.')[0];
+    expect(
+      (await app.request('/api/v1/me', { headers: { authorization: `Bearer ${bare}` } }))
+        .status
+    ).toBe(401);
+    // Writes from the app's origin pass the cross-site guard with the bearer token.
+    const push = await app.request('/api/v1/sync/settings/push', {
+      method: 'POST',
+      headers: {
+        authorization: `Bearer ${token}`,
+        origin: APP,
+        'sec-fetch-site': 'cross-site',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ records: [] }),
+    });
+    expect(push.status).toBe(200);
   });
 
   it('uses each link only once and stores it hashed', async () => {

@@ -39,6 +39,15 @@
 		respond `{"status":"ok","role":"web","version":"{$SUFFA_VERSION:dev}"}` 200
 	}
 
+	# Universal Links / App Links for the native app (ADR-0019), answered by the API.
+	@applinks path /.well-known/apple-app-site-association /.well-known/assetlinks.json
+	handle @applinks {
+		uri replace /.well-known/ /api/v1/app-links/
+		reverse_proxy {$SUFFA_API_UPSTREAM:srv-captain--suffa-api:8000} {
+			header_up X-Real-IP {client_ip}
+		}
+	}
+
 	@api path /api/* /healthz
 	handle @api {
 		reverse_proxy {$SUFFA_API_UPSTREAM:srv-captain--suffa-api:8000} {

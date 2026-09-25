@@ -365,6 +365,7 @@ function buildApp() {
       me: async (h) => actorFrom(h),
     },
     errorTunnel: { webDsn: undefined, log: quiet },
+    appLinks: { iosAppIds: [], android: undefined },
     authzLog: quiet,
   });
 }

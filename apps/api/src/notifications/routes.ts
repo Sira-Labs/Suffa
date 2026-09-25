@@ -5,12 +5,15 @@
  *   PUT    /notifications/preferences  { reminderEnabled, reminderTime, … }    (profile:write)
  *   POST   /notifications/subscriptions { endpoint, keys: { p256dh, auth } } (profile:write)
  *   DELETE /notifications/subscriptions { endpoint }                        (profile:write)
+ *   POST   /notifications/devices   { token, platform } (the native app, FCM) (profile:write)
+ *   DELETE /notifications/devices   { token }                               (profile:write)
  *   GET    /recaps/latest              → { recap | null }                   (profile:read)
  */
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
 import type { AuthResolver } from '../auth/resolver.js';
 import { authorize, type ActorEnv, type AuthorizeLog } from '../authz/middleware.js';
+import { FCM_PREFIX } from './fcm.js';
 import type { RecapRepository } from './recap.js';
 import type { NotificationRepository } from './repository.js';
 
@@ -19,6 +22,8 @@ export interface NotificationRouteDeps {
   recaps: Pick<RecapRepository, 'latest'>;
   /** VAPID public key for the browser; null when push is not configured. */
   publicKey: string | null;
+  /** App push (FCM) is configured on this server. */
+  appPush?: boolean;
   auth: AuthResolver;
   log: AuthorizeLog;
 }
@@ -41,6 +46,12 @@ const Subscription = z.object({
   keys: z.object({ p256dh: Key.max(200), auth: Key.max(100) }),
 });
 const Unsubscribe = z.object({ endpoint: Endpoint });
+// FCM registration tokens: URL-safe, a few hundred characters.
+const DeviceToken = z.string().regex(/^[A-Za-z0-9_:.-]{20,900}$/);
+const Device = z
+  .object({ token: DeviceToken, platform: z.enum(['ios', 'android']) })
+  .strict();
+const RemoveDevice = z.object({ token: DeviceToken }).strict();
 
 export function createNotificationRoutes(deps: NotificationRouteDeps): Hono<ActorEnv> {
   const app = new Hono<ActorEnv>();
@@ -81,6 +92,26 @@ export function createNotificationRoutes(deps: NotificationRouteDeps): Hono<Acto
     const parsed = Unsubscribe.safeParse(await readJson(c));
     if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
     await deps.repo.unsubscribe(me(c), parsed.data.endpoint);
+    return c.body(null, 204);
+  });
+
+  // App devices are stored like web push subscriptions (endpoint "fcm:<token>").
+  app.post('/notifications/devices', write, async (c) => {
+    if (!deps.appPush) return c.json({ error: 'push_disabled' }, 409);
+    const parsed = Device.safeParse(await readJson(c));
+    if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+    await deps.repo.subscribe(
+      me(c),
+      { endpoint: `${FCM_PREFIX}${parsed.data.token}`, p256dh: '', auth: '' },
+      `app:${parsed.data.platform}`
+    );
+    return c.body(null, 204);
+  });
+
+  app.delete('/notifications/devices', write, async (c) => {
+    const parsed = RemoveDevice.safeParse(await readJson(c));
+    if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+    await deps.repo.unsubscribe(me(c), `${FCM_PREFIX}${parsed.data.token}`);
     return c.body(null, 204);
   });
 

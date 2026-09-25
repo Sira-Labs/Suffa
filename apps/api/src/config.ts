@@ -63,6 +63,17 @@ const RawEnvSchema = z.object({
    * old domain while moving to a new one. Sign-in mails always link to SUFFA_PUBLIC_URL.
    */
   SUFFA_TRUSTED_ORIGINS: z.string().trim().optional(),
+  /**
+   * Origins of the native app's web view (ADR-0019), allowed cross-origin with bearer tokens
+   * (never cookies). Default: Capacitor's iOS and Android origins.
+   */
+  SUFFA_APP_ORIGINS: z.string().trim().default('capacitor://localhost,https://localhost'),
+  /** Universal Links: app ids "TEAMID.bundle.id", comma-separated. */
+  SUFFA_IOS_APP_IDS: z.string().trim().optional(),
+  /** App Links: "package.name:SHA256FINGERPRINT[,…]" (fingerprints of the signing keys). */
+  SUFFA_ANDROID_APP_LINKS: z.string().trim().optional(),
+  /** Firebase service account (the JSON, base64-encoded) for FCM push to the apps. */
+  SUFFA_FCM_SERVICE_ACCOUNT: z.string().trim().optional(),
   /** SMTP for sign-in mails: the Google Workspace relay (smtp-relay.gmail.com). */
   SUFFA_SMTP_HOST: z.string().trim().optional(),
   SUFFA_SMTP_PORT: z.coerce.number().int().min(1).max(65535).default(587),
@@ -189,6 +200,15 @@ export interface Config {
   publicUrl: string | undefined;
   /** Origins browsers may send (SUFFA_PUBLIC_URL first, then SUFFA_TRUSTED_ORIGINS). */
   trustedOrigins: string[];
+  /** Native app web view origins (bearer tokens, CORS without credentials). */
+  appOrigins: string[];
+  /** Universal Links / App Links (served under /.well-known); undefined parts are off. */
+  appLinks: {
+    iosAppIds: string[];
+    android: { packageName: string; fingerprints: string[] } | undefined;
+  };
+  /** FCM service account; undefined turns app push off (local reminders still work). */
+  fcm: { projectId: string; clientEmail: string; privateKey: string } | undefined;
   /** SMTP for sign-in mails; outside prod the link may go to the log instead. */
   smtp: SmtpSettings | undefined;
   /** Public DSN of the web project; undefined disables browser error reporting. */
@@ -318,6 +338,20 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
   }
   const extraOrigins = parseOrigins(raw.SUFFA_TRUSTED_ORIGINS);
   issues.push(...extraOrigins.issues);
+  const appOrigins = raw.SUFFA_APP_ORIGINS.split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  for (const origin of appOrigins) {
+    if (!/^(capacitor|https|ionic):\/\/[a-z0-9.-]+(:\d+)?$/.test(origin)) {
+      issues.push(
+        `SUFFA_APP_ORIGINS: "${origin}" is not an app origin like capacitor://localhost`
+      );
+    }
+  }
+  const android = parseAndroidAppLinks(raw.SUFFA_ANDROID_APP_LINKS);
+  issues.push(...android.issues);
+  const fcm = parseServiceAccount(raw.SUFFA_FCM_SERVICE_ACCOUNT);
+  issues.push(...fcm.issues);
   if (issues.length > 0) throw new ConfigError(issues);
   const trustedOrigins = [
     ...new Set([
@@ -340,6 +374,15 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     errorDsn: raw.SUFFA_ERROR_DSN,
     publicUrl: raw.SUFFA_PUBLIC_URL?.replace(/\/$/, ''),
     trustedOrigins,
+    appOrigins,
+    appLinks: {
+      iosAppIds: (raw.SUFFA_IOS_APP_IDS ?? '')
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => /^[A-Z0-9]{10}\.[A-Za-z0-9.-]+$/.test(id)),
+      android: android.value,
+    },
+    fcm: fcm.value,
     smtp: smtpComplete
       ? {
           host: raw.SUFFA_SMTP_HOST!,
@@ -441,4 +484,65 @@ export function parseOrigins(value: string | undefined): {
     }
   }
   return { origins, issues };
+}
+
+/** "org.siralabs.suffa:AB:CD:…[,…]" → package name and SHA-256 fingerprints. */
+export function parseAndroidAppLinks(value: string | undefined): {
+  value: { packageName: string; fingerprints: string[] } | undefined;
+  issues: string[];
+} {
+  if (!value) return { value: undefined, issues: [] };
+  const [packageName, ...rest] = value.split(':');
+  const fingerprints = rest
+    .join(':')
+    .split(',')
+    .map((f) => f.trim().toUpperCase())
+    .filter(Boolean);
+  const valid =
+    /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/i.test(packageName ?? '') &&
+    fingerprints.length > 0 &&
+    fingerprints.every((f) => /^([0-9A-F]{2}:){31}[0-9A-F]{2}$/.test(f));
+  return valid
+    ? { value: { packageName: packageName!, fingerprints }, issues: [] }
+    : {
+        value: undefined,
+        issues: ['SUFFA_ANDROID_APP_LINKS must look like package.name:AA:BB:…(32 bytes)'],
+      };
+}
+
+/** The Firebase service account JSON (base64) → what FCM needs. */
+export function parseServiceAccount(value: string | undefined): {
+  value: { projectId: string; clientEmail: string; privateKey: string } | undefined;
+  issues: string[];
+} {
+  if (!value) return { value: undefined, issues: [] };
+  try {
+    const json = JSON.parse(Buffer.from(value, 'base64').toString('utf8')) as {
+      project_id?: string;
+      client_email?: string;
+      private_key?: string;
+    };
+    if (
+      json.project_id &&
+      json.client_email &&
+      json.private_key?.includes('PRIVATE KEY')
+    ) {
+      return {
+        value: {
+          projectId: json.project_id,
+          clientEmail: json.client_email,
+          privateKey: json.private_key,
+        },
+        issues: [],
+      };
+    }
+  } catch (error) {
+    if (!(error instanceof SyntaxError)) throw error;
+  }
+  return {
+    value: undefined,
+    issues: [
+      'SUFFA_FCM_SERVICE_ACCOUNT must be the base64 of a Firebase service account JSON',
+    ],
+  };
 }

@@ -1,6 +1,8 @@
 /**
- * Sign-in with Better Auth (ADR-0008), magic link only: the learner enters an email address,
- * gets a link, and the click signs them in with an httpOnly session cookie. Web and API share
+ * Sign-in with Better Auth (ADR-0008), by email only: the learner enters an email address and
+ * gets a link, and the click signs them in with an httpOnly session cookie. The same mail
+ * carries a six-digit code for the same sign-in in another browser: a mail app that opens
+ * links in its own built-in browser (Yahoo, Gmail) keeps the session there. Web and API share
  * one origin (Caddy proxies /api), so there are no tokens in the browser's storage.
  *
  * Better Auth's field names are mapped onto our snake_case tables (migration 0003); user ids
@@ -8,7 +10,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import { betterAuth } from 'better-auth';
-import { bearer, magicLink } from 'better-auth/plugins';
+import { bearer, emailOTP, magicLink } from 'better-auth/plugins';
 import type pg from 'pg';
 import { isRole, type Actor, type Role } from '../authz/policies.js';
 import type { AuthResolver } from './resolver.js';
@@ -16,8 +18,12 @@ import type { Mailer } from './mailer.js';
 
 /** Where the auth routes live; Caddy forwards /api to this service. */
 export const AUTH_BASE_PATH = '/api/v1/auth';
-/** A magic link is valid this long (seconds). */
+/** A magic link (and its code) is valid this long (seconds). */
 export const MAGIC_LINK_TTL_SEC = 15 * 60;
+/** Wrong guesses allowed per code; then a new link (and code) is needed. */
+export const SIGN_IN_CODE_ATTEMPTS = 5;
+/** Better Auth's key for the sign-in code of an address (see its email-otp plugin). */
+const signInCodeKey = (email: string) => `sign-in-otp-${email.toLowerCase()}`;
 /** Sessions last 30 days and are extended once a day while used. */
 const SESSION_TTL_SEC = 30 * 24 * 60 * 60;
 const SESSION_REFRESH_SEC = 24 * 60 * 60;
@@ -39,7 +45,7 @@ export interface AuthOptions {
 const timestamps = { createdAt: 'created_at', updatedAt: 'updated_at' } as const;
 
 export function createAuth(options: AuthOptions) {
-  return betterAuth({
+  const auth = betterAuth({
     appName: 'Suffa',
     secret: options.secret,
     baseURL: options.publicUrl,
@@ -120,6 +126,8 @@ export function createAuth(options: AuthOptions) {
         // Mails cost trust: at most 5 sign-in links per 10 minutes and client.
         '/sign-in/magic-link': { window: 600, max: 5 },
         '/magic-link/verify': { window: 60, max: 10 },
+        // With 5 guesses per code and at most 5 codes per 10 minutes, guessing stays hopeless.
+        '/sign-in/email-otp': { window: 600, max: 10 },
       },
     },
     advanced: {
@@ -138,10 +146,30 @@ export function createAuth(options: AuthOptions) {
       magicLink({
         expiresIn: MAGIC_LINK_TTL_SEC,
         storeToken: 'hashed',
-        sendMagicLink: ({ email, url }) => options.mailer.sendMagicLink(email, url),
+        sendMagicLink: async ({ email, url }) => {
+          // One valid code per address: a new mail replaces the code of the last one.
+          await options.pool.query('delete from verifications where identifier = $1', [
+            signInCodeKey(email),
+          ]);
+          const code = await auth.api.createVerificationOTP({
+            body: { email, type: 'sign-in' },
+          });
+          await options.mailer.sendMagicLink(email, url, code);
+        },
+      }),
+      // Codes are only created with a magic link (above); the plugin's own mail routes stay
+      // closed (PUBLIC_AUTH_ENDPOINTS), so this sender is never used.
+      emailOTP({
+        expiresIn: MAGIC_LINK_TTL_SEC,
+        storeOTP: 'hashed',
+        allowedAttempts: SIGN_IN_CODE_ATTEMPTS,
+        sendVerificationOTP: async () => {
+          throw new Error('sign-in codes are only sent with a magic link');
+        },
       }),
     ],
   });
+  return auth;
 }
 
 export type SuffaAuth = ReturnType<typeof createAuth>;
@@ -149,12 +177,13 @@ export type SuffaAuth = ReturnType<typeof createAuth>;
 /**
  * The only Better Auth endpoints reachable from outside (relative to AUTH_BASE_PATH). Better
  * Auth ships many more (password reset, email change, account deletion, session listing with
- * raw tokens); none of them is needed for magic-link sign-in, and each is attack surface.
+ * raw tokens); none of them is needed for sign-in by link or code, and each is attack surface.
  * Sessions are managed through /api/v1/account instead, which never returns a token.
  */
 export const PUBLIC_AUTH_ENDPOINTS: readonly string[] = [
   'POST /sign-in/magic-link',
   'GET /magic-link/verify',
+  'POST /sign-in/email-otp',
   'POST /sign-out',
 ];
 

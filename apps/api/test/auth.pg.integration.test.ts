@@ -27,9 +27,9 @@ const OLD_URL = 'https://old.example.org';
 const quiet = { info: () => undefined, warn: () => undefined, error: () => undefined };
 
 class CapturingMailer implements Mailer {
-  links: { email: string; url: string }[] = [];
-  async sendMagicLink(email: string, url: string): Promise<void> {
-    this.links.push({ email, url });
+  links: { email: string; url: string; code: string }[] = [];
+  async sendMagicLink(email: string, url: string, code: string): Promise<void> {
+    this.links.push({ email, url, code });
   }
 }
 
@@ -209,6 +209,78 @@ describe.skipIf(!url)('Magic-link sign-in (Postgres)', () => {
       body: JSON.stringify({ records: [] }),
     });
     expect(push.status).toBe(200);
+  });
+
+  const enterCode = (email: string, otp: string, origin = PUBLIC_URL) =>
+    app.request('/api/v1/auth/sign-in/email-otp', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        origin,
+        'x-real-ip': '203.0.113.20',
+      },
+      body: JSON.stringify({ email, otp }),
+    });
+
+  it('signs in with the code from the mail in another browser, once', async () => {
+    await requestLink('Code@Example.org');
+    const { code } = mailer.links[0]!;
+    expect(code).toMatch(/^\d{6}$/);
+    // Stored hashed, like the link.
+    const stored = await pool.query<{ value: string }>(
+      "select value from verifications where identifier = 'sign-in-otp-code@example.org'"
+    );
+    expect(stored.rows[0]!.value).not.toContain(code);
+
+    const response = await enterCode('code@example.org', code);
+    expect(response.status).toBe(200);
+    // The browser gets the httpOnly cookie only: no token for scripts to read.
+    expect(await response.json()).toEqual({ ok: true });
+    expect(response.headers.get('set-auth-token')).toBeNull();
+    const cookie = (response.headers.getSetCookie?.() ?? [])
+      .map((c) => c.split(';')[0])
+      .filter((c) => c?.startsWith('suffa.session_token='))
+      .join('; ');
+    const me = await app.request('/api/v1/me', { headers: { cookie } });
+    expect(((await me.json()) as { email: string }).email).toBe('code@example.org');
+
+    expect((await enterCode('code@example.org', code)).status).toBe(400);
+  });
+
+  it('replaces the code with each new mail and locks it after five wrong guesses', async () => {
+    await requestLink('guess@example.org');
+    await requestLink('guess@example.org');
+    const [first, second] = mailer.links;
+    const wrong = second!.code === '000000' ? '111111' : '000000';
+    // The last mail's code counts; the first one's is a wrong guess (unless they happen to match).
+    const guesses = [
+      first!.code === second!.code ? wrong : first!.code,
+      wrong,
+      wrong,
+      wrong,
+      wrong,
+    ];
+    for (const guess of guesses) {
+      expect((await enterCode('guess@example.org', guess)).status).toBe(400);
+    }
+    expect((await enterCode('guess@example.org', second!.code)).status).toBe(403);
+  });
+
+  it('hands the native app its bearer token for a code', async () => {
+    const APP = 'capacitor://localhost';
+    await requestLink('app-code@example.org');
+    const response = await enterCode('app-code@example.org', mailer.links[0]!.code, APP);
+    expect(response.status).toBe(200);
+    expect(response.headers.get('set-auth-token')).toMatch(/\./);
+  });
+
+  it("keeps the code plugin's own mail routes closed", async () => {
+    const response = await app.request('/api/v1/auth/email-otp/send-verification-otp', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', origin: PUBLIC_URL },
+      body: JSON.stringify({ email: 'x@example.org', type: 'sign-in' }),
+    });
+    expect(response.status).toBe(404);
   });
 
   it('uses each link only once and stores it hashed', async () => {

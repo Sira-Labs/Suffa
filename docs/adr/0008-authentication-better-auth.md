@@ -64,3 +64,17 @@ CapRover with our Postgres. The PWA must keep working offline with a cached iden
 
 Auth lives in our codebase and DB (backups cover it). We own upgrades of the library. Rate
 limits on auth routes and admin 2FA are mandatory acceptance criteria.
+
+## Update 2026-09-25: a sign-in code in the same mail
+
+- Mail apps such as Yahoo and Gmail open links in their own built-in browser, which has its own
+  cookies: the magic link signed the learner in there, not in Safari. The sign-in mail now
+  also carries a **six-digit code** (Better Auth `emailOTP`, type `sign-in`) that signs in
+  whichever browser it is typed into (`POST /sign-in/email-otp`, on the sign-in page after
+  "Link senden").
+- The code is created only together with a magic link (a new mail replaces the old code),
+  shares its 15 minutes, is stored hashed, and allows 5 wrong guesses before a new mail is
+  needed; the route is rate-limited to 10 requests per 10 minutes and client. The plugin's own
+  mail routes stay closed.
+- The answer carries no session token for the browser (httpOnly cookie only); the native app's
+  origins keep `set-auth-token`, as after the magic link.

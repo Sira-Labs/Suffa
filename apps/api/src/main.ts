@@ -29,6 +29,7 @@ import { disabledNotifier, WebPushNotifier } from './notifications/notifier.js';
 import { PgRecapRepository } from './notifications/recap.js';
 import { PgNotificationRepository } from './notifications/repository.js';
 import { PgClassProgressRepository } from './classes/progress.js';
+import { PgClassLeagueRepository } from './classes/league.js';
 import { PgClassSpiritRepository } from './classes/spirit.js';
 import { registerEngagement, requestRecompute } from './engagement/jobs.js';
 import { PgEngagementRepository } from './engagement/repository.js';
@@ -458,6 +459,7 @@ async function main(): Promise<void> {
       classes: new PgClassRepository(pool),
       progress: new PgClassProgressRepository(pool),
       spirit: new PgClassSpiritRepository(pool),
+      league: new PgClassLeagueRepository(pool),
       auth,
       log,
     },

@@ -108,11 +108,26 @@ const MESSAGES: Record<string, string> = {
   invalid_invite:
     'Dieser Einladungslink ist abgelaufen oder ungültig. Bitte frag nach einem neuen.',
   forbidden: 'Das darf nur die Lehrkraft dieser Klasse.',
+  not_a_learner: 'An der Liga nehmen nur Lernende der Klasse teil.',
 };
 
 /** The token of an invite URL `…/join/<token>`, or null. */
 export function inviteToken(url: string): string | null {
   return /\/join\/([A-Za-z0-9_-]{20,64})$/.exec(url)?.[1] ?? null;
+}
+
+export interface LeagueSettings {
+  enabled: boolean;
+  /** A class of under-18s: first names only, league off unless turned on deliberately. */
+  minors: boolean;
+}
+
+export interface LeagueView extends LeagueSettings {
+  /** The learner's own choice; null for teachers, who are not ranked. */
+  optedIn: boolean | null;
+  participants: number;
+  podium: { place: number; title: string; name: string; percent: number; you: boolean }[];
+  you: { percent: number; activeDays: number; goal: number; onPodium: boolean } | null;
 }
 
 export class ClassesApi {
@@ -220,6 +235,29 @@ export class ClassesApi {
       `${this.base(classId)}/shoutouts/${encodeURIComponent(shoutoutId)}`,
       { method: 'DELETE' }
     );
+  }
+
+  /** The weekly league (story 14.2). */
+  league(classId: string) {
+    return this.call<LeagueView>(`${this.base(classId)}/league`);
+  }
+
+  setLeagueOptIn(classId: string, optIn: boolean) {
+    return this.call<void>(`${this.base(classId)}/league/opt-in`, {
+      method: 'PUT',
+      body: JSON.stringify({ optIn }),
+    });
+  }
+
+  leagueSettings(classId: string) {
+    return this.call<LeagueSettings>(`${this.base(classId)}/league/settings`);
+  }
+
+  saveLeagueSettings(classId: string, settings: LeagueSettings) {
+    return this.call<void>(`${this.base(classId)}/league/settings`, {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    });
   }
 
   private base(classId: string) {

@@ -292,6 +292,11 @@ lock-screen controls via Media Session. The Capacitor project is configuration i
 | 14.3 | Unit certificates (PDF)                     | 3   | Teacher can award/print.          |
 | 14.4 | Live class quiz (teacher-led, leech words)  | 5   | Works for 30 concurrent students. |
 
+Status (Sprint 14, in progress): 14.2 built — the teacher switches the weekly league on per
+class (off by default; marking a class of minors switches it off and shortens names to first
+names); each learner opts in. Ranked by % of the own weekly goal, ties share a place, only the
+top three are named with a title, everyone else sees only their own week.
+
 **Gate G5.**
 
 ## P7 — Next level

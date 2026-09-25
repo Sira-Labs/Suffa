@@ -105,6 +105,8 @@ export function describeAudit(entry: AuditEntry): string {
       return `Erlaubnis des Videokanals: ${String(d.from ?? '')} → ${String(d.permissionStatus ?? '')}`;
     case 'video.channel_updated':
       return 'Videokanal geändert';
+    case 'class.league.settings':
+      return `Wochenliga ${d.enabled ? 'eingeschaltet' : 'ausgeschaltet'}${d.minors ? ' (Klasse mit Minderjährigen)' : ''}`;
     default:
       return entry.action;
   }

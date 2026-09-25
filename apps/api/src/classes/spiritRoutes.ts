@@ -9,6 +9,10 @@
  *   POST   /classes/:id/badges/:badgeId/awards { userId } → 204     (class:manage)
  *   POST   /classes/:id/shoutouts   { message, userId? }            (class:manage)
  *   DELETE /classes/:id/shoutouts/:shoutoutId        → 204            (class:manage)
+ *   GET    /classes/:id/league                       → podium and own week  (class:read)
+ *   PUT    /classes/:id/league/opt-in  { optIn }     → 204 (learners only)  (class:read)
+ *   GET    /classes/:id/league/settings              → { enabled, minors }  (class:manage)
+ *   PUT    /classes/:id/league/settings { enabled, minors } → 204          (class:manage)
  *
  * Every route is scoped by the caller's role in that class, read from the database.
  */
@@ -18,6 +22,7 @@ import { isTimeZone } from '@suffa/engagement';
 import type { AuthResolver } from '../auth/resolver.js';
 import { authorize, type ActorEnv, type AuthorizeLog } from '../authz/middleware.js';
 import type { Actor as PolicyActor } from '../authz/policies.js';
+import type { ClassLeagueRepository } from './league.js';
 import type { ClassProgressRepository } from './progress.js';
 import type { ClassRepository } from './repository.js';
 import {
@@ -30,6 +35,7 @@ export interface ClassSpiritRouteDeps {
   classes: Pick<ClassRepository, 'scope'>;
   progress: ClassProgressRepository;
   spirit: ClassSpiritRepository;
+  league: ClassLeagueRepository;
   auth: AuthResolver;
   log: AuthorizeLog;
 }
@@ -55,6 +61,11 @@ const ShoutoutBody = z
     message: z.string().trim().min(1).max(280),
     userId: z.string().uuid().nullish(),
   })
+  .strict();
+
+const OptInBody = z.object({ optIn: z.boolean() }).strict();
+const LeagueSettingsBody = z
+  .object({ enabled: z.boolean(), minors: z.boolean() })
   .strict();
 
 const clientIp = (c: Context) => c.req.header('x-real-ip') ?? null;
@@ -135,6 +146,34 @@ export function createClassSpiritRoutes(deps: ClassSpiritRouteDeps): Hono<ActorE
       shoutoutId.data
     );
     return done ? c.body(null, 204) : c.json({ error: 'not_found' }, 404);
+  });
+
+  app.get('/classes/:id/league', read, async (c) => {
+    c.header('Cache-Control', 'no-store');
+    return c.json(await deps.league.view(c.req.param('id'), c.get('actor').id));
+  });
+
+  app.put('/classes/:id/league/opt-in', read, async (c) => {
+    const parsed = OptInBody.safeParse(await readJson(c));
+    if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+    const done = await deps.league.setOptIn(
+      c.req.param('id'),
+      c.get('actor').id,
+      parsed.data.optIn
+    );
+    return done ? c.body(null, 204) : c.json({ error: 'not_a_learner' }, 409);
+  });
+
+  app.get('/classes/:id/league/settings', manage, async (c) => {
+    c.header('Cache-Control', 'no-store');
+    return c.json(await deps.league.settings(c.req.param('id')));
+  });
+
+  app.put('/classes/:id/league/settings', manage, async (c) => {
+    const parsed = LeagueSettingsBody.safeParse(await readJson(c));
+    if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+    await deps.league.updateSettings(actorOf(c), c.req.param('id'), parsed.data);
+    return c.body(null, 204);
   });
 
   return app;

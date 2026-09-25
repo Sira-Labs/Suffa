@@ -12,6 +12,7 @@ import type { AuthResolver } from '../src/auth/resolver.js';
 import type { Role } from '../src/authz/policies.js';
 import { PgClassProgressRepository } from '../src/classes/progress.js';
 import { PgClassRepository } from '../src/classes/repository.js';
+import { PgClassLeagueRepository } from '../src/classes/league.js';
 import { PgClassSpiritRepository } from '../src/classes/spirit.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
 import { PgSyncRepository } from '../src/sync/repository.js';
@@ -82,6 +83,7 @@ describe.skipIf(!url)('Class dashboard and spirit (Postgres)', () => {
         classes,
         progress: new PgClassProgressRepository(pool, () => NOW),
         spirit: new PgClassSpiritRepository(pool, () => NOW),
+        league: new PgClassLeagueRepository(pool, () => NOW),
         auth,
         log: quiet,
       },
@@ -299,5 +301,88 @@ describe.skipIf(!url)('Class dashboard and spirit (Postgres)', () => {
         })
       ).status
     ).toBe(400);
+  });
+
+  it('ranks only learners who opted in, by share of their own weekly goal', async () => {
+    const quests = (user: string, days: string[]) =>
+      Promise.all(
+        days.map((day) =>
+          pool.query(
+            `insert into quest_progress (user_id, day, quest_id, progress, target, completed_at)
+             values ($1, $2, 'review', 1, 1, $3)`,
+            [users[user]!.id, day, `${day}T10:00:00Z`]
+          )
+        )
+      );
+    // Amina: 2 of 3 days this week (goal 3); Bilal: 3 of 5 (default goal) plus last week.
+    await pool.query(
+      `insert into settings (user_id, id, key, "weeklyGoal", updated_at)
+       values ($1, 'user-settings', 'user-settings', 3, now())`,
+      [users.amina!.id]
+    );
+    await quests('amina', ['2026-09-21', '2026-09-22']);
+    await quests('bilal', ['2026-09-18', '2026-09-21', '2026-09-22', '2026-09-23']);
+
+    // Off by default: nobody is ranked, learners see their own switch only.
+    expect(await (await call('amina', 'GET', '/league')).json()).toMatchObject({
+      enabled: false,
+      optedIn: false,
+      podium: [],
+    });
+    expect(
+      (await call('amina', 'PUT', '/league/settings', { enabled: true, minors: false }))
+        .status
+    ).toBe(403);
+    expect(
+      (await call('teacher', 'PUT', '/league/settings', { enabled: true, minors: false }))
+        .status
+    ).toBe(204);
+
+    // Enabled, but only who opted in takes part.
+    expect((await call('amina', 'PUT', '/league/opt-in', { optIn: true })).status).toBe(
+      204
+    );
+    type View = {
+      participants: number;
+      podium: { place: number; name: string; percent: number; you: boolean }[];
+      you: { percent: number; onPodium: boolean } | null;
+    };
+    const league = async (who: string) =>
+      (await (await call(who, 'GET', '/league')).json()) as View;
+    let view = await league('amina');
+    expect(view.participants).toBe(1);
+    expect(view.podium).toEqual([
+      { place: 1, title: 'Wochen-Stern', name: 'Amina', percent: 66, you: true },
+    ]);
+
+    await call('bilal', 'PUT', '/league/opt-in', { optIn: true });
+    view = await league('bilal');
+    expect(view.podium.map((p) => [p.place, p.percent, p.you])).toEqual([
+      [1, 66, false],
+      [2, 60, true],
+    ]);
+    expect(view.you).toMatchObject({ percent: 60, onPodium: true });
+
+    // Teachers are not ranked and cannot opt in.
+    expect((await call('teacher', 'PUT', '/league/opt-in', { optIn: true })).status).toBe(
+      409
+    );
+    expect(await (await call('teacher', 'GET', '/league')).json()).toMatchObject({
+      optedIn: null,
+      you: null,
+    });
+    expect((await call('other', 'GET', '/league')).status).toBe(403);
+
+    // A class of minors shows first names only; the change is audit-logged.
+    await pool.query("update users set name = 'Bilal Yilmaz' where id = $1", [
+      users.bilal!.id,
+    ]);
+    await call('teacher', 'PUT', '/league/settings', { enabled: true, minors: true });
+    view = await league('bilal');
+    expect(view.podium.map((p) => p.name)).toContain('Bilal');
+    const audit = await pool.query(
+      "select count(*)::int as n from audit_log where action = 'class.league.settings'"
+    );
+    expect(audit.rows[0].n).toBe(2);
   });
 });

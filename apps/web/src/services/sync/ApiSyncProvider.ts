@@ -192,6 +192,56 @@ export class ApiSyncProvider implements SyncProvider {
     return fail('auth-failed', 'Der Anmeldelink konnte nicht gesendet werden.');
   }
 
+  /**
+   * Signs in with the six-digit code from the sign-in mail, in this browser: for mail apps
+   * that open the link in their own built-in browser (the session would stay there).
+   */
+  async signInWithCode(email: string, code: string): Promise<Result<void>> {
+    const otp = code.replace(/\s/g, '');
+    if (!/^\d{6}$/.test(otp)) {
+      return fail('invalid-code', 'Der Code hat 6 Ziffern.');
+    }
+    let response: Response;
+    try {
+      response = await this.request('/api/v1/auth/sign-in/email-otp', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), otp }),
+      });
+    } catch {
+      return fail('offline', 'Keine Verbindung – versuch es gleich noch einmal.');
+    }
+    if (response.ok) {
+      await this.refresh();
+      return { ok: true, value: undefined };
+    }
+    if (response.status === 403) {
+      return fail(
+        'too-many-attempts',
+        'Zu viele falsche Versuche. Fordere einen neuen Link an – er bringt einen neuen Code mit.'
+      );
+    }
+    if (response.status === 429) {
+      return fail(
+        'rate-limited',
+        'Zu viele Anfragen – bitte in ein paar Minuten noch einmal.'
+      );
+    }
+    const { code: reason } = ((await response.json().catch(() => ({}))) ?? {}) as {
+      code?: string;
+    };
+    if (reason === 'OTP_EXPIRED') {
+      return fail(
+        'code-expired',
+        'Der Code ist abgelaufen. Fordere einen neuen Link an.'
+      );
+    }
+    return fail(
+      'invalid-code',
+      'Der Code stimmt nicht. Prüfe die Ziffern in der neuesten Mail.'
+    );
+  }
+
   async signOut(): Promise<Result<void>> {
     try {
       const response = await this.request('/api/v1/auth/sign-out', {

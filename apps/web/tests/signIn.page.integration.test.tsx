@@ -44,6 +44,32 @@ describe('Sign-in page (integration)', () => {
     expect(screen.getByLabelText('E-Mail-Adresse')).toBeVisible();
   });
 
+  it('signs in with the code from the mail and goes on to the wanted page', async () => {
+    const signInWithCode = vi.fn(async () => ({ ok: true }));
+    useSyncStore.setState({ signIn: async () => ({ ok: true }), signInWithCode });
+    const router = renderAt('/login?next=%2Fvocab');
+    await userEvent.type(screen.getByLabelText('E-Mail-Adresse'), 'amina@example.org');
+    await userEvent.click(screen.getByRole('button', { name: 'Link senden' }));
+    await userEvent.type(await screen.findByLabelText('Anmeldecode'), '042917');
+    await userEvent.click(screen.getByRole('button', { name: 'Anmelden' }));
+    expect(signInWithCode).toHaveBeenCalledWith('amina@example.org', '042917');
+    expect(await screen.findByText('App-Seite')).toBeVisible();
+    expect(router.state.location.pathname).toBe('/vocab');
+  });
+
+  it('says why a code was refused', async () => {
+    useSyncStore.setState({
+      signIn: async () => ({ ok: true }),
+      signInWithCode: async () => ({ ok: false, message: 'Der Code stimmt nicht.' }),
+    });
+    renderAt('/login');
+    await userEvent.type(screen.getByLabelText('E-Mail-Adresse'), 'a@example.org');
+    await userEvent.click(screen.getByRole('button', { name: 'Link senden' }));
+    await userEvent.type(await screen.findByLabelText('Anmeldecode'), '111111');
+    await userEvent.click(screen.getByRole('button', { name: 'Anmelden' }));
+    expect(await screen.findByText('Der Code stimmt nicht.')).toBeVisible();
+  });
+
   it('shows why sending failed', async () => {
     useSyncStore.setState({
       signIn: async () => ({ ok: false, message: 'Zu viele Anfragen' }),

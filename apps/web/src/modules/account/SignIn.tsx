@@ -48,7 +48,10 @@ export function SignIn() {
               und deine Klasse sieht deinen Fortschritt.
             </p>
             {linkError && <span className="feedback-bad">{linkError}</span>}
-            <SignInForm returnTo={signInReturnPath(next)} />
+            <SignInForm
+              returnTo={signInReturnPath(next)}
+              onSignedIn={() => navigate(next, { replace: true })}
+            />
             <button className="btn sign-in-skip" type="button" onClick={continueLocally}>
               Ohne Konto weiter – dein Lernstand bleibt nur auf diesem Gerät
             </button>

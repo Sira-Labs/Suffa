@@ -2378,3 +2378,11 @@ button.quiz-option:disabled {
   color: var(--text);
   text-decoration: underline;
 }
+.sign-in-code-input {
+  flex: 1;
+  min-width: 0;
+  max-width: 11rem;
+  font-size: 1.3rem;
+  letter-spacing: 0.3em;
+  font-variant-numeric: tabular-nums;
+}

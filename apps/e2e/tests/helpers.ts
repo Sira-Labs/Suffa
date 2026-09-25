@@ -11,13 +11,13 @@ export function newEmail(name: string): string {
   return `${name}-${Date.now().toString(36)}-${unique++}@example.org`;
 }
 
-/** Waits for the sign-in link the API writes for this address. */
-async function magicLink(email: string): Promise<string> {
+/** Waits for the sign-in mail the API writes for this address: the link and the code. */
+export async function signInMail(email: string): Promise<{ url: string; code: string }> {
   const file = join(MAIL_DIR, `${email.toLowerCase()}.txt`);
   for (let i = 0; i < 50; i++) {
     try {
-      const url = (await readFile(file, 'utf8')).trim();
-      if (url.startsWith('http')) return url;
+      const [url = '', code = ''] = (await readFile(file, 'utf8')).trim().split('\n');
+      if (url.startsWith('http') && /^\d{6}$/.test(code)) return { url, code };
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     }
@@ -26,16 +26,21 @@ async function magicLink(email: string): Promise<string> {
   throw new Error(`no sign-in link for ${email}`);
 }
 
+/** Asks for a sign-in mail on the current page's form. */
+export async function requestSignIn(page: Page, email: string) {
+  await rm(join(MAIL_DIR, `${email.toLowerCase()}.txt`), { force: true });
+  await page.getByLabel('E-Mail-Adresse').fill(email);
+  await page.getByRole('button', { name: 'Link senden' }).click();
+}
+
 /**
  * Asks for a sign-in link on the current page's form (settings or an invitation) and opens
  * it, as a learner would from the mail.
  */
 export async function signIn(page: Page, email: string, from?: string) {
   if (from) await page.goto(from);
-  await rm(join(MAIL_DIR, `${email.toLowerCase()}.txt`), { force: true });
-  await page.getByLabel('E-Mail-Adresse').fill(email);
-  await page.getByRole('button', { name: 'Link senden' }).click();
-  await page.goto(await magicLink(email));
+  await requestSignIn(page, email);
+  await page.goto((await signInMail(email)).url);
 }
 
 export async function signedInOnSettings(page: Page, email: string) {

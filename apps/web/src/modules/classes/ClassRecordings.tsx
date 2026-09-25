@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { MediaApi, type MediaItem } from '@/services/media/mediaApi';
 import { putPart, uploadRecording } from '@/services/media/uploader';
 import { useListenStore } from '@/state';
+import { DriveImport } from './DriveImport';
 
 const STATUS: Record<MediaItem['status'], string> = {
   uploading: 'Upload läuft',
@@ -66,6 +67,7 @@ export function ClassRecordings({
   return (
     <div className="stack" style={{ gap: '1rem' }}>
       {teacher && <UploadForm api={api} classId={classId} onDone={load} />}
+      {teacher && <DriveImport classId={classId} onImported={() => void load()} />}
       {message && <p className="feedback-bad">{message}</p>}
       {items.length === 0 ? (
         <p className="muted">

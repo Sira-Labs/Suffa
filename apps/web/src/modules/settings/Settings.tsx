@@ -1,8 +1,8 @@
 import { WEEKLY_GOALS } from '@suffa/engagement';
 import { useSearchParams } from 'react-router-dom';
-import { useState } from 'react';
 import { TashkilToggle } from '@/components';
-import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
+import { ApiSyncProvider, SIGN_IN_RETURN_PATH } from '@/services/sync/ApiSyncProvider';
+import { SignInForm } from '@/modules/account/SignInForm';
 import { useSettingsStore, useSyncStore } from '@/state';
 import { AccountDevices } from './AccountDevices';
 import { RemindersCard } from './RemindersCard';
@@ -106,12 +106,9 @@ export function Settings() {
 function AccountPanel() {
   const provider = useSyncStore((s) => s.provider);
   const auth = useSyncStore((s) => s.auth);
-  const signIn = useSyncStore((s) => s.signIn);
   const signOut = useSyncStore((s) => s.signOut);
   const syncNow = useSyncStore((s) => s.syncNow);
   const lastSyncAt = useSyncStore((s) => s.lastSyncAt);
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState<string | null>(null);
   // Back from the magic link (/settings?angemeldet=1): confirm once.
   const [params] = useSearchParams();
   const justSignedIn = params.get('angemeldet') === '1';
@@ -174,44 +171,15 @@ function AccountPanel() {
     );
   }
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage(null);
-    const result = await signIn(email);
-    setMessage(
-      result.ok
-        ? '✓ Link gesendet. Öffne die E-Mail auf diesem Gerät und tippe auf „Bei Suffa anmelden“ – der Link gilt 15 Minuten.'
-        : `Fehler: ${result.message}`
-    );
-  };
-
   return (
-    <form className="stack" onSubmit={submit}>
-      {linkError && !message && <span className="feedback-bad">{linkError}</span>}
-      <p className="muted">
+    <div className="stack">
+      {linkError && <span className="feedback-bad">{linkError}</span>}
+      <p className="muted" style={{ margin: 0 }}>
         Anmelden ohne Passwort: Du bekommst einen Link per E-Mail. Mit demselben Konto auf
         Handy und Computer wird dein Lernstand automatisch abgeglichen.
       </p>
-      <div className="row">
-        <input
-          className="input"
-          type="email"
-          placeholder="du@example.com"
-          aria-label="E-Mail-Adresse"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <button className="btn btn-primary" type="submit">
-          Link senden
-        </button>
-      </div>
-      {message && (
-        <span className={message.startsWith('✓') ? 'feedback-good' : 'feedback-bad'}>
-          {message}
-        </span>
-      )}
-    </form>
+      <SignInForm returnTo={SIGN_IN_RETURN_PATH} />
+    </div>
   );
 }
 
@@ -261,7 +229,7 @@ function SourcesCard() {
 export function signInLinkError(code: string | null): string | null {
   if (!code) return null;
   if (code === 'INVALID_TOKEN' || code === 'EXPIRED_TOKEN') {
-    return 'Dieser Anmeldelink ist abgelaufen oder wurde schon benutzt. Fordere unten einen neuen an.';
+    return 'Dieser Anmeldelink ist abgelaufen oder wurde schon benutzt. Fordere einen neuen an.';
   }
-  return 'Die Anmeldung hat nicht geklappt. Fordere unten einen neuen Link an.';
+  return 'Die Anmeldung hat nicht geklappt. Fordere einen neuen Link an.';
 }

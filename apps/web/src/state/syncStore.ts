@@ -21,6 +21,7 @@ import { useSettingsStore } from './settingsStore';
 import { useSrsStore } from './srsStore';
 import { useEngagementStore } from './engagementStore';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
+import { setSignInSkipped } from '@/services/signInGate';
 
 /** Everything a sync can change underneath the screen. */
 async function reloadSyncedStores(): Promise<void> {
@@ -51,12 +52,14 @@ interface SyncState {
   provider: SyncProvider;
   engine: SyncEngine;
   auth: AuthState;
+  /** The server has answered who is signed in (false until then, and while offline). */
+  authChecked: boolean;
   status: UiSyncStatus;
   pending: number;
   lastSyncAt: string | null;
   errorMessage: string | null;
   init(): void;
-  signIn(email: string): Promise<{ ok: boolean; message?: string }>;
+  signIn(email: string, returnTo?: string): Promise<{ ok: boolean; message?: string }>;
   signOut(): Promise<void>;
   syncNow(): Promise<void>;
   refreshPending(): Promise<void>;
@@ -69,6 +72,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   provider,
   engine,
   auth: provider.getAuthState(),
+  authChecked: false,
   status: provider.isConfigured() ? 'idle' : 'disabled',
   pending: 0,
   lastSyncAt: null,
@@ -77,7 +81,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   init() {
     const p = get().provider;
     p.onAuthChange((auth) => {
-      set({ auth });
+      set({ auth, authChecked: true });
       if (auth.status === 'signed-in') {
         void get().syncNow();
       }
@@ -100,8 +104,8 @@ export const useSyncStore = create<SyncState>((set, get) => ({
       .then((lastSyncAt) => set({ lastSyncAt }));
   },
 
-  async signIn(email) {
-    const result = await get().provider.signInWithEmail(email);
+  async signIn(email, returnTo) {
+    const result = await get().provider.signInWithEmail(email, returnTo);
     if (!result.ok) {
       set({ errorMessage: result.error.message });
       return { ok: false, message: result.error.message };
@@ -111,6 +115,8 @@ export const useSyncStore = create<SyncState>((set, get) => ({
 
   async signOut() {
     await get().provider.signOut();
+    // Signed out on purpose: the sign-in page comes first again.
+    setSignInSkipped(false);
     set({ auth: { status: 'signed-out' } });
   },
 

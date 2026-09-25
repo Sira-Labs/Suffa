@@ -2345,3 +2345,36 @@ button.quiz-option:disabled {
   font-weight: 500;
   opacity: 0.8;
 }
+
+/* ---------- Sign-in page (/login) ---------- */
+
+.sign-in {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+.sign-in-card {
+  width: 100%;
+  max-width: 440px;
+  gap: 1rem;
+}
+.sign-in-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.8rem;
+}
+.sign-in-skip {
+  background: none;
+  border-color: transparent;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: normal;
+  text-align: center;
+  padding: 0.25rem 0.5rem;
+}
+.sign-in-skip:hover {
+  color: var(--text);
+  text-decoration: underline;
+}

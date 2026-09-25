@@ -61,7 +61,7 @@ export interface AiRepository extends RouteSource {
   /** Spend of the calendar month (UTC) that contains `now`. */
   monthSpend(now: Date): Promise<number>;
   /** Turns the user took today, in their own time zone. */
-  turnsToday(userId: string): Promise<number>;
+  turnsToday(userId: string, now: Date): Promise<number>;
   record(call: CallRecord, now: Date): Promise<void>;
   usageByTask(since: Date): Promise<TaskUsage[]>;
 }
@@ -216,13 +216,14 @@ export class PgAiRepository implements AiRepository {
     return rows[0] ? Number(rows[0].cost_micro) : 0;
   }
 
-  async turnsToday(userId: string): Promise<number> {
+  async turnsToday(userId: string, now: Date): Promise<number> {
+    // The same clock as record(): "today" in the learner's time zone.
     const { rows } = await this.pool.query(
       `select d.turns from users u
          join ai_usage_daily d on d.user_id = u.id
-          and d.day = (now() at time zone coalesce(u.time_zone, 'UTC'))::date
+          and d.day = ($2::timestamptz at time zone coalesce(u.time_zone, 'UTC'))::date
         where u.id = $1`,
-      [userId]
+      [userId, now]
     );
     return rows[0]?.turns ?? 0;
   }

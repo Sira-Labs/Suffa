@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router-dom';
+import {
+  Link,
+  Navigate,
+  NavLink,
+  Outlet,
+  ScrollRestoration,
+  useLocation,
+} from 'react-router-dom';
 import { CelebrationToast, SyncBadge } from './components';
 import { Icon } from './components/Icon';
 import {
@@ -13,6 +20,7 @@ import {
 import { logger } from './services/logger';
 import { useTrainingScope } from './modules/units/useReachedUnits';
 import { EngagementWatcher } from './modules/engagement/EngagementWatcher';
+import { useSignInGate } from './modules/account';
 import {
   useCheckInStore,
   useContentStore,
@@ -122,6 +130,9 @@ function Brand() {
 function Shell() {
   const { pathname } = useLocation();
   const moreActive = isUnderMore(pathname);
+  // Not signed in: the sign-in page comes first (it also offers "ohne Konto weiter").
+  const signInFirst = useSignInGate();
+  if (signInFirst) return <Navigate to={signInFirst} replace />;
   if (isFocusPath(pathname)) {
     return (
       <main className="focus-main">

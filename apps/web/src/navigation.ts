@@ -161,7 +161,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
 export const MORE_PATH = '/more';
 
 /** Full-screen routes without navigation (one task at a time). */
-export const FOCUS_PATHS: readonly string[] = ['/review', '/milestone'];
+export const FOCUS_PATHS: readonly string[] = ['/review', '/milestone', '/login'];
 
 /** True for a focus route or anything below it (e.g. /milestone/1). */
 export function isFocusPath(pathname: string): boolean {

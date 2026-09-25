@@ -22,6 +22,7 @@ import { Discover } from './modules/discover';
 import { FocusReview } from './modules/review';
 import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
 import { Admin } from './modules/admin';
+import { SignIn } from './modules/account';
 import { Classes, Join } from './modules/classes';
 import { Tutor } from './modules/tutor';
 import { VideoLesson, VideoLessons } from './modules/videos';
@@ -50,6 +51,7 @@ export const router = createBrowserRouter([
       { path: 'conjugation', element: <Conjugation /> },
       { path: 'exam', element: <Exam /> },
       { path: 'library', element: <Library /> },
+      { path: 'login', element: <SignIn /> },
       { path: 'settings', element: <Settings /> },
       { path: 'admin', element: <Admin /> },
       { path: 'classes', element: <Classes /> },

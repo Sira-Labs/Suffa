@@ -14,7 +14,15 @@ import {
 } from './auth/betterAuth.js';
 import { createAccountRoutes, type AccountRouteDeps } from './account/routes.js';
 import { createClassRoutes, type ClassRouteDeps } from './classes/routes.js';
+import {
+  createAssignmentRoutes,
+  type AssignmentRouteDeps,
+} from './classes/assignments.js';
 import { createMediaRoutes, type MediaRouteDeps } from './media/routes.js';
+import {
+  createInteractiveRoutes,
+  type InteractiveRouteDeps,
+} from './media/interactiveRoutes.js';
 import { createDriveRoutes, type DriveRouteDeps } from './drive/routes.js';
 import {
   createNotificationRoutes,
@@ -49,6 +57,10 @@ export interface AppDeps {
   onProbeError?: (error: unknown) => void;
   /** Sync endpoints; omitted in tests that only exercise health/version. */
   sync?: SyncRouteDeps;
+  /** Class assignments with due dates (story 8.5). */
+  assignments?: AssignmentRouteDeps;
+  /** Transcripts, checkpoints and the class AI switch (Sprint 8). */
+  interactive?: InteractiveRouteDeps;
   /** Google Drive import of recordings (story 7.2). */
   drive?: DriveRouteDeps;
   /** Class recordings: upload, transcode status, playback (Sprint 7). */
@@ -150,6 +162,8 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.classSpirit) app.route('/api/v1', createClassSpiritRoutes(deps.classSpirit));
   if (deps.media) app.route('/api/v1', createMediaRoutes(deps.media));
   if (deps.drive) app.route('/api/v1', createDriveRoutes(deps.drive));
+  if (deps.interactive) app.route('/api/v1', createInteractiveRoutes(deps.interactive));
+  if (deps.assignments) app.route('/api/v1', createAssignmentRoutes(deps.assignments));
   if (deps.notifications) {
     app.route('/api/v1', createNotificationRoutes(deps.notifications));
   }

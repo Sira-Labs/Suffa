@@ -107,6 +107,18 @@ const RawEnvSchema = z.object({
    * <public URL>/api/v1/drive/callback), a browser API key for the Picker and the project
    * number as Picker app id. Drive import stays off until all four are set.
    */
+  /**
+   * Transcription (story 8.1): an OpenAI-compatible /audio/transcriptions endpoint (OpenAI,
+   * Groq, or a self-hosted faster-whisper server such as speaches). Off without a URL.
+   */
+  SUFFA_TRANSCRIBE_URL: z
+    .string()
+    .trim()
+    .transform((value) => value || undefined)
+    .pipe(z.string().url('SUFFA_TRANSCRIBE_URL must be a URL').optional())
+    .optional(),
+  SUFFA_TRANSCRIBE_TOKEN: z.string().trim().optional(),
+  SUFFA_TRANSCRIBE_MODEL: z.string().trim().default('whisper-1'),
   SUFFA_GOOGLE_CLIENT_ID: z.string().trim().optional(),
   SUFFA_GOOGLE_CLIENT_SECRET: z.string().trim().optional(),
   SUFFA_GOOGLE_API_KEY: z.string().trim().optional(),
@@ -170,6 +182,8 @@ export interface Config {
   webErrorDsn: string | undefined;
   /** Object storage; undefined turns recordings and uploads off. */
   storage: S3Settings | undefined;
+  /** Transcription service; undefined turns automatic transcripts off. */
+  transcribe: { url: string; token: string | null; model: string } | undefined;
   /** Google Drive import; undefined turns it off. */
   google:
     | { clientId: string; clientSecret: string; apiKey: string; appId: string }
@@ -330,6 +344,13 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
             uploads: raw.SUFFA_S3_BUCKET_UPLOADS,
             content: raw.SUFFA_S3_BUCKET_CONTENT,
           },
+        }
+      : undefined,
+    transcribe: raw.SUFFA_TRANSCRIBE_URL
+      ? {
+          url: raw.SUFFA_TRANSCRIBE_URL,
+          token: raw.SUFFA_TRANSCRIBE_TOKEN || null,
+          model: raw.SUFFA_TRANSCRIBE_MODEL,
         }
       : undefined,
     google: googleComplete

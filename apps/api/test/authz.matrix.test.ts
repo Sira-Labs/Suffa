@@ -163,6 +163,37 @@ function buildApp() {
       auth: resolver,
       log: quiet,
     },
+    assignments: {
+      classes: classRepo,
+      repo: { list: async () => [], create: async () => null, remove: async () => false },
+      auth: resolver,
+      log: quiet,
+    },
+    interactive: {
+      classes: classRepo,
+      media: {
+        create: async () => ({}) as never,
+        get: async () => null,
+        byId: async () => null,
+        creator: async () => null,
+        list: async () => [],
+        classBytes: async () => 0,
+        update: async () => {},
+        publish: async () => {},
+        remove: async () => {},
+      },
+      interactive: {
+        transcript: async () => null,
+        saveTranscript: async () => {},
+        checkpoints: async () => [],
+        addCheckpoint: async () => ({}) as never,
+        removeCheckpoint: async () => false,
+        aiEnabled: async () => true,
+        setAiEnabled: async () => {},
+      },
+      auth: resolver,
+      log: quiet,
+    },
     notifications: {
       repo: {
         subscribe: async () => {},

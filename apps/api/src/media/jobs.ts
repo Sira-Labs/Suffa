@@ -19,9 +19,13 @@ export const TRANSCODE_EXPIRE_SECONDS = 4 * 60 * 60;
 export const MediaJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('transcode'), mediaId: z.string().uuid() }),
   z.object({ task: z.literal('import'), mediaId: z.string().uuid() }),
+  z.object({ task: z.literal('transcribe'), mediaId: z.string().uuid() }),
 ]);
 
-function enqueue(boss: Pick<PgBoss, 'send'>, task: 'transcode' | 'import') {
+function enqueue(
+  boss: Pick<PgBoss, 'send'>,
+  task: 'transcode' | 'import' | 'transcribe'
+) {
   return async (mediaId: string) => {
     await boss.send(
       MEDIA_QUEUE,
@@ -35,6 +39,9 @@ export const enqueueTranscode = (boss: Pick<PgBoss, 'send'>) =>
   enqueue(boss, 'transcode');
 /** Drive import: copy from Drive, then transcode, in one job (story 7.2). */
 export const enqueueImport = (boss: Pick<PgBoss, 'send'>) => enqueue(boss, 'import');
+/** Transcription of a ready recording (story 8.1). */
+export const enqueueTranscribe = (boss: Pick<PgBoss, 'send'>) =>
+  enqueue(boss, 'transcribe');
 
 export interface MediaJobDeps {
   repo: MediaRepository;
@@ -43,22 +50,34 @@ export interface MediaJobDeps {
   log: Pick<Logger, 'info' | 'warn'>;
   /** Runs a Drive import; absent when Drive is not configured. */
   importFromDrive?: (mediaId: string) => Promise<void>;
+  /** Transcribes a recording; absent when no transcription service is configured. */
+  transcribe?: (mediaId: string) => Promise<void>;
+  /** Called when a recording became ready (queues its transcription). */
+  onReady?: (mediaId: string) => Promise<void>;
 }
 
 export async function runMediaJob(deps: MediaJobDeps, raw: unknown): Promise<void> {
   const task = MediaJob.parse(raw);
+  if (task.task === 'transcribe') {
+    if (!deps.transcribe) throw new Error('no transcription service is configured');
+    await deps.transcribe(task.mediaId);
+    return;
+  }
   if (task.task === 'import') {
     if (!deps.importFromDrive) throw new Error('Google Drive is not configured');
     await deps.importFromDrive(task.mediaId);
-    return;
+  } else {
+    await processRecording(
+      deps.repo,
+      deps.storage,
+      deps.transcoder,
+      task.mediaId,
+      deps.log
+    );
   }
-  await processRecording(
-    deps.repo,
-    deps.storage,
-    deps.transcoder,
-    task.mediaId,
-    deps.log
-  );
+  if ((await deps.repo.byId(task.mediaId))?.status === 'ready') {
+    await deps.onReady?.(task.mediaId);
+  }
 }
 
 export async function registerMedia(

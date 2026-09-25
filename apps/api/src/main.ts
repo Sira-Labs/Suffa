@@ -3,7 +3,15 @@
  * Exit codes: 1 = invalid configuration / fatal error, 3 = schema revision mismatch
  * (worker started before the api migrated; CapRover restarts it).
  */
-import { enqueueImport, enqueueTranscode, registerMedia } from './media/jobs.js';
+import { PgAssignmentRepository } from './classes/assignments.js';
+import {
+  enqueueImport,
+  enqueueTranscode,
+  enqueueTranscribe,
+  registerMedia,
+} from './media/jobs.js';
+import { PgInteractiveRepository, transcribeRecording } from './media/interactive.js';
+import { OpenAiCompatibleTranscriber } from './media/transcribe.js';
 import { HttpGoogleClient } from './drive/google.js';
 import { DriveService, importFromDrive, PgDriveConnections } from './drive/service.js';
 import { PgMediaRepository } from './media/repository.js';
@@ -146,6 +154,34 @@ async function main(): Promise<void> {
                         mediaId
                       )
                   : undefined,
+                transcribe: config.transcribe
+                  ? (mediaId) =>
+                      transcribeRecording(
+                        {
+                          media: repo,
+                          interactive: new PgInteractiveRepository(pool),
+                          storage,
+                          transcriber: new OpenAiCompatibleTranscriber(
+                            config.transcribe!
+                          ),
+                          log,
+                        },
+                        mediaId
+                      )
+                  : undefined,
+                onReady: config.transcribe
+                  ? async (mediaId) => {
+                      const item = await repo.byId(mediaId);
+                      const interactive = new PgInteractiveRepository(pool);
+                      if (item && (await interactive.aiEnabled(item.classId))) {
+                        await interactive.saveTranscript(mediaId, {
+                          status: 'queued',
+                          source: 'whisper',
+                        });
+                        await enqueueTranscribe(boss)(mediaId);
+                      }
+                    }
+                  : undefined,
               },
               errors
             );
@@ -283,6 +319,22 @@ async function main(): Promise<void> {
             enqueueTranscode(boss)
           ),
           audit: pool,
+          auth,
+          log,
+        }
+      : undefined,
+    assignments: {
+      classes: new PgClassRepository(pool),
+      repo: new PgAssignmentRepository(pool),
+      auth,
+      log,
+    },
+    interactive: config.storage
+      ? {
+          classes: new PgClassRepository(pool),
+          media: new PgMediaRepository(pool),
+          interactive: new PgInteractiveRepository(pool),
+          transcribe: config.transcribe ? enqueueTranscribe(boss) : undefined,
           auth,
           log,
         }

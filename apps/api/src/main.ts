@@ -30,6 +30,7 @@ import { PgRecapRepository } from './notifications/recap.js';
 import { PgNotificationRepository } from './notifications/repository.js';
 import { PgClassProgressRepository } from './classes/progress.js';
 import { PgCertificateRepository } from './classes/certificates.js';
+import { PgLiveQuizRepository } from './classes/quizRepository.js';
 import { PgClassLeagueRepository } from './classes/league.js';
 import { PgClassSpiritRepository } from './classes/spirit.js';
 import { registerEngagement, requestRecompute } from './engagement/jobs.js';
@@ -456,7 +457,7 @@ async function main(): Promise<void> {
       auth,
       log,
     },
-    certificates: await certificateDeps(pool, auth, log),
+    ...(await classContentDeps(pool, auth, log)),
     classSpirit: {
       classes: new PgClassRepository(pool),
       progress: new PgClassProgressRepository(pool),
@@ -610,8 +611,10 @@ function aiParts(
   };
 }
 
-/** Certificates need the course's words per unit; without the content they stay off. */
-async function certificateDeps(
+/**
+ * Certificates and the live quiz need the course words; without the content both stay off.
+ */
+async function classContentDeps(
   pool: pg.Pool,
   auth: AuthResolver,
   log: Pick<Logger, 'info' | 'warn'>
@@ -620,18 +623,25 @@ async function certificateDeps(
   try {
     catalog = await ContentCatalog.load(CONTENT_DIR);
   } catch (error) {
-    log.warn({ err: error, dir: CONTENT_DIR }, 'certificates.content_missing');
-    return undefined;
+    log.warn({ err: error, dir: CONTENT_DIR }, 'class_content.missing');
+    return {};
   }
+  const classes = new PgClassRepository(pool);
   const units = catalog.units.map((u) => ({
     unit: u.einheit,
     title: u.titel,
     wordIds: u.vokabeln.map((w) => w.id),
   }));
+  const words = catalog.units.flatMap((u) =>
+    u.vokabeln.map((w) => ({ id: w.id, ar: w.ar, de: w.de, unit: u.einheit }))
+  );
   return {
-    classes: new PgClassRepository(pool),
-    certificates: new PgCertificateRepository(pool, units),
-    auth,
-    log,
+    certificates: {
+      classes,
+      certificates: new PgCertificateRepository(pool, units),
+      auth,
+      log,
+    },
+    quiz: { classes, quiz: new PgLiveQuizRepository(pool, words), auth, log },
   };
 }

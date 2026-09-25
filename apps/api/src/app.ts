@@ -40,6 +40,7 @@ import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
 import { createTutorRoutes, type TutorRouteDeps } from './tutor/routes.js';
 import { createReviewRoutes, type ReviewRouteDeps } from './tutor/reviewRoutes.js';
 import { createVideoRoutes, type VideoRouteDeps } from './videos/routes.js';
+import { createQuizRoutes, type QuizRouteDeps } from './classes/quizRoutes.js';
 import {
   createCertificateRoutes,
   type CertificateRouteDeps,
@@ -84,6 +85,7 @@ export interface AppDeps {
   /** Class dashboard, challenge, teacher badges and shout-outs (Sprint 6). */
   classSpirit?: ClassSpiritRouteDeps;
   certificates?: CertificateRouteDeps;
+  quiz?: QuizRouteDeps;
   /** The server's copy of XP, streak and badges (story 5.4). */
   engagement?: EngagementRouteDeps;
   /** Browser error reporting: /api/client-config and the /api/errors tunnel. */
@@ -198,6 +200,7 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.certificates) {
     app.route('/api/v1', createCertificateRoutes(deps.certificates));
   }
+  if (deps.quiz) app.route('/api/v1', createQuizRoutes(deps.quiz));
   if (deps.media) app.route('/api/v1', createMediaRoutes(deps.media));
   if (deps.drive) app.route('/api/v1', createDriveRoutes(deps.drive));
   if (deps.interactive) app.route('/api/v1', createInteractiveRoutes(deps.interactive));

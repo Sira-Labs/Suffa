@@ -45,9 +45,9 @@ const MESSAGES: Record<string, string> = {
 };
 
 /** Splits an SSE byte stream into the JSON payloads of its `data:` lines. */
-export async function* readEvents(
+export async function* readEvents<T = TutorEvent>(
   body: ReadableStream<Uint8Array>
-): AsyncIterable<TutorEvent> {
+): AsyncIterable<T> {
   const reader = body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
@@ -63,7 +63,7 @@ export async function* readEvents(
         .filter((l) => l.startsWith('data:'))
         .map((l) => l.slice(5).trimStart())
         .join('\n');
-      if (data) yield JSON.parse(data) as TutorEvent;
+      if (data) yield JSON.parse(data) as T;
     }
     if (done) return;
   }

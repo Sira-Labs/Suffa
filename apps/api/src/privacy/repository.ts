@@ -39,6 +39,8 @@ export interface AccountExport {
     /** Unit certificates (story 14.3) and the weekly league choice per class (14.2). */
     certificates: Record<string, unknown>[];
     leagues: Record<string, unknown>[];
+    /** Live quiz answers (kept 30 days after the quiz, story 14.4). */
+    quizzes: Record<string, unknown>[];
   };
   /** al-Muʿallim: conversations (kept 90 days) and AI usage per day. */
   tutor: {
@@ -168,6 +170,13 @@ export class PgPrivacyRepository implements PrivacyRepository {
           `select c.name as class, cm.league_opt_in as opted_in
              from class_members cm join classes c on c.id = cm.class_id
             where cm.user_id = $1 order by c.name`
+        ),
+        quizzes: await q(
+          `select c.name as class, a.question, a.choice, a.correct, a.points, a.answered_at
+             from live_quiz_answers a
+             join live_quizzes z on z.id = a.quiz_id
+             join classes c on c.id = z.class_id
+            where a.user_id = $1 order by a.answered_at`
         ),
       },
       tutor: {

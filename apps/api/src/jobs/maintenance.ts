@@ -4,6 +4,8 @@
  * Every redeploy starts containers with new hostnames, so `service_heartbeats` gains a row per
  * instance that is never updated again; `prune-heartbeats` removes rows older than a week.
  * `prune-conversations` deletes tutor conversations untouched for 90 days (ADR-0011 privacy).
+ * `prune-quizzes` ends live quizzes left running for 12 hours (a teacher closed the tab) and
+ * deletes finished ones after 30 days with their answers (story 14.4).
  */
 import type { PgBoss, Job } from 'pg-boss';
 import type { Logger } from 'pino';
@@ -16,10 +18,13 @@ export const MAINTENANCE_QUEUE: QueueName = 'maintenance';
 
 const HEARTBEAT_RETENTION_DAYS = 7;
 export const CONVERSATION_RETENTION_DAYS = 90;
+export const QUIZ_ABANDONED_HOURS = 12;
+export const QUIZ_RETENTION_DAYS = 30;
 
 export const MaintenanceJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('prune-heartbeats') }),
   z.object({ task: z.literal('prune-conversations') }),
+  z.object({ task: z.literal('prune-quizzes') }),
 ]);
 export type MaintenanceJob = z.infer<typeof MaintenanceJob>;
 
@@ -28,6 +33,7 @@ export const MAINTENANCE_SCHEDULES: ReadonlyArray<{ cron: string; job: Maintenan
   [
     { cron: '17 3 * * *', job: { task: 'prune-heartbeats' } },
     { cron: '27 3 * * *', job: { task: 'prune-conversations' } },
+    { cron: '37 3 * * *', job: { task: 'prune-quizzes' } },
   ];
 
 export async function pruneHeartbeats(pool: SqlPool): Promise<number> {
@@ -59,6 +65,28 @@ export async function pruneConversations(pool: SqlPool): Promise<number> {
   }
 }
 
+export async function pruneQuizzes(
+  pool: SqlPool
+): Promise<{ ended: number; removed: number }> {
+  const client = await pool.connect();
+  try {
+    const ended = await client.query(
+      `update live_quizzes set status = 'finished', finished_at = now(), version = version + 1
+        where status <> 'finished' and created_at < now() - make_interval(hours => $1)
+        returning id`,
+      [QUIZ_ABANDONED_HOURS]
+    );
+    const removed = await client.query(
+      `delete from live_quizzes where finished_at < now() - make_interval(days => $1)
+       returning id`,
+      [QUIZ_RETENTION_DAYS]
+    );
+    return { ended: ended.rows.length, removed: removed.rows.length };
+  } finally {
+    client.release();
+  }
+}
+
 /** Runs one maintenance job; throws on unknown payloads so pg-boss retries/dead-letters them. */
 export async function runMaintenance(
   pool: SqlPool,
@@ -75,6 +103,11 @@ export async function runMaintenance(
     case 'prune-conversations': {
       const removed = await pruneConversations(pool);
       log.info({ task: job.task, removed }, 'maintenance.done');
+      return;
+    }
+    case 'prune-quizzes': {
+      const result = await pruneQuizzes(pool);
+      log.info({ task: job.task, ...result }, 'maintenance.done');
       return;
     }
   }

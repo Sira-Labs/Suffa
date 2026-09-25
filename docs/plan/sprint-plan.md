@@ -41,6 +41,7 @@ gantt
   S12 Video lessons (5/5)           :done, s12, after s11, 14d
   section P6 Mobile apps
   S13 In their pocket (3/5)         :active, s13, after s12, 14d
+  S14 Celebrate (3/4)               :active, s14, after s13, 14d
 ```
 
 ```mermaid
@@ -300,6 +301,12 @@ top three are named with a title, everyone else sees only their own week.
 the server re-checks on award, one certificate per learner and unit, audit-logged and
 withdrawable. Learners find them under "Abzeichen"; both sides print an A4 certificate or save
 it as PDF through the print dialog (Arabic script and fonts intact). In the privacy export.
+14.4 built — "Live-Quiz" on the class page: the teacher's projector view (start, reveal, next,
+end) with questions from the class's leech words, topped up from the units reached; learners
+answer on their phones (four meanings, 20 s, points for right and quick), every change pushed
+through an event stream; only the top five are shown. Missed words become due cards at once.
+Tested with 30 learners answering at the same moment. Abandoned quizzes end after 12 h,
+results are deleted after 30 days. Open for the PO: 14.1 store release, 14.5 store assets.
 
 **Gate G5.**
 

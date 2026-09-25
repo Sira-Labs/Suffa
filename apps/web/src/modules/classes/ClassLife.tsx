@@ -17,6 +17,7 @@ import {
 import { useLearnerTimeZone } from '@/modules/engagement/useEngagement';
 import { Assignments } from './Assignments';
 import { LeagueCard } from './LeagueCard';
+import { QuizEntry } from './QuizEntry';
 
 const DATE = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'short' });
 
@@ -65,6 +66,7 @@ export function ClassLife({
   return (
     <div className="stack" style={{ gap: '1rem' }}>
       {message && <p className="feedback-bad">{message}</p>}
+      <QuizEntry classId={classId} teacher={teacher} />
       <ChallengeCard challenge={feed.challenge} />
       <LeagueCard api={api} classId={classId} teacher={teacher} />
       <Assignments classId={classId} teacher={teacher} />

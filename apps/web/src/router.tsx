@@ -1,4 +1,5 @@
 import { RecordingPlayer } from './modules/classes/RecordingPlayer';
+import { LiveQuiz } from './modules/classes/LiveQuiz';
 import { ClassPage } from './modules/classes/ClassPage';
 import { Badges } from './modules/engagement/Badges';
 import { createBrowserRouter } from 'react-router-dom';
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
       { path: 'classes', element: <Classes /> },
       { path: 'classes/:id', element: <ClassPage /> },
       { path: 'classes/:id/recordings/:mediaId', element: <RecordingPlayer /> },
+      { path: 'classes/:id/quiz', element: <LiveQuiz /> },
       { path: 'tutor', element: <Tutor /> },
       { path: 'videos', element: <VideoLessons /> },
       { path: 'videos/:id', element: <VideoLesson /> },

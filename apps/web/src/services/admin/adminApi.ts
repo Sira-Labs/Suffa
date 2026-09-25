@@ -99,6 +99,12 @@ export function describeAudit(entry: AuditEntry): string {
       return `KI-Modelle für ${entry.targetId} geändert`;
     case 'ai.settings.update':
       return 'KI-Budget und Kontingente geändert';
+    case 'video.channel_created':
+      return `Videokanal angelegt: ${String(d.name ?? '')}`;
+    case 'video.permission_changed':
+      return `Erlaubnis des Videokanals: ${String(d.from ?? '')} → ${String(d.permissionStatus ?? '')}`;
+    case 'video.channel_updated':
+      return 'Videokanal geändert';
     default:
       return entry.action;
   }

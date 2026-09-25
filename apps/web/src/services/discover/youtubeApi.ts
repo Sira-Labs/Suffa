@@ -9,6 +9,10 @@ export interface YouTubePlayer {
   getCurrentTime(): number;
   getDuration(): number;
   getPlaylistIndex?(): number;
+  /** Used by video lessons to stop at checkpoints (Sprint 12). */
+  pauseVideo?(): void;
+  playVideo?(): void;
+  seekTo?(seconds: number, allowSeekAhead: boolean): void;
   destroy(): void;
 }
 

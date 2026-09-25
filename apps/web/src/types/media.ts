@@ -9,7 +9,7 @@ export interface MediaProgress extends Syncable {
   /** Stable track id, e.g. "b1/unit01/lesson01/01" (see trackId()). */
   id: string;
   /** Publisher audio track, a video marked as seen in "Entdecken", or a class recording. */
-  source: 'publisher-audio' | 'discover-video' | 'recording';
+  source: 'publisher-audio' | 'discover-video' | 'recording' | 'video-lesson';
   /** Audio URL. */
   ref: string;
   /** Lesson key the track belongs to, e.g. "b1/u1/l1" (for lesson bonuses). */

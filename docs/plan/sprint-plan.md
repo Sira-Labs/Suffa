@@ -37,6 +37,8 @@ gantt
   S9 Gateway (5/5)                  :done, s9, after s8, 14d
   S10 al-Muʿallim speaks (4/4)      :done, s10, after s9, 14d
   S11 Grading & evals (4/4)         :done, s11, after s10, 14d
+  section P5 Interactive YouTube
+  S12 Video lessons (5/5)           :done, s12, after s11, 14d
 ```
 
 ```mermaid
@@ -249,6 +251,13 @@ recordings that the teacher accepts one by one.
 | 12.3 | Transcripts + tap-to-gloss where permitted (`permission_status`)                   | 5   | Hidden when not granted.         |
 | 12.4 | Outreach + permission tracking (PO)                                                | 1   | Status recorded.                 |
 | 12.5 | Lesson quests from YouTube lessons                                                 | 2   | Count toward daily quests.       |
+
+Status (Sprint 12): all five stories built. Catalog + YouTube import (needs
+`SUFFA_YOUTUBE_API_KEY`), admin tab "Videos" with unit mapping and the permission record,
+lesson player with checkpoints (IFrame API, inline on phones), transcript with tap-to-gloss
+when permission is granted, and the video lesson quest. Open for the PO: contact Muhammad
+al-Andalusi and record the answer (12.4); checkpoints on real iOS/Android devices to be
+confirmed in the pilot.
 
 ## P6 — Mobile apps
 

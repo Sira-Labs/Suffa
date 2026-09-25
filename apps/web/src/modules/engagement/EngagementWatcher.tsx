@@ -7,6 +7,7 @@ import {
   useSyncStore,
 } from '@/state';
 import { TutorApi } from '@/services/tutor/tutorApi';
+import { VideosApi } from '@/services/videos/videosApi';
 import { useLocalEngagement } from './useEngagement';
 
 const TIER_LABEL = { bronze: 'Bronze', silver: 'Silber', gold: 'Gold' } as const;
@@ -41,6 +42,18 @@ export function EngagementWatcher() {
       cancelled = true;
     };
   }, [signedIn, setTutorAvailable]);
+
+  // Whether the video quest can come up: the public catalog has lessons (asked once a start).
+  const setVideosAvailable = useEngagementStore((s) => s.setVideosAvailable);
+  useEffect(() => {
+    let cancelled = false;
+    void new VideosApi().list().then((result) => {
+      if (!cancelled && result.ok) setVideosAvailable(result.value.videos.length > 0);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [setVideosAvailable]);
 
   useEffect(() => {
     const quests = summary.quests.quests.filter((q) => q.done);

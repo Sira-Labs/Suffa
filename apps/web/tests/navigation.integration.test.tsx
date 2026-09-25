@@ -52,6 +52,7 @@ describe('navigation', () => {
         .getAllByRole('link')
         .map((a) => a.getAttribute('href'))
     ).toEqual([
+      '/videos',
       '/tutor',
       '/badges',
       '/classes',

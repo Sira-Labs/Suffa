@@ -94,6 +94,13 @@ export const NAV_ITEMS: readonly NavItem[] = [
     tier: 'training',
   },
   {
+    to: '/videos',
+    label: 'Videolektionen',
+    icon: 'play',
+    description: 'Lektionen zum Buch auf YouTube, mit Fragen zwischendurch',
+    tier: 'secondary',
+  },
+  {
     to: '/tutor',
     label: 'al-Muʿallim',
     icon: 'chat',

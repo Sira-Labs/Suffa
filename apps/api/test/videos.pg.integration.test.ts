@@ -182,6 +182,7 @@ describe.skipIf(!url)('Video catalog (Postgres)', () => {
       permissionStatus: 'granted',
     });
 
+    expect(await repo.hasVisibleVideos()).toBe(true);
     // Hidden videos disappear for learners.
     await call('PATCH', `/admin/videos/${intro.id}`, { hidden: true });
     const after = (await (await app.request('/api/v1/videos')).json()) as {

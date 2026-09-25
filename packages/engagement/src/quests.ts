@@ -18,14 +18,18 @@ export type QuestMetric =
   | { kind: 'correct'; minRatio: number }
   /** Cards reviewed successfully for the first time ever. */
   | { kind: 'new-cards' }
-  /** Audio tracks heard. */
+  /** Audio tracks heard (video lessons count too). */
   | { kind: 'tracks' }
+  /** Video lessons watched to the end (tracks with a `yt/` id). */
+  | { kind: 'videos' }
   /** Unit practice items; only these skills, or any skill without a list. */
   | { kind: 'practice'; skills?: readonly string[] };
 
 /** Features a quest may need; without them it is never picked (e.g. no AI tutor). */
 export interface QuestFeatures {
   tutor?: boolean;
+  /** The video lesson catalog has lessons (Sprint 12). */
+  videos?: boolean;
 }
 
 export interface QuestDef {
@@ -48,6 +52,8 @@ export interface QuestDef {
 
 /** The day the tutor quest joins the pool (Sprint 10). */
 export const TUTOR_QUESTS_SINCE = '2026-09-26';
+/** The day the video lesson quest joins the pool (Sprint 12). */
+export const VIDEO_QUESTS_SINCE = '2026-09-27';
 
 export const QUEST_XP: Record<QuestSlot, number> & { bonus: number } = {
   review: 30,
@@ -108,6 +114,16 @@ export const QUEST_POOL: Record<QuestSlot, readonly QuestDef[]> = {
       target: 1,
       xp: QUEST_XP.learn,
       metric: { kind: 'tracks' },
+    },
+    {
+      id: 'video-1',
+      slot: 'learn',
+      title: 'Schau eine Videolektion ganz an',
+      target: 1,
+      xp: QUEST_XP.learn,
+      metric: { kind: 'videos' },
+      since: VIDEO_QUESTS_SINCE,
+      requires: 'videos',
     },
   ],
   produce: [
@@ -183,6 +199,8 @@ export function dailyQuests(day: string, features: QuestFeatures = {}): QuestDef
 export interface Tick {
   at: string;
   kind: 'review' | 'track' | 'practice';
+  /** A track that is a video lesson. */
+  video?: boolean;
   correct?: boolean;
   /** First successful review of this card ever. */
   firstSuccess?: boolean;
@@ -206,7 +224,9 @@ export function ticksByDay(
     ticks.push({ at: r.reviewedAt, kind: 'review', correct, firstSuccess });
   }
   for (const t of input.tracks) {
-    if (!t.deleted && t.completedAt) ticks.push({ at: t.completedAt, kind: 'track' });
+    if (!t.deleted && t.completedAt) {
+      ticks.push({ at: t.completedAt, kind: 'track', video: t.id.startsWith('yt/') });
+    }
   }
   for (const p of input.practice) {
     if (!p.deleted) ticks.push({ at: p.practisedAt, kind: 'practice', skill: p.skill });
@@ -238,6 +258,8 @@ function counts(metric: QuestMetric, tick: Tick): boolean {
       return tick.kind === 'review' && tick.firstSuccess === true;
     case 'tracks':
       return tick.kind === 'track';
+    case 'videos':
+      return tick.kind === 'track' && tick.video === true;
     case 'practice':
       return (
         tick.kind === 'practice' &&

@@ -54,6 +54,43 @@ describe('daily quests', () => {
     }
   });
 
+  it('offers the video quest only from its start day and with lessons in the catalog', () => {
+    const later = Array.from({ length: 60 }, (_, i) =>
+      new Date(Date.UTC(2026, 8, 27 + i)).toISOString().slice(0, 10)
+    );
+    expect(
+      later.flatMap((d) => dailyQuests(d, { videos: true }).map((q) => q.id))
+    ).toContain('video-1');
+    expect(later.flatMap((d) => dailyQuests(d).map((q) => q.id))).not.toContain(
+      'video-1'
+    );
+    for (const day of ['2026-09-20', '2026-09-26']) {
+      expect(dailyQuests(day, { videos: true, tutor: true })).toEqual(
+        dailyQuests(day, { tutor: true })
+      );
+    }
+    const video = QUEST_POOL.learn.find((q) => q.id === 'video-1')!;
+    const at = '2026-10-01T09:00:00.000Z';
+    expect(questStatus(video, [tick(at, { kind: 'track', video: false })]).progress).toBe(
+      0
+    );
+    expect(questStatus(video, [tick(at, { kind: 'track', video: true })]).done).toBe(
+      true
+    );
+    expect(
+      ticksByDay(
+        {
+          reviews: [],
+          tracks: [track('yt/abc', 'yt', at), track('rec/x', 'rec/c', at)],
+          practice: [],
+        },
+        TZ
+      )
+        .get('2026-10-01')
+        ?.map((t) => t.video)
+    ).toEqual([true, false]);
+  });
+
   it('offers the tutor quest only from its start day and only with the tutor', () => {
     const later = Array.from({ length: 60 }, (_, i) =>
       new Date(Date.UTC(2026, 8, 26 + i)).toISOString().slice(0, 10)

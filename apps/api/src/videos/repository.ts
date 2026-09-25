@@ -240,6 +240,14 @@ export class PgVideoRepository {
     return rows.length > 0;
   }
 
+  /** Whether learners can find any lesson (decides the video quest, story 12.5). */
+  async hasVisibleVideos(): Promise<boolean> {
+    const { rows } = await this.pool.query(
+      'select exists (select 1 from videos where not hidden) as any'
+    );
+    return rows[0]?.any === true;
+  }
+
   /** Visible lessons for learners, optionally of one unit, in course order. */
   async publicVideos(unit: number | null): Promise<PublicVideo[]> {
     const { rows } = await this.pool.query(

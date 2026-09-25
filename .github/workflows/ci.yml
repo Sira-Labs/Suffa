@@ -43,8 +43,12 @@ jobs:
           POSTGRES_DB: suffa_test
         ports: ['5432:5432']
         options: >-
-          --health-cmd "pg_isready -U suffa" --health-interval 2s --health-timeout 5s
-          --health-retries 20
+          --health-cmd "pg_isready -U suffa -d suffa_test" --health-interval 2s
+          --health-timeout 5s --health-retries 20
+      # S3 API for the object storage tests (ADR-0017), in place of RustFS.
+      moto:
+        image: motoserver/moto:5.2.3
+        ports: ['5055:5000']
     env:
       # Throwaway database: the integration tests wipe it.
       SUFFA_TEST_DATABASE_URL: postgres://suffa:ci0123456789abcdef@127.0.0.1:5432/suffa_test
@@ -58,10 +62,6 @@ jobs:
       - run: npm run typecheck -w @suffa/api
       # ffmpeg for the recording transcode tests (story 7.4).
       - run: command -v ffmpeg || (sudo apt-get update -q && sudo apt-get install -y -q ffmpeg)
-      # S3 API for the object storage tests (ADR-0017), in place of RustFS.
-      - run: |
-          pip install --quiet "moto[server]"
-          moto_server -p 5055 > /tmp/moto.log 2>&1 &
       - run: npm test -w @suffa/api
         env:
           SUFFA_TEST_S3_ENDPOINT: http://127.0.0.1:5055

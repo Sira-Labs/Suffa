@@ -16,7 +16,8 @@ async function magicLink(email: string): Promise<string> {
   const file = join(MAIL_DIR, `${email.toLowerCase()}.txt`);
   for (let i = 0; i < 50; i++) {
     try {
-      return await readFile(file, 'utf8');
+      const url = (await readFile(file, 'utf8')).trim();
+      if (url.startsWith('http')) return url;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     }
@@ -99,4 +100,30 @@ export async function classWithLearner(
   await teacher.getByRole('button', { name: 'Freigeben' }).click();
   await expect(teacher.getByRole('button', { name: 'Freigeben' })).toHaveCount(0);
   return { classId, teacherEmail, learnerEmail };
+}
+
+/** Runs one query against the test database (for data a real learner would build up slowly). */
+export async function sql<T extends pg.QueryResultRow = pg.QueryResultRow>(
+  query: string,
+  params: unknown[] = []
+): Promise<T[]> {
+  const db = new pg.Client({ connectionString: DATABASE_URL });
+  await db.connect();
+  try {
+    return (await db.query<T>(query, params)).rows;
+  } finally {
+    await db.end();
+  }
+}
+
+/** The course word ids of a unit, as the app and the server know them. */
+export async function unitWordIds(unit: number): Promise<string[]> {
+  const file = new URL(
+    `../../web/src/content/units/einheit-${String(unit).padStart(2, '0')}.json`,
+    import.meta.url
+  );
+  const content = JSON.parse(await readFile(file, 'utf8')) as {
+    vokabeln: { id: string }[];
+  };
+  return content.vokabeln.map((w) => w.id);
 }

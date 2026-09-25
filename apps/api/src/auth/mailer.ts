@@ -4,7 +4,7 @@
  * credentials; outside prod the link may instead be written to the log, so a developer can
  * sign in without a mail account.
  */
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rename, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import nodemailer, { type Transporter } from 'nodemailer';
 
@@ -128,6 +128,10 @@ export class FileMailer implements Mailer {
   async sendMagicLink(email: string, url: string): Promise<void> {
     await mkdir(this.dir, { recursive: true });
     const name = email.toLowerCase().replace(/[^a-z0-9@._-]/g, '_');
-    await writeFile(join(this.dir, `${name}.txt`), url, 'utf8');
+    // Written aside and renamed, so a reader never sees a half-written (or empty) file.
+    const target = join(this.dir, `${name}.txt`);
+    const temp = `${target}.${process.pid}.tmp`;
+    await writeFile(temp, url, 'utf8');
+    await rename(temp, target);
   }
 }

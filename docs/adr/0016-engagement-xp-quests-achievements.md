@@ -73,3 +73,17 @@ Rules live in one tested package used by web and worker. New tables: `xp_ledger`
   data is uploaded and the server computed after the newest local event, and always shows
   the badges the server knows.
 - `RULES_VERSION` is stored with every ledger row; changing a weight bumps it.
+
+## Implementation (Sprint 6)
+
+- **Teacher layer:** `GET /classes/:id/progress` returns aggregates of active learners only
+  (no raw records); content ids are resolved to words and units by the teacher's app. The
+  class feed (`class:read`, any active member) carries the weekly challenge, shout-outs and
+  teacher badges. A challenge is one cooperative target per week in the teacher's time
+  zone; progress is counted live from synced data, and reaching it gives every helper the
+  "Rūḥ al-Faṣl" badge (server-side unlock, shown in the app through reconciliation).
+- **Notifications:** a `Notifier` interface with Web Push (VAPID keys from the environment,
+  off without them). The worker checks every 15 minutes; `notification_log (user, kind,
+day)` is claimed before sending, so a learner gets at most one reminder a day even with
+  retries. Reminders respect quiet hours and are skipped when a quest is already done that
+  day. Weekly recaps are generated on Sunday from 18:00 local time and announced once.

@@ -28,7 +28,7 @@ gantt
   S4 Classes & admin (4/5)          :active, s4, after s3, 14d
   section P2 Engagement
   S5 Every day counts (5/5)         :done, s5, after s4, 14d
-  S6 Class spirit                    :s6, after s5, 14d
+  S6 Class spirit (4/4)             :done, s6, after s5, 14d
   Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
 ```
 
@@ -68,6 +68,10 @@ pie showData
 | 5.3 badges + level      | ✅     | "Abzeichen" gallery (10 badges × tiers + stages), XP level on "Heute", mastery ring (mature words) on every unit tile                               |
 | 5.4 server recompute    | ✅     | debounced worker job after each push; plausibility checks; `xp_ledger`, `quest_progress`, `achievement_unlocks`, `engagement_state`; app reconciles |
 | 5.5 weekly goal         | ✅     | 3/5/7 active days (synced setting); weekly streak; a missed day never breaks a met week                                                             |
+| 6.1 class dashboard     | ✅     | per class page: activity, learning days, quests, XP (7 days), streak, mature words, class mastery per unit, leech words; aggregates only            |
+| 6.2 class spirit        | ✅     | weekly challenge (reviews/quests/XP/learning days, one shared target), teacher badges, shout-outs; reached challenge → "Rūḥ al-Faṣl" badge          |
+| 6.3 web push            | ✅     | `Notifier` + Web Push (VAPID env); reminder time, quiet hours; ≤ 1 reminder/day, skipped when a quest is done; expired devices dropped              |
+| 6.4 weekly recap        | ✅     | Sunday from 18:00 local: XP, quests, learning days, words matured, best day, badges; card on "Heute" + one push                                     |
 
 ## P0 — Foundation
 

@@ -26,6 +26,9 @@ jobs:
       - run: npm run typecheck -w @suffa/engagement
       # The shared rules decide rewards everywhere: every branch must be covered.
       - run: npm run test:coverage -w @suffa/engagement
+      - run: npm run typecheck -w @suffa/llm
+      # Adapter contract suite on recorded fixtures (no network, no keys).
+      - run: npm run test:coverage -w @suffa/llm
       - run: npm run typecheck -w @suffa/web
       - run: npm test -w @suffa/web
       - run: npm run test:tools

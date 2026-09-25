@@ -15,6 +15,7 @@ COPY package.json package-lock.json ./
 COPY apps/web/package.json apps/web/
 COPY apps/api/package.json apps/api/
 COPY packages/engagement/package.json packages/engagement/
+COPY packages/llm/package.json packages/llm/
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 COPY packages/engagement packages/engagement
 COPY apps/web apps/web

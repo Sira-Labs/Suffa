@@ -11,6 +11,7 @@
 import { randomUUID } from 'node:crypto';
 import { betterAuth } from 'better-auth';
 import { bearer, emailOTP, magicLink } from 'better-auth/plugins';
+import { passkeyPlugin } from './passkeys.js';
 import type pg from 'pg';
 import { isRole, type Actor, type Role } from '../authz/policies.js';
 import type { AuthResolver } from './resolver.js';
@@ -128,6 +129,10 @@ export function createAuth(options: AuthOptions) {
         '/magic-link/verify': { window: 60, max: 10 },
         // With 5 guesses per code and at most 5 codes per 10 minutes, guessing stays hopeless.
         '/sign-in/email-otp': { window: 600, max: 10 },
+        '/passkey/generate-authenticate-options': { window: 60, max: 20 },
+        '/passkey/verify-authentication': { window: 60, max: 10 },
+        '/passkey/generate-register-options': { window: 600, max: 5 },
+        '/passkey/verify-registration': { window: 600, max: 5 },
       },
     },
     advanced: {
@@ -157,6 +162,8 @@ export function createAuth(options: AuthOptions) {
           await options.mailer.sendMagicLink(email, url, code);
         },
       }),
+      // Passkeys (update 2026-09-26): optional, added in the settings after signing in.
+      passkeyPlugin(options.publicUrl),
       // Codes are only created with a magic link (above); the plugin's own mail routes stay
       // closed (PUBLIC_AUTH_ENDPOINTS), so this sender is never used.
       emailOTP({
@@ -184,6 +191,12 @@ export const PUBLIC_AUTH_ENDPOINTS: readonly string[] = [
   'POST /sign-in/magic-link',
   'GET /magic-link/verify',
   'POST /sign-in/email-otp',
+  // Passkeys: sign in, and add one to the signed-in account. The plugin's list, update and
+  // delete stay closed; /api/v1/account/passkeys lists and removes them without key material.
+  'GET /passkey/generate-authenticate-options',
+  'POST /passkey/verify-authentication',
+  'GET /passkey/generate-register-options',
+  'POST /passkey/verify-registration',
   'POST /sign-out',
 ];
 

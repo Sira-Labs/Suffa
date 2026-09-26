@@ -21,10 +21,27 @@ export interface AccountRepository {
   /** Ends every session of this user except `keepSessionId`; returns how many ended. */
   revokeOtherSessions(userId: string, keepSessionId: string): Promise<number>;
   setTimeZone(userId: string, timeZone: string | null): Promise<void>;
+  /** This user's passkeys, newest first; never the public key. */
+  listPasskeys(userId: string): Promise<StoredPasskey[]>;
+  /** Removes one passkey of this user; false when there is no such passkey. */
+  deletePasskey(userId: string, passkeyId: string): Promise<boolean>;
+}
+
+/** A passkey as the settings list it (ADR-0008 update 2026-09-26). */
+export interface StoredPasskey {
+  id: string;
+  name: string | null;
+  aaguid: string | null;
+  /** Synced across the learner's devices (iCloud Keychain, Google Password Manager). */
+  synced: boolean;
+  createdAt: string;
 }
 
 /** Upper bound for the device list; more live sessions than this means something is off. */
 export const MAX_LISTED_SESSIONS = 50;
+
+/** Upper bound for the passkey list. */
+export const MAX_LISTED_PASSKEYS = 50;
 
 export class PgAccountRepository implements AccountRepository {
   constructor(private readonly pool: pg.Pool) {}
@@ -74,5 +91,37 @@ export class PgAccountRepository implements AccountRepository {
       'update users set time_zone = $2, updated_at = now() where id = $1',
       [userId, timeZone]
     );
+  }
+
+  async listPasskeys(userId: string): Promise<StoredPasskey[]> {
+    const { rows } = await this.pool.query<{
+      id: string;
+      name: string | null;
+      aaguid: string | null;
+      backed_up: boolean;
+      created_at: Date;
+    }>(
+      `select id, name, aaguid, backed_up, created_at
+         from passkeys
+        where user_id = $1
+        order by created_at desc, id
+        limit $2`,
+      [userId, MAX_LISTED_PASSKEYS]
+    );
+    return rows.map((r) => ({
+      id: r.id,
+      name: r.name || null,
+      aaguid: r.aaguid || null,
+      synced: r.backed_up,
+      createdAt: r.created_at.toISOString(),
+    }));
+  }
+
+  async deletePasskey(userId: string, passkeyId: string): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      'delete from passkeys where user_id = $1 and id = $2',
+      [userId, passkeyId]
+    );
+    return (rowCount ?? 0) > 0;
   }
 }

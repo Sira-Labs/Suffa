@@ -5,6 +5,8 @@
  *   DELETE /sessions/:id            → 204 (404 when it is not one of yours)
  *   POST   /sessions/revoke-others  → { revoked }
  *   PATCH  /settings   { timeZone } → 204
+ *   GET    /passkeys                → { passkeys: [{ id, name, provider, synced, createdAt }] }
+ *   DELETE /passkeys/:id            → 204 (404 when it is not one of yours)
  *   GET    /2fa                     → { enabled, confirmed }
  *   POST   /2fa/setup               → { uri, secret }  (409 when already enabled)
  *   POST   /2fa/confirm  { code }   → 204; enables a pending setup, confirms this session
@@ -23,6 +25,7 @@ import {
   type ActorSource,
   type AuthorizeLog,
 } from '../authz/middleware.js';
+import { providerName } from '../auth/passkeys.js';
 import type { AccountRepository } from './repository.js';
 import type { SecondFactorService } from './secondFactor.js';
 import type { PrivacyRepository } from '../privacy/repository.js';
@@ -68,6 +71,7 @@ const Settings = z
   .strict();
 
 const SessionId = z.string().min(1).max(200);
+const PasskeyId = z.string().min(1).max(200);
 
 export function createAccountRoutes(
   deps: AccountRouteDeps
@@ -122,6 +126,29 @@ export function createAccountRoutes(
     if (settings.data.timeZone !== undefined) {
       await deps.repo.setTimeZone(c.get('actor').id, settings.data.timeZone);
     }
+    return c.body(null, 204);
+  });
+
+  // Adding a passkey goes through Better Auth (/api/auth/passkey/*), which needs a fresh
+  // session; listing and removing live here, next to the devices.
+  app.get('/passkeys', read, async (c) => {
+    const passkeys = await deps.repo.listPasskeys(c.get('actor').id);
+    c.header('Cache-Control', 'no-store');
+    return c.json({
+      passkeys: passkeys.map(({ aaguid, ...p }) => ({
+        ...p,
+        provider: providerName(aaguid),
+      })),
+    });
+  });
+
+  app.delete('/passkeys/:id', write, async (c) => {
+    const actor = c.get('actor');
+    const id = PasskeyId.safeParse(c.req.param('id'));
+    if (!id.success) return c.json({ error: 'not_found' }, 404);
+    const removed = await deps.repo.deletePasskey(actor.id, id.data);
+    if (!removed) return c.json({ error: 'not_found' }, 404);
+    deps.log.info({ userId: actor.id }, 'account.passkey_removed');
     return c.body(null, 204);
   });
 

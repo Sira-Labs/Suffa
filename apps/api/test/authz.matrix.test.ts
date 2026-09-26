@@ -60,6 +60,7 @@ const privacyRepo: PrivacyRepository = {
     profile: {},
     secondFactorEnabled: false,
     sessions: [],
+    passkeys: [],
     classes: [],
     learningData: {} as never,
     tutor: { conversations: [], messages: [], usage: [], grades: [] },
@@ -112,6 +113,8 @@ const accountRepo: AccountRepository = {
   revokeSession: async () => true,
   revokeOtherSessions: async () => 0,
   setTimeZone: async () => {},
+  listPasskeys: async () => [],
+  deletePasskey: async () => true,
 };
 const sessionActors = {
   actor: async (h: Headers) => {

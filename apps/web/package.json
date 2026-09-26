@@ -19,6 +19,7 @@
     "@fontsource-variable/reem-kufi": "^5.3.0",
     "@fontsource/amiri": "^5.3.0",
     "@sentry/browser": "^11.0.0",
+    "@simplewebauthn/browser": "13.3.0",
     "@suffa/engagement": "0.1.0",
     "dexie": "^4.0.8",
     "qrcode": "^1.5.4",

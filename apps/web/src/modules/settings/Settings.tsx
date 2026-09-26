@@ -2,6 +2,7 @@ import { WEEKLY_GOALS } from '@suffa/engagement';
 import { useSearchParams } from 'react-router-dom';
 import { TashkilToggle } from '@/components';
 import { ApiSyncProvider, SIGN_IN_RETURN_PATH } from '@/services/sync/ApiSyncProvider';
+import { PasskeySignIn } from '@/modules/account/PasskeySignIn';
 import { SignInForm } from '@/modules/account/SignInForm';
 import { useSettingsStore, useSyncStore } from '@/state';
 import { AccountDevices } from './AccountDevices';
@@ -179,6 +180,7 @@ function AccountPanel() {
         Handy und Computer wird dein Lernstand automatisch abgeglichen.
       </p>
       <SignInForm returnTo={SIGN_IN_RETURN_PATH} />
+      <PasskeySignIn />
     </div>
   );
 }

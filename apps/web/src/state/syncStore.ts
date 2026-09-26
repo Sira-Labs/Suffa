@@ -12,6 +12,7 @@ import {
   type SyncProvider,
 } from '@/services/sync';
 import { logger } from '@/services/logger';
+import { PasskeyClient } from '@/services/passkeys';
 import { useCheckInStore } from './checkInStore';
 import { useDiscoverStore } from './discoverStore';
 import { useEnrollmentStore } from './enrollmentStore';
@@ -62,12 +63,15 @@ interface SyncState {
   signIn(email: string, returnTo?: string): Promise<{ ok: boolean; message?: string }>;
   /** The code from the sign-in mail, entered in this browser (see ApiSyncProvider). */
   signInWithCode(email: string, code: string): Promise<{ ok: boolean; message?: string }>;
+  /** One tap with a passkey added in the settings; `message` is unset when cancelled. */
+  signInWithPasskey(): Promise<{ ok: boolean; message?: string }>;
   signOut(): Promise<void>;
   syncNow(): Promise<void>;
   refreshPending(): Promise<void>;
 }
 
 const provider = createSyncProvider();
+const passkeys = new PasskeyClient();
 const engine = new SyncEngine(provider);
 
 export const useSyncStore = create<SyncState>((set, get) => ({
@@ -122,6 +126,17 @@ export const useSyncStore = create<SyncState>((set, get) => ({
     }
     const result = await p.signInWithCode(email, code);
     return result.ok ? { ok: true } : { ok: false, message: result.error.message };
+  },
+
+  async signInWithPasskey() {
+    const p = get().provider;
+    if (!(p instanceof ApiSyncProvider)) {
+      return { ok: false, message: 'Anmelden ist hier nicht eingerichtet.' };
+    }
+    const result = await passkeys.signIn();
+    if (!result.ok) return { ok: false, message: result.message };
+    await p.refresh();
+    return { ok: true };
   },
 
   async signOut() {

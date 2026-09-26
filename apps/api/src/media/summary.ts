@@ -214,19 +214,20 @@ export async function summarizeRecording(
   if (!record || record.status !== 'queued' || !item || !record.requestedBy) return;
   // Only one job calls the (paid) model for a run, even if pg-boss retries or it is queued twice.
   if (!(await deps.summaries.claim(mediaId))) return;
-  const transcript = await deps.interactive.transcript(mediaId);
-  if (transcript?.status !== 'ready' || transcript.cues.length === 0) {
-    await deps.summaries.setRun(mediaId, 'failed', { error: 'no transcript' });
-    return;
-  }
-  // The class switch is checked again: it may have been turned off after queueing.
-  if (!(await deps.interactive.aiEnabled(item.classId))) {
-    await deps.summaries.setRun(mediaId, 'failed', {
-      error: 'AI is switched off for this class',
-    });
-    return;
-  }
+  // From here on every way out leaves the run ready or failed, never running.
   try {
+    const transcript = await deps.interactive.transcript(mediaId);
+    if (transcript?.status !== 'ready' || transcript.cues.length === 0) {
+      await deps.summaries.setRun(mediaId, 'failed', { error: 'no transcript' });
+      return;
+    }
+    // The class switch is checked again: it may have been turned off after queueing.
+    if (!(await deps.interactive.aiEnabled(item.classId))) {
+      await deps.summaries.setRun(mediaId, 'failed', {
+        error: 'AI is switched off for this class',
+      });
+      return;
+    }
     const result = await deps.gateway.complete(
       { id: record.requestedBy, role: 'teacher' },
       SUMMARY_TASK,

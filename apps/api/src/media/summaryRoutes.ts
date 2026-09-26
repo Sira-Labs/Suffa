@@ -14,6 +14,8 @@ import type { InteractiveRepository } from './interactive.js';
 import type { MediaRepository } from './repository.js';
 import type { SummaryRepository } from './summary.js';
 
+/** A summary run older than this without progress is taken as lost. */
+export const STALE_RUN_MS = 15 * 60 * 1000;
 export interface SummaryRouteDeps {
   classes: { scope(classId: string, userId: string): Promise<ClassScope> };
   media: Pick<MediaRepository, 'get'>;
@@ -54,9 +56,10 @@ export function createSummaryRoutes(deps: SummaryRouteDeps): Hono<ActorEnv> {
     }
     if (!(await deps.available())) return c.json({ error: 'ai_unavailable' }, 409);
     const current = await deps.summaries.get(item.id);
-    if (current?.status === 'queued' || current?.status === 'running') {
-      return c.body(null, 202);
-    }
+    const active = current?.status === 'queued' || current?.status === 'running';
+    // A run that has not moved for a while lost its worker (restart, crash): queue it again.
+    const stale = active && Date.now() - Date.parse(current.updatedAt) > STALE_RUN_MS;
+    if (active && !stale) return c.body(null, 202);
     await deps.summaries.setRun(item.id, 'queued', { requestedBy: c.get('actor').id });
     await deps.enqueue(item.id);
     return c.body(null, 202);

@@ -236,6 +236,24 @@ describe.skipIf(!url)('Recording summaries (Postgres)', () => {
     expect((await summaryOf('teacher')).summary?.status).toBe('ready');
   });
 
+  it('queues again a run whose worker was lost, but not one still in progress', async () => {
+    await pool.query(
+      `update media_summaries set status = 'running', updated_at = now() where media_id = $1`,
+      [mediaId]
+    );
+    queued.length = 0;
+    expect((await call('POST', '/summary')).status).toBe(202);
+    expect(queued).toEqual([]);
+    await pool.query(
+      `update media_summaries set updated_at = now() - interval '20 minutes' where media_id = $1`,
+      [mediaId]
+    );
+    expect((await call('POST', '/summary')).status).toBe(202);
+    expect(queued).toEqual([mediaId]);
+    await run();
+    expect((await summaryOf('teacher')).summary?.status).toBe('ready');
+  });
+
   it('refuses without transcript access to AI (class switch off)', async () => {
     await pool.query('update classes set ai_enabled = false where id = $1', [classId]);
     expect((await call('POST', '/summary')).status).toBe(409);

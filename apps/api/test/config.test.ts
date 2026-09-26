@@ -298,3 +298,94 @@ describe('SUFFA_MAIL_DIR (browser tests)', () => {
     ).toThrow(/SUFFA_MAIL_DIR must not be set in prod/);
   });
 });
+
+describe('transcription settings', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+
+  it('is off without a URL and detects the language unless one is set', () => {
+    expect(loadConfig(base).transcribe).toBeUndefined();
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'https://api.mistral.ai/v1/audio/transcriptions',
+      }).transcribe
+    ).toEqual({
+      url: 'https://api.mistral.ai/v1/audio/transcriptions',
+      token: null,
+      model: 'voxtral-mini-latest',
+      language: null,
+    });
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'https://stt.example/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_LANGUAGE: 'AR',
+      }).transcribe?.language
+    ).toBe('ar');
+  });
+
+  it('uses the Mistral key for Voxtral unless a token is given', () => {
+    const voxtral = {
+      ...base,
+      SUFFA_TRANSCRIBE_URL: 'https://api.mistral.ai/v1/audio/transcriptions',
+      SUFFA_TRANSCRIBE_MODEL: 'voxtral-mini-latest',
+      SUFFA_MISTRAL_API_KEY: 'mistral-key',
+    };
+    expect(loadConfig(voxtral).transcribe?.token).toBe('mistral-key');
+    expect(
+      loadConfig({ ...voxtral, SUFFA_TRANSCRIBE_TOKEN: 'own' }).transcribe?.token
+    ).toBe('own');
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'https://stt.example/v1/audio/transcriptions',
+        SUFFA_MISTRAL_API_KEY: 'mistral-key',
+      }).transcribe?.token
+    ).toBeNull();
+  });
+
+  it('sends recordings only over https, except to the loopback', () => {
+    for (const token of ['secret', undefined]) {
+      const outside = loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'http://stt.example.org/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_TOKEN: token,
+      });
+      expect(outside.transcribe).toBeUndefined();
+      expect(outside.warnings.join(' ')).toMatch(/must use https/);
+    }
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'http://srv-captain--stt:8000/v1/audio/transcriptions',
+      }).transcribe
+    ).toBeUndefined();
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'http://localhost:8000/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_TOKEN: 'secret',
+      }).transcribe?.token
+    ).toBe('secret');
+  });
+
+  it('warns that Voxtral ignores a fixed language', () => {
+    const config = loadConfig({
+      ...base,
+      SUFFA_TRANSCRIBE_URL: 'https://api.mistral.ai/v1/audio/transcriptions',
+      SUFFA_TRANSCRIBE_LANGUAGE: 'ar',
+    });
+    expect(config.transcribe).toBeDefined();
+    expect(config.warnings.join(' ')).toMatch(/ignored for Mistral Voxtral/);
+  });
+
+  it('refuses a language that is not a two-letter code', () => {
+    expect(() =>
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'https://stt.example/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_LANGUAGE: 'arabic',
+      })
+    ).toThrow(/two-letter/);
+  });
+});

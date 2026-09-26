@@ -10,6 +10,8 @@ import type { MediaApi, UploadPlan } from './mediaApi';
 const URL_BATCH = 20;
 /** Tries per part before the upload stops (the next start resumes it). */
 const MAX_TRIES = 5;
+/** Parts sent at the same time: hides the latency per request on slow links. */
+export const PARALLEL_PARTS = 3;
 const RESUME_KEY = 'suffa:upload-resume';
 
 export interface UploadProgress {
@@ -20,8 +22,13 @@ export interface UploadProgress {
 
 export interface UploaderDeps {
   api: Pick<MediaApi, 'start' | 'partUrls' | 'uploadedParts' | 'complete'>;
-  /** PUT one part; resolves when stored. */
-  put(url: string, body: Blob, signal?: AbortSignal): Promise<void>;
+  /** PUT one part; resolves when stored. `onSent` reports the bytes of this part sent so far. */
+  put(
+    url: string,
+    body: Blob,
+    signal?: AbortSignal,
+    onSent?: (bytes: number) => void
+  ): Promise<void>;
   sleep(ms: number): Promise<void>;
   storage?: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 }
@@ -105,41 +112,72 @@ export async function uploadRecording(
   const missing = Array.from({ length: plan.partCount }, (_, i) => i + 1).filter(
     (n) => !done.has(n)
   );
+  // Bytes of the parts in flight, so the bar moves while a 32 MB part is on its way.
+  const inFlight = new Map<number, number>();
+  const report = () => {
+    let moving = 0;
+    for (const bytes of inFlight.values()) moving += bytes;
+    onProgress({
+      mediaId: plan.mediaId,
+      sentBytes: sent + moving,
+      totalBytes: file.size,
+    });
+  };
+
+  /** Sends one part with retries; returns a failure result, or null when stored. */
+  const sendPart = async (n: number, url: string): Promise<UploadResult | null> => {
+    const body = file.slice(
+      (n - 1) * plan.partSize,
+      (n - 1) * plan.partSize + partBytes(n)
+    );
+    let tries = 0;
+    for (;;) {
+      if (signal?.aborted) {
+        return { ok: false, message: 'Upload angehalten.', mediaId: plan.mediaId };
+      }
+      try {
+        await deps.put(url, body, signal, (bytes) => {
+          inFlight.set(n, bytes);
+          report();
+        });
+        inFlight.delete(n);
+        sent += partBytes(n);
+        report();
+        return null;
+      } catch (error) {
+        if (!(error instanceof TypeError) && !(error instanceof UploadError)) throw error;
+        inFlight.delete(n);
+        report();
+        tries++;
+        if (tries >= MAX_TRIES) {
+          return {
+            ok: false,
+            message:
+              'Die Verbindung ist abgebrochen. Wähle die Datei erneut, um fortzusetzen.',
+            mediaId: plan.mediaId,
+          };
+        }
+        await deps.sleep(Math.min(30_000, 1000 * 2 ** tries));
+      }
+    }
+  };
+
   for (let i = 0; i < missing.length; i += URL_BATCH) {
     const batch = missing.slice(i, i + URL_BATCH);
     const urls = await deps.api.partUrls(classId, plan.mediaId, batch);
     if (!urls.ok) return { ok: false, message: urls.message, mediaId: plan.mediaId };
-    for (const n of batch) {
-      const body = file.slice(
-        (n - 1) * plan.partSize,
-        (n - 1) * plan.partSize + partBytes(n)
-      );
-      let tries = 0;
-      for (;;) {
-        if (signal?.aborted) {
-          return { ok: false, message: 'Upload angehalten.', mediaId: plan.mediaId };
-        }
-        try {
-          await deps.put(urls.value.urls[n]!, body, signal);
-          break;
-        } catch (error) {
-          if (!(error instanceof TypeError) && !(error instanceof UploadError))
-            throw error;
-          tries++;
-          if (tries >= MAX_TRIES) {
-            return {
-              ok: false,
-              message:
-                'Die Verbindung ist abgebrochen. Wähle die Datei erneut, um fortzusetzen.',
-              mediaId: plan.mediaId,
-            };
-          }
-          await deps.sleep(Math.min(30_000, 1000 * 2 ** tries));
-        }
+    let next = 0;
+    let failure: UploadResult | null = null;
+    const lane = async () => {
+      while (failure === null && next < batch.length) {
+        const n = batch[next++]!;
+        failure = (await sendPart(n, urls.value.urls[n]!)) ?? failure;
       }
-      sent += partBytes(n);
-      onProgress({ mediaId: plan.mediaId, sentBytes: sent, totalBytes: file.size });
-    }
+    };
+    await Promise.all(
+      Array.from({ length: Math.min(PARALLEL_PARTS, batch.length) }, lane)
+    );
+    if (failure) return failure;
   }
 
   const completed = await deps.api.complete(classId, plan.mediaId);
@@ -156,11 +194,34 @@ export async function uploadRecording(
 export class UploadError extends Error {}
 
 /** Browser PUT of one part (same-origin /media URL). */
-export async function putPart(
+export function putPart(
   url: string,
   body: Blob,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  onSent?: (bytes: number) => void
 ): Promise<void> {
-  const response = await fetch(url, { method: 'PUT', body, signal });
-  if (!response.ok) throw new UploadError(`part upload failed (${response.status})`);
+  // XMLHttpRequest, not fetch: only it reports upload progress.
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    const abort = () => xhr.abort();
+    const done = () => signal?.removeEventListener('abort', abort);
+    xhr.open('PUT', url);
+    xhr.upload.onprogress = (event) => onSent?.(event.loaded);
+    xhr.onload = () => {
+      done();
+      if (xhr.status >= 200 && xhr.status < 300) resolve();
+      else reject(new UploadError(`part upload failed (${xhr.status})`));
+    };
+    // Same error type as a failed fetch, so the uploader retries it.
+    xhr.onerror = () => {
+      done();
+      reject(new TypeError('network error'));
+    };
+    xhr.onabort = () => {
+      done();
+      reject(new DOMException('Upload aborted', 'AbortError'));
+    };
+    signal?.addEventListener('abort', abort, { once: true });
+    xhr.send(body);
+  });
 }

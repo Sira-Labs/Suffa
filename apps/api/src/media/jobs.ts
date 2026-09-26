@@ -20,18 +20,21 @@ export const MediaJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('transcode'), mediaId: z.string().uuid() }),
   z.object({ task: z.literal('import'), mediaId: z.string().uuid() }),
   z.object({ task: z.literal('transcribe'), mediaId: z.string().uuid() }),
+  z.object({ task: z.literal('summarize'), mediaId: z.string().uuid() }),
   z.object({ task: z.literal('suggest'), mediaId: z.string().uuid() }),
 ]);
 
 function enqueue(
   boss: Pick<PgBoss, 'send'>,
-  task: 'transcode' | 'import' | 'transcribe' | 'suggest'
+  task: 'transcode' | 'import' | 'transcribe' | 'suggest' | 'summarize'
 ) {
   return async (mediaId: string) => {
     await boss.send(
       MEDIA_QUEUE,
       { task, mediaId },
-      { expireInSeconds: TRANSCODE_EXPIRE_SECONDS, singletonKey: mediaId }
+      // One job per task and recording: a summary must not wait behind (or be dropped
+      // for) a suggestion run of the same recording.
+      { expireInSeconds: TRANSCODE_EXPIRE_SECONDS, singletonKey: `${task}:${mediaId}` }
     );
   };
 }
@@ -45,6 +48,9 @@ export const enqueueTranscribe = (boss: Pick<PgBoss, 'send'>) =>
   enqueue(boss, 'transcribe');
 /** AI chapter and checkpoint suggestions from the transcript (story 11.4). */
 export const enqueueSuggest = (boss: Pick<PgBoss, 'send'>) => enqueue(boss, 'suggest');
+/** Lesson summary from the transcript. */
+export const enqueueSummarize = (boss: Pick<PgBoss, 'send'>) =>
+  enqueue(boss, 'summarize');
 
 export interface MediaJobDeps {
   repo: MediaRepository;
@@ -59,6 +65,8 @@ export interface MediaJobDeps {
   onReady?: (mediaId: string) => Promise<void>;
   /** Suggests chapters and checkpoints; absent when no model is configured. */
   suggest?: (mediaId: string) => Promise<void>;
+  /** Summarises a lesson from its transcript. */
+  summarize?: (mediaId: string) => Promise<void>;
 }
 
 export async function runMediaJob(deps: MediaJobDeps, raw: unknown): Promise<void> {
@@ -66,6 +74,11 @@ export async function runMediaJob(deps: MediaJobDeps, raw: unknown): Promise<voi
   if (task.task === 'suggest') {
     if (!deps.suggest) throw new Error('no model is configured for suggestions');
     await deps.suggest(task.mediaId);
+    return;
+  }
+  if (task.task === 'summarize') {
+    if (!deps.summarize) throw new Error('no model is configured for summaries');
+    await deps.summarize(task.mediaId);
     return;
   }
   if (task.task === 'transcribe') {

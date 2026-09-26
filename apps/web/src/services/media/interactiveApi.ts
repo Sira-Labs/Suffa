@@ -26,6 +26,26 @@ export interface Interactive {
   canGenerate: boolean;
   /** AI suggestions can be requested (a model is configured). */
   canSuggest: boolean;
+  /** A lesson summary can be requested (an EU model is configured; teachers only). */
+  canSummarize?: boolean;
+  /** Teachers: the latest run or draft; learners: the published summary or null. */
+  summary?: SummaryState | null;
+}
+
+/** A lesson summary written by the EU model from the transcript. */
+export interface LessonSummary {
+  overview: string;
+  points: string[];
+  vocabulary: { ar: string; de: string }[];
+  grammar: string[];
+}
+
+export interface SummaryState {
+  status: 'queued' | 'running' | 'ready' | 'failed';
+  error: string | null;
+  content: LessonSummary | null;
+  /** Set once the teacher has published it for the class. */
+  publishedAt: string | null;
 }
 
 export type Suggestion =
@@ -52,8 +72,9 @@ const MESSAGES: Record<string, string> = {
   transcription_unavailable:
     'Automatische Transkripte sind auf diesem Server nicht eingerichtet.',
   ai_disabled: 'KI ist für diese Klasse ausgeschaltet (Klassen-Einstellungen).',
-  no_transcript: 'Für Vorschläge braucht die Aufnahme zuerst ein Transkript.',
+  no_transcript: 'Dafür braucht die Aufnahme zuerst ein Transkript.',
   ai_unavailable: 'Auf diesem Server ist kein KI-Modell eingerichtet.',
+  no_summary: 'Es gibt noch keine fertige Zusammenfassung.',
 };
 
 export class InteractiveApi {
@@ -88,6 +109,17 @@ export class InteractiveApi {
       `${this.media(classId, mediaId)}/checkpoints/${encodeURIComponent(id)}`,
       { method: 'DELETE' }
     );
+  }
+
+  requestSummary(classId: string, mediaId: string) {
+    return this.call<void>(`${this.media(classId, mediaId)}/summary`, { method: 'POST' });
+  }
+
+  publishSummary(classId: string, mediaId: string, published: boolean) {
+    return this.call<void>(`${this.media(classId, mediaId)}/summary`, {
+      method: 'PUT',
+      body: JSON.stringify({ published }),
+    });
   }
 
   requestSuggestions(classId: string, mediaId: string) {

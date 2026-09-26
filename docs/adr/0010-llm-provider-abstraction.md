@@ -69,3 +69,17 @@ recorded fixtures. Quality differs across models — evals (ADR-0011) gate route
   last 30 days by task/model; routes per task and the budget are editable (audit-logged),
   and a route can be tried with a prompt.
 - Tool calls, embeddings and speech-to-text routes follow with al-Muʿallim (Sprint 10).
+
+## Update 2026-09-26: Mistral (EU) and EU-only routes for recordings
+
+- **Mistral La Plateforme** is a fourth provider (`mistralProvider`, OpenAI-compatible,
+  `SUFFA_MISTRAL_API_KEY`). It streams without `stream_options` and reports usage in the
+  last chunk.
+- **Recordings stay in the EU** (owner decision): the tasks that send a recording's
+  transcript to a model, `recording.suggest` and the new `recording.summarize`, route to
+  `ministral-14b-latest` then `ministral-8b-latest` (migration 0025; the starting Mistral
+  tier has no Medium/Small, switch in admin → KI when it does). Their Anthropic
+  routes remain listed but switched off, so a Mistral outage cannot fall back to the US.
+  Other tasks (tutor, grading) keep their routes.
+- Prices for the Mistral routes are estimates in the routing table; check them in the
+  Mistral console and correct them in the admin area.

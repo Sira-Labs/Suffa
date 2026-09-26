@@ -2,10 +2,13 @@ import { execFileSync } from 'node:child_process';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { describe, expect, it, vi } from 'vitest';
 import {
   CHUNK_SECONDS,
   OpenAiCompatibleTranscriber,
+  slowServiceFetch,
   transcribeFile,
 } from '../src/media/transcribe.js';
 
@@ -21,6 +24,7 @@ const settings = {
   url: 'https://stt.example/v1/audio/transcriptions',
   token: 'tok',
   model: 'whisper-1',
+  language: 'ar' as string | null,
 };
 
 describe('transcription client', () => {
@@ -54,6 +58,102 @@ describe('transcription client', () => {
     ]);
     await expect(transcribeFile(settings, file, fetchFn)).rejects.toThrow(/429/);
     await rm(dir, { recursive: true });
+  });
+
+  it('lets the model detect the language when none is set (mixed lessons)', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'suffa-stt-'));
+    const file = join(dir, 'a.m4a');
+    await writeFile(file, 'audio');
+    const fetchImpl = vi.fn(async () => Response.json({ segments: [] }));
+    await transcribeFile(
+      { ...settings, language: null },
+      file,
+      fetchImpl as unknown as typeof fetch
+    );
+    const [, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    expect((init.body as FormData).has('language')).toBe(false);
+    await rm(dir, { recursive: true });
+  });
+
+  it('asks Voxtral (Mistral) for segment timestamps and fills segments without times', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'suffa-stt-'));
+    const file = join(dir, 'a.m4a');
+    await writeFile(file, 'audio');
+    const fetchImpl = vi.fn(async () =>
+      Response.json({
+        model: 'voxtral-mini-latest',
+        text: 'مرحبا يا طلاب',
+        language: 'ar',
+        segments: [
+          { text: ' مرحبا ', start: 0.5, end: 1.5 },
+          { text: 'يا طلاب', start: null, end: null },
+        ],
+      })
+    );
+    const cues = await transcribeFile(
+      {
+        ...settings,
+        url: 'https://api.mistral.ai/v1/audio/transcriptions',
+        model: 'voxtral-mini-latest',
+      },
+      file,
+      fetchImpl as unknown as typeof fetch
+    );
+    expect(cues).toEqual([
+      { start: 0.5, end: 1.5, text: 'مرحبا' },
+      { start: 1.5, end: 1.5, text: 'يا طلاب' },
+    ]);
+    const [, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    const form = init.body as FormData;
+    expect(form.getAll('timestamp_granularities')).toEqual(['segment']);
+    expect(form.has('response_format')).toBe(false);
+    expect(form.has('language')).toBe(false);
+    await rm(dir, { recursive: true });
+  });
+
+  it('posts the form over node:http and reads the answer (no 5-minute limit)', async () => {
+    let received = '';
+    const server = createServer((req, res) => {
+      req.on('data', (chunk: Buffer) => (received += chunk.toString('latin1')));
+      req.on('end', () => {
+        expect(req.headers['content-type']).toMatch(/^multipart\/form-data; boundary=/);
+        expect(req.headers.authorization).toBe('Bearer tok');
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ segments: [{ start: 0, end: 1, text: 'سلام' }] }));
+      });
+    });
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address() as AddressInfo;
+    const dir = await mkdtemp(join(tmpdir(), 'suffa-stt-'));
+    const file = join(dir, 'a.m4a');
+    await writeFile(file, 'audio-bytes');
+    try {
+      const cues = await transcribeFile(
+        { ...settings, url: `http://127.0.0.1:${port}/v1/audio/transcriptions` },
+        file,
+        slowServiceFetch(5_000)
+      );
+      expect(cues).toEqual([{ start: 0, end: 1, text: 'سلام' }]);
+      expect(received).toContain('audio-bytes');
+      expect(received).toContain('whisper-1');
+    } finally {
+      server.close();
+      await rm(dir, { recursive: true });
+    }
+  });
+
+  it('gives up on a service that stays silent past the timeout', async () => {
+    const server = createServer(() => undefined);
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    const { port } = server.address() as AddressInfo;
+    try {
+      await expect(
+        slowServiceFetch(200)(`http://127.0.0.1:${port}/`, { method: 'POST', body: 'x' })
+      ).rejects.toThrow(/silent/);
+    } finally {
+      server.closeAllConnections();
+      server.close();
+    }
   });
 
   it.skipIf(!hasFfmpeg)(

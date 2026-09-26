@@ -29,6 +29,7 @@ import { CheckpointDialog } from './player/CheckpointDialog';
 import { CheckpointEditor, TranscriptEditor } from './player/RecordingEditors';
 import { ChapterList } from './player/ChapterList';
 import { SuggestionsEditor } from './player/SuggestionsEditor';
+import { SummaryPanel } from './player/SummaryPanel';
 import { TranscriptPanel } from './player/TranscriptPanel';
 
 /** Save played time at least this often. */
@@ -287,6 +288,18 @@ export function RecordingPlayer() {
             : undefined
         }
       />
+      {media.interactive && (
+        <SummaryPanel
+          api={api}
+          classId={id}
+          mediaId={mediaId}
+          summary={media.interactive.summary ?? null}
+          teacher={teacher}
+          canSummarize={media.interactive.canSummarize ?? false}
+          hasTranscript={media.cues.length > 0}
+          onChange={() => void load()}
+        />
+      )}
       <TranscriptPanel cues={media.cues} time={time} onSeek={seek} />
       {teacher && media.interactive && (
         <>

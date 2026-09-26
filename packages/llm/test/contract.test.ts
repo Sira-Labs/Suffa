@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AnthropicProvider,
   huggingFaceProvider,
+  mistralProvider,
   LlmError,
   openRouterProvider,
   type LlmProvider,
@@ -44,6 +45,12 @@ const subjects: Subject[] = [
     model: 'meta-llama/Llama-3.3-70B-Instruct',
     wire: openAiWire,
     make: (f) => huggingFaceProvider({ apiKey: 'test-key', fetch: f }),
+  },
+  {
+    name: 'mistral',
+    model: 'mistral-medium-latest',
+    wire: openAiWire,
+    make: (f) => mistralProvider({ apiKey: 'test-key', fetch: f }),
   },
 ];
 

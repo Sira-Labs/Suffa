@@ -1,7 +1,12 @@
 /** OpenRouter / Hugging Face specifics: endpoints, headers, system prompt, SSE edge cases. */
 import { describe, expect, it } from 'vitest';
-import { huggingFaceProvider, openRouterProvider, readSse } from '../src/index.js';
-import { fakeFetch, json } from './fakeFetch.js';
+import {
+  huggingFaceProvider,
+  mistralProvider,
+  openRouterProvider,
+  readSse,
+} from '../src/index.js';
+import { fakeFetch, json, sse } from './fakeFetch.js';
 
 const ok = () =>
   json({ model: 'm', choices: [{ message: { content: 'x' }, finish_reason: 'stop' }] });
@@ -36,6 +41,40 @@ describe('OpenAI-compatible adapters', () => {
       outputTokens: 0,
       cacheReadTokens: 0,
       cacheWriteTokens: 0,
+    });
+  });
+
+  it('Mistral posts to its EU API and streams without stream_options', async () => {
+    const fake = fakeFetch([
+      ok(),
+      sse([
+        { data: { model: 'm', choices: [{ delta: { content: 'مرحبا' } }] } },
+        {
+          data: {
+            model: 'm',
+            choices: [{ delta: {}, finish_reason: 'stop' }],
+            usage: { prompt_tokens: 7, completion_tokens: 2 },
+          },
+        },
+        { data: '[DONE]' },
+      ]),
+    ]);
+    const p = mistralProvider({ apiKey: 'k', fetch: fake.fetch });
+    await p.complete({
+      model: 'm',
+      messages: [{ role: 'user', content: 'q' }],
+      maxTokens: 5,
+    });
+    const events = [];
+    for await (const e of p.stream({ model: 'm', messages: [], maxTokens: 5 }))
+      events.push(e);
+    expect(fake.requests[0]!.url).toBe('https://api.mistral.ai/v1/chat/completions');
+    expect(fake.requests[0]!.headers).toMatchObject({ authorization: 'Bearer k' });
+    expect(fake.requests[1]!.body.stream).toBe(true);
+    expect(fake.requests[1]!.body).not.toHaveProperty('stream_options');
+    expect(events.at(-1)).toMatchObject({
+      type: 'done',
+      result: { usage: { inputTokens: 7, outputTokens: 2 } },
     });
   });
 

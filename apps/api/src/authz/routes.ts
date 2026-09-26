@@ -47,6 +47,16 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     action: 'class:manage',
   },
   {
+    method: 'POST',
+    path: '/api/v1/classes/:id/media/:mediaId/summary',
+    action: 'class:manage',
+  },
+  {
+    method: 'PUT',
+    path: '/api/v1/classes/:id/media/:mediaId/summary',
+    action: 'class:manage',
+  },
+  {
     method: 'GET',
     path: '/api/v1/classes/:id/media/:mediaId/suggestions',
     action: 'class:manage',

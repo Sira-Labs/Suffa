@@ -1,6 +1,7 @@
 /**
- * Adapter for OpenAI-compatible chat-completion APIs, used for non-Claude models: OpenRouter
- * and Hugging Face (Inference Providers router or a dedicated Inference Endpoint).
+ * Adapter for OpenAI-compatible chat-completion APIs, used for non-Claude models: OpenRouter,
+ * Hugging Face (Inference Providers router or a dedicated Inference Endpoint) and Mistral
+ * (La Plateforme, EU).
  */
 import { LlmError, kindForStatus } from './errors.js';
 import { readSse } from './sse.js';
@@ -22,6 +23,11 @@ export interface OpenAiCompatibleOptions {
   timeoutMs?: number;
   /** Extra headers (e.g. OpenRouter's app attribution). */
   headers?: Record<string, string>;
+  /**
+   * Send `stream_options.include_usage` when streaming (OpenAI's way to get token counts).
+   * Default true; Mistral reports usage in the last chunk anyway and refuses the field.
+   */
+  streamUsage?: boolean;
   fetch?: typeof fetch;
 }
 
@@ -224,7 +230,14 @@ export class OpenAiCompatibleProvider implements LlmProvider {
             },
           }
         : {}),
-      ...(stream ? { stream: true, stream_options: { include_usage: true } } : {}),
+      ...(stream
+        ? {
+            stream: true,
+            ...(this.options.streamUsage === false
+              ? {}
+              : { stream_options: { include_usage: true } }),
+          }
+        : {}),
     };
     const timeout = AbortSignal.timeout(this.options.timeoutMs ?? 120_000);
     const signal = request.signal ? AbortSignal.any([request.signal, timeout]) : timeout;
@@ -309,6 +322,24 @@ export function huggingFaceProvider(options: {
       ? `${options.endpointUrl.replace(/\/$/, '')}/v1`
       : 'https://router.huggingface.co/v1',
     apiKey: options.apiKey,
+    fetch: options.fetch,
+    timeoutMs: options.timeoutMs,
+  });
+}
+
+/**
+ * Mistral La Plateforme (api.mistral.ai, hosted in the EU): the provider for tasks whose
+ * input must not leave the EU, such as transcripts of the teachers' recordings.
+ */
+export function mistralProvider(options: {
+  apiKey: string;
+  fetch?: typeof fetch;
+  timeoutMs?: number;
+}): OpenAiCompatibleProvider {
+  return new OpenAiCompatibleProvider('mistral', {
+    baseUrl: 'https://api.mistral.ai/v1',
+    apiKey: options.apiKey,
+    streamUsage: false,
     fetch: options.fetch,
     timeoutMs: options.timeoutMs,
   });

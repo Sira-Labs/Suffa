@@ -3,7 +3,7 @@
  * picks provider + model; adapters translate this shape to each provider's wire format.
  */
 
-export type ProviderId = 'anthropic' | 'openrouter' | 'huggingface';
+export type ProviderId = 'anthropic' | 'openrouter' | 'huggingface' | 'mistral';
 
 /** What a task may require of a model; the router only picks models that declare it. */
 export type Capability = 'tools' | 'structuredOutput' | 'vision' | 'streaming';

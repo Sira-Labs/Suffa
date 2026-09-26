@@ -121,8 +121,8 @@ const RawEnvSchema = z.object({
    * number as Picker app id. Drive import stays off until all four are set.
    */
   /**
-   * Transcription (story 8.1): an OpenAI-compatible /audio/transcriptions endpoint (OpenAI,
-   * Groq, or a self-hosted faster-whisper server such as speaches). Off without a URL.
+   * Transcription (story 8.1): an OpenAI-compatible /audio/transcriptions endpoint; in
+   * production Mistral Voxtral (EU, runbook §11). Off without a URL.
    */
   SUFFA_TRANSCRIBE_URL: z
     .string()
@@ -131,11 +131,25 @@ const RawEnvSchema = z.object({
     .pipe(z.string().url('SUFFA_TRANSCRIBE_URL must be a URL').optional())
     .optional(),
   SUFFA_TRANSCRIBE_TOKEN: z.string().trim().optional(),
-  SUFFA_TRANSCRIBE_MODEL: z.string().trim().default('whisper-1'),
+  SUFFA_TRANSCRIBE_MODEL: z.string().trim().default('voxtral-mini-latest'),
+  /** Language of the recordings ("ar"); empty lets the model detect it (mixed lessons). */
+  SUFFA_TRANSCRIBE_LANGUAGE: z
+    .string()
+    .trim()
+    .transform((value) => value.toLowerCase() || undefined)
+    .pipe(
+      z
+        .string()
+        .regex(/^[a-z]{2}$/, 'SUFFA_TRANSCRIBE_LANGUAGE must be a two-letter code')
+        .optional()
+    )
+    .optional(),
   // AI gateway (ADR-0010): each provider is on only with its key; keys stay on the server.
   SUFFA_ANTHROPIC_API_KEY: z.string().trim().optional(),
   SUFFA_OPENROUTER_API_KEY: z.string().trim().optional(),
   SUFFA_HF_API_KEY: z.string().trim().optional(),
+  /** Mistral La Plateforme (EU); recording transcripts go only to EU providers. */
+  SUFFA_MISTRAL_API_KEY: z.string().trim().optional(),
   /** Dedicated Hugging Face Inference Endpoint; the shared router otherwise. */
   SUFFA_HF_ENDPOINT_URL: z
     .string()
@@ -220,13 +234,16 @@ export interface Config {
   /** Object storage; undefined turns recordings and uploads off. */
   storage: S3Settings | undefined;
   /** Transcription service; undefined turns automatic transcripts off. */
-  transcribe: { url: string; token: string | null; model: string } | undefined;
+  transcribe:
+    | { url: string; token: string | null; model: string; language: string | null }
+    | undefined;
   /** AI provider keys (ADR-0010); a provider without a key is simply not routed to. */
   ai: {
     anthropicKey: string | undefined;
     openRouterKey: string | undefined;
     huggingFaceKey: string | undefined;
     huggingFaceEndpoint: string | undefined;
+    mistralKey: string | undefined;
   };
   /** YouTube Data API key; undefined turns the catalog import off. */
   youtubeApiKey: string | undefined;
@@ -361,6 +378,29 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       );
     }
   }
+  // Voxtral uses the same Mistral key as the chat models unless a token is given.
+  const transcribeUrl = raw.SUFFA_TRANSCRIBE_URL
+    ? new URL(raw.SUFFA_TRANSCRIBE_URL)
+    : null;
+  const transcribeToken =
+    raw.SUFFA_TRANSCRIBE_TOKEN ||
+    (transcribeUrl?.hostname === 'api.mistral.ai' ? raw.SUFFA_MISTRAL_API_KEY : '') ||
+    null;
+  // Recordings (and the token) would travel in clear over http: only loopback, for
+  // development, may use it.
+  const transcribeInsecure =
+    transcribeUrl !== null &&
+    transcribeUrl.protocol !== 'https:' &&
+    !isLoopbackHost(transcribeUrl.hostname);
+  if (transcribeInsecure) {
+    warnings.push('SUFFA_TRANSCRIBE_URL must use https; transcription is off');
+  }
+  if (transcribeUrl?.hostname === 'api.mistral.ai' && raw.SUFFA_TRANSCRIBE_LANGUAGE) {
+    // Mistral takes no language together with timestamps, and cues need timestamps.
+    warnings.push(
+      'SUFFA_TRANSCRIBE_LANGUAGE is ignored for Mistral Voxtral, which detects the language itself'
+    );
+  }
   const android = parseAndroidAppLinks(raw.SUFFA_ANDROID_APP_LINKS);
   warnings.push(...android.issues);
   const fcm = parseServiceAccount(raw.SUFFA_FCM_SERVICE_ACCOUNT);
@@ -425,18 +465,21 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
           },
         }
       : undefined,
-    transcribe: raw.SUFFA_TRANSCRIBE_URL
-      ? {
-          url: raw.SUFFA_TRANSCRIBE_URL,
-          token: raw.SUFFA_TRANSCRIBE_TOKEN || null,
-          model: raw.SUFFA_TRANSCRIBE_MODEL,
-        }
-      : undefined,
+    transcribe:
+      raw.SUFFA_TRANSCRIBE_URL && !transcribeInsecure
+        ? {
+            url: raw.SUFFA_TRANSCRIBE_URL,
+            token: transcribeToken,
+            model: raw.SUFFA_TRANSCRIBE_MODEL,
+            language: raw.SUFFA_TRANSCRIBE_LANGUAGE ?? null,
+          }
+        : undefined,
     ai: {
       anthropicKey: raw.SUFFA_ANTHROPIC_API_KEY || undefined,
       openRouterKey: raw.SUFFA_OPENROUTER_API_KEY || undefined,
       huggingFaceKey: raw.SUFFA_HF_API_KEY || undefined,
       huggingFaceEndpoint: raw.SUFFA_HF_ENDPOINT_URL,
+      mistralKey: raw.SUFFA_MISTRAL_API_KEY || undefined,
     },
     youtubeApiKey: raw.SUFFA_YOUTUBE_API_KEY || undefined,
     google: googleComplete
@@ -560,4 +603,9 @@ export function parseServiceAccount(value: string | undefined): {
       'SUFFA_FCM_SERVICE_ACCOUNT must be the base64 of a Firebase service account JSON',
     ],
   };
+}
+
+/** The loopback: plain http stays on this machine. */
+export function isLoopbackHost(hostname: string): boolean {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
 }

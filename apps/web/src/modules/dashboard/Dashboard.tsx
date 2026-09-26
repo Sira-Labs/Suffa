@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { dayKey } from '@suffa/engagement';
 import { Link } from 'react-router-dom';
 import type { SrsCard } from '@/types';
 import { content } from '@/content';
@@ -63,6 +64,8 @@ export function Dashboard() {
   const listened = useListenStore((s) => s.progress);
   const practised = usePracticeStore((s) => s.records);
   const timeZone = useLearnerTimeZone();
+  // The learner's day now: a render after midnight moves the 28-day window on.
+  const learnerDay = dayKey(new Date(), timeZone);
   const heat = useMemo(
     () =>
       activityHeatmap(
@@ -73,7 +76,8 @@ export function Dashboard() {
         },
         timeZone
       ),
-    [logs, listened, practised, timeZone]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- learnerDay only invalidates
+    [logs, listened, practised, timeZone, learnerDay]
   );
   const maxHeat = Math.max(1, ...heat.map((h) => h.total));
   const todayKey = localDay(new Date());

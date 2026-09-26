@@ -99,9 +99,17 @@ function Shadowing({
   // Done in this sitting, shown right away (the store catches up asynchronously).
   const [doneNow, setDoneNow] = useState<ReadonlySet<string>>(new Set());
   const [rate, setRate] = useState(0.9);
-  const [recording, setRecording] = useState<ActiveRecorder | null>(null);
+  // The sentence a recording belongs to is fixed when it starts (navigation is locked too).
+  const [recording, setRecording] = useState<{
+    recorder: ActiveRecorder;
+    lineId: string;
+  } | null>(null);
   const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
-  const [score, setScore] = useState<RecognitionResult | null>(null);
+  // Tied to its sentence: a late answer never shows under another one.
+  const [score, setScore] = useState<{
+    lineId: string;
+    result: RecognitionResult;
+  } | null>(null);
   const [scoring, setScoring] = useState(false);
   const [recordHint, setRecordHint] = useState<string | null>(null);
   const [scoreHint, setScoreHint] = useState<string | null>(null);
@@ -128,15 +136,15 @@ function Shadowing({
       setRecordHint(recorderHelp(started.reason, help));
       return;
     }
-    setRecording(started.recorder);
+    setRecording({ recorder: started.recorder, lineId: target.id });
     setRecordedUrl(null);
   };
   const stopRecording = async () => {
     if (!recording) return;
     try {
-      const { blob } = await recording.stop();
+      const { blob } = await recording.recorder.stop();
       setRecordedUrl(URL.createObjectURL(blob));
-      markPractised(target.id);
+      markPractised(recording.lineId);
     } catch (error) {
       if (!(error instanceof EmptyRecordingError)) throw error;
       setRecordHint(recorderHelp('empty', help));
@@ -152,7 +160,7 @@ function Shadowing({
     // Called directly from the tap: iOS only allows recognition inside the user gesture.
     const outcome = await recognizeOnce({ target: target.ar });
     if (outcome.ok) {
-      setScore(outcome.result);
+      setScore({ lineId: target.id, result: outcome.result });
       markPractised(target.id);
     } else setScoreHint(recognitionHelp(outcome.reason, help));
     setScoring(false);
@@ -229,22 +237,32 @@ function Shadowing({
         </p>
       )}
 
-      {score && (
+      {score?.lineId === target.id && (
         <div className="stack" style={{ alignItems: 'center' }}>
           <span>
-            Erkannt: <span className="arabic-inline">{score.transcript}</span>
+            Erkannt: <span className="arabic-inline">{score.result.transcript}</span>
           </span>
-          <strong className={score.similarity > 0.7 ? 'feedback-good' : 'feedback-warn'}>
-            Ähnlichkeit: {Math.round(score.similarity * 100)} %
+          <strong
+            className={score.result.similarity > 0.7 ? 'feedback-good' : 'feedback-warn'}
+          >
+            Ähnlichkeit: {Math.round(score.result.similarity * 100)} %
           </strong>
         </div>
       )}
 
       <div className="row" style={{ justifyContent: 'center' }}>
-        <button className="btn" onClick={() => go(-1)} disabled={lines.length < 2}>
+        <button
+          className="btn"
+          onClick={() => go(-1)}
+          disabled={lines.length < 2 || recording !== null}
+        >
           ← Vorheriger Satz
         </button>
-        <button className="btn" onClick={() => go(1)} disabled={lines.length < 2}>
+        <button
+          className="btn"
+          onClick={() => go(1)}
+          disabled={lines.length < 2 || recording !== null}
+        >
           Nächster Satz →
         </button>
       </div>

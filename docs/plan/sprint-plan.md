@@ -333,7 +333,10 @@ results are deleted after 30 days. Open for the PO: 14.1 store release, 14.5 sto
   the learner's own recording of a sentence is scored on the server (the same assessor), so
   it need not be spoken a second time for the browser's recogniser; and a learner can share
   chosen recordings with the class teacher. Sharing is opt-in per recording, visible to the
-  class's teachers only, withdrawable, and deleted with the account.
+  class's teachers only, withdrawable, and deleted with the account. In classes flagged
+  `minors` (ADR-0022 privacy rule) sharing is off by default: the teacher first records the
+  parents' consent for the learner, and shared recordings are deleted when the learner
+  leaves the class.
 - **Sprint 16 (May 3 – May 16):** content CMS + offline bundles (ADR-0014); English UI,
   per-language glosses and meaning-language setting (ADR-0021);
   WCAG 2.2 AA audit; `v2.2`.

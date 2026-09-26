@@ -1,7 +1,7 @@
 /**
- * Transcription (story 8.1) through any OpenAI-compatible speech-to-text endpoint: OpenAI,
- * Groq, or a self-hosted faster-whisper server (e.g. speaches) so audio never leaves our
- * servers. Long recordings are cut into 10-minute pieces (upload limits) and the cues are
+ * Transcription (story 8.1) through an OpenAI-style speech-to-text endpoint: Mistral's
+ * Voxtral (EU), a self-hosted faster-whisper server (speaches), or any OpenAI-compatible
+ * service. Long recordings are cut into 10-minute pieces (upload limits) and the cues are
  * shifted back into place.
  */
 import { readdir, readFile } from 'node:fs/promises';
@@ -25,6 +25,11 @@ export interface TranscriberSettings {
    * German parts into nonsense.
    */
   language: string | null;
+}
+
+/** Mistral asks for segment timestamps its own way and has no `response_format`. */
+export function isMistral(url: string): boolean {
+  return new URL(url).hostname === 'api.mistral.ai';
 }
 
 /** Length of one piece sent to the service. */
@@ -98,8 +103,14 @@ export async function transcribeFile(
     basename(file)
   );
   form.append('model', settings.model);
-  if (settings.language) form.append('language', settings.language);
-  form.append('response_format', 'verbose_json');
+  if (isMistral(settings.url)) {
+    // Voxtral: segments come with `timestamp_granularities`; it does not take a language
+    // together with timestamps, and detects the language itself.
+    form.append('timestamp_granularities', 'segment');
+  } else {
+    if (settings.language) form.append('language', settings.language);
+    form.append('response_format', 'verbose_json');
+  }
   const response = await fetchImpl(settings.url, {
     method: 'POST',
     headers: settings.token ? { authorization: `Bearer ${settings.token}` } : undefined,
@@ -113,11 +124,18 @@ export async function transcribeFile(
   const data = (await response.json()) as {
     text?: string;
     duration?: number;
-    segments?: { start: number; end: number; text: string }[];
+    segments?: { start: number | null; end: number | null; text: string }[];
   };
   if (data.segments?.length) {
+    // A segment without times (possible with Voxtral) keeps the previous segment's end.
+    let last = 0;
     return data.segments
-      .map((s) => ({ start: s.start, end: s.end, text: s.text.trim() }))
+      .map((s) => {
+        const start = s.start ?? last;
+        const end = s.end ?? start;
+        last = end;
+        return { start, end, text: s.text.trim() };
+      })
       .filter((c) => c.text);
   }
   const text = data.text?.trim();

@@ -326,6 +326,27 @@ describe('transcription settings', () => {
     ).toBe('ar');
   });
 
+  it('uses the Mistral key for Voxtral unless a token is given', () => {
+    const voxtral = {
+      ...base,
+      SUFFA_TRANSCRIBE_URL: 'https://api.mistral.ai/v1/audio/transcriptions',
+      SUFFA_TRANSCRIBE_MODEL: 'voxtral-mini-latest',
+      SUFFA_MISTRAL_API_KEY: 'mistral-key',
+    };
+    expect(loadConfig(voxtral).transcribe?.token).toBe('mistral-key');
+    expect(
+      loadConfig({ ...voxtral, SUFFA_TRANSCRIBE_TOKEN: 'own' }).transcribe?.token
+    ).toBe('own');
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL:
+          'http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions',
+        SUFFA_MISTRAL_API_KEY: 'mistral-key',
+      }).transcribe?.token
+    ).toBeNull();
+  });
+
   it('refuses a language that is not a two-letter code', () => {
     expect(() =>
       loadConfig({

@@ -75,6 +75,42 @@ describe('transcription client', () => {
     await rm(dir, { recursive: true });
   });
 
+  it('asks Voxtral (Mistral) for segment timestamps and fills segments without times', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'suffa-stt-'));
+    const file = join(dir, 'a.m4a');
+    await writeFile(file, 'audio');
+    const fetchImpl = vi.fn(async () =>
+      Response.json({
+        model: 'voxtral-mini-latest',
+        text: 'مرحبا يا طلاب',
+        language: 'ar',
+        segments: [
+          { text: ' مرحبا ', start: 0.5, end: 1.5 },
+          { text: 'يا طلاب', start: null, end: null },
+        ],
+      })
+    );
+    const cues = await transcribeFile(
+      {
+        ...settings,
+        url: 'https://api.mistral.ai/v1/audio/transcriptions',
+        model: 'voxtral-mini-latest',
+      },
+      file,
+      fetchImpl as unknown as typeof fetch
+    );
+    expect(cues).toEqual([
+      { start: 0.5, end: 1.5, text: 'مرحبا' },
+      { start: 1.5, end: 1.5, text: 'يا طلاب' },
+    ]);
+    const [, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
+    const form = init.body as FormData;
+    expect(form.getAll('timestamp_granularities')).toEqual(['segment']);
+    expect(form.has('response_format')).toBe(false);
+    expect(form.has('language')).toBe(false);
+    await rm(dir, { recursive: true });
+  });
+
   it('posts the form over node:http and reads the answer (no 5-minute limit)', async () => {
     let received = '';
     const server = createServer((req, res) => {

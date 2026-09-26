@@ -175,15 +175,28 @@ describe('transcription client', () => {
         '16k',
         file,
       ]);
-      const fetchImpl = vi.fn(async () =>
-        Response.json({ segments: [{ start: 1, end: 2, text: 'x' }] })
-      ) as unknown as typeof fetch;
+      // The first piece answers last: the cues must still come back in order.
+      const fetchImpl = vi.fn(async (_url: string, init: RequestInit) => {
+        const name = ((init.body as FormData).get('file') as File).name;
+        const first = name.includes('000');
+        await new Promise((r) => setTimeout(r, first ? 50 : 0));
+        return Response.json({
+          segments: [{ start: 1, end: 2, text: first ? 'a' : 'b' }],
+        });
+      }) as unknown as typeof fetch;
+      const progress: number[] = [];
       const cues = await new OpenAiCompatibleTranscriber(
         settings,
         () => join(dir, 'parts'),
         fetchImpl
-      ).transcribe(file);
-      expect(cues.map((c) => c.start)).toEqual([1, CHUNK_SECONDS + 1]);
+      ).transcribe(file, (done) => {
+        progress.push(done);
+      });
+      expect(cues.map((c) => [c.start, c.text])).toEqual([
+        [1, 'a'],
+        [CHUNK_SECONDS + 1, 'b'],
+      ]);
+      expect(progress).toEqual([0.5, 1]);
       await rm(dir, { recursive: true });
     },
     60_000

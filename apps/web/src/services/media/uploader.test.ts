@@ -114,4 +114,28 @@ describe('uploadRecording', () => {
       message: 'zu groß',
     });
   });
+
+  it('sends up to three parts at once and moves the bar while a part is on its way', async () => {
+    const { deps } = setup();
+    let running = 0;
+    let most = 0;
+    deps.put = vi.fn(async (_url, body, _signal, onSent) => {
+      running++;
+      most = Math.max(most, running);
+      onSent?.(body.size / 2);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      onSent?.(body.size);
+      running--;
+    });
+    const progress: number[] = [];
+    const result = await uploadRecording(deps, 'c1', file, 'Stunde', (p) =>
+      progress.push(p.sentBytes)
+    );
+    expect(result.ok).toBe(true);
+    expect(most).toBe(3);
+    // Half a part is reported before any part is done, and the bar ends at the full size.
+    expect(progress).toContain(2 * MB);
+    expect(progress.at(-1)).toBe(10 * MB);
+    expect(Math.max(...progress)).toBe(10 * MB);
+  });
 });

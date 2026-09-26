@@ -190,7 +190,10 @@ export class PgMediaRepository implements MediaRepository {
   }
 
   async rename(id: string, title: string) {
-    await this.pool.query('update media_items set title = $2 where id = $1', [id, title]);
+    await this.pool.query(
+      'update media_items set title = $2, updated_at = now() where id = $1',
+      [id, title]
+    );
   }
 
   async remove(id: string) {

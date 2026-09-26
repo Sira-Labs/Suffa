@@ -113,6 +113,32 @@ describe('Recordings (integration)', () => {
     expect(screen.queryByRole('textbox', { name: 'Neuer Titel' })).toBeNull();
   });
 
+  it('keeps the rename editor open when saving fails', async () => {
+    const base = globalThis.fetch;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === 'PATCH') {
+          return new Response(JSON.stringify({ error: 'invalid' }), { status: 400 });
+        }
+        return base(input, init);
+      })
+    );
+    const router = createMemoryRouter(
+      [{ path: '/', element: <ClassRecordings classId={CLASS} teacher /> }],
+      { initialEntries: ['/'] }
+    );
+    render(<RouterProvider router={router} />);
+    await screen.findByRole('link', { name: 'Stunde 1' });
+    await userEvent.click(screen.getAllByRole('button', { name: 'Umbenennen' })[0]!);
+    const input = screen.getByRole('textbox', { name: 'Neuer Titel' });
+    await userEvent.clear(input);
+    await userEvent.type(input, 'Neu{Enter}');
+    expect(await screen.findByRole('textbox', { name: 'Neuer Titel' })).toHaveValue(
+      'Neu'
+    );
+  });
+
   it('counts played time, not seeking, and marks the recording heard at 85 %', async () => {
     const router = createMemoryRouter(
       [{ path: '/classes/:id/recordings/:mediaId', element: <RecordingPlayer /> }],

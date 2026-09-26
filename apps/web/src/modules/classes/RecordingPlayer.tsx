@@ -219,7 +219,7 @@ export function RecordingPlayer() {
       const to = e.currentTarget.currentTime;
       // Going back before a checkpoint asks it again when playback passes it.
       for (const cp of media.checkpoints) {
-        if (cp.atSec > to + 0.5) shown.current.delete(cp.id);
+        if (cp.atSec > to) shown.current.delete(cp.id);
       }
       lastTime.current = to;
     },
@@ -230,7 +230,7 @@ export function RecordingPlayer() {
       if (previous !== null && !el.seeking) {
         const step = now - previous;
         if (step > 0 && step < MAX_NATURAL_STEP_SEC) pending.current += step;
-        const due = dueCheckpoint(media.checkpoints, previous, now, done);
+        const due = dueCheckpoint(media.checkpoints, previous, now, doneCheckpoints());
         if (due && !open) {
           el.pause();
           setOpen(due);
@@ -255,13 +255,16 @@ export function RecordingPlayer() {
   const teacher = media.interactive?.canEdit === true;
   // Checkpoints not to ask (again): the ones shown in this sitting, and for learners the ones
   // answered right before. Teachers see every checkpoint again when they go back (testing).
-  // Worked out on every render: `shown` is a ref and changes without a re-render.
-  const done = new Set(shown.current);
-  if (!teacher) {
-    for (const cp of media?.checkpoints ?? []) {
-      if (practised[`0:checkpoint:${mediaId}/${cp.id}`]) done.add(cp.id);
+  // Worked out on each call: `shown` is a ref and changes (on seek) without a re-render.
+  const doneCheckpoints = () => {
+    const done = new Set(shown.current);
+    if (!teacher) {
+      for (const cp of media?.checkpoints ?? []) {
+        if (practised[`0:checkpoint:${mediaId}/${cp.id}`]) done.add(cp.id);
+      }
     }
-  }
+    return done;
+  };
 
   const toggleOffline = async () => {
     if (saved) {
@@ -364,7 +367,7 @@ export function RecordingPlayer() {
       )}
       {media.checkpoints.length > 0 && (
         <span className="muted" style={{ fontSize: '0.9rem' }}>
-          {media.checkpoints.length} Checkpoints · {done.size} erledigt
+          {media.checkpoints.length} Checkpoints · {doneCheckpoints().size} erledigt
         </span>
       )}
       <ChapterList

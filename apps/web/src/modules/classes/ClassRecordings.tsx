@@ -58,10 +58,13 @@ export function ClassRecordings({
     return () => window.clearInterval(timer);
   }, [busy, load]);
 
-  const act = async (run: () => Promise<{ ok: boolean; message?: string }>) => {
+  const act = async (
+    run: () => Promise<{ ok: boolean; message?: string }>
+  ): Promise<boolean> => {
     const result = await run();
     setMessage(result.ok ? null : (result.message ?? null));
     await load();
+    return result.ok;
   };
 
   if (!items) return <p className="muted">{message ?? 'Lade Aufnahmen …'}</p>;
@@ -164,7 +167,7 @@ function RenameButton({
   onRename,
 }: {
   title: string;
-  onRename: (title: string) => Promise<void>;
+  onRename: (title: string) => Promise<boolean>;
 }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(title);
@@ -186,9 +189,10 @@ function RenameButton({
   const save = async () => {
     if (!trimmed || saving) return;
     setSaving(true);
-    await onRename(trimmed);
+    const ok = await onRename(trimmed);
     setSaving(false);
-    setEditing(false);
+    // On failure the editor stays open with the typed title; the error shows above the list.
+    if (ok) setEditing(false);
   };
   return (
     <form
@@ -221,7 +225,7 @@ function RenameButton({
   );
 }
 
-function PublishButton({ onPublish }: { onPublish: () => Promise<void> }) {
+function PublishButton({ onPublish }: { onPublish: () => Promise<boolean> }) {
   const [consent, setConsent] = useState(false);
   return (
     <span className="row" style={{ flexWrap: 'wrap' }}>

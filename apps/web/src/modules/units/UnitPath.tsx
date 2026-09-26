@@ -133,7 +133,10 @@ export function UnitPath() {
 
       {!unlocked && <LockedPanel unit={unit.unit} />}
       {unlocked && status.state === 'not-started' && <StartPanel unit={unit.unit} />}
-      {unlocked && <SectionCelebration unit={unit.unit} sections={sections} />}
+      {unlocked && (
+        // Keyed by unit: switching units must not carry the queue over.
+        <SectionCelebration key={unit.unit} unit={unit.unit} sections={sections} />
+      )}
       {unlocked && (
         <ol className="path-sections" aria-label={`Lernpfad Einheit ${unit.unit}`}>
           {sections.map((section) => (

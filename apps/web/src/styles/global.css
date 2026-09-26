@@ -1978,6 +1978,20 @@ textarea.input {
 .checkpoint-card {
   border: 2px solid var(--accent);
 }
+/* Cards that fold away behind their heading (summary, transcript under the player). */
+.collapsible-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.collapsible-head .eyebrow {
+  margin: 0;
+}
+.collapsible-toggle {
+  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+}
 /* Lesson summary: its own scroll area, so a long summary does not push the player away. */
 .summary-body {
   max-height: min(28rem, 60vh);

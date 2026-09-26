@@ -9,3 +9,4 @@ export * from './RouteError';
 export * from './CelebrationToast';
 export * from './WordExample';
 export * from './InlineMarkdown';
+export * from './CollapsibleCard';

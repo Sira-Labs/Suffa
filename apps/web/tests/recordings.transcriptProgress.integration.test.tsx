@@ -28,7 +28,10 @@ const base = {
 };
 
 describe('transcript progress', () => {
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    localStorage.clear();
+  });
 
   it('shows the waiting state, then the percentage, and looks again every few seconds', () => {
     vi.useFakeTimers();
@@ -59,5 +62,20 @@ describe('transcript progress', () => {
     expect(
       screen.getByRole('button', { name: /Automatisch erstellen/ })
     ).toBeInTheDocument();
+  });
+
+  it('keeps a finished transcript folded, with the rerun button still at hand', () => {
+    setup({
+      ...base,
+      status: 'ready',
+      progress: null,
+      cues: [{ start: 0, end: 3, text: 'مرحبا' }],
+    });
+    expect(screen.getByRole('button', { name: /Aufklappen/ })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.getByRole('button', { name: /Neu erstellen/ })).toBeVisible();
   });
 });

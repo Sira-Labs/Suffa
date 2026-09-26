@@ -3,6 +3,7 @@
  * With "Mitlaufen" on, the list scrolls along with playback (only the list, not the page).
  */
 import { useEffect, useRef, useState } from 'react';
+import { CollapsibleCard } from '@/components';
 import { activeCue, clock, type Cue } from '@/services/media/checkpoints';
 
 export function TranscriptPanel({
@@ -28,23 +29,18 @@ export function TranscriptPanel({
 
   if (cues.length === 0) return null;
   return (
-    <section className="card stack" aria-labelledby="transcript-title">
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h2 id="transcript-title" className="eyebrow">
-          Transkript
-        </h2>
-        <label className="row muted" style={{ gap: '0.4rem', fontSize: '0.9rem' }}>
-          <input
-            type="checkbox"
-            checked={follow}
-            onChange={(e) => {
-              setFollow(e.target.checked);
-              saveFollow(e.target.checked);
-            }}
-          />
-          Text mitlaufen lassen
-        </label>
-      </div>
+    <CollapsibleCard id="transcript" title="Transkript">
+      <label className="row muted" style={{ gap: '0.4rem', fontSize: '0.9rem' }}>
+        <input
+          type="checkbox"
+          checked={follow}
+          onChange={(e) => {
+            setFollow(e.target.checked);
+            saveFollow(e.target.checked);
+          }}
+        />
+        Text mitlaufen lassen
+      </label>
       <ol className="transcript" ref={list}>
         {cues.map((cue, i) => (
           <li
@@ -60,7 +56,7 @@ export function TranscriptPanel({
           </li>
         ))}
       </ol>
-    </section>
+    </CollapsibleCard>
   );
 }
 

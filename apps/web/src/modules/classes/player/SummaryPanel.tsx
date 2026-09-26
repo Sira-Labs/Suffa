@@ -3,7 +3,7 @@
  * EU model for one, reads it and publishes or hides it for the class.
  */
 import { useEffect, useRef, useState } from 'react';
-import { ArabicText, InlineMarkdown } from '@/components';
+import { ArabicText, CollapsibleCard, InlineMarkdown } from '@/components';
 import type {
   InteractiveApi,
   LessonSummary,
@@ -103,12 +103,9 @@ export function SummaryPanel({
   if (!teacher) {
     if (!summary?.content) return null;
     return (
-      <section className="card stack" aria-labelledby="summary-title">
-        <h2 id="summary-title" className="eyebrow">
-          Zusammenfassung
-        </h2>
+      <CollapsibleCard id="summary" title="Zusammenfassung">
         <SummaryContent content={summary.content} />
-      </section>
+      </CollapsibleCard>
     );
   }
   if (!canSummarize && !summary) return null;
@@ -125,10 +122,7 @@ export function SummaryPanel({
   };
 
   return (
-    <section className="card stack" aria-labelledby="summary-title">
-      <h2 id="summary-title" className="eyebrow">
-        Zusammenfassung (KI)
-      </h2>
+    <CollapsibleCard id="summary" title="Zusammenfassung (KI)">
       {running && <span className="muted">Die Zusammenfassung wird erstellt …</span>}
       {summary?.status === 'failed' && (
         <span className="feedback-bad">
@@ -168,6 +162,6 @@ export function SummaryPanel({
         </span>
       )}
       {message && <span className="feedback-bad">{message}</span>}
-    </section>
+    </CollapsibleCard>
   );
 }

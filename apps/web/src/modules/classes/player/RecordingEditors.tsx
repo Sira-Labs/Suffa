@@ -4,6 +4,7 @@
  * correct it line by line.
  */
 import { useEffect, useRef, useState } from 'react';
+import { CollapsibleCard } from '@/components';
 import {
   clock,
   type Checkpoint,
@@ -245,35 +246,43 @@ export function TranscriptEditor({
   };
 
   return (
-    <section className="card stack" aria-labelledby="transcript-editor">
-      <h2 id="transcript-editor" className="eyebrow">
-        Transkript bearbeiten
-      </h2>
-      {busy && !stuck && <TranscriptProgress transcript={transcript} />}
-      {stuck && (
-        <span className="feedback-bad">
-          Seit einer Weile tut sich nichts – der Auftrag ist wohl hängen geblieben. Starte
-          ihn neu.
-        </span>
-      )}
-      {transcript?.status === 'failed' && transcript.error && (
-        <span className="feedback-bad">{transcript.error}</span>
-      )}
-      {!canGenerate && !transcript?.cues.length && (
-        <span className="muted" style={{ fontSize: '0.9rem' }}>
-          Automatische Transkripte sind auf diesem Server noch nicht eingerichtet. Du
-          kannst den Text unten selbst eintragen; er erscheint dann beim Abspielen.
-        </span>
-      )}
-      {canGenerate && (!busy || stuck) && (
-        <button
-          className="btn"
-          onClick={() => void generate()}
-          style={{ alignSelf: 'flex-start' }}
-        >
-          {transcript?.cues.length ? 'Neu erstellen (KI)' : 'Automatisch erstellen (KI)'}
-        </button>
-      )}
+    <CollapsibleCard
+      id="transcript-editor"
+      title="Transkript bearbeiten"
+      // Many text fields: folded unless the teacher opens it (or there is nothing yet).
+      defaultOpen={!transcript?.cues.length}
+      lead={
+        <>
+          {busy && !stuck && <TranscriptProgress transcript={transcript} />}
+          {stuck && (
+            <span className="feedback-bad">
+              Seit einer Weile tut sich nichts – der Auftrag ist wohl hängen geblieben.
+              Starte ihn neu.
+            </span>
+          )}
+          {transcript?.status === 'failed' && transcript.error && (
+            <span className="feedback-bad">{transcript.error}</span>
+          )}
+          {!canGenerate && !transcript?.cues.length && (
+            <span className="muted" style={{ fontSize: '0.9rem' }}>
+              Automatische Transkripte sind auf diesem Server noch nicht eingerichtet. Du
+              kannst den Text unten selbst eintragen; er erscheint dann beim Abspielen.
+            </span>
+          )}
+          {canGenerate && (!busy || stuck) && (
+            <button
+              className="btn"
+              onClick={() => void generate()}
+              style={{ alignSelf: 'flex-start' }}
+            >
+              {transcript?.cues.length
+                ? 'Neu erstellen (KI)'
+                : 'Automatisch erstellen (KI)'}
+            </button>
+          )}
+        </>
+      }
+    >
       <ol className="stack" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         {cues.map((cue, i) => (
           <li key={i} className="row" style={{ alignItems: 'flex-start' }}>
@@ -316,6 +325,6 @@ export function TranscriptEditor({
         )}
         {message && <span className="muted">{message}</span>}
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }

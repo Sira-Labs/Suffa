@@ -1,7 +1,6 @@
 /**
  * Transcription (story 8.1) through an OpenAI-style speech-to-text endpoint: Mistral's
- * Voxtral (EU), a self-hosted faster-whisper server (speaches), or any OpenAI-compatible
- * service. Long recordings are cut into 10-minute pieces (upload limits) and the cues are
+ * Voxtral (EU) in production, or any other OpenAI-compatible service. Long recordings are cut into 10-minute pieces (upload limits) and the cues are
  * shifted back into place.
  */
 import { readdir, readFile } from 'node:fs/promises';
@@ -35,14 +34,14 @@ export function isMistral(url: string): boolean {
 /** Length of one piece sent to the service. */
 export const CHUNK_SECONDS = 600;
 
-/** How long one piece may take: a self-hosted, CPU-only Whisper is slower than real time. */
+/** How long one piece may take: generous, so a busy or slow service does not fail a lesson. */
 export const PIECE_TIMEOUT_MS = 60 * 60 * 1000;
 
 type Fetch = typeof fetch;
 
 /**
  * `fetch` for slow services. Node's built-in fetch gives up when no response headers
- * arrive within 5 minutes, which a CPU-only Whisper server easily exceeds for a
+ * arrive within 5 minutes, which a slow or busy service can exceed for a
  * 10-minute piece; this sends the same request over node:http(s) with a longer idle
  * timeout.
  */

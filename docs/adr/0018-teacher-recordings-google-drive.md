@@ -88,23 +88,22 @@ fine for one teacher, up to 100 test users; production verification for `drive.f
 - Chapters appear in the player (tap to jump, current part highlighted); teachers can remove
   them.
 
-## Update 2026-09-26: transcripts on our own server
+## Update 2026-09-26: transcripts in the EU (Mistral Voxtral)
 
 - **Decision (owner):** recordings are not sent to a transcription provider in the US.
-  Transcripts come from a self-hosted Whisper (`suffa-whisper`: speaches with faster-whisper
-  on the CPU, `infra/caprover/one-click/suffa-whisper.yml`), reached only over CapRover's
-  internal network. The api still speaks the OpenAI-compatible protocol, so a GPU build or
-  another self-hosted server needs only a new URL.
+  Transcripts come from Mistral's Voxtral transcription API
+  (`https://api.mistral.ai/v1/audio/transcriptions`, model `voxtral-mini-latest`, EU). The
+  api asks it for segment timestamps and uses the Mistral key.
+- **Considered and dropped:** a self-hosted Whisper on the CPU (speaches/faster-whisper).
+  Nothing would leave the server, but a transcript takes about as long as the recording and
+  needs ~2 GB RAM; Voxtral is fast and EU-hosted. The api still speaks the OpenAI-compatible
+  protocol, so a self-hosted server needs only a new URL, model and token.
 - **Mixed lessons:** the language is detected per 10-minute piece unless
   `SUFFA_TRANSCRIBE_LANGUAGE` forces one; teachers explain Arabic in German, and a fixed `ar`
   garbled those parts.
-- **Slow CPUs:** one piece may take up to an hour (Node's built-in fetch gave up after five
-  minutes without a response). The api logs `transcribe.enabled` with host, model and
+- **Slow services:** one piece may take up to an hour (Node's built-in fetch gave up after
+  five minutes without a response). The api logs `transcribe.enabled` with host, model and
   language at start.
 - The class AI switch stays: off means a class's recordings are never transcribed.
-- **Alternative in the EU (same day):** Mistral's Voxtral transcription API
-  (`https://api.mistral.ai/v1/audio/transcriptions`) works with the same settings; the api
-  asks it for segment timestamps and uses the Mistral key. The owner chooses per server
-  between Voxtral (simpler) and the self-hosted Whisper (nothing leaves the server).
 - **Lesson summaries:** from the transcript, by the EU model, as a draft the teacher
   publishes for the class (migration 0025, ADR-0010 update).

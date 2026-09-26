@@ -162,8 +162,8 @@ Env (App Configs → Environment variables):
 | `SUFFA_TRUSTED_ORIGINS`                                                     | optional: further addresses the app is served from (e.g. the old domain), comma-separated                           | S5          |
 | `SUFFA_VAPID_PUBLIC_KEY`, `SUFFA_VAPID_PRIVATE_KEY`                         | `npx web-push generate-vapid-keys` (once; keep them, new keys cancel every device's reminders)                      | S6          |
 | `SUFFA_VAPID_SUBJECT`                                                       | `mailto:<ops address>` – contact for push services; reminders stay off until all three are set                      | S6          |
-| `SUFFA_TRANSCRIBE_URL`                                                      | optional: Mistral Voxtral or our self-hosted `suffa-whisper` (§11); OpenAI-style transcription endpoint             | S8          |
-| `SUFFA_TRANSCRIBE_TOKEN`, `SUFFA_TRANSCRIBE_MODEL`                          | API token (if the service needs one) and model, default `whisper-1`                                                 | S8          |
+| `SUFFA_TRANSCRIBE_URL`                                                      | optional: `https://api.mistral.ai/v1/audio/transcriptions` (Mistral Voxtral, EU, §11)                               | S8          |
+| `SUFFA_TRANSCRIBE_TOKEN`, `SUFFA_TRANSCRIBE_MODEL`                          | model, default `voxtral-mini-latest`; the token falls back to `SUFFA_MISTRAL_API_KEY` for Mistral                   | S8          |
 | `SUFFA_TRANSCRIBE_LANGUAGE`                                                 | optional: `ar` to force Arabic; empty = detect per piece (mixed German/Arabic lessons)                              | S8          |
 | `SUFFA_APP_ORIGINS`                                                         | native app web view origins for bearer-token API access; default `capacitor://localhost,https://localhost`          | S13         |
 | `SUFFA_IOS_APP_IDS`                                                         | optional: `TEAMID.org.siralabs.suffa` for Universal Links (`/.well-known/apple-app-site-association`)               | S13         |
@@ -551,9 +551,8 @@ official Sentry SDK of the app's language. Nothing else changes on the server.
 ## 10. Capacity (each server)
 
 Tabayyun's guidance is 2 vCPU / 4 GB for its api + web. Suffa adds roughly 1–1.5 GB RAM
-(api, worker, Postgres). Transcoding is CPU-heavy: keep `SUFFA_TRANSCODE_CONCURRENCY=1`, and
-self-hosted transcription (`suffa-whisper`, §11) needs about 2 GB RAM while a model is
-loaded and all the CPU threads it is given. Recommended: **8 GB
+(api, worker, Postgres). Transcoding is CPU-heavy: keep `SUFFA_TRANSCODE_CONCURRENCY=1` (Zoom recordings are
+mostly copied, not re-encoded); transcription runs at Mistral (§11). Recommended: **8 GB
 RAM / 4 vCPU** for both apps together; watch disk (RustFS holds recordings for both).
 GlitchTip adds about 300–500 MB RAM (app + its Postgres) and a little disk for 90 days of events,
 on the staging and tools server only. Production carries the three projects' production apps,
@@ -561,17 +560,26 @@ their databases, RustFS and WAL-G; size its disk for Postgres plus local WAL.
 
 ## 11. Transcription and summaries (EU only)
 
-Recordings and their transcripts never go to a US provider (owner decision 2026-09-26). Two
-ways to transcribe, both through the same `SUFFA_TRANSCRIBE_*` settings:
+Recordings and their transcripts never go to a US provider (owner decision 2026-09-26).
+Both run at Mistral (La Plateforme, EU); no server of our own is needed.
 
-- **A. Mistral Voxtral (EU, simplest):** no server of our own. On `suffa-api` and
-  `suffa-worker` set `SUFFA_MISTRAL_API_KEY` (La Plateforme → API Keys),
-  `SUFFA_TRANSCRIBE_URL=https://api.mistral.ai/v1/audio/transcriptions` and
-  `SUFFA_TRANSCRIBE_MODEL=voxtral-mini-latest` (or the exact Voxtral Mini Transcribe model id
-  shown in the Mistral console). The token is taken from `SUFFA_MISTRAL_API_KEY`; Voxtral
-  detects the language itself and returns segment timestamps.
-- **B. Self-hosted Whisper (`suffa-whisper`, below):** recordings never leave our server;
-  slower on a CPU.
+1. **API key:** Mistral console → La Plateforme → API Keys → "Create new key" (the
+   workspace needs an active plan/billing). Keep it only in CapRover.
+2. **Set on `suffa-api` and `suffa-worker`:**
+
+   | Variable                    | Value                                                           |
+   | --------------------------- | --------------------------------------------------------------- |
+   | `SUFFA_MISTRAL_API_KEY`     | the key from step 1                                             |
+   | `SUFFA_TRANSCRIBE_URL`      | `https://api.mistral.ai/v1/audio/transcriptions`                |
+   | `SUFFA_TRANSCRIBE_MODEL`    | `voxtral-mini-latest` (or the exact Voxtral Mini Transcribe id) |
+   | `SUFFA_TRANSCRIBE_LANGUAGE` | leave empty: Voxtral detects German and Arabic itself           |
+
+   `SUFFA_TRANSCRIBE_TOKEN` is not needed: the api uses `SUFFA_MISTRAL_API_KEY` for Mistral.
+   After the restart the api logs `transcribe.enabled` with host and model.
+
+3. **In the class**, the teacher switches on "KI für Transkripte". New recordings are then
+   transcribed after processing; existing ones via "Automatisch erstellen (KI)" in the
+   player. The transcript appears under the player with the current line marked.
 
 **Summaries and suggestions** (the "Zusammenfassung (KI)" and "Vorschläge holen" buttons in
 the player) run on Mistral as soon as `SUFFA_MISTRAL_API_KEY` is set: `recording.summarize`
@@ -579,46 +587,9 @@ and `recording.suggest` route to `mistral-medium-latest`, then `mistral-small-la
 Anthropic routes for these tasks are switched off (admin → KI shows them). A summary is a
 draft until the teacher publishes it for the class.
 
-### 11.1 Self-hosted Whisper (`suffa-whisper`)
-
-With option B, transcripts are made on our own server, so no recording leaves it. [`suffa-whisper.yml`](../../infra/caprover/one-click/suffa-whisper.yml)
-runs [speaches](https://github.com/speaches-ai/speaches) (faster-whisper on the CPU) with an
-OpenAI-compatible endpoint, internal only. Put it on the server where `suffa-api` and
-`suffa-worker` run: the staging and tools server now, the production server later
-(ADR-0024: real people's recordings belong on production).
-
-1. **Deploy** the template with app name `suffa`. Note the generated API key.
-2. **Download the model once** (on the server, over SSH):
-
-   ```bash
-   docker exec $(docker ps -q -f name=srv-captain--suffa-whisper) \
-     curl -s -X POST -H "Authorization: Bearer <API key>" \
-     http://localhost:8000/v1/models/deepdml/faster-whisper-large-v3-turbo-ct2
-   ```
-
-   `200`/`201` means downloaded or already there (about 1.6 GB in the app's volume). On a
-   small CPU take `Systran/faster-whisper-medium` instead (faster, a little less accurate).
-
-3. **Set on `suffa-api` and `suffa-worker`:**
-
-   | Variable                    | Value                                                               |
-   | --------------------------- | ------------------------------------------------------------------- |
-   | `SUFFA_TRANSCRIBE_URL`      | `http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions`    |
-   | `SUFFA_TRANSCRIBE_TOKEN`    | the API key from step 1                                             |
-   | `SUFFA_TRANSCRIBE_MODEL`    | `deepdml/faster-whisper-large-v3-turbo-ct2` (the model from step 2) |
-   | `SUFFA_TRANSCRIBE_LANGUAGE` | empty (detect per 10-minute piece), or `ar` for Arabic-only lessons |
-
-   After the restart the api logs `transcribe.enabled` with host, model and language.
-
-4. **In the class**, the teacher switches on "KI für Transkripte". New recordings are then
-   transcribed after processing; existing ones via "Automatisch erstellen (KI)" in the
-   player. The transcript appears under the player with the current line marked.
-
-**Speed and load:** on the CPU a transcript takes roughly as long as the recording, or
-longer, depending on cores and model. One recording is transcribed at a time; the client
-waits up to an hour per 10-minute piece. Keep `WHISPER__CPU_THREADS` below the server's
-core count so the other apps stay responsive, and prefer uploading long lessons in the
-evening. With a GPU later, change only the image tag (`-cuda`) and the URL stays the same.
+The api speaks the OpenAI-compatible transcription protocol, so another EU or self-hosted
+service needs only a new URL, model and `SUFFA_TRANSCRIBE_TOKEN`; a token is sent over plain
+http only inside CapRover's network.
 
 ## Troubleshooting
 

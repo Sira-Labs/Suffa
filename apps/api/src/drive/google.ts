@@ -105,7 +105,8 @@ export class HttpGoogleClient implements GoogleClient {
 
   async file(accessToken: string, fileId: string): Promise<DriveFile> {
     const response = await this.fetchImpl(
-      `${FILES_URL}/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size`,
+      // supportsAllDrives: files in shared drives are otherwise answered with 404.
+      `${FILES_URL}/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size&supportsAllDrives=true`,
       { headers: { authorization: `Bearer ${accessToken}` } }
     );
     if (!response.ok) throw new GoogleError('file not accessible', response.status);
@@ -125,7 +126,7 @@ export class HttpGoogleClient implements GoogleClient {
 
   async download(accessToken: string, fileId: string) {
     const response = await this.fetchImpl(
-      `${FILES_URL}/${encodeURIComponent(fileId)}?alt=media`,
+      `${FILES_URL}/${encodeURIComponent(fileId)}?alt=media&supportsAllDrives=true`,
       { headers: { authorization: `Bearer ${accessToken}` } }
     );
     if (!response.ok || !response.body) {

@@ -75,7 +75,19 @@ publisher's exercises, the verbs and the unit test.
 | 🔤 **Alphabet**  | For absolute beginners: the 28 letters in eight lessons with forms, sounds, example words and a two-way quiz.                                       |
 | 🧭 **Entdecken** | A curated library of YouTube videos and podcasts on Arabic and the Quran; started videos are pinned to "Weiterschauen" until seen or unpinned.      |
 | ⭐ **XP**        | Points for reviews, heard tracks, practised items, the daily check-in, units finished on time and stages; shown the moment you earn them.           |
-| 🔁 **Sync**      | Offline-first on each device (IndexedDB) with an outbox and last-write-wins sync; engagement data joins the sync in the engagement sprint.          |
+| 🎯 **Quests**    | Three daily quests, streak with shields, weekly goal (3/5/7 days), badges and levels; checked again on the server so they cannot be faked.          |
+| 🔁 **Sync**      | Offline-first on each device (IndexedDB) with an outbox; everything syncs through the own API once signed in, on phone and computer alike.          |
+
+**With a class and a teacher**
+
+| Area                 | What it does                                                                                                                                         |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 👥 **Classes**       | Teachers create a class and invite with a link or QR code; they approve who joins. Class page with activity, mastery per unit and problem words.     |
+| 🏆 **Class spirit**  | Weekly class challenge, teacher badges and shout-outs, an opt-in weekly league (off for classes of minors), unit certificates, a live class quiz.    |
+| 🎙️ **Recordings**    | The teacher's lessons from Google Drive or upload: transcoded, transcribed, with chapters and checkpoints, playable offline; assignments with dates. |
+| 📺 **Video lessons** | YouTube lessons in the same player with checkpoints and, where permitted, a transcript with tap-to-gloss.                                            |
+| 🤖 **al-Muʿallim**   | An AI assistant teacher that explains, converses, drills and grades along the curriculum; mistakes become review cards; the teacher can override.    |
+| 🔔 **Reminders**     | One reminder a day at the chosen time (web push or the app), never in quiet hours, skipped when today's quest is done; a weekly recap on Sundays.    |
 
 The interface is in **German**; learning content is MSA with full vocalisation.
 
@@ -92,17 +104,19 @@ The interface is in **German**; learning content is MSA with full vocalisation.
 
 ## Where it's going
 
-| Phase                      | When (plan)     | Highlights                                                                          |
-| -------------------------- | --------------- | ----------------------------------------------------------------------------------- |
-| Learning experience        | ✅ Sep 2026     | Unit room, focused sections, guided writing, cloze, levels & stages, XP (on device) |
-| Foundation                 | Oct 2026        | Own API on CapRover, CI, backups (almost done)                                      |
-| Accounts, roles & classes  | Nov 2026        | Student / teacher / admin, invite links, admin panel                                |
-| Engagement                 | Dec 2026        | Server sync of progress, daily quests, streak shields, class challenges, reminders  |
-| **Teacher pilot**          | **Jan 4, 2027** | First real class                                                                    |
-| Teacher recordings         | Jan 2027        | Google Drive import, transcripts, interactive checkpoints, offline audio            |
-| AI teacher **al-Muʿallim** | Feb–Mar 2027    | Explain, converse, drill and grade; Anthropic, OpenRouter or Hugging Face models    |
-| Interactive YouTube        | Mar 2027        | Muhammad al-Andalusi's lessons with checkpoints                                     |
-| iOS & Android apps         | Apr 2027        | Capacitor apps, native reminders and push                                           |
+| Phase                        | Status                  | Highlights                                                                             |
+| ---------------------------- | ----------------------- | -------------------------------------------------------------------------------------- |
+| Learning experience          | ✅ built                | Unit room, focused sections, guided writing, cloze, grammar, alphabet, levels & stages |
+| Foundation                   | ✅ built                | Own API on CapRover, CI, backups, error tracking, staging → production promotion       |
+| Accounts, roles & classes    | ✅ built                | Link, code or passkey sign-in; student / teacher / admin; invite links; admin panel    |
+| Engagement                   | ✅ built                | Daily quests, streak shields, class challenges, reminders, weekly recap                |
+| Teacher recordings           | ✅ built                | Google Drive import, transcripts, interactive checkpoints, offline audio, assignments  |
+| AI teacher **al-Muʿallim**   | ✅ built                | Explain, converse, drill and grade; Anthropic, OpenRouter or Hugging Face models       |
+| Interactive YouTube          | ✅ built                | Video lessons with checkpoints and transcripts                                         |
+| iOS & Android apps           | ◐ built, stores open    | Capacitor apps, native reminders and push; store release after device tests            |
+| Pronunciation, FSRS, English | ▶ week of Sep 28        | Own recordings scored and shared with the teacher, FSRS, content CMS, English UI       |
+| Own production server        | ▶ when the server is up | Separate production with point-in-time backups (ADR-0024)                              |
+| **Teacher pilot**            | **Jan 4, 2027**         | First real class                                                                       |
 
 Details: [roadmap](docs/plan/roadmap.md) · [sprint plan](docs/plan/sprint-plan.md) ·
 [engagement plan](docs/plan/engagement-plan.md) · [content plan](docs/plan/content-plan.md) ·
@@ -113,15 +127,22 @@ Details: [roadmap](docs/plan/roadmap.md) · [sprint plan](docs/plan/sprint-plan.
 ```mermaid
 flowchart LR
   subgraph Device["Phone / desktop — works offline"]
-    PWA[Suffa PWA] --> IDB[(IndexedDB)]
+    PWA["Suffa PWA<br/>(or the iOS/Android app)"] --> IDB[(IndexedDB)]
   end
-  subgraph CapRover
+  subgraph Prod["Production CapRover"]
     Web["suffa-web<br/>Caddy + PWA"] --> API[suffa-api]
-    Worker[suffa-worker] --> DB[(suffa-db<br/>Postgres 17)]
+    Worker["suffa-worker<br/>jobs, transcode, push"] --> DB[(suffa-db<br/>Postgres 17)]
     API --> DB
-    Web --> RustFS[(RustFS)]
+    API --> RustFS[(RustFS<br/>media)]
+    Worker --> RustFS
+  end
+  subgraph Tools["Staging + tools CapRover"]
+    Staging[staging apps]
+    GlitchTip[GlitchTip]
   end
   PWA -- "HTTPS, same origin" --> Web
+  API -. "LLM, STT" .-> AI[(Anthropic / OpenRouter /<br/>Hugging Face)]
+  Prod -. errors .-> GlitchTip
 ```
 
 The device is the source of truth for learning data; the server owns identity, classes,
@@ -151,9 +172,17 @@ run across both workspaces:
 API (health, migrations, sync endpoints, job queue on pg-boss):
 
 ```bash
-npm test -w @suffa/api
+npm test -w @suffa/api                      # Postgres tests run with SUFFA_TEST_DATABASE_URL
 npm run build -w @suffa/api
 SUFFA_DATABASE_URL=postgres://user:pass@localhost:5432/suffa npm start -w @suffa/api
+```
+
+Browser tests (Playwright, desktop and phone) against the built app and API on a throwaway
+database:
+
+```bash
+npm run build -w @suffa/api && npm run build -w @suffa/web
+E2E_DATABASE_URL=postgres://…/suffa_e2e npm run e2e -w @suffa/e2e
 ```
 
 ## Deploy on CapRover
@@ -171,13 +200,22 @@ needs no registry credentials.
 Optional: [`suffa-backup.yml`](infra/caprover/one-click/suffa-backup.yml) (nightly verified
 backups to RustFS) and [`glitchtip.yml`](infra/caprover/one-click/glitchtip.yml) (error tracking
 and uptime checks, no Redis).
+**Releases:** every push to `main` builds the images once, scans them, and deploys them by
+digest to **staging**. **Production** runs on its own server and gets exactly those digests
+after the owner approves the release in GitHub (ADR-0024); a rollback goes through the same
+approval.
+
 Step-by-step guide, env vars and troubleshooting: [docs/ops/caprover-deployment.md](docs/ops/caprover-deployment.md).
 
 ## Sign-in and device sync
 
-Learners sign in by **magic link only** (no passwords, ADR-0008): they enter their email, get a
-link and are signed in on that device with an httpOnly session cookie. Learning data then syncs
-through the own API (`/api/v1/sync`), offline-first as before.
+Learners sign in **without a password** (ADR-0008): they enter their email and get a mail
+with a link and a six-digit code. The link signs in the device that opens it; the code signs in
+any browser it is typed into (for mail apps that open links in their own browser). Once signed
+in, a learner can add a **passkey** in the settings and from then on sign in with Face ID,
+Touch ID or the device PIN. The session is an httpOnly cookie (the apps keep a token in the
+Keychain/Keystore). Learning data then syncs through the own API (`/api/v1/sync`),
+offline-first as before.
 
 - **Server:** set `SUFFA_AUTH_SECRET`, `SUFFA_PUBLIC_URL` and the SMTP variables on `suffa-api`
   (the Google Workspace SMTP relay, as for Tabayyun) — see
@@ -193,20 +231,23 @@ No secrets live in the code; they are set as environment variables only.
 ## Project structure
 
 ```
-apps/web/       PWA (@suffa/web)
-  src/modules/  dashboard (Heute), units (level map, unit path, stations), discover,
-                review, vocab, roots, reading, cloze, writing, speaking, conjugation,
-                exam, library (book media), settings, more
-  src/services/ srs, units & practice (sections, cloze, writing tasks), enrollment,
-                engagement (XP), discover, storage (Dexie), sync, speech, audio, video
-  src/content/  units/einheit-NN.json (own texts), meta.json, sources/ (examples,
-                discover catalogue, publisher audio/video index)
-  tests/        integration tests (Vitest + Testing Library)
-apps/api/       suffa-api / suffa-worker (@suffa/api: Hono, Postgres, migrations)
-tools/content/  scripts that build the video index and find Tatoeba examples
-infra/          Dockerfiles, Caddyfile, CapRover templates
-docs/           specs, ADRs, roadmap, sprint/engagement/content/cost plans, ops runbook
-apps/web/public/brand/   logo (SVG)
+apps/web/        PWA (@suffa/web)
+  src/modules/   dashboard (Heute), units, alphabet, grammar, discover, library, review, vocab,
+                 roots, reading, cloze, writing, speaking, conjugation, exam, classes (incl.
+                 recordings), videos, tutor, engagement, account, settings, admin
+  src/services/  srs, units & practice, enrollment, engagement, sync, passkeys, speech,
+                 audio, video, storage (Dexie)
+  src/native/    bridge for the iOS/Android shell (token storage, deep links, push)
+  src/content/   units/einheit-NN.json (own texts), meta.json, sources/
+apps/api/        suffa-api / suffa-worker (@suffa/api: Hono, Better Auth, Postgres, pg-boss)
+  migrations/    plain SQL migrations
+apps/e2e/        Playwright browser tests (desktop + phone)
+packages/engagement/  XP, quests, streak, badges, levels (shared by app and server)
+packages/llm/    LLM providers (Anthropic, OpenRouter, Hugging Face) behind one interface
+mobile/          Capacitor configuration for the iOS and Android apps
+tools/content/   scripts that build the video index and find Tatoeba examples
+infra/           Dockerfiles, Caddyfile, CapRover templates
+docs/            specs, ADRs, roadmap, sprint/engagement/content/cost plans, ops runbook
 ```
 
 ## Fonts

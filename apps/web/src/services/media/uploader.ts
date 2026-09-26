@@ -147,6 +147,7 @@ export async function uploadRecording(
       } catch (error) {
         if (!(error instanceof TypeError) && !(error instanceof UploadError)) throw error;
         inFlight.delete(n);
+        report();
         tries++;
         if (tries >= MAX_TRIES) {
           return {

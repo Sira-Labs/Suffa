@@ -121,8 +121,8 @@ const RawEnvSchema = z.object({
    * number as Picker app id. Drive import stays off until all four are set.
    */
   /**
-   * Transcription (story 8.1): an OpenAI-compatible /audio/transcriptions endpoint (OpenAI,
-   * Groq, or a self-hosted faster-whisper server such as speaches). Off without a URL.
+   * Transcription (story 8.1): an OpenAI-compatible /audio/transcriptions endpoint; in
+   * production Mistral Voxtral (EU, runbook §11). Off without a URL.
    */
   SUFFA_TRANSCRIBE_URL: z
     .string()
@@ -131,7 +131,7 @@ const RawEnvSchema = z.object({
     .pipe(z.string().url('SUFFA_TRANSCRIBE_URL must be a URL').optional())
     .optional(),
   SUFFA_TRANSCRIBE_TOKEN: z.string().trim().optional(),
-  SUFFA_TRANSCRIBE_MODEL: z.string().trim().default('whisper-1'),
+  SUFFA_TRANSCRIBE_MODEL: z.string().trim().default('voxtral-mini-latest'),
   /** Language of the recordings ("ar"); empty lets the model detect it (mixed lessons). */
   SUFFA_TRANSCRIBE_LANGUAGE: z
     .string()
@@ -378,6 +378,26 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       );
     }
   }
+  // Voxtral uses the same Mistral key as the chat models unless a token is given.
+  const transcribeUrl = raw.SUFFA_TRANSCRIBE_URL
+    ? new URL(raw.SUFFA_TRANSCRIBE_URL)
+    : null;
+  const transcribeToken =
+    raw.SUFFA_TRANSCRIBE_TOKEN ||
+    (transcribeUrl?.hostname === 'api.mistral.ai' ? raw.SUFFA_MISTRAL_API_KEY : '') ||
+    null;
+  // Recordings and the token travel in clear over http: only allowed inside the server
+  // (CapRover's internal network, localhost), never to an outside host.
+  const transcribeInsecure =
+    transcribeUrl !== null &&
+    transcribeToken !== null &&
+    transcribeUrl.protocol === 'http:' &&
+    !isInternalHost(transcribeUrl.hostname);
+  if (transcribeInsecure) {
+    warnings.push(
+      'SUFFA_TRANSCRIBE_URL must use https for an outside host when a token is set; transcription is off'
+    );
+  }
   const android = parseAndroidAppLinks(raw.SUFFA_ANDROID_APP_LINKS);
   warnings.push(...android.issues);
   const fcm = parseServiceAccount(raw.SUFFA_FCM_SERVICE_ACCOUNT);
@@ -442,19 +462,15 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
           },
         }
       : undefined,
-    transcribe: raw.SUFFA_TRANSCRIBE_URL
-      ? {
-          url: raw.SUFFA_TRANSCRIBE_URL,
-          // Voxtral uses the same Mistral key as the chat models unless one is given.
-          token:
-            raw.SUFFA_TRANSCRIBE_TOKEN ||
-            (new URL(raw.SUFFA_TRANSCRIBE_URL).hostname === 'api.mistral.ai'
-              ? raw.SUFFA_MISTRAL_API_KEY || null
-              : null),
-          model: raw.SUFFA_TRANSCRIBE_MODEL,
-          language: raw.SUFFA_TRANSCRIBE_LANGUAGE ?? null,
-        }
-      : undefined,
+    transcribe:
+      raw.SUFFA_TRANSCRIBE_URL && !transcribeInsecure
+        ? {
+            url: raw.SUFFA_TRANSCRIBE_URL,
+            token: transcribeToken,
+            model: raw.SUFFA_TRANSCRIBE_MODEL,
+            language: raw.SUFFA_TRANSCRIBE_LANGUAGE ?? null,
+          }
+        : undefined,
     ai: {
       anthropicKey: raw.SUFFA_ANTHROPIC_API_KEY || undefined,
       openRouterKey: raw.SUFFA_OPENROUTER_API_KEY || undefined,
@@ -584,4 +600,14 @@ export function parseServiceAccount(value: string | undefined): {
       'SUFFA_FCM_SERVICE_ACCOUNT must be the base64 of a Firebase service account JSON',
     ],
   };
+}
+
+/** Hosts inside the server: CapRover's internal service names and the loopback. */
+export function isInternalHost(hostname: string): boolean {
+  return (
+    hostname.startsWith('srv-captain--') ||
+    hostname === 'localhost' ||
+    hostname === '127.0.0.1' ||
+    hostname === '[::1]'
+  );
 }

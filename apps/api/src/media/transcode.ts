@@ -55,7 +55,8 @@ export function videoStreamArgs(info: Probe): string[] {
       ];
   const audio =
     info.audioCodec === 'aac' ? ['-c:a', 'copy'] : ['-c:a', 'aac', '-b:a', '96k'];
-  return ['-map', '0:v:0', '-map', '0:a:0', ...video, ...audio];
+  // 0:V (capital) skips attached pictures, like probe() does: cover art is not the video.
+  return ['-map', '0:V:0', '-map', '0:a:0', ...video, ...audio];
 }
 
 export interface Renditions {

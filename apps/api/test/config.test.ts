@@ -347,6 +347,31 @@ describe('transcription settings', () => {
     ).toBeNull();
   });
 
+  it('keeps the token off plain http to outside hosts, but allows the internal network', () => {
+    const outside = loadConfig({
+      ...base,
+      SUFFA_TRANSCRIBE_URL: 'http://stt.example.org/v1/audio/transcriptions',
+      SUFFA_TRANSCRIBE_TOKEN: 'secret',
+    });
+    expect(outside.transcribe).toBeUndefined();
+    expect(outside.warnings.join(' ')).toMatch(/must use https/);
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL:
+          'http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_TOKEN: 'secret',
+      }).transcribe?.token
+    ).toBe('secret');
+    // Without a token nothing secret is sent: allowed (the recording still travels).
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'http://stt.example.org/v1/audio/transcriptions',
+      }).transcribe?.token
+    ).toBeNull();
+  });
+
   it('refuses a language that is not a two-letter code', () => {
     expect(() =>
       loadConfig({

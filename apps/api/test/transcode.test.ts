@@ -45,7 +45,7 @@ describe('video rendition', () => {
     expect(canCopyVideo(zoom)).toBe(true);
     expect(videoStreamArgs(zoom)).toEqual([
       '-map',
-      '0:v:0',
+      '0:V:0',
       '-map',
       '0:a:0',
       '-c:v',

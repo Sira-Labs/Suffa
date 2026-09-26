@@ -18,13 +18,18 @@ export function Grammar({
   section,
 }: {
   scope: UnitPracticeScope;
-  section?: number;
+  /** One section, or the sections that are open on the unit path. */
+  section?: number | readonly number[];
 }) {
   const points = useMemo(
     () =>
       content.grammatik.filter(
         (p) =>
-          p.einheit === scope.unit && (section === undefined || p.abschnitt === section)
+          p.einheit === scope.unit &&
+          (section === undefined ||
+            (typeof section === 'number'
+              ? p.abschnitt === section
+              : section.includes(p.abschnitt)))
       ),
     [scope.unit, section]
   );

@@ -162,7 +162,7 @@ Env (App Configs → Environment variables):
 | `SUFFA_TRUSTED_ORIGINS`                                                     | optional: further addresses the app is served from (e.g. the old domain), comma-separated                           | S5          |
 | `SUFFA_VAPID_PUBLIC_KEY`, `SUFFA_VAPID_PRIVATE_KEY`                         | `npx web-push generate-vapid-keys` (once; keep them, new keys cancel every device's reminders)                      | S6          |
 | `SUFFA_VAPID_SUBJECT`                                                       | `mailto:<ops address>` – contact for push services; reminders stay off until all three are set                      | S6          |
-| `SUFFA_TRANSCRIBE_URL`                                                      | optional: our self-hosted `suffa-whisper` (§11); any OpenAI-compatible transcription endpoint                       | S8          |
+| `SUFFA_TRANSCRIBE_URL`                                                      | optional: Mistral Voxtral or our self-hosted `suffa-whisper` (§11); OpenAI-style transcription endpoint             | S8          |
 | `SUFFA_TRANSCRIBE_TOKEN`, `SUFFA_TRANSCRIBE_MODEL`                          | API token (if the service needs one) and model, default `whisper-1`                                                 | S8          |
 | `SUFFA_TRANSCRIBE_LANGUAGE`                                                 | optional: `ar` to force Arabic; empty = detect per piece (mixed German/Arabic lessons)                              | S8          |
 | `SUFFA_APP_ORIGINS`                                                         | native app web view origins for bearer-token API access; default `capacitor://localhost,https://localhost`          | S13         |
@@ -173,6 +173,7 @@ Env (App Configs → Environment variables):
 | `SUFFA_ANTHROPIC_API_KEY`                                                   | optional: turns on Anthropic routes (AI gateway, ADR-0010); api and worker                                          | S9          |
 | `SUFFA_OPENROUTER_API_KEY`                                                  | optional: turns on OpenRouter routes (open-weight models)                                                           | S9          |
 | `SUFFA_HF_API_KEY`, `SUFFA_HF_ENDPOINT_URL`                                 | optional: Hugging Face token; endpoint URL for a dedicated Inference Endpoint (router otherwise)                    | S9          |
+| `SUFFA_MISTRAL_API_KEY`                                                     | optional: Mistral (EU); recording summaries/suggestions, and Voxtral transcripts (§11)                              | S15         |
 | GitHub secret `SUFFA_EVAL_ANTHROPIC_API_KEY`                                | optional, CI only: runs the AI evals (`.github/workflows/evals.yml`, ≤ $0.30 per run); use a key with a spend limit | S11         |
 | `SUFFA_GOOGLE_CLIENT_ID`, `SUFFA_GOOGLE_CLIENT_SECRET`                      | OAuth web client (Google Cloud), redirect URI `https://<app>/api/v1/drive/callback`, scope `drive.file`             | S7          |
 | `SUFFA_GOOGLE_API_KEY`, `SUFFA_GOOGLE_APP_ID`                               | browser API key (Picker API, restricted to the app's domain) and the project number                                 | S7          |
@@ -558,10 +559,29 @@ GlitchTip adds about 300–500 MB RAM (app + its Postgres) and a little disk for
 on the staging and tools server only. Production carries the three projects' production apps,
 their databases, RustFS and WAL-G; size its disk for Postgres plus local WAL.
 
-## 11. Transcription (`suffa-whisper`, self-hosted)
+## 11. Transcription and summaries (EU only)
 
-Transcripts of the teachers' recordings are made on our own server, so no recording leaves
-it (no US provider). [`suffa-whisper.yml`](../../infra/caprover/one-click/suffa-whisper.yml)
+Recordings and their transcripts never go to a US provider (owner decision 2026-09-26). Two
+ways to transcribe, both through the same `SUFFA_TRANSCRIBE_*` settings:
+
+- **A. Mistral Voxtral (EU, simplest):** no server of our own. On `suffa-api` and
+  `suffa-worker` set `SUFFA_MISTRAL_API_KEY` (La Plateforme → API Keys),
+  `SUFFA_TRANSCRIBE_URL=https://api.mistral.ai/v1/audio/transcriptions` and
+  `SUFFA_TRANSCRIBE_MODEL=voxtral-mini-latest` (or the exact Voxtral Mini Transcribe model id
+  shown in the Mistral console). The token is taken from `SUFFA_MISTRAL_API_KEY`; Voxtral
+  detects the language itself and returns segment timestamps.
+- **B. Self-hosted Whisper (`suffa-whisper`, below):** recordings never leave our server;
+  slower on a CPU.
+
+**Summaries and suggestions** (the "Zusammenfassung (KI)" and "Vorschläge holen" buttons in
+the player) run on Mistral as soon as `SUFFA_MISTRAL_API_KEY` is set: `recording.summarize`
+and `recording.suggest` route to `mistral-medium-latest`, then `mistral-small-latest`; the
+Anthropic routes for these tasks are switched off (admin → KI shows them). A summary is a
+draft until the teacher publishes it for the class.
+
+### 11.1 Self-hosted Whisper (`suffa-whisper`)
+
+With option B, transcripts are made on our own server, so no recording leaves it. [`suffa-whisper.yml`](../../infra/caprover/one-click/suffa-whisper.yml)
 runs [speaches](https://github.com/speaches-ai/speaches) (faster-whisper on the CPU) with an
 OpenAI-compatible endpoint, internal only. Put it on the server where `suffa-api` and
 `suffa-worker` run: the staging and tools server now, the production server later

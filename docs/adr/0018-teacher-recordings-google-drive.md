@@ -102,3 +102,9 @@ fine for one teacher, up to 100 test users; production verification for `drive.f
   minutes without a response). The api logs `transcribe.enabled` with host, model and
   language at start.
 - The class AI switch stays: off means a class's recordings are never transcribed.
+- **Alternative in the EU (same day):** Mistral's Voxtral transcription API
+  (`https://api.mistral.ai/v1/audio/transcriptions`) works with the same settings; the api
+  asks it for segment timestamps and uses the Mistral key. The owner chooses per server
+  between Voxtral (simpler) and the self-hosted Whisper (nothing leaves the server).
+- **Lesson summaries:** from the transcript, by the EU model, as a draft the teacher
+  publishes for the class (migration 0025, ADR-0010 update).

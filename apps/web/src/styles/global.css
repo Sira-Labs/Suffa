@@ -1978,6 +1978,14 @@ textarea.input {
 .checkpoint-card {
   border: 2px solid var(--accent);
 }
+/* Lesson summary: its own scroll area, so a long summary does not push the player away. */
+.summary-body {
+  max-height: min(28rem, 60vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  overflow-wrap: anywhere;
+  padding-inline-end: 0.25rem;
+}
 .transcript {
   position: relative;
   list-style: none;

@@ -33,9 +33,10 @@ Suffa.
       `suffa-uploads`, `suffa-content`, `suffa`), under the same app name `rustfs`.
     - `srv-captain--*` names resolve only inside one CapRover. Keeping the app name means
       `SUFFA_S3_ENDPOINT=http://srv-captain--rustfs:9000` is the same on both servers.
-  - **Staging and tools** is the current server. It runs `suffa-web-stg`, `suffa-api-stg`,
-    `suffa-worker-stg`, `suffa-db-stg` and `suffa-backup-stg`. It also hosts GlitchTip (errors
-    and uptime checks for both servers) and experiments. Tools live here so they keep working
+  - **Staging and tools** is the current server. Today's apps there (`suffa-web`, `suffa-api`,
+    `suffa-worker`, `suffa-db`, `suffa-backup`) are the staging apps; the names stay, because
+    each server has its own name space. It also hosts GlitchTip (errors and uptime checks for
+    both servers) and experiments. Tools live here so they keep working
     when production is down.
 - **Data rule:** personal data of real people lives only on production. Staging holds test
   accounts and generated data.
@@ -56,8 +57,8 @@ Suffa.
 - **Promotion, not rebuild** (`.github/workflows/release.yml`):
   - **Build once:** CI builds each image once, smoke-tests and scans it, and publishes exactly
     that image. It is pushed, not rebuilt.
-  - **Staging:** every push to `main` deploys it by digest to the `-stg` apps. The workflow
-    then checks that staging reports the new version.
+  - **Staging:** every push to `main` deploys it by digest to the staging apps, in the GitHub
+    environment `staging`. The workflow then checks that staging reports the new version.
   - **Production:** a separate job bound to the GitHub environment `production`, where the
     owner is the required reviewer. After approval it deploys the **same digests** to
     production. Nothing is rebuilt between staging and production.
@@ -95,12 +96,13 @@ Suffa.
   - The backups section ("monthly restore drill into staging") is replaced by the backup and
     drill rules above.
   - Its RTO of 2 h / RPO of 24 h becomes RPO minutes (WAL) for production.
-- **Release workflow:** `main` deploys only to `-stg` apps. Production is a separate, approved
-  job that promotes the digests staging runs.
+- **Release workflow:** `main` deploys only to staging (GitHub environment `staging`).
+  Production is a separate, approved job that promotes the digests staging runs; a rollback
+  workflow deploys an earlier release through the same approval.
 - **Runbook:** `docs/ops/caprover-deployment.md` describes both servers, the GitHub
   environments, the production secrets and GlitchTip over HTTPS.
-- **The move:** the current apps without suffix become staging. Either create the `-stg` apps
-  or point the staging app variables at the old names until then (runbook §6).
+- **The move:** nothing is renamed. Today's apps and settings on the current server become
+  staging as they are; the release binds them to the GitHub environment `staging`.
 - **Owner tasks:**
   - order the production server;
   - sign Hetzner's data processing agreement;

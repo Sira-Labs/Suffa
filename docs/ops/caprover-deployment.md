@@ -21,10 +21,10 @@ Internet ─▶ CapRover nginx (TLS) ─▶ suffa-web (Caddy :80) ─/api──�
 
 Suffa runs on **two independent CapRover servers** (Sīra family decision, Arqam ADR-0020):
 
-| Server                               | Runs                                                                                                          | Data                                            |
-| ------------------------------------ | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
-| **Staging and tools** (current host) | `suffa-web-stg`, `suffa-api-stg`, `suffa-worker-stg`, `suffa-db-stg`, `suffa-backup-stg`, `rustfs`, GlitchTip | test accounts and generated data only           |
-| **Production** (new, Germany)        | `suffa-web`, `suffa-api`, `suffa-worker`, `suffa-db`, `suffa-backup`, WAL-G, its **own** `rustfs`             | real learners; the only place for personal data |
+| Server                               | Runs                                                                                                     | Data                                            |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **Staging and tools** (current host) | `suffa-web`, `suffa-api`, `suffa-worker`, `suffa-db`, `suffa-backup` (today's apps), `rustfs`, GlitchTip | test accounts and generated data only           |
+| **Production** (new, Germany)        | `suffa-web`, `suffa-api`, `suffa-worker`, `suffa-db`, `suffa-backup`, WAL-G, its **own** `rustfs`        | real learners; the only place for personal data |
 
 - **Every push to `main`** is deployed to the staging apps and checked there (`/healthz` and
   `/healthz-web` report the new `sha-…`).
@@ -46,17 +46,18 @@ Suffa runs on **two independent CapRover servers** (Sīra family decision, Arqam
 - **Both servers:** SSH by key only; firewall opens 80, 443 and 22 only; CapRover dashboard
   with a strong password and 2FA; unattended security updates.
 
-The sections below describe one server. The app names without `-stg` are production, and
-staging uses the same steps with the `-stg` names and its own secrets.
+The sections below describe one server; both servers use the same app names, since each
+CapRover has its own name space. Staging and production differ only in their secrets and
+domains.
 
-### Moving today's apps to staging
+### Today's apps are staging
 
-Today's apps (`suffa-web`, `suffa-api`, … without suffix) are on the staging and tools server.
-Until `-stg` apps exist, point the staging variables at them (§6):
-`CAPROVER_APP_API=suffa-api`, `CAPROVER_APP_WORKER=suffa-worker`, `CAPROVER_APP_WEB=suffa-web`,
-`CAPROVER_APP_BACKUP=suffa-backup`. Otherwise the next release tries to deploy to `suffa-*-stg`
-and fails. Later you can create the `-stg` apps (e.g. domain `suffa-stg.<domain>`) and remove
-the variables.
+Nothing is renamed or moved. The apps on the current server (`suffa-web`, `suffa-api`, … without
+suffix) are staging as they are, with the repository's `CAPROVER_SERVER` and
+`CAPROVER_APP_TOKEN_*`. The release binds them to the GitHub environment **`staging`**; values set
+in that environment win over the repository's. Its URL defaults to
+`https://suffa.siralabs.org`. When that domain moves to production (§8.5), give staging its own
+domain and set `SUFFA_STAGING_URL` (repository or environment `staging`).
 
 ## Quick start: one-click templates (YAML)
 
@@ -267,14 +268,15 @@ nginx configurations).
        approval; approve the newest run instead.
    - Before production exists, it only leaves a notice.
 
-**Repository** (Settings → Secrets and variables → Actions): **staging**
+**Staging:** the repository settings as they are, or the same names in the environment
+`staging` (Settings → Environments → `staging`, no reviewer needed). Environment values win.
 
-| Kind     | Name                                                      | Value                                                                     |
-| -------- | --------------------------------------------------------- | ------------------------------------------------------------------------- |
-| variable | `CAPROVER_SERVER`                                         | `https://captain.<staging root domain>`                                   |
-| variable | `SUFFA_STAGING_URL`                                       | e.g. `https://suffa-stg.<domain>`; without it production is never offered |
-| variable | `CAPROVER_APP_API` / `_WORKER` / `_WEB` / `_BACKUP`       | only to override `suffa-*-stg` (see "Moving today's apps to staging")     |
-| secret   | `CAPROVER_APP_TOKEN_API` / `_WORKER` / `_WEB` / `_BACKUP` | app tokens of the staging apps                                            |
+| Kind     | Name                                                      | Value                                                                         |
+| -------- | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| variable | `CAPROVER_SERVER`                                         | `https://captain.<staging root domain>`                                       |
+| secret   | `CAPROVER_APP_TOKEN_API` / `_WORKER` / `_WEB` / `_BACKUP` | app tokens of the staging apps (all four, or none to skip staging)            |
+| variable | `SUFFA_STAGING_URL`                                       | optional; default `https://suffa.siralabs.org` until that domain moves (§8.5) |
+| variable | `CAPROVER_APP_API` / `_WORKER` / `_WEB` / `_BACKUP`       | optional; default `suffa-api` / `suffa-worker` / `suffa-web` / `suffa-backup` |
 
 **Environment `production`** (Settings → Environments → New environment → `production`):
 
@@ -443,7 +445,8 @@ production server. The server's own RustFS is not a backup of the server.
 ### 8.5 When production goes live
 
 1. Production apps deployed through the approved release; `suffa.siralabs.org` points at the
-   production server; staging gets its own domain (`suffa-stg.<domain>`).
+   production server; staging gets its own domain (`suffa-stg.<domain>`), set as
+   `SUFFA_STAGING_URL`.
 2. The owner, family and friends sign up again on production. Nothing is copied from staging.
 3. On staging, delete their accounts: each person with **Einstellungen → Konto löschen**
    (story 4.4), or the admin with `delete from users where email in (…)`. Sessions, devices,

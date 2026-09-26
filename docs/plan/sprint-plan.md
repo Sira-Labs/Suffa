@@ -59,7 +59,7 @@ pie showData
 | 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                    |
 | 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                                  |
 | 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                         |
-| 2.1 release workflow    | ✅     | 2026-09-25 (ADR-0024): `main` deploys to the `-stg` apps by digest; production is 2.7                                                               |
+| 2.1 release workflow    | ✅     | 2026-09-25 (ADR-0024): `main` deploys to staging (environment `staging`) by digest; production is 2.7                                               |
 | 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                        |
 | 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; production backups are 2.8    |
 | 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                      |
@@ -124,7 +124,7 @@ pie showData
 ### Sprint 2b — _"Production of its own"_ (ADR-0024, added 2026-09-25)
 
 The Sīra family moves production to a new server in Germany (Arqam ADR-0020). The current host
-becomes staging and tools: every `-stg` app, GlitchTip and the uptime checks. Only the owner,
+becomes staging and tools: today's apps as staging, GlitchTip and the uptime checks. Only the owner,
 family and friends use Suffa today, so nothing moves: they sign up again on production.
 
 | #   | Story                                                                                                                                                                                                                                                                                                                                                                                                                                            | Pts | Acceptance                                                                                                                                                                                                                                                                        |

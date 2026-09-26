@@ -50,8 +50,8 @@ describe('HttpGoogleClient', () => {
           ? Response.json({ access_token: 'a2' })
           : Response.json({ error: 'invalid_grant' }, { status: 400 });
       }
-      if (url.endsWith('alt=media')) return new Response('bytes');
-      if (url.includes('/files/f1')) {
+      if (url.includes('alt=media&supportsAllDrives=true')) return new Response('bytes');
+      if (url.includes('/files/f1?') && url.endsWith('supportsAllDrives=true')) {
         return Response.json({
           id: 'f1',
           name: 'Stunde.mp4',

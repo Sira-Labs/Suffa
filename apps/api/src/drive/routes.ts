@@ -117,11 +117,16 @@ export function createDriveRoutes(deps: DriveRouteDeps): Hono<ActorEnv> {
       c.get('actor').id,
       parsed.data.fileIds
     );
-    if (!result.ok)
+    if (!result.ok) {
+      deps.log.warn(
+        { reason: result.reason, files: parsed.data.fileIds.length, ...result.detail },
+        'drive.import_refused'
+      );
       return c.json(
         { error: result.reason },
         result.reason === 'not_connected' ? 409 : 422
       );
+    }
     return c.json({ ids: result.ids }, 202);
   });
 

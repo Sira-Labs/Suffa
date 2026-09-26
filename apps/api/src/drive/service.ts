@@ -70,6 +70,8 @@ export type ImportResult =
         | 'too_large'
         | 'quota_exceeded'
         | 'not_accessible';
+      /** For the log only: Google's status or the refused file type, never file names. */
+      detail?: { googleStatus?: number; mimeType?: string };
     };
 
 export class DriveService {
@@ -115,12 +117,24 @@ export class DriveService {
       try {
         files.push(await this.google.file(token, id));
       } catch (error) {
-        if (error instanceof GoogleError) return { ok: false, reason: 'not_accessible' };
+        if (error instanceof GoogleError) {
+          return {
+            ok: false,
+            reason: 'not_accessible',
+            detail: { googleStatus: error.status },
+          };
+        }
         throw error;
       }
     }
-    if (files.some((f) => !isSupportedType(f.mimeType)))
-      return { ok: false, reason: 'unsupported_type' };
+    const unsupported = files.find((f) => !isSupportedType(f.mimeType));
+    if (unsupported) {
+      return {
+        ok: false,
+        reason: 'unsupported_type',
+        detail: { mimeType: unsupported.mimeType },
+      };
+    }
     if (files.some((f) => f.size > MAX_RECORDING_BYTES))
       return { ok: false, reason: 'too_large' };
     const total = files.reduce((sum, f) => sum + f.size, 0);

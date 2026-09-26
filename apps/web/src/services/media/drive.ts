@@ -59,6 +59,14 @@ export function driveConnectUrl(returnTo: string): string {
 }
 
 /* Minimal typings of the parts of gapi / google.picker used here. */
+interface DocsView {
+  setMimeTypes(types: string): DocsView;
+  setIncludeFolders(include: boolean): DocsView;
+  setSelectFolderEnabled(enabled: boolean): DocsView;
+  setEnableDrives(enabled: boolean): DocsView;
+  setOwnedByMe(owned: boolean): DocsView;
+  setLabel(label: string): DocsView;
+}
 interface PickerBuilder {
   addView(view: unknown): PickerBuilder;
   enableFeature(feature: string): PickerBuilder;
@@ -73,9 +81,9 @@ interface PickerBuilder {
 }
 interface GooglePicker {
   PickerBuilder: new () => PickerBuilder;
-  DocsView: new (viewId?: string) => { setMimeTypes(types: string): unknown };
+  DocsView: new (viewId?: string) => DocsView;
   ViewId: { DOCS: string };
-  Feature: { MULTISELECT_ENABLED: string };
+  Feature: { MULTISELECT_ENABLED: string; SUPPORT_DRIVES: string };
   Action: { PICKED: string; CANCEL: string };
 }
 declare global {
@@ -125,11 +133,20 @@ export const PICKABLE_TYPES = [
 export async function pickRecordings(status: DriveStatus, accessToken: string) {
   const picker = await loadPicker();
   return new Promise<string[]>((resolve) => {
-    const view = new picker.DocsView(picker.ViewId.DOCS);
-    view.setMimeTypes(PICKABLE_TYPES);
+    // Folders stay browsable (recordings often sit in a course folder), files shared with
+    // the teacher and shared drives get their own tabs.
+    const view = (label: string) =>
+      new picker.DocsView(picker.ViewId.DOCS)
+        .setMimeTypes(PICKABLE_TYPES)
+        .setIncludeFolders(true)
+        .setSelectFolderEnabled(false)
+        .setLabel(label);
     new picker.PickerBuilder()
-      .addView(view)
+      .addView(view('Meine Ablage').setOwnedByMe(true))
+      .addView(view('Für mich freigegeben').setOwnedByMe(false))
+      .addView(view('Geteilte Ablagen').setEnableDrives(true))
       .enableFeature(picker.Feature.MULTISELECT_ENABLED)
+      .enableFeature(picker.Feature.SUPPORT_DRIVES)
       .setOAuthToken(accessToken)
       .setDeveloperKey(status.apiKey)
       .setAppId(status.appId)

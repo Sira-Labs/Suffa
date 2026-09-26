@@ -169,7 +169,7 @@ Write in German:
 - vocabulary: up to 15 important Arabic words that were taught, with full vocalisation (tashkīl) and their German meaning;
 - grammar: the grammar points that were explained (may be empty).
 
-Only use what the transcript says; do not add content from outside the lesson. The transcript comes from speech recognition and may contain mistakes: leave out what you cannot make sense of. Arabic in Arabic letters only.`;
+Only use what the transcript says; do not add content from outside the lesson. The transcript comes from speech recognition and may contain mistakes: leave out what you cannot make sense of. Arabic in Arabic letters only. Plain text: no Markdown (no asterisks, no italics).`;
 
 /** Model output → a summary within the limits (overlong lists are cut, not refused). */
 export function toSummary(raw: unknown): LessonSummary {

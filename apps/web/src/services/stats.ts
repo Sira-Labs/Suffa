@@ -112,35 +112,6 @@ export function isStreakBroken(logs: ReviewLog[], now: Date = new Date()): boole
   return days !== null && days >= 2;
 }
 
-export interface HeatCell {
-  date: string;
-  count: number;
-}
-
-/** Review count per day over the last `days` days (for the heatmap). */
-export function reviewHeatmap(
-  logs: ReviewLog[],
-  days = 28,
-  now: Date = new Date()
-): HeatCell[] {
-  const counts = new Map<string, number>();
-  for (const l of logs) {
-    const key = l.reviewedAt.slice(0, 10);
-    counts.set(key, (counts.get(key) ?? 0) + 1);
-  }
-  const cells: HeatCell[] = [];
-  const cursor = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  );
-  cursor.setUTCDate(cursor.getUTCDate() - (days - 1));
-  for (let i = 0; i < days; i++) {
-    const key = cursor.toISOString().slice(0, 10);
-    cells.push({ date: key, count: counts.get(key) ?? 0 });
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
-  return cells;
-}
-
 export interface NextRecommendation {
   text: string;
   to: string;

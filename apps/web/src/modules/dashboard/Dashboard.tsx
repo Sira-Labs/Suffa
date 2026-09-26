@@ -5,7 +5,8 @@ import { content } from '@/content';
 import { ArabicText } from '@/components';
 import { Icon } from '@/components/Icon';
 import { isTtsSupported, speakArabic } from '@/services/speech';
-import { masteryBuckets, reviewHeatmap, weakCards } from '@/services/stats';
+import { masteryBuckets, weakCards } from '@/services/stats';
+import { activityHeatmap, activityLabel } from '@/services/activity';
 import { localDay, wordOfTheDay } from '@/services/today';
 import { XP_RULES } from '@/services/engagement/xp';
 import { ForgettingReminder } from './ForgettingReminder';
@@ -15,6 +16,8 @@ import {
   useContentStore,
   useEngagementStore,
   useEnrollmentStore,
+  useListenStore,
+  usePracticeStore,
   useSrsStore,
 } from '@/state';
 import { CurrentUnitCard, currentUnit } from './CurrentUnitCard';
@@ -23,7 +26,7 @@ import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { TodayQuests } from '@/modules/engagement/TodayQuests';
 import { TodayClassCard } from '@/modules/classes/TodayClassCard';
 import { WeeklyRecapCard } from './WeeklyRecapCard';
-import { useEngagement } from '@/modules/engagement/useEngagement';
+import { useEngagement, useLearnerTimeZone } from '@/modules/engagement/useEngagement';
 
 const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
   weekday: 'long',
@@ -56,8 +59,23 @@ export function Dashboard() {
   const mastery = masteryBuckets(cards);
   const weak = weakCards(cards, logs);
   const streak = engagement.streak.current;
-  const heat = reviewHeatmap(logs);
-  const maxHeat = Math.max(1, ...heat.map((h) => h.count));
+  // Every kind of learning counts, on the learner's own days (like the streak).
+  const listened = useListenStore((s) => s.progress);
+  const practised = usePracticeStore((s) => s.records);
+  const timeZone = useLearnerTimeZone();
+  const heat = useMemo(
+    () =>
+      activityHeatmap(
+        {
+          reviews: logs,
+          tracks: Object.values(listened),
+          practice: Object.values(practised),
+        },
+        timeZone
+      ),
+    [logs, listened, practised, timeZone]
+  );
+  const maxHeat = Math.max(1, ...heat.map((h) => h.total));
   const todayKey = localDay(new Date());
   const { weekXp, totalXp } = engagement;
   // The word of the day comes from the units reached so far.
@@ -199,19 +217,19 @@ export function Dashboard() {
 
         <div className="card stack">
           <strong>Aktivität (letzte 28 Tage)</strong>
-          <div className="row" style={{ gap: 4 }} aria-label="Wiederholungs-Heatmap">
+          <div className="row" style={{ gap: 4 }} aria-label="Lern-Aktivität je Tag">
             {heat.map((cell) => {
-              const intensity = cell.count / maxHeat;
+              const intensity = cell.total / maxHeat;
               return (
                 <span
                   key={cell.date}
-                  title={`${cell.date}: ${cell.count} Wiederholungen`}
+                  title={activityLabel(cell)}
                   style={{
                     width: 16,
                     height: 16,
                     borderRadius: 3,
                     background:
-                      cell.count === 0
+                      cell.total === 0
                         ? 'var(--bg-elev-2)'
                         : `color-mix(in srgb, var(--accent) ${20 + intensity * 80}%, transparent)`,
                   }}

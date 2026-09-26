@@ -17,7 +17,7 @@ import type { ObjectStorage } from '../storage/objectStorage.js';
 import type { MediaRepository } from '../media/repository.js';
 import {
   CLASS_QUOTA_BYTES,
-  isSupportedType,
+  recordingContentType,
   MAX_RECORDING_BYTES,
   processRecording,
   recordingKey,
@@ -127,7 +127,11 @@ export class DriveService {
         throw error;
       }
     }
-    const unsupported = files.find((f) => !isSupportedType(f.mimeType));
+    const typed = files.map((f) => ({
+      ...f,
+      contentType: recordingContentType(f.mimeType, f.name),
+    }));
+    const unsupported = typed.find((f) => !f.contentType);
     if (unsupported) {
       return {
         ok: false,
@@ -142,7 +146,7 @@ export class DriveService {
       return { ok: false, reason: 'quota_exceeded' };
     }
     const ids: string[] = [];
-    for (const f of files) {
+    for (const f of typed) {
       const id = randomUUID();
       await this.media.create({
         id,
@@ -154,7 +158,7 @@ export class DriveService {
         originalKey: recordingKey(classId, id, 'original'),
         originalName: f.name.slice(0, 255),
         originalSize: f.size,
-        contentType: f.mimeType,
+        contentType: f.contentType!,
         uploadId: null,
         driveFileId: f.id,
       });

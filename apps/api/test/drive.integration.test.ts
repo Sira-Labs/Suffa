@@ -39,6 +39,14 @@ class FakeGoogle implements GoogleClient {
       size: 11,
       body: 'fake-mp3-11',
     },
+    // Drive often labels an MP4 as a generic binary file.
+    f_video_0001: {
+      id: 'f_video_0001',
+      name: 'Unterricht 5.MP4',
+      mimeType: 'application/octet-stream',
+      size: 12,
+      body: 'fake-mp4-012',
+    },
     f_notes_00001: {
       id: 'f_notes_00001',
       name: 'notes.pdf',
@@ -257,6 +265,18 @@ describe.skipIf(!dbUrl || !s3)('Google Drive import (Postgres + S3)', () => {
     expect(
       new TextDecoder().decode((await storage.get('media', item!.originalKey))!)
     ).toBe('fake-mp3-11');
+  });
+
+  it('imports an MP4 that Drive labels as a generic binary file', async () => {
+    const accepted = await call('teacher', 'POST', `/classes/${classId}/media/drive`, {
+      fileIds: ['f_video_0001'],
+    });
+    expect(accepted.status).toBe(202);
+    const { ids } = (await accepted.json()) as { ids: string[] };
+    expect(await new PgMediaRepository(pool).byId(ids[0]!)).toMatchObject({
+      contentType: 'video/mp4',
+      title: 'Unterricht 5',
+    });
   });
 
   it('disconnects and revokes', async () => {

@@ -60,7 +60,6 @@ export function driveConnectUrl(returnTo: string): string {
 
 /* Minimal typings of the parts of gapi / google.picker used here. */
 interface DocsView {
-  setMimeTypes(types: string): DocsView;
   setIncludeFolders(include: boolean): DocsView;
   setSelectFolderEnabled(enabled: boolean): DocsView;
   setEnableDrives(enabled: boolean): DocsView;
@@ -116,28 +115,16 @@ function loadPicker(): Promise<GooglePicker> {
   return loading;
 }
 
-export const PICKABLE_TYPES = [
-  'audio/mpeg',
-  'audio/mp4',
-  'audio/x-m4a',
-  'audio/aac',
-  'audio/wav',
-  'audio/ogg',
-  'audio/webm',
-  'video/mp4',
-  'video/quicktime',
-  'video/webm',
-].join(',');
-
 /** Opens the Picker; resolves with the chosen file ids (empty when cancelled). */
 export async function pickRecordings(status: DriveStatus, accessToken: string) {
   const picker = await loadPicker();
   return new Promise<string[]>((resolve) => {
     // Folders stay browsable (recordings often sit in a course folder), files shared with
-    // the teacher and shared drives get their own tabs.
+    // the teacher and shared drives get their own tabs. No type filter: Drive often labels
+    // an MP4 as `application/octet-stream`, which a filter greys out; the server decides
+    // by type and file extension instead.
     const view = (label: string) =>
       new picker.DocsView(picker.ViewId.DOCS)
-        .setMimeTypes(PICKABLE_TYPES)
         .setIncludeFolders(true)
         .setSelectFolderEnabled(false)
         .setLabel(label);

@@ -26,6 +26,26 @@ function setup() {
     setTimeZone: async (userId, tz) => {
       calls.push(`tz ${userId} ${tz}`);
     },
+    listPasskeys: async () => [
+      {
+        id: 'pk-phone',
+        name: null,
+        aaguid: 'ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4',
+        synced: true,
+        createdAt: '2026-09-26T08:00:00.000Z',
+      },
+      {
+        id: 'pk-key',
+        name: 'Schlüssel',
+        aaguid: null,
+        synced: false,
+        createdAt: '2026-09-25T08:00:00.000Z',
+      },
+    ],
+    deletePasskey: async (userId, id) => {
+      calls.push(`passkey ${userId} ${id}`);
+      return id === 'pk-phone';
+    },
   };
   const app = createAccountRoutes({
     repo,
@@ -53,6 +73,39 @@ describe('account routes', () => {
     ]);
     expect(JSON.stringify(body)).not.toMatch(/token/i);
     expect(response.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('lists passkeys with their provider, without keys or credential ids', async () => {
+    const { app } = setup();
+    const response = await app.request('/passkeys');
+    expect(await response.json()).toEqual({
+      passkeys: [
+        {
+          id: 'pk-phone',
+          name: null,
+          provider: 'Google Password Manager',
+          synced: true,
+          createdAt: '2026-09-26T08:00:00.000Z',
+        },
+        {
+          id: 'pk-key',
+          name: 'Schlüssel',
+          provider: null,
+          synced: false,
+          createdAt: '2026-09-25T08:00:00.000Z',
+        },
+      ],
+    });
+    expect(response.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('removes one own passkey and answers 404 for anything else', async () => {
+    const { app, calls } = setup();
+    expect((await app.request('/passkeys/pk-phone', { method: 'DELETE' })).status).toBe(
+      204
+    );
+    expect((await app.request('/passkeys/other', { method: 'DELETE' })).status).toBe(404);
+    expect(calls).toEqual([`passkey ${USER} pk-phone`, `passkey ${USER} other`]);
   });
 
   it('ends all other sessions of the signed-in user only', async () => {

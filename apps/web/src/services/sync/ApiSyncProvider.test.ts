@@ -247,4 +247,25 @@ describe('ApiSyncProvider during a server outage', () => {
     await provider.refresh();
     expect(provider.isServerDown()).toBe(false);
   });
+
+  it('lists and removes passkeys of the account', async () => {
+    const passkey = {
+      id: 'pk 1',
+      name: null,
+      provider: 'iCloud Keychain',
+      synced: true,
+      createdAt: '2026-09-26T08:00:00.000Z',
+    };
+    const { provider, calls } = fakeApi((_path, init) =>
+      init?.method === 'DELETE'
+        ? new Response(null, { status: 204 })
+        : json({ passkeys: [passkey] })
+    );
+    expect(await provider.listPasskeys()).toEqual({ ok: true, value: [passkey] });
+    expect(await provider.deletePasskey('pk 1')).toEqual({ ok: true, value: undefined });
+    expect(calls.map((c) => c.path)).toEqual([
+      '/api/v1/account/passkeys',
+      '/api/v1/account/passkeys/pk%201',
+    ]);
+  });
 });

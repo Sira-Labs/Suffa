@@ -1,6 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSyncStore } from '@/state';
 import { signInLinkError } from '@/modules/settings/Settings';
+import { PasskeySignIn } from './PasskeySignIn';
 import { SignInForm } from './SignInForm';
 import { safeNext, setSignInSkipped, signInReturnPath } from '@/services/signInGate';
 
@@ -52,6 +53,7 @@ export function SignIn() {
               returnTo={signInReturnPath(next)}
               onSignedIn={() => navigate(next, { replace: true })}
             />
+            <PasskeySignIn onSignedIn={() => navigate(next, { replace: true })} />
             <button className="btn sign-in-skip" type="button" onClick={continueLocally}>
               Ohne Konto weiter – dein Lernstand bleibt nur auf diesem Gerät
             </button>

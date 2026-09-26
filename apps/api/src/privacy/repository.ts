@@ -16,6 +16,8 @@ export interface AccountExport {
   profile: Record<string, unknown>;
   secondFactorEnabled: boolean;
   sessions: Record<string, unknown>[];
+  /** Passkeys without their public keys and credential ids. */
+  passkeys: Record<string, unknown>[];
   classes: Record<string, unknown>[];
   learningData: Record<SyncTableName, Record<string, unknown>[]>;
   /** What the server derived from the learning data: XP, daily quests, badges (story 5.4). */
@@ -95,6 +97,10 @@ export class PgPrivacyRepository implements PrivacyRepository {
       sessions: await q(
         `select created_at, updated_at as last_active_at, expires_at, ip_address, user_agent
            from sessions where user_id = $1 order by created_at`
+      ),
+      passkeys: await q(
+        `select name, device_type, backed_up, transports, aaguid, created_at
+           from passkeys where user_id = $1 order by created_at`
       ),
       classes: await q(
         `select c.name, m.class_role, m.status, m.joined_at, m.approved_at

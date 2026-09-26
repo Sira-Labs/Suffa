@@ -58,7 +58,7 @@ test('signs in with the code when the mail app opens the link elsewhere @mobile'
 
   // The code from the same mail signs this browser in and goes on to the wanted page.
   await page.getByLabel('Anmeldecode').fill(code);
-  await page.getByRole('button', { name: 'Anmelden' }).click();
+  await page.getByRole('button', { name: 'Anmelden', exact: true }).click();
   await expect(page).toHaveURL(/\/vocab$/);
   const me = await page.request.get('/api/v1/me');
   expect(await me.json()).toMatchObject({ email });

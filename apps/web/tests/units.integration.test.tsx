@@ -220,6 +220,35 @@ describe('Units (integration)', () => {
     expect(useCelebrationStore.getState().current).toMatchObject({ title: 'Richtig' });
   });
 
+  it('steps back and forth through the sentences to speak and says where the learner is', async () => {
+    const user = userEvent.setup();
+    const [first] = dialogueSections(content, 1);
+    const total = first!.lineIds.length;
+    renderAt('/units/1/speak?section=1');
+    expect(await screen.findByText(`Satz 1 von ${total}`)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Nächster Satz →' }));
+    expect(screen.getByText(`Satz 2 von ${total}`)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '← Vorheriger Satz' }));
+    await user.click(screen.getByRole('button', { name: '← Vorheriger Satz' }));
+    expect(screen.getByText(`Satz ${total} von ${total}`)).toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'Station geschafft' })).toBeNull();
+  });
+
+  it('shows the way on once every sentence of a section is spoken', async () => {
+    const [first] = dialogueSections(content, 1);
+    const lines = first!.lineIds;
+    for (const id of lines)
+      await usePracticeStore.getState().practise(1, 'speak', id, lines);
+    renderAt('/units/1/speak?section=1');
+    const done = await screen.findByRole('region', { name: 'Station geschafft' });
+    expect(within(done).getByText('Sprechen geschafft')).toBeInTheDocument();
+    expect(
+      within(done).getByRole('link', { name: 'Weiter im Lernpfad' })
+    ).toHaveAttribute('href', '/units/1');
+    // Practice goes on: all sentences stay available.
+    expect(screen.getByText(`Satz 1 von ${lines.length}`)).toBeInTheDocument();
+  });
+
   it('fills gaps in real sentences inside a section and counts each sentence', async () => {
     const user = userEvent.setup();
     const [first] = dialogueSections(content, 1);

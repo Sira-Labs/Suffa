@@ -145,6 +145,23 @@ export function UnitStation() {
         )}
       </header>
 
+      {skill && total > 0 && done >= total && (
+        <section className="card row station-done" aria-label="Station geschafft">
+          <span className="station-done-icon" aria-hidden>
+            <Icon name="check" size={22} strokeWidth={2.5} />
+          </span>
+          <span className="stack" style={{ gap: '0.15rem', flex: 1, minWidth: 0 }}>
+            <strong>{meta.label} geschafft</strong>
+            <span className="muted">
+              Du kannst hier weiter üben oder zum nächsten Schritt gehen.
+            </span>
+          </span>
+          <Link to={`/units/${unit}`} className="btn btn-primary">
+            Weiter im Lernpfad
+          </Link>
+        </section>
+      )}
+
       {station === 'listen' && (
         <>
           {!onlyLesson && (

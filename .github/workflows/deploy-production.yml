@@ -87,6 +87,10 @@ jobs:
             echo "::error::Set SUFFA_PRODUCTION_URL in the environment 'production': every deploy is checked there"
             exit 1
           fi
+          if [ -z "$STAGING_SERVER" ]; then
+            echo "::error::The staging server is unknown, so production cannot be told apart from it; refusing"
+            exit 1
+          fi
           if [ "$SERVER" = "$STAGING_SERVER" ]; then
             echo "::error::CAPROVER_SERVER_PROD is the staging server; production runs on its own server (ADR-0024)"
             exit 1

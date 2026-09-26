@@ -78,3 +78,31 @@ limits on auth routes and admin 2FA are mandatory acceptance criteria.
   mail routes stay closed.
 - The answer carries no session token for the browser (httpOnly cookie only); the native app's
   origins keep `set-auth-token`, as after the magic link.
+
+## Update 2026-09-26: passkeys as an option
+
+- Learners asked for a way in without waiting for a mail each time. Like Arqam (spec 009), a
+  signed-in learner can now **add a passkey** in the settings ("Passkey hinzufügen") and later
+  sign in with **one tap** ("Mit Passkey anmelden") using Face ID, Touch ID or the device PIN.
+  Link and code stay; a passkey is optional and never required. This replaces "no passkeys for
+  now" above.
+- **Plugin:** Better Auth's `@better-auth/passkey` (same version as `better-auth`), table
+  `passkeys` (migration 0024, cascades with the user). Only the four ceremony endpoints are
+  reachable: `GET /passkey/generate-register-options`, `POST /passkey/verify-registration`,
+  `GET /passkey/generate-authenticate-options` and `POST /passkey/verify-authentication`.
+  Listing and removing go through `/api/v1/account/passkeys` (never the public key or the
+  credential id); the privacy export lists passkeys without keys.
+- **Security:**
+  - The relying party is the host of `SUFFA_PUBLIC_URL` and the expected origin is its origin;
+    neither is taken from the request.
+  - Discoverable credentials (sign-in starts without an email) and **user verification
+    required**: a ceremony whose authenticator did not check a PIN or biometric is refused
+    (`USER_NOT_VERIFIED`), and the sign-in options ask for verification so browsers prompt.
+  - Adding a passkey needs a **fresh session** (signed in within the last day); otherwise the
+    learner signs in again with link or code first.
+  - Answers carry no session token for the browser (httpOnly cookie only); the native app's
+    origins keep `set-auth-token`.
+  - Rate limits per client: sign-in options 20 and verification 10 per minute; adding 5 per
+    10 minutes.
+- **Consequence:** moving the app to another domain invalidates existing passkeys (they are
+  bound to the host). Learners then sign in with link or code and add a new one.

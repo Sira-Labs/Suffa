@@ -53,9 +53,21 @@ jobs:
             echo "$name: $IMAGE_PREFIX-$name@$digest"
           done
 
+  # The production job cannot read the staging environment; its server is read here so the
+  # shared gate can refuse a production server that is the staging one.
+  staging-server:
+    name: staging server
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: staging
+    outputs:
+      server: ${{ vars.CAPROVER_SERVER }}
+    steps:
+      - run: echo "staging server known"
+
   deploy-production:
     name: roll back production
-    needs: resolve
+    needs: [resolve, staging-server]
     permissions:
       contents: read
       actions: read
@@ -66,4 +78,5 @@ jobs:
       web: ${{ needs.resolve.outputs.web }}
       backup: ${{ needs.resolve.outputs.backup }}
       require-staging: false
+      staging-server: ${{ needs.staging-server.outputs.server }}
     secrets: inherit

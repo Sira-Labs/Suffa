@@ -1,6 +1,6 @@
 /**
- * Signing in with the code (POST /sign-in/email-otp) answers with the session token in the
- * body and in `set-auth-token`. The browser needs neither: its session is the httpOnly cookie,
+ * Signing in with the code or a passkey answers with the session token in the body and in
+ * `set-auth-token` (adding a passkey, with the stored credential). The browser needs neither: its session is the httpOnly cookie,
  * and a token readable by scripts is what an injected script would steal. Only the native app
  * (ADR-0019, its origins in SUFFA_APP_ORIGINS) keeps the header, as after the magic link.
  */

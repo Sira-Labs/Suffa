@@ -35,6 +35,13 @@ import {
 import { sameOriginOnly } from './http/sameOrigin.js';
 import { appCors } from './http/appCors.js';
 import { withoutSessionToken } from './http/withoutSessionToken.js';
+import { AUTHENTICATE_OPTIONS, requireVerificationInOptions } from './auth/passkeys.js';
+
+const SIGN_IN_ANSWERS = new Set([
+  '/sign-in/email-otp',
+  '/passkey/verify-authentication',
+  '/passkey/verify-registration',
+]);
 import { createAppLinkRoutes, type AppLinks } from './apps/links.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
 import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
@@ -184,8 +191,18 @@ export function createApp(deps: AppDeps): Hono {
       const rejected = await rejectUnsafeRedirect(c.req.raw);
       if (rejected) return rejected;
       const response = await auth.handler(c.req.raw);
-      return c.req.path === `${AUTH_BASE_PATH}/sign-in/email-otp`
-        ? withoutSessionToken(response, c.req.header('origin'), deps.appOrigins ?? [])
+      const endpoint = c.req.path.slice(AUTH_BASE_PATH.length);
+      // Sign-in answers carry the session token (and passkey records their key): the browser
+      // gets the cookie and `{ ok: true }` only.
+      if (SIGN_IN_ANSWERS.has(endpoint)) {
+        return withoutSessionToken(
+          response,
+          c.req.header('origin'),
+          deps.appOrigins ?? []
+        );
+      }
+      return endpoint === AUTHENTICATE_OPTIONS
+        ? requireVerificationInOptions(response)
         : response;
     });
     // The profile doubles as the actor: one session lookup per request.

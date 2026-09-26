@@ -8,6 +8,7 @@
  */
 import type { SyncTable } from '@/types';
 import { logger } from '@/services/logger';
+import type { Passkey } from '@/services/passkeys';
 import type {
   PullResult,
   AuthListener,
@@ -311,6 +312,19 @@ export class ApiSyncProvider implements SyncProvider {
       { method: 'POST' }
     );
     return result.ok ? { ok: true, value: result.value.revoked } : result;
+  }
+
+  /** The passkeys of this account (adding one runs through PasskeyClient). */
+  async listPasskeys(): Promise<Result<Passkey[]>> {
+    const result = await this.send<{ passkeys: Passkey[] }>('/api/v1/account/passkeys');
+    return result.ok ? { ok: true, value: result.value.passkeys } : result;
+  }
+
+  /** Removes one passkey; it no longer signs in. */
+  async deletePasskey(id: string): Promise<Result<void>> {
+    return this.send<void>(`/api/v1/account/passkeys/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
   }
 
   /** XP, streak and badges as the server computed them from the synced data (story 5.4). */

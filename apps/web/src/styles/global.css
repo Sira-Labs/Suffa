@@ -2386,3 +2386,20 @@ button.quiz-option:disabled {
   letter-spacing: 0.3em;
   font-variant-numeric: tabular-nums;
 }
+
+/* A finished unit station: done, with the way on. */
+.station-done {
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  border-color: var(--good);
+}
+.station-done-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--good);
+  color: #fff;
+  flex: none;
+}

@@ -21,6 +21,8 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   },
   { method: 'DELETE', path: '/api/v1/account/sessions/:id', action: 'profile:write' },
   { method: 'PATCH', path: '/api/v1/account/settings', action: 'profile:write' },
+  { method: 'GET', path: '/api/v1/account/passkeys', action: 'profile:read' },
+  { method: 'DELETE', path: '/api/v1/account/passkeys/:id', action: 'profile:write' },
   { method: 'POST', path: '/api/v1/sync/:table/push', action: 'sync:own' },
   { method: 'GET', path: '/api/v1/sync/:table/pull', action: 'sync:own' },
   { method: 'GET', path: '/api/v1/engagement', action: 'sync:own' },

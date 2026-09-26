@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ApiSyncProvider, type DeviceSession } from '@/services/sync/ApiSyncProvider';
 import { useSyncStore } from '@/state';
+import { AccountPasskeys } from './AccountPasskeys';
 import { browserTimeZone, describeDevice, timeZoneOptions } from './devices';
 
 const dateTime = (iso: string) =>
@@ -22,6 +23,7 @@ export function AccountDevices() {
         </Link>
       )}
       <TimeZoneSetting provider={provider} />
+      <AccountPasskeys provider={provider} />
       <DeviceList provider={provider} />
     </>
   );

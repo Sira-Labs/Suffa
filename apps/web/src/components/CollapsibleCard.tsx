@@ -10,6 +10,7 @@ export function CollapsibleCard({
   title,
   lead,
   defaultOpen = true,
+  onOpenChange,
   children,
 }: {
   /** Stable name, used for the element ids and the remembered state. */
@@ -17,6 +18,8 @@ export function CollapsibleCard({
   title: ReactNode;
   lead?: ReactNode;
   defaultOpen?: boolean;
+  /** Told after the body was shown or hidden (e.g. to scroll it into place). */
+  onOpenChange?: (open: boolean) => void;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(() => readOpen(id, defaultOpen));
@@ -25,6 +28,7 @@ export function CollapsibleCard({
   const toggle = () => {
     setOpen(!open);
     saveOpen(id, !open);
+    onOpenChange?.(!open);
   };
   return (
     <section className="card stack" aria-labelledby={titleId}>

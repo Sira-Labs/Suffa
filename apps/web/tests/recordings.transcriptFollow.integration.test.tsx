@@ -38,4 +38,14 @@ describe('transcript follow-along', () => {
       screen.getByRole('checkbox', { name: 'Text mitlaufen lassen' })
     ).not.toBeChecked();
   });
+
+  it('aligns the list again when the card is opened', async () => {
+    const scrollTo = vi.fn();
+    HTMLElement.prototype.scrollTo = scrollTo as never;
+    render(<TranscriptPanel cues={cues} time={52} onSeek={() => {}} />);
+    await userEvent.click(screen.getByRole('button', { name: /Zuklappen/ }));
+    scrollTo.mockClear();
+    await userEvent.click(screen.getByRole('button', { name: /Aufklappen/ }));
+    expect(scrollTo).toHaveBeenCalled();
+  });
 });

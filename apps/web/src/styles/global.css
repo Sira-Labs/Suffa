@@ -1978,6 +1978,11 @@ textarea.input {
 .checkpoint-card {
   border: 2px solid var(--accent);
 }
+/* `hidden` must win over layout classes like .stack (display: flex). */
+[hidden] {
+  display: none !important;
+}
+
 /* Cards that fold away behind their heading (summary, transcript under the player). */
 .collapsible-head {
   display: flex;

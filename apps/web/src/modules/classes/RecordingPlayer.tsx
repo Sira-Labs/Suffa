@@ -116,9 +116,12 @@ export function RecordingPlayer() {
 
   // Transcript, checkpoints and summary only: the media URLs stay, so playback never
   // restarts while the page looks again for a running transcript or summary.
+  // Polls and button refreshes may overlap: only the newest answer is applied.
+  const latest = useRef(0);
   const refresh = useCallback(async () => {
+    const request = ++latest.current;
     const result = await api.get(id, mediaId);
-    if (!result.ok) return;
+    if (!result.ok || request !== latest.current) return;
     const data = result.value;
     setMedia(
       (m) =>
@@ -351,7 +354,12 @@ export function RecordingPlayer() {
             />
           )}
           <TranscriptEditor
-            key={media.interactive.transcript?.updatedAt ?? 'none'}
+            // New server cues (ready, saved) replace the draft; progress updates do not.
+            key={
+              media.interactive.transcript?.status === 'ready'
+                ? media.interactive.transcript.updatedAt
+                : (media.interactive.transcript?.status ?? 'none')
+            }
             api={api}
             classId={id}
             mediaId={mediaId}

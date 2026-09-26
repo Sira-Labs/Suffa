@@ -18,6 +18,8 @@ export function TranscriptPanel({
   const current = activeCue(cues, time);
   const list = useRef<HTMLOListElement>(null);
   const [follow, setFollow] = useState(readFollow);
+  // Bumped when the card is opened again: the list was hidden and must be re-aligned.
+  const [shown, setShown] = useState(0);
 
   useEffect(() => {
     const box = list.current;
@@ -25,11 +27,15 @@ export function TranscriptPanel({
     if (!follow || !box || !el) return;
     // Keep the current line in the upper third of the list.
     box.scrollTo?.({ top: el.offsetTop - box.clientHeight / 3, behavior: 'smooth' });
-  }, [current, follow]);
+  }, [current, follow, shown]);
 
   if (cues.length === 0) return null;
   return (
-    <CollapsibleCard id="transcript" title="Transkript">
+    <CollapsibleCard
+      id="transcript"
+      title="Transkript"
+      onOpenChange={(open) => open && setShown((n) => n + 1)}
+    >
       <label className="row muted" style={{ gap: '0.4rem', fontSize: '0.9rem' }}>
         <input
           type="checkbox"

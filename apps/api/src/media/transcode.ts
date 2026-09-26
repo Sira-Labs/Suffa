@@ -1,6 +1,7 @@
 /**
  * Transcoding recordings (story 7.4): one small audio file for listening (AAC, mono, plays
- * everywhere incl. iOS) and, for videos, a 720p MP4 with fast start. ffmpeg runs with few
+ * everywhere incl. iOS) and, for videos, an MP4 of at most 720p with fast start (copied without
+ * re-encoding when the video already fits, as Zoom recordings do). ffmpeg runs with few
  * threads and low priority, one job at a time, so the shared server (Tabayyun) stays fast.
  */
 import { spawn } from 'node:child_process';
@@ -10,6 +11,51 @@ export interface Probe {
   durationSec: number;
   hasVideo: boolean;
   hasAudio: boolean;
+  /** The first real video stream (not cover art), when there is one. */
+  video?: { codec: string; height: number; pixFmt: string };
+  /** Codec of the first audio stream. */
+  audioCodec?: string;
+}
+
+/** Target height of the video rendition. */
+export const MAX_VIDEO_HEIGHT = 720;
+
+/**
+ * Can the video stream be copied as it is? Zoom and most phones record H.264 in 8-bit
+ * 4:2:0, which every browser plays; re-encoding such a file only costs minutes of CPU.
+ * Taller videos (1080p, 4K) and other codecs (HEVC from iPhones, VP9, 10-bit) are
+ * re-encoded.
+ */
+export function canCopyVideo(info: Probe): boolean {
+  const video = info.video;
+  return (
+    video !== undefined &&
+    video.codec === 'h264' &&
+    video.pixFmt === 'yuv420p' &&
+    video.height > 0 &&
+    video.height <= MAX_VIDEO_HEIGHT
+  );
+}
+
+/** ffmpeg arguments for the streams of the video rendition. */
+export function videoStreamArgs(info: Probe): string[] {
+  const video = canCopyVideo(info)
+    ? ['-c:v', 'copy']
+    : [
+        '-vf',
+        `scale=-2:'min(${MAX_VIDEO_HEIGHT},ih)'`,
+        '-c:v',
+        'libx264',
+        '-preset',
+        'veryfast',
+        '-crf',
+        '26',
+        '-pix_fmt',
+        'yuv420p',
+      ];
+  const audio =
+    info.audioCodec === 'aac' ? ['-c:a', 'copy'] : ['-c:a', 'aac', '-b:a', '96k'];
+  return ['-map', '0:v:0', '-map', '0:a:0', ...video, ...audio];
 }
 
 export interface Renditions {
@@ -53,23 +99,39 @@ export async function probe(file: string): Promise<Probe> {
     '-v',
     'error',
     '-show_entries',
-    'format=duration:stream=codec_type:stream_disposition=attached_pic',
+    'format=duration:stream=codec_type,codec_name,height,pix_fmt:stream_disposition=attached_pic',
     '-of',
     'json',
     file,
   ]);
   const data = JSON.parse(out) as {
     format?: { duration?: string };
-    streams?: { codec_type?: string; disposition?: { attached_pic?: number } }[];
+    streams?: {
+      codec_type?: string;
+      codec_name?: string;
+      height?: number;
+      pix_fmt?: string;
+      disposition?: { attached_pic?: number };
+    }[];
   };
   const streams = data.streams ?? [];
+  // Cover art in an MP3/M4A is a "video" stream with attached_pic; it is not a video.
+  const video = streams.find(
+    (s) => s.codec_type === 'video' && s.disposition?.attached_pic !== 1
+  );
+  const audio = streams.find((s) => s.codec_type === 'audio');
   return {
     durationSec: Number(data.format?.duration ?? 0),
-    // Cover art in an MP3/M4A is a "video" stream with attached_pic; it is not a video.
-    hasVideo: streams.some(
-      (s) => s.codec_type === 'video' && s.disposition?.attached_pic !== 1
-    ),
-    hasAudio: streams.some((s) => s.codec_type === 'audio'),
+    hasVideo: video !== undefined,
+    hasAudio: audio !== undefined,
+    video: video
+      ? {
+          codec: video.codec_name ?? '',
+          height: video.height ?? 0,
+          pixFmt: video.pix_fmt ?? '',
+        }
+      : undefined,
+    audioCodec: audio?.codec_name,
   };
 }
 
@@ -129,20 +191,7 @@ export async function transcode(
         ...common,
         '-i',
         input,
-        '-vf',
-        "scale=-2:'min(720,ih)'",
-        '-c:v',
-        'libx264',
-        '-preset',
-        'veryfast',
-        '-crf',
-        '26',
-        '-pix_fmt',
-        'yuv420p',
-        '-c:a',
-        'aac',
-        '-b:a',
-        '96k',
+        ...videoStreamArgs(info),
         '-movflags',
         '+faststart',
         '-progress',

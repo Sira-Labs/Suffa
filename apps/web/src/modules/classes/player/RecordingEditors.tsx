@@ -212,6 +212,12 @@ export function TranscriptEditor({
       {transcript?.status === 'failed' && transcript.error && (
         <span className="feedback-bad">{transcript.error}</span>
       )}
+      {!canGenerate && !transcript?.cues.length && (
+        <span className="muted" style={{ fontSize: '0.9rem' }}>
+          Automatische Transkripte sind auf diesem Server noch nicht eingerichtet. Du
+          kannst den Text unten selbst eintragen; er erscheint dann beim Abspielen.
+        </span>
+      )}
       {canGenerate && !busy && (
         <button
           className="btn"

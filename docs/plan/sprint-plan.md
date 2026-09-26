@@ -59,9 +59,9 @@ pie showData
 | 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                    |
 | 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                                  |
 | 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                         |
-| 2.1 release workflow    | ✅     |                                                                                                                                                     |
+| 2.1 release workflow    | ✅     | 2026-09-25 (ADR-0024): `main` deploys to staging (environment `staging`) by digest; production is 2.7                                               |
 | 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                        |
-| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; off-site copy still open      |
+| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; production backups are 2.8    |
 | 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                      |
 | 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                                 |
 | 2.6 browser router      | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline        |
@@ -110,16 +110,30 @@ pie showData
 
 ### Sprint 2 (Oct 19 – Nov 1) — _"Operable"_
 
-| #   | Story                                                                                               | Pts | Acceptance                                                 |
-| --- | --------------------------------------------------------------------------------------------------- | --- | ---------------------------------------------------------- |
-| 2.1 | Release workflow: GHCR images + `caprover/deploy-from-github` for api/web/worker (Tabayyun pattern) | 5   | Push to main deploys in < 10 min; skipped when vars unset. |
-| 2.2 | `suffa-db`, `suffa-api`, `suffa-worker` apps; pg-boss queue + worker role (ADR-0020)                | 3   | `/healthz` shows schema revision + queue depth.            |
-| 2.3 | Backups: nightly `pg_dump` → off-box; restore drill                                                 | 3   | Restore documented and tested.                             |
-| 2.4 | Error tracking + uptime check                                                                       | 2   | Test error visible with release tag.                       |
-| 2.5 | Sync endpoints `push`/`pull` (contract = `SyncProvider`)                                            | 5   | Existing sync engine suite passes against the server.      |
-| 2.6 | `createBrowserRouter` behind Caddy SPA fallback                                                     | 2   | Deep links + offline navigation work.                      |
+| #   | Story                                                                                               | Pts | Acceptance                                                                                      |
+| --- | --------------------------------------------------------------------------------------------------- | --- | ----------------------------------------------------------------------------------------------- |
+| 2.1 | Release workflow: GHCR images + `caprover/deploy-from-github` for api/web/worker (Tabayyun pattern) | 5   | Push to main deploys **to staging** in < 10 min and is verified there; skipped when vars unset. |
+| 2.2 | `suffa-db`, `suffa-api`, `suffa-worker` apps; pg-boss queue + worker role (ADR-0020)                | 3   | `/healthz` shows schema revision + queue depth.                                                 |
+| 2.3 | Backups: nightly `pg_dump` → off-box; restore drill                                                 | 3   | Restore documented and tested. (Production backups and drills: 2.8.)                            |
+| 2.4 | Error tracking + uptime check                                                                       | 2   | Test error visible with release tag.                                                            |
+| 2.5 | Sync endpoints `push`/`pull` (contract = `SyncProvider`)                                            | 5   | Existing sync engine suite passes against the server.                                           |
+| 2.6 | `createBrowserRouter` behind Caddy SPA fallback                                                     | 2   | Deep links + offline navigation work.                                                           |
 
 **Gate G0.**
+
+### Sprint 2b — _"Production of its own"_ (ADR-0024, added 2026-09-25)
+
+The Sīra family moves production to a new server in Germany (Arqam ADR-0020). The current host
+becomes staging and tools: today's apps as staging, GlitchTip and the uptime checks. Only the owner,
+family and friends use Suffa today, so nothing moves: they sign up again on production.
+
+| #   | Story                                                                                                                                                                                                                                                                                                                                                                                                                                            | Pts | Acceptance                                                                                                                                                                                                                                                                        |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2.7 | Production server and promotion (all of it on the new server): **(1)** CapRover with `suffa-web`, `-api`, `-worker`, `-db`, `-backup` and its own `rustfs`. **(2)** Own secrets, OAuth client, VAPID/FCM keys, SMTP and app tokens. **(3)** GitHub environment `production` with the owner as required reviewer. **(4)** GlitchTip over its public HTTPS DSN. **(5)** Firewall 80/443/22, SSH keys only, dashboard 2FA.                          | 5   | **(1)** An approved release deploys the digests staging runs, without a rebuild, and `/healthz` reports them. **(2)** The job refuses to run without a reviewer, when production is partly configured, or with the staging server. **(3)** Production errors arrive in GlitchTip. |
+| 2.8 | Production backups: **(1)** WAL-G continuous archiving plus physical base backups (weekly full, daily delta, ≥ 2 fulls). **(2)** The nightly `pg_dump` stays. **(3)** All of it encrypted, to object storage in another Hetzner location, with a write-only key and object lock. **(4)** `suffa-media` versioned off-site. **(5)** Monthly restore drill into a throwaway database on the production server, alternating dump and point in time. | 5   | **(1)** A point-in-time restore to a chosen minute and a dump restore both pass the row-count check, timed and logged in `docs/ops/restore-drills.md`. **(2)** No drill touches staging. **(3)** The encryption keys are in the owner's password manager.                         |
+| 2.9 | Go-live and staging clean-up: **(1)** `suffa.siralabs.org` points at production and staging moves to its own domain. **(2)** The owner, family and friends sign up again on production. **(3)** Their staging accounts are deleted.                                                                                                                                                                                                              | 2   | **(1)** No real person's account is left on staging. **(2)** The clean-up is logged. **(3)** Staging holds test accounts only.                                                                                                                                                    |
+
+Before any paid launch: a standby database in a second location, failover rehearsed.
 
 ## P1 — Identity, roles & classes
 

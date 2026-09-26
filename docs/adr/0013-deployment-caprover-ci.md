@@ -1,7 +1,13 @@
 # ADR-0013: Deployment, CI/CD and operations on CapRover
 
-- Status: proposed
+- Status: proposed; environments, backups and restore drills amended by ADR-0024
 - Date: 2026-09-23 (revised 2026-09-24: Tabayyun pattern, RustFS, no Redis)
+
+> **Amended 2026-09-25 by [ADR-0024](0024-separate-production-server.md):** production runs on
+> its own server; this server becomes staging and tools (`-stg` apps, GlitchTip). `main`
+> deploys to staging only, and production gets the same image digests after the owner's
+> approval. Production Postgres adds WAL archiving and physical base backups; restore drills
+> run on the production server, never on staging.
 
 ## Context
 
@@ -19,8 +25,8 @@ initially, with room to add nodes.
   `caprover/deploy-from-github@v2` with per-app tokens (`CAPROVER_APP_TOKEN_API|WEB|WORKER`),
   immutable `sha-<short>` tags. `captain-definition` files in `infra/caprover/` for the
   build-on-server alternative.
-- **Environments:** `staging` and `production` as separate CapRover apps (`-stg` suffix), same
-  images promoted by tag.
+- **Environments:** ~~`staging` and `production` as separate CapRover apps (`-stg` suffix), same
+  images promoted by tag.~~ Superseded by ADR-0024: two servers, the same digest promoted.
 - **DB migrations** run as a pre-start step of `suffa-api` (drizzle migrate, idempotent,
   guarded by an advisory lock); the worker exits with code 3 until the schema matches.
 - **Secrets** only as CapRover env vars with `SUFFA_` prefix (`SUFFA_DATABASE_URL`,
@@ -28,7 +34,8 @@ initially, with room to add nodes.
   (`ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`). The API refuses to start in prod
   with placeholder or short secrets (as Tabayyun does).
 - **Backups:** nightly `pg_dump` sidecar → off-box S3-compatible storage (e.g. Hetzner Storage
-  Box / Backblaze B2), 30 daily + 12 monthly; monthly restore drill into staging.
+  Box / Backblaze B2), 30 daily + 12 monthly; ~~monthly restore drill into staging~~ restore
+  drills into a throwaway database on the production server, plus WAL archiving (ADR-0024).
 - **Security:** Postgres and RustFS not exposed; CapRover dashboard behind strong password + 2FA;
   firewall 80/443/22 (+ Swarm ports only between nodes); unattended OS security updates.
 - **Observability:** pino JSON logs, `/healthz` + `/readyz`, GlitchTip for errors, uptime check

@@ -17,6 +17,48 @@ Internet ─▶ CapRover nginx (TLS) ─▶ suffa-web (Caddy :80) ─/api──�
 > **Status:** `suffa-web` serves the full offline app; `suffa-api` is a skeleton (health,
 > migrations, worker heartbeat) that grows sprint by sprint (`docs/plan/sprint-plan.md`).
 
+## Two servers: staging and tools, production (ADR-0024)
+
+Suffa runs on **two independent CapRover servers** (Sīra family decision, Arqam ADR-0020):
+
+| Server                               | Runs                                                                                                     | Data                                            |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| **Staging and tools** (current host) | `suffa-web`, `suffa-api`, `suffa-worker`, `suffa-db`, `suffa-backup` (today's apps), `rustfs`, GlitchTip | test accounts and generated data only           |
+| **Production** (new, Germany)        | `suffa-web`, `suffa-api`, `suffa-worker`, `suffa-db`, `suffa-backup`, WAL-G, its **own** `rustfs`        | real learners; the only place for personal data |
+
+- **Every push to `main`** is deployed to the staging apps and checked there (`/healthz` and
+  `/healthz-web` report the new `sha-…`).
+- **Production** gets the **same image digests** after the owner approves the run in the GitHub
+  environment `production` (§6). Nothing is rebuilt.
+- **`srv-captain--*` names only resolve inside one CapRover.** Each server has its own
+  `rustfs` app with the same name, so `SUFFA_S3_ENDPOINT=http://srv-captain--rustfs:9000` is
+  the same on both.
+- **GlitchTip stays on the staging and tools server.** Production reaches it through its
+  public HTTPS address (§9.2).
+- **Production has its own everything:** `SUFFA_AUTH_SECRET`, VAPID and FCM keys, Google OAuth
+  client, RustFS keys, SMTP settings and CapRover app tokens. None is shared with staging.
+  Keep `SUFFA_AUTH_SECRET` in the owner's password manager too. It signs sessions and seals
+  the stored Drive tokens and admin 2FA secrets.
+- **Restore drills** run on the production server into a throwaway database (§8.3), never on
+  staging.
+- **Nothing is copied across.** The owner, family and friends sign up again on production once
+  it is live. Their accounts on staging are then deleted (§8.5).
+- **Both servers:** SSH by key only; firewall opens 80, 443 and 22 only; CapRover dashboard
+  with a strong password and 2FA; unattended security updates.
+
+The sections below describe one server; both servers use the same app names, since each
+CapRover has its own name space. Staging and production differ only in their secrets and
+domains.
+
+### Today's apps are staging
+
+Nothing is renamed or moved. The apps on the current server (`suffa-web`, `suffa-api`, … without
+suffix) are staging as they are, with the repository's `CAPROVER_SERVER` and
+`CAPROVER_APP_TOKEN_*`. The release binds them to the GitHub environment **`staging`**; values set
+in that environment win over the repository's. Its URL defaults to
+`https://suffa.siralabs.org`. When that domain moves to production (§8.5), give staging its own
+domain and set `SUFFA_STAGING_URL` (repository or environment `staging`).
+
 ## Quick start: one-click templates (YAML)
 
 The templates live in `infra/caprover/one-click/`. In CapRover: **Apps → One-Click
@@ -202,17 +244,69 @@ Uploads use multipart parts ≤ 64 MB. If you still see `413` from CapRover's ng
 `client_max_body_size` in the `suffa-web` app's nginx config (HTTP Settings → Edit default
 nginx configurations).
 
-## 6. GitHub Actions (same names as Tabayyun)
+## 6. GitHub Actions: staging, then production
 
-| Kind     | Name                                          | Value                                                     |
-| -------- | --------------------------------------------- | --------------------------------------------------------- |
-| variable | `CAPROVER_SERVER`                             | `https://captain.<root-domain>` (same server as Tabayyun) |
-| variable | `CAPROVER_APP_API` / `_WEB` / `_WORKER`       | `suffa-api` / `suffa-web` / `suffa-worker` (defaults)     |
-| secret   | `CAPROVER_APP_TOKEN_API` / `_WEB` / `_WORKER` | app tokens from each app                                  |
+`.github/workflows/release.yml` runs on every push to `main`:
 
-The release workflow builds `suffa-api` and `suffa-web` images tagged `sha-<short>`, pushes
-to GHCR, and deploys with `caprover/deploy-from-github@v2`. Every step is skipped while
-`CAPROVER_SERVER` is unset.
+1. **checks, images:**
+   - runs CI;
+   - builds `suffa-api`, `suffa-web` and `suffa-backup`;
+   - smoke-tests and scans each image;
+   - pushes **exactly that image** as `sha-<short>`.
+2. **deploy-staging:** resolves the tags to digests and deploys them to the staging apps (api
+   first, it migrates; then worker, backup, web). All four apps or none: a partly configured
+   staging fails the run, so production is only offered a release staging ran in full.
+3. **verify-staging:** waits until staging's `/healthz` and `/healthz-web` report the new
+   `sha-…`.
+4. **deploy-production:** waits for the owner's approval, then deploys the **same digests** to
+   production and checks its `/healthz` and `/healthz-web` the same way.
+   - The job refuses to run in these cases:
+     - the environment has no required reviewer;
+     - production is only partly configured, or `SUFFA_PRODUCTION_URL` is missing;
+     - its server is the staging server;
+     - staging no longer runs this release. A newer push replaced it while the run waited for
+       approval; approve the newest run instead.
+   - Before production exists, it only leaves a notice.
+
+**Staging:** the repository settings as they are, or the same names in the environment
+`staging` (Settings → Environments → `staging`, no reviewer needed). Environment values win.
+
+| Kind     | Name                                                      | Value                                                                         |
+| -------- | --------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| variable | `CAPROVER_SERVER`                                         | `https://captain.<staging root domain>`                                       |
+| secret   | `CAPROVER_APP_TOKEN_API` / `_WORKER` / `_WEB` / `_BACKUP` | app tokens of the staging apps (all four, or none to skip staging)            |
+| variable | `SUFFA_STAGING_URL`                                       | optional; default `https://suffa.siralabs.org` until that domain moves (§8.5) |
+| variable | `CAPROVER_APP_API` / `_WORKER` / `_WEB` / `_BACKUP`       | optional; default `suffa-api` / `suffa-worker` / `suffa-web` / `suffa-backup` |
+
+**Environment `production`** (Settings → Environments → New environment → `production`):
+
+- **Required reviewers:** the owner. Optionally allow only the `main` branch (Deployment
+  branches and tags → Selected → `main`).
+- These are environment variables and secrets, **not** repository ones: only the production
+  job can read them. Their `_PROD` names never match a staging value.
+
+| Kind     | Name                                                                          | Value                                             |
+| -------- | ----------------------------------------------------------------------------- | ------------------------------------------------- |
+| variable | `CAPROVER_SERVER_PROD`                                                        | `https://captain.<production root domain>`        |
+| variable | `SUFFA_PRODUCTION_URL`                                                        | `https://suffa.siralabs.org` once it points there |
+| variable | `CAPROVER_APP_API_PROD` / `_WORKER_PROD` / `_WEB_PROD` / `_BACKUP_PROD`       | only to override `suffa-api` / … (defaults)       |
+| secret   | `CAPROVER_APP_TOKEN_API_PROD` / `_WORKER_PROD` / `_WEB_PROD` / `_BACKUP_PROD` | app tokens of the production apps (all four)      |
+
+**Image pulls on the production server:** CapRover pulls the images itself, and the workflow's
+GHCR login does not reach it. Keep the packages `suffa-web`, `suffa-api` and `suffa-backup`
+**public**, as on staging. If they are private, add the registry on the production CapRover
+(Cluster → Docker Registry Configuration → Add Remote Registry: `ghcr.io`, a GitHub user, and a
+token with only `read:packages`). Before the first promotion, deploy one digest by hand on the
+production server (Deploy via ImageName, `ghcr.io/sira-labs/suffa-web@sha256:…`) to see the
+pull work.
+
+To promote: open the run in Actions → **Review deployments** → `production` → Approve. Only the
+newest waiting run deploys; an older one still waiting is replaced. **Rolling back:** Actions →
+**rollback production** → Run workflow (from `main`) → tag of the release to go back to
+(`sha-…`, as `/healthz` reported it). It resolves that tag's images to digests and deploys them
+through the same approval and checks, except that staging need not run that tag. Schema
+migrations only go forward, so check the migrations between the two releases
+(`apps/api/migrations/`) before rolling back across one.
 
 ## 7. Order of setup (first time)
 
@@ -295,10 +389,13 @@ suffa/postgres/monthly/YYYY/suffa-<timestamp>.dump      additionally on the 1st
 Uploads carry `Content-MD5` on every request/part (required by object-lock buckets) and use
 only PUT/GET/HEAD/list calls — verified against RustFS with object lock.
 
-### 8.3 Restore drill (monthly)
+### 8.3 Restore drill (monthly, on the production server)
 
-Never restore into the live database; the script refuses when the target equals
-`SUFFA_BACKUP_DATABASE_URL`.
+Restore production backups **on the production server** into a throwaway database, check it,
+note how long it took, and drop it. **Never into staging**: that would copy real learners' data
+there (ADR-0024). Never restore into the live database either; the script refuses when the
+target equals `SUFFA_BACKUP_DATABASE_URL`. Record date, backup, duration and row counts in the
+drill log (`docs/ops/restore-drills.md`).
 
 ```bash
 # 1. scratch database
@@ -315,17 +412,56 @@ docker exec -it $(docker ps -q -f name=srv-captain--suffa-db) psql -U suffa -c '
 
 A specific backup: `restore.sh postgres/daily/2026/09/suffa-20260923T023000Z.dump`.
 
-### 8.4 Off-site copy (recommended next)
+Every second drill also restores the **physical backup to a point in time** (§8.4): WAL-G
+fetches the newest base backup into an empty data directory of a throwaway `suffa-db-drill`
+app, replays WAL up to a chosen minute, and the same row-count check runs against it.
 
-RustFS on the same server protects against deletion and ransomware (object lock), but not
-against losing the server. Add a second, off-site target (e.g. Hetzner Storage Box / Object
-Storage, Backblaze B2) as soon as real learner data exists; recordings in `suffa-media` join
-the backup when the recordings feature ships (ADR-0017).
+### 8.4 Production: point-in-time recovery and an off-site copy (story 2.8)
+
+On the production server, `suffa-backup` is one of three layers. All of them are **encrypted
+before upload** and go to S3-compatible object storage in **another Hetzner location** than the
+production server. The server's own RustFS is not a backup of the server.
+
+| Layer                    | What                                                                                                                            | Restores to                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| Continuous WAL archiving | WAL-G `archive_command` in `suffa-db`; every finished WAL segment, plus `archive_timeout = 60s` so a quiet database still ships | any minute since the oldest full |
+| Physical base backups    | WAL-G `backup-push`: weekly full, daily delta; **at least two fulls kept**                                                      | the base WAL replays onto        |
+| Nightly `pg_dump -Fc`    | `suffa-backup` as today, uploaded off-site as well                                                                              | a portable copy, any Postgres 17 |
+
+- **Why both WAL and base backups:** WAL replays only onto a base backup. The RPO of minutes
+  rests on the base backups, not only on WAL.
+- **Encryption:** WAL-G uses libsodium (`WALG_LIBSODIUM_KEY`); the dump is encrypted before
+  upload. Keep the keys in the owner's password manager, **not only on the server**. Without
+  them the backups are unreadable.
+- **Object storage key:** as in §8.1, it can write and read but not delete, plus object lock on
+  the bucket.
+- **Staging:** keeps only the nightly dump (test data). Nothing on staging is archived
+  off-site.
+- **Recordings** in `suffa-media` join the off-site copy with versioning, so deleted objects
+  stay recoverable.
+- **Standby database** in a second location, failover rehearsed: planned before any paid
+  launch (restore takes hours; promoting a standby takes minutes).
+
+### 8.5 When production goes live
+
+1. Production apps deployed through the approved release; `suffa.siralabs.org` points at the
+   production server; staging gets its own domain (`suffa-stg.<domain>`), set as
+   `SUFFA_STAGING_URL`.
+2. The owner, family and friends sign up again on production. Nothing is copied from staging.
+3. On staging, delete their accounts: each person with **Einstellungen → Konto löschen**
+   (story 4.4), or the admin with `delete from users where email in (…)`. Sessions, devices,
+   learning records and memberships go with the user (`on delete cascade`). Rows others still
+   need, such as classes they created, keep only a cleared author (`on delete set null`);
+   delete those test classes too. Record the clean-up in `docs/ops/restore-drills.md`.
+4. From then on staging holds test accounts only.
 
 ## 9. Error tracking and uptime (GlitchTip)
 
-GlitchTip is Sentry-compatible and runs on the same CapRover: one container (web + background
-worker) plus its own Postgres, **no Redis**. Suffa sends errors only, never personal data:
+GlitchTip is Sentry-compatible and runs on the **staging and tools server** (ADR-0024): one
+container (web + background worker) plus its own Postgres, **no Redis**. It serves both
+servers. Production apps cannot reach `srv-captain--glitchtip`, so their DSNs use GlitchTip's
+**public HTTPS address**. Keep GlitchTip's public domain (and HTTPS) until a Hetzner private
+network between the two servers replaces it. Suffa sends errors only, never personal data:
 no user info, cookies, headers, query strings or request bodies, and no session pings.
 
 ```
@@ -354,6 +490,10 @@ stays `connect-src 'self'`, and GlitchTip does not see learners' IP addresses.
 3. `suffa-worker` → env: `SUFFA_ERROR_DSN=<DSN suffa-api>` (the `role` tag tells api and
    worker apart).
 4. **Save & Update** both apps. The start log shows `"errorTracking":true`.
+5. The DSN is always the **public** one (`https://<key>@glitchtip.<root domain>/<id>`) on
+   both servers, never `srv-captain--glitchtip`. Both servers run `SUFFA_ENV=prod` (staging
+   gets the same hardening), so staging reports to its own projects, **`suffa-api-stg`** and
+   **`suffa-web-stg`**, and production to `suffa-api` and `suffa-web`.
 
 ### 9.3 Verify (acceptance of story 2.4)
 
@@ -371,10 +511,11 @@ suffa-web with the same release.
 
 GlitchTip → Uptime Monitors → **New**:
 
-| Name        | URL                                           | Interval | Expect |
-| ----------- | --------------------------------------------- | -------- | ------ |
-| Suffa       | `https://suffa-web.<root domain>/healthz`     | 60 s     | 200    |
-| Suffa (PWA) | `https://suffa-web.<root domain>/healthz-web` | 5 min    | 200    |
+| Name        | URL                                               | Interval | Expect |
+| ----------- | ------------------------------------------------- | -------- | ------ |
+| Suffa       | `https://suffa.siralabs.org/healthz` (production) | 60 s     | 200    |
+| Suffa (PWA) | `https://suffa.siralabs.org/healthz-web`          | 5 min    | 200    |
+| Suffa stg   | `https://suffa-stg.<domain>/healthz`              | 5 min    | 200    |
 
 `/healthz` answers 503 when the database is unreachable, the schema is behind or the job queue
 is missing, so one monitor covers api, database and queue. Alerts: Project → Alerts → e-mail
@@ -405,13 +546,15 @@ official Sentry SDK of the app's language. Nothing else changes on the server.
   A second organization needs `ENABLE_ORGANIZATION_CREATION=True` for a moment (App Configs),
   then set it back to `False`.
 
-## 10. Capacity with Tabayyun on the same server
+## 10. Capacity (each server)
 
 Tabayyun's guidance is 2 vCPU / 4 GB for its api + web. Suffa adds roughly 1–1.5 GB RAM
 (api, worker, Postgres). Transcoding is CPU-heavy: keep `SUFFA_TRANSCODE_CONCURRENCY=1`, and
 if you choose `faster-whisper` in the worker, run transcription at night. Recommended: **8 GB
 RAM / 4 vCPU** for both apps together; watch disk (RustFS holds recordings for both).
-GlitchTip adds about 300–500 MB RAM (app + its Postgres) and a little disk for 90 days of events.
+GlitchTip adds about 300–500 MB RAM (app + its Postgres) and a little disk for 90 days of events,
+on the staging and tools server only. Production carries the three projects' production apps,
+their databases, RustFS and WAL-G; size its disk for Postgres plus local WAL.
 
 ## Troubleshooting
 

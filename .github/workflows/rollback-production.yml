@@ -1,0 +1,69 @@
+name: rollback production
+
+# Deploys an earlier release to production (ADR-0024): the images of the given tag, by digest,
+# after the owner's approval in the environment `production`. Unlike a promotion it does not
+# require staging to run that tag. Schema migrations only go forward: check the migrations
+# between the two releases first (docs/ops/caprover-deployment.md, §6).
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release to go back to (sha-<short>, as /healthz reported it)
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  resolve:
+    name: resolve ${{ inputs.tag }}
+    # Started from main only, like every deploy.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      api: ${{ steps.digests.outputs.api }}
+      web: ${{ steps.digests.outputs.web }}
+      backup: ${{ steps.digests.outputs.backup }}
+    steps:
+      - name: tag format
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          echo "$TAG" | grep -Eq '^sha-[0-9a-f]{7}$' || { echo "::error::expected sha-<7 hex>, got '$TAG'"; exit 1; }
+          echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/suffa" >> "$GITHUB_ENV"
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Only released images carry a sha- tag: they passed the smoke tests and the scan.
+      - name: image digests
+        id: digests
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          for name in api web backup; do
+            digest=$(docker buildx imagetools inspect "$IMAGE_PREFIX-$name:$TAG" --format '{{.Manifest.Digest}}')
+            case "$digest" in sha256:*) ;; *) echo "::error::no image $name:$TAG"; exit 1 ;; esac
+            echo "$name=$IMAGE_PREFIX-$name@$digest" >> "$GITHUB_OUTPUT"
+            echo "$name: $IMAGE_PREFIX-$name@$digest"
+          done
+
+  deploy-production:
+    name: roll back production
+    needs: resolve
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/deploy-production.yml
+    with:
+      tag: ${{ inputs.tag }}
+      api: ${{ needs.resolve.outputs.api }}
+      web: ${{ needs.resolve.outputs.web }}
+      backup: ${{ needs.resolve.outputs.backup }}
+      require-staging: false
+    secrets: inherit

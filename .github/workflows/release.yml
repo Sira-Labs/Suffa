@@ -1,9 +1,13 @@
 name: release
 
-# Runs the CI checks, builds the suffa-web and suffa-api images, smoke-tests each image in a
-# real container, scans it for critical vulnerabilities (Trivy), publishes them to GHCR and
-# (optionally) deploys them to CapRover.
-# Nothing is pushed or deployed unless the checks, the smoke tests and the scan pass.
+# Runs the CI checks, builds the suffa-web, suffa-api and suffa-backup images, smoke-tests each
+# image in a real container, scans it for critical vulnerabilities (Trivy) and publishes exactly
+# that image to GHCR. Nothing is pushed or deployed unless the checks, the smoke tests and the
+# scan pass.
+#
+# Two servers (ADR-0024): every push to main goes to the staging apps (`suffa-*-stg`) and is
+# verified there. Production is a separate job in the GitHub environment `production`: after the
+# owner approves, it deploys the same image digests staging runs. Nothing is rebuilt.
 on:
   push:
     branches: [main]
@@ -158,70 +162,161 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      # The image that passed the smoke tests and the scan is the one published: tagged and
+      # pushed, not rebuilt, so staging and production run exactly what was tested.
       - name: publish image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ${{ matrix.dockerfile }}
-          push: true
-          tags: |
-            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:${{ steps.tag.outputs.tag }}
-            ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}:latest
-          build-args: |
-            VITE_SYNC_BACKEND=${{ vars.VITE_SYNC_BACKEND }}
-            VITE_SYNC_ENABLED=${{ vars.VITE_SYNC_ENABLED || 'true' }}
-            SUFFA_VERSION=${{ steps.tag.outputs.tag }}
-          cache-from: type=gha,scope=${{ matrix.name }}
+        env:
+          IMAGE: ${{ env.IMAGE_PREFIX }}-${{ matrix.name }}
+          TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          docker tag "smoke/suffa-${{ matrix.name }}:test" "$IMAGE:$TAG"
+          docker tag "smoke/suffa-${{ matrix.name }}:test" "$IMAGE:latest"
+          docker push "$IMAGE:$TAG"
+          docker push "$IMAGE:latest"
 
-  deploy-caprover:
-    name: deploy to CapRover
+  # Staging: the current CapRover server (ADR-0024). Deploys by digest, so the production job
+  # can promote exactly these images.
+  deploy-staging:
+    name: deploy to staging
     needs: images
     runs-on: ubuntu-latest
-    # Skipped until the repository variable CAPROVER_SERVER is set.
-    if: ${{ github.ref == 'refs/heads/main' && vars.CAPROVER_SERVER != '' }}
+    if: github.ref == 'refs/heads/main'
+    # The GitHub environment `staging`: its variables and secrets win over the repository's
+    # (CAPROVER_SERVER, CAPROVER_APP_TOKEN_*, …), and deploys show up under Environments.
+    environment:
+      name: staging
+      url: ${{ vars.SUFFA_STAGING_URL || 'https://suffa.siralabs.org' }}
+    permissions:
+      contents: read
+      packages: read
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    outputs:
+      deployed: ${{ steps.gate.outputs.deployed }}
+      # Handed on: the production job cannot read the staging environment's variables.
+      server: ${{ vars.CAPROVER_SERVER }}
+      url: ${{ vars.SUFFA_STAGING_URL || 'https://suffa.siralabs.org' }}
+      api: ${{ steps.digests.outputs.api }}
+      web: ${{ steps.digests.outputs.web }}
+      backup: ${{ steps.digests.outputs.backup }}
     steps:
       # Image names must be lowercase; the owner (e.g. "Sira-Labs") may not be.
       - name: image prefix
         run: echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/suffa" >> "$GITHUB_ENV"
-      - name: which apps are configured?
+      # New packages in an organization start private: read them with the workflow's token.
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # The published tag is resolved to its digest once; staging and production use the digest.
+      - name: image digests
+        id: digests
+        env:
+          TAG: ${{ needs.images.outputs.tag }}
+        run: |
+          for name in api web backup; do
+            digest=$(docker buildx imagetools inspect "$IMAGE_PREFIX-$name:$TAG" --format '{{.Manifest.Digest}}')
+            case "$digest" in sha256:*) ;; *) echo "::error::no digest for $name:$TAG"; exit 1 ;; esac
+            echo "$name=$IMAGE_PREFIX-$name@$digest" >> "$GITHUB_OUTPUT"
+            echo "$name: $IMAGE_PREFIX-$name@$digest"
+          done
+      # All four apps or none: production is only offered a release that staging ran in full.
+      - name: staging is set up
         id: gate
         env:
-          API_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_API }}
-          WORKER_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
-          BACKUP_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
+          SERVER: ${{ vars.CAPROVER_SERVER }}
+          API: ${{ secrets.CAPROVER_APP_TOKEN_API }}
+          WORKER: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
+          BACKUP: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
+          WEB: ${{ secrets.CAPROVER_APP_TOKEN_WEB }}
         run: |
-          echo "api=$([ -n "$API_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          echo "worker=$([ -n "$WORKER_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          echo "backup=$([ -n "$BACKUP_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          count=0
+          for token in "$API" "$WORKER" "$BACKUP" "$WEB"; do [ -n "$token" ] && count=$((count + 1)); done
+          if [ -z "$SERVER" ] || [ "$count" -eq 0 ]; then
+            echo "deployed=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Staging is not set up (CAPROVER_SERVER or the app tokens missing); skipping the staging deploy"
+          elif [ "$count" -eq 4 ]; then
+            echo "deployed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Staging is partly configured: set all four CAPROVER_APP_TOKEN_API/_WORKER/_BACKUP/_WEB, or none"
+            exit 1
+          fi
       # Order matters: the api migrates the schema; the worker waits for it (exit code 3).
       - name: deploy api
-        if: steps.gate.outputs.api == 'true'
+        if: steps.gate.outputs.deployed == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
           app: ${{ vars.CAPROVER_APP_API || 'suffa-api' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_API }}
-          image: ${{ env.IMAGE_PREFIX }}-api:${{ needs.images.outputs.tag }}
+          image: ${{ steps.digests.outputs.api }}
       - name: deploy worker
-        if: steps.gate.outputs.worker == 'true'
+        if: steps.gate.outputs.deployed == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
           app: ${{ vars.CAPROVER_APP_WORKER || 'suffa-worker' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
-          image: ${{ env.IMAGE_PREFIX }}-api:${{ needs.images.outputs.tag }}
+          image: ${{ steps.digests.outputs.api }}
       - name: deploy backup
-        if: steps.gate.outputs.backup == 'true'
+        if: steps.gate.outputs.deployed == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
           app: ${{ vars.CAPROVER_APP_BACKUP || 'suffa-backup' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
-          image: ${{ env.IMAGE_PREFIX }}-backup:${{ needs.images.outputs.tag }}
+          image: ${{ steps.digests.outputs.backup }}
       - name: deploy web
+        if: steps.gate.outputs.deployed == 'true'
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
           app: ${{ vars.CAPROVER_APP_WEB || 'suffa-web' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_WEB }}
-          image: ${{ env.IMAGE_PREFIX }}-web:${{ needs.images.outputs.tag }}
+          image: ${{ steps.digests.outputs.web }}
+
+  # Staging must run the new images before production can be offered them.
+  verify-staging:
+    name: verify staging
+    needs: [images, deploy-staging]
+    runs-on: ubuntu-latest
+    if: needs.deploy-staging.outputs.deployed == 'true'
+    timeout-minutes: 12
+    steps:
+      - name: staging reports the new version
+        env:
+          URL: ${{ needs.deploy-staging.outputs.url }}
+          TAG: ${{ needs.images.outputs.tag }}
+        run: |
+          for i in $(seq 1 60); do
+            api=$(curl -fsS "$URL/healthz" || true)
+            web=$(curl -fsS "$URL/healthz-web" || true)
+            if echo "$api" | grep -q "\"version\":\"$TAG\"" && echo "$api" | grep -q '"status":"ok"' \
+              && echo "$web" | grep -q "\"version\":\"$TAG\""; then
+              echo "staging runs $TAG"; exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::staging did not report $TAG within 10 minutes"; echo "$api"; echo "$web"; exit 1
+
+  # Production: its own server (ADR-0024). Waits for the owner's approval (required reviewer on
+  # the GitHub environment `production`), then deploys the digests staging runs
+  # (deploy-production.yml). Rolling back: rollback-production.yml.
+  deploy-production:
+    name: promote to production
+    needs: [images, deploy-staging, verify-staging]
+    permissions:
+      contents: read
+      actions: read
+    uses: ./.github/workflows/deploy-production.yml
+    with:
+      tag: ${{ needs.images.outputs.tag }}
+      api: ${{ needs.deploy-staging.outputs.api }}
+      web: ${{ needs.deploy-staging.outputs.web }}
+      backup: ${{ needs.deploy-staging.outputs.backup }}
+      require-staging: true
+      staging-server: ${{ needs.deploy-staging.outputs.server }}
+      staging-url: ${{ needs.deploy-staging.outputs.url }}
+    secrets: inherit

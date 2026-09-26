@@ -92,12 +92,12 @@ const BY_EXTENSION: Record<string, string> = {
  */
 export function recordingContentType(declared: string, fileName: string): string | null {
   const type = declared.split(';')[0]!.trim().toLowerCase();
-  if (type in EXTENSIONS) return type;
+  if (Object.hasOwn(EXTENSIONS, type)) return type;
   const generic =
     GENERIC_TYPES.has(type) || type.startsWith('audio/') || type.startsWith('video/');
   if (!generic) return null;
   const extension = /\.[a-z0-9]+$/i.exec(fileName)?.[0]?.toLowerCase() ?? '';
-  return BY_EXTENSION[extension] ?? null;
+  return Object.hasOwn(BY_EXTENSION, extension) ? BY_EXTENSION[extension]! : null;
 }
 
 export function recordingKey(classId: string, mediaId: string, file: string): string {

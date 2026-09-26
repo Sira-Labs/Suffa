@@ -49,7 +49,7 @@ export function UnitStation() {
   // The unit path opens dialogues one after another: a locked dialogue cannot be practised,
   // and the whole-unit view only offers the dialogues that are open. Until the path is known,
   // nothing is offered (it loads with the app's bundled index).
-  const { units: book } = useBookProgress();
+  const { units: book, failed: pathFailed, retry: retryPath } = useBookProgress();
   const pathSections = book.find((u) => u.unit.unit === unit)?.sections;
   const openNos = useMemo(
     () =>
@@ -131,6 +131,17 @@ export function UnitStation() {
   }
 
   if (openNos === null) {
+    if (pathFailed) {
+      return (
+        <section className="card stack" aria-label="Lernpfad nicht geladen">
+          <strong>Der Lernpfad konnte nicht geladen werden.</strong>
+          <span className="muted">Prüfe die Verbindung und versuch es noch einmal.</span>
+          <button className="btn btn-primary" type="button" onClick={retryPath}>
+            Erneut versuchen
+          </button>
+        </section>
+      );
+    }
     return <p className="muted">Lade Lernpfad …</p>;
   }
 

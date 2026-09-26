@@ -44,16 +44,22 @@ export function SectionCelebration({
   useEffect(() => {
     const seen = readSeen(unit);
     const now = doneKey ? doneKey.split(',').map(Number) : [];
-    // Only ever add: a dialogue that falls back to open and is finished again is not
-    // celebrated twice.
-    saveSeen(unit, [...new Set([...(seen ?? []), ...now])]);
     // First visit on this device: remember what is done, celebrate only what comes next.
-    if (seen === null) return;
+    if (seen === null) {
+      saveSeen(unit, now);
+      return;
+    }
     const fresh = now.filter((no) => !seen.includes(no)).sort((a, b) => a - b);
     if (fresh.length > 0) setQueue((q) => [...q, ...fresh.filter((n) => !q.includes(n))]);
   }, [unit, doneKey]);
 
   const shown = queue[0] ?? null;
+  // Remembered once it is on screen (not before: leaving via "Weiter" drops the queue, and the
+  // next dialogue must still be celebrated later). The list only ever grows.
+  useEffect(() => {
+    if (shown === null) return;
+    saveSeen(unit, [...new Set([...(readSeen(unit) ?? []), shown])]);
+  }, [unit, shown]);
   const dialog = useRef<HTMLDivElement>(null);
   const before = useRef<Element | null>(null);
   // Focus moves into the dialog while it is open and back where it was afterwards.

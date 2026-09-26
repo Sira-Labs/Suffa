@@ -8,7 +8,12 @@ let cached: Promise<PublisherAudioIndex> | null = null;
 
 export function loadPublisherIndex(): Promise<PublisherAudioIndex> {
   cached ??= import('@/content/sources/book1-audio.json').then(
-    (module) => module.default as PublisherAudioIndex
+    (module) => module.default as PublisherAudioIndex,
+    (error: unknown) => {
+      // A failed chunk load (offline, new deploy) may work on the next try.
+      cached = null;
+      throw error;
+    }
   );
   return cached;
 }

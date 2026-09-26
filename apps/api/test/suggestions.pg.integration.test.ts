@@ -282,7 +282,7 @@ describe.skipIf(!url)('Recording suggestions (Postgres)', () => {
     const after = (await (
       await call('GET', '/interactive', undefined, 'student')
     ).json()) as {
-      checkpoints: { atSec: number; data: { kind: string } }[];
+      checkpoints: { id: string; atSec: number; data: { kind: string } }[];
       chapters: { id: string; atSec: number; title: string }[];
       canSuggest: boolean;
     };
@@ -295,6 +295,18 @@ describe.skipIf(!url)('Recording suggestions (Postgres)', () => {
     expect(remaining.suggestions).toHaveLength(2);
 
     expect((await call('DELETE', `/chapters/${after.chapters[0]!.id}`)).status).toBe(204);
+    // Removing what a suggestion became puts the suggestion back up for decision.
+    const open = async () =>
+      (
+        (await (await call('GET', '/suggestions')).json()) as {
+          suggestions: { atSec: number }[];
+        }
+      ).suggestions.map((x) => x.atSec);
+    expect(await open()).toEqual([0, 95, 100]);
+    expect(
+      (await call('DELETE', `/checkpoints/${after.checkpoints[0]!.id}`)).status
+    ).toBe(204);
+    expect(await open()).toEqual([0, 95, 100, 120]);
     const usage = await pool.query(
       'select turns from ai_usage_daily where user_id = $1',
       [TEACHER]

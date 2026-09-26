@@ -352,6 +352,7 @@ function buildApp() {
         replacePending: async () => {},
         pending: async () => [],
         decide: async () => null,
+        linkResult: async () => {},
         chapters: async () => [],
         addChapter: async () => ({}) as never,
         removeChapter: async () => false,

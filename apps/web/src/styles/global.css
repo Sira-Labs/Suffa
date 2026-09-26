@@ -1279,6 +1279,19 @@ textarea.input {
 }
 
 /* Milestone (stage passed): full screen, big medal, a burst of saffron and teal. */
+/* Section finished: the milestone screen as an overlay over the unit path. */
+.section-celebration {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow-y: auto;
+  background: var(--bg);
+}
+.section-celebration-arabic {
+  margin: 0;
+  font-size: 2.2rem;
+  color: var(--accent);
+}
 .milestone {
   position: relative;
   min-height: 100dvh;
@@ -2004,6 +2017,17 @@ textarea.input {
   overscroll-behavior: contain;
   overflow-wrap: anywhere;
   padding-inline-end: 0.25rem;
+}
+.transcript-now {
+  display: flex;
+  gap: 0.75rem;
+  align-items: baseline;
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  font-size: 1.1rem;
+  min-height: 2.6rem;
 }
 .transcript {
   position: relative;

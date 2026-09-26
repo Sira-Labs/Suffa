@@ -10,6 +10,7 @@ import {
 } from '@/services/units';
 import { useBookProgress, type SkillProgress } from './useBookProgress';
 import { DeadlineChip, LockedPanel, StartPanel } from './UnitGate';
+import { SectionCelebration } from './SectionCelebration';
 
 const STATION_ICONS: Record<StationKind, IconName> = {
   dialogue: 'listen',
@@ -132,6 +133,7 @@ export function UnitPath() {
 
       {!unlocked && <LockedPanel unit={unit.unit} />}
       {unlocked && status.state === 'not-started' && <StartPanel unit={unit.unit} />}
+      {unlocked && <SectionCelebration unit={unit.unit} sections={sections} />}
       {unlocked && (
         <ol className="path-sections" aria-label={`Lernpfad Einheit ${unit.unit}`}>
           {sections.map((section) => (

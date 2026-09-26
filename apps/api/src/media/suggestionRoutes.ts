@@ -98,16 +98,21 @@ export function createSuggestionRoutes(deps: SuggestionRouteDeps): Hono<ActorEnv
     );
     if (!decided) return c.json({ error: 'not_found' }, 404);
     if (parsed.data.decision === 'accept') {
-      if (decided.kind === 'chapter') {
-        await deps.suggestions.addChapter(
-          item.id,
-          decided.atSec,
-          decided.data.title,
-          actor
-        );
-      } else {
-        await deps.interactive.addCheckpoint(item.id, decided.atSec, decided.data, actor);
-      }
+      const made =
+        decided.kind === 'chapter'
+          ? await deps.suggestions.addChapter(
+              item.id,
+              decided.atSec,
+              decided.data.title,
+              actor
+            )
+          : await deps.interactive.addCheckpoint(
+              item.id,
+              decided.atSec,
+              decided.data,
+              actor
+            );
+      await deps.suggestions.linkResult(item.id, decided.id, made.id);
     }
     return c.body(null, 204);
   });

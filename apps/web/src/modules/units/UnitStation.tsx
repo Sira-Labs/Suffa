@@ -22,6 +22,7 @@ import { Conjugation } from '@/modules/conjugation';
 import { Cloze } from '@/modules/cloze';
 import { Grammar } from '@/modules/grammar';
 import { useClozeIds } from './useClozeIds';
+import { useBookProgress } from './useBookProgress';
 import { isStationKey, STATION_META } from './skills';
 
 const UNITS = 16;
@@ -45,11 +46,35 @@ export function UnitStation() {
     () => dialogueSections(content, unit).find((s) => s.no === sectionNo) ?? null,
     [unit, sectionNo]
   );
-  const clozeIds = useClozeIds();
-  const items = useMemo(
-    () => sectionItems(unitPracticeItems(content, unit, clozeIds ?? undefined), section),
-    [unit, section, clozeIds]
+  // The unit path opens dialogues one after another: a locked dialogue cannot be practised,
+  // and the whole-unit view only offers the dialogues that are open (until the path is
+  // known, nothing is held back).
+  const { units: book } = useBookProgress();
+  const pathSections = book.find((u) => u.unit.unit === unit)?.sections;
+  const openNos = useMemo(
+    () =>
+      pathSections
+        ?.filter((s) => s.no !== null && s.state !== 'locked')
+        .map((s) => s.no as number) ?? null,
+    [pathSections]
   );
+  const allSections = useMemo(() => dialogueSections(content, unit), [unit]);
+  const openSections = useMemo(
+    () =>
+      openNos && openNos.length < allSections.length
+        ? allSections.filter((s) => openNos.includes(s.no))
+        : null,
+    [openNos, allSections]
+  );
+  const sectionLocked =
+    section !== null && openNos !== null && !openNos.includes(section.no);
+  const clozeIds = useClozeIds();
+  const items = useMemo(() => {
+    const all = unitPracticeItems(content, unit, clozeIds ?? undefined);
+    if (section) return sectionItems(all, section);
+    if (openSections) return openItems(all, openSections);
+    return all;
+  }, [unit, section, openSections, clozeIds]);
 
   const skill = station !== 'listen' ? (station as PracticeSkill) : null;
   const scope = useMemo<UnitPracticeScope | null>(() => {
@@ -57,6 +82,11 @@ export function UnitStation() {
     return {
       unit,
       ...(section && { dialogIds: [section.dialogId], wordIds: section.wordIds }),
+      ...(!section &&
+        openSections && {
+          dialogIds: openSections.map((s) => s.dialogId),
+          wordIds: openSections.flatMap((s) => s.wordIds),
+        }),
       isPractised: (itemId) =>
         Boolean(usePracticeStore.getState().records[practiceId(unit, skill, itemId)]),
       onPractised(itemId) {
@@ -75,7 +105,7 @@ export function UnitStation() {
         });
       },
     };
-  }, [skill, unit, section, items, practise, celebrate]);
+  }, [skill, unit, section, openSections, items, practise, celebrate]);
 
   if (!Number.isInteger(unit) || unit < 1 || unit > UNITS || !isStationKey(station)) {
     return (
@@ -96,6 +126,26 @@ export function UnitStation() {
           Einheit {unit}
         </Link>
         <LockedPanel unit={unit} />
+      </div>
+    );
+  }
+
+  if (sectionLocked) {
+    return (
+      <div className="stack" style={{ gap: '1.25rem' }}>
+        <Link to={`/units/${unit}`} className="back-link">
+          <Icon name="arrowLeft" size={18} />
+          Einheit {unit}
+        </Link>
+        <section className="card stack" aria-label="Dialog gesperrt">
+          <strong>Dialog {section.no} ist noch gesperrt</strong>
+          <p className="muted" style={{ margin: 0 }}>
+            Schließe zuerst Dialog {section.no - 1} ab – dann geht es hier weiter.
+          </p>
+          <Link to={`/units/${unit}`} className="btn btn-primary">
+            Zum Lernpfad
+          </Link>
+        </section>
       </div>
     );
   }
@@ -186,7 +236,9 @@ export function UnitStation() {
       {station === 'read' && scope && <Reading scope={scope} />}
       {station === 'write' && scope && <Writing scope={scope} />}
       {station === 'speak' && scope && <Speaking scope={scope} />}
-      {station === 'grammar' && scope && <Grammar scope={scope} section={section?.no} />}
+      {station === 'grammar' && scope && (
+        <Grammar scope={scope} section={section?.no ?? openSections?.map((s) => s.no)} />
+      )}
       {station === 'cloze' && scope && <Cloze scope={scope} />}
       {station === 'verbs' && scope && <Conjugation scope={scope} />}
     </div>
@@ -205,6 +257,23 @@ function sectionItems(
     cloze: all.cloze.filter((id) => section.wordIds.includes(id)),
     write: section.writeIds,
     speak: section.lineIds,
+    verbs: all.verbs,
+  };
+}
+
+/** The whole-unit view while later dialogues are locked: the items of the open sections. */
+function openItems(
+  all: Record<PracticeSkill, string[]>,
+  open: UnitSection[]
+): Record<PracticeSkill, string[]> {
+  const parts = open.map((s) => sectionItems(all, s));
+  const join = (skill: PracticeSkill) => [...new Set(parts.flatMap((p) => p[skill]))];
+  return {
+    read: join('read'),
+    grammar: join('grammar'),
+    cloze: join('cloze'),
+    write: join('write'),
+    speak: join('speak'),
     verbs: all.verbs,
   };
 }

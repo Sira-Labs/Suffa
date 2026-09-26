@@ -7,7 +7,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { playableUrl } from '@/native/install';
-import { dueCheckpoint, type Checkpoint, type Cue } from '@/services/media/checkpoints';
+import {
+  cuesToVtt,
+  dueCheckpoint,
+  type Checkpoint,
+  type Cue,
+} from '@/services/media/checkpoints';
 import { InteractiveApi, type Interactive } from '@/services/media/interactiveApi';
 import { MediaApi } from '@/services/media/mediaApi';
 import { useMediaSession } from '@/services/media/mediaSession';
@@ -158,6 +163,22 @@ export function RecordingPlayer() {
 
   useMediaSession(media?.title, element);
 
+  // The transcript as subtitles on the video (also in full screen); a new file per change.
+  const cueList = media?.cues;
+  const subtitles = useMemo(
+    () =>
+      cueList?.length && typeof URL.createObjectURL === 'function'
+        ? URL.createObjectURL(new Blob([cuesToVtt(cueList)], { type: 'text/vtt' }))
+        : null,
+    [cueList]
+  );
+  useEffect(
+    () => () => {
+      if (subtitles) URL.revokeObjectURL(subtitles);
+    },
+    [subtitles]
+  );
+
   if (message) return <p className="feedback-bad">{message}</p>;
   if (!media) return <p className="muted">Lade Aufnahme …</p>;
 
@@ -274,7 +295,17 @@ export function RecordingPlayer() {
           style={{ width: '100%', borderRadius: 12, background: '#000' }}
           aria-label={media.title}
           {...handlers}
-        />
+        >
+          {subtitles && (
+            <track
+              kind="subtitles"
+              src={subtitles}
+              srcLang="ar"
+              label="Transkript"
+              default
+            />
+          )}
+        </video>
       ) : (
         <audio
           controls
@@ -285,6 +316,7 @@ export function RecordingPlayer() {
           {...handlers}
         />
       )}
+      <TranscriptPanel cues={media.cues} time={time} onSeek={seek} />
       {open && (
         <CheckpointDialog checkpoint={open} onDone={(ok) => void answered(open, ok)} />
       )}
@@ -318,7 +350,7 @@ export function RecordingPlayer() {
         onRemove={
           teacher
             ? (chapter) =>
-                void api.removeChapter(id, mediaId, chapter.id).then(() => load())
+                void api.removeChapter(id, mediaId, chapter.id).then(() => refresh())
             : undefined
         }
       />
@@ -334,7 +366,6 @@ export function RecordingPlayer() {
           onChange={() => void refresh()}
         />
       )}
-      <TranscriptPanel cues={media.cues} time={time} onSeek={seek} />
       {teacher && media.interactive && (
         <>
           <CheckpointEditor
@@ -347,6 +378,8 @@ export function RecordingPlayer() {
           />
           {media.interactive.canSuggest && media.cues.length > 0 && (
             <SuggestionsEditor
+              // Removing a checkpoint or chapter can put its suggestion back: load again.
+              key={`${media.checkpoints.length}:${media.interactive.chapters?.length ?? 0}`}
               api={api}
               classId={id}
               mediaId={mediaId}

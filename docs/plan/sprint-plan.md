@@ -1,6 +1,7 @@
 # Suffa — Sprint Plan (S1–S16)
 
 v2 (2026-09-24): re-sequenced for the teacher pilot (engagement + recordings before AI).
+v3 (2026-09-26): S1–S14 built; S2b added; S15–S16 detailed and pulled into the week of Sep 28.
 Two-week sprints; estimates in story points (1 pt ≈ half a day); target ≈ 20 pts/sprint.
 
 **Definition of Done (every story):** code + tests (unit/integration as relevant) · lint,
@@ -9,10 +10,16 @@ demoed · no secrets in code · structured logs on new paths.
 
 ---
 
-## Progress (as of 2026-09-23)
+## Progress (as of 2026-09-26)
 
-Sprints 1–2 (P0) were planned for Oct 5 – Nov 1 and shipped early, all stories. Gate G0 is met
-(one-command deploy, restore drill passed). Dates of later sprints are kept as buffer.
+Sprints 1–14 were planned for Oct 5, 2026 – Apr 18, 2027. Everything in them that can be built
+without devices, store accounts or the teacher's class was shipped by Sep 26, 2026: **63 of 68
+stories**. The five open ones belong to the PO (pilot kick-off, YouTube outreach, TestFlight,
+store assets, store release). Gates G0 and G1 are met; G2–G5 wait for the pilot, real devices
+and the stores. Sprint 2b (own production server, ADR-0024) waits for the server.
+
+The calendar dates of the sprints are kept: they are now buffer for the pilot on Jan 4, 2027.
+What is built next goes by the "Next" section below, not by those dates.
 
 ```mermaid
 gantt
@@ -20,80 +27,114 @@ gantt
   axisFormat %d %b
   todayMarker on
   section P0 Foundation
-  S1 New home, same app (6/6)        :done, s1, 2026-10-05, 14d
-  S2 Operable (6/6)                  :done, s2, after s1, 14d
+  S1 New home, same app (6/6)        :done, s1, 2026-09-21, 1d
+  S2 Operable (6/6)                  :done, s2, after s1, 2d
   G0 met                             :milestone, done, g0, 2026-09-23, 0d
+  S2b Production of its own (0/3)    :crit, s2b, 2026-09-28, 5d
   section P1 Identity
-  S3 Who are you? (5/5)              :done, s3, after s2, 14d
-  S4 Classes & admin (4/5)          :active, s4, after s3, 14d
+  S3 Who are you? (5/5)              :done, s3, 2026-09-24, 1d
+  S4 Classes & admin (4/5, PO 1)     :done, s4, 2026-09-24, 1d
   section P2 Engagement
-  S5 Every day counts (5/5)         :done, s5, after s4, 14d
-  S6 Class spirit (4/4)             :done, s6, after s5, 14d
-  Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
+  S5 Every day counts (5/5)          :done, s5, 2026-09-24, 1d
+  S6 Class spirit (4/4)              :done, s6, 2026-09-24, 1d
   section P3 Teacher recordings
-  S7 Bring the sessions in (5/5)    :done, s7, after s6, 14d
-  S8 Make them interactive (5/5)    :done, s8, after s7, 14d
+  S7 Bring the sessions in (5/5)     :done, s7, 2026-09-24, 1d
+  S8 Make them interactive (5/5)     :done, s8, 2026-09-25, 1d
   section P4 AI teacher
-  S9 Gateway (5/5)                  :done, s9, after s8, 14d
-  S10 al-Muʿallim speaks (4/4)      :done, s10, after s9, 14d
-  S11 Grading & evals (4/4)         :done, s11, after s10, 14d
+  S9 Gateway (5/5)                   :done, s9, 2026-09-25, 1d
+  S10 al-Muʿallim speaks (4/4)       :done, s10, 2026-09-25, 1d
+  S11 Grading & evals (4/4)          :done, s11, 2026-09-25, 1d
   section P5 Interactive YouTube
-  S12 Video lessons (5/5)           :done, s12, after s11, 14d
+  S12 Video lessons (4/5, PO 1)      :done, s12, 2026-09-25, 1d
   section P6 Mobile apps
-  S13 In their pocket (3/5)         :active, s13, after s12, 14d
-  S14 Celebrate (3/4)               :active, s14, after s13, 14d
+  S13 In their pocket (3/5, PO 2)    :done, s13, 2026-09-25, 1d
+  S14 Celebrate (3/4, PO 1)          :done, s14, 2026-09-25, 1d
+  section P7 Next level
+  S15 Hear yourself (0/6)            :active, s15, 2026-09-28, 4d
+  S16 Open up (0/6)                  :s16, after s15, 4d
+  Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
 ```
 
 ```mermaid
 pie showData
-  title Sprint 1–2 story points
-  "Done" : 38
-  "Open" : 2
+  title Stories in Sprints 1–16
+  "Done" : 63
+  "Open for the PO" : 5
+  "S2b, waits for the server" : 3
+  "S15–S16, next" : 12
 ```
 
-| Story                   | Status | Notes                                                                                                                                               |
-| ----------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.1 workspaces          | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                               |
-| 1.2 CI                  | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                             |
-| 1.3 api skeleton        | ✅     |                                                                                                                                                     |
-| 1.4 schema + migrations | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                    |
-| 1.5 Dockerfiles         | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                                  |
-| 1.6 first deploy        | ✅     | full stack live on CapRover                                                                                                                         |
-| 2.1 release workflow    | ✅     | 2026-09-25 (ADR-0024): `main` deploys to staging (environment `staging`) by digest; production is 2.7                                               |
-| 2.2 apps + queue        | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                        |
-| 2.3 backups             | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; production backups are 2.8    |
-| 2.4 error tracking      | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                      |
-| 2.5 sync endpoints      | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                                 |
-| 2.6 browser router      | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline        |
-| 3.1 Better Auth         | ✅     | magic link only, Google Workspace SMTP relay (port 587); rate limits in Postgres; httpOnly session cookie; open-redirect guard                      |
-| 3.2 authz               | ✅     | `authz/` policies + `authorize()` middleware; route × role matrix test fails on any route without a policy; first admin route `GET /admin/users`    |
-| 3.3 ApiSyncProvider     | ✅     | same-origin cookie sync; `VITE_SYNC_BACKEND=off` for an offline build                                                                               |
-| 3.4 account UI          | ✅     | devices (browser, last activity), sign out one or all others, time zone; an ended session fails on its next request                                 |
-| 3.5 security review     | ✅     | `docs/security/2026-09-review-auth-sync.md`: shared rate-limit bucket (proxy IP) and token-leaking Better Auth endpoints fixed; rest ticketed       |
-| 4.1 Supabase migration  | ✅     | nothing to migrate (only the PO's data, already synced to the API by the devices); Supabase removed from app, CSP and repo                          |
-| 4.2 admin area          | ✅     | users (search, role, disable), audit log; admin actions need a TOTP second factor confirmed within 12 h                                             |
-| 4.3 classes             | ✅     | create, invite link + QR (14 days, token hashed), join from a signed-out phone, teacher approval; scoped `class:manage`                             |
-| 4.4 GDPR                | ✅     | JSON export of all data; account deletion cascades (checked over every table with `user_id`), sole-teacher classes archived                         |
-| 4.5 pilot kick-off      | 📋     | interview guide and records in `docs/pilot/kickoff-interview.md`; the conversation itself is the PO's                                               |
-| 5.1 engagement package  | ✅     | `packages/engagement`: XP, units/stages, days in the learner's zone, quests, streak + shields, weekly goal, badges, levels; 100 % branch coverage   |
-| 5.2 Today card          | ✅     | "Tagesaufgaben": 3 quests per day (same on every device), bonus, streak, shields, weekly goal; toasts for quests and badges; offline                |
-| 5.3 badges + level      | ✅     | "Abzeichen" gallery (10 badges × tiers + stages), XP level on "Heute", mastery ring (mature words) on every unit tile                               |
-| 5.4 server recompute    | ✅     | debounced worker job after each push; plausibility checks; `xp_ledger`, `quest_progress`, `achievement_unlocks`, `engagement_state`; app reconciles |
-| 5.5 weekly goal         | ✅     | 3/5/7 active days (synced setting); weekly streak; a missed day never breaks a met week                                                             |
-| 6.1 class dashboard     | ✅     | per class page: activity, learning days, quests, XP (7 days), streak, mature words, class mastery per unit, leech words; aggregates only            |
-| 6.2 class spirit        | ✅     | weekly challenge (reviews/quests/XP/learning days, one shared target), teacher badges, shout-outs; reached challenge → "Rūḥ al-Faṣl" badge          |
-| 6.3 web push            | ✅     | `Notifier` + Web Push (VAPID env); reminder time, quiet hours; ≤ 1 reminder/day, skipped when a quest is done; expired devices dropped              |
-| 6.4 weekly recap        | ✅     | Sunday from 18:00 local: XP, quests, learning days, words matured, best day, badges; card on "Heute" + one push                                     |
-| 7.1 object storage      | ✅     | `ObjectStorage` on S3 (RustFS); presigned GET/PUT/part URLs as same-origin `/media/…` via Caddy; range requests tested (moto in CI)                 |
-| 7.2 Google Drive        | ✅     | OAuth `drive.file`, state bound to the teacher, refresh token sealed; Picker in the browser; import job copies into storage, then transcode         |
-| 7.3 multipart upload    | ✅     | 32 MB parts via presigned URLs, retries with back-off, resume by picking the same file again (server lists stored parts)                            |
-| 7.4 transcode           | ✅     | ffmpeg in the api image: mono AAC for everyone, 720p fast-start MP4 for video; one job at a time, nice'd, progress on the item                      |
-| 7.5 player + progress   | ✅     | class recordings list, publish with consent, player counts played time into `media_progress` (source `recording`) → XP and sync                     |
-| 8.1 transcription       | ✅     | OpenAI-compatible STT (self-hosted faster-whisper possible), 10-min pieces; per-class AI switch checked again in the worker; cue editor             |
-| 8.2 checkpoints         | ✅     | mcq, dictation (compared without tashkīl), vocab_flash; pause within ±0.5 s when played across, never on seeking; right answer = practice XP        |
-| 8.3 publish + consent   | ✅     | (Sprint 7) teacher confirms consent; members only see published recordings                                                                          |
-| 8.4 offline audio       | ✅     | audio + transcript + checkpoints in Cache Storage; the player falls back to the saved copy without network                                          |
-| 8.5 assignments         | ✅     | unit test or recording with due date; done derived from synced exams/listening; teacher sees x/y done; learners see open ones on "Heute"            |
+| Story                    | Status | Notes                                                                                                                                               |
+| ------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.1 workspaces           | ✅     | `apps/web`, `apps/api`; `packages/*` follow when code is first shared                                                                               |
+| 1.2 CI                   | ✅     | plus: releases are gated on CI and on image smoke tests                                                                                             |
+| 1.3 api skeleton         | ✅     |                                                                                                                                                     |
+| 1.4 schema + migrations  | ✅     | plain SQL migrations with an own runner (advisory lock); Drizzle not adopted yet                                                                    |
+| 1.5 Dockerfiles          | ✅     | ffmpeg is added to the api image with the recordings pipeline (S7)                                                                                  |
+| 1.6 first deploy         | ✅     | full stack live on CapRover                                                                                                                         |
+| 2.1 release workflow     | ✅     | 2026-09-25 (ADR-0024): `main` deploys to staging (environment `staging`) by digest; production is 2.7                                               |
+| 2.2 apps + queue         | ✅     | pg-boss queues + dead-letter queue; worker runs a daily maintenance job; `/healthz` reports live queue depth                                        |
+| 2.3 backups              | ✅     | `suffa-backup` app: nightly verified pg_dump → RustFS (versioning + object lock, write-only key); restore drill done; production backups are 2.8    |
+| 2.4 error tracking       | ✅     | GlitchTip (template, no Redis): api, worker and web report with release tag; browser via `/api/errors` tunnel; uptime monitors                      |
+| 2.5 sync endpoints       | ✅     | `/api/v1/sync/:table/push\|pull`; closed (401) until Better Auth (S3), dev tokens outside prod only                                                 |
+| 2.6 browser router       | ✅     | `createBrowserRouter`; Caddy and the service worker fall back to index.html; old `/#/…` links are rewritten on load; deep links work offline        |
+| 3.1 Better Auth          | ✅     | magic link only, Google Workspace SMTP relay (port 587); rate limits in Postgres; httpOnly session cookie; open-redirect guard                      |
+| 3.2 authz                | ✅     | `authz/` policies + `authorize()` middleware; route × role matrix test fails on any route without a policy; first admin route `GET /admin/users`    |
+| 3.3 ApiSyncProvider      | ✅     | same-origin cookie sync; `VITE_SYNC_BACKEND=off` for an offline build                                                                               |
+| 3.4 account UI           | ✅     | devices (browser, last activity), sign out one or all others, time zone; an ended session fails on its next request                                 |
+| 3.5 security review      | ✅     | `docs/security/2026-09-review-auth-sync.md`: shared rate-limit bucket (proxy IP) and token-leaking Better Auth endpoints fixed; rest ticketed       |
+| 4.1 Supabase migration   | ✅     | nothing to migrate (only the PO's data, already synced to the API by the devices); Supabase removed from app, CSP and repo                          |
+| 4.2 admin area           | ✅     | users (search, role, disable), audit log; admin actions need a TOTP second factor confirmed within 12 h                                             |
+| 4.3 classes              | ✅     | create, invite link + QR (14 days, token hashed), join from a signed-out phone, teacher approval; scoped `class:manage`                             |
+| 4.4 GDPR                 | ✅     | JSON export of all data; account deletion cascades (checked over every table with `user_id`), sole-teacher classes archived                         |
+| 4.5 pilot kick-off       | 📋     | interview guide and records in `docs/pilot/kickoff-interview.md`; the conversation itself is the PO's                                               |
+| 5.1 engagement package   | ✅     | `packages/engagement`: XP, units/stages, days in the learner's zone, quests, streak + shields, weekly goal, badges, levels; 100 % branch coverage   |
+| 5.2 Today card           | ✅     | "Tagesaufgaben": 3 quests per day (same on every device), bonus, streak, shields, weekly goal; toasts for quests and badges; offline                |
+| 5.3 badges + level       | ✅     | "Abzeichen" gallery (10 badges × tiers + stages), XP level on "Heute", mastery ring (mature words) on every unit tile                               |
+| 5.4 server recompute     | ✅     | debounced worker job after each push; plausibility checks; `xp_ledger`, `quest_progress`, `achievement_unlocks`, `engagement_state`; app reconciles |
+| 5.5 weekly goal          | ✅     | 3/5/7 active days (synced setting); weekly streak; a missed day never breaks a met week                                                             |
+| 6.1 class dashboard      | ✅     | per class page: activity, learning days, quests, XP (7 days), streak, mature words, class mastery per unit, leech words; aggregates only            |
+| 6.2 class spirit         | ✅     | weekly challenge (reviews/quests/XP/learning days, one shared target), teacher badges, shout-outs; reached challenge → "Rūḥ al-Faṣl" badge          |
+| 6.3 web push             | ✅     | `Notifier` + Web Push (VAPID env); reminder time, quiet hours; ≤ 1 reminder/day, skipped when a quest is done; expired devices dropped              |
+| 6.4 weekly recap         | ✅     | Sunday from 18:00 local: XP, quests, learning days, words matured, best day, badges; card on "Heute" + one push                                     |
+| 7.1 object storage       | ✅     | `ObjectStorage` on S3 (RustFS); presigned GET/PUT/part URLs as same-origin `/media/…` via Caddy; range requests tested (moto in CI)                 |
+| 7.2 Google Drive         | ✅     | OAuth `drive.file`, state bound to the teacher, refresh token sealed; Picker in the browser; import job copies into storage, then transcode         |
+| 7.3 multipart upload     | ✅     | 32 MB parts via presigned URLs, retries with back-off, resume by picking the same file again (server lists stored parts)                            |
+| 7.4 transcode            | ✅     | ffmpeg in the api image: mono AAC for everyone, 720p fast-start MP4 for video; one job at a time, nice'd, progress on the item                      |
+| 7.5 player + progress    | ✅     | class recordings list, publish with consent, player counts played time into `media_progress` (source `recording`) → XP and sync                     |
+| 8.1 transcription        | ✅     | OpenAI-compatible STT (self-hosted faster-whisper possible), 10-min pieces; per-class AI switch checked again in the worker; cue editor             |
+| 8.2 checkpoints          | ✅     | mcq, dictation (compared without tashkīl), vocab_flash; pause within ±0.5 s when played across, never on seeking; right answer = practice XP        |
+| 8.3 publish + consent    | ✅     | (Sprint 7) teacher confirms consent; members only see published recordings                                                                          |
+| 8.4 offline audio        | ✅     | audio + transcript + checkpoints in Cache Storage; the player falls back to the saved copy without network                                          |
+| 8.5 assignments          | ✅     | unit test or recording with due date; done derived from synced exams/listening; teacher sees x/y done; learners see open ones on "Heute"            |
+| 9.1–9.2 `packages/llm`   | ✅     | Anthropic, OpenRouter and Hugging Face adapters with one shared contract suite on recorded fixtures                                                 |
+| 9.3–9.5 gateway          | ✅     | routing table with 60-s cache, quotas, budget downgrade at 80 %, pause at 100 %, metering; admin tab "KI"                                           |
+| 10.1–10.4 al-Muʿallim    | ✅     | SSE tutor with grounded prompt, four authz-checked tools, validators with one repair retry, 👍/👎, "ask about this minute"                          |
+| 11.1–11.4 grading, evals | ✅     | grade mode (mistakes → due cards), teacher review → eval export, budget-capped eval harness in CI, AI chapter suggestions                           |
+| 12.1–12.3, 12.5 video    | ✅     | YouTube catalog + import, lesson player with checkpoints, tap-to-gloss transcript when permitted, video quest                                       |
+| 12.4 outreach            | 📋     | PO: contact Muhammad al-Andalusi and record the answer                                                                                              |
+| 13.1–13.3 apps           | ✅     | bearer tokens, app links, FCM beside web push, native bridge, device reminders, lock-screen controls; `mobile/` Capacitor config                    |
+| 13.4–13.5 test builds    | 📋     | PO: Apple/Firebase accounts, signing, `cap add` on a Mac, TestFlight/Play testing, store assets                                                     |
+| 14.1 store release       | 📋     | PO, after 13.4–13.5                                                                                                                                 |
+| 14.2–14.4 celebrate      | ✅     | opt-in weekly league (off for minors), unit certificates at 90 % mastery, live class quiz for 30 phones                                             |
+
+## Next: the week of Sep 28 – Oct 4, 2026
+
+At the pace of the last week (Sprints 3–14, about 240 points, built in three days, each with
+tests, review and a green release), **Sprints 15 and 16 can be built in this one week**, with
+Sprint 2b as soon as the production server exists. What code alone cannot finish is named in
+each sprint: it needs pilot data, a model endpoint, a person's review or the PO.
+
+| Day (approx.) | Work                                                                        | Needs from the PO                                      |
+| ------------- | --------------------------------------------------------------------------- | ------------------------------------------------------ |
+| Mon – Tue     | S15: own recording scored on the server, sharing with the teacher, G2P      | —                                                      |
+| Tue – Wed     | S15: assessor interface, letter feedback, eval harness, FSRS behind a flag  | optional: a Hugging Face endpoint for the ASR assessor |
+| Wed – Fri     | S16: content CMS + bundles, English UI and meaning language, WCAG 2.2 audit | someone to review the English glosses before publish   |
+| any day       | S2b: production server, backups with WAL-G, go-live on `suffa.siralabs.org` | server ordered, backup location, `production` reviewer |
+
+**Stays open after the week, by design:** choosing between the ASR and the phoneme assessor
+(ADR-0022 needs ~300 consented pilot recordings from January), English content going live
+(reviewed first), and everything that waits for the stores and devices (13.4, 13.5, 14.1).
 
 ## P0 — Foundation
 
@@ -326,20 +367,27 @@ results are deleted after 30 days. Open for the PO: 14.1 store release, 14.5 sto
 
 ## P7 — Next level
 
-- **Sprint 15 (Apr 19 – May 2):** pronunciation assessment (ADR-0022): G2P for vocalised
-  MSA, evaluation harness on consented pilot recordings, ASR assessor as default and phoneme
-  assessor if it wins the evaluation; FSRS behind
-  `schedule()` with migration flag. **Speaking recordings (pilot feedback, 26 Sep 2026):**
-  the learner's own recording of a sentence is scored on the server (the same assessor), so
-  it need not be spoken a second time for the browser's recogniser; and a learner can share
-  chosen recordings with the class teacher. Sharing is opt-in per recording, visible to the
-  class's teachers only, withdrawable, and deleted with the account. In classes flagged
-  `minors` (ADR-0022 privacy rule) sharing is off by default: the teacher first records the
-  parents' consent for the learner, and shared recordings are deleted when the learner
-  leaves the class.
-- **Sprint 16 (May 3 – May 16):** content CMS + offline bundles (ADR-0014); English UI,
-  per-language glosses and meaning-language setting (ADR-0021);
-  WCAG 2.2 AA audit; `v2.2`.
+### Sprint 15 — _"Hear yourself"_ (plan: Apr 19 – May 2; now: week of Sep 28)
+
+| #    | Story                                                                                                                                                                                                                                             | Pts | Acceptance                                                                                                                              |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| 15.1 | `packages/phonology`: rule-based G2P for vocalised MSA (shadda, sun letters, hamzat al-waṣl, tanwīn, tāʾ marbūṭa, alif maqṣūra, long vowels) with an index back to the letters (ADR-0022)                                                         | 5   | Every Book 1 word and dialogue line converts; tests for each rule; the letter index points at the right letter.                         |
+| 15.2 | `PronunciationAssessor` interface: `BrowserAssessor` (today's) and `AsrAssessor` (server STT from 8.1 + tashkīl-tolerant diff); letter feedback good / check / wrong with one tip per sound                                                       | 5   | Selectable per class by the admin; falls back to the browser without a server STT; audio is not stored by default.                      |
+| 15.3 | Own recording scored on the server (pilot feedback, Sep 26): the recording just made is assessed, no second speaking for the recogniser                                                                                                           | 3   | One recording gives the replay and the score; works on iPhone (`audio/mp4`).                                                            |
+| 15.4 | Share recordings with the teacher: opt-in per recording, class teachers only, withdrawable, deleted with the account; teacher listening list with a short comment. In classes flagged `minors` off until the teacher records the parents' consent | 5   | Non-teachers get 403; withdrawing deletes the file; a learner leaving a class of minors deletes their shared recordings; in the export. |
+| 15.5 | Pronunciation eval harness next to the AI evals: teacher ratings 1–5 and wrong letters; Spearman ρ, F1, false rejections, p95 latency, cost                                                                                                       | 3   | Runs on a fixture set now; ready for the consented pilot recordings (January). Choosing the phoneme assessor waits for that data.       |
+| 15.6 | FSRS behind `schedule()` with a migration flag; SM-2 history converted; per-learner switch for the pilot                                                                                                                                          | 5   | Same due counts ±10 % on the first day after migration; switching back loses nothing; syncs.                                            |
+
+### Sprint 16 — _"Open up"_ (plan: May 3 – May 16; now: week of Sep 28)
+
+| #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                              |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------- |
+| 16.1 | Content CMS (ADR-0014): `content_units` in Postgres with draft / review / published, admin editor, the teacher marks a unit as checked                                    | 5   | Existing JSON is the seed; stable IDs; every change audit-logged.                       |
+| 16.2 | Content bundles: publishing makes an immutable, checksummed bundle; `/v1/content/manifest`; the PWA ships one and updates in the background; removed items are tombstoned | 5   | Offline first run still works; SRS references stay valid across bundles.                |
+| 16.3 | English UI (ADR-0021): `i18next` catalogues per module, a lint rule against new hard-coded strings, UI language setting                                                   | 5   | Every screen in German and English; no untranslated string in the e2e run.              |
+| 16.4 | Meaning language: per-language glosses, English drafts by the LLM batch, reviewed in the CMS before publish; grading per locale                                           | 5   | Missing English falls back to German with a badge; nothing unreviewed reaches learners. |
+| 16.5 | WCAG 2.2 AA: axe checks in the e2e run plus a keyboard and screen-reader pass; fixes                                                                                      | 3   | No serious axe finding; audit written down in `docs/`.                                  |
+| 16.6 | Release `v2.2`                                                                                                                                                            | 1   | Promoted to production (once 2b is live).                                               |
 
 ---
 
@@ -353,6 +401,21 @@ results are deleted after 30 days. Open for the PO: 14.1 store release, 14.5 sto
   timeouts and concrete German help texts instead of silent failures.
 - **2026-09-23 — security updates:** React Router 7, uuid 11.1; `npm audit` clean for
   production dependencies.
+- **2026-09-25 — browser tests:** Playwright on desktop and phone for sign-in, classes,
+  sync across devices, live quiz, certificates, league and passkeys; release images scanned
+  with Trivy.
+- **2026-09-25 — sign-in page and code:** a sign-in page comes first ("Ohne Konto weiter"
+  stays possible); the mail carries a six-digit code next to the link, for mail apps that open
+  links in their own browser.
+- **2026-09-25 — review after an empty day:** when no card is due, the review offers wobbly
+  words and more new words instead of an empty screen.
+- **2026-09-26 — passkeys:** optional sign-in with Face ID, Touch ID or the device PIN
+  (ADR-0008 update); link and code stay.
+- **2026-09-26 — pilot fixes:** a finished station shows the way on; speaking steps back and
+  forth and credits the recorded sentence; the activity heatmap counts all learning on the
+  learner's own days.
+- **2026-09-26 — releases:** `main` deploys to staging by digest; production is promoted
+  after approval, without a rebuild (ADR-0024).
 
 ## Backlog (unscheduled)
 

@@ -17,5 +17,10 @@ describe('isRecordingFile', () => {
   it('refuses other files', () => {
     expect(isRecordingFile({ name: 'notes.pdf', type: 'application/pdf' })).toBe(false);
     expect(isRecordingFile({ name: 'noext', type: '' })).toBe(false);
+    // Same rule as the server: an unknown audio type needs a known extension, and a known
+    // extension does not make a PDF a recording.
+    expect(isRecordingFile({ name: 'voice', type: 'audio/x-unknown' })).toBe(false);
+    expect(isRecordingFile({ name: 'voice.m4a', type: 'audio/x-unknown' })).toBe(true);
+    expect(isRecordingFile({ name: 'slides.mp4', type: 'application/pdf' })).toBe(false);
   });
 });

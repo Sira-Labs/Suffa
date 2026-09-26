@@ -244,6 +244,7 @@ function UploadForm({
           const picked = e.target.files?.[0] ?? null;
           if (picked && !isRecordingFile(picked)) {
             setFile(null);
+            e.target.value = '';
             setMessage('Bitte eine Audio- oder Videodatei wählen (z. B. MP4, M4A, MP3).');
             return;
           }

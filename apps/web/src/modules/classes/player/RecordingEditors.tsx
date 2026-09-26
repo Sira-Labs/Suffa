@@ -3,7 +3,7 @@
  * remove checkpoints, generate the transcript (when the server and the class allow AI) and
  * correct it line by line.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   clock,
   type Checkpoint,
@@ -171,6 +171,32 @@ export function CheckpointEditor({
   );
 }
 
+const POLL_MS = 5000;
+/** Same as the api: a run without news for this long is taken as lost. */
+const STALE_TRANSCRIPT_MS = 10 * 60 * 1000;
+
+/** Where an automatic transcript stands: waiting, or how far it has come. */
+function TranscriptProgress({ transcript }: { transcript: Transcript }) {
+  if (transcript.status === 'queued' || transcript.progress == null) {
+    return (
+      <span className="muted" role="status">
+        Wartet auf den Start … (es läuft immer nur ein Auftrag gleichzeitig)
+      </span>
+    );
+  }
+  return (
+    <div className="stack" role="status" style={{ gap: '0.25rem' }}>
+      <span className="muted">Transkript wird erstellt … {transcript.progress} %</span>
+      <progress
+        max={100}
+        value={transcript.progress}
+        aria-label="Fortschritt des Transkripts"
+        style={{ width: '100%' }}
+      />
+    </div>
+  );
+}
+
 export function TranscriptEditor({
   api,
   classId,
@@ -191,6 +217,21 @@ export function TranscriptEditor({
   const [cues, setCues] = useState<Cue[]>(transcript?.cues ?? []);
   const [message, setMessage] = useState<string | null>(null);
   const busy = transcript?.status === 'queued' || transcript?.status === 'processing';
+  // No news from the worker for a while: it was probably restarted; offer to start again.
+  const stuck =
+    busy && Date.now() - Date.parse(transcript.updatedAt) > STALE_TRANSCRIPT_MS;
+
+  // While it runs, look again every few seconds (the callback sits in a ref so the
+  // player's re-renders do not restart the timer).
+  const changed = useRef(onChange);
+  useEffect(() => {
+    changed.current = onChange;
+  });
+  useEffect(() => {
+    if (!busy) return;
+    const timer = window.setInterval(() => changed.current(), POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [busy]);
 
   const save = async () => {
     const result = await api.saveTranscript(classId, mediaId, cues);
@@ -208,7 +249,13 @@ export function TranscriptEditor({
       <h2 id="transcript-editor" className="eyebrow">
         Transkript bearbeiten
       </h2>
-      {busy && <span className="muted">Das Transkript wird gerade erstellt …</span>}
+      {busy && !stuck && <TranscriptProgress transcript={transcript} />}
+      {stuck && (
+        <span className="feedback-bad">
+          Seit einer Weile tut sich nichts – der Auftrag ist wohl hängen geblieben. Starte
+          ihn neu.
+        </span>
+      )}
       {transcript?.status === 'failed' && transcript.error && (
         <span className="feedback-bad">{transcript.error}</span>
       )}
@@ -218,7 +265,7 @@ export function TranscriptEditor({
           kannst den Text unten selbst eintragen; er erscheint dann beim Abspielen.
         </span>
       )}
-      {canGenerate && !busy && (
+      {canGenerate && (!busy || stuck) && (
         <button
           className="btn"
           onClick={() => void generate()}

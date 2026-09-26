@@ -16,6 +16,7 @@ import type { AuthResolver } from '../auth/resolver.js';
 import { authorize, type ActorEnv, type AuthorizeLog } from '../authz/middleware.js';
 import type { Actor as PolicyActor, ClassScope } from '../authz/policies.js';
 import { CheckpointData, Cues, type InteractiveRepository } from './interactive.js';
+import type { SummaryRepository } from './summary.js';
 import type { MediaRepository } from './repository.js';
 
 export interface InteractiveRouteDeps {
@@ -30,6 +31,10 @@ export interface InteractiveRouteDeps {
   };
   /** Whether AI suggestions can be requested (a model is configured). */
   canSuggest?: () => Promise<boolean>;
+  /** Lesson summaries; learners only see published ones. */
+  summaries?: Pick<SummaryRepository, 'get'>;
+  /** Whether a summary can be requested (an EU model is configured). */
+  canSummarize?: () => Promise<boolean>;
   auth: AuthResolver;
   log: AuthorizeLog;
 }
@@ -76,12 +81,15 @@ export function createInteractiveRoutes(deps: InteractiveRouteDeps): Hono<ActorE
       (await deps.classes.scope(c.req.param('id'), actor.id)).classRole === 'teacher';
     if (!item || (!item.publishedAt && !manager))
       return c.json({ error: 'not_found' }, 404);
-    const [transcript, checkpoints, chapters, canSuggest] = await Promise.all([
-      deps.interactive.transcript(item.id),
-      deps.interactive.checkpoints(item.id),
-      deps.chapters?.chapters(item.id) ?? [],
-      manager && deps.canSuggest ? deps.canSuggest() : false,
-    ]);
+    const [transcript, checkpoints, chapters, canSuggest, summary, canSummarize] =
+      await Promise.all([
+        deps.interactive.transcript(item.id),
+        deps.interactive.checkpoints(item.id),
+        deps.chapters?.chapters(item.id) ?? [],
+        manager && deps.canSuggest ? deps.canSuggest() : false,
+        deps.summaries?.get(item.id) ?? null,
+        manager && deps.canSummarize ? deps.canSummarize() : false,
+      ]);
     c.header('Cache-Control', 'no-store');
     return c.json({
       transcript,
@@ -90,6 +98,23 @@ export function createInteractiveRoutes(deps: InteractiveRouteDeps): Hono<ActorE
       canEdit: manager,
       canGenerate: manager && Boolean(deps.transcribe),
       canSuggest,
+      canSummarize,
+      // Teachers see the run and drafts; learners only a published summary.
+      summary: manager
+        ? summary && {
+            status: summary.status,
+            error: summary.error,
+            content: summary.summary,
+            publishedAt: summary.publishedAt,
+          }
+        : summary?.publishedAt && summary.summary
+          ? {
+              status: 'ready',
+              error: null,
+              content: summary.summary,
+              publishedAt: summary.publishedAt,
+            }
+          : null,
     });
   });
 

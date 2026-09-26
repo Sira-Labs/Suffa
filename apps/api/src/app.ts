@@ -57,6 +57,7 @@ import {
   createSuggestionRoutes,
   type SuggestionRouteDeps,
 } from './media/suggestionRoutes.js';
+import { createSummaryRoutes, type SummaryRouteDeps } from './media/summaryRoutes.js';
 import { createEngagementRoutes, type EngagementRouteDeps } from './engagement/routes.js';
 import { authorize, type AuthorizeLog } from './authz/middleware.js';
 
@@ -123,6 +124,8 @@ export interface AppDeps {
   videos?: VideoRouteDeps;
   /** AI chapter and checkpoint suggestions for recordings (story 11.4). */
   suggestions?: SuggestionRouteDeps;
+  /** Lesson summaries of recordings (EU model, published by the teacher). */
+  summaries?: SummaryRouteDeps;
   /** Admin AI page: routes, budget, spend (ADR-0010). */
   aiAdmin?: AiAdminDeps;
   /** Where denied requests are logged (authz.denied). */
@@ -233,6 +236,7 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.tutor) app.route('/api/v1', createTutorRoutes(deps.tutor));
   if (deps.reviews) app.route('/api/v1', createReviewRoutes(deps.reviews));
   if (deps.suggestions) app.route('/api/v1', createSuggestionRoutes(deps.suggestions));
+  if (deps.summaries) app.route('/api/v1', createSummaryRoutes(deps.summaries));
   if (deps.aiAdmin) app.route('/api/v1/admin/ai', createAiAdminRoutes(deps.aiAdmin));
   if (deps.videos) app.route('/api/v1', createVideoRoutes(deps.videos));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));

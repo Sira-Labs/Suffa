@@ -72,13 +72,13 @@ const PROPOSAL = {
 };
 
 class ScriptedModel implements LlmProvider {
-  readonly id = 'anthropic' as const;
+  readonly id = 'mistral' as const;
   requests: LlmRequest[] = [];
   reply = JSON.stringify(PROPOSAL);
   async complete(request: LlmRequest) {
     this.requests.push(request);
     return {
-      provider: 'anthropic' as const,
+      provider: 'mistral' as const,
       model: request.model,
       text: this.reply,
       stopReason: 'end' as const,
@@ -145,7 +145,8 @@ describe.skipIf(!url)('Recording suggestions (Postgres)', () => {
     });
     model = new ScriptedModel();
     const aiRepo = new PgAiRepository(pool);
-    const router = new ModelRouter({ providers: { anthropic: model }, source: aiRepo });
+    // Recordings go to the EU provider only (migration 0025): Anthropic is switched off here.
+    const router = new ModelRouter({ providers: { mistral: model }, source: aiRepo });
     const suggestions = new PgSuggestionRepository(pool);
     const catalog = await ContentCatalog.load(
       fileURLToPath(new URL('../../web/src/content', import.meta.url))

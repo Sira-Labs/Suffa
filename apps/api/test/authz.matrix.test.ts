@@ -361,6 +361,21 @@ function buildApp() {
       auth: resolver,
       log: quiet,
     },
+    summaries: {
+      classes: classRepo,
+      media: { get: async () => null },
+      interactive: { transcript: async () => null, aiEnabled: async () => false },
+      summaries: {
+        get: async () => null,
+        setRun: async () => {},
+        save: async () => {},
+        publish: async () => false,
+      },
+      enqueue: async () => {},
+      available: async () => false,
+      auth: resolver,
+      log: quiet,
+    },
     reviews: {
       classes: classRepo,
       reviews: {

@@ -8,6 +8,7 @@ import {
   enqueueImport,
   enqueueTranscode,
   enqueueSuggest,
+  enqueueSummarize,
   enqueueTranscribe,
   registerMedia,
 } from './media/jobs.js';
@@ -21,6 +22,11 @@ import {
   SUGGEST_TASK,
   suggestForRecording,
 } from './media/suggestions.js';
+import {
+  PgSummaryRepository,
+  SUMMARY_TASK,
+  summarizeRecording,
+} from './media/summary.js';
 import { ffmpegTranscoder, MediaService } from './media/service.js';
 import { S3ObjectStorage } from './storage/s3Storage.js';
 import { registerNotifications } from './notifications/jobs.js';
@@ -251,6 +257,21 @@ async function main(): Promise<void> {
                       }
                     }
                   : undefined,
+                summarize: async (mediaId) =>
+                  summarizeRecording(
+                    {
+                      gateway: new AiGateway({
+                        router: tutorRouter,
+                        repo: new PgAiRepository(pool),
+                        log,
+                      }),
+                      summaries: new PgSummaryRepository(pool),
+                      media: repo,
+                      interactive: new PgInteractiveRepository(pool),
+                      log,
+                    },
+                    mediaId
+                  ),
                 suggest: async (mediaId) =>
                   suggestForRecording(
                     {
@@ -388,6 +409,8 @@ async function main(): Promise<void> {
   const ai = aiParts(config, pool, log, auth);
   const suggestAvailable = async () =>
     (await ai.router.plan(SUGGEST_TASK, { requires: ['structuredOutput'] })).length > 0;
+  const summaryAvailable = async () =>
+    (await ai.router.plan(SUMMARY_TASK, { requires: ['structuredOutput'] })).length > 0;
   const app = createApp({
     version: config.version,
     expectedRevision: expected,
@@ -431,6 +454,20 @@ async function main(): Promise<void> {
           transcribe: config.transcribe ? enqueueTranscribe(boss) : undefined,
           chapters: new PgSuggestionRepository(pool),
           canSuggest: suggestAvailable,
+          summaries: new PgSummaryRepository(pool),
+          canSummarize: summaryAvailable,
+          auth,
+          log,
+        }
+      : undefined,
+    summaries: config.storage
+      ? {
+          classes: new PgClassRepository(pool),
+          media: new PgMediaRepository(pool),
+          interactive: new PgInteractiveRepository(pool),
+          summaries: new PgSummaryRepository(pool),
+          enqueue: enqueueSummarize(boss),
+          available: summaryAvailable,
           auth,
           log,
         }

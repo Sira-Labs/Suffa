@@ -12,6 +12,7 @@ import { AiQuotaError, type AiGateway } from '../ai/gateway.js';
 import { foldArabic, type ContentCatalog } from '../tutor/content.js';
 import { CheckpointData, type Cue, type InteractiveRepository } from './interactive.js';
 import type { MediaRepository } from './repository.js';
+import { reopenSuggestion } from './suggestionLinks.js';
 
 export const SUGGEST_TASK = 'recording.suggest';
 /** Transcript sent to the model at most (about an hour of speech). */
@@ -52,6 +53,8 @@ export interface SuggestionRepository {
     decision: 'accepted' | 'dismissed',
     by: string
   ): Promise<Suggestion | null>;
+  /** Remembers what an accepted suggestion became (checkpoint or chapter id). */
+  linkResult(mediaId: string, id: string, resultId: string): Promise<void>;
   chapters(mediaId: string): Promise<Chapter[]>;
   addChapter(mediaId: string, atSec: number, title: string, by: string): Promise<Chapter>;
   removeChapter(mediaId: string, id: string): Promise<boolean>;
@@ -144,6 +147,13 @@ export class PgSuggestionRepository implements SuggestionRepository {
       : null;
   }
 
+  async linkResult(mediaId: string, id: string, resultId: string) {
+    await this.pool.query(
+      'update media_suggestions set result_id = $3 where media_id = $1 and id = $2',
+      [mediaId, id, resultId]
+    );
+  }
+
   async chapters(mediaId: string) {
     const { rows } = await this.pool.query(
       'select id, at_sec, title from media_chapters where media_id = $1 order by at_sec',
@@ -170,7 +180,9 @@ export class PgSuggestionRepository implements SuggestionRepository {
       'delete from media_chapters where media_id = $1 and id = $2 returning id',
       [mediaId, id]
     );
-    return rows.length > 0;
+    if (rows.length === 0) return false;
+    await reopenSuggestion(this.pool, mediaId, id);
+    return true;
   }
 }
 

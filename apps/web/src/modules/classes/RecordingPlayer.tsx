@@ -350,7 +350,7 @@ export function RecordingPlayer() {
         onRemove={
           teacher
             ? (chapter) =>
-                void api.removeChapter(id, mediaId, chapter.id).then(() => load())
+                void api.removeChapter(id, mediaId, chapter.id).then(() => refresh())
             : undefined
         }
       />
@@ -378,6 +378,8 @@ export function RecordingPlayer() {
           />
           {media.interactive.canSuggest && media.cues.length > 0 && (
             <SuggestionsEditor
+              // Removing a checkpoint or chapter can put its suggestion back: load again.
+              key={`${media.checkpoints.length}:${media.interactive.chapters?.length ?? 0}`}
               api={api}
               classId={id}
               mediaId={mediaId}

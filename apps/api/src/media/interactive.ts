@@ -218,7 +218,10 @@ export async function transcribeRecording(
     let progress = 5;
     let saved = Promise.resolve();
     const write = () => {
-      saved = saved.then(() => deps.interactive.saveTranscript(mediaId, { progress }));
+      // A failed earlier write (e.g. a heartbeat) must not block this one.
+      saved = saved
+        .catch(() => {})
+        .then(() => deps.interactive.saveTranscript(mediaId, { progress }));
       return saved;
     };
     const heartbeat = setInterval(() => void write().catch(() => {}), HEARTBEAT_MS);

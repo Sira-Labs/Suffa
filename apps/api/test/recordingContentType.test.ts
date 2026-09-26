@@ -19,5 +19,7 @@ describe('recordingContentType', () => {
     expect(recordingContentType('application/pdf', 'notes.mp4')).toBeNull();
     expect(recordingContentType('application/octet-stream', 'archive.zip')).toBeNull();
     expect(recordingContentType('', 'no-extension')).toBeNull();
+    expect(recordingContentType('__proto__', 'x')).toBeNull();
+    expect(recordingContentType('constructor', 'x.toString')).toBeNull();
   });
 });

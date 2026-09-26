@@ -9,6 +9,7 @@ import { MediaApi, type MediaItem } from '@/services/media/mediaApi';
 import { putPart, uploadRecording } from '@/services/media/uploader';
 import { useListenStore } from '@/state';
 import { DriveImport } from './DriveImport';
+import { isRecordingFile } from '@/services/media/recordingFile';
 import { InteractiveApi } from '@/services/media/interactiveApi';
 
 const STATUS: Record<MediaItem['status'], string> = {
@@ -238,9 +239,17 @@ function UploadForm({
       <input
         type="file"
         aria-label="Datei"
-        accept="audio/*,video/*"
         disabled={uploading}
-        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+        onChange={(e) => {
+          const picked = e.target.files?.[0] ?? null;
+          if (picked && !isRecordingFile(picked)) {
+            setFile(null);
+            setMessage('Bitte eine Audio- oder Videodatei wählen (z. B. MP4, M4A, MP3).');
+            return;
+          }
+          setMessage(null);
+          setFile(picked);
+        }}
       />
       {uploading && (
         <span

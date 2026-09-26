@@ -5,6 +5,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { CollapsibleCard } from '@/components';
+import { useCelebrationStore } from '@/state';
 import {
   clock,
   type Checkpoint,
@@ -234,10 +235,19 @@ export function TranscriptEditor({
     return () => window.clearInterval(timer);
   }, [busy]);
 
+  // Saved: fold the editor away and say so briefly.
+  const [fold, setFold] = useState(0);
+  const celebrate = useCelebrationStore((s) => s.show);
   const save = async () => {
     const result = await api.saveTranscript(classId, mediaId, cues);
-    setMessage(result.ok ? 'Transkript gespeichert.' : result.message);
-    if (result.ok) onChange();
+    if (!result.ok) {
+      setMessage(result.message);
+      return;
+    }
+    setMessage(null);
+    setFold((n) => n + 1);
+    celebrate({ title: 'Transkript gespeichert', xp: 0, big: false });
+    onChange();
   };
   const generate = async () => {
     const result = await api.generateTranscript(classId, mediaId);
@@ -249,6 +259,7 @@ export function TranscriptEditor({
     <CollapsibleCard
       id="transcript-editor"
       title="Transkript bearbeiten"
+      foldSignal={fold}
       // Many text fields: folded unless the teacher opens it (or there is nothing yet).
       defaultOpen={!transcript?.cues.length}
       lead={

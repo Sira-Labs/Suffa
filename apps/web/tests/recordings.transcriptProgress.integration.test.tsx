@@ -1,14 +1,17 @@
 /** Transcript editor while an automatic transcript runs: waiting, progress, stuck. */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useCelebrationStore } from '@/state';
 import { TranscriptEditor } from '@/modules/classes/player/RecordingEditors';
 import { InteractiveApi, type Transcript } from '@/services/media/interactiveApi';
 
 function setup(transcript: Transcript) {
   const onChange = vi.fn();
+  const fetchImpl = vi.fn(async () => new Response(null, { status: 204 }));
   render(
     <TranscriptEditor
-      api={new InteractiveApi(vi.fn() as unknown as typeof fetch)}
+      api={new InteractiveApi(fetchImpl as unknown as typeof fetch)}
       classId="c1"
       mediaId="m1"
       transcript={transcript}
@@ -77,5 +80,22 @@ describe('transcript progress', () => {
     );
     expect(screen.queryByRole('textbox')).toBeNull();
     expect(screen.getByRole('button', { name: /Neu erstellen/ })).toBeVisible();
+  });
+
+  it('folds away after saving and says so', async () => {
+    const { onChange } = setup({
+      ...base,
+      status: 'ready',
+      progress: null,
+      cues: [{ start: 0, end: 3, text: 'مرحبا' }],
+    });
+    await userEvent.click(screen.getByRole('button', { name: /Aufklappen/ }));
+    await userEvent.click(screen.getByRole('button', { name: /Speichern/ }));
+    expect(onChange).toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: /Aufklappen/ })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+    expect(useCelebrationStore.getState().current?.title).toBe('Transkript gespeichert');
   });
 });

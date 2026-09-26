@@ -3,7 +3,7 @@
  * player on a phone. `lead` (status, main action) stays visible when folded. Open or closed is
  * remembered per card on this device.
  */
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 export function CollapsibleCard({
   id,
@@ -11,6 +11,7 @@ export function CollapsibleCard({
   lead,
   defaultOpen = true,
   onOpenChange,
+  foldSignal = 0,
   children,
 }: {
   /** Stable name, used for the element ids and the remembered state. */
@@ -20,11 +21,18 @@ export function CollapsibleCard({
   defaultOpen?: boolean;
   /** Told after the body was shown or hidden (e.g. to scroll it into place). */
   onOpenChange?: (open: boolean) => void;
+  /** Raise it to fold the card from outside (e.g. after saving). */
+  foldSignal?: number;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(() => readOpen(id, defaultOpen));
   const titleId = `${id}-title`;
   const bodyId = `${id}-body`;
+  useEffect(() => {
+    if (foldSignal === 0) return;
+    setOpen(false);
+    saveOpen(id, false);
+  }, [foldSignal, id]);
   const toggle = () => {
     setOpen(!open);
     saveOpen(id, !open);

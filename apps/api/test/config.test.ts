@@ -298,3 +298,41 @@ describe('SUFFA_MAIL_DIR (browser tests)', () => {
     ).toThrow(/SUFFA_MAIL_DIR must not be set in prod/);
   });
 });
+
+describe('transcription settings', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+
+  it('is off without a URL and detects the language unless one is set', () => {
+    expect(loadConfig(base).transcribe).toBeUndefined();
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL:
+          'http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_MODEL: 'deepdml/faster-whisper-large-v3-turbo-ct2',
+      }).transcribe
+    ).toEqual({
+      url: 'http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions',
+      token: null,
+      model: 'deepdml/faster-whisper-large-v3-turbo-ct2',
+      language: null,
+    });
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'https://stt.example/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_LANGUAGE: 'AR',
+      }).transcribe?.language
+    ).toBe('ar');
+  });
+
+  it('refuses a language that is not a two-letter code', () => {
+    expect(() =>
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'https://stt.example/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_LANGUAGE: 'arabic',
+      })
+    ).toThrow(/two-letter/);
+  });
+});

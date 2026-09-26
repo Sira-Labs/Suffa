@@ -162,8 +162,9 @@ Env (App Configs → Environment variables):
 | `SUFFA_TRUSTED_ORIGINS`                                                     | optional: further addresses the app is served from (e.g. the old domain), comma-separated                           | S5          |
 | `SUFFA_VAPID_PUBLIC_KEY`, `SUFFA_VAPID_PRIVATE_KEY`                         | `npx web-push generate-vapid-keys` (once; keep them, new keys cancel every device's reminders)                      | S6          |
 | `SUFFA_VAPID_SUBJECT`                                                       | `mailto:<ops address>` – contact for push services; reminders stay off until all three are set                      | S6          |
-| `SUFFA_TRANSCRIBE_URL`                                                      | optional: OpenAI-compatible `/v1/audio/transcriptions` (OpenAI, Groq, self-hosted faster-whisper)                   | S8          |
+| `SUFFA_TRANSCRIBE_URL`                                                      | optional: our self-hosted `suffa-whisper` (§11); any OpenAI-compatible transcription endpoint                       | S8          |
 | `SUFFA_TRANSCRIBE_TOKEN`, `SUFFA_TRANSCRIBE_MODEL`                          | API token (if the service needs one) and model, default `whisper-1`                                                 | S8          |
+| `SUFFA_TRANSCRIBE_LANGUAGE`                                                 | optional: `ar` to force Arabic; empty = detect per piece (mixed German/Arabic lessons)                              | S8          |
 | `SUFFA_APP_ORIGINS`                                                         | native app web view origins for bearer-token API access; default `capacitor://localhost,https://localhost`          | S13         |
 | `SUFFA_IOS_APP_IDS`                                                         | optional: `TEAMID.org.siralabs.suffa` for Universal Links (`/.well-known/apple-app-site-association`)               | S13         |
 | `SUFFA_ANDROID_APP_LINKS`                                                   | optional: `org.siralabs.suffa:<SHA-256 of the signing key>` for App Links (`/.well-known/assetlinks.json`)          | S13         |
@@ -550,11 +551,54 @@ official Sentry SDK of the app's language. Nothing else changes on the server.
 
 Tabayyun's guidance is 2 vCPU / 4 GB for its api + web. Suffa adds roughly 1–1.5 GB RAM
 (api, worker, Postgres). Transcoding is CPU-heavy: keep `SUFFA_TRANSCODE_CONCURRENCY=1`, and
-if you choose `faster-whisper` in the worker, run transcription at night. Recommended: **8 GB
+self-hosted transcription (`suffa-whisper`, §11) needs about 2 GB RAM while a model is
+loaded and all the CPU threads it is given. Recommended: **8 GB
 RAM / 4 vCPU** for both apps together; watch disk (RustFS holds recordings for both).
 GlitchTip adds about 300–500 MB RAM (app + its Postgres) and a little disk for 90 days of events,
 on the staging and tools server only. Production carries the three projects' production apps,
 their databases, RustFS and WAL-G; size its disk for Postgres plus local WAL.
+
+## 11. Transcription (`suffa-whisper`, self-hosted)
+
+Transcripts of the teachers' recordings are made on our own server, so no recording leaves
+it (no US provider). [`suffa-whisper.yml`](../../infra/caprover/one-click/suffa-whisper.yml)
+runs [speaches](https://github.com/speaches-ai/speaches) (faster-whisper on the CPU) with an
+OpenAI-compatible endpoint, internal only. Put it on the server where `suffa-api` and
+`suffa-worker` run: the staging and tools server now, the production server later
+(ADR-0024: real people's recordings belong on production).
+
+1. **Deploy** the template with app name `suffa`. Note the generated API key.
+2. **Download the model once** (on the server, over SSH):
+
+   ```bash
+   docker exec $(docker ps -q -f name=srv-captain--suffa-whisper) \
+     curl -s -X POST -H "Authorization: Bearer <API key>" \
+     http://localhost:8000/v1/models/deepdml/faster-whisper-large-v3-turbo-ct2
+   ```
+
+   `200`/`201` means downloaded or already there (about 1.6 GB in the app's volume). On a
+   small CPU take `Systran/faster-whisper-medium` instead (faster, a little less accurate).
+
+3. **Set on `suffa-api` and `suffa-worker`:**
+
+   | Variable                    | Value                                                               |
+   | --------------------------- | ------------------------------------------------------------------- |
+   | `SUFFA_TRANSCRIBE_URL`      | `http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions`    |
+   | `SUFFA_TRANSCRIBE_TOKEN`    | the API key from step 1                                             |
+   | `SUFFA_TRANSCRIBE_MODEL`    | `deepdml/faster-whisper-large-v3-turbo-ct2` (the model from step 2) |
+   | `SUFFA_TRANSCRIBE_LANGUAGE` | empty (detect per 10-minute piece), or `ar` for Arabic-only lessons |
+
+   After the restart the api logs `transcribe.enabled` with host, model and language.
+
+4. **In the class**, the teacher switches on "KI für Transkripte". New recordings are then
+   transcribed after processing; existing ones via "Automatisch erstellen (KI)" in the
+   player. The transcript appears under the player with the current line marked.
+
+**Speed and load:** on the CPU a transcript takes roughly as long as the recording, or
+longer, depending on cores and model. One recording is transcribed at a time; the client
+waits up to an hour per 10-minute piece. Keep `WHISPER__CPU_THREADS` below the server's
+core count so the other apps stay responsive, and prefer uploading long lessons in the
+evening. With a GPU later, change only the image tag (`-cuda`) and the URL stays the same.
 
 ## Troubleshooting
 

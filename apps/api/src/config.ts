@@ -132,6 +132,18 @@ const RawEnvSchema = z.object({
     .optional(),
   SUFFA_TRANSCRIBE_TOKEN: z.string().trim().optional(),
   SUFFA_TRANSCRIBE_MODEL: z.string().trim().default('whisper-1'),
+  /** Language of the recordings ("ar"); empty lets the model detect it (mixed lessons). */
+  SUFFA_TRANSCRIBE_LANGUAGE: z
+    .string()
+    .trim()
+    .transform((value) => value.toLowerCase() || undefined)
+    .pipe(
+      z
+        .string()
+        .regex(/^[a-z]{2}$/, 'SUFFA_TRANSCRIBE_LANGUAGE must be a two-letter code')
+        .optional()
+    )
+    .optional(),
   // AI gateway (ADR-0010): each provider is on only with its key; keys stay on the server.
   SUFFA_ANTHROPIC_API_KEY: z.string().trim().optional(),
   SUFFA_OPENROUTER_API_KEY: z.string().trim().optional(),
@@ -220,7 +232,9 @@ export interface Config {
   /** Object storage; undefined turns recordings and uploads off. */
   storage: S3Settings | undefined;
   /** Transcription service; undefined turns automatic transcripts off. */
-  transcribe: { url: string; token: string | null; model: string } | undefined;
+  transcribe:
+    | { url: string; token: string | null; model: string; language: string | null }
+    | undefined;
   /** AI provider keys (ADR-0010); a provider without a key is simply not routed to. */
   ai: {
     anthropicKey: string | undefined;
@@ -430,6 +444,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
           url: raw.SUFFA_TRANSCRIBE_URL,
           token: raw.SUFFA_TRANSCRIBE_TOKEN || null,
           model: raw.SUFFA_TRANSCRIBE_MODEL,
+          language: raw.SUFFA_TRANSCRIBE_LANGUAGE ?? null,
         }
       : undefined,
     ai: {

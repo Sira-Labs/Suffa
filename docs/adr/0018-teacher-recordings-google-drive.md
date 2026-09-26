@@ -87,3 +87,18 @@ fine for one teacher, up to 100 test users; production verification for `drive.f
   dismissing it removes it. The class AI switch is checked when queueing and in the worker.
 - Chapters appear in the player (tap to jump, current part highlighted); teachers can remove
   them.
+
+## Update 2026-09-26: transcripts on our own server
+
+- **Decision (owner):** recordings are not sent to a transcription provider in the US.
+  Transcripts come from a self-hosted Whisper (`suffa-whisper`: speaches with faster-whisper
+  on the CPU, `infra/caprover/one-click/suffa-whisper.yml`), reached only over CapRover's
+  internal network. The api still speaks the OpenAI-compatible protocol, so a GPU build or
+  another self-hosted server needs only a new URL.
+- **Mixed lessons:** the language is detected per 10-minute piece unless
+  `SUFFA_TRANSCRIBE_LANGUAGE` forces one; teachers explain Arabic in German, and a fixed `ar`
+  garbled those parts.
+- **Slow CPUs:** one piece may take up to an hour (Node's built-in fetch gave up after five
+  minutes without a response). The api logs `transcribe.enabled` with host, model and
+  language at start.
+- The class AI switch stays: off means a class's recordings are never transcribed.

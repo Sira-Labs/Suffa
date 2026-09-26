@@ -115,6 +115,19 @@ async function main(): Promise<void> {
   });
   // Incomplete optional features are off; say so loudly so the setting gets fixed.
   for (const warning of config.warnings) log.error({ warning }, 'config.feature_off');
+  // Where recordings go for transcripts, visible in the log (host only, never the token).
+  if (config.transcribe) {
+    log.info(
+      {
+        host: new URL(config.transcribe.url).host,
+        model: config.transcribe.model,
+        language: config.transcribe.language ?? 'auto',
+      },
+      'transcribe.enabled'
+    );
+  } else {
+    log.info('transcribe.disabled: SUFFA_TRANSCRIBE_URL is not set');
+  }
   errors = createErrorReporter({
     dsn: config.errorDsn,
     release: config.version,

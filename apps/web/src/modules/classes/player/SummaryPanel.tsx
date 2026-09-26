@@ -2,7 +2,7 @@
  * Lesson summary under the player: learners read the published summary; the teacher asks the
  * EU model for one, reads it and publishes or hides it for the class.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArabicText } from '@/components';
 import type {
   InteractiveApi,
@@ -80,12 +80,17 @@ export function SummaryPanel({
   const [message, setMessage] = useState<string | null>(null);
   const running = summary?.status === 'queued' || summary?.status === 'running';
 
-  // While the model works, look again every few seconds.
+  // While the model works, look again every few seconds. The callback sits in a ref so the
+  // player's frequent re-renders (playback time) do not restart the timer.
+  const changed = useRef(onChange);
+  useEffect(() => {
+    changed.current = onChange;
+  });
   useEffect(() => {
     if (!running) return;
-    const timer = window.setInterval(onChange, POLL_MS);
+    const timer = window.setInterval(() => changed.current(), POLL_MS);
     return () => window.clearInterval(timer);
-  }, [running, onChange]);
+  }, [running]);
 
   if (!teacher) {
     if (!summary?.content) return null;

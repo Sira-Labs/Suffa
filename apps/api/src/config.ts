@@ -386,16 +386,19 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     raw.SUFFA_TRANSCRIBE_TOKEN ||
     (transcribeUrl?.hostname === 'api.mistral.ai' ? raw.SUFFA_MISTRAL_API_KEY : '') ||
     null;
-  // Recordings and the token travel in clear over http: only allowed inside the server
-  // (CapRover's internal network, localhost), never to an outside host.
+  // Recordings (and the token) would travel in clear over http: only loopback, for
+  // development, may use it.
   const transcribeInsecure =
     transcribeUrl !== null &&
-    transcribeToken !== null &&
-    transcribeUrl.protocol === 'http:' &&
-    !isInternalHost(transcribeUrl.hostname);
+    transcribeUrl.protocol !== 'https:' &&
+    !isLoopbackHost(transcribeUrl.hostname);
   if (transcribeInsecure) {
+    warnings.push('SUFFA_TRANSCRIBE_URL must use https; transcription is off');
+  }
+  if (transcribeUrl?.hostname === 'api.mistral.ai' && raw.SUFFA_TRANSCRIBE_LANGUAGE) {
+    // Mistral takes no language together with timestamps, and cues need timestamps.
     warnings.push(
-      'SUFFA_TRANSCRIBE_URL must use https for an outside host when a token is set; transcription is off'
+      'SUFFA_TRANSCRIBE_LANGUAGE is ignored for Mistral Voxtral, which detects the language itself'
     );
   }
   const android = parseAndroidAppLinks(raw.SUFFA_ANDROID_APP_LINKS);
@@ -602,12 +605,7 @@ export function parseServiceAccount(value: string | undefined): {
   };
 }
 
-/** Hosts inside the server: CapRover's internal service names and the loopback. */
-export function isInternalHost(hostname: string): boolean {
-  return (
-    hostname.startsWith('srv-captain--') ||
-    hostname === 'localhost' ||
-    hostname === '127.0.0.1' ||
-    hostname === '[::1]'
-  );
+/** The loopback: plain http stays on this machine. */
+export function isLoopbackHost(hostname: string): boolean {
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
 }

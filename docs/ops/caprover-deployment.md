@@ -587,9 +587,10 @@ and `recording.suggest` route to `mistral-medium-latest`, then `mistral-small-la
 Anthropic routes for these tasks are switched off (admin → KI shows them). A summary is a
 draft until the teacher publishes it for the class.
 
-The api speaks the OpenAI-compatible transcription protocol, so another EU or self-hosted
-service needs only a new URL, model and `SUFFA_TRANSCRIBE_TOKEN`; a token is sent over plain
-http only inside CapRover's network.
+The api speaks the OpenAI-compatible transcription protocol, so another EU service needs
+only a new URL, model and `SUFFA_TRANSCRIBE_TOKEN`. Recordings go out over https only
+(plain http is accepted for localhost, in development). `SUFFA_TRANSCRIBE_LANGUAGE` is
+ignored for Voxtral, which returns timestamps only when it detects the language itself.
 
 ## Troubleshooting
 

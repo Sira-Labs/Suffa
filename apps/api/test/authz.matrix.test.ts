@@ -368,6 +368,7 @@ function buildApp() {
       summaries: {
         get: async () => null,
         setRun: async () => {},
+        claim: async () => false,
         save: async () => {},
         publish: async () => false,
       },

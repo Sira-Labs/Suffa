@@ -49,6 +49,8 @@ export interface SummaryRepository {
     status: RunStatus,
     extra?: { requestedBy?: string; error?: string }
   ): Promise<void>;
+  /** Moves a queued run to running; false when another job already took it. */
+  claim(mediaId: string): Promise<boolean>;
   /** Stores a new summary; it starts unpublished. */
   save(mediaId: string, summary: LessonSummary, model: string): Promise<void>;
   /** Publishes or hides the summary; false when there is no ready summary. */
@@ -90,6 +92,15 @@ export class PgSummaryRepository implements SummaryRepository {
          error = excluded.error, updated_at = now()`,
       [mediaId, status, extra.requestedBy ?? null, extra.error ?? null]
     );
+  }
+
+  async claim(mediaId: string): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      `update media_summaries set status = 'running', updated_at = now()
+        where media_id = $1 and status = 'queued'`,
+      [mediaId]
+    );
+    return (rowCount ?? 0) > 0;
   }
 
   async save(mediaId: string, summary: LessonSummary, model: string): Promise<void> {
@@ -201,6 +212,8 @@ export async function summarizeRecording(
   const record = await deps.summaries.get(mediaId);
   const item = await deps.media.byId(mediaId);
   if (!record || record.status !== 'queued' || !item || !record.requestedBy) return;
+  // Only one job calls the (paid) model for a run, even if pg-boss retries or it is queued twice.
+  if (!(await deps.summaries.claim(mediaId))) return;
   const transcript = await deps.interactive.transcript(mediaId);
   if (transcript?.status !== 'ready' || transcript.cues.length === 0) {
     await deps.summaries.setRun(mediaId, 'failed', { error: 'no transcript' });
@@ -213,7 +226,6 @@ export async function summarizeRecording(
     });
     return;
   }
-  await deps.summaries.setRun(mediaId, 'running');
   try {
     const result = await deps.gateway.complete(
       { id: record.requestedBy, role: 'teacher' },

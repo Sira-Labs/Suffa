@@ -307,14 +307,12 @@ describe('transcription settings', () => {
     expect(
       loadConfig({
         ...base,
-        SUFFA_TRANSCRIBE_URL:
-          'http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions',
-        SUFFA_TRANSCRIBE_MODEL: 'deepdml/faster-whisper-large-v3-turbo-ct2',
+        SUFFA_TRANSCRIBE_URL: 'https://api.mistral.ai/v1/audio/transcriptions',
       }).transcribe
     ).toEqual({
-      url: 'http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions',
+      url: 'https://api.mistral.ai/v1/audio/transcriptions',
       token: null,
-      model: 'deepdml/faster-whisper-large-v3-turbo-ct2',
+      model: 'voxtral-mini-latest',
       language: null,
     });
     expect(
@@ -340,36 +338,45 @@ describe('transcription settings', () => {
     expect(
       loadConfig({
         ...base,
-        SUFFA_TRANSCRIBE_URL:
-          'http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_URL: 'https://stt.example/v1/audio/transcriptions',
         SUFFA_MISTRAL_API_KEY: 'mistral-key',
       }).transcribe?.token
     ).toBeNull();
   });
 
-  it('keeps the token off plain http to outside hosts, but allows the internal network', () => {
-    const outside = loadConfig({
-      ...base,
-      SUFFA_TRANSCRIBE_URL: 'http://stt.example.org/v1/audio/transcriptions',
-      SUFFA_TRANSCRIBE_TOKEN: 'secret',
-    });
-    expect(outside.transcribe).toBeUndefined();
-    expect(outside.warnings.join(' ')).toMatch(/must use https/);
+  it('sends recordings only over https, except to the loopback', () => {
+    for (const token of ['secret', undefined]) {
+      const outside = loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'http://stt.example.org/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_TOKEN: token,
+      });
+      expect(outside.transcribe).toBeUndefined();
+      expect(outside.warnings.join(' ')).toMatch(/must use https/);
+    }
     expect(
       loadConfig({
         ...base,
-        SUFFA_TRANSCRIBE_URL:
-          'http://srv-captain--suffa-whisper:8000/v1/audio/transcriptions',
+        SUFFA_TRANSCRIBE_URL: 'http://srv-captain--stt:8000/v1/audio/transcriptions',
+      }).transcribe
+    ).toBeUndefined();
+    expect(
+      loadConfig({
+        ...base,
+        SUFFA_TRANSCRIBE_URL: 'http://localhost:8000/v1/audio/transcriptions',
         SUFFA_TRANSCRIBE_TOKEN: 'secret',
       }).transcribe?.token
     ).toBe('secret');
-    // Without a token nothing secret is sent: allowed (the recording still travels).
-    expect(
-      loadConfig({
-        ...base,
-        SUFFA_TRANSCRIBE_URL: 'http://stt.example.org/v1/audio/transcriptions',
-      }).transcribe?.token
-    ).toBeNull();
+  });
+
+  it('warns that Voxtral ignores a fixed language', () => {
+    const config = loadConfig({
+      ...base,
+      SUFFA_TRANSCRIBE_URL: 'https://api.mistral.ai/v1/audio/transcriptions',
+      SUFFA_TRANSCRIBE_LANGUAGE: 'ar',
+    });
+    expect(config.transcribe).toBeDefined();
+    expect(config.warnings.join(' ')).toMatch(/ignored for Mistral Voxtral/);
   });
 
   it('refuses a language that is not a two-letter code', () => {

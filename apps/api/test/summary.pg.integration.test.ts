@@ -228,6 +228,14 @@ describe.skipIf(!url)('Recording summaries (Postgres)', () => {
     expect(again.summary).toMatchObject({ status: 'ready', publishedAt: null });
   });
 
+  it('calls the model once when two jobs run for the same request', async () => {
+    await call('POST', '/summary');
+    const before = model.requests.length;
+    await Promise.all([run(), run()]);
+    expect(model.requests.length).toBe(before + 1);
+    expect((await summaryOf('teacher')).summary?.status).toBe('ready');
+  });
+
   it('refuses without transcript access to AI (class switch off)', async () => {
     await pool.query('update classes set ai_enabled = false where id = $1', [classId]);
     expect((await call('POST', '/summary')).status).toBe(409);
@@ -246,5 +254,27 @@ describe.skipIf(!url)('Recording summaries (Postgres)', () => {
       'recording.summarize',
       'recording.summarize',
     ]);
+  });
+
+  // Last: it rebuilds the schema.
+  it('moves routes an admin put in front of the recording tasks out of the way', async () => {
+    await pool.query('drop schema public cascade; create schema public');
+    const all = await loadMigrations(join(import.meta.dirname, '..', 'migrations'));
+    const at = all.findIndex((m) => m.id.startsWith('0025'));
+    await migrate(pool, all.slice(0, at), quiet);
+    await pool.query(
+      `update ai_model_routes set provider = 'openrouter', model = 'some/us-model', enabled = true
+        where task = 'recording.suggest' and position = 0`
+    );
+    await migrate(pool, all, quiet);
+    const { rows } = await pool.query(
+      `select position, provider, enabled from ai_model_routes
+        where task = 'recording.suggest' order by position`
+    );
+    expect(rows.slice(0, 2).map((r) => r.provider)).toEqual(['mistral', 'mistral']);
+    expect(rows.filter((r) => r.provider !== 'mistral').every((r) => !r.enabled)).toBe(
+      true
+    );
+    expect(rows.some((r) => r.provider === 'openrouter')).toBe(true);
   });
 });

@@ -6,9 +6,33 @@ alter table ai_model_routes drop constraint if exists ai_model_routes_provider_c
 alter table ai_model_routes add constraint ai_model_routes_provider_check
   check (provider in ('anthropic', 'openrouter', 'huggingface', 'mistral'));
 
--- recording.suggest: move the Anthropic routes behind Mistral and switch them off.
-update ai_model_routes set position = position + 2, enabled = false
- where task = 'recording.suggest' and provider = 'anthropic' and position < 2;
+-- The recording tasks: switch off every non-Mistral route (also routes an admin changed)
+-- and move those at positions 0 and 1 to the next free places (2–9), so Mistral takes the
+-- front. A route with no free place left is removed: it is switched off anyway.
+update ai_model_routes set enabled = false
+ where task in ('recording.suggest', 'recording.summarize') and provider <> 'mistral';
+do $$
+declare
+  r record;
+  free smallint;
+begin
+  for r in
+    select task, position from ai_model_routes
+     where task in ('recording.suggest', 'recording.summarize') and provider <> 'mistral'
+       and position < 2
+     order by task, position
+  loop
+    select min(p) into free from generate_series(2, 9) as p
+     where not exists (
+       select 1 from ai_model_routes a where a.task = r.task and a.position = p);
+    if free is null then
+      delete from ai_model_routes where task = r.task and position = r.position;
+    else
+      update ai_model_routes set position = free
+       where task = r.task and position = r.position;
+    end if;
+  end loop;
+end $$;
 
 -- Prices in USD per million tokens are estimates: check them in the Mistral console.
 insert into ai_model_routes

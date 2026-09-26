@@ -87,6 +87,15 @@ export class MediaApi {
     );
   }
 
+  /** A new title for a recording (teacher). */
+  rename(classId: string, mediaId: string, title: string) {
+    return this.call<void>(`${this.base(classId)}/${encodeURIComponent(mediaId)}`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ title }),
+    });
+  }
+
   remove(classId: string, mediaId: string) {
     return this.call<void>(`${this.base(classId)}/${encodeURIComponent(mediaId)}`, {
       method: 'DELETE',

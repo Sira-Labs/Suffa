@@ -37,6 +37,7 @@ const NewUpload = z
     contentType: z.string().max(100),
   })
   .strict();
+const Rename = z.object({ title: z.string().trim().min(1).max(120) }).strict();
 const Parts = z
   .object({
     partNumbers: z.array(z.number().int().min(1).max(10_000)).min(1).max(MAX_PART_URLS),
@@ -148,6 +149,16 @@ export function createMediaRoutes(deps: MediaRouteDeps): Hono<ActorEnv> {
     }
     await deps.repo.publish(item.id, c.get('actor').id);
     await audit(c, 'media.published', item);
+    return c.body(null, 204);
+  });
+
+  app.patch('/classes/:id/media/:mediaId', manage, async (c) => {
+    const item = await itemOf(c);
+    if (!item) return c.json({ error: 'not_found' }, 404);
+    const parsed = Rename.safeParse(await readJson(c));
+    if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+    await deps.repo.rename(item.id, parsed.data.title);
+    await audit(c, 'media.renamed', { ...item, title: parsed.data.title });
     return c.body(null, 204);
   });
 

@@ -610,6 +610,9 @@ address in the browser (or is missing from `SUFFA_TRUSTED_ORIGINS`); `auth.enabl
 origins the api accepts. **Moving to a new domain:** set `SUFFA_PUBLIC_URL` to the new address
 (sign-in mails and invite links point there) and list the old one in `SUFFA_TRUSTED_ORIGINS`
 until nobody uses it. Browsers keep data and sign-in per domain: on the new address learners
-sign in once more, and sync brings their progress over. Secrets live
+sign in once more, and sync brings their progress over. Passkeys are bound to the host of
+`SUFFA_PUBLIC_URL` (ADR-0008, update 2026-09-26): after a domain move they stop working, and
+learners add a new one after signing in with link or code. Staging and production have
+different hosts, so a passkey made on staging never opens production. Secrets live
 only in CapRover, never in the repository. Outside prod the api may run without SMTP: the
 sign-in link is then written to the log (`auth.magic_link_logged`) for local testing.

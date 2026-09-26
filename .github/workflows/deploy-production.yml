@@ -25,6 +25,16 @@ on:
         description: Refuse unless staging still runs this tag (promotion); false for a rollback.
         type: boolean
         required: true
+      staging-server:
+        description: The staging CapRover (production must be another server).
+        type: string
+        required: false
+        default: ''
+      staging-url:
+        description: Where staging answers /healthz (checked when require-staging is true).
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -50,13 +60,13 @@ jobs:
         id: gate
         env:
           SERVER: ${{ vars.CAPROVER_SERVER_PROD }}
-          STAGING_SERVER: ${{ vars.CAPROVER_SERVER }}
+          STAGING_SERVER: ${{ inputs.staging-server || vars.CAPROVER_SERVER }}
           API: ${{ secrets.CAPROVER_APP_TOKEN_API_PROD }}
           WORKER: ${{ secrets.CAPROVER_APP_TOKEN_WORKER_PROD }}
           BACKUP: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP_PROD }}
           WEB: ${{ secrets.CAPROVER_APP_TOKEN_WEB_PROD }}
           PROD_URL: ${{ vars.SUFFA_PRODUCTION_URL }}
-          STAGING_URL: ${{ vars.SUFFA_STAGING_URL }}
+          STAGING_URL: ${{ inputs.staging-url }}
           TAG: ${{ inputs.tag }}
           REQUIRE_STAGING: ${{ inputs.require-staging }}
           GH_TOKEN: ${{ github.token }}

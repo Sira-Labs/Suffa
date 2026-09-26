@@ -180,8 +180,12 @@ jobs:
     name: deploy to staging
     needs: images
     runs-on: ubuntu-latest
-    # Skipped until the repository variable CAPROVER_SERVER (the staging server) is set.
-    if: ${{ github.ref == 'refs/heads/main' && vars.CAPROVER_SERVER != '' }}
+    if: github.ref == 'refs/heads/main'
+    # The GitHub environment `staging`: its variables and secrets win over the repository's
+    # (CAPROVER_SERVER, CAPROVER_APP_TOKEN_*, …), and deploys show up under Environments.
+    environment:
+      name: staging
+      url: ${{ vars.SUFFA_STAGING_URL || 'https://suffa.siralabs.org' }}
     permissions:
       contents: read
       packages: read
@@ -190,6 +194,9 @@ jobs:
       cancel-in-progress: false
     outputs:
       deployed: ${{ steps.gate.outputs.deployed }}
+      # Handed on: the production job cannot read the staging environment's variables.
+      server: ${{ vars.CAPROVER_SERVER }}
+      url: ${{ vars.SUFFA_STAGING_URL || 'https://suffa.siralabs.org' }}
       api: ${{ steps.digests.outputs.api }}
       web: ${{ steps.digests.outputs.web }}
       backup: ${{ steps.digests.outputs.backup }}
@@ -219,6 +226,7 @@ jobs:
       - name: staging is set up
         id: gate
         env:
+          SERVER: ${{ vars.CAPROVER_SERVER }}
           API: ${{ secrets.CAPROVER_APP_TOKEN_API }}
           WORKER: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
           BACKUP: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
@@ -226,9 +234,9 @@ jobs:
         run: |
           count=0
           for token in "$API" "$WORKER" "$BACKUP" "$WEB"; do [ -n "$token" ] && count=$((count + 1)); done
-          if [ "$count" -eq 0 ]; then
+          if [ -z "$SERVER" ] || [ "$count" -eq 0 ]; then
             echo "deployed=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::No staging app tokens set; skipping the staging deploy"
+            echo "::notice::Staging is not set up (CAPROVER_SERVER or the app tokens missing); skipping the staging deploy"
           elif [ "$count" -eq 4 ]; then
             echo "deployed=true" >> "$GITHUB_OUTPUT"
           else
@@ -241,7 +249,7 @@ jobs:
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
-          app: ${{ vars.CAPROVER_APP_API || 'suffa-api-stg' }}
+          app: ${{ vars.CAPROVER_APP_API || 'suffa-api' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_API }}
           image: ${{ steps.digests.outputs.api }}
       - name: deploy worker
@@ -249,7 +257,7 @@ jobs:
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
-          app: ${{ vars.CAPROVER_APP_WORKER || 'suffa-worker-stg' }}
+          app: ${{ vars.CAPROVER_APP_WORKER || 'suffa-worker' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_WORKER }}
           image: ${{ steps.digests.outputs.api }}
       - name: deploy backup
@@ -257,7 +265,7 @@ jobs:
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
-          app: ${{ vars.CAPROVER_APP_BACKUP || 'suffa-backup-stg' }}
+          app: ${{ vars.CAPROVER_APP_BACKUP || 'suffa-backup' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_BACKUP }}
           image: ${{ steps.digests.outputs.backup }}
       - name: deploy web
@@ -265,7 +273,7 @@ jobs:
         uses: caprover/deploy-from-github@v2
         with:
           server: ${{ vars.CAPROVER_SERVER }}
-          app: ${{ vars.CAPROVER_APP_WEB || 'suffa-web-stg' }}
+          app: ${{ vars.CAPROVER_APP_WEB || 'suffa-web' }}
           token: ${{ secrets.CAPROVER_APP_TOKEN_WEB }}
           image: ${{ steps.digests.outputs.web }}
 
@@ -274,12 +282,12 @@ jobs:
     name: verify staging
     needs: [images, deploy-staging]
     runs-on: ubuntu-latest
-    if: ${{ needs.deploy-staging.outputs.deployed == 'true' && vars.SUFFA_STAGING_URL != '' }}
+    if: needs.deploy-staging.outputs.deployed == 'true'
     timeout-minutes: 12
     steps:
       - name: staging reports the new version
         env:
-          URL: ${{ vars.SUFFA_STAGING_URL }}
+          URL: ${{ needs.deploy-staging.outputs.url }}
           TAG: ${{ needs.images.outputs.tag }}
         run: |
           for i in $(seq 1 60); do
@@ -309,4 +317,6 @@ jobs:
       web: ${{ needs.deploy-staging.outputs.web }}
       backup: ${{ needs.deploy-staging.outputs.backup }}
       require-staging: true
+      staging-server: ${{ needs.deploy-staging.outputs.server }}
+      staging-url: ${{ needs.deploy-staging.outputs.url }}
     secrets: inherit

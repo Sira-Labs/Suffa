@@ -20,7 +20,7 @@ import type { SuggestionRepository } from './suggestions.js';
 export interface SuggestionRouteDeps {
   classes: { scope(classId: string, userId: string): Promise<ClassScope> };
   media: Pick<MediaRepository, 'get'>;
-  interactive: Pick<InteractiveRepository, 'transcript' | 'aiEnabled' | 'addCheckpoint'>;
+  interactive: Pick<InteractiveRepository, 'transcript' | 'aiEnabled'>;
   suggestions: SuggestionRepository;
   /** Queues a suggestion run. */
   enqueue: (mediaId: string) => Promise<void>;
@@ -90,30 +90,12 @@ export function createSuggestionRoutes(deps: SuggestionRouteDeps): Hono<ActorEnv
     const parsed = Decision.safeParse(body);
     if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
     const actor = c.get('actor').id;
-    const decided = await deps.suggestions.decide(
-      item.id,
-      sid.data,
-      parsed.data.decision === 'accept' ? 'accepted' : 'dismissed',
-      actor
-    );
+    // Accepting creates the chapter or checkpoint in the same transaction as the decision.
+    const decided =
+      parsed.data.decision === 'accept'
+        ? await deps.suggestions.accept(item.id, sid.data, actor)
+        : await deps.suggestions.decide(item.id, sid.data, 'dismissed', actor);
     if (!decided) return c.json({ error: 'not_found' }, 404);
-    if (parsed.data.decision === 'accept') {
-      const made =
-        decided.kind === 'chapter'
-          ? await deps.suggestions.addChapter(
-              item.id,
-              decided.atSec,
-              decided.data.title,
-              actor
-            )
-          : await deps.interactive.addCheckpoint(
-              item.id,
-              decided.atSec,
-              decided.data,
-              actor
-            );
-      await deps.suggestions.linkResult(item.id, decided.id, made.id);
-    }
     return c.body(null, 204);
   });
 

@@ -12,7 +12,7 @@ import { AiQuotaError, type AiGateway } from '../ai/gateway.js';
 import { foldArabic, type ContentCatalog } from '../tutor/content.js';
 import { CheckpointData, type Cue, type InteractiveRepository } from './interactive.js';
 import type { MediaRepository } from './repository.js';
-import { reopenSuggestion } from './suggestionLinks.js';
+import { removeAndReopen } from './suggestionLinks.js';
 
 export const SUGGEST_TASK = 'recording.suggest';
 /** Transcript sent to the model at most (about an hour of speech). */
@@ -53,8 +53,11 @@ export interface SuggestionRepository {
     decision: 'accepted' | 'dismissed',
     by: string
   ): Promise<Suggestion | null>;
-  /** Remembers what an accepted suggestion became (checkpoint or chapter id). */
-  linkResult(mediaId: string, id: string, resultId: string): Promise<void>;
+  /**
+   * Accepts a pending suggestion: marks it accepted, creates its chapter or checkpoint and
+   * remembers the link, all in one transaction. Null when there is no such pending suggestion.
+   */
+  accept(mediaId: string, id: string, by: string): Promise<Suggestion | null>;
   chapters(mediaId: string): Promise<Chapter[]>;
   addChapter(mediaId: string, atSec: number, title: string, by: string): Promise<Chapter>;
   removeChapter(mediaId: string, id: string): Promise<boolean>;
@@ -147,11 +150,60 @@ export class PgSuggestionRepository implements SuggestionRepository {
       : null;
   }
 
-  async linkResult(mediaId: string, id: string, resultId: string) {
-    await this.pool.query(
-      'update media_suggestions set result_id = $3 where media_id = $1 and id = $2',
-      [mediaId, id, resultId]
-    );
+  async accept(mediaId: string, id: string, by: string) {
+    const client = await this.pool.connect();
+    try {
+      await client.query('begin');
+      const { rows } = await client.query(
+        `update media_suggestions set status = 'accepted', decided_by = $3, decided_at = now()
+          where media_id = $1 and id = $2 and status = 'pending'
+         returning id, kind, at_sec, data`,
+        [mediaId, id, by]
+      );
+      const r = rows[0];
+      if (!r) {
+        await client.query('rollback');
+        return null;
+      }
+      const suggestion = {
+        id: r.id,
+        kind: r.kind,
+        atSec: r.at_sec,
+        data: r.data,
+      } as Suggestion;
+      const resultId = randomUUID();
+      if (suggestion.kind === 'chapter') {
+        await client.query(
+          `insert into media_chapters (id, media_id, at_sec, title, created_by)
+           values ($1, $2, $3, $4, $5)`,
+          [resultId, mediaId, suggestion.atSec, suggestion.data.title, by]
+        );
+      } else {
+        await client.query(
+          `insert into media_checkpoints (id, media_id, at_sec, kind, data, created_by)
+           values ($1, $2, $3, $4, $5, $6)`,
+          [
+            resultId,
+            mediaId,
+            suggestion.atSec,
+            suggestion.data.kind,
+            JSON.stringify(suggestion.data),
+            by,
+          ]
+        );
+      }
+      await client.query('update media_suggestions set result_id = $2 where id = $1', [
+        id,
+        resultId,
+      ]);
+      await client.query('commit');
+      return suggestion;
+    } catch (error) {
+      await client.query('rollback');
+      throw error;
+    } finally {
+      client.release();
+    }
   }
 
   async chapters(mediaId: string) {
@@ -176,13 +228,7 @@ export class PgSuggestionRepository implements SuggestionRepository {
   }
 
   async removeChapter(mediaId: string, id: string) {
-    const { rows } = await this.pool.query(
-      'delete from media_chapters where media_id = $1 and id = $2 returning id',
-      [mediaId, id]
-    );
-    if (rows.length === 0) return false;
-    await reopenSuggestion(this.pool, mediaId, id);
-    return true;
+    return removeAndReopen(this.pool, 'media_chapters', mediaId, id);
   }
 }
 

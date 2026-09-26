@@ -5,7 +5,7 @@
 import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
 import { z } from 'zod';
-import { reopenSuggestion } from './suggestionLinks.js';
+import { removeAndReopen } from './suggestionLinks.js';
 
 export const Cue = z.object({
   start: z
@@ -151,13 +151,7 @@ export class PgInteractiveRepository implements InteractiveRepository {
   }
 
   async removeCheckpoint(mediaId: string, id: string) {
-    const { rowCount } = await this.pool.query(
-      'delete from media_checkpoints where media_id = $1 and id = $2',
-      [mediaId, id]
-    );
-    if ((rowCount ?? 0) === 0) return false;
-    await reopenSuggestion(this.pool, mediaId, id);
-    return true;
+    return removeAndReopen(this.pool, 'media_checkpoints', mediaId, id);
   }
 
   async aiEnabled(classId: string) {

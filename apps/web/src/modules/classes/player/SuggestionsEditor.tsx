@@ -55,6 +55,8 @@ export function SuggestionsEditor({
 }) {
   const [state, setState] = useState<SuggestionState | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  // One decision (or batch) at a time: repeated clicks must not send the same one twice.
+  const [busy, setBusy] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const load = useCallback(async () => {
@@ -82,7 +84,11 @@ export function SuggestionsEditor({
   };
 
   const decide = async (s: Suggestion, decision: 'accept' | 'dismiss') => {
-    const result = await api.decide(classId, mediaId, s.id, decision);
+    if (busy) return;
+    setBusy(true);
+    const result = await api
+      .decide(classId, mediaId, s.id, decision)
+      .finally(() => setBusy(false));
     if (!result.ok) return setMessage(result.message);
     setState((current) =>
       current
@@ -94,6 +100,15 @@ export function SuggestionsEditor({
 
   // All at once, one after another (each is its own decision on the server).
   const decideAll = async (decision: 'accept' | 'dismiss') => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await decideEach(decision);
+    } finally {
+      setBusy(false);
+    }
+  };
+  const decideEach = async (decision: 'accept' | 'dismiss') => {
     for (const s of state?.suggestions ?? []) {
       const result = await api.decide(classId, mediaId, s.id, decision);
       if (!result.ok) {
@@ -149,11 +164,17 @@ export function SuggestionsEditor({
           <button
             className="btn btn-primary"
             type="button"
+            disabled={busy}
             onClick={() => void decideAll('accept')}
           >
             Alle übernehmen
           </button>
-          <button className="btn" type="button" onClick={() => void decideAll('dismiss')}>
+          <button
+            className="btn"
+            type="button"
+            disabled={busy}
+            onClick={() => void decideAll('dismiss')}
+          >
             Alle verwerfen
           </button>
         </div>
@@ -171,6 +192,7 @@ export function SuggestionsEditor({
             <button
               className="btn btn-primary"
               type="button"
+              disabled={busy}
               aria-label={`Übernehmen (${clock(s.atSec)})`}
               onClick={() => void decide(s, 'accept')}
             >
@@ -179,6 +201,7 @@ export function SuggestionsEditor({
             <button
               className="btn"
               type="button"
+              disabled={busy}
               aria-label={`Verwerfen (${clock(s.atSec)})`}
               onClick={() => void decide(s, 'dismiss')}
             >

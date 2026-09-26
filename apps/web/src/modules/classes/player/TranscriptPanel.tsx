@@ -38,7 +38,7 @@ export function TranscriptPanel({
       defaultOpen={false}
       onOpenChange={(open) => open && setShown((n) => n + 1)}
       lead={
-        <p className="transcript-now" aria-live="off">
+        <p className="transcript-now" aria-live="polite">
           {current >= 0 ? (
             <>
               <span className="muted transcript-time">{clock(cues[current]!.start)}</span>

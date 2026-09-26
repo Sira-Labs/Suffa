@@ -344,7 +344,6 @@ function buildApp() {
       interactive: {
         transcript: async () => null,
         aiEnabled: async () => false,
-        addCheckpoint: async () => ({}) as never,
       },
       suggestions: {
         run: async () => null,
@@ -352,7 +351,7 @@ function buildApp() {
         replacePending: async () => {},
         pending: async () => [],
         decide: async () => null,
-        linkResult: async () => {},
+        accept: async () => null,
         chapters: async () => [],
         addChapter: async () => ({}) as never,
         removeChapter: async () => false,

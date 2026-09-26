@@ -342,4 +342,53 @@ describe.skipIf(!url)('Recording suggestions (Postgres)', () => {
       error: 'AI is switched off for this class',
     });
   });
+
+  // Last: it rebuilds the schema.
+  it('links suggestions accepted before 0027 to what they became, where it is unambiguous', async () => {
+    await pool.query('drop schema public cascade; create schema public');
+    const all = await loadMigrations(join(import.meta.dirname, '..', 'migrations'));
+    const at = all.findIndex((m) => m.id.startsWith('0028'));
+    await migrate(pool, all.slice(0, at), quiet);
+    await pool.query(
+      `insert into users (id, email, name, role) values ($1, 't@example.org', 'T', 'teacher')`,
+      [TEACHER]
+    );
+    await pool.query(`insert into classes (id, name, created_by) values ($1, 'K', $2)`, [
+      classId,
+      TEACHER,
+    ]);
+    await pool.query(
+      `insert into media_items (id, class_id, created_by, title, source, status, original_key,
+         original_size, content_type) values ($1, $2, $3, 'S', 'upload', 'ready', 'k', 1, 'audio/mp4')`,
+      [mediaId, classId, TEACHER]
+    );
+    const card = { kind: 'vocab_flash', ar: 'بَيْتٌ', de: 'ein Haus', contentRef: null };
+    const [cp, ch, s1, s2, s3] = [1, 2, 3, 4, 5].map(() => randomUUID());
+    await pool.query(
+      `insert into media_checkpoints (id, media_id, at_sec, kind, data, created_by)
+       values ($1, $2, 12, 'vocab_flash', $3, $4)`,
+      [cp, mediaId, JSON.stringify(card), TEACHER]
+    );
+    await pool.query(
+      `insert into media_chapters (id, media_id, at_sec, title, created_by)
+       values ($1, $2, 30, 'Begrüßung', $3)`,
+      [ch, mediaId, TEACHER]
+    );
+    await pool.query(
+      `insert into media_suggestions (id, media_id, kind, at_sec, data, status) values
+         ($1, $4, 'checkpoint', 12, $5, 'accepted'),
+         ($2, $4, 'chapter', 30, '{"title":"Begrüßung"}', 'accepted'),
+         ($3, $4, 'chapter', 50, '{"title":"Gelöscht"}', 'accepted')`,
+      [s1, s2, s3, mediaId, JSON.stringify(card)]
+    );
+    await migrate(pool, all, quiet);
+    const { rows } = await pool.query(
+      'select id, result_id from media_suggestions order by at_sec'
+    );
+    expect(rows).toEqual([
+      { id: s1, result_id: cp },
+      { id: s2, result_id: ch },
+      { id: s3, result_id: null },
+    ]);
+  });
 });

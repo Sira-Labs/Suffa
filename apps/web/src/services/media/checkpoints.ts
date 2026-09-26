@@ -104,7 +104,10 @@ export function cuesToVtt(cues: readonly Cue[]): string {
     const end =
       cue.end > cue.start ? cue.end : Math.min(next ?? cue.start + 8, cue.start + 8);
     // A blank line or "-->" would end or break the cue.
-    const text = cue.text.replace(/\n\s*\n/g, '\n').replace(/-->/g, '→');
+    const text = cue.text
+      .trim()
+      .replace(/\n\s*\n/g, '\n')
+      .replace(/-->/g, '→');
     return `${vttTime(cue.start)} --> ${vttTime(end)}\n${text}`;
   });
   return ['WEBVTT', ...blocks].join('\n\n') + '\n';

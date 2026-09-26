@@ -3,7 +3,7 @@
  * stage milestone, with the way on to the next section. It shows once per section and device;
  * sections already done when this was first seen are not celebrated again.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { arabicNumber, type PathSection } from '@/services/units';
 
@@ -34,7 +34,8 @@ export function SectionCelebration({
   unit: number;
   sections: PathSection[];
 }) {
-  const [shown, setShown] = useState<number | null>(null);
+  // Newly finished dialogues, shown one after another (lowest first).
+  const [queue, setQueue] = useState<number[]>([]);
   const done = sections
     .filter((s) => s.no !== null && s.state === 'done')
     .map((s) => s.no as number);
@@ -43,22 +44,68 @@ export function SectionCelebration({
   useEffect(() => {
     const seen = readSeen(unit);
     const now = doneKey ? doneKey.split(',').map(Number) : [];
-    saveSeen(unit, now);
+    // Only ever add: a dialogue that falls back to open and is finished again is not
+    // celebrated twice.
+    saveSeen(unit, [...new Set([...(seen ?? []), ...now])]);
     // First visit on this device: remember what is done, celebrate only what comes next.
     if (seen === null) return;
-    const fresh = now.filter((no) => !seen.includes(no));
-    if (fresh.length > 0) setShown(Math.max(...fresh));
+    const fresh = now.filter((no) => !seen.includes(no)).sort((a, b) => a - b);
+    if (fresh.length > 0) setQueue((q) => [...q, ...fresh.filter((n) => !q.includes(n))]);
   }, [unit, doneKey]);
+
+  const shown = queue[0] ?? null;
+  const dialog = useRef<HTMLDivElement>(null);
+  const before = useRef<Element | null>(null);
+  // Focus moves into the dialog while it is open and back where it was afterwards.
+  useEffect(() => {
+    if (shown === null) return;
+    before.current ??= document.activeElement;
+    dialog.current?.querySelector<HTMLElement>('a, button')?.focus();
+  }, [shown]);
+  useEffect(
+    () => () => {
+      (before.current as HTMLElement | null)?.focus?.();
+    },
+    []
+  );
 
   if (shown === null) return null;
   const next = sections.find((s) => s.state === 'current');
   const nextStation =
     next?.stations.find((s) => s.state === 'current') ?? next?.stations[0];
-  const close = () => setShown(null);
+  const close = () => {
+    setQueue((q) => q.slice(1));
+    if (queue.length <= 1) {
+      (before.current as HTMLElement | null)?.focus?.();
+      before.current = null;
+    }
+  };
+  // Keep Tab inside the dialog; Escape closes it.
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      close();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+    const items = [...(dialog.current?.querySelectorAll<HTMLElement>('a, button') ?? [])];
+    if (items.length === 0) return;
+    const first = items[0]!;
+    const last = items[items.length - 1]!;
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
 
   return (
     <div
+      ref={dialog}
       className="section-celebration"
+      onKeyDown={onKeyDown}
       role="dialog"
       aria-modal="true"
       aria-labelledby="section-celebration-title"

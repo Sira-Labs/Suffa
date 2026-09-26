@@ -77,7 +77,8 @@ recorded fixtures. Quality differs across models — evals (ADR-0011) gate route
   last chunk.
 - **Recordings stay in the EU** (owner decision): the tasks that send a recording's
   transcript to a model, `recording.suggest` and the new `recording.summarize`, route to
-  `mistral-medium-latest` then `mistral-small-latest` (migration 0025). Their Anthropic
+  `ministral-14b-latest` then `ministral-8b-latest` (migration 0025; the starting Mistral
+  tier has no Medium/Small, switch in admin → KI when it does). Their Anthropic
   routes remain listed but switched off, so a Mistral outage cannot fall back to the US.
   Other tasks (tutor, grading) keep their routes.
 - Prices for the Mistral routes are estimates in the routing table; check them in the

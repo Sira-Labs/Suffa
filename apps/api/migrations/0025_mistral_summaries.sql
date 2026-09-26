@@ -34,18 +34,21 @@ begin
   end loop;
 end $$;
 
+-- Ministral 14B first: the Mistral tier at start does not include Medium/Small (0 requests
+-- per minute); it wrote good German summaries with vocalised Arabic in testing. Switch to
+-- mistral-medium-latest in admin → KI once the tier allows it.
 -- Prices in USD per million tokens are estimates: check them in the Mistral console.
 insert into ai_model_routes
   (task, position, provider, model, effort, max_tokens, capabilities, premium, price_input, price_output)
 values
-  ('recording.suggest', 0, 'mistral', 'mistral-medium-latest', null, 4000,
-   array['tools', 'structuredOutput', 'streaming'], false, 0.4, 2),
-  ('recording.suggest', 1, 'mistral', 'mistral-small-latest', null, 4000,
-   array['tools', 'structuredOutput', 'streaming'], false, 0.1, 0.3),
-  ('recording.summarize', 0, 'mistral', 'mistral-medium-latest', null, 3000,
-   array['tools', 'structuredOutput', 'streaming'], false, 0.4, 2),
-  ('recording.summarize', 1, 'mistral', 'mistral-small-latest', null, 3000,
-   array['tools', 'structuredOutput', 'streaming'], false, 0.1, 0.3)
+  ('recording.suggest', 0, 'mistral', 'ministral-14b-latest', null, 4000,
+   array['tools', 'structuredOutput', 'streaming'], false, 0.2, 0.2),
+  ('recording.suggest', 1, 'mistral', 'ministral-8b-latest', null, 4000,
+   array['tools', 'structuredOutput', 'streaming'], false, 0.15, 0.15),
+  ('recording.summarize', 0, 'mistral', 'ministral-14b-latest', null, 3000,
+   array['tools', 'structuredOutput', 'streaming'], false, 0.2, 0.2),
+  ('recording.summarize', 1, 'mistral', 'ministral-8b-latest', null, 3000,
+   array['tools', 'structuredOutput', 'streaming'], false, 0.15, 0.15)
 on conflict (task, position) do nothing;
 
 -- One summary per recording: made by AI from the transcript, seen by learners only after the

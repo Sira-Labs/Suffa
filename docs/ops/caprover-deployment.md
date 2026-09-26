@@ -583,7 +583,8 @@ Both run at Mistral (La Plateforme, EU); no server of our own is needed.
 
 **Summaries and suggestions** (the "Zusammenfassung (KI)" and "Vorschläge holen" buttons in
 the player) run on Mistral as soon as `SUFFA_MISTRAL_API_KEY` is set: `recording.summarize`
-and `recording.suggest` route to `mistral-medium-latest`, then `mistral-small-latest`; the
+and `recording.suggest` route to `ministral-14b-latest`, then `ministral-8b-latest` (once
+the Mistral tier includes Medium, switch to `mistral-medium-latest` in admin → KI); the
 Anthropic routes for these tasks are switched off (admin → KI shows them). A summary is a
 draft until the teacher publishes it for the class.
 

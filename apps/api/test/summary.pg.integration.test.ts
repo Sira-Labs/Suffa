@@ -188,7 +188,7 @@ describe.skipIf(!url)('Recording summaries (Postgres)', () => {
     await run();
 
     const sent = model.requests[0]!;
-    expect(sent.model).toBe('mistral-medium-latest');
+    expect(sent.model).toBe('ministral-14b-latest');
     expect((sent.messages[0] as { content: string }).content).toContain(
       '[6] اِسْمِي هُدى'
     );

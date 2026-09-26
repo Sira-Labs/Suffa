@@ -59,10 +59,45 @@ const EXTENSIONS: Record<string, string> = {
   'video/quicktime': '.mov',
   'video/webm': '.webm',
   'video/x-matroska': '.mkv',
+  'video/x-m4v': '.m4v',
+  'video/mpeg': '.mpg',
 };
 
-export function isSupportedType(contentType: string): boolean {
-  return contentType in EXTENSIONS;
+/** Declared types that say nothing about the content (Drive, some browsers and OSes). */
+const GENERIC_TYPES = new Set(['', 'application/octet-stream', 'binary/octet-stream']);
+
+const BY_EXTENSION: Record<string, string> = {
+  '.mp3': 'audio/mpeg',
+  '.m4a': 'audio/mp4',
+  '.aac': 'audio/aac',
+  '.wav': 'audio/wav',
+  '.ogg': 'audio/ogg',
+  '.oga': 'audio/ogg',
+  '.opus': 'audio/ogg',
+  '.flac': 'audio/flac',
+  '.mp4': 'video/mp4',
+  '.m4v': 'video/x-m4v',
+  '.mov': 'video/quicktime',
+  '.webm': 'video/webm',
+  '.mkv': 'video/x-matroska',
+  '.mpg': 'video/mpeg',
+  '.mpeg': 'video/mpeg',
+};
+
+/**
+ * The content type a recording is stored under, or null when it is not audio or video.
+ * Google Drive and some systems label an MP4 as `application/octet-stream` (or leave the
+ * type empty); then the file extension decides. ffmpeg checks the real content when it
+ * transcodes, so a mislabelled file fails there, not silently.
+ */
+export function recordingContentType(declared: string, fileName: string): string | null {
+  const type = declared.split(';')[0]!.trim().toLowerCase();
+  if (type in EXTENSIONS) return type;
+  const generic =
+    GENERIC_TYPES.has(type) || type.startsWith('audio/') || type.startsWith('video/');
+  if (!generic) return null;
+  const extension = /\.[a-z0-9]+$/i.exec(fileName)?.[0]?.toLowerCase() ?? '';
+  return BY_EXTENSION[extension] ?? null;
 }
 
 export function recordingKey(classId: string, mediaId: string, file: string): string {
@@ -81,19 +116,15 @@ export class MediaService implements Media {
     userId: string,
     file: { title: string; fileName: string; size: number; contentType: string }
   ): Promise<StartResult> {
-    if (!isSupportedType(file.contentType))
-      return { ok: false, reason: 'unsupported_type' };
+    const contentType = recordingContentType(file.contentType, file.fileName);
+    if (!contentType) return { ok: false, reason: 'unsupported_type' };
     if (file.size > MAX_RECORDING_BYTES) return { ok: false, reason: 'too_large' };
     if ((await this.repo.classBytes(classId)) + file.size > CLASS_QUOTA_BYTES) {
       return { ok: false, reason: 'quota_exceeded' };
     }
     const id = randomUUID();
-    const key = recordingKey(classId, id, `original${EXTENSIONS[file.contentType]}`);
-    const uploadId = await this.storage.createMultipartUpload(
-      'media',
-      key,
-      file.contentType
-    );
+    const key = recordingKey(classId, id, `original${EXTENSIONS[contentType]}`);
+    const uploadId = await this.storage.createMultipartUpload('media', key, contentType);
     const item = await this.repo.create({
       id,
       classId,
@@ -104,7 +135,7 @@ export class MediaService implements Media {
       originalKey: key,
       originalName: file.fileName,
       originalSize: file.size,
-      contentType: file.contentType,
+      contentType,
       uploadId,
       driveFileId: null,
     });

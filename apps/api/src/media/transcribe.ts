@@ -197,9 +197,12 @@ export class OpenAiCompatibleTranscriber implements Transcriber {
     const results: Cue[][] = new Array(parts.length);
     let next = 0;
     let done = 0;
-    // A few pieces at once; each lane takes the next piece until none is left.
+    // A few pieces at once; each lane takes the next piece until none is left. After a
+    // failure no new piece starts, and the pieces already running finish before the error
+    // goes up (the caller removes the files afterwards).
+    let failed = false;
     const lane = async () => {
-      while (next < parts.length) {
+      while (!failed && next < parts.length) {
         const i = next++;
         const offset = i * CHUNK_SECONDS;
         const cues = await transcribeFile(this.settings, parts[i]!, this.fetchImpl);
@@ -212,9 +215,16 @@ export class OpenAiCompatibleTranscriber implements Transcriber {
         await onProgress?.(done / parts.length);
       }
     };
-    await Promise.all(
-      Array.from({ length: Math.min(PARALLEL_PIECES, parts.length) }, lane)
+    const lanes = await Promise.allSettled(
+      Array.from({ length: Math.min(PARALLEL_PIECES, parts.length) }, () =>
+        lane().catch((error: unknown) => {
+          failed = true;
+          throw error;
+        })
+      )
     );
+    const rejected = lanes.find((l) => l.status === 'rejected');
+    if (rejected) throw rejected.reason;
     return results.flat();
   }
 }

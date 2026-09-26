@@ -173,6 +173,9 @@ export class PgInteractiveRepository implements InteractiveRepository {
   }
 }
 
+/** How often a running transcript touches its row; well below the 10-minute restart limit. */
+export const HEARTBEAT_MS = 2 * 60 * 1000;
+
 /** Worker step (story 8.1): the recording's audio → transcript cues. */
 export async function transcribeRecording(
   deps: {
@@ -210,14 +213,25 @@ export async function transcribeRecording(
     // The download is the first 5 %, the pieces the rest.
     await deps.interactive.saveTranscript(mediaId, { progress: 5 });
     // Pieces finish in parallel: the updates go out one after another, so the bar never
-    // steps back.
+    // steps back. A heartbeat keeps the row fresh during a long piece, so the teacher is
+    // only offered a restart when the worker is really gone.
+    let progress = 5;
     let saved = Promise.resolve();
-    const cues = await deps.transcriber.transcribe(audio, (done) => {
-      saved = saved.then(() =>
-        deps.interactive.saveTranscript(mediaId, { progress: 5 + Math.floor(done * 94) })
-      );
+    const write = () => {
+      saved = saved.then(() => deps.interactive.saveTranscript(mediaId, { progress }));
       return saved;
-    });
+    };
+    const heartbeat = setInterval(() => void write().catch(() => {}), HEARTBEAT_MS);
+    let cues: Cue[];
+    try {
+      cues = await deps.transcriber.transcribe(audio, (done) => {
+        progress = 5 + Math.floor(done * 94);
+        return write();
+      });
+    } finally {
+      clearInterval(heartbeat);
+      await saved.catch(() => {});
+    }
     await deps.interactive.saveTranscript(mediaId, {
       status: 'ready',
       cues,

@@ -153,14 +153,6 @@ export function RecordingPlayer() {
     }
   }, [transcriptStatus, celebrate]);
 
-  const done = useMemo(() => {
-    const ids = new Set(shown.current);
-    for (const cp of media?.checkpoints ?? []) {
-      if (practised[`0:checkpoint:${mediaId}/${cp.id}`]) ids.add(cp.id);
-    }
-    return ids;
-  }, [media, practised, mediaId]);
-
   useMediaSession(media?.title, element);
 
   // The transcript as subtitles on the video (also in full screen); a new file per change.
@@ -224,7 +216,12 @@ export function RecordingPlayer() {
       lastTime.current = e.currentTarget.currentTime;
     },
     onSeeked: (e: React.SyntheticEvent<HTMLMediaElement>) => {
-      lastTime.current = e.currentTarget.currentTime;
+      const to = e.currentTarget.currentTime;
+      // Going back before a checkpoint asks it again when playback passes it.
+      for (const cp of media.checkpoints) {
+        if (cp.atSec > to + 0.5) shown.current.delete(cp.id);
+      }
+      lastTime.current = to;
     },
     onTimeUpdate: (e: React.SyntheticEvent<HTMLMediaElement>) => {
       const el = e.currentTarget;
@@ -256,6 +253,15 @@ export function RecordingPlayer() {
     ? Math.round((heard.listenedSec / Math.max(1, heard.durationSec)) * 100)
     : 0;
   const teacher = media.interactive?.canEdit === true;
+  // Checkpoints not to ask (again): the ones shown in this sitting, and for learners the ones
+  // answered right before. Teachers see every checkpoint again when they go back (testing).
+  // Worked out on every render: `shown` is a ref and changes without a re-render.
+  const done = new Set(shown.current);
+  if (!teacher) {
+    for (const cp of media?.checkpoints ?? []) {
+      if (practised[`0:checkpoint:${mediaId}/${cp.id}`]) done.add(cp.id);
+    }
+  }
 
   const toggleOffline = async () => {
     if (saved) {

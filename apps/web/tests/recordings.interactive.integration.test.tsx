@@ -107,6 +107,44 @@ describe('Interactive recordings (integration)', () => {
     localStorage.clear();
   });
 
+  it('asks a missed checkpoint again after going back before it', async () => {
+    const router = createMemoryRouter(
+      [{ path: '/classes/:id/recordings/:mediaId', element: <RecordingPlayer /> }],
+      { initialEntries: [`/classes/${CLASS}/recordings/${MEDIA}`] }
+    );
+    render(<RouterProvider router={router} />);
+    const audio = (await screen.findByLabelText('Stunde 1')) as HTMLAudioElement;
+    let time = 0;
+    Object.defineProperty(audio, 'currentTime', {
+      get: () => time,
+      set: (v: number) => (time = v),
+      configurable: true,
+    });
+    audio.pause = vi.fn();
+    audio.play = vi.fn(async () => undefined);
+    const playTo = (...times: number[]) => {
+      for (const t of times) {
+        time = t;
+        fireEvent.timeUpdate(audio);
+      }
+    };
+    fireEvent.play(audio);
+    playTo(5, 6.1);
+    // Answered wrong: it does not come back while playing on …
+    let dialog = screen.getByRole('dialog');
+    await userEvent.click(within(dialog).getByLabelText('Haus'));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Prüfen' }));
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Weiter' }));
+    playTo(6.5, 7);
+    expect(screen.queryByRole('dialog')).toBeNull();
+    // … but after going back before it, it is asked again.
+    time = 2;
+    fireEvent.seeked(audio);
+    playTo(3, 4, 5, 6.2);
+    dialog = screen.getByRole('dialog');
+    expect(within(dialog).getByText('Was heißt حال?')).toBeInTheDocument();
+  });
+
   it('pauses at a checkpoint, counts a right answer and shows the transcript', async () => {
     const router = createMemoryRouter(
       [{ path: '/classes/:id/recordings/:mediaId', element: <RecordingPlayer /> }],

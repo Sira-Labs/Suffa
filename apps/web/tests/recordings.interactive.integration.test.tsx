@@ -115,7 +115,7 @@ describe('Interactive recordings (integration)', () => {
     render(<RouterProvider router={router} />);
     const audio = (await screen.findByLabelText('Stunde 1')) as HTMLAudioElement;
     const transcript = screen.getByRole('region', { name: 'Transkript' });
-    expect(within(transcript).getAllByText('كيف حالك').length).toBeGreaterThan(0);
+    expect(transcript.querySelector('.transcript-now')).toHaveTextContent('السلام عليكم');
 
     let time = 0;
     Object.defineProperty(audio, 'currentTime', {
@@ -143,10 +143,10 @@ describe('Interactive recordings (integration)', () => {
       ).toBeTruthy()
     );
     expect(screen.queryByRole('dialog')).toBeNull();
-    // Folded, the line being spoken stays in view under the player.
+    // By default the line being spoken stays in view under the player.
     expect(transcript.querySelector('.transcript-now')).toHaveTextContent('كيف حالك');
-    // Opened: the current line is marked in the list; a tap on a line jumps there.
-    await userEvent.click(within(transcript).getByRole('button', { name: /Aufklappen/ }));
+    // "Alles": the current line is marked in the list; a tap on a line jumps there.
+    await userEvent.click(within(transcript).getByRole('button', { name: 'Alles' }));
     const line = within(transcript)
       .getAllByText('كيف حالك')
       .find((el) => el.closest('li'));

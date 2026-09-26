@@ -1996,6 +1996,16 @@ textarea.input {
   display: none !important;
 }
 
+/* A small group of mutually exclusive buttons (e.g. transcript: off / one line / all). */
+.segmented {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+.segmented-item {
+  font-size: 0.85rem;
+  padding: 0.3rem 0.6rem;
+}
+
 /* Cards that fold away behind their heading (summary, transcript under the player). */
 .collapsible-head {
   display: flex;

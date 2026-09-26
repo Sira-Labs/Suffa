@@ -166,6 +166,12 @@ export function RecordingPlayer() {
   // The transcript as subtitles on the video (also in full screen); a new file per change.
   const cueList = media?.cues;
   const [subtitles, setSubtitles] = useState<string | null>(null);
+  // Subtitles on the picture: on unless switched off on this device.
+  const [subtitlesOn, setSubtitlesOn] = useState(readSubtitlesOn);
+  useEffect(() => {
+    const track = element.current?.textTracks?.[0];
+    if (track) track.mode = subtitlesOn ? 'showing' : 'hidden';
+  }, [subtitlesOn, subtitles]);
   useEffect(() => {
     if (!cueList?.length || typeof URL.createObjectURL !== 'function') {
       setSubtitles(null);
@@ -299,7 +305,7 @@ export function RecordingPlayer() {
               src={subtitles}
               srcLang="ar"
               label="Transkript"
-              default
+              default={subtitlesOn}
             />
           )}
         </video>
@@ -313,7 +319,22 @@ export function RecordingPlayer() {
           {...handlers}
         />
       )}
-      <TranscriptPanel cues={media.cues} time={time} onSeek={seek} />
+      <TranscriptPanel
+        cues={media.cues}
+        time={time}
+        onSeek={seek}
+        subtitles={
+          media.video && subtitles
+            ? {
+                on: subtitlesOn,
+                onChange: (on) => {
+                  setSubtitlesOn(on);
+                  saveSubtitlesOn(on);
+                },
+              }
+            : undefined
+        }
+      />
       {open && (
         <CheckpointDialog checkpoint={open} onDone={(ok) => void answered(open, ok)} />
       )}
@@ -402,4 +423,22 @@ export function RecordingPlayer() {
       )}
     </div>
   );
+}
+
+const SUBTITLES_KEY = 'suffa.player.subtitles';
+
+function readSubtitlesOn(): boolean {
+  try {
+    return localStorage.getItem(SUBTITLES_KEY) !== 'off';
+  } catch {
+    return true;
+  }
+}
+
+function saveSubtitlesOn(on: boolean): void {
+  try {
+    localStorage.setItem(SUBTITLES_KEY, on ? 'on' : 'off');
+  } catch {
+    // Storage blocked: the choice lasts for this visit only.
+  }
 }

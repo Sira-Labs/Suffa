@@ -4,7 +4,7 @@
  */
 import { apiRequest, type Fetch } from '@/services/api/request';
 
-export type ProviderId = 'anthropic' | 'openrouter' | 'huggingface';
+export type ProviderId = 'anthropic' | 'openrouter' | 'huggingface' | 'mistral';
 export type Capability = 'tools' | 'structuredOutput' | 'vision' | 'streaming';
 export type Effort = 'low' | 'medium' | 'high' | 'xhigh' | 'max';
 
@@ -87,12 +87,15 @@ export const TASK_LABELS: Record<string, string> = {
   'exercise.generate': 'Übungen erzeugen',
   'tutor.coach': 'Wochenplan',
   'content.author-assist': 'Autorenhilfe',
+  'recording.suggest': 'Vorschläge für Aufnahmen',
+  'recording.summarize': 'Zusammenfassung von Aufnahmen',
 };
 
 export const PROVIDER_LABELS: Record<ProviderId, string> = {
   anthropic: 'Anthropic',
   openrouter: 'OpenRouter',
   huggingface: 'Hugging Face',
+  mistral: 'Mistral (EU)',
 };
 
 /** "$1.23" from micro-dollars; small amounts keep more digits. */

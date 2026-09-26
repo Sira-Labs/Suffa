@@ -27,7 +27,7 @@ export interface AiAdminDeps {
 }
 
 const TASK = /^[a-z]+(\.[a-z-]+)+$/;
-const PROVIDERS = ['anthropic', 'openrouter', 'huggingface'] as const;
+const PROVIDERS = ['anthropic', 'openrouter', 'huggingface', 'mistral'] as const;
 
 const Route = z
   .object({

@@ -148,6 +148,8 @@ const RawEnvSchema = z.object({
   SUFFA_ANTHROPIC_API_KEY: z.string().trim().optional(),
   SUFFA_OPENROUTER_API_KEY: z.string().trim().optional(),
   SUFFA_HF_API_KEY: z.string().trim().optional(),
+  /** Mistral La Plateforme (EU); recording transcripts go only to EU providers. */
+  SUFFA_MISTRAL_API_KEY: z.string().trim().optional(),
   /** Dedicated Hugging Face Inference Endpoint; the shared router otherwise. */
   SUFFA_HF_ENDPOINT_URL: z
     .string()
@@ -241,6 +243,7 @@ export interface Config {
     openRouterKey: string | undefined;
     huggingFaceKey: string | undefined;
     huggingFaceEndpoint: string | undefined;
+    mistralKey: string | undefined;
   };
   /** YouTube Data API key; undefined turns the catalog import off. */
   youtubeApiKey: string | undefined;
@@ -442,7 +445,12 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
     transcribe: raw.SUFFA_TRANSCRIBE_URL
       ? {
           url: raw.SUFFA_TRANSCRIBE_URL,
-          token: raw.SUFFA_TRANSCRIBE_TOKEN || null,
+          // Voxtral uses the same Mistral key as the chat models unless one is given.
+          token:
+            raw.SUFFA_TRANSCRIBE_TOKEN ||
+            (new URL(raw.SUFFA_TRANSCRIBE_URL).hostname === 'api.mistral.ai'
+              ? raw.SUFFA_MISTRAL_API_KEY || null
+              : null),
           model: raw.SUFFA_TRANSCRIBE_MODEL,
           language: raw.SUFFA_TRANSCRIBE_LANGUAGE ?? null,
         }
@@ -452,6 +460,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       openRouterKey: raw.SUFFA_OPENROUTER_API_KEY || undefined,
       huggingFaceKey: raw.SUFFA_HF_API_KEY || undefined,
       huggingFaceEndpoint: raw.SUFFA_HF_ENDPOINT_URL,
+      mistralKey: raw.SUFFA_MISTRAL_API_KEY || undefined,
     },
     youtubeApiKey: raw.SUFFA_YOUTUBE_API_KEY || undefined,
     google: googleComplete

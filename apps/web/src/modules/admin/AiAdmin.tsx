@@ -31,7 +31,7 @@ const CAPABILITY_LABELS: Record<Capability, string> = {
 };
 
 const EFFORTS: Effort[] = ['low', 'medium', 'high', 'xhigh', 'max'];
-const PROVIDERS: ProviderId[] = ['anthropic', 'openrouter', 'huggingface'];
+const PROVIDERS: ProviderId[] = ['anthropic', 'openrouter', 'huggingface', 'mistral'];
 
 const toDraft = ({ task: _task, position: _position, ...rest }: AiRoute): RouteDraft =>
   rest;

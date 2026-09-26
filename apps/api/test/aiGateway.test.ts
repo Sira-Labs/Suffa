@@ -56,6 +56,7 @@ describe('buildProviders', () => {
     openRouterKey: undefined,
     huggingFaceKey: undefined,
     huggingFaceEndpoint: undefined,
+    mistralKey: undefined,
   };
 
   it('turns on exactly the providers that have a key', () => {
@@ -66,14 +67,20 @@ describe('buildProviders', () => {
         openRouterKey: 'o',
         huggingFaceKey: 'h',
         huggingFaceEndpoint: undefined,
+        mistralKey: 'm',
       },
       publicUrl: 'https://suffa.example',
     });
-    expect(Object.keys(all).sort()).toEqual(['anthropic', 'huggingface', 'openrouter']);
+    expect(Object.keys(all).sort()).toEqual([
+      'anthropic',
+      'huggingface',
+      'mistral',
+      'openrouter',
+    ]);
     expect(
       Object.values(all)
         .map((p) => p.id)
         .sort()
-    ).toEqual(['anthropic', 'huggingface', 'openrouter']);
+    ).toEqual(['anthropic', 'huggingface', 'mistral', 'openrouter']);
   });
 });

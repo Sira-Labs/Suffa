@@ -2,6 +2,7 @@
 import {
   AnthropicProvider,
   huggingFaceProvider,
+  mistralProvider,
   openRouterProvider,
   type LlmProvider,
   type ProviderId,
@@ -26,6 +27,9 @@ export function buildProviders(
       apiKey: config.ai.huggingFaceKey,
       endpointUrl: config.ai.huggingFaceEndpoint,
     });
+  }
+  if (config.ai.mistralKey) {
+    providers.mistral = mistralProvider({ apiKey: config.ai.mistralKey });
   }
   return providers;
 }

@@ -47,8 +47,8 @@ export function UnitStation() {
     [unit, sectionNo]
   );
   // The unit path opens dialogues one after another: a locked dialogue cannot be practised,
-  // and the whole-unit view only offers the dialogues that are open (until the path is
-  // known, nothing is held back).
+  // and the whole-unit view only offers the dialogues that are open. Until the path is known,
+  // nothing is offered (it loads with the app's bundled index).
   const { units: book } = useBookProgress();
   const pathSections = book.find((u) => u.unit.unit === unit)?.sections;
   const openNos = useMemo(
@@ -128,6 +128,10 @@ export function UnitStation() {
         <LockedPanel unit={unit} />
       </div>
     );
+  }
+
+  if (openNos === null) {
+    return <p className="muted">Lade Lernpfad …</p>;
   }
 
   if (sectionLocked) {

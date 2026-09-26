@@ -69,4 +69,10 @@ describe('cuesToVtt', () => {
       'WEBVTT\n\n00:00:00.000 --> 00:00:02.500\nمرحبا\n\n01:01:01.200 --> 01:01:09.200\na → b\nc\n'
     );
   });
+
+  it('drops blank lines at the edges of a cue, which would empty it', () => {
+    expect(cuesToVtt([{ start: 0, end: 1, text: '\nمرحبا\n' }])).toBe(
+      'WEBVTT\n\n00:00:00.000 --> 00:00:01.000\nمرحبا\n'
+    );
+  });
 });

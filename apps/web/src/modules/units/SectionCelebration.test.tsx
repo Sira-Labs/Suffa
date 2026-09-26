@@ -56,4 +56,24 @@ describe('SectionCelebration', () => {
     show([section(1, 'done'), section(2, 'current')]);
     expect(screen.queryByRole('dialog')).toBeNull();
   });
+
+  it('shows every newly finished dialogue in turn, and Escape closes one', async () => {
+    localStorage.setItem('suffa.path.celebrated.1', '[]');
+    show([section(1, 'done'), section(2, 'done'), section(3, 'current')]);
+    expect(screen.getByRole('dialog', { name: 'Dialog 1 geschafft' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Weiter mit Dialog 3' })).toHaveFocus();
+    await userEvent.keyboard('{Escape}');
+    expect(screen.getByRole('dialog', { name: 'Dialog 2 geschafft' })).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Zum Lernpfad' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('keeps dialogues celebrated even when they fall back to open', () => {
+    localStorage.setItem('suffa.path.celebrated.1', '[1]');
+    const view = show([section(1, 'current'), section(2, 'locked')]);
+    view.unmount();
+    expect(JSON.parse(localStorage.getItem('suffa.path.celebrated.1')!)).toEqual([1]);
+    show([section(1, 'done'), section(2, 'current')]);
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
 });

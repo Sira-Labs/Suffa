@@ -64,7 +64,8 @@ describe('Recording suggestions', () => {
   it('dismisses all open suggestions at once, and folds away', async () => {
     const { requests, onChange } = setup([READY]);
     expect(await screen.findByText('KI-Vorschläge (3 offen)')).toBeTruthy();
-    await userEvent.click(screen.getByRole('button', { name: 'Alle verwerfen' }));
+    // A double click must not send the batch twice.
+    await userEvent.dblClick(screen.getByRole('button', { name: 'Alle verwerfen' }));
     const puts = requests.filter((r) => r.method === 'PUT');
     expect(puts.map((r) => r.body)).toEqual([
       { decision: 'dismiss' },

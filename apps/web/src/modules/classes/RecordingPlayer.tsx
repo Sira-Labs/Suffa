@@ -165,19 +165,16 @@ export function RecordingPlayer() {
 
   // The transcript as subtitles on the video (also in full screen); a new file per change.
   const cueList = media?.cues;
-  const subtitles = useMemo(
-    () =>
-      cueList?.length && typeof URL.createObjectURL === 'function'
-        ? URL.createObjectURL(new Blob([cuesToVtt(cueList)], { type: 'text/vtt' }))
-        : null,
-    [cueList]
-  );
-  useEffect(
-    () => () => {
-      if (subtitles) URL.revokeObjectURL(subtitles);
-    },
-    [subtitles]
-  );
+  const [subtitles, setSubtitles] = useState<string | null>(null);
+  useEffect(() => {
+    if (!cueList?.length || typeof URL.createObjectURL !== 'function') {
+      setSubtitles(null);
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([cuesToVtt(cueList)], { type: 'text/vtt' }));
+    setSubtitles(url);
+    return () => URL.revokeObjectURL(url);
+  }, [cueList]);
 
   if (message) return <p className="feedback-bad">{message}</p>;
   if (!media) return <p className="muted">Lade Aufnahme …</p>;

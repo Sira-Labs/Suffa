@@ -71,8 +71,8 @@ gantt
   P1–P2 Identity, classes, engagement :done, p12, 2026-09-24, 1d
   P3–P6 Recordings, AI, video, apps  :done, p36, 2026-09-24, 3d
   section Next
-  P7 S15 Hear yourself               :active, s15, 2026-09-28, 4d
-  P7 S16 Open up                     :s16, after s15, 4d
+  P7 S15 Hear yourself               :active, s15, 2026-09-28, 3d
+  P7 S16 Open up                     :s16, 2026-09-30, 3d
   S2b Production server              :crit, s2b, 2026-09-28, 7d
   section Pilot and stores
   Store builds and review (PO)       :stores, 2026-10-05, 42d

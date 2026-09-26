@@ -50,8 +50,8 @@ gantt
   S13 In their pocket (3/5, PO 2)    :done, s13, 2026-09-25, 1d
   S14 Celebrate (3/4, PO 1)          :done, s14, 2026-09-25, 1d
   section P7 Next level
-  S15 Hear yourself (0/6)            :active, s15, 2026-09-28, 4d
-  S16 Open up (0/6)                  :s16, after s15, 4d
+  S15 Hear yourself (0/6)            :active, s15, 2026-09-28, 3d
+  S16 Open up (0/6)                  :s16, 2026-09-30, 3d
   Pilot starts                       :milestone, crit, pilot, 2027-01-04, 0d
 ```
 

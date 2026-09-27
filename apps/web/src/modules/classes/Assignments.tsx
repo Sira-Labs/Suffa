@@ -71,7 +71,14 @@ export function Assignments({
         Klassenaufgaben
       </h2>
       {teacher && (
-        <AssignmentForm api={api} classId={classId} course={course} onAdded={load} />
+        // Keyed: another class or course starts the form fresh, with a unit of that course.
+        <AssignmentForm
+          key={`${classId}:${course}`}
+          api={api}
+          classId={classId}
+          course={course}
+          onAdded={load}
+        />
       )}
       {message && <span className="feedback-bad">{message}</span>}
       {items?.length === 0 && (

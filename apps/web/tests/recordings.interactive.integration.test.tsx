@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-dom';
 import { Assignments } from '@/modules/classes/Assignments';
 import { RecordingPlayer } from '@/modules/classes/RecordingPlayer';
 import { db } from '@/services/storage';
@@ -241,6 +241,24 @@ describe('Interactive recordings (integration)', () => {
     const post = requests.filter((r) => r.method === 'POST').at(-1);
     expect(post).toMatchObject({
       body: { kind: 'unit', ref: '103', title: 'Lektion 3: Test bestehen' },
+    });
+  });
+
+  it('starts the form fresh when the class course changes', async () => {
+    const view = (course: 'bayna-yadayk' | 'madinah') => (
+      <MemoryRouter>
+        <Assignments classId={CLASS} teacher course={course} />
+      </MemoryRouter>
+    );
+    const { rerender } = render(view('bayna-yadayk'));
+    const form = await screen.findByRole('form', { name: 'Aufgabe stellen' });
+    await userEvent.selectOptions(within(form).getByLabelText('Aufgabe'), 'unit:5');
+    rerender(view('madinah'));
+    const fresh = await screen.findByRole('form', { name: 'Aufgabe stellen' });
+    await userEvent.click(within(fresh).getByRole('button', { name: 'Aufgabe stellen' }));
+    // Not the unit picked for the previous course (the server would refuse it).
+    expect(requests.filter((r) => r.method === 'POST').at(-1)).toMatchObject({
+      body: { kind: 'unit', ref: '101', title: 'Lektion 1: Test bestehen' },
     });
   });
 });

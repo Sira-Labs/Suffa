@@ -1,5 +1,5 @@
 import { WEEKLY_GOALS } from '@suffa/engagement';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { TashkilToggle } from '@/components';
 import { ApiSyncProvider, SIGN_IN_RETURN_PATH } from '@/services/sync/ApiSyncProvider';
 import { PasskeySignIn } from '@/modules/account/PasskeySignIn';
@@ -185,44 +185,16 @@ function AccountPanel() {
   );
 }
 
-/** Sources and licences of the content the app shows (attribution for CC BY material). */
+/** Sources and licences of the content the app shows (the full list is its own page). */
 function SourcesCard() {
   return (
     <section className="card stack" aria-labelledby="sources-title">
       <strong id="sources-title">Quellen & Lizenzen</strong>
-      <ul className="stack" style={{ margin: 0, paddingLeft: '1.1rem', gap: '0.4rem' }}>
-        <li>
-          <strong>Beispielsätze:</strong>{' '}
-          <a href="https://tatoeba.org" target="_blank" rel="noreferrer">
-            Tatoeba
-          </a>{' '}
-          (
-          <a
-            href="https://creativecommons.org/licenses/by/2.0/fr/"
-            target="_blank"
-            rel="noreferrer"
-          >
-            CC BY 2.0 FR
-          </a>
-          ), von Suffa vokalisiert und teils berichtigt; die Autorin oder der Autor steht
-          bei jedem Satz.
-        </li>
-        <li>
-          <strong>Audio und Seitenvideos zum Buch:</strong> © Arabic for All (العربية
-          للجميع), alle Rechte beim Verlag; wird vom Verlag bzw. YouTube abgespielt.
-        </li>
-        <li>
-          <strong>Entdecken:</strong> Videos gehören ihren Kanälen und laufen über
-          YouTube.
-        </li>
-        <li>
-          <strong>Wortlisten, Dialoge, Verbtabellen:</strong> eigene Inhalte von Suffa.
-        </li>
-        <li>
-          <strong>Schriften:</strong> Amiri, Reem Kufi, Manrope, Fraunces (SIL Open Font
-          License).
-        </li>
-      </ul>
+      <p className="muted" style={{ margin: 0 }}>
+        Woher Bücher, Aufnahmen, Videos und Beispielsätze kommen und unter welchen
+        Bedingungen wir sie zeigen.
+      </p>
+      <Link to="/sources">Alle Quellen & Lizenzen</Link>
     </section>
   );
 }

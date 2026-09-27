@@ -79,6 +79,16 @@ and our own exercises, and no copied book texts or pictures in the repo.
     author's recording from archive.org (CSP `media-src` allows `archive.org`). The book's
     solutions, English key, glossary, class notes and video lessons are linked. There is no
     book text in the repo.
+- **Stage 2, first part (done):**
+  - Each Medina lesson has its own page (`/units/madinah/<n>`). It shows our own content: the
+    lesson's new words (facts) with German meanings, grammar in our own words with our own
+    examples (`content/courses/madinah/book1-lessons.json`, lessons 1–5, draft).
+  - The page also has the author's recording and the book in the archive.org BookReader,
+    embedded at the lesson's page on request. archive.org holds the identical PDF, allows
+    embedding and works on phones; CSP `frame-src` allows `archive.org`. Links to archive.org
+    and the PDF remain as a fallback.
+  - A page "Quellen & Lizenzen" (`/sources`) names every source with its terms.
+  - Word ids are `md-<unit>-<n>`, so the words can become SRS cards later without new ids.
 - **Stage 2 and later:**
   - our own Madinah exercises, lesson by lesson;
   - stages and badges per course (`STAGES` gets a `course`);

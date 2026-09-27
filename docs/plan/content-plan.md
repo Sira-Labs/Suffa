@@ -63,6 +63,9 @@ not. Numbers for Book 1 are estimates; the teacher confirms them in the inventor
 | Publisher page videos (YouTube)            | 160 Book 1 videos by book page, grouped by unit (`tools/content/publisher-video-index.mjs`), no-cookie embed on play                                          | link          |
 | Curated "Entdecken" library (YouTube)      | channels and starter videos for Arabic language, Quran, stories and podcasts (`apps/web/src/content/sources/discover.json`), checked by hand, no-cookie embed | link          |
 | Muhammad al-Andalusi videos (ADR-0012)     | embedded, with our checkpoints                                                                                                                                | link          |
+| Medina course, Book 1 (Dr. V. Abdur Rahim) | book PDF in the archive.org BookReader, embedded at the lesson page; solutions, keys and notes linked ("for personal use, by kind permission")                | link          |
+| Medina lesson content (own)                | new words per lesson (facts) with our German meanings, grammar and examples in our own words (`content/courses/madinah/book1-lessons.json`)                   | open          |
+| Author's audio, Medina Book 1              | lessons 1–23 on archive.org, streamed in the lesson page, never copied                                                                                        | link          |
 | Neural TTS (Azure / Google, Arabic voices) | audio for words and sentences until recorded                                                                                                                  | generated     |
 
 Unit page ranges (`apps/web/src/content/sources/book1-pages.json`) are estimated from the

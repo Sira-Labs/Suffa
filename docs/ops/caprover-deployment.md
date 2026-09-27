@@ -586,7 +586,10 @@ the player) run on Mistral as soon as `SUFFA_MISTRAL_API_KEY` is set: `recording
 and `recording.suggest` route to `ministral-14b-latest`, then `ministral-8b-latest` (once
 the Mistral tier includes Medium, switch to `mistral-medium-latest` in admin → KI); the
 Anthropic routes for these tasks are switched off (admin → KI shows them). A summary is a
-draft until the teacher publishes it for the class.
+draft until the teacher publishes it for the class. "Vorschläge holen" also proofreads the
+transcript (`recording.proofread`, same Mistral routes, migration 0030): lines where Arabic
+came out in Latin letters ("Hather Beiton") are proposed in Arabic letters, and an accepted
+correction replaces the line in the transcript. Correct lines are left alone.
 
 The api speaks the OpenAI-compatible transcription protocol, so another EU service needs
 only a new URL, model and `SUFFA_TRANSCRIBE_TOKEN`. Recordings go out over https only

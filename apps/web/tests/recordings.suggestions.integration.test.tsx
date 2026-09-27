@@ -105,6 +105,39 @@ describe('Recording suggestions', () => {
     expect(screen.queryByText('Kapitel: Neue Wörter: Schule')).toBeNull();
   });
 
+  it('shows a transcript correction and explains when its line changed meanwhile', async () => {
+    const fetchImpl = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if ((init?.method ?? 'GET') === 'GET') {
+        return Response.json({
+          run: { status: 'ready', error: null },
+          suggestions: [
+            {
+              id: 'f1',
+              kind: 'fix',
+              atSec: 6,
+              data: { cue: 1, before: 'Ma hada?', after: 'مَا هٰذَا؟' },
+            },
+          ],
+        });
+      }
+      return Response.json({ error: 'transcript_changed' }, { status: 409 });
+    });
+    render(
+      <SuggestionsEditor
+        api={new InteractiveApi(fetchImpl as typeof fetch)}
+        classId="c1"
+        mediaId="m1"
+        onChange={vi.fn()}
+      />
+    );
+    expect(await screen.findByText('Ma hada?')).toBeTruthy();
+    expect(screen.getByText('مَا هٰذَا؟')).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Übernehmen (0:06)' }));
+    expect(await screen.findByText(/wurde inzwischen geändert/)).toBeTruthy();
+    // Still there to dismiss.
+    expect(screen.getByText('Ma hada?')).toBeTruthy();
+  });
+
   it('shows a failed run', async () => {
     setup([{ run: { status: 'failed', error: 'x' }, suggestions: [] }]);
     expect(await screen.findByText(/hat nicht geklappt/)).toBeTruthy();

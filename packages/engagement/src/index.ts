@@ -1,4 +1,5 @@
 export * from './achievements.js';
+export * from './courses.js';
 export * from './day.js';
 export * from './lessons.js';
 export * from './levels.js';

@@ -72,6 +72,18 @@ the printed book and set `status` to `"verified"`. The publisher has no videos f
 Open actions before the pilot: ask the teacher what his school has licensed; write to the
 publisher about a classroom licence (a licence would let class packs use book texts directly).
 
+Permission requests sent on 2026-09-27 (ADR-0025):
+
+- **Arabic for All** (info@arabicforall.net), publisher of _al-ʿArabiyya bayna yadayk_. We asked
+  whether streaming their Book 1 audio and referring to the book's pages is acceptable, and
+  whether the free app may show selected dialogues, exercises or pictures.
+- **AbdurRahman.org** (abdurrahman.org@gmail.com), with a request to forward to Dr. V. Abdur
+  Rahim or the rights holders of the Madinah course. We said we plan to link the book PDFs,
+  solutions, audio and videos per lesson and to write our own exercises. We asked permission to
+  show book exercises and pictures in the app and to use the answer keys.
+
+Until an answer arrives, only links and our own content are used, as ADR-0023 requires.
+
 ## 4. Content model v2
 
 English field names, stable ids, one format for open and class packs:

@@ -86,7 +86,9 @@ export function ClassPage() {
           </div>
           <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
             {tab === 'progress' && <ClassProgressView api={api} classId={summary.id} />}
-            {tab === 'life' && <ClassLife api={api} classId={summary.id} teacher />}
+            {tab === 'life' && (
+              <ClassLife api={api} classId={summary.id} teacher course={summary.course} />
+            )}
             {tab === 'recordings' && <ClassRecordings classId={summary.id} teacher />}
             {tab === 'grades' && <ClassGrades classId={summary.id} />}
             {tab === 'certificates' && (
@@ -99,7 +101,12 @@ export function ClassPage() {
         </>
       ) : (
         <>
-          <ClassLife api={api} classId={summary.id} teacher={false} />
+          <ClassLife
+            api={api}
+            classId={summary.id}
+            teacher={false}
+            course={summary.course}
+          />
           <section className="stack" aria-labelledby="recordings-title">
             <h2 id="recordings-title" className="eyebrow">
               Aufnahmen

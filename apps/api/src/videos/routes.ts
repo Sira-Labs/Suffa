@@ -17,6 +17,7 @@
  *   POST   /:videoId/checkpoints           { atSec, data } → 201
  *   DELETE /:videoId/checkpoints/:cpId     → 204
  */
+import { MAX_UNIT } from '@suffa/engagement';
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
 import type { AuthResolver } from '../auth/resolver.js';
@@ -62,7 +63,7 @@ const ChannelPatch = z
   .strict();
 const VideoPatch = z
   .object({
-    unit: z.number().int().min(1).max(100).nullable().optional(),
+    unit: z.number().int().min(1).max(MAX_UNIT).nullable().optional(),
     hidden: z.boolean().optional(),
   })
   .strict();
@@ -93,7 +94,12 @@ export function createVideoRoutes(deps: VideoRouteDeps): Hono {
   const app = new Hono();
 
   app.get('/videos', async (c) => {
-    const unit = z.coerce.number().int().min(1).max(100).safeParse(c.req.query('unit'));
+    const unit = z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(MAX_UNIT)
+      .safeParse(c.req.query('unit'));
     c.header('Cache-Control', 'public, max-age=300');
     return c.json({
       videos: await deps.videos.publicVideos(unit.success ? unit.data : null),

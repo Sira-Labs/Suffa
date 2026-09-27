@@ -2,6 +2,7 @@
  * Class life (story 6.2): the weekly class challenge, shout-outs and the teacher's badges.
  * Learners see the feed; teachers also set the challenge, write shout-outs and award badges.
  */
+import { DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 import { useCallback, useEffect, useState } from 'react';
 import { Icon } from '@/components/Icon';
 import {
@@ -25,10 +26,12 @@ export function ClassLife({
   api,
   classId,
   teacher,
+  course = DEFAULT_COURSE,
 }: {
   api: ClassesApi;
   classId: string;
   teacher: boolean;
+  course?: CourseId;
 }) {
   const [feed, setFeed] = useState<ClassFeed | null>(null);
   const [students, setStudents] = useState<Member[]>([]);
@@ -69,7 +72,7 @@ export function ClassLife({
       <QuizEntry classId={classId} teacher={teacher} />
       <ChallengeCard challenge={feed.challenge} />
       <LeagueCard api={api} classId={classId} teacher={teacher} />
-      <Assignments classId={classId} teacher={teacher} />
+      <Assignments classId={classId} teacher={teacher} course={course} />
       {teacher && (
         <ChallengeEditor
           current={feed.challenge}

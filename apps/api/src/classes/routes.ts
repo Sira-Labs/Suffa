@@ -13,6 +13,7 @@
  * class:manage is scoped: the actor's class role comes from the database (only the class's
  * teachers, or admins), never from the request.
  */
+import { COURSES, type CourseId } from '@suffa/engagement';
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
 import type { AuthResolver } from '../auth/resolver.js';
@@ -30,7 +31,17 @@ export interface ClassRouteDeps {
 
 const Uuid = z.string().uuid();
 const Token = z.string().regex(/^[A-Za-z0-9_-]{20,64}$/);
-const NewClass = z.object({ name: z.string().trim().min(1).max(80) }).strict();
+// Only courses with content can be chosen (ADR-0025); the first one is the default.
+const NewClass = z
+  .object({
+    name: z.string().trim().min(1).max(80),
+    course: z
+      .string()
+      .refine((c) => COURSES.some((x) => x.id === c && x.available))
+      .transform((c) => c as CourseId)
+      .optional(),
+  })
+  .strict();
 
 const clientIp = (c: Context) => c.req.header('x-real-ip') ?? null;
 
@@ -55,7 +66,10 @@ export function createClassRoutes(deps: ClassRouteDeps): Hono<ActorEnv> {
     const parsed = NewClass.safeParse(body);
     if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
     const actor = { id: c.get('actor').id, ip: clientIp(c) };
-    return c.json(await deps.repo.create(actor, parsed.data.name), 201);
+    return c.json(
+      await deps.repo.create(actor, parsed.data.name, parsed.data.course),
+      201
+    );
   });
 
   app.post('/classes/:id/invite', manage, async (c) => {

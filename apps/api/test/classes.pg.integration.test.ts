@@ -144,6 +144,28 @@ describe.skipIf(!url)('Classes (Postgres)', () => {
     ]);
   });
 
+  it('a class follows one course: the default, or one that is offered', async () => {
+    const plain = await call('teacher', 'POST', '/classes', { name: 'Arabisch 1b' });
+    expect(await plain.json()).toMatchObject({ course: 'bayna-yadayk' });
+    const chosen = await call('teacher', 'POST', '/classes', {
+      name: 'Arabisch 1c',
+      course: 'bayna-yadayk',
+    });
+    expect(chosen.status).toBe(201);
+    // The Medina course is not offered until its content exists; unknown ones never are.
+    for (const course of ['madinah', 'klingonisch']) {
+      expect(
+        (await call('teacher', 'POST', '/classes', { name: 'X', course })).status
+      ).toBe(400);
+    }
+    const listed = (await (await call('teacher', 'GET', '/classes')).json()) as {
+      classes: { name: string; course: string }[];
+    };
+    expect(listed.classes.find((c) => c.name === 'Arabisch 1b')?.course).toBe(
+      'bayna-yadayk'
+    );
+  });
+
   it('only the class teacher manages it; learners cannot create classes', async () => {
     const { id } = await newClassWithInvite();
     expect((await call('otherTeacher', 'GET', `/classes/${id}/members`)).status).toBe(

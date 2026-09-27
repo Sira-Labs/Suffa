@@ -6,13 +6,29 @@ import { STAGES, stageState, type Stage, type StageState } from '@/services/enro
 import { content } from '@/content';
 import { unitMastery } from '@/services/stats';
 import { useEnrollmentStore, useSrsStore } from '@/state';
+import { useActiveCourse } from '@/services/courses';
+import { CourseSwitch } from './CourseSwitch';
+import { MadinahPath } from './MadinahPath';
 import { unitToContinue, useBookProgress, type UnitOverview } from './useBookProgress';
+
+/**
+ * The learning path of the learner's course (ADR-0025), with the course switch on top.
+ */
+export function Units() {
+  const course = useActiveCourse();
+  return (
+    <div className="stack" style={{ gap: '1rem' }}>
+      <CourseSwitch />
+      {course === 'madinah' ? <MadinahPath /> : <BaynaYadaykPath />}
+    </div>
+  );
+}
 
 /**
  * Level map (step 3): Book 1 = level 1, in two stages of eight units that each end with a
  * stage test; the unit to continue is highlighted on top.
  */
-export function Units() {
+function BaynaYadaykPath() {
   const { units } = useBookProgress();
   const exams = useEnrollmentStore((s) => s.exams);
   const cards = useSrsStore((s) => s.cards);

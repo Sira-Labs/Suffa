@@ -152,12 +152,17 @@ describe.skipIf(!url)('Classes (Postgres)', () => {
       course: 'bayna-yadayk',
     });
     expect(chosen.status).toBe(201);
-    // The Medina course is not offered until its content exists; unknown ones never are.
-    for (const course of ['madinah', 'klingonisch']) {
-      expect(
-        (await call('teacher', 'POST', '/classes', { name: 'X', course })).status
-      ).toBe(400);
-    }
+    const madinah = await call('teacher', 'POST', '/classes', {
+      name: 'Medina 1',
+      course: 'madinah',
+    });
+    expect(madinah.status).toBe(201);
+    expect(await madinah.json()).toMatchObject({ course: 'madinah' });
+    // Unknown courses are refused.
+    expect(
+      (await call('teacher', 'POST', '/classes', { name: 'X', course: 'klingonisch' }))
+        .status
+    ).toBe(400);
     const listed = (await (await call('teacher', 'GET', '/classes')).json()) as {
       classes: { name: string; course: string }[];
     };

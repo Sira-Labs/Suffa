@@ -64,19 +64,27 @@ and our own exercises, and no copied book texts or pictures in the repo.
 
 ## Rollout
 
-- **Stage 0 (this ADR):** the registry, `classes.course`, per-course validation of assignments,
-  and wider unit limits. Learners see nothing new.
-- **Stage 1:**
-  - Content is loaded per course: `content/courses/<id>/`, with the current bundle as
-    `bayna-yadayk`.
-  - A course switch for learners without a class; a class's course wins over it.
-  - The screens with hardcoded 16 read the course's units: units list, unit station, level
-    card, exam, library, video admin, YouTube unit guess.
-  - The Madinah Book 1 skeleton: 23 lessons with links to the book PDF, solutions, the author's
-    audio and videos.
+- **Stage 0 (done):** the registry, `classes.course`, per-course validation of assignments,
+  and wider unit limits.
+- **Stage 1 (done):**
+  - Both courses are offered. A course has an `exercises` flag: only courses with our own
+    exercises and a unit test accept unit assignments. The Medina course starts without one.
+  - The learner's own course is a synced setting, `settings.course` (migration 0032). The
+    learning path shows a course switch.
+  - A learner on the page of a class that follows another course is offered to switch to it.
+    The class does not switch them silently: a learner may be in classes of both courses.
+  - Teachers choose the course when they create a class.
+  - **The Medina path, Book 1:** 23 lessons (units 101–123). Each lesson opens the book PDF at
+    its start page (read from the PDF, `content/courses/madinah/book1.json`) and plays the
+    author's recording from archive.org (CSP `media-src` allows `archive.org`). The book's
+    solutions, English key, glossary, class notes and video lessons are linked. There is no
+    book text in the repo.
 - **Stage 2 and later:**
   - our own Madinah exercises, lesson by lesson;
   - stages and badges per course (`STAGES` gets a `course`);
+  - content loaded per course (`content/courses/<id>/`);
+  - the screens that still assume _bayna yadayk_ read the active course: dashboard level card,
+    unit station, exam, library, video admin, YouTube unit guess;
   - homework references;
   - the LLM prompts name the class's course instead of _bayna yadayk_.
 - **Only with the rights holders' permission:** book exercises and pictures, served from private

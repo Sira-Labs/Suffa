@@ -339,6 +339,10 @@ describe.skipIf(!dbUrl || !s3)(
       expect((await add({ kind: 'unit', ref: '3', title: 'x', dueAt: due })).status).toBe(
         400
       );
+      // The Medina course has no unit tests yet, so its lessons cannot be assigned either.
+      expect(
+        (await add({ kind: 'unit', ref: '101', title: 'x', dueAt: due })).status
+      ).toBe(400);
       await pool.query(`update classes set course = 'bayna-yadayk' where id = $1`, [
         classId,
       ]);

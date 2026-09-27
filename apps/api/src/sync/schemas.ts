@@ -5,6 +5,7 @@
  *
  * Mirrors `apps/web/src/types/*.ts` (camelCase columns).
  */
+import { COURSE_IDS, type CourseId } from '@suffa/engagement';
 import { z } from 'zod';
 
 const isoTimestamp = z.string().datetime({ offset: true });
@@ -71,6 +72,10 @@ export const SYNC_SCHEMAS = {
     weeklyGoal: z.union([z.literal(3), z.literal(5), z.literal(7)]).default(5),
     showTransliteration: z.boolean(),
     dialectNotes: z.boolean(),
+    // The learner's own course choice (ADR-0025). Older app versions do not send it; then
+    // the stored choice is kept (PRESERVED_WHEN_MISSING) and none means the default course.
+    // Null (no choice yet) comes back from pulls and is sent again: it keeps the stored value.
+    course: z.enum(COURSE_IDS as [CourseId, ...CourseId[]]).nullish(),
   }),
   user_vocab: z.object({
     ...base,
@@ -150,6 +155,15 @@ export function isSyncTable(name: string): name is SyncTableName {
 
 /** Columns stored as jsonb (serialised on write). */
 export const JSON_COLUMNS: ReadonlySet<string> = new Set(['units', 'items']);
+
+/**
+ * Columns newer app versions added: a record without them keeps the stored value, so an older
+ * device cannot reset what a newer one chose.
+ */
+export const PRESERVED_WHEN_MISSING: Partial<Record<SyncTableName, ReadonlySet<string>>> =
+  {
+    settings: new Set(['course']),
+  };
 
 /** Record columns per table, in schema order (user_id is added by the server). */
 export function columnsOf(table: SyncTableName): string[] {

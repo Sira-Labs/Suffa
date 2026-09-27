@@ -11,6 +11,7 @@ import type pg from 'pg';
 import {
   columnsOf,
   JSON_COLUMNS,
+  PRESERVED_WHEN_MISSING,
   type SyncRecord,
   type SyncTableName,
 } from './schemas.js';
@@ -131,13 +132,18 @@ export class PgSyncRepository implements SyncRepository {
       });
       return `(${placeholders.join(', ')})`;
     });
+    const t = quote(table);
+    const preserved = PRESERVED_WHEN_MISSING[table];
     const updates = [
       ...columns
         .filter((column) => column !== 'id')
-        .map((column) => `${quote(column)} = excluded.${quote(column)}`),
+        .map((column) =>
+          preserved?.has(column)
+            ? `${quote(column)} = coalesce(excluded.${quote(column)}, ${t}.${quote(column)})`
+            : `${quote(column)} = excluded.${quote(column)}`
+        ),
       `${quote(SYNCED_AT)} = date_trunc('milliseconds', clock_timestamp())`,
     ].join(', ');
-    const t = quote(table);
     const sql = `insert into ${t} (${insertColumns}) values ${rows.join(', ')}
       on conflict ("user_id", "id") do update set ${updates}
       where ${acceptIncoming(table, t)}

@@ -175,8 +175,10 @@ export function createAssignmentRoutes(deps: AssignmentRouteDeps): Hono<ActorEnv
     if (parsed.data.kind === 'unit') {
       const course = await deps.classes.course(c.req.param('id'));
       if (!course) return c.json({ error: 'not_found' }, 404);
-      // Units of another course would never count as done here (ADR-0025).
-      if (!courseById(course).units.includes(Number(parsed.data.ref))) {
+      // Units of another course would never count as done here, and a course without our own
+      // exercises has no unit test to pass yet (ADR-0025).
+      const { units, exercises } = courseById(course);
+      if (!exercises || !units.includes(Number(parsed.data.ref))) {
         return c.json({ error: 'invalid_body' }, 400);
       }
     }

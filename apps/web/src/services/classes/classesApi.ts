@@ -167,10 +167,10 @@ export class ClassesApi {
     return this.call<{ classes: ClassSummary[] }>('/api/v1/classes');
   }
 
-  create(name: string) {
+  create(name: string, course?: CourseId) {
     return this.call<ClassSummary>('/api/v1/classes', {
       method: 'POST',
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(course ? { name, course } : { name }),
     });
   }
 

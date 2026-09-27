@@ -128,6 +128,7 @@ export const defaultSettings: SettingsRecord = {
   weeklyGoal: 5,
   showTransliteration: true,
   dialectNotes: false,
+  course: 'bayna-yadayk',
   updated_at: new Date(0).toISOString(),
   deleted: false,
 };

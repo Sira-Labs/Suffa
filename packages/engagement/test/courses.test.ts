@@ -41,7 +41,11 @@ describe('courses', () => {
     expect(() => courseById('x' as never)).toThrow();
   });
 
-  it('offers the Medina course only once its content exists', () => {
-    expect(courseById('madinah').available).toBe(false);
+  it('offers the Medina course with links first, before its own exercises exist', () => {
+    expect(courseById('madinah')).toMatchObject({ available: true, exercises: false });
+    expect(courseById('bayna-yadayk')).toMatchObject({
+      available: true,
+      exercises: true,
+    });
   });
 });

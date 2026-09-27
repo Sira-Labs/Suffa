@@ -30,3 +30,22 @@ describe('settings sync schema: weekly goal (story 5.5)', () => {
     }
   });
 });
+
+describe('settings sync schema: course (ADR-0025)', () => {
+  it('leaves the course out for app versions that do not send it', () => {
+    expect(SYNC_SCHEMAS.settings.parse(settings).course).toBeUndefined();
+  });
+
+  it('accepts null, as pulled for a learner who never chose', () => {
+    expect(SYNC_SCHEMAS.settings.parse({ ...settings, course: null }).course).toBeNull();
+  });
+
+  it('accepts known courses only', () => {
+    expect(SYNC_SCHEMAS.settings.parse({ ...settings, course: 'madinah' }).course).toBe(
+      'madinah'
+    );
+    expect(SYNC_SCHEMAS.settings.safeParse({ ...settings, course: 'x' }).success).toBe(
+      false
+    );
+  });
+});

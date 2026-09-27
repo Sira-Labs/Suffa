@@ -98,6 +98,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
         weeklyGoal: 3,
         showTransliteration: false,
         dialectNotes: true,
+        course: 'madinah',
       },
       user_vocab: {
         id: 'uv-1',
@@ -205,6 +206,51 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
     });
     expect(records).toHaveLength(1);
     expect(records[0]).toMatchObject({ reps: 2, updated_at: '2026-09-23T11:00:00.000Z' });
+  });
+
+  it('keeps the chosen course when an older app version sends settings without it', async () => {
+    const settings = (at: string, extra: Record<string, unknown> = {}): SyncRecord => ({
+      id: 'user-settings',
+      updated_at: at,
+      deleted: false,
+      key: 'user-settings',
+      tashkilLevel: 'full',
+      theme: 'dark',
+      arabicFontScale: 1,
+      dailyGoal: 20,
+      weeklyGoal: 5,
+      showTransliteration: true,
+      dialectNotes: false,
+      ...extra,
+    });
+    const pullCourse = async () =>
+      (await repo.pull(BOB, 'settings', { since: null, afterId: null, limit: 10 }))
+        .records[0]?.course;
+    // A new row from an old version has no course: the default course applies.
+    await repo.upsert(BOB, 'settings', [settings('2026-09-23T09:00:00.000Z')]);
+    expect(await pullCourse()).toBeNull();
+    await repo.upsert(BOB, 'settings', [
+      settings('2026-09-23T10:00:00.000Z', { course: 'madinah' }),
+    ]);
+    // A device re-sends the null it pulled: the stored choice stays, too.
+    await repo.upsert(BOB, 'settings', [
+      settings('2026-09-23T10:30:00.000Z', { course: null }),
+    ]);
+    expect(await pullCourse()).toBe('madinah');
+    // Newer, but without the field: the other settings change, the course stays.
+    await repo.upsert(BOB, 'settings', [
+      settings('2026-09-23T11:00:00.000Z', { theme: 'light' }),
+    ]);
+    const { records } = await repo.pull(BOB, 'settings', {
+      since: null,
+      afterId: null,
+      limit: 10,
+    });
+    expect(records[0]).toMatchObject({ theme: 'light', course: 'madinah' });
+    await repo.upsert(BOB, 'settings', [
+      settings('2026-09-23T12:00:00.000Z', { course: 'bayna-yadayk' }),
+    ]);
+    expect(await pullCourse()).toBe('bayna-yadayk');
   });
 
   it('never lets a merely created card replace a reviewed one', async () => {

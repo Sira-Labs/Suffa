@@ -17,6 +17,8 @@ export interface Course {
   units: readonly number[];
   /** Offered to classes and learners (false while its content is being built). */
   available: boolean;
+  /** Its units have our own exercises and a unit test (assignments can ask for them). */
+  exercises: boolean;
 }
 
 const range = (from: number, to: number) =>
@@ -30,6 +32,7 @@ export const COURSES: readonly Course[] = [
     textbook: 'العربية بين يديك – Buch 1',
     units: range(1, 16),
     available: true,
+    exercises: true,
   },
   {
     id: 'madinah',
@@ -37,7 +40,10 @@ export const COURSES: readonly Course[] = [
     textbook: 'دروس اللغة العربية – Buch 1',
     // Book 1 has 23 lessons; book n will take (n)01–(n)99.
     units: range(101, 123),
-    available: false,
+    // Offered with links to the book, the solutions and the author's audio per lesson; our own
+    // exercises follow lesson by lesson (ADR-0025, stage 2).
+    available: true,
+    exercises: false,
   },
 ];
 

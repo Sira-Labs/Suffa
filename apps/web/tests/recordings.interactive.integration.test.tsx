@@ -221,4 +221,26 @@ describe('Interactive recordings (integration)', () => {
       body: { kind: 'unit', ref: '5', title: 'Einheit 5: Test bestehen' },
     });
   });
+
+  it('offers the units of the class course (Medina lessons 101+, shown as Lektion)', async () => {
+    const router = createMemoryRouter(
+      [
+        {
+          path: '/',
+          element: <Assignments classId={CLASS} teacher course="madinah" />,
+        },
+      ],
+      { initialEntries: ['/'] }
+    );
+    render(<RouterProvider router={router} />);
+    const form = await screen.findByRole('form', { name: 'Aufgabe stellen' });
+    const select = within(form).getByLabelText('Aufgabe');
+    expect(within(select).queryByRole('option', { name: 'Einheit 1' })).toBeNull();
+    await userEvent.selectOptions(select, 'unit:103');
+    await userEvent.click(within(form).getByRole('button', { name: 'Aufgabe stellen' }));
+    const post = requests.filter((r) => r.method === 'POST').at(-1);
+    expect(post).toMatchObject({
+      body: { kind: 'unit', ref: '103', title: 'Lektion 3: Test bestehen' },
+    });
+  });
 });

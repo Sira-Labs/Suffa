@@ -84,6 +84,7 @@ const classRepo: ClassRepository = {
   create: async () => ({
     id: 'c',
     name: 'x',
+    course: 'bayna-yadayk',
     classRole: 'teacher',
     status: 'active',
     studentCount: 0,
@@ -92,6 +93,7 @@ const classRepo: ClassRepository = {
   }),
   listFor: async () => [],
   scope: async () => ({ classRole: null }),
+  course: async () => null,
   createInvite: async () => ({ token: 't', expiresAt: '2026-10-08T00:00:00.000Z' }),
   members: async () => [],
   approve: async () => false,

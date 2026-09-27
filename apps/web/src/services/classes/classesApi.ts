@@ -1,4 +1,5 @@
 /** Client for classes and invites (story 4.3). */
+import type { CourseId } from '@suffa/engagement';
 import { apiRequest, type Fetch } from '@/services/api/request';
 
 export type ClassRole = 'teacher' | 'student';
@@ -7,6 +8,8 @@ export type MemberStatus = 'pending' | 'active';
 export interface ClassSummary {
   id: string;
   name: string;
+  /** The textbook stream the class follows (ADR-0025); older servers send none. */
+  course?: CourseId;
   classRole: ClassRole;
   status: MemberStatus;
   studentCount: number;

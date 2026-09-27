@@ -11,6 +11,7 @@
  *   POST   /tutor/grade                    { kind, task, answer, unit? } → the grade
  *   GET    /tutor/grades                   → { grades }   (the learner's own, newest first)
  */
+import { MAX_UNIT } from '@suffa/engagement';
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import type pg from 'pg';
@@ -66,7 +67,7 @@ const Turn = z
     message: z.string().trim().min(1).max(2000),
     context: z
       .object({
-        unit: z.number().int().min(1).max(100).optional(),
+        unit: z.number().int().min(1).max(MAX_UNIT).optional(),
         mediaId: z.string().uuid().optional(),
         atSec: z
           .number()
@@ -89,7 +90,7 @@ const GradeBody = z
     kind: z.enum(['writing', 'speech']),
     task: z.string().trim().max(500).default(''),
     answer: z.string().trim().min(1).max(3000),
-    unit: z.number().int().min(1).max(100).optional(),
+    unit: z.number().int().min(1).max(MAX_UNIT).optional(),
   })
   .strict();
 

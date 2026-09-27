@@ -4,6 +4,7 @@
  * audit-logged in the same transaction.
  */
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 import type pg from 'pg';
 import { writeAudit } from '../audit/log.js';
 import type { ClassScope } from '../authz/policies.js';
@@ -14,6 +15,8 @@ export type MemberStatus = 'pending' | 'active';
 export interface ClassSummary {
   id: string;
   name: string;
+  /** The textbook stream the class follows (ADR-0025). */
+  course: CourseId;
   classRole: ClassRole;
   status: MemberStatus;
   /** Active learners (for teachers). */
@@ -54,10 +57,12 @@ export function hashToken(token: string): string {
 }
 
 export interface ClassRepository {
-  create(actor: Actor, name: string): Promise<ClassSummary>;
+  create(actor: Actor, name: string, course?: CourseId): Promise<ClassSummary>;
   listFor(userId: string): Promise<ClassSummary[]>;
   /** How the user relates to the class (for the policies). */
   scope(classId: string, userId: string): Promise<ClassScope>;
+  /** The course the class follows; null for an unknown class. */
+  course(classId: string): Promise<CourseId | null>;
   /** A new invite token (revokes the old one); returned once, stored hashed. */
   createInvite(
     actor: Actor,
@@ -93,12 +98,16 @@ export class PgClassRepository implements ClassRepository {
     }
   }
 
-  async create(actor: Actor, name: string): Promise<ClassSummary> {
+  async create(
+    actor: Actor,
+    name: string,
+    course: CourseId = DEFAULT_COURSE
+  ): Promise<ClassSummary> {
     const id = randomUUID();
     await this.tx(async (client) => {
       await client.query(
-        'insert into classes (id, name, created_by) values ($1, $2, $3)',
-        [id, name, actor.id]
+        'insert into classes (id, name, created_by, course) values ($1, $2, $3, $4)',
+        [id, name, actor.id, course]
       );
       await client.query(
         `insert into class_members (class_id, user_id, class_role, status, approved_at)
@@ -110,7 +119,7 @@ export class PgClassRepository implements ClassRepository {
         action: 'class.created',
         targetType: 'class',
         targetId: id,
-        details: { name },
+        details: { name, course },
         ipAddress: actor.ip,
       });
     });
@@ -122,13 +131,14 @@ export class PgClassRepository implements ClassRepository {
     const { rows } = await this.pool.query<{
       id: string;
       name: string;
+      course: CourseId;
       class_role: ClassRole;
       status: MemberStatus;
       student_count: string;
       pending_count: string;
       created_at: Date;
     }>(
-      `select c.id, c.name, m.class_role, m.status, c.created_at,
+      `select c.id, c.name, c.course, m.class_role, m.status, c.created_at,
               (select count(*) from class_members s
                 where s.class_id = c.id and s.class_role = 'student' and s.status = 'active')
                 as student_count,
@@ -142,6 +152,7 @@ export class PgClassRepository implements ClassRepository {
     return rows.map((r) => ({
       id: r.id,
       name: r.name,
+      course: r.course,
       classRole: r.class_role,
       status: r.status,
       // Learners do not see who else is in the class (ADR-0009).
@@ -158,6 +169,14 @@ export class PgClassRepository implements ClassRepository {
       [classId, userId]
     );
     return { classRole: rows[0]?.class_role ?? null };
+  }
+
+  async course(classId: string): Promise<CourseId | null> {
+    const { rows } = await this.pool.query<{ course: CourseId }>(
+      'select course from classes where id = $1',
+      [classId]
+    );
+    return rows[0]?.course ?? null;
   }
 
   async createInvite(actor: Actor, classId: string) {

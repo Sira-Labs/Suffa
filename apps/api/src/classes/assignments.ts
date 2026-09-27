@@ -4,12 +4,14 @@
  * synced data: a passed unit test (≥ 80 %) or a recording heard to 85 %.
  */
 import { randomUUID } from 'node:crypto';
+import { courseById } from '@suffa/engagement';
 import { Hono, type Context } from 'hono';
 import type pg from 'pg';
 import { z } from 'zod';
 import type { AuthResolver } from '../auth/resolver.js';
 import { authorize, type ActorEnv, type AuthorizeLog } from '../authz/middleware.js';
-import type { Actor as PolicyActor, ClassScope } from '../authz/policies.js';
+import type { Actor as PolicyActor } from '../authz/policies.js';
+import type { ClassRepository } from './repository.js';
 
 export interface Assignment {
   id: string;
@@ -117,7 +119,7 @@ export class PgAssignmentRepository implements AssignmentRepository {
 }
 
 export interface AssignmentRouteDeps {
-  classes: { scope(classId: string, userId: string): Promise<ClassScope> };
+  classes: Pick<ClassRepository, 'scope' | 'course'>;
   repo: AssignmentRepository;
   auth: AuthResolver;
   log: AuthorizeLog;
@@ -132,7 +134,8 @@ const NewAssignment = z
     dueAt: z.string().datetime({ offset: true }),
   })
   .strict()
-  .refine((a) => a.kind !== 'unit' || /^(?:[1-9]|1[0-6])$/.test(a.ref), 'unit 1–16')
+  // A unit number; whether it belongs to the class's course is checked in the route.
+  .refine((a) => a.kind !== 'unit' || /^[1-9]\d{0,2}$/.test(a.ref), 'unit number')
   .refine((a) => a.kind !== 'recording' || Uuid.safeParse(a.ref).success, 'recording id');
 
 /**
@@ -169,6 +172,14 @@ export function createAssignmentRoutes(deps: AssignmentRouteDeps): Hono<ActorEnv
     }
     const parsed = NewAssignment.safeParse(body);
     if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+    if (parsed.data.kind === 'unit') {
+      const course = await deps.classes.course(c.req.param('id'));
+      if (!course) return c.json({ error: 'not_found' }, 404);
+      // Units of another course would never count as done here (ADR-0025).
+      if (!courseById(course).units.includes(Number(parsed.data.ref))) {
+        return c.json({ error: 'invalid_body' }, 400);
+      }
+    }
     const id = await deps.repo.create(c.req.param('id'), c.get('actor').id, parsed.data);
     return id ? c.json({ id }, 201) : c.json({ error: 'not_found' }, 404);
   });

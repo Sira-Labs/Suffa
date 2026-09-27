@@ -5,6 +5,12 @@
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  DEFAULT_COURSE,
+  courseById,
+  unitLabelNumber,
+  type CourseId,
+} from '@suffa/engagement';
 import { InteractiveApi, type Assignment } from '@/services/media/interactiveApi';
 import { MediaApi, type MediaItem } from '@/services/media/mediaApi';
 
@@ -30,7 +36,20 @@ export function endOfDay(date: string): string {
   return d.toISOString();
 }
 
-export function Assignments({ classId, teacher }: { classId: string; teacher: boolean }) {
+/** "Einheit 3" in the first course, "Lektion 3" in the Medina course (unit 103). */
+export function unitName(course: CourseId, unit: number): string {
+  return `${course === 'madinah' ? 'Lektion' : 'Einheit'} ${unitLabelNumber(unit)}`;
+}
+
+export function Assignments({
+  classId,
+  teacher,
+  course = DEFAULT_COURSE,
+}: {
+  classId: string;
+  teacher: boolean;
+  course?: CourseId;
+}) {
   const api = useMemo(() => new InteractiveApi(), []);
   const [items, setItems] = useState<Assignment[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -51,7 +70,9 @@ export function Assignments({ classId, teacher }: { classId: string; teacher: bo
       <h2 id="assignments-title" className="eyebrow">
         Klassenaufgaben
       </h2>
-      {teacher && <AssignmentForm api={api} classId={classId} onAdded={load} />}
+      {teacher && (
+        <AssignmentForm api={api} classId={classId} course={course} onAdded={load} />
+      )}
       {message && <span className="feedback-bad">{message}</span>}
       {items?.length === 0 && (
         <p className="muted" style={{ margin: 0 }}>
@@ -99,15 +120,18 @@ export function Assignments({ classId, teacher }: { classId: string; teacher: bo
 function AssignmentForm({
   api,
   classId,
+  course,
   onAdded,
 }: {
   api: InteractiveApi;
   classId: string;
+  course: CourseId;
   onAdded: () => Promise<void>;
 }) {
+  const units = courseById(course).units;
   const mediaApi = useMemo(() => new MediaApi(), []);
   const [recordings, setRecordings] = useState<MediaItem[]>([]);
-  const [choice, setChoice] = useState('unit:1');
+  const [choice, setChoice] = useState(`unit:${units[0]}`);
   const [due, setDue] = useState(() =>
     new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10)
   );
@@ -128,7 +152,7 @@ function AssignmentForm({
     const [kind, ref] = choice.split(':') as ['unit' | 'recording', string];
     const title =
       kind === 'unit'
-        ? `Einheit ${ref}: Test bestehen`
+        ? `${unitName(course, Number(ref))}: Test bestehen`
         : `Anhören: ${recordings.find((r) => r.id === ref)?.title ?? 'Aufnahme'}`;
     const result = await api.addAssignment(classId, {
       kind,
@@ -153,10 +177,12 @@ function AssignmentForm({
         value={choice}
         onChange={(e) => setChoice(e.target.value)}
       >
-        <optgroup label="Einheit (Test bestehen)">
-          {Array.from({ length: 16 }, (_, i) => (
-            <option key={i} value={`unit:${i + 1}`}>
-              Einheit {i + 1}
+        <optgroup
+          label={`${course === 'madinah' ? 'Lektion' : 'Einheit'} (Test bestehen)`}
+        >
+          {units.map((u) => (
+            <option key={u} value={`unit:${u}`}>
+              {unitName(course, u)}
             </option>
           ))}
         </optgroup>

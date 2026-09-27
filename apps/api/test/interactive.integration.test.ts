@@ -331,6 +331,17 @@ describe.skipIf(!dbUrl || !s3)(
       expect(
         (await add({ kind: 'unit', ref: '17', title: 'x', dueAt: due })).status
       ).toBe(400);
+      // Only units of the class's course (ADR-0025): Medina lessons are 101+.
+      expect(
+        (await add({ kind: 'unit', ref: '101', title: 'x', dueAt: due })).status
+      ).toBe(400);
+      await pool.query(`update classes set course = 'madinah' where id = $1`, [classId]);
+      expect((await add({ kind: 'unit', ref: '3', title: 'x', dueAt: due })).status).toBe(
+        400
+      );
+      await pool.query(`update classes set course = 'bayna-yadayk' where id = $1`, [
+        classId,
+      ]);
 
       // Amina passed unit 3 and heard the recording; Bilal did nothing.
       const sync = new PgSyncRepository(pool);

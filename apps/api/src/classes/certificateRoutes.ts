@@ -6,6 +6,7 @@
  *   DELETE /classes/:id/certificates/:certificateId   → 204                        (class:manage)
  *   GET    /certificates                              → the caller's own          (profile:read)
  */
+import { MAX_UNIT } from '@suffa/engagement';
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
 import type { AuthResolver } from '../auth/resolver.js';
@@ -23,7 +24,7 @@ export interface CertificateRouteDeps {
 
 const Uuid = z.string().uuid();
 const AwardBody = z
-  .object({ userId: z.string().uuid(), unit: z.number().int().min(1).max(99) })
+  .object({ userId: z.string().uuid(), unit: z.number().int().min(1).max(MAX_UNIT) })
   .strict();
 
 const STATUS = {

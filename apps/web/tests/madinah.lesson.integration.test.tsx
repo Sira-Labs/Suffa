@@ -45,27 +45,45 @@ describe('Medina lesson page', () => {
     expect(screen.getByRole('link', { name: 'Lektion 3 →' })).toBeTruthy();
   });
 
-  it('opens the book in the archive.org reader at the lesson page, only on request', async () => {
+  it('embeds the book PDF at the lesson page on request where the browser shows PDFs', async () => {
+    Object.defineProperty(navigator, 'pdfViewerEnabled', {
+      value: true,
+      configurable: true,
+    });
     renderAt('/units/madinah/2');
     const book = await screen.findByRole('region', { name: 'Im Buch' });
     expect(within(book).queryByTitle('Buch, Seite 9')).toBeNull();
     await userEvent.click(within(book).getByRole('button', { name: 'Buch anzeigen' }));
     expect(within(book).getByTitle('Buch, Seite 9')).toHaveAttribute(
       'src',
-      'https://archive.org/embed/madinah_arabic__dr_v_abdur_rahim/book_1/madinah_arabic_1.pdf/page/n8/mode/1up'
+      'https://archive.org/download/madinah_arabic__dr_v_abdur_rahim/book_1/madinah_arabic_1.pdf#page=9'
     );
     expect(
-      within(book).getByRole('link', { name: 'Bei archive.org öffnen' })
-    ).toHaveAttribute(
-      'href',
-      expect.stringContaining('/details/madinah_arabic__dr_v_abdur_rahim/')
+      within(book).getByRole('link', { name: 'PDF bei AbdurRahman.org' })
+    ).toHaveAttribute('href', expect.stringMatching(/#page=9$/));
+    // The next lesson starts with the book closed again.
+    await userEvent.click(screen.getByRole('link', { name: 'Lektion 3 →' }));
+    const next = await screen.findByRole('region', { name: 'Im Buch' });
+    expect(await within(next).findByText('Im Buch (ab S. 11)')).toBeTruthy();
+    expect(within(next).queryByTitle(/Buch, Seite/)).toBeNull();
+    expect(within(next).getByRole('button', { name: 'Buch anzeigen' })).toHaveAttribute(
+      'aria-expanded',
+      'false'
     );
-    expect(within(book).getByRole('link', { name: 'als PDF' })).toHaveAttribute(
+  });
+
+  it('opens the book in the phone PDF viewer where it cannot be embedded', async () => {
+    Object.defineProperty(navigator, 'pdfViewerEnabled', {
+      value: false,
+      configurable: true,
+    });
+    renderAt('/units/madinah/2');
+    const book = await screen.findByRole('region', { name: 'Im Buch' });
+    expect(within(book).queryByRole('button', { name: 'Buch anzeigen' })).toBeNull();
+    expect(within(book).getByRole('link', { name: 'Buch öffnen' })).toHaveAttribute(
       'href',
-      expect.stringMatching(/#page=9$/)
+      expect.stringMatching(/archive\.org\/download\/.*madinah_arabic_1\.pdf#page=9$/)
     );
-    await userEvent.click(within(book).getByRole('button', { name: 'Buch schließen' }));
-    expect(within(book).queryByTitle('Buch, Seite 9')).toBeNull();
   });
 
   it('points to the book for lessons without own content yet, and handles unknown ones', async () => {

@@ -83,10 +83,11 @@ and our own exercises, and no copied book texts or pictures in the repo.
   - Each Medina lesson has its own page (`/units/madinah/<n>`). It shows our own content: the
     lesson's new words (facts) with German meanings, grammar in our own words with our own
     examples (`content/courses/madinah/book1-lessons.json`, lessons 1–5, draft).
-  - The page also has the author's recording and the book in the archive.org BookReader,
-    embedded at the lesson's page on request. archive.org holds the identical PDF, allows
-    embedding and works on phones; CSP `frame-src` allows `archive.org`. Links to archive.org
-    and the PDF remain as a fallback.
+  - The page also has the author's recording and the book at the lesson's page: the PDF from
+    archive.org (the identical file, which names Book 1 for sure, unlike the item's BookReader
+    that holds many PDFs). Where the browser shows PDFs itself (`navigator.pdfViewerEnabled`),
+    it is embedded on request; on phones it opens in the phone's PDF viewer. CSP `frame-src`
+    allows `archive.org` and its download hosts (`*.archive.org`).
   - A page "Quellen & Lizenzen" (`/sources`) names every source with its terms.
   - Word ids are `md-<unit>-<n>`, so the words can become SRS cards later without new ids.
 - **Stage 2 and later:**

@@ -1,0 +1,101 @@
+# ADR-0025: Courses — parallel textbook streams, one per class
+
+- Status: accepted
+- Date: 2026-09-27
+- Builds on: ADR-0003 (content loading), ADR-0023 (content sources, licensing and packs)
+
+## Context
+
+Suffa's learning path follows one textbook: _al-ʿArabiyya bayna yadayk_, Book 1, with 16 units.
+The owner decided to add a second stream built on the Madinah course (_Durus al-Lughah
+al-ʿArabiyyah_ by Dr. V. Abdur Rahim, Book 1 with 23 lessons, later Books 2 and 3). Teachers
+choose one of the two for a class; learners without a class choose for themselves.
+
+Today the single book is assumed in many places:
+
+- **Content.** `apps/web/src/content` is one bundle of `einheit-01…16.json`, used as
+  module-level singletons by about 30 web modules and loaded again by the API's
+  `ContentCatalog`.
+- **Stored ids.** They carry a bare unit number and no course:
+  - practice records `unit:skill:item`;
+  - enrollments `b1-uN`;
+  - exam results `units: [n]`;
+  - certificates `unit`;
+  - class assignments `ref = "n"`.
+- **Units, stages and badges.** `packages/engagement/src/units.ts` fixes 16 units and two stages.
+- **Hardcoded numbers and names.** "16" and the book's name appear in several screens and in the
+  LLM prompts.
+
+Permission from the rights holders of both books has been requested (see
+`docs/plan/content-plan.md`). Until it is given, ADR-0023 applies: links, our own word lists
+and our own exercises, and no copied book texts or pictures in the repo.
+
+## Decision
+
+1. **A course registry** lives in `packages/engagement/src/courses.ts`, shared by web and API.
+   Each course has:
+   - an `id`: `bayna-yadayk` or `madinah`;
+   - a name and the textbook's title;
+   - its unit numbers in learning order;
+   - an `available` flag, which says whether classes and learners may choose it yet.
+2. **Each course owns a band of unit numbers.**
+   - _bayna yadayk_ keeps units 1–16.
+   - The Madinah course uses `n01–n99` for Book n, so Book 1 is units 101–123.
+   - Unit 0 stays reserved for course-independent practice: the alphabet course and recording
+     checkpoints.
+   - The limit is `MAX_UNIT = 999`.
+
+   Every id that already contains a unit number therefore stays unique across courses, with no
+   new column and no data migration. Nothing stored before this ADR changes meaning.
+
+3. **Learners see numbers inside their course.** `unitLabelNumber(103)` is 3, shown as
+   "Lektion 3" in the Madinah course and "Einheit n" in _bayna yadayk_.
+4. **Every class follows exactly one course.** The column `classes.course` is added by
+   migration 0031; existing classes get `bayna-yadayk`.
+   - A teacher picks the course when creating the class. Only `available` courses are accepted.
+   - The class list returns the course.
+   - Class assignments accept only units of the class's course, because units of another course
+     could never count as done there.
+5. **Content ids stay unique across courses.** A new course prefixes its own content ids (for
+   example `md-` for Madinah vocabulary), so SRS cards and daily check-ins cannot collide with
+   _bayna yadayk_ ids, which stay unprefixed. Ids are never reused (ADR-0023).
+6. **Unit limits in validators and tables** follow `MAX_UNIT`: certificates, video lessons and the
+   tutor routes. Sync already accepted up to 1000.
+
+## Rollout
+
+- **Stage 0 (this ADR):** the registry, `classes.course`, per-course validation of assignments,
+  and wider unit limits. Learners see nothing new.
+- **Stage 1:**
+  - Content is loaded per course: `content/courses/<id>/`, with the current bundle as
+    `bayna-yadayk`.
+  - A course switch for learners without a class; a class's course wins over it.
+  - The screens with hardcoded 16 read the course's units: units list, unit station, level
+    card, exam, library, video admin, YouTube unit guess.
+  - The Madinah Book 1 skeleton: 23 lessons with links to the book PDF, solutions, the author's
+    audio and videos.
+- **Stage 2 and later:**
+  - our own Madinah exercises, lesson by lesson;
+  - stages and badges per course (`STAGES` gets a `course`);
+  - homework references;
+  - the LLM prompts name the class's course instead of _bayna yadayk_.
+- **Only with the rights holders' permission:** book exercises and pictures, served from private
+  storage and never from the repo.
+
+## Alternatives
+
+- **A `course` column on every progress table.** This is cleaner in theory. It would need a
+  data migration of every learner's records, changes to the sync protocol and a new unique key
+  in several tables. The number bands give the same uniqueness with none of that.
+- **Separate deployments per course.** They would duplicate everything and split classes and
+  teachers who use both books.
+- **Replacing _bayna yadayk_ with the Madinah course.** Teachers already use _bayna yadayk_; the
+  owner wants both streams.
+
+## Consequences
+
+- Code that asks "which course is this unit in" calls `courseOfUnit`; code that lists units
+  reads `courseById(id).units`, never a literal range.
+- A class cannot switch course while it has unit assignments without losing their meaning. A
+  course change for existing classes is left for later, admin-only if ever needed.
+- Book 10 of any course would not fit the bands. No course in sight has more than three books.

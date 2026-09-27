@@ -42,3 +42,4 @@
 | [0022](adr/0022-pronunciation-assessment-arabic-speech-models.md) | Pronunciation assessment with Arabic speech models            | proposed                                   |
 | [0023](adr/0023-content-sources-licensing-and-packs.md)           | Content sources, licensing and content packs                  | proposed                                   |
 | [0024](adr/0024-separate-production-server.md)                    | Separate production server; this host is staging and tools    | accepted                                   |
+| [0025](adr/0025-courses.md)                                       | Courses: parallel textbook streams, one per class             | accepted                                   |

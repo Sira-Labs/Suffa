@@ -74,7 +74,8 @@ export const SYNC_SCHEMAS = {
     dialectNotes: z.boolean(),
     // The learner's own course choice (ADR-0025). Older app versions do not send it; then
     // the stored choice is kept (PRESERVED_WHEN_MISSING) and none means the default course.
-    course: z.enum(COURSE_IDS as [CourseId, ...CourseId[]]).optional(),
+    // Null (no choice yet) comes back from pulls and is sent again: it keeps the stored value.
+    course: z.enum(COURSE_IDS as [CourseId, ...CourseId[]]).nullish(),
   }),
   user_vocab: z.object({
     ...base,

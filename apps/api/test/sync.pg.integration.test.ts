@@ -232,6 +232,11 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
     await repo.upsert(BOB, 'settings', [
       settings('2026-09-23T10:00:00.000Z', { course: 'madinah' }),
     ]);
+    // A device re-sends the null it pulled: the stored choice stays, too.
+    await repo.upsert(BOB, 'settings', [
+      settings('2026-09-23T10:30:00.000Z', { course: null }),
+    ]);
+    expect(await pullCourse()).toBe('madinah');
     // Newer, but without the field: the other settings change, the course stays.
     await repo.upsert(BOB, 'settings', [
       settings('2026-09-23T11:00:00.000Z', { theme: 'light' }),

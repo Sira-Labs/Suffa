@@ -36,6 +36,10 @@ describe('settings sync schema: course (ADR-0025)', () => {
     expect(SYNC_SCHEMAS.settings.parse(settings).course).toBeUndefined();
   });
 
+  it('accepts null, as pulled for a learner who never chose', () => {
+    expect(SYNC_SCHEMAS.settings.parse({ ...settings, course: null }).course).toBeNull();
+  });
+
   it('accepts known courses only', () => {
     expect(SYNC_SCHEMAS.settings.parse({ ...settings, course: 'madinah' }).course).toBe(
       'madinah'

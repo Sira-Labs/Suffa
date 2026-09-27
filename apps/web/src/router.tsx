@@ -21,6 +21,8 @@ import { Alphabet, AlphabetLessonPage } from './modules/alphabet';
 import { Discover } from './modules/discover';
 import { FocusReview } from './modules/review';
 import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
+import { MadinahLessonPage } from './modules/units/MadinahLesson';
+import { Sources } from './modules/sources';
 import { Admin } from './modules/admin';
 import { SignIn } from './modules/account';
 import { Classes, Join } from './modules/classes';
@@ -53,6 +55,7 @@ export const router = createBrowserRouter([
       { path: 'library', element: <Library /> },
       { path: 'login', element: <SignIn /> },
       { path: 'settings', element: <Settings /> },
+      { path: 'sources', element: <Sources /> },
       { path: 'admin', element: <Admin /> },
       { path: 'classes', element: <Classes /> },
       { path: 'classes/:id', element: <ClassPage /> },
@@ -68,6 +71,7 @@ export const router = createBrowserRouter([
       { path: 'discover', element: <Discover /> },
       { path: 'review', element: <FocusReview /> },
       { path: 'units', element: <Units /> },
+      { path: 'units/madinah/:lesson', element: <MadinahLessonPage /> },
       { path: 'units/:unit', element: <UnitPath /> },
       { path: 'units/:unit/:station', element: <UnitStation /> },
       { path: 'milestone/:stage', element: <Milestone /> },

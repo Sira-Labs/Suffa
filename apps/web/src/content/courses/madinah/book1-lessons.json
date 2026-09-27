@@ -1,0 +1,685 @@
+{
+  "course": "madinah",
+  "book": 1,
+  "note": "Own content (ADR-0023, ADR-0025): the lesson's new words are facts; the German meanings, explanations and example sentences are written by Suffa. Draft until a teacher has reviewed it.",
+  "lessons": [
+    {
+      "unit": 101,
+      "lesson": 1,
+      "topic": "Was ist das? Wer ist das?",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-101-01",
+          "ar": "بَيْتٌ",
+          "de": "Haus"
+        },
+        {
+          "id": "md-101-02",
+          "ar": "مَسْجِدٌ",
+          "de": "Moschee"
+        },
+        {
+          "id": "md-101-03",
+          "ar": "بَابٌ",
+          "de": "Tür"
+        },
+        {
+          "id": "md-101-04",
+          "ar": "كِتَابٌ",
+          "de": "Buch"
+        },
+        {
+          "id": "md-101-05",
+          "ar": "قَلَمٌ",
+          "de": "Stift"
+        },
+        {
+          "id": "md-101-06",
+          "ar": "مِفْتَاحٌ",
+          "de": "Schlüssel"
+        },
+        {
+          "id": "md-101-07",
+          "ar": "مَكْتَبٌ",
+          "de": "Schreibtisch"
+        },
+        {
+          "id": "md-101-08",
+          "ar": "سَرِيرٌ",
+          "de": "Bett"
+        },
+        {
+          "id": "md-101-09",
+          "ar": "كُرْسِيٌّ",
+          "de": "Stuhl"
+        },
+        {
+          "id": "md-101-10",
+          "ar": "قَمِيصٌ",
+          "de": "Hemd"
+        },
+        {
+          "id": "md-101-11",
+          "ar": "نَجْمٌ",
+          "de": "Stern"
+        },
+        {
+          "id": "md-101-12",
+          "ar": "مِنْدِيلٌ",
+          "de": "Taschentuch"
+        },
+        {
+          "id": "md-101-13",
+          "ar": "كَلْبٌ",
+          "de": "Hund"
+        },
+        {
+          "id": "md-101-14",
+          "ar": "قِطٌّ",
+          "de": "Katze"
+        },
+        {
+          "id": "md-101-15",
+          "ar": "حِمَارٌ",
+          "de": "Esel"
+        },
+        {
+          "id": "md-101-16",
+          "ar": "حِصَانٌ",
+          "de": "Pferd"
+        },
+        {
+          "id": "md-101-17",
+          "ar": "جَمَلٌ",
+          "de": "Kamel"
+        },
+        {
+          "id": "md-101-18",
+          "ar": "دِيكٌ",
+          "de": "Hahn"
+        },
+        {
+          "id": "md-101-19",
+          "ar": "وَلَدٌ",
+          "de": "Junge"
+        },
+        {
+          "id": "md-101-20",
+          "ar": "رَجُلٌ",
+          "de": "Mann"
+        },
+        {
+          "id": "md-101-21",
+          "ar": "طَبِيبٌ",
+          "de": "Arzt"
+        },
+        {
+          "id": "md-101-22",
+          "ar": "طَالِبٌ",
+          "de": "Student, Schüler"
+        },
+        {
+          "id": "md-101-23",
+          "ar": "تَاجِرٌ",
+          "de": "Händler"
+        },
+        {
+          "id": "md-101-24",
+          "ar": "هٰذَا",
+          "de": "dies, das (hier)"
+        },
+        {
+          "id": "md-101-25",
+          "ar": "مَا",
+          "de": "was?"
+        },
+        {
+          "id": "md-101-26",
+          "ar": "مَنْ",
+          "de": "wer?"
+        },
+        {
+          "id": "md-101-27",
+          "ar": "نَعَمْ",
+          "de": "ja"
+        },
+        {
+          "id": "md-101-28",
+          "ar": "لَا",
+          "de": "nein"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "„Das ist …“ ohne „ist“",
+          "text": "Im Arabischen gibt es im Präsens kein „ist“. هٰذَا (dies) und das Nomen bilden schon einen ganzen Satz.",
+          "examples": [
+            {
+              "ar": "هٰذَا قَلَمٌ.",
+              "de": "Das ist ein Stift."
+            },
+            {
+              "ar": "هٰذَا طَبِيبٌ.",
+              "de": "Das ist ein Arzt."
+            }
+          ]
+        },
+        {
+          "title": "Die Endung -un: „ein“",
+          "text": "Das doppelte Vokalzeichen am Wortende (Tanwīn, gesprochen -un) zeigt, dass das Nomen unbestimmt ist: كِتَابٌ = „ein Buch“.",
+          "examples": [
+            {
+              "ar": "كِتَابٌ",
+              "de": "ein Buch"
+            },
+            {
+              "ar": "كُرْسِيٌّ",
+              "de": "ein Stuhl"
+            }
+          ]
+        },
+        {
+          "title": "Fragen: مَا, مَنْ und أَ",
+          "text": "مَا fragt nach Dingen und Tieren, مَنْ nach Menschen. Ein أَ vor dem Satz macht daraus eine Ja/Nein-Frage; die Antwort ist نَعَمْ oder لَا.",
+          "examples": [
+            {
+              "ar": "مَا هٰذَا؟ هٰذَا مِفْتَاحٌ.",
+              "de": "Was ist das? Das ist ein Schlüssel."
+            },
+            {
+              "ar": "مَنْ هٰذَا؟ هٰذَا تَاجِرٌ.",
+              "de": "Wer ist das? Das ist ein Händler."
+            },
+            {
+              "ar": "أَهٰذَا بَابٌ؟ لَا، هٰذَا مَكْتَبٌ.",
+              "de": "Ist das eine Tür? Nein, das ist ein Schreibtisch."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 102,
+      "lesson": 2,
+      "topic": "Das dort: ذٰلِكَ",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-102-01",
+          "ar": "ذٰلِكَ",
+          "de": "jenes, das (dort)"
+        },
+        {
+          "id": "md-102-02",
+          "ar": "وَ",
+          "de": "und"
+        },
+        {
+          "id": "md-102-03",
+          "ar": "إِمَامٌ",
+          "de": "Imam, Vorbeter"
+        },
+        {
+          "id": "md-102-04",
+          "ar": "حَجَرٌ",
+          "de": "Stein"
+        },
+        {
+          "id": "md-102-05",
+          "ar": "سُكَّرٌ",
+          "de": "Zucker"
+        },
+        {
+          "id": "md-102-06",
+          "ar": "لَبَنٌ",
+          "de": "Milch"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Nah und fern: هٰذَا und ذٰلِكَ",
+          "text": "هٰذَا zeigt auf etwas in der Nähe, ذٰلِكَ auf etwas weiter weg. Beide stehen für männliche Nomen.",
+          "examples": [
+            {
+              "ar": "هٰذَا بَيْتٌ وَذٰلِكَ مَسْجِدٌ.",
+              "de": "Das hier ist ein Haus, und das dort ist eine Moschee."
+            },
+            {
+              "ar": "مَنْ ذٰلِكَ؟ ذٰلِكَ إِمَامٌ.",
+              "de": "Wer ist das dort? Das ist ein Imam."
+            }
+          ]
+        },
+        {
+          "title": "وَ – „und“",
+          "text": "وَ wird direkt an das nächste Wort geschrieben: وَذٰلِكَ.",
+          "examples": [
+            {
+              "ar": "سُكَّرٌ وَلَبَنٌ",
+              "de": "Zucker und Milch"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 103,
+      "lesson": 3,
+      "topic": "Der Artikel اَلْ und Eigenschaften",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-103-01",
+          "ar": "الْقَمَرُ",
+          "de": "der Mond"
+        },
+        {
+          "id": "md-103-02",
+          "ar": "جَدِيدٌ",
+          "de": "neu"
+        },
+        {
+          "id": "md-103-03",
+          "ar": "قَدِيمٌ",
+          "de": "alt"
+        },
+        {
+          "id": "md-103-04",
+          "ar": "نَظِيفٌ",
+          "de": "sauber"
+        },
+        {
+          "id": "md-103-05",
+          "ar": "وَسِخٌ",
+          "de": "schmutzig"
+        },
+        {
+          "id": "md-103-06",
+          "ar": "حَارٌّ",
+          "de": "heiß"
+        },
+        {
+          "id": "md-103-07",
+          "ar": "بَارِدٌ",
+          "de": "kalt"
+        },
+        {
+          "id": "md-103-08",
+          "ar": "كَبِيرٌ",
+          "de": "groß"
+        },
+        {
+          "id": "md-103-09",
+          "ar": "صَغِيرٌ",
+          "de": "klein"
+        },
+        {
+          "id": "md-103-10",
+          "ar": "مَفْتُوحٌ",
+          "de": "offen"
+        },
+        {
+          "id": "md-103-11",
+          "ar": "مَكْسُورٌ",
+          "de": "kaputt, zerbrochen"
+        },
+        {
+          "id": "md-103-12",
+          "ar": "ثَقِيلٌ",
+          "de": "schwer"
+        },
+        {
+          "id": "md-103-13",
+          "ar": "خَفِيفٌ",
+          "de": "leicht"
+        },
+        {
+          "id": "md-103-14",
+          "ar": "جَمِيلٌ",
+          "de": "schön"
+        },
+        {
+          "id": "md-103-15",
+          "ar": "وَاقِفٌ",
+          "de": "stehend"
+        },
+        {
+          "id": "md-103-16",
+          "ar": "جَالِسٌ",
+          "de": "sitzend"
+        },
+        {
+          "id": "md-103-17",
+          "ar": "حُلْوٌ",
+          "de": "süß"
+        },
+        {
+          "id": "md-103-18",
+          "ar": "مَرِيضٌ",
+          "de": "krank"
+        },
+        {
+          "id": "md-103-19",
+          "ar": "غَنِيٌّ",
+          "de": "reich"
+        },
+        {
+          "id": "md-103-20",
+          "ar": "فَقِيرٌ",
+          "de": "arm"
+        },
+        {
+          "id": "md-103-21",
+          "ar": "طَوِيلٌ",
+          "de": "lang, groß (gewachsen)"
+        },
+        {
+          "id": "md-103-22",
+          "ar": "قَصِيرٌ",
+          "de": "kurz, klein"
+        },
+        {
+          "id": "md-103-23",
+          "ar": "الدُّكَّانُ",
+          "de": "der Laden"
+        },
+        {
+          "id": "md-103-24",
+          "ar": "التُّفَّاحُ",
+          "de": "die Äpfel"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Der Artikel اَلْ – „der, die, das“",
+          "text": "اَلْ macht ein Nomen bestimmt. Dann fällt die Endung -un weg und wird zu -u: بَيْتٌ (ein Haus) → اَلْبَيْتُ (das Haus).",
+          "examples": [
+            {
+              "ar": "كِتَابٌ ← اَلْكِتَابُ",
+              "de": "ein Buch → das Buch"
+            }
+          ]
+        },
+        {
+          "title": "Sonnen- und Mondbuchstaben",
+          "text": "Vor 14 „Sonnenbuchstaben“ (z. B. ت د ر س ش ن) wird das ل von اَلْ nicht gesprochen, der folgende Buchstabe verdoppelt sich: اَلشَّمْسُ (asch-schams). Vor den „Mondbuchstaben“ bleibt das ل hörbar: اَلْقَمَرُ (al-qamar).",
+          "examples": [
+            {
+              "ar": "اَلرَّجُلُ",
+              "de": "ar-radschul – der Mann"
+            },
+            {
+              "ar": "اَلْوَلَدُ",
+              "de": "al-walad – der Junge"
+            }
+          ]
+        },
+        {
+          "title": "Ein Satz aus zwei Nomen",
+          "text": "Bestimmtes Nomen + unbestimmte Eigenschaft ergibt einen Satz: Das Haus ist groß. Auch hier steht kein „ist“.",
+          "examples": [
+            {
+              "ar": "اَلْبَابُ مَفْتُوحٌ.",
+              "de": "Die Tür ist offen."
+            },
+            {
+              "ar": "اَلْحَجَرُ ثَقِيلٌ.",
+              "de": "Der Stein ist schwer."
+            },
+            {
+              "ar": "اَلتَّاجِرُ غَنِيٌّ.",
+              "de": "Der Händler ist reich."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 104,
+      "lesson": 4,
+      "topic": "Wo? Präpositionen",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-104-01",
+          "ar": "أَيْنَ",
+          "de": "wo?"
+        },
+        {
+          "id": "md-104-02",
+          "ar": "فِي",
+          "de": "in"
+        },
+        {
+          "id": "md-104-03",
+          "ar": "عَلَى",
+          "de": "auf"
+        },
+        {
+          "id": "md-104-04",
+          "ar": "مِنْ",
+          "de": "von, aus"
+        },
+        {
+          "id": "md-104-05",
+          "ar": "إِلَى",
+          "de": "zu, nach"
+        },
+        {
+          "id": "md-104-06",
+          "ar": "الْمَدْرَسَةُ",
+          "de": "die Schule"
+        },
+        {
+          "id": "md-104-07",
+          "ar": "الْفَصْلُ",
+          "de": "das Klassenzimmer"
+        },
+        {
+          "id": "md-104-08",
+          "ar": "الْغُرْفَةُ",
+          "de": "das Zimmer"
+        },
+        {
+          "id": "md-104-09",
+          "ar": "الْمَطْبَخُ",
+          "de": "die Küche"
+        },
+        {
+          "id": "md-104-10",
+          "ar": "الْحَمَّامُ",
+          "de": "das Badezimmer"
+        },
+        {
+          "id": "md-104-11",
+          "ar": "الْمِرْحَاضُ",
+          "de": "die Toilette"
+        },
+        {
+          "id": "md-104-12",
+          "ar": "الْجَامِعَةُ",
+          "de": "die Universität"
+        },
+        {
+          "id": "md-104-13",
+          "ar": "السُّوقُ",
+          "de": "der Markt"
+        },
+        {
+          "id": "md-104-14",
+          "ar": "الْمُدِيرُ",
+          "de": "der Direktor"
+        },
+        {
+          "id": "md-104-15",
+          "ar": "الْيَابَانُ",
+          "de": "Japan"
+        },
+        {
+          "id": "md-104-16",
+          "ar": "الصِّينُ",
+          "de": "China"
+        },
+        {
+          "id": "md-104-17",
+          "ar": "الْهِنْدُ",
+          "de": "Indien"
+        },
+        {
+          "id": "md-104-18",
+          "ar": "الْفِلِبِّينُ",
+          "de": "die Philippinen"
+        },
+        {
+          "id": "md-104-19",
+          "ar": "ذَهَبَ",
+          "de": "er ging"
+        },
+        {
+          "id": "md-104-20",
+          "ar": "خَرَجَ",
+          "de": "er ging hinaus"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Nach فِي, عَلَى, مِنْ, إِلَى: Endung -i",
+          "text": "Diese Wörter heißen „Präpositionen“ (حُرُوفُ الْجَرِّ). Das Nomen danach bekommt statt -u die Endung -i (Genitiv).",
+          "examples": [
+            {
+              "ar": "اَلْكِتَابُ عَلَى الْمَكْتَبِ.",
+              "de": "Das Buch liegt auf dem Schreibtisch."
+            },
+            {
+              "ar": "اَلطَّالِبُ فِي الْفَصْلِ.",
+              "de": "Der Schüler ist im Klassenzimmer."
+            }
+          ]
+        },
+        {
+          "title": "Fragen mit أَيْنَ",
+          "text": "أَيْنَ fragt nach dem Ort. Die Antwort nennt ihn meist mit einer Präposition.",
+          "examples": [
+            {
+              "ar": "أَيْنَ الْمُدِيرُ؟ هُوَ فِي الْغُرْفَةِ.",
+              "de": "Wo ist der Direktor? Er ist im Zimmer."
+            }
+          ]
+        },
+        {
+          "title": "„Er ging …“: ذَهَبَ und خَرَجَ",
+          "text": "Die ersten Verben stehen in der Vergangenheit, 3. Person männlich. ذَهَبَ إِلَى heißt „ging zu“, خَرَجَ مِنْ „ging hinaus aus“.",
+          "examples": [
+            {
+              "ar": "ذَهَبَ الْوَلَدُ إِلَى السُّوقِ.",
+              "de": "Der Junge ging zum Markt."
+            },
+            {
+              "ar": "خَرَجَ الطَّبِيبُ مِنَ الْبَيْتِ.",
+              "de": "Der Arzt ging aus dem Haus."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "unit": 105,
+      "lesson": 5,
+      "topic": "Besitz: zwei Nomen verbunden (Iḍāfa)",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-105-01",
+          "ar": "الِاسْمُ",
+          "de": "der Name"
+        },
+        {
+          "id": "md-105-02",
+          "ar": "الِابْنُ",
+          "de": "der Sohn"
+        },
+        {
+          "id": "md-105-03",
+          "ar": "الْعَمُّ",
+          "de": "der Onkel (väterlicherseits)"
+        },
+        {
+          "id": "md-105-04",
+          "ar": "الْخَالُ",
+          "de": "der Onkel (mütterlicherseits)"
+        },
+        {
+          "id": "md-105-05",
+          "ar": "الرَّسُولُ",
+          "de": "der Gesandte"
+        },
+        {
+          "id": "md-105-06",
+          "ar": "الْكَعْبَةُ",
+          "de": "die Kaaba"
+        },
+        {
+          "id": "md-105-07",
+          "ar": "الْحَقِيبَةُ",
+          "de": "die Tasche"
+        },
+        {
+          "id": "md-105-08",
+          "ar": "السَّيَّارَةُ",
+          "de": "das Auto"
+        },
+        {
+          "id": "md-105-09",
+          "ar": "الشَّارِعُ",
+          "de": "die Straße"
+        },
+        {
+          "id": "md-105-10",
+          "ar": "مُغْلَقٌ",
+          "de": "geschlossen"
+        },
+        {
+          "id": "md-105-11",
+          "ar": "تَحْتَ",
+          "de": "unter"
+        },
+        {
+          "id": "md-105-12",
+          "ar": "هُنَاكَ",
+          "de": "dort"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "„Das Auto des Lehrers“: zwei Nomen hintereinander",
+          "text": "Besitz wird ausgedrückt, indem zwei Nomen direkt hintereinander stehen. Das erste (مُضَافٌ) hat keinen Artikel und keine Endung -un, das zweite (مُضَافٌ إِلَيْهِ) steht im Genitiv (-i).",
+          "examples": [
+            {
+              "ar": "حَقِيبَةُ الطَّالِبِ",
+              "de": "die Tasche des Schülers"
+            },
+            {
+              "ar": "بَابُ الْمَسْجِدِ",
+              "de": "die Tür der Moschee"
+            }
+          ]
+        },
+        {
+          "title": "Mit Namen",
+          "text": "Auch ein Name kann das zweite Glied sein. Er bekommt dann oft die Endung -in.",
+          "examples": [
+            {
+              "ar": "بَيْتُ حَامِدٍ",
+              "de": "Hamids Haus"
+            },
+            {
+              "ar": "اِسْمُ الْوَلَدِ",
+              "de": "der Name des Jungen"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -39,21 +39,20 @@ describe('Course switch and Medina path', () => {
 
     const lessons = await screen.findAllByRole('listitem', { name: /^Lektion \d+$/ });
     expect(lessons).toHaveLength(23);
-    const second = screen.getByRole('listitem', { name: 'Lektion 2' });
-    expect(
-      within(second).getByRole('link', { name: 'Im Buch öffnen (S. 9)' })
-    ).toHaveAttribute(
-      'href',
-      expect.stringMatching(/madina-book-1-arabic-text.*\.pdf#page=9$/)
-    );
-    expect(within(second).getByLabelText('Aufnahme Lektion 2')).toHaveAttribute(
-      'src',
-      'https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L02.mp3'
-    );
+    // Lessons with our own content say what they cover; the others point to the book.
+    const first = screen.getByRole('listitem', { name: 'Lektion 1' });
+    expect(within(first).getByRole('link')).toHaveAttribute('href', '/units/madinah/1');
+    expect(within(first).getByText(/Was ist das\? .* · \d+ Wörter/)).toBeTruthy();
+    const seventh = screen.getByRole('listitem', { name: 'Lektion 7' });
+    expect(within(seventh).getByText('Buch S. 36 · Aufnahme')).toBeTruthy();
     // Links open outside the app and name the source.
     expect(screen.getByRole('link', { name: 'Lösungen (arabisch)' })).toHaveAttribute(
       'rel',
       'noopener noreferrer'
+    );
+    expect(screen.getByRole('link', { name: 'Vokabelliste' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('archive.org')
     );
     expect(screen.getByText(/persönlichen Nutzung/)).toBeTruthy();
     expect(screen.queryByRole('list', { name: 'Etappe 1: Einheiten' })).toBeNull();

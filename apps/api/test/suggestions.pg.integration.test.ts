@@ -372,11 +372,12 @@ describe.skipIf(!url)('Recording suggestions (Postgres)', () => {
       'Das ist richtig.',
     ]);
 
-    // The teacher corrected the line by hand meanwhile: the suggestion no longer fits.
+    // A line was added before it meanwhile: the same text elsewhere is not taken for it.
     await interactive.saveTranscript(mediaId, {
       cues: [
         { start: 0, end: 5, text: 'Heute lernen wir: هٰذَا بَيْتٌ.' },
-        { start: 6, end: 9, text: 'مَا هٰذا؟' },
+        { start: 5, end: 6, text: 'Noch einmal:' },
+        { start: 6, end: 9, text: 'Ma hada?' },
       ],
     });
     const stale = await call('PUT', `/suggestions/${fixes[1]!.id}`, {

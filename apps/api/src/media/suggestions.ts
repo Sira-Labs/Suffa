@@ -257,8 +257,9 @@ export class PgSuggestionRepository implements SuggestionRepository {
 }
 
 /**
- * Writes a correction into the transcript. The line is found at its index or, when lines were
- * added or removed since, by its text; a line whose text changed is left alone.
+ * Writes a correction into the transcript, only into the line it was made for: that index
+ * with unchanged text. Anything else is a conflict, since repeated lines ("Gut.") make a
+ * search by text land on the wrong one.
  */
 async function applyFix(client: pg.PoolClient, mediaId: string, fix: Fix, by: string) {
   const { rows } = await client.query(
@@ -266,12 +267,8 @@ async function applyFix(client: pg.PoolClient, mediaId: string, fix: Fix, by: st
     [mediaId]
   );
   const cues = (rows[0]?.cues ?? []) as Cue[];
-  const index =
-    cues[fix.cue]?.text === fix.before
-      ? fix.cue
-      : cues.findIndex((c) => c.text === fix.before);
-  if (index < 0) throw new TranscriptChangedError();
-  const next = cues.map((c, i) => (i === index ? { ...c, text: fix.after } : c));
+  if (cues[fix.cue]?.text !== fix.before) throw new TranscriptChangedError();
+  const next = cues.map((c, i) => (i === fix.cue ? { ...c, text: fix.after } : c));
   await client.query(
     `update media_transcripts set cues = $2::jsonb, edited_by = $3, updated_at = now()
       where media_id = $1`,

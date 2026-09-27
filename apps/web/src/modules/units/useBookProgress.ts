@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useClozeIds } from './useClozeIds';
 import type { AudioUnit, PracticeSkill, PublisherAudioIndex } from '@/types';
 import { content, unitInfos } from '@/content';
@@ -66,8 +66,13 @@ export interface UnitOverview {
 export function useBookProgress(): {
   index: PublisherAudioIndex | null;
   units: UnitOverview[];
+  /** The index could not be loaded; `retry` tries again. */
+  failed: boolean;
+  retry: () => void;
 } {
   const [index, setIndex] = useState<PublisherAudioIndex | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const exams = useEnrollmentStore((s) => s.exams);
   const enrollments = useEnrollmentStore((s) => s.enrollments);
   const [videoData, setVideoData] = useState<BookVideoData | null>(null);
@@ -79,7 +84,11 @@ export function useBookProgress(): {
 
   useEffect(() => {
     let cancelled = false;
-    void loadPublisherIndex().then((i) => !cancelled && setIndex(i));
+    setFailed(false);
+    loadPublisherIndex().then(
+      (i) => !cancelled && setIndex(i),
+      () => !cancelled && setFailed(true)
+    );
     // Videos are an extra: without their index the path simply has no video station.
     void loadBookVideos()
       .then((v) => !cancelled && setVideoData(v))
@@ -87,7 +96,7 @@ export function useBookProgress(): {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
   const units = useMemo(() => {
     if (!index) return [];
@@ -175,7 +184,8 @@ export function useBookProgress(): {
     clozeIds,
   ]);
 
-  return { index, units };
+  const retry = useCallback(() => setAttempt((n) => n + 1), []);
+  return { index, units, failed, retry };
 }
 
 function videoStation(

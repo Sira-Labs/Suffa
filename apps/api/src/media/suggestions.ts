@@ -1,6 +1,6 @@
 /**
- * AI suggestions for a recording (story 11.4): chapters and checkpoints (questions,
- * dictations, word cards) proposed from its transcript. They wait as "pending" until the
+ * AI suggestions for a recording (story 11.4): chapters, checkpoints (questions, dictations,
+ * word cards) and transcript corrections proposed from its transcript. They wait as "pending" until the
  * teacher accepts or dismisses each one; nothing is ever published on its own.
  */
 import { randomUUID } from 'node:crypto';
@@ -11,6 +11,14 @@ import { LlmError, RouteUnavailableError } from '@suffa/llm';
 import { AiQuotaError, type AiGateway } from '../ai/gateway.js';
 import { foldArabic, type ContentCatalog } from '../tutor/content.js';
 import { CheckpointData, type Cue, type InteractiveRepository } from './interactive.js';
+import {
+  PROOFREAD_PROMPT,
+  PROOFREAD_SCHEMA,
+  PROOFREAD_TASK,
+  toFixes,
+  transcriptPieces,
+  type Fix,
+} from './proofread.js';
 import type { MediaRepository } from './repository.js';
 import { removeAndReopen } from './suggestionLinks.js';
 
@@ -28,7 +36,16 @@ export interface SuggestionRun {
 
 export type Suggestion =
   | { id: string; kind: 'chapter'; atSec: number; data: { title: string } }
-  | { id: string; kind: 'checkpoint'; atSec: number; data: CheckpointData };
+  | { id: string; kind: 'checkpoint'; atSec: number; data: CheckpointData }
+  | { id: string; kind: 'fix'; atSec: number; data: Fix };
+
+/** A correction no longer fits: the line was changed or removed since the run. */
+export class TranscriptChangedError extends Error {
+  constructor() {
+    super('the transcript line changed since the suggestion was made');
+    this.name = 'TranscriptChangedError';
+  }
+}
 
 export interface Chapter {
   id: string;
@@ -55,7 +72,9 @@ export interface SuggestionRepository {
   ): Promise<Suggestion | null>;
   /**
    * Accepts a pending suggestion: marks it accepted, creates its chapter or checkpoint and
-   * remembers the link, all in one transaction. Null when there is no such pending suggestion.
+   * remembers the link, all in one transaction; a correction is written into the transcript
+   * instead. Null when there is no such pending suggestion; TranscriptChangedError when the
+   * corrected line is no longer in the transcript.
    */
   accept(mediaId: string, id: string, by: string): Promise<Suggestion | null>;
   chapters(mediaId: string): Promise<Chapter[]>;
@@ -171,6 +190,11 @@ export class PgSuggestionRepository implements SuggestionRepository {
         atSec: r.at_sec,
         data: r.data,
       } as Suggestion;
+      if (suggestion.kind === 'fix') {
+        await applyFix(client, mediaId, suggestion.data, by);
+        await client.query('commit');
+        return suggestion;
+      }
       const resultId = randomUUID();
       if (suggestion.kind === 'chapter') {
         await client.query(
@@ -230,6 +254,26 @@ export class PgSuggestionRepository implements SuggestionRepository {
   async removeChapter(mediaId: string, id: string) {
     return removeAndReopen(this.pool, 'media_chapters', mediaId, id);
   }
+}
+
+/**
+ * Writes a correction into the transcript, only into the line it was made for: that index
+ * with unchanged text. Anything else is a conflict, since repeated lines ("Gut.") make a
+ * search by text land on the wrong one.
+ */
+async function applyFix(client: pg.PoolClient, mediaId: string, fix: Fix, by: string) {
+  const { rows } = await client.query(
+    'select cues from media_transcripts where media_id = $1 for update',
+    [mediaId]
+  );
+  const cues = (rows[0]?.cues ?? []) as Cue[];
+  if (cues[fix.cue]?.text !== fix.before) throw new TranscriptChangedError();
+  const next = cues.map((c, i) => (i === fix.cue ? { ...c, text: fix.after } : c));
+  await client.query(
+    `update media_transcripts set cues = $2::jsonb, edited_by = $3, updated_at = now()
+      where media_id = $1`,
+    [mediaId, JSON.stringify(next), by]
+  );
 }
 
 /** Structured output; one flat checkpoint shape (fields a kind does not use stay empty). */
@@ -408,21 +452,64 @@ export async function suggestForRecording(
       item.durationSec,
       deps.catalog
     );
-    await deps.suggestions.replacePending(mediaId, suggestions);
+    const fixes = await proofread(deps, run.requestedBy, mediaId, transcript.cues);
+    await deps.suggestions.replacePending(mediaId, [...suggestions, ...fixes]);
     await deps.suggestions.setRun(mediaId, 'ready');
-    deps.log.info({ mediaId, count: suggestions.length }, 'media.suggested');
+    deps.log.info(
+      { mediaId, count: suggestions.length, fixes: fixes.length },
+      'media.suggested'
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message.slice(0, 300) : 'failed';
     await deps.suggestions.setRun(mediaId, 'failed', { error: message });
     deps.log.warn({ mediaId, err: error }, 'media.suggest_failed');
     // Model trouble, quota and malformed output are expected outcomes; anything else is a bug
     // the job runner should report (the run is already marked failed, so a retry is a no-op).
-    const expected =
-      error instanceof SyntaxError ||
-      error instanceof z.ZodError ||
-      error instanceof LlmError ||
-      error instanceof RouteUnavailableError ||
-      error instanceof AiQuotaError;
-    if (!expected) throw error;
+    if (!isExpected(error)) throw error;
   }
+}
+
+function isExpected(error: unknown) {
+  return (
+    error instanceof SyntaxError ||
+    error instanceof z.ZodError ||
+    error instanceof LlmError ||
+    error instanceof RouteUnavailableError ||
+    error instanceof AiQuotaError
+  );
+}
+
+/**
+ * Transcript corrections, piece by piece. Best effort: a piece the model fails on only loses
+ * its corrections, so the chapters and checkpoints of the run still arrive.
+ */
+async function proofread(
+  deps: { gateway: AiGateway; log: Pick<Logger, 'info' | 'warn'> },
+  requestedBy: string,
+  mediaId: string,
+  cues: readonly Cue[]
+): Promise<Omit<Suggestion, 'id'>[]> {
+  const out: Omit<Suggestion, 'id'>[] = [];
+  for (const piece of transcriptPieces(cues)) {
+    try {
+      const result = await deps.gateway.complete(
+        { id: requestedBy, role: 'teacher' },
+        PROOFREAD_TASK,
+        {
+          system: [{ text: PROOFREAD_PROMPT, cache: true }],
+          messages: [{ role: 'user', content: `Transcript lines:\n${piece}` }],
+          jsonSchema: PROOFREAD_SCHEMA as unknown as Record<string, unknown>,
+        }
+      );
+      for (const fix of toFixes(JSON.parse(result.text), cues)) {
+        out.push({ kind: 'fix', atSec: cues[fix.cue]!.start, data: fix });
+      }
+    } catch (error) {
+      if (!isExpected(error)) throw error;
+      deps.log.warn({ mediaId, err: error }, 'media.proofread_failed');
+      // No route or no quota: the other pieces would fail the same way.
+      if (error instanceof RouteUnavailableError || error instanceof AiQuotaError) break;
+    }
+  }
+  return out;
 }

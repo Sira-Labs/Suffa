@@ -151,6 +151,7 @@ function buildApp() {
         classBytes: async () => 0,
         update: async () => {},
         publish: async () => {},
+        rename: async () => {},
         remove: async () => {},
       },
       media: {
@@ -197,6 +198,7 @@ function buildApp() {
         classBytes: async () => 0,
         update: async () => {},
         publish: async () => {},
+        rename: async () => {},
         remove: async () => {},
       },
       interactive: {

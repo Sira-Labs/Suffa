@@ -58,10 +58,13 @@ export function ClassRecordings({
     return () => window.clearInterval(timer);
   }, [busy, load]);
 
-  const act = async (run: () => Promise<{ ok: boolean; message?: string }>) => {
+  const act = async (
+    run: () => Promise<{ ok: boolean; message?: string }>
+  ): Promise<boolean> => {
     const result = await run();
     setMessage(result.ok ? null : (result.message ?? null));
     await load();
+    return result.ok;
   };
 
   if (!items) return <p className="muted">{message ?? 'Lade Aufnahmen …'}</p>;
@@ -133,6 +136,10 @@ export function ClassRecordings({
                         onPublish={() => act(() => api.publish(classId, item.id))}
                       />
                     )}
+                    <RenameButton
+                      title={item.title}
+                      onRename={(title) => act(() => api.rename(classId, item.id, title))}
+                    />
                     <button
                       className="btn btn-small"
                       onClick={() => {
@@ -154,7 +161,71 @@ export function ClassRecordings({
   );
 }
 
-function PublishButton({ onPublish }: { onPublish: () => Promise<void> }) {
+/** Change a recording's title in place (e.g. after uploading under the wrong name). */
+function RenameButton({
+  title,
+  onRename,
+}: {
+  title: string;
+  onRename: (title: string) => Promise<boolean>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(title);
+  const [saving, setSaving] = useState(false);
+  if (!editing) {
+    return (
+      <button
+        className="btn btn-small"
+        onClick={() => {
+          setValue(title);
+          setEditing(true);
+        }}
+      >
+        Umbenennen
+      </button>
+    );
+  }
+  const trimmed = value.trim();
+  const save = async () => {
+    if (!trimmed || saving) return;
+    setSaving(true);
+    const ok = await onRename(trimmed);
+    setSaving(false);
+    // On failure the editor stays open with the typed title; the error shows above the list.
+    if (ok) setEditing(false);
+  };
+  return (
+    <form
+      className="row"
+      style={{ flexWrap: 'wrap', gap: '0.4rem' }}
+      onSubmit={(e) => {
+        e.preventDefault();
+        void save();
+      }}
+    >
+      <input
+        className="input"
+        aria-label="Neuer Titel"
+        maxLength={120}
+        value={value}
+        autoFocus
+        onChange={(e) => setValue(e.target.value)}
+      />
+      <button
+        className="btn btn-small btn-primary"
+        type="submit"
+        disabled={!trimmed || saving}
+      >
+        Speichern
+      </button>
+      <button className="btn btn-small" type="button" onClick={() => setEditing(false)}>
+        Abbrechen
+      </button>
+    </form>
+  );
+}
+
+function PublishButton({ onPublish }: { onPublish: () => Promise<boolean> }) {
   const [consent, setConsent] = useState(false);
   return (
     <span className="row" style={{ flexWrap: 'wrap' }}>

@@ -238,6 +238,25 @@ describe.skipIf(!dbUrl || !s3 || !hasFfmpeg)(
       expect(play.video).toMatch(/video\.mp4/);
       expect((await call('other', 'GET', `/${mediaId}/play`)).status).toBe(403);
 
+      // Renaming: only the teacher, and not to an empty title.
+      expect((await call('amina', 'PATCH', `/${mediaId}`, { title: 'X' })).status).toBe(
+        403
+      );
+      expect(
+        (await call('teacher', 'PATCH', `/${mediaId}`, { title: '  ' })).status
+      ).toBe(400);
+      expect(
+        (
+          await call('teacher', 'PATCH', `/${mediaId}`, {
+            title: ' Stunde 5 – Wiederholung ',
+          })
+        ).status
+      ).toBe(204);
+      const renamed = await pool.query('select title from media_items where id = $1', [
+        mediaId,
+      ]);
+      expect(renamed.rows[0].title).toBe('Stunde 5 – Wiederholung');
+
       expect((await call('teacher', 'DELETE', `/${mediaId}`)).status).toBe(204);
       expect(
         await storage.head('media', `recordings/${classId}/${mediaId}/audio.m4a`)
@@ -248,6 +267,7 @@ describe.skipIf(!dbUrl || !s3 || !hasFfmpeg)(
       expect(audit.rows.map((r) => r.action)).toEqual([
         'media.upload_started',
         'media.published',
+        'media.renamed',
         'media.deleted',
       ]);
     });

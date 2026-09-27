@@ -65,6 +65,8 @@ export interface MediaRepository {
     >
   ): Promise<void>;
   publish(id: string, userId: string): Promise<void>;
+  /** A new title (e.g. after uploading under the wrong name). */
+  rename(id: string, title: string): Promise<void>;
   remove(id: string): Promise<void>;
 }
 
@@ -184,6 +186,13 @@ export class PgMediaRepository implements MediaRepository {
       `update media_items set published_at = now(), consent_confirmed_by = $2, updated_at = now()
         where id = $1 and published_at is null`,
       [id, userId]
+    );
+  }
+
+  async rename(id: string, title: string) {
+    await this.pool.query(
+      'update media_items set title = $2, updated_at = now() where id = $1',
+      [id, title]
     );
   }
 

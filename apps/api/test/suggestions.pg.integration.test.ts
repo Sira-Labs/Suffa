@@ -75,12 +75,15 @@ class ScriptedModel implements LlmProvider {
   readonly id = 'mistral' as const;
   requests: LlmRequest[] = [];
   reply = JSON.stringify(PROPOSAL);
+  /** The answer to transcript proofreading (asked with its own schema). */
+  fixes = JSON.stringify({ fixes: [] });
   async complete(request: LlmRequest) {
     this.requests.push(request);
+    const proofreading = JSON.stringify(request.jsonSchema ?? {}).includes('"fixes"');
     return {
       provider: 'mistral' as const,
       model: request.model,
-      text: this.reply,
+      text: proofreading ? this.fixes : this.reply,
       stopReason: 'end' as const,
       usage: {
         inputTokens: 4000,
@@ -311,7 +314,80 @@ describe.skipIf(!url)('Recording suggestions (Postgres)', () => {
       'select turns from ai_usage_daily where user_id = $1',
       [TEACHER]
     );
-    expect(usage.rows).toEqual([{ turns: 1 }]);
+    // One call for the suggestions, one for proofreading the (short) transcript.
+    expect(usage.rows).toEqual([{ turns: 2 }]);
+  });
+
+  it('proposes corrections for Arabic in Latin letters and writes accepted ones into the transcript', async () => {
+    const interactive = new PgInteractiveRepository(pool);
+    await interactive.saveTranscript(mediaId, {
+      status: 'ready',
+      cues: [
+        { start: 0, end: 5, text: 'Heute lernen wir: Hather Beiton.' },
+        { start: 6, end: 9, text: 'Ma hada?' },
+        { start: 10, end: 12, text: 'Das ist richtig.' },
+      ],
+    });
+    model.requests = [];
+    model.fixes = JSON.stringify({
+      fixes: [
+        { line: 0, text: 'Heute lernen wir: هٰذَا بَيْتٌ.' },
+        { line: 1, text: '[1] مَا هٰذَا؟' },
+        // Unchanged, no Arabic, or no such line: dropped.
+        { line: 2, text: 'Das ist richtig.' },
+        { line: 2, text: 'Das ist falsch.' },
+        { line: 7, text: 'مَا' },
+      ],
+    });
+    expect((await call('POST', '/suggestions')).status).toBe(202);
+    await run();
+    const proofreading = model.requests.find((r) =>
+      JSON.stringify(r.jsonSchema).includes('"fixes"')
+    )!;
+    expect((proofreading.messages[0] as { content: string }).content).toContain(
+      '[0] Heute lernen wir: Hather Beiton.'
+    );
+    const listed = (await (await call('GET', '/suggestions')).json()) as {
+      suggestions: { id: string; kind: string; atSec: number; data: unknown }[];
+    };
+    const fixes = listed.suggestions.filter((x) => x.kind === 'fix');
+    expect(fixes.map((f) => [f.atSec, f.data])).toEqual([
+      [
+        0,
+        {
+          cue: 0,
+          before: 'Heute lernen wir: Hather Beiton.',
+          after: 'Heute lernen wir: هٰذَا بَيْتٌ.',
+        },
+      ],
+      [6, { cue: 1, before: 'Ma hada?', after: 'مَا هٰذَا؟' }],
+    ]);
+
+    expect(
+      (await call('PUT', `/suggestions/${fixes[0]!.id}`, { decision: 'accept' })).status
+    ).toBe(204);
+    expect((await interactive.transcript(mediaId))!.cues.map((c) => c.text)).toEqual([
+      'Heute lernen wir: هٰذَا بَيْتٌ.',
+      'Ma hada?',
+      'Das ist richtig.',
+    ]);
+
+    // A line was added before it meanwhile: the same text elsewhere is not taken for it.
+    await interactive.saveTranscript(mediaId, {
+      cues: [
+        { start: 0, end: 5, text: 'Heute lernen wir: هٰذَا بَيْتٌ.' },
+        { start: 5, end: 6, text: 'Noch einmal:' },
+        { start: 6, end: 9, text: 'Ma hada?' },
+      ],
+    });
+    const stale = await call('PUT', `/suggestions/${fixes[1]!.id}`, {
+      decision: 'accept',
+    });
+    expect(stale.status).toBe(409);
+    expect(await stale.json()).toEqual({ error: 'transcript_changed' });
+    expect(
+      (await call('PUT', `/suggestions/${fixes[1]!.id}`, { decision: 'dismiss' })).status
+    ).toBe(204);
   });
 
   it('keeps suggestions to the class teacher and respects the AI switch', async () => {

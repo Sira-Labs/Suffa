@@ -89,6 +89,7 @@ export const TASK_LABELS: Record<string, string> = {
   'content.author-assist': 'Autorenhilfe',
   'recording.suggest': 'Vorschläge für Aufnahmen',
   'recording.summarize': 'Zusammenfassung von Aufnahmen',
+  'recording.proofread': 'Transkript-Korrekturen von Aufnahmen',
 };
 
 export const PROVIDER_LABELS: Record<ProviderId, string> = {

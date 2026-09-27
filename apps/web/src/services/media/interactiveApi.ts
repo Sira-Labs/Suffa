@@ -52,7 +52,14 @@ export interface SummaryState {
 
 export type Suggestion =
   | { id: string; kind: 'chapter'; atSec: number; data: { title: string } }
-  | { id: string; kind: 'checkpoint'; atSec: number; data: CheckpointData };
+  | { id: string; kind: 'checkpoint'; atSec: number; data: CheckpointData }
+  /** A transcript line with Arabic in Latin letters, rewritten in Arabic letters. */
+  | {
+      id: string;
+      kind: 'fix';
+      atSec: number;
+      data: { cue: number; before: string; after: string };
+    };
 
 export interface SuggestionState {
   run: { status: 'queued' | 'running' | 'ready' | 'failed'; error: string | null } | null;
@@ -77,6 +84,8 @@ const MESSAGES: Record<string, string> = {
   no_transcript: 'Dafür braucht die Aufnahme zuerst ein Transkript.',
   ai_unavailable: 'Auf diesem Server ist kein KI-Modell eingerichtet.',
   no_summary: 'Es gibt noch keine fertige Zusammenfassung.',
+  transcript_changed:
+    'Diese Transkript-Zeile wurde inzwischen geändert. Bitte verwirf den Vorschlag.',
 };
 
 export class InteractiveApi {

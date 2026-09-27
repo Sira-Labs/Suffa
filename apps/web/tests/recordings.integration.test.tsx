@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { ClassRecordings } from '@/modules/classes/ClassRecordings';
 import { RecordingPlayer } from '@/modules/classes/RecordingPlayer';
@@ -79,6 +80,63 @@ describe('Recordings (integration)', () => {
       '40'
     );
     expect(screen.getByRole('form', { name: 'Aufnahme hochladen' })).toBeInTheDocument();
+  });
+
+  it('lets the teacher rename a recording uploaded under the wrong title', async () => {
+    const sent: { method: string; body: unknown }[] = [];
+    const base = globalThis.fetch;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === 'PATCH') {
+          sent.push({ method: 'PATCH', body: JSON.parse(String(init.body)) });
+          return new Response(null, { status: 204 });
+        }
+        return base(input, init);
+      })
+    );
+    const router = createMemoryRouter(
+      [{ path: '/', element: <ClassRecordings classId={CLASS} teacher /> }],
+      { initialEntries: ['/'] }
+    );
+    render(<RouterProvider router={router} />);
+    await screen.findByRole('link', { name: 'Stunde 1' });
+    await userEvent.click(screen.getAllByRole('button', { name: 'Umbenennen' })[0]!);
+    const input = screen.getByRole('textbox', { name: 'Neuer Titel' });
+    expect(input).toHaveValue('Stunde 1');
+    await userEvent.clear(input);
+    expect(screen.getByRole('button', { name: 'Speichern' })).toBeDisabled();
+    await userEvent.type(input, ' Stunde 5 – Wiederholung {Enter}');
+    expect(sent).toEqual([
+      { method: 'PATCH', body: { title: 'Stunde 5 – Wiederholung' } },
+    ]);
+    expect(screen.queryByRole('textbox', { name: 'Neuer Titel' })).toBeNull();
+  });
+
+  it('keeps the rename editor open when saving fails', async () => {
+    const base = globalThis.fetch;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (init?.method === 'PATCH') {
+          return new Response(JSON.stringify({ error: 'invalid' }), { status: 400 });
+        }
+        return base(input, init);
+      })
+    );
+    const router = createMemoryRouter(
+      [{ path: '/', element: <ClassRecordings classId={CLASS} teacher /> }],
+      { initialEntries: ['/'] }
+    );
+    render(<RouterProvider router={router} />);
+    await screen.findByRole('link', { name: 'Stunde 1' });
+    await userEvent.click(screen.getAllByRole('button', { name: 'Umbenennen' })[0]!);
+    const input = screen.getByRole('textbox', { name: 'Neuer Titel' });
+    await userEvent.clear(input);
+    await userEvent.type(input, 'Neu{Enter}');
+    expect(await screen.findByRole('textbox', { name: 'Neuer Titel' })).toHaveValue(
+      'Neu'
+    );
   });
 
   it('counts played time, not seeking, and marks the recording heard at 85 %', async () => {

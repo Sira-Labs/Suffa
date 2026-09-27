@@ -76,4 +76,14 @@ describe('SectionCelebration', () => {
     show([section(1, 'done'), section(2, 'current')]);
     expect(screen.queryByRole('dialog')).toBeNull();
   });
+
+  it('still celebrates the second dialogue after leaving during the first', () => {
+    localStorage.setItem('suffa.path.celebrated.1', '[]');
+    const both = [section(1, 'done'), section(2, 'done'), section(3, 'current')];
+    const view = show(both);
+    expect(screen.getByRole('dialog', { name: 'Dialog 1 geschafft' })).toBeTruthy();
+    view.unmount();
+    show(both);
+    expect(screen.getByRole('dialog', { name: 'Dialog 2 geschafft' })).toBeTruthy();
+  });
 });

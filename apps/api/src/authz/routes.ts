@@ -175,6 +175,11 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     action: 'class:manage',
   },
   {
+    method: 'PATCH',
+    path: '/api/v1/classes/:id/media/:mediaId',
+    action: 'class:manage',
+  },
+  {
     method: 'DELETE',
     path: '/api/v1/classes/:id/media/:mediaId',
     action: 'class:manage',

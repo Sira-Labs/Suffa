@@ -1,6 +1,6 @@
 /**
- * AI suggestions for a recording (story 11.4): the teacher asks for chapters and checkpoints
- * made from the transcript, then accepts or dismisses each one. Nothing reaches learners
+ * AI suggestions for a recording (story 11.4): the teacher asks for chapters, checkpoints and
+ * transcript corrections made from the transcript, then accepts or dismisses each one. Nothing reaches learners
  * without the teacher's click.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -16,6 +16,14 @@ const POLL_MS = 3000;
 
 function describe(s: Suggestion) {
   if (s.kind === 'chapter') return <span>Kapitel: {s.data.title}</span>;
+  if (s.kind === 'fix') {
+    return (
+      <span>
+        Transkript: <del className="muted">{s.data.before}</del> →{' '}
+        <ArabicText>{s.data.after}</ArabicText>
+      </span>
+    );
+  }
   const d = s.data;
   switch (d.kind) {
     case 'mcq':
@@ -139,7 +147,9 @@ export function SuggestionsEditor({
         Kapitel, Wortkarten, Fragen und Diktate aus dem Transkript. Lernende sehen nur,
         was du übernimmst: Kapitel erscheinen als Liste unter dem Video (antippen springt
         dorthin), Fragen, Diktate und Wortkarten als Checkpoints – das Video hält an der
-        Stelle an und zeigt die Aufgabe.
+        Stelle an und zeigt die Aufgabe. Transkript-Korrekturen ersetzen Arabisch in
+        Lautschrift (z. B. „Ma hada“) durch arabische Schrift; übernommen ändern sie die
+        Zeile im Transkript, richtige Zeilen bleiben, wie sie sind.
       </p>
       <div className="row" style={{ gap: '0.5rem', flexWrap: 'wrap' }}>
         <button

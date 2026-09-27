@@ -6,7 +6,9 @@
  *   PUT    /classes/:id/media/:mediaId/suggestions/:sid      { decision } → 204
  *   DELETE /classes/:id/media/:mediaId/chapters/:chapterId   → 204
  *
- * Accepting a suggestion creates the chapter or checkpoint; nothing is published without it.
+ * Accepting a suggestion creates the chapter or checkpoint, or writes a correction into the
+ * transcript (409 transcript_changed when that line has changed since); nothing is published
+ * without it.
  */
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
@@ -15,7 +17,7 @@ import { authorize, type ActorEnv, type AuthorizeLog } from '../authz/middleware
 import type { Actor, ClassScope } from '../authz/policies.js';
 import type { InteractiveRepository } from './interactive.js';
 import type { MediaRepository } from './repository.js';
-import type { SuggestionRepository } from './suggestions.js';
+import { TranscriptChangedError, type SuggestionRepository } from './suggestions.js';
 
 export interface SuggestionRouteDeps {
   classes: { scope(classId: string, userId: string): Promise<ClassScope> };
@@ -91,10 +93,18 @@ export function createSuggestionRoutes(deps: SuggestionRouteDeps): Hono<ActorEnv
     if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
     const actor = c.get('actor').id;
     // Accepting creates the chapter or checkpoint in the same transaction as the decision.
-    const decided =
-      parsed.data.decision === 'accept'
-        ? await deps.suggestions.accept(item.id, sid.data, actor)
-        : await deps.suggestions.decide(item.id, sid.data, 'dismissed', actor);
+    let decided;
+    try {
+      decided =
+        parsed.data.decision === 'accept'
+          ? await deps.suggestions.accept(item.id, sid.data, actor)
+          : await deps.suggestions.decide(item.id, sid.data, 'dismissed', actor);
+    } catch (error) {
+      if (error instanceof TranscriptChangedError) {
+        return c.json({ error: 'transcript_changed' }, 409);
+      }
+      throw error;
+    }
     if (!decided) return c.json({ error: 'not_found' }, 404);
     return c.body(null, 204);
   });

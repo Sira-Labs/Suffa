@@ -80,6 +80,7 @@ recorded fixtures. Quality differs across models — evals (ADR-0011) gate route
   `ministral-14b-latest` then `ministral-8b-latest` (migration 0025; the starting Mistral
   tier has no Medium/Small, switch in admin → KI when it does). Their Anthropic
   routes remain listed but switched off, so a Mistral outage cannot fall back to the US.
+  `recording.proofread` (transcript corrections, migration 0030) follows the same rule.
   Other tasks (tutor, grading) keep their routes.
 - Prices for the Mistral routes are estimates in the routing table; check them in the
   Mistral console and correct them in the admin area.

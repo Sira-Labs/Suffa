@@ -267,6 +267,8 @@ describe.skipIf(!url)('Recording summaries (Postgres)', () => {
     );
     expect(rows.every((r) => r.provider === 'mistral')).toBe(true);
     expect(rows.map((r) => r.task)).toEqual([
+      'recording.proofread',
+      'recording.proofread',
       'recording.suggest',
       'recording.suggest',
       'recording.summarize',

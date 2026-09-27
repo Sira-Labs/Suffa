@@ -32,8 +32,8 @@ describe('settings sync schema: weekly goal (story 5.5)', () => {
 });
 
 describe('settings sync schema: course (ADR-0025)', () => {
-  it('defaults to the first course for app versions that do not send it', () => {
-    expect(SYNC_SCHEMAS.settings.parse(settings).course).toBe('bayna-yadayk');
+  it('leaves the course out for app versions that do not send it', () => {
+    expect(SYNC_SCHEMAS.settings.parse(settings).course).toBeUndefined();
   });
 
   it('accepts known courses only', () => {

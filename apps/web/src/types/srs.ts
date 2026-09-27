@@ -112,8 +112,8 @@ export interface SettingsRecord extends Syncable {
   weeklyGoal: number;
   showTransliteration: boolean;
   dialectNotes: boolean;
-  /** The learner's own course (ADR-0025); records from before courses have none. */
-  course?: CourseId;
+  /** The learner's own course (ADR-0025); none or null means the default course. */
+  course?: CourseId | null;
 }
 
 export type TashkilLevel = 'full' | 'partial' | 'none';

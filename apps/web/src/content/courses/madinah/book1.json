@@ -1,0 +1,180 @@
+{
+  "course": "madinah",
+  "book": 1,
+  "title": "دروس اللغة العربية لغير الناطقين بها – الجزء الأول",
+  "author": "Dr. V. Abdur Rahim",
+  "note": "Links only (ADR-0023, ADR-0025): the book, its keys and the author's audio are hosted by AbdurRahman.org and archive.org, marked 'for personal use only, by kind permission of Shaykh Dr. V. Abdur Raheem'. Lesson start pages were read from the PDF on 2026-09-27.",
+  "sources": {
+    "book": "https://abdurrahman.org/wp-content/uploads/2014/01/madina-book-1-arabic-text-dr-v-abdurrahim.pdf",
+    "solutions": "https://abdurrahman.org/wp-content/uploads/2014/08/madina-book-1-arabic-solutions.pdf",
+    "englishKey": "https://abdurrahman.org/wp-content/uploads/2014/08/madina-book-1-english-key.pdf",
+    "glossary": "https://abdurrahman.org/wp-content/uploads/2014/08/madina-books-glossary.pdf",
+    "classNotes": "https://abdurrahman.org/2014/03/05/madina-arabic-book-1-class-notes/",
+    "videos": "https://abdurrahman.org/arabic-learning/dvds/",
+    "overview": "https://abdurrahman.org/arabic-learning/madina-arabic/",
+    "audioCollection": "https://archive.org/details/MAA_BK1_VAR"
+  },
+  "lessons": [
+    {
+      "unit": 101,
+      "lesson": 1,
+      "title": "الدرس الأول",
+      "page": 2,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L01.mp3"
+    },
+    {
+      "unit": 102,
+      "lesson": 2,
+      "title": "الدرس الثاني",
+      "page": 9,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L02.mp3"
+    },
+    {
+      "unit": 103,
+      "lesson": 3,
+      "title": "الدرس الثالث",
+      "page": 11,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L03.mp3"
+    },
+    {
+      "unit": 104,
+      "lesson": 4,
+      "title": "الدرس الرابع",
+      "page": 18,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L04.mp3"
+    },
+    {
+      "unit": 105,
+      "lesson": 5,
+      "title": "الدرس الخامس",
+      "page": 24,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L05.mp3"
+    },
+    {
+      "unit": 106,
+      "lesson": 6,
+      "title": "الدرس السادس",
+      "page": 30,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L06.mp3"
+    },
+    {
+      "unit": 107,
+      "lesson": 7,
+      "title": "الدرس السابع",
+      "page": 36,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L07.mp3"
+    },
+    {
+      "unit": 108,
+      "lesson": 8,
+      "title": "الدرس الثامن",
+      "page": 39,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L08.mp3"
+    },
+    {
+      "unit": 109,
+      "lesson": 9,
+      "title": "الدرس التاسع",
+      "page": 44,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L09.mp3"
+    },
+    {
+      "unit": 110,
+      "lesson": 10,
+      "title": "الدرس العاشر",
+      "page": 51,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L10.mp3"
+    },
+    {
+      "unit": 111,
+      "lesson": 11,
+      "title": "الدرس الحادي عشر",
+      "page": 58,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L11.mp3"
+    },
+    {
+      "unit": 112,
+      "lesson": 12,
+      "title": "الدرس الثاني عشر",
+      "page": 60,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L12.mp3"
+    },
+    {
+      "unit": 113,
+      "lesson": 13,
+      "title": "الدرس الثالث عشر",
+      "page": 65,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L13.mp3"
+    },
+    {
+      "unit": 114,
+      "lesson": 14,
+      "title": "الدرس الرابع عشر",
+      "page": 79,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L14.mp3"
+    },
+    {
+      "unit": 115,
+      "lesson": 15,
+      "title": "الدرس الخامس عشر",
+      "page": 84,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L15.mp3"
+    },
+    {
+      "unit": 116,
+      "lesson": 16,
+      "title": "الدرس السادس عشر",
+      "page": 89,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L16.mp3"
+    },
+    {
+      "unit": 117,
+      "lesson": 17,
+      "title": "الدرس السابع عشر",
+      "page": 93,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L17.mp3"
+    },
+    {
+      "unit": 118,
+      "lesson": 18,
+      "title": "الدرس الثامن عشر",
+      "page": 97,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L18.mp3"
+    },
+    {
+      "unit": 119,
+      "lesson": 19,
+      "title": "الدرس التاسع عشر",
+      "page": 102,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L19.mp3"
+    },
+    {
+      "unit": 120,
+      "lesson": 20,
+      "title": "الدرس العشرون",
+      "page": 106,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L20.mp3"
+    },
+    {
+      "unit": 121,
+      "lesson": 21,
+      "title": "الدرس الحادي والعشرون",
+      "page": 111,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L21.mp3"
+    },
+    {
+      "unit": 122,
+      "lesson": 22,
+      "title": "الدرس الثاني والعشرون",
+      "page": 114,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L22.mp3"
+    },
+    {
+      "unit": 123,
+      "lesson": 23,
+      "title": "الدرس الثالث والعشرون",
+      "page": 117,
+      "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L23.mp3"
+    }
+  ]
+}

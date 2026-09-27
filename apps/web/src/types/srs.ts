@@ -6,6 +6,7 @@
  *   - updated_at: ISO timestamp (basis for last-write-wins, see ADR-0002)
  *   - deleted:    soft-delete flag (tombstone) so deletions can be synced
  */
+import type { CourseId } from '@suffa/engagement';
 
 export interface Syncable {
   id: string;
@@ -111,6 +112,8 @@ export interface SettingsRecord extends Syncable {
   weeklyGoal: number;
   showTransliteration: boolean;
   dialectNotes: boolean;
+  /** The learner's own course (ADR-0025); records from before courses have none. */
+  course?: CourseId;
 }
 
 export type TashkilLevel = 'full' | 'partial' | 'none';

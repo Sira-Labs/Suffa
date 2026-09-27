@@ -135,10 +135,11 @@ function AssignmentForm({
   course: CourseId;
   onAdded: () => Promise<void>;
 }) {
-  const units = courseById(course).units;
+  // Units can only be assigned where a unit test exists (our own exercises, ADR-0025).
+  const { units, exercises } = courseById(course);
   const mediaApi = useMemo(() => new MediaApi(), []);
   const [recordings, setRecordings] = useState<MediaItem[]>([]);
-  const [choice, setChoice] = useState(`unit:${units[0]}`);
+  const [choice, setChoice] = useState(exercises ? `unit:${units[0]}` : '');
   const [due, setDue] = useState(() =>
     new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10)
   );
@@ -154,8 +155,14 @@ function AssignmentForm({
     });
   }, [mediaApi, classId]);
 
+  // Without unit tests the first recording is the default choice.
+  useEffect(() => {
+    if (!choice && recordings[0]) setChoice(`recording:${recordings[0].id}`);
+  }, [choice, recordings]);
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!choice) return;
     const [kind, ref] = choice.split(':') as ['unit' | 'recording', string];
     const title =
       kind === 'unit'
@@ -184,15 +191,18 @@ function AssignmentForm({
         value={choice}
         onChange={(e) => setChoice(e.target.value)}
       >
-        <optgroup
-          label={`${course === 'madinah' ? 'Lektion' : 'Einheit'} (Test bestehen)`}
-        >
-          {units.map((u) => (
-            <option key={u} value={`unit:${u}`}>
-              {unitName(course, u)}
-            </option>
-          ))}
-        </optgroup>
+        {!choice && <option value="">Noch nichts zum Aufgeben</option>}
+        {exercises && (
+          <optgroup
+            label={`${course === 'madinah' ? 'Lektion' : 'Einheit'} (Test bestehen)`}
+          >
+            {units.map((u) => (
+              <option key={u} value={`unit:${u}`}>
+                {unitName(course, u)}
+              </option>
+            ))}
+          </optgroup>
+        )}
         {recordings.length > 0 && (
           <optgroup label="Aufnahme (anhören)">
             {recordings.map((r) => (
@@ -210,9 +220,15 @@ function AssignmentForm({
         value={due}
         onChange={(e) => setDue(e.target.value)}
       />
-      <button className="btn btn-primary" type="submit" disabled={!due}>
+      <button className="btn btn-primary" type="submit" disabled={!due || !choice}>
         Aufgabe stellen
       </button>
+      {!exercises && (
+        <span className="muted" style={{ fontSize: '0.85rem' }}>
+          Lektionen mit Test gibt es im {courseById(course).name} noch nicht; Aufnahmen
+          kannst du schon aufgeben.
+        </span>
+      )}
       {message && <span className="feedback-bad">{message}</span>}
     </form>
   );

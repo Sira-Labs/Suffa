@@ -13,6 +13,8 @@ import { ClassMembers } from './ClassMembers';
 import { ClassGrades } from './ClassGrades';
 import { ClassRecordings } from './ClassRecordings';
 import { ClassProgressView } from './ClassProgressView';
+import { courseById, type CourseId } from '@suffa/engagement';
+import { useActiveCourse, useSetCourse } from '@/services/courses';
 
 type Tab = 'progress' | 'life' | 'recordings' | 'grades' | 'certificates' | 'members';
 const TABS: { id: Tab; label: string }[] = [
@@ -66,6 +68,7 @@ export function ClassPage() {
           ← Klassen
         </Link>
         <h1>{summary.name}</h1>
+        {!teacher && <ClassCourseHint course={summary.course} />}
       </header>
       {teacher ? (
         <>
@@ -116,5 +119,23 @@ export function ClassPage() {
         </>
       )}
     </div>
+  );
+}
+
+/** A learner whose own course differs from the class's is offered to follow the class. */
+function ClassCourseHint({ course }: { course?: CourseId }) {
+  const active = useActiveCourse();
+  const setCourse = useSetCourse();
+  if (!course || course === active) return null;
+  return (
+    <p className="card row" style={{ flexWrap: 'wrap', gap: '0.5rem', margin: 0 }}>
+      <span>Diese Klasse lernt mit dem {courseById(course).name}.</span>
+      <button
+        className="btn btn-small btn-primary"
+        onClick={() => void setCourse(course)}
+      >
+        Zum {courseById(course).name} wechseln
+      </button>
+    </p>
   );
 }

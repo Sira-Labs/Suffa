@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, MemoryRouter, RouterProvider } from 'react-router-dom';
 import { Assignments } from '@/modules/classes/Assignments';
@@ -222,7 +222,7 @@ describe('Interactive recordings (integration)', () => {
     });
   });
 
-  it('offers the units of the class course (Medina lessons 101+, shown as Lektion)', async () => {
+  it('offers only recordings in a course without unit tests yet (Medina)', async () => {
     const router = createMemoryRouter(
       [
         {
@@ -235,12 +235,15 @@ describe('Interactive recordings (integration)', () => {
     render(<RouterProvider router={router} />);
     const form = await screen.findByRole('form', { name: 'Aufgabe stellen' });
     const select = within(form).getByLabelText('Aufgabe');
-    expect(within(select).queryByRole('option', { name: 'Einheit 1' })).toBeNull();
-    await userEvent.selectOptions(select, 'unit:103');
+    expect(within(select).queryByRole('option', { name: /Lektion|Einheit/ })).toBeNull();
+    expect(
+      within(form).getByText(/Lektionen mit Test gibt es im Medina-Kurs noch nicht/)
+    ).toBeTruthy();
+    // The published recording becomes the default choice once the list has loaded.
+    await waitFor(() => expect(select).toHaveValue(`recording:${MEDIA}`));
     await userEvent.click(within(form).getByRole('button', { name: 'Aufgabe stellen' }));
-    const post = requests.filter((r) => r.method === 'POST').at(-1);
-    expect(post).toMatchObject({
-      body: { kind: 'unit', ref: '103', title: 'Lektion 3: Test bestehen' },
+    expect(requests.filter((r) => r.method === 'POST').at(-1)).toMatchObject({
+      body: { kind: 'recording', ref: MEDIA, title: 'Anhören: Stunde 1' },
     });
   });
 
@@ -255,10 +258,13 @@ describe('Interactive recordings (integration)', () => {
     await userEvent.selectOptions(within(form).getByLabelText('Aufgabe'), 'unit:5');
     rerender(view('madinah'));
     const fresh = await screen.findByRole('form', { name: 'Aufgabe stellen' });
+    await waitFor(() =>
+      expect(within(fresh).getByLabelText('Aufgabe')).toHaveValue(`recording:${MEDIA}`)
+    );
     await userEvent.click(within(fresh).getByRole('button', { name: 'Aufgabe stellen' }));
     // Not the unit picked for the previous course (the server would refuse it).
     expect(requests.filter((r) => r.method === 'POST').at(-1)).toMatchObject({
-      body: { kind: 'unit', ref: '101', title: 'Lektion 1: Test bestehen' },
+      body: { kind: 'recording', ref: MEDIA },
     });
   });
 });

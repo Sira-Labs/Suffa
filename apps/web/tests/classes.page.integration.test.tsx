@@ -2,9 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
+import { Classes } from '@/modules/classes';
 import { ClassPage } from '@/modules/classes/ClassPage';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
-import { useSyncStore } from '@/state';
+import { db } from '@/services/storage';
+import { useSettingsStore, useSyncStore } from '@/state';
 
 const CLASS_ID = '11111111-1111-4111-8111-111111111111';
 const AMINA = '22222222-2222-4222-8222-222222222222';
@@ -34,7 +36,11 @@ const feed = {
 };
 
 /** A signed-in provider and a fake API answering the class routes. */
-async function signIn(role: 'teacher' | 'student', classRole: 'teacher' | 'student') {
+async function signIn(
+  role: 'teacher' | 'student',
+  classRole: 'teacher' | 'student',
+  course: 'bayna-yadayk' | 'madinah' = 'bayna-yadayk'
+) {
   const requests: { method: string; path: string; body: unknown }[] = [];
   const api = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = String(input);
@@ -59,6 +65,7 @@ async function signIn(role: 'teacher' | 'student', classRole: 'teacher' | 'stude
           {
             id: CLASS_ID,
             name: 'Arabisch 1a',
+            course,
             classRole,
             status: 'active',
             studentCount: 1,
@@ -166,5 +173,36 @@ describe('Class page (integration)', () => {
     expect(screen.getByText('Masha’Allah, Amina!')).toBeInTheDocument();
     expect(screen.queryByRole('tab')).toBeNull();
     expect(screen.queryByRole('form', { name: 'Challenge festlegen' })).toBeNull();
+  });
+
+  it('offers a learner the course of their class', async () => {
+    await db.settings.clear();
+    await useSettingsStore.getState().load();
+    await signIn('student', 'student', 'madinah');
+    renderClass();
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Zum Medina-Kurs wechseln' })
+    );
+    expect(useSettingsStore.getState().settings.course).toBe('madinah');
+    expect(screen.queryByRole('button', { name: 'Zum Medina-Kurs wechseln' })).toBeNull();
+  });
+
+  it('lets a teacher choose the course of a new class', async () => {
+    const requests = await signIn('teacher', 'teacher');
+    const router = createMemoryRouter([{ path: '/classes', element: <Classes /> }], {
+      initialEntries: ['/classes'],
+    });
+    render(<RouterProvider router={router} />);
+    await userEvent.type(
+      await screen.findByLabelText('Name der neuen Klasse'),
+      'Medina 1'
+    );
+    await userEvent.selectOptions(screen.getByLabelText('Kurs der Klasse'), 'madinah');
+    await userEvent.click(screen.getByRole('button', { name: 'Anlegen' }));
+    expect(
+      requests.find((r) => r.method === 'POST' && r.path === '/api/v1/classes')
+    ).toMatchObject({
+      body: { name: 'Medina 1', course: 'madinah' },
+    });
   });
 });

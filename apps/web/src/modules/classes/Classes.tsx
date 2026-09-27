@@ -7,6 +7,8 @@ import { Link } from 'react-router-dom';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { ClassesApi, type ClassSummary } from '@/services/classes/classesApi';
 import { useSyncStore } from '@/state';
+import { OFFERED_COURSES } from '@/services/courses';
+import { DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 
 export function Classes() {
   const provider = useSyncStore((s) => s.provider);
@@ -89,10 +91,11 @@ function CreateClass({
   onCreated: () => Promise<void>;
 }) {
   const [name, setName] = useState('');
+  const [course, setCourse] = useState<CourseId>(DEFAULT_COURSE);
   const [message, setMessage] = useState<string | null>(null);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await api.create(name.trim());
+    const result = await api.create(name.trim(), course);
     if (!result.ok) return setMessage(result.message);
     setName('');
     setMessage(null);
@@ -109,6 +112,20 @@ function CreateClass({
         aria-label="Name der neuen Klasse"
         style={{ flex: 1 }}
       />
+      {OFFERED_COURSES.length > 1 && (
+        <select
+          className="input"
+          aria-label="Kurs der Klasse"
+          value={course}
+          onChange={(e) => setCourse(e.target.value as CourseId)}
+        >
+          {OFFERED_COURSES.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      )}
       <button className="btn btn-primary" type="submit" disabled={!name.trim()}>
         Anlegen
       </button>

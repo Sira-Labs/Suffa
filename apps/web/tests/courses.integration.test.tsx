@@ -1,6 +1,6 @@
 /** Courses (ADR-0025): the learner chooses the textbook stream the learning path follows. */
 import { beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { Units } from '@/modules/units';
@@ -31,10 +31,13 @@ describe('Course switch and Medina path', () => {
     expect(await screen.findByRole('list', { name: 'Etappe 1: Einheiten' })).toBeTruthy();
 
     await userEvent.click(within(course).getByRole('button', { name: 'Medina-Kurs' }));
-    expect(useSettingsStore.getState().settings.course).toBe('madinah');
+    // Saving is asynchronous (IndexedDB first, then the store).
+    await waitFor(() =>
+      expect(useSettingsStore.getState().settings.course).toBe('madinah')
+    );
     expect(await db.settings.get('user-settings')).toMatchObject({ course: 'madinah' });
 
-    const lessons = screen.getAllByRole('listitem', { name: /^Lektion \d+$/ });
+    const lessons = await screen.findAllByRole('listitem', { name: /^Lektion \d+$/ });
     expect(lessons).toHaveLength(23);
     const second = screen.getByRole('listitem', { name: 'Lektion 2' });
     expect(

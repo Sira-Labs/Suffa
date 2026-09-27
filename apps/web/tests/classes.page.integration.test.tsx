@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { Classes } from '@/modules/classes';
@@ -183,8 +183,15 @@ describe('Class page (integration)', () => {
     await userEvent.click(
       await screen.findByRole('button', { name: 'Zum Medina-Kurs wechseln' })
     );
-    expect(useSettingsStore.getState().settings.course).toBe('madinah');
-    expect(screen.queryByRole('button', { name: 'Zum Medina-Kurs wechseln' })).toBeNull();
+    // Saving is asynchronous (IndexedDB first, then the store).
+    await waitFor(() =>
+      expect(useSettingsStore.getState().settings.course).toBe('madinah')
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('button', { name: 'Zum Medina-Kurs wechseln' })
+      ).toBeNull()
+    );
   });
 
   it('lets a teacher choose the course of a new class', async () => {

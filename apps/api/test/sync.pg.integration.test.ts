@@ -98,6 +98,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
         weeklyGoal: 3,
         showTransliteration: false,
         dialectNotes: true,
+        course: 'madinah',
       },
       user_vocab: {
         id: 'uv-1',

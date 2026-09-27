@@ -5,6 +5,7 @@
  *
  * Mirrors `apps/web/src/types/*.ts` (camelCase columns).
  */
+import { COURSE_IDS, DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 import { z } from 'zod';
 
 const isoTimestamp = z.string().datetime({ offset: true });
@@ -71,6 +72,8 @@ export const SYNC_SCHEMAS = {
     weeklyGoal: z.union([z.literal(3), z.literal(5), z.literal(7)]).default(5),
     showTransliteration: z.boolean(),
     dialectNotes: z.boolean(),
+    // The learner's own course choice (ADR-0025); older app versions do not send it.
+    course: z.enum(COURSE_IDS as [CourseId, ...CourseId[]]).default(DEFAULT_COURSE),
   }),
   user_vocab: z.object({
     ...base,

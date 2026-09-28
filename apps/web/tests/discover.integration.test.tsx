@@ -124,8 +124,9 @@ describe('Entdecken (integration)', () => {
   it('marks a video as seen once', async () => {
     const user = userEvent.setup();
     renderDiscover();
-    await screen.findByRole('list', { name: 'Empfehlungen' });
-    const card = screen.getByText('Das Alphabet').closest('li')!;
+    const list = await screen.findByRole('list', { name: 'Empfehlungen' });
+    // The daily pick above the list can be the same video, so look inside the list only.
+    const card = within(list).getByText('Das Alphabet').closest('li')!;
     await user.click(within(card).getByRole('button', { name: 'Als gesehen markieren' }));
     expect(await within(card).findByText('Gesehen')).toBeInTheDocument();
     expect(useListenStore.getState().progress['yt/vid00000001']).toMatchObject({

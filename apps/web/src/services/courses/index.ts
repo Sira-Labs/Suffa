@@ -32,7 +32,7 @@ export interface MadinahBook {
     videos: string;
     overview: string;
     audioCollection: string;
-    /** archive.org holds the identical book PDF; its BookReader may be embedded. */
+    /** archive.org holds the identical book PDF, which may be embedded. */
     archiveItem: string;
     archiveBookPath: string;
     vocabularyList: string;
@@ -90,18 +90,18 @@ export function madinahLesson(
 }
 
 /**
- * The archive.org BookReader for the book, open at a PDF page (its pages count from 0).
- * Embedding shows the book at its source; nothing is copied.
+ * The book PDF at archive.org (the identical file), at a page. Unlike the item's BookReader,
+ * which holds many PDFs and may open another one, this URL always names Book 1. archive.org
+ * serves it inline and allows embedding it.
  */
-export function bookReaderEmbedUrl(book: MadinahBook, page: number): string {
+export function archivePdfUrl(book: MadinahBook, page: number): string {
   const { archiveItem, archiveBookPath } = book.sources;
-  return `https://archive.org/embed/${archiveItem}/${archiveBookPath}/page/n${page - 1}/mode/1up`;
+  return `https://archive.org/download/${archiveItem}/${archiveBookPath}#page=${page}`;
 }
 
-/** The same reader as a full archive.org page (fallback when embedding fails). */
-export function bookReaderPageUrl(book: MadinahBook, page: number): string {
-  const { archiveItem, archiveBookPath } = book.sources;
-  return `https://archive.org/details/${archiveItem}/${archiveBookPath}/page/n${page - 1}/mode/1up`;
+/** The archive.org item with everything for the course (books, keys, notes, audio). */
+export function archiveItemUrl(book: MadinahBook): string {
+  return `https://archive.org/details/${book.sources.archiveItem}`;
 }
 
 /** A link that opens the book PDF at a page (browsers' PDF viewers honour #page). */

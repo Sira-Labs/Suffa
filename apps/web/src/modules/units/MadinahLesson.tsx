@@ -7,8 +7,8 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArabicText } from '@/components';
 import {
-  bookReaderEmbedUrl,
-  bookReaderPageUrl,
+  archiveItemUrl,
+  archivePdfUrl,
   bookPageUrl,
   madinahLesson,
   madinahLessonContent,
@@ -86,9 +86,11 @@ export function MadinahLessonPage() {
       </section>
 
       <BookReader
-        embedUrl={bookReaderEmbedUrl(book, lesson.page)}
-        pageUrl={bookReaderPageUrl(book, lesson.page)}
-        pdfUrl={bookPageUrl(book, lesson.page)}
+        // A new lesson starts with the book closed (it loads only on request).
+        key={lesson.unit}
+        pdfUrl={archivePdfUrl(book, lesson.page)}
+        mirrorUrl={bookPageUrl(book, lesson.page)}
+        itemUrl={archiveItemUrl(book)}
         page={lesson.page}
       />
 
@@ -176,55 +178,65 @@ function GrammarCard({ point }: { point: MadinahGrammar }) {
   );
 }
 
+/** True when the browser shows PDFs itself, so an embedded PDF works (desktop browsers). */
+function canEmbedPdf(): boolean {
+  return typeof navigator !== 'undefined' && navigator.pdfViewerEnabled === true;
+}
+
 /**
- * The book at the lesson's page, in the archive.org reader (loaded only when opened, so the
- * lesson stays light on a phone). Links cover browsers that refuse the embedded reader.
+ * The book at the lesson's page: the PDF from archive.org, embedded when the browser shows
+ * PDFs inline (loaded only when opened), otherwise opened in the phone's PDF viewer.
  */
 function BookReader({
-  embedUrl,
-  pageUrl,
   pdfUrl,
+  mirrorUrl,
+  itemUrl,
   page,
 }: {
-  embedUrl: string;
-  pageUrl: string;
   pdfUrl: string;
+  mirrorUrl: string;
+  itemUrl: string;
   page: number;
 }) {
   const [open, setOpen] = useState(false);
+  const embed = canEmbedPdf();
   return (
     <section className="card stack" aria-label="Im Buch">
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <strong>Im Buch (ab S. {page})</strong>
-        <button
-          type="button"
-          className="btn btn-small btn-primary"
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? 'Buch schließen' : 'Buch anzeigen'}
-        </button>
+        {embed ? (
+          <button
+            type="button"
+            className="btn btn-small btn-primary"
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+          >
+            {open ? 'Buch schließen' : 'Buch anzeigen'}
+          </button>
+        ) : (
+          <a className="btn btn-small btn-primary" href={pdfUrl} {...external}>
+            Buch öffnen
+          </a>
+        )}
       </div>
-      {open && (
+      {embed && open && (
         <iframe
           title={`Buch, Seite ${page}`}
-          src={embedUrl}
+          src={pdfUrl}
           style={{ width: '100%', height: '70vh', border: 0, borderRadius: '0.5rem' }}
-          allowFullScreen
           loading="lazy"
           referrerPolicy="no-referrer"
         />
       )}
       <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
         Lädt nichts?{' '}
-        <a href={pageUrl} {...external}>
-          Bei archive.org öffnen
+        <a href={mirrorUrl} {...external}>
+          PDF bei AbdurRahman.org
         </a>{' '}
-        oder{' '}
-        <a href={pdfUrl} {...external}>
-          als PDF
+        ·{' '}
+        <a href={itemUrl} {...external}>
+          Sammlung bei archive.org
         </a>
-        .
       </p>
     </section>
   );

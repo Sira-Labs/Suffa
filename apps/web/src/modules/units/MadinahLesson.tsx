@@ -1,15 +1,16 @@
 /**
  * One lesson of the Medina course (ADR-0025): our own word list and grammar in our own
- * words, the author's recording, and the book itself in the archive.org reader, embedded at
+ * words, the author's recording, and the book itself as page images from archive.org, at
  * the lesson's page. Book text is shown only at its source, never copied (ADR-0023).
  */
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArabicText } from '@/components';
 import {
-  archiveItemUrl,
   archivePdfUrl,
+  bookPageImageUrl,
   bookPageUrl,
+  lessonPages,
   madinahLesson,
   madinahLessonContent,
   type MadinahGrammar,
@@ -85,13 +86,13 @@ export function MadinahLessonPage() {
         />
       </section>
 
-      <BookReader
-        // A new lesson starts with the book closed (it loads only on request).
+      <BookPages
+        // A new lesson starts with the book closed (its pages load only on request).
         key={lesson.unit}
-        pdfUrl={archivePdfUrl(book, lesson.page)}
-        mirrorUrl={bookPageUrl(book, lesson.page)}
-        itemUrl={archiveItemUrl(book)}
-        page={lesson.page}
+        pages={lessonPages(book, lesson)}
+        image={(page, reduced) => bookPageImageUrl(book, page, reduced)}
+        pdfUrl={(page) => archivePdfUrl(book, page)}
+        mirrorUrl={(page) => bookPageUrl(book, page)}
       />
 
       <nav
@@ -178,64 +179,88 @@ function GrammarCard({ point }: { point: MadinahGrammar }) {
   );
 }
 
-/** True when the browser shows PDFs itself, so an embedded PDF works (desktop browsers). */
-function canEmbedPdf(): boolean {
-  return typeof navigator !== 'undefined' && navigator.pdfViewerEnabled === true;
-}
-
 /**
- * The book at the lesson's page: the PDF from archive.org, embedded when the browser shows
- * PDFs inline (loaded only when opened), otherwise opened in the phone's PDF viewer.
+ * The lesson's pages of the book, one at a time, as page images from archive.org. Plain
+ * images show on phones and computers alike; they load only when the book is opened.
  */
-function BookReader({
+function BookPages({
+  pages,
+  image,
   pdfUrl,
   mirrorUrl,
-  itemUrl,
-  page,
 }: {
-  pdfUrl: string;
-  mirrorUrl: string;
-  itemUrl: string;
-  page: number;
+  pages: number[];
+  image: (page: number, reduced: boolean) => string;
+  pdfUrl: (page: number) => string;
+  mirrorUrl: (page: number) => string;
 }) {
   const [open, setOpen] = useState(false);
-  const embed = canEmbedPdf();
+  const [index, setIndex] = useState(0);
+  const page = pages[index]!;
   return (
     <section className="card stack" aria-label="Im Buch">
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <strong>Im Buch (ab S. {page})</strong>
-        {embed ? (
-          <button
-            type="button"
-            className="btn btn-small btn-primary"
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? 'Buch schließen' : 'Buch anzeigen'}
-          </button>
-        ) : (
-          <a className="btn btn-small btn-primary" href={pdfUrl} {...external}>
-            Buch öffnen
-          </a>
-        )}
+        <strong>
+          Im Buch (S. {pages[0]}–{pages[pages.length - 1]})
+        </strong>
+        <button
+          type="button"
+          className="btn btn-small btn-primary"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? 'Buch schließen' : 'Buch anzeigen'}
+        </button>
       </div>
-      {embed && open && (
-        <iframe
-          title={`Buch, Seite ${page}`}
-          src={pdfUrl}
-          style={{ width: '100%', height: '70vh', border: 0, borderRadius: '0.5rem' }}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-        />
+      {open && (
+        <figure
+          className="stack"
+          style={{ margin: '0 auto', gap: '0.5rem', width: '100%', maxWidth: '40rem' }}
+        >
+          <a href={image(page, false)} {...external} title="Seite groß öffnen">
+            <img
+              src={image(page, true)}
+              alt={`Buchseite ${page}`}
+              style={{
+                width: '100%',
+                height: 'auto',
+                aspectRatio: '1275 / 1651',
+                background: 'white',
+                borderRadius: '0.5rem',
+              }}
+            />
+          </a>
+          <figcaption className="row" style={{ justifyContent: 'space-between' }}>
+            <button
+              type="button"
+              className="btn btn-small"
+              disabled={index === 0}
+              onClick={() => setIndex((i) => i - 1)}
+            >
+              ← Seite
+            </button>
+            <span className="muted">
+              S. {page} ({index + 1} von {pages.length})
+            </span>
+            <button
+              type="button"
+              className="btn btn-small"
+              disabled={index === pages.length - 1}
+              onClick={() => setIndex((i) => i + 1)}
+            >
+              Seite →
+            </button>
+          </figcaption>
+        </figure>
       )}
       <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-        Lädt nichts?{' '}
-        <a href={mirrorUrl} {...external}>
-          PDF bei AbdurRahman.org
+        Als PDF:{' '}
+        <a href={pdfUrl(page)} {...external}>
+          archive.org
         </a>{' '}
         ·{' '}
-        <a href={itemUrl} {...external}>
-          Sammlung bei archive.org
+        <a href={mirrorUrl(page)} {...external}>
+          AbdurRahman.org
         </a>
       </p>
     </section>

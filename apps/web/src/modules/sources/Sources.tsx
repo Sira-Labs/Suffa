@@ -42,7 +42,8 @@ export function Sources() {
             >
               archive.org
             </a>
-            ; das Buch erscheint im Buch-Leser von archive.org.
+            ; in den Lektionen zeigen wir die Buchseiten als Seitenbilder, die archive.org
+            aus dem PDF erzeugt und von dort geladen werden.
           </li>
           <li>
             Aufnahmen der Lektionen von Dr. V. Abdur Rahim:{' '}

@@ -21,6 +21,8 @@ export interface MadinahLesson {
 
 export interface MadinahBook {
   book: number;
+  /** Pages of the book PDF. */
+  pages: number;
   title: string;
   author: string;
   sources: {
@@ -39,6 +41,8 @@ export interface MadinahBook {
     grammarRules: string;
     crossword: string;
     slideNotes: string;
+    /** archive.org's page images of the PDF; `{leaf}` is the 0-based page, 4 digits. */
+    archivePageImage: string;
   };
   lessons: MadinahLesson[];
 }
@@ -99,9 +103,25 @@ export function archivePdfUrl(book: MadinahBook, page: number): string {
   return `https://archive.org/download/${archiveItem}/${archiveBookPath}#page=${page}`;
 }
 
-/** The archive.org item with everything for the course (books, keys, notes, audio). */
-export function archiveItemUrl(book: MadinahBook): string {
-  return `https://archive.org/details/${book.sources.archiveItem}`;
+/**
+ * A page of the book as an image that archive.org derives from the PDF (plain images, so they
+ * show on every device, unlike an embedded PDF). `reduced` halves the size for the page view.
+ */
+export function bookPageImageUrl(
+  book: MadinahBook,
+  page: number,
+  reduced = true
+): string {
+  const leaf = String(page - 1).padStart(4, '0');
+  const url = book.sources.archivePageImage.replace('{leaf}', leaf);
+  return reduced ? `${url}&reduce=2` : url;
+}
+
+/** The PDF pages of a lesson: from its first page to the page before the next lesson. */
+export function lessonPages(book: MadinahBook, lesson: MadinahLesson): number[] {
+  const next = book.lessons.find((l) => l.lesson === lesson.lesson + 1);
+  const last = next ? next.page - 1 : book.pages;
+  return Array.from({ length: last - lesson.page + 1 }, (_, i) => lesson.page + i);
 }
 
 /** A link that opens the book PDF at a page (browsers' PDF viewers honour #page). */

@@ -3,7 +3,7 @@
   "book": 1,
   "title": "دروس اللغة العربية لغير الناطقين بها – الجزء الأول",
   "author": "Dr. V. Abdur Rahim",
-  "note": "Links only (ADR-0023, ADR-0025): the book, its keys and the author's audio are hosted by AbdurRahman.org and archive.org, marked 'for personal use only, by kind permission of Shaykh Dr. V. Abdur Raheem'. Lesson start pages were read from the PDF on 2026-09-27. The same book PDF is on archive.org (identical file, same page numbers); the app embeds that file.",
+  "note": "Links only (ADR-0023, ADR-0025): the book, its keys and the author's audio are hosted by AbdurRahman.org and archive.org, marked 'for personal use only, by kind permission of Shaykh Dr. V. Abdur Raheem'. Lesson start pages were read from the PDF on 2026-09-27. The same book PDF is on archive.org (identical file, same page numbers); the app shows its lesson pages as page images that archive.org derives from it (loaded from archive.org, never copied).",
   "sources": {
     "book": "https://abdurrahman.org/wp-content/uploads/2014/01/madina-book-1-arabic-text-dr-v-abdurrahim.pdf",
     "solutions": "https://abdurrahman.org/wp-content/uploads/2014/08/madina-book-1-arabic-solutions.pdf",
@@ -18,7 +18,8 @@
     "vocabularyList": "https://archive.org/download/madinah_arabic__dr_v_abdur_rahim/book_1/madinah_arabic_1__vocabulary.pdf",
     "grammarRules": "https://archive.org/download/madinah_arabic__dr_v_abdur_rahim/book_1/madinah_arabic_1__grammer_rules.pdf",
     "crossword": "https://archive.org/download/madinah_arabic__dr_v_abdur_rahim/book_1/madinah_arabic_1__crossword.pdf",
-    "slideNotes": "https://archive.org/download/madinah_arabic__dr_v_abdur_rahim/book_1/madinah_arabic_1__slide_notes__v8.pdf"
+    "slideNotes": "https://archive.org/download/madinah_arabic__dr_v_abdur_rahim/book_1/madinah_arabic_1__slide_notes__v8.pdf",
+    "archivePageImage": "https://archive.org/download/madinah_arabic__dr_v_abdur_rahim/book_1/madinah_arabic_1_jp2.zip/madinah_arabic_1_jp2%2Fmadinah_arabic_1_{leaf}.jp2&ext=jpg"
   },
   "lessons": [
     {
@@ -182,5 +183,6 @@
       "page": 117,
       "audio": "https://archive.org/download/MAA_BK1_VAR/MAA_BK1_VAR_L23.mp3"
     }
-  ]
+  ],
+  "pages": 120
 }

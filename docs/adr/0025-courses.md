@@ -83,11 +83,14 @@ and our own exercises, and no copied book texts or pictures in the repo.
   - Each Medina lesson has its own page (`/units/madinah/<n>`). It shows our own content: the
     lesson's new words (facts) with German meanings, grammar in our own words with our own
     examples (`content/courses/madinah/book1-lessons.json`, lessons 1–5, draft).
-  - The page also has the author's recording and the book at the lesson's page: the PDF from
-    archive.org (the identical file, which names Book 1 for sure, unlike the item's BookReader
-    that holds many PDFs). Where the browser shows PDFs itself (`navigator.pdfViewerEnabled`),
-    it is embedded on request; on phones it opens in the phone's PDF viewer. CSP `frame-src`
-    allows `archive.org` and its download hosts (`*.archive.org`).
+  - The page also has the author's recording and the lesson's pages of the book, shown one at a
+    time as the page images archive.org derives from the identical PDF
+    (`madinah_arabic_1_jp2.zip`, `&reduce=2`, about 165 KB a page), loaded from archive.org
+    only when opened. Plain images show on every device. Two approaches failed in a real
+    browser test: the item's embedded BookReader stays blank for a file in a sub-folder, and
+    phone browsers do not show an embedded PDF. archive.org sends no CORS headers, so rendering the
+    PDF ourselves is not possible either. CSP `img-src` allows `archive.org` and
+    `*.archive.org`; links to the PDF at the page remain.
   - A page "Quellen & Lizenzen" (`/sources`) names every source with its terms.
   - Word ids are `md-<unit>-<n>`, so the words can become SRS cards later without new ids.
 - **Stage 2 and later:**

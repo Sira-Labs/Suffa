@@ -9,7 +9,10 @@ import { madinahLessonContent } from '@/services/courses';
 import { usePracticeStore, useSettingsStore } from '@/state';
 
 vi.mock('@/services/speech/tts', () => ({ speakArabic: vi.fn() }));
-vi.mock('@/services/speech', () => ({ speakArabic: vi.fn() }));
+vi.mock('@/services/speech', () => ({
+  speakArabic: vi.fn(),
+  isTtsSupported: () => false,
+}));
 
 function renderAt(path: string) {
   const router = createMemoryRouter(
@@ -127,6 +130,44 @@ describe('Medina lesson page', () => {
       itemId: second.id,
     });
     expect(await within(station).findByText(`1 ${counter}`)).toBeTruthy();
+  });
+
+  it('dictation: accepts the word without vowel signs, brings back skipped words', async () => {
+    const user = userEvent.setup();
+    await usePracticeStore.getState().load();
+    const words = madinahLessonContent(101)!.words;
+    renderAt('/units/madinah/1');
+    const station = await screen.findByRole('region', { name: 'Diktat' });
+    await user.click(within(station).getByRole('button', { name: 'Diktat starten' }));
+    // Without speech output the word is shown instead.
+    const shownWord = () => {
+      const hint = within(station).getByText(/das Wort:/);
+      return words.find((w) => w.ar === hint.querySelector('[lang="ar"]')!.textContent)!;
+    };
+    const first = shownWord();
+    const input = within(station).getByRole('textbox');
+    await user.type(input, 'خطأ');
+    await user.click(within(station).getByRole('button', { name: 'Prüfen' }));
+    expect(within(station).getByText('✗ Noch nicht richtig')).toBeTruthy();
+    // Skipping keeps the word in the round.
+    await user.click(within(station).getByRole('button', { name: 'Später' }));
+    expect(
+      within(station).getByText(`Noch ${words.length} Wörter in dieser Runde`)
+    ).toBeTruthy();
+
+    const second = shownWord();
+    expect(second.id).not.toBe(first.id);
+    const bare = second.ar.replace(/[\u064B-\u065F\u0670]/g, '');
+    await user.type(within(station).getByRole('textbox'), bare);
+    await user.click(within(station).getByRole('button', { name: 'Prüfen' }));
+    expect(within(station).getByText(/✓ Richtig/)).toBeTruthy();
+    expect(usePracticeStore.getState().records[`101:write:${second.id}`]).toMatchObject({
+      unit: 101,
+      skill: 'write',
+    });
+    expect(
+      await within(station).findByText(`1 von ${words.length} geschrieben`)
+    ).toBeTruthy();
   });
 
   it('ends the last lesson at the last page of the book', async () => {

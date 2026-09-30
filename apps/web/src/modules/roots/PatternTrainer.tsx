@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArabicText } from '@/components';
 import { speakArabic } from '@/services/speech';
@@ -17,6 +17,10 @@ export function PatternTrainer() {
     makePatternQuestion(pool)
   );
   const [chosen, setChosen] = useState<string | null>(null);
+  // The reached units load after the first render: start once there are words.
+  useEffect(() => {
+    if (question === null && pool.length > 0) setQuestion(makePatternQuestion(pool));
+  }, [pool, question]);
   const [score, setScore] = useState({ right: 0, total: 0 });
 
   const next = () => {

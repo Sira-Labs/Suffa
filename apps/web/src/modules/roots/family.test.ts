@@ -139,5 +139,9 @@ describe('makePatternQuestion', () => {
 
   it('gives no question without a second option', () => {
     expect(makePatternQuestion([pool[0]!])).toBeNull();
+    // Two words of one root and one pattern cannot be told apart by the question.
+    expect(
+      makePatternQuestion([w('كاتِب', 'ك-ت-ب', 'فاعِل'), w('كاتِبَة', 'ك-ت-ب', 'فاعِل')])
+    ).toBeNull();
   });
 });

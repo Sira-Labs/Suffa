@@ -31,12 +31,14 @@ export function RootExplorer() {
   const drillWords = useLearnedRootWords();
 
   const chips = useMemo(() => {
-    const q = query.trim().toLowerCase().replace(/[\s-]/g, '');
-    if (!q) return families.slice(0, CHIPS);
+    // Root letters match without spaces or dashes; German meanings keep their spaces.
+    const text = query.trim().toLowerCase();
+    const letters = text.replace(/[\s-]/g, '');
+    if (!letters) return families.slice(0, CHIPS);
     return families.filter(
       (f) =>
-        f.letters.join('').includes(q) ||
-        f.words.some((w) => w.de.toLowerCase().includes(q))
+        f.letters.join('').includes(letters) ||
+        f.words.some((w) => w.de.toLowerCase().includes(text))
     );
   }, [families, query]);
 

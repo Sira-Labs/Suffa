@@ -213,8 +213,14 @@ export function makePatternQuestion(
     }
     return out;
   };
+  // Same eligibility as the wrong options below, so an answer always has one.
   const candidates = pool.filter((w) =>
-    pool.some((o) => o.ar !== w.ar && (o.root === w.root || o.wazn === w.wazn))
+    pool.some(
+      (o) =>
+        o.ar !== w.ar &&
+        ((o.root === w.root && o.wazn !== w.wazn) ||
+          (o.wazn === w.wazn && o.root !== w.root))
+    )
   );
   const answer = pick(candidates);
   if (!answer) return null;

@@ -69,6 +69,10 @@ describe('Root families (integration)', () => {
     renderAt('/roots');
     await user.type(screen.getByRole('searchbox'), 'Lehrer');
     expect(screen.getByRole('button', { name: 'د ر س' })).toBeTruthy();
+    // A meaning of several words keeps its spaces.
+    await user.clear(screen.getByRole('searchbox'));
+    await user.type(screen.getByRole('searchbox'), 'Friede; Begrüßung');
+    expect(screen.getByRole('button', { name: 'س ل م' })).toBeTruthy();
     await user.clear(screen.getByRole('searchbox'));
     await user.type(screen.getByRole('searchbox'), 'xyz');
     expect(screen.getByText('Keine Wurzel gefunden.')).toBeTruthy();

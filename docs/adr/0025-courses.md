@@ -107,8 +107,14 @@ and our own exercises, and no copied book texts or pictures in the repo.
   - The words are vocabulary (`madinahVokabeln`) with recognition and recall review cards. A word
     joins the learner's reviews once practised in its lesson, so Medina learners review exactly
     what they met, and bayna yadayk learners get no Medina cards they never saw.
+- **Stage 2, third part (done): dictation.** A "Diktat" station reads a word of the lesson aloud
+  (or shows it where the browser has no speech output); the learner writes it in Arabic, vowel
+  signs optional, graded like the unit writing station. Words not written right come back at the
+  end of the round. A word written right is stored once as practice with the existing skill
+  `write` under the lesson's unit, so the daily "write" quest counts it and the sync needs no
+  change.
 - **Stage 2 and later:**
-  - more Madinah exercises, lesson by lesson (dictation, gap texts, a lesson test);
+  - more Madinah exercises, lesson by lesson (gap texts, a lesson test);
   - stages and badges per course (`STAGES` gets a `course`);
   - content loaded per course (`content/courses/<id>/`);
   - the screens that still assume _bayna yadayk_ read the active course: dashboard level card,

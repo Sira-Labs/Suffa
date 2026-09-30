@@ -8,7 +8,7 @@
  * instead of being duplicated (see ADR-0002).
  */
 import type { CardKind, UserVocab } from '@/types';
-import { content } from '@/content';
+import { content, madinahVokabeln } from '@/content';
 
 export interface CardSeed {
   id: string;
@@ -34,6 +34,12 @@ export function buildCardSeeds(userVocab: UserVocab[] = []): CardSeed[] {
     if (v.plural) seeds.push(seed('plural', v.id));
     // Pronouns and particles have no root: no root card for them.
     if (v.wurzel) seeds.push(seed('root_to_word', v.id));
+  }
+
+  // Medina words: recognition and recall only (no plural or root data yet).
+  for (const v of madinahVokabeln) {
+    seeds.push(seed('vocab_ar_de', v.id));
+    seeds.push(seed('vocab_de_ar', v.id));
   }
 
   for (const n of content.nisba) {

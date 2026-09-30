@@ -17,6 +17,7 @@ import type {
   Vokabel,
 } from '@/types';
 import metaRaw from './meta.json';
+import madinahBook1Lessons from './courses/madinah/book1-lessons.json';
 
 interface UnitFile {
   einheit: number;
@@ -104,3 +105,24 @@ export const wurzelFamilien: Map<string, WurzelFamilie> = (() => {
 })();
 
 export const CONTENT_VERSION = content.meta.contentVersion;
+
+/**
+ * Words of the Medina lessons (ADR-0025, stage 2) as vocabulary: our own German meanings of the
+ * words a lesson introduces. They become review cards once practised in their lesson, so they
+ * live apart from `content.vokabeln` (the bayna yadayk units).
+ */
+export const madinahVokabeln: Vokabel[] = (
+  madinahBook1Lessons.lessons as {
+    unit: number;
+    words: { id: string; ar: string; de: string }[];
+  }[]
+).flatMap((lesson) =>
+  lesson.words.map((w) => ({
+    id: w.id,
+    ar: w.ar,
+    de: w.de,
+    tr: '',
+    wurzel: '',
+    einheit: lesson.unit,
+  }))
+);

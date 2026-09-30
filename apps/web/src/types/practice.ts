@@ -6,9 +6,10 @@ export type PracticeSkill = 'read' | 'grammar' | 'cloze' | 'write' | 'speak' | '
 /**
  * Practice outside the units (stored under unit 0): the alphabet course, checkpoints answered
  * correctly in class recordings (Sprint 8), and writing Arabic to al-Muʿallim (Sprint 10, once
- * a day: item `tutor/<day>`).
+ * a day: item `tutor/<day>`). Medina lessons (ADR-0025) store their practised words as `words`
+ * under the lesson's unit number.
  */
-export type CourseSkill = 'letters' | 'checkpoint' | 'tutor';
+export type CourseSkill = 'letters' | 'checkpoint' | 'tutor' | 'words';
 
 /**
  * One practised item of a unit skill (a dialogue read, a word written correctly, a dialogue

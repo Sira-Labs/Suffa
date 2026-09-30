@@ -38,6 +38,7 @@ const FORMAT_LABELS: Record<ExamFormat, string> = {
   speed: 'Speed-Round',
   adaptive: 'Adaptiver Modus',
   stage_test: 'Etappentest',
+  madinah_lesson: 'Medina-Lektionstest',
 };
 
 type Stage = 'config' | 'running' | 'result';

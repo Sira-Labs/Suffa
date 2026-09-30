@@ -1,12 +1,12 @@
 /** A Medina lesson page (ADR-0025): own words and grammar, the recording, the book reader. */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { MadinahLessonPage } from '@/modules/units/MadinahLesson';
 import { Sources } from '@/modules/sources';
 import { madinahLessonContent } from '@/services/courses';
-import { usePracticeStore, useSettingsStore } from '@/state';
+import { useEnrollmentStore, usePracticeStore, useSettingsStore } from '@/state';
 
 vi.mock('@/services/speech/tts', () => ({ speakArabic: vi.fn() }));
 vi.mock('@/services/speech', () => ({
@@ -167,6 +167,74 @@ describe('Medina lesson page', () => {
     });
     expect(
       await within(station).findByText(`1 von ${words.length} geschrieben`)
+    ).toBeTruthy();
+  });
+
+  it('gap text: a wrong choice retries the sentence, a right one fills and stores it', async () => {
+    const user = userEvent.setup();
+    await usePracticeStore.getState().load();
+    const gap = madinahLessonContent(101)!.gaps[0]!;
+    renderAt('/units/madinah/1');
+    const station = await screen.findByRole('region', { name: 'Lückentext' });
+    await user.click(within(station).getByRole('button', { name: 'Lückentext starten' }));
+    expect(within(station).getByText(gap.de)).toBeTruthy();
+    const options = within(station).getByRole('group', { name: 'Fehlendes Wort wählen' });
+    const wrong = gap.options.find((o) => o !== gap.answer)!;
+    await user.click(within(options).getByRole('button', { name: wrong }));
+    expect(within(station).getByRole('status')).toHaveTextContent('Nicht ganz');
+    await user.click(within(station).getByRole('button', { name: 'Nochmal' }));
+    await user.click(within(options).getByRole('button', { name: gap.answer }));
+    expect(within(station).getByRole('status')).toHaveTextContent('Richtig!');
+    expect(usePracticeStore.getState().records['101:cloze:gap-1']).toMatchObject({
+      skill: 'cloze',
+    });
+    await user.click(within(station).getByRole('button', { name: 'Weiter' }));
+    expect(
+      within(station).getByText('Satz 2 von ' + madinahLessonContent(101)!.gaps.length)
+    ).toBeTruthy();
+  });
+
+  it('lesson test: all right passes, is stored like a unit test and shows the best result', async () => {
+    const user = userEvent.setup();
+    await useEnrollmentStore.getState().load();
+    const content = madinahLessonContent(102)!;
+    renderAt('/units/madinah/2');
+    const station = await screen.findByRole('region', { name: 'Lektionstest' });
+    await user.click(
+      within(station).getByRole('button', { name: /Test starten|Test wiederholen/ })
+    );
+    const total = content.words.length + content.gaps.length;
+    for (let n = 1; n <= total; n++) {
+      expect(within(station).getByText(`Frage ${n} von ${total}`)).toBeTruthy();
+      // A gap question shows its German sentence; otherwise it asks a word's meaning.
+      const gap = content.gaps.find((g) => within(station).queryByText(g.de));
+      const word = content.words.find((w) =>
+        within(station).queryByText(w.ar, { selector: '[lang="ar"]:not(button)' })
+      );
+      const expected = gap ? gap.answer : word!.de;
+      const group = within(station).getByRole('group', { name: 'Antwort wählen' });
+      await user.click(within(group).getByRole('button', { name: expected }));
+      await user.click(
+        within(station).getByRole('button', {
+          name: n === total ? 'Test abgeben' : 'Weiter',
+        })
+      );
+    }
+    expect(within(station).getByRole('status')).toHaveTextContent(
+      `Bestanden! – ${total} von ${total} richtig`
+    );
+    // The result is saved after the last answer.
+    await waitFor(() =>
+      expect(
+        useEnrollmentStore
+          .getState()
+          .exams.find((e) => e.format === 'madinah_lesson' && e.units[0] === 102)
+      ).toMatchObject({ score: total, total })
+    );
+    expect(
+      await within(station).findByText(
+        `Bestes Ergebnis: ${total} von ${total} · bestanden`
+      )
     ).toBeTruthy();
   });
 

@@ -103,6 +103,22 @@ export function stableShuffle<T>(
   return [...items].sort((a, b) => hash(`${seed}|${key(a)}`) - hash(`${seed}|${key(b)}`));
 }
 
+/**
+ * A new random order on every call (Fisher–Yates). Use it where each round should differ;
+ * `stableShuffle` keeps one order per seed and barely changes between similar seeds.
+ */
+export function randomShuffle<T>(
+  items: readonly T[],
+  random: () => number = Math.random
+): T[] {
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [out[i], out[j]] = [out[j]!, out[i]!];
+  }
+  return out;
+}
+
 function hash(text: string): number {
   let h = 0;
   for (const ch of text) h = (h * 31 + ch.charCodeAt(0)) >>> 0;

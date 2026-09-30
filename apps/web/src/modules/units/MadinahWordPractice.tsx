@@ -5,7 +5,7 @@
  */
 import { useMemo, useState } from 'react';
 import { ArabicText } from '@/components';
-import { practiceId, stableShuffle } from '@/services/practice';
+import { practiceId, randomShuffle, stableShuffle } from '@/services/practice';
 import type { MadinahWord } from '@/services/courses';
 import { speakArabic } from '@/services/speech';
 import { useCelebrationStore, usePracticeStore } from '@/state';
@@ -46,11 +46,7 @@ export function MadinahWordPractice({
   const start = () => {
     // Words not practised yet come first; a finished lesson repeats all of them.
     const open = words.filter((w) => !isDone(w.id));
-    const round = stableShuffle(
-      open.length ? open : words,
-      String(Date.now()),
-      (w) => w.id
-    );
+    const round = randomShuffle(open.length ? open : words);
     setQueue(round);
     setChosen(null);
     setFirstTry(0);

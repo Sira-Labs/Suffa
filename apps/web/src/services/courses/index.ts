@@ -71,6 +71,17 @@ export interface MadinahGrammar {
   examples: { ar: string; de: string }[];
 }
 
+/**
+ * A gap sentence of our own: the sentence with `___` where a word is missing, the missing word,
+ * the choices (answer included) and the German meaning of the whole sentence.
+ */
+export interface MadinahGap {
+  ar: string;
+  answer: string;
+  options: string[];
+  de: string;
+}
+
 /** Our own content for a lesson (draft until a teacher has reviewed it). */
 export interface MadinahLessonContent {
   unit: number;
@@ -79,6 +90,7 @@ export interface MadinahLessonContent {
   status: 'draft' | 'reviewed';
   words: MadinahWord[];
   grammar: MadinahGrammar[];
+  gaps: MadinahGap[];
 }
 
 const LESSON_CONTENT: ReadonlyMap<number, MadinahLessonContent> = new Map(

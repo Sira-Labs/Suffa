@@ -218,6 +218,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
     speed: () => null,
     adaptive: () => null,
     stage_test: () => null, // a stage test mixes the other formats
+    madinah_lesson: () => null, // asked on the Medina lesson page, not in the exam
   };
 
   // "mixed_chapter", "speed" and "adaptive" draw on the full format set.

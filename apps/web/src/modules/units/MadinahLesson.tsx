@@ -18,6 +18,8 @@ import {
 } from '@/services/courses';
 import { speakArabic } from '@/services/speech/tts';
 import { MadinahDictation } from './MadinahDictation';
+import { MadinahGaps } from './MadinahGaps';
+import { MadinahLessonTest } from './MadinahLessonTest';
 import { MadinahWordPractice } from './MadinahWordPractice';
 
 const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
@@ -67,12 +69,22 @@ export function MadinahLessonPage() {
             unit={lesson.unit}
             words={content.words}
           />
+          <MadinahGaps
+            key={`gaps-${lesson.unit}`}
+            unit={lesson.unit}
+            gaps={content.gaps}
+          />
           <section className="stack" aria-label="Grammatik">
             <h2 style={{ margin: 0 }}>Grammatik</h2>
             {content.grammar.map((g) => (
               <GrammarCard key={g.title} point={g} />
             ))}
           </section>
+          <MadinahLessonTest
+            key={`test-${lesson.unit}`}
+            unit={lesson.unit}
+            content={content}
+          />
           {content.status === 'draft' && (
             <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
               Entwurf: Wortbedeutungen und Erklärungen sind von Suffa geschrieben und noch

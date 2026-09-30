@@ -2594,3 +2594,17 @@ button.quiz-option:disabled {
   border-color: var(--bad);
   color: var(--bad);
 }
+
+/* ---------- Medina gap sentences and lesson test ---------- */
+.gap-blank {
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+.gap-filled {
+  margin: 0 0.25rem;
+  color: var(--good);
+}
+.pattern-option.chosen {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}

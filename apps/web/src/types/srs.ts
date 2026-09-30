@@ -77,7 +77,9 @@ export type ExamFormat =
   | 'speed'
   | 'adaptive'
   /** Test at the end of a stage (units 1–8 or 9–16), step 3 of the unit room. */
-  | 'stage_test';
+  | 'stage_test'
+  /** Test of one Medina lesson (ADR-0025): meanings and gap sentences. */
+  | 'madinah_lesson';
 
 export interface ExamItemResult {
   contentRef: string;

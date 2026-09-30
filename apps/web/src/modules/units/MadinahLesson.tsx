@@ -17,6 +17,7 @@ import {
   type MadinahWord,
 } from '@/services/courses';
 import { speakArabic } from '@/services/speech/tts';
+import { MadinahDictation } from './MadinahDictation';
 import { MadinahWordPractice } from './MadinahWordPractice';
 
 const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
@@ -58,6 +59,11 @@ export function MadinahLessonPage() {
           <WordList words={content.words} />
           <MadinahWordPractice
             key={lesson.unit}
+            unit={lesson.unit}
+            words={content.words}
+          />
+          <MadinahDictation
+            key={`dictation-${lesson.unit}`}
             unit={lesson.unit}
             words={content.words}
           />

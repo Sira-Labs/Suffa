@@ -91,6 +91,11 @@ and our own exercises, and no copied book texts or pictures in the repo.
     phone browsers do not show an embedded PDF. archive.org sends no CORS headers, so rendering the
     PDF ourselves is not possible either. CSP `img-src` allows `archive.org` and
     `*.archive.org`; links to the PDF at the page remain.
+  - If archive.org cannot deliver a page image, the page says so and points to the PDF links.
+  - The same course is sold in print as "Madinah Arabic Reader" by Goodword Books, split into
+    8 books (our book 1 = their books 1 and 2). Each lesson names its book and start page in
+    that edition, so learners with the printed book find it. We show none of its pages: its
+    scans on archive.org carry "© Goodword Books" and no permission, unlike the old edition.
   - A page "Quellen & Lizenzen" (`/sources`) names every source with its terms.
   - Word ids are `md-<unit>-<n>`, so the words can become SRS cards later without new ids.
 - **Stage 2 and later:**

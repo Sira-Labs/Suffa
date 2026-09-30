@@ -10,7 +10,11 @@ import {
   type PullCursor,
   type SyncRepository,
 } from '../src/sync/repository.js';
-import type { SyncRecord, SyncTableName } from '../src/sync/schemas.js';
+import {
+  SYNC_SCHEMAS,
+  type SyncRecord,
+  type SyncTableName,
+} from '../src/sync/schemas.js';
 
 const ALICE = '11111111-1111-4111-8111-111111111111';
 const BOB = '22222222-2222-4222-8222-222222222222';
@@ -231,5 +235,23 @@ describe('newestPerId', () => {
     const newer = card('c1', '2026-09-23T12:30:00.000+02:00'); // 10:30Z
     const other = card('c2');
     expect(newestPerId([newer, older, other])).toEqual([newer, other]);
+  });
+});
+
+describe('practice_progress schema', () => {
+  it('accepts the Medina lesson words (unit 101, skill words)', () => {
+    const record = {
+      id: '101:words:md-101-01',
+      updated_at: '2026-09-30T10:00:00.000Z',
+      deleted: false,
+      unit: 101,
+      skill: 'words',
+      itemId: 'md-101-01',
+      practisedAt: '2026-09-30T10:00:00.000Z',
+    };
+    expect(SYNC_SCHEMAS.practice_progress.safeParse(record).success).toBe(true);
+    expect(
+      SYNC_SCHEMAS.practice_progress.safeParse({ ...record, skill: 'unknown' }).success
+    ).toBe(false);
   });
 });

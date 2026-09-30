@@ -20,7 +20,9 @@ export function introducibleRefs(
     'vokabeln' | 'verben' | 'nisba' | 'phonologie_minimalpaare'
   >,
   units: readonly number[],
-  userVocab: readonly Pick<UserVocab, 'id'>[]
+  userVocab: readonly Pick<UserVocab, 'id'>[],
+  /** Further refs the learner has met, e.g. Medina words practised in their lesson. */
+  practised: Iterable<string> = []
 ): Set<string> {
   const keep = inReachedUnits(units);
   return new Set([
@@ -29,5 +31,6 @@ export function introducibleRefs(
     ...bundle.nisba.map((n) => n.id),
     ...bundle.phonologie_minimalpaare.map((m) => m.id),
     ...userVocab.map((v) => v.id),
+    ...practised,
   ]);
 }

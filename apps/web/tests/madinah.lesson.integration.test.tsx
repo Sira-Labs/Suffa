@@ -1,6 +1,6 @@
 /** A Medina lesson page (ADR-0025): own words and grammar, the recording, the book reader. */
 import { beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { MadinahLessonPage } from '@/modules/units/MadinahLesson';
@@ -88,6 +88,35 @@ describe('Medina lesson page', () => {
     expect(await screen.findByText('Im Buch (S. 117–120)')).toBeTruthy();
   });
 
+  it('points to the PDF when archive.org cannot deliver a page image', async () => {
+    renderAt('/units/madinah/2');
+    const book = await screen.findByRole('region', { name: 'Im Buch' });
+    await userEvent.click(within(book).getByRole('button', { name: 'Buch anzeigen' }));
+    fireEvent.error(within(book).getByRole('img', { name: 'Buchseite 9' }));
+    expect(within(book).getByRole('alert')).toHaveTextContent(
+      'Seite 9 lässt sich gerade nicht laden'
+    );
+    // The next page tries its own image again.
+    await userEvent.click(within(book).getByRole('button', { name: 'Seite →' }));
+    expect(within(book).getByRole('img', { name: 'Buchseite 10' })).toBeTruthy();
+    expect(within(book).queryByRole('alert')).toBeNull();
+  });
+
+  it('names where the lesson is in the printed Goodword edition', async () => {
+    const { unmount } = renderAt('/units/madinah/5');
+    const book = await screen.findByRole('region', { name: 'Im Buch' });
+    expect(within(book).getByText(/Buch 1, S\. 37$/)).toBeTruthy();
+    expect(within(book).getByRole('link', { name: 'Goodword' })).toHaveAttribute(
+      'href',
+      'https://www.goodwordbooks.com/'
+    );
+    unmount();
+    // Goodword's book 2 starts with our lesson 11.
+    renderAt('/units/madinah/11');
+    const second = await screen.findByRole('region', { name: 'Im Buch' });
+    expect(within(second).getByText(/Buch 2, S\. 5$/)).toBeTruthy();
+  });
+
   it('points to the book for lessons without own content yet, and handles unknown ones', async () => {
     const { unmount } = renderAt('/units/madinah/7');
     expect(
@@ -116,5 +145,6 @@ describe('Sources page', () => {
       'noopener noreferrer'
     );
     expect(screen.getByRole('link', { name: 'CC BY 2.0 FR' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Goodword Books' })).toBeTruthy();
   });
 });

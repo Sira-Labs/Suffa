@@ -46,6 +46,14 @@ export function Sources() {
             aus dem PDF erzeugt und von dort geladen werden.
           </li>
           <li>
+            Dasselbe Buch gibt es gedruckt als „Madinah Arabic Reader“ bei{' '}
+            <a href={madinah.sources.goodword} {...external}>
+              Goodword Books
+            </a>{' '}
+            (© Goodword). Zu jeder Lektion nennen wir nur Buch und Seite dieser Ausgabe;
+            ihre Seiten zeigen wir nicht.
+          </li>
+          <li>
             Aufnahmen der Lektionen von Dr. V. Abdur Rahim:{' '}
             <a href={madinah.sources.audioCollection} {...external}>
               archive.org

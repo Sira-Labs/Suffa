@@ -1,0 +1,150 @@
+{
+  "note": "Own content (ADR-0023): further common words of roots the course teaches, so a root family shows how Arabic builds words from one root. General vocabulary with our own German meanings; words the course already has are taken from the units instead.",
+  "families": {
+    "ك-ت-ب": [
+      { "ar": "كاتِب", "de": "Schreiber, Schriftsteller", "wazn": "فاعِل" },
+      { "ar": "مَكْتوب", "de": "geschrieben; Brief", "wazn": "مَفْعول" },
+      { "ar": "كُتُب", "de": "Bücher", "wazn": "فُعُل" },
+      { "ar": "كِتابَة", "de": "das Schreiben", "wazn": "فِعالَة" }
+    ],
+    "د-ر-س": [
+      { "ar": "دارِس", "de": "Lernender", "wazn": "فاعِل" },
+      { "ar": "مَدْروس", "de": "durchdacht, gelernt", "wazn": "مَفْعول" },
+      { "ar": "تَدْريس", "de": "das Unterrichten", "wazn": "تَفْعيل" },
+      { "ar": "دُروس", "de": "Lektionen", "wazn": "فُعول" }
+    ],
+    "ع-ل-م": [
+      { "ar": "عالِم", "de": "Gelehrter, Wissenschaftler", "wazn": "فاعِل" },
+      { "ar": "عِلْم", "de": "Wissen, Wissenschaft" },
+      { "ar": "مُعَلِّم", "de": "Lehrer", "wazn": "مُفَعِّل" },
+      { "ar": "مَعْلوم", "de": "bekannt", "wazn": "مَفْعول" },
+      { "ar": "تَعْليم", "de": "Unterricht, Bildung", "wazn": "تَفْعيل" },
+      { "ar": "عَلَّمَ", "de": "er lehrte", "wazn": "فَعَّلَ" }
+    ],
+    "س-ك-ن": [
+      { "ar": "سُكّان", "de": "Einwohner" },
+      { "ar": "مَسْكون", "de": "bewohnt", "wazn": "مَفْعول" }
+    ],
+    "ج-ل-س": [
+      { "ar": "مَجْلِس", "de": "Versammlung, Rat", "wazn": "مَفْعِل" },
+      { "ar": "جالِس", "de": "sitzend", "wazn": "فاعِل" },
+      { "ar": "جَلْسَة", "de": "Sitzung", "wazn": "فَعْلَة" }
+    ],
+    "س-ج-د": [
+      { "ar": "ساجِد", "de": "sich niederwerfend", "wazn": "فاعِل" },
+      { "ar": "سُجود", "de": "Niederwerfung", "wazn": "فُعول" },
+      { "ar": "سَجّادَة", "de": "Gebetsteppich", "wazn": "فَعّالَة" }
+    ],
+    "ط-ب-خ": [
+      { "ar": "طَبّاخ", "de": "Koch", "wazn": "فَعّال" },
+      { "ar": "مَطْبوخ", "de": "gekocht", "wazn": "مَفْعول" },
+      { "ar": "طَبْخ", "de": "das Kochen", "wazn": "فَعْل" }
+    ],
+    "ش-ر-ب": [
+      { "ar": "مَشْروب", "de": "Getränk", "wazn": "مَفْعول" },
+      { "ar": "شَراب", "de": "Getränk, Saft", "wazn": "فَعال" }
+    ],
+    "ع-م-ل": [
+      { "ar": "عامِل", "de": "Arbeiter", "wazn": "فاعِل" },
+      { "ar": "عَمَل", "de": "Arbeit", "wazn": "فَعَل" },
+      { "ar": "مَعْمَل", "de": "Labor, Werkstatt", "wazn": "مَفْعَل" }
+    ],
+    "ف-ت-ح": [
+      { "ar": "مِفْتاح", "de": "Schlüssel", "wazn": "مِفْعال" },
+      { "ar": "مَفْتوح", "de": "offen", "wazn": "مَفْعول" },
+      { "ar": "الفاتِحَة", "de": "die Eröffnende (erste Sure)", "wazn": "فاعِلَة" }
+    ],
+    "ج-م-ع": [
+      { "ar": "مَجْموعَة", "de": "Gruppe, Sammlung", "wazn": "مَفْعولَة" },
+      { "ar": "جامِع", "de": "große Moschee", "wazn": "فاعِل" },
+      { "ar": "جَمْع", "de": "Mehrzahl; das Sammeln", "wazn": "فَعْل" }
+    ],
+    "س-ف-ر": [{ "ar": "سَفير", "de": "Botschafter", "wazn": "فَعيل" }],
+    "ك-ب-ر": [
+      { "ar": "أَكْبَر", "de": "größer, am größten", "wazn": "أَفْعَل" },
+      { "ar": "كِبار", "de": "die Großen", "wazn": "فِعال" },
+      { "ar": "تَكْبير", "de": "„Allāhu akbar“ sagen", "wazn": "تَفْعيل" }
+    ],
+    "ص-غ-ر": [
+      { "ar": "أَصْغَر", "de": "kleiner, am kleinsten", "wazn": "أَفْعَل" },
+      { "ar": "صِغار", "de": "die Kleinen", "wazn": "فِعال" }
+    ],
+    "ح-م-ل": [
+      { "ar": "حامِل", "de": "Träger", "wazn": "فاعِل" },
+      { "ar": "مَحْمول", "de": "getragen; Handy", "wazn": "مَفْعول" }
+    ],
+    "ط-ل-ب": [
+      { "ar": "مَطْلوب", "de": "verlangt, gesucht", "wazn": "مَفْعول" },
+      { "ar": "طَلَب", "de": "Bitte, Antrag", "wazn": "فَعَل" },
+      { "ar": "طُلّاب", "de": "Studenten", "wazn": "فُعّال" }
+    ],
+    "ل-ع-ب": [
+      { "ar": "لاعِب", "de": "Spieler", "wazn": "فاعِل" },
+      { "ar": "مَلْعَب", "de": "Spielfeld, Stadion", "wazn": "مَفْعَل" },
+      { "ar": "لُعْبَة", "de": "Spielzeug, Spiel" }
+    ],
+    "ر-س-م": [
+      { "ar": "رَسّام", "de": "Maler", "wazn": "فَعّال" },
+      { "ar": "رَسْم", "de": "Zeichnung", "wazn": "فَعْل" }
+    ],
+    "ر-ك-ب": [
+      { "ar": "راكِب", "de": "Fahrgast", "wazn": "فاعِل" },
+      { "ar": "مَرْكَب", "de": "Boot", "wazn": "مَفْعَل" }
+    ],
+    "ل-ب-س": [
+      { "ar": "مَلابِس", "de": "Kleidung", "wazn": "مَفاعِل" },
+      { "ar": "لِباس", "de": "Kleidung, Gewand", "wazn": "فِعال" }
+    ],
+    "م-ر-ض": [
+      { "ar": "مَرَض", "de": "Krankheit", "wazn": "فَعَل" },
+      { "ar": "مُمَرِّض", "de": "Krankenpfleger", "wazn": "مُفَعِّل" }
+    ],
+    "ق-ر-أ": [
+      { "ar": "قِراءَة", "de": "das Lesen", "wazn": "فِعالَة" },
+      { "ar": "قارِئ", "de": "Leser", "wazn": "فاعِل" },
+      { "ar": "القُرْآن", "de": "der Koran (die Lesung)", "wazn": "فُعْلان" }
+    ],
+    "ن-ظ-ر": [
+      { "ar": "نَظّارَة", "de": "Brille", "wazn": "فَعّالَة" },
+      { "ar": "مَنْظَر", "de": "Aussicht, Anblick", "wazn": "مَفْعَل" }
+    ],
+    "ع-ر-ف": [
+      { "ar": "مَعْروف", "de": "bekannt", "wazn": "مَفْعول" },
+      { "ar": "مَعْرِفَة", "de": "Wissen, Kenntnis", "wazn": "مَفْعِلَة" }
+    ],
+    "س-ل-م": [
+      { "ar": "إِسْلام", "de": "Islam (Hingabe)", "wazn": "إِفْعال" },
+      { "ar": "سَلَّمَ", "de": "er grüßte; er übergab", "wazn": "فَعَّلَ" }
+    ],
+    "ذ-ه-ب": [
+      { "ar": "ذَهاب", "de": "das Gehen", "wazn": "فَعال" },
+      { "ar": "ذاهِب", "de": "gehend", "wazn": "فاعِل" }
+    ],
+    "خ-ر-ج": [
+      { "ar": "مَخْرَج", "de": "Ausgang", "wazn": "مَفْعَل" },
+      { "ar": "خارِج", "de": "draußen", "wazn": "فاعِل" },
+      { "ar": "خُروج", "de": "das Hinausgehen", "wazn": "فُعول" }
+    ],
+    "ف-ه-م": [
+      { "ar": "فَهْم", "de": "Verständnis", "wazn": "فَعْل" },
+      { "ar": "مَفْهوم", "de": "verstanden; Begriff", "wazn": "مَفْعول" }
+    ],
+    "ن-ز-ل": [
+      { "ar": "مَنْزِل", "de": "Haus, Wohnung", "wazn": "مَفْعِل" },
+      { "ar": "نُزول", "de": "das Herabkommen", "wazn": "فُعول" }
+    ],
+    "ح-ض-ر": [
+      { "ar": "حاضِر", "de": "anwesend", "wazn": "فاعِل" },
+      { "ar": "حَضارَة", "de": "Zivilisation", "wazn": "فَعالَة" },
+      { "ar": "مُحاضَرَة", "de": "Vorlesung", "wazn": "مُفاعَلَة" }
+    ],
+    "ش-ك-ر": [
+      { "ar": "شُكْر", "de": "Dank" },
+      { "ar": "شاكِر", "de": "dankbar", "wazn": "فاعِل" }
+    ],
+    "ر-ج-ع": [
+      { "ar": "مَرْجِع", "de": "Nachschlagewerk", "wazn": "مَفْعِل" },
+      { "ar": "رُجوع", "de": "Rückkehr", "wazn": "فُعول" }
+    ]
+  }
+}

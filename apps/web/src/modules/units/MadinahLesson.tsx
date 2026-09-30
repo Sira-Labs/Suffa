@@ -93,6 +93,8 @@ export function MadinahLessonPage() {
         image={(page, reduced) => bookPageImageUrl(book, page, reduced)}
         pdfUrl={(page) => archivePdfUrl(book, page)}
         mirrorUrl={(page) => bookPageUrl(book, page)}
+        printed={lesson.goodword}
+        printedUrl={book.sources.goodword}
       />
 
       <nav
@@ -181,21 +183,28 @@ function GrammarCard({ point }: { point: MadinahGrammar }) {
 
 /**
  * The lesson's pages of the book, one at a time, as page images from archive.org. Plain
- * images show on phones and computers alike; they load only when the book is opened.
+ * images show on phones and computers alike; they load only when the book is opened. Where
+ * the lesson is in the printed Goodword edition is given as a reference only.
  */
 function BookPages({
   pages,
   image,
   pdfUrl,
   mirrorUrl,
+  printed,
+  printedUrl,
 }: {
   pages: number[];
   image: (page: number, reduced: boolean) => string;
   pdfUrl: (page: number) => string;
   mirrorUrl: (page: number) => string;
+  printed: { book: number; page: number };
+  printedUrl: string;
 }) {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
+  // The page whose image archive.org could not deliver (the next page tries again).
+  const [failed, setFailed] = useState<number | null>(null);
   const page = pages[index]!;
   return (
     <section className="card stack" aria-label="Im Buch">
@@ -217,19 +226,28 @@ function BookPages({
           className="stack"
           style={{ margin: '0 auto', gap: '0.5rem', width: '100%', maxWidth: '40rem' }}
         >
-          <a href={image(page, false)} {...external} title="Seite groß öffnen">
-            <img
-              src={image(page, true)}
-              alt={`Buchseite ${page}`}
-              style={{
-                width: '100%',
-                height: 'auto',
-                aspectRatio: '1275 / 1651',
-                background: 'white',
-                borderRadius: '0.5rem',
-              }}
-            />
-          </a>
+          {failed === page ? (
+            <p role="alert" className="card muted" style={{ margin: 0 }}>
+              Seite {page} lässt sich gerade nicht laden. Öffne sie als PDF über die Links
+              unten.
+            </p>
+          ) : (
+            <a href={image(page, false)} {...external} title="Seite groß öffnen">
+              <img
+                key={page}
+                src={image(page, true)}
+                alt={`Buchseite ${page}`}
+                onError={() => setFailed(page)}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  aspectRatio: '1275 / 1651',
+                  background: 'white',
+                  borderRadius: '0.5rem',
+                }}
+              />
+            </a>
+          )}
           <figcaption className="row" style={{ justifyContent: 'space-between' }}>
             <button
               type="button"
@@ -262,6 +280,13 @@ function BookPages({
         <a href={mirrorUrl(page)} {...external}>
           AbdurRahman.org
         </a>
+      </p>
+      <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
+        Gedruckt als „Madinah Arabic Reader“ (
+        <a href={printedUrl} {...external}>
+          Goodword
+        </a>
+        ): Buch {printed.book}, S. {printed.page}
       </p>
     </section>
   );

@@ -1,0 +1,257 @@
+{
+  "note": "Own content (ADR-0023): what a pattern (wazn) usually means, in our own German words, with one example each. Spellings match the wazn fields of the unit files (long vowels without sukun).",
+  "patterns": [
+    {
+      "wazn": "فَعَلَ",
+      "de": "Verb, Grundstamm: „er tat“",
+      "example": "كَتَبَ",
+      "exampleDe": "er schrieb"
+    },
+    {
+      "wazn": "فَعِلَ",
+      "de": "Verb, Grundstamm (oft Zustand oder Wahrnehmung)",
+      "example": "فَهِمَ",
+      "exampleDe": "er verstand"
+    },
+    {
+      "wazn": "فَعَّلَ",
+      "de": "Verb, Stamm II: etwas bewirken, jemanden etwas tun lassen",
+      "example": "عَلَّمَ",
+      "exampleDe": "er lehrte"
+    },
+    {
+      "wazn": "فاعَلَ",
+      "de": "Verb, Stamm III: etwas mit jemandem oder auf jemanden hin tun",
+      "example": "سافَرَ",
+      "exampleDe": "er reiste"
+    },
+    {
+      "wazn": "أَفْعَلَ",
+      "de": "Verb, Stamm IV: etwas bewirken",
+      "example": "أَحَبَّ",
+      "exampleDe": "er liebte"
+    },
+    {
+      "wazn": "تَفَعَّلَ",
+      "de": "Verb, Stamm V: etwas an sich selbst bewirken (oft zu Stamm II)",
+      "example": "تَعَلَّمَ",
+      "exampleDe": "er lernte"
+    },
+    {
+      "wazn": "اِفْتَعَلَ",
+      "de": "Verb, Stamm VIII: etwas für sich tun",
+      "example": "اِشْتَرى",
+      "exampleDe": "er kaufte"
+    },
+    {
+      "wazn": "اِسْتَفْعَلَ",
+      "de": "Verb, Stamm X: etwas suchen, erbitten oder werden",
+      "example": "اِسْتَيْقَظَ",
+      "exampleDe": "er wachte auf"
+    },
+    {
+      "wazn": "فاعِل",
+      "de": "Wer etwas tut (aktives Partizip)",
+      "example": "كاتِب",
+      "exampleDe": "Schreiber, Schriftsteller"
+    },
+    {
+      "wazn": "فاعِلَة",
+      "de": "Weibliche Form von فاعِل: die etwas tut",
+      "example": "طالِبَة",
+      "exampleDe": "Studentin"
+    },
+    {
+      "wazn": "مَفْعول",
+      "de": "Was getan wird oder wurde (passives Partizip)",
+      "example": "مَكْتوب",
+      "exampleDe": "geschrieben; Brief"
+    },
+    {
+      "wazn": "مَفْعولَة",
+      "de": "Weibliche Form von مَفْعول, oft ein Ding",
+      "example": "مَجْموعَة",
+      "exampleDe": "Gruppe, Sammlung"
+    },
+    {
+      "wazn": "مَفْعَل",
+      "de": "Ort, an dem etwas geschieht",
+      "example": "مَكْتَب",
+      "exampleDe": "Büro, Schreibtisch"
+    },
+    {
+      "wazn": "مَفْعِل",
+      "de": "Ort, an dem etwas geschieht",
+      "example": "مَسْجِد",
+      "exampleDe": "Moschee: Ort der Niederwerfung"
+    },
+    {
+      "wazn": "مَفْعَلَة",
+      "de": "Ort, an dem etwas geschieht oder gesammelt ist",
+      "example": "مَكْتَبَة",
+      "exampleDe": "Bibliothek"
+    },
+    {
+      "wazn": "مَفْعِلَة",
+      "de": "Substantiv zum Verb (Ergebnis des Tuns)",
+      "example": "مَعْرِفَة",
+      "exampleDe": "Wissen, Kenntnis"
+    },
+    {
+      "wazn": "مِفْعال",
+      "de": "Werkzeug, mit dem man etwas tut",
+      "example": "مِفْتاح",
+      "exampleDe": "Schlüssel"
+    },
+    {
+      "wazn": "فَعيل",
+      "de": "Eigenschaft (Adjektiv)",
+      "example": "كَبير",
+      "exampleDe": "groß"
+    },
+    {
+      "wazn": "أَفْعَل",
+      "de": "Steigerung „-er, am -sten“, auch Farben",
+      "example": "أَكْبَر",
+      "exampleDe": "größer"
+    },
+    {
+      "wazn": "فَعّال",
+      "de": "Beruf: wer etwas oft oder berufsmäßig tut",
+      "example": "طَبّاخ",
+      "exampleDe": "Koch"
+    },
+    {
+      "wazn": "فَعّالَة",
+      "de": "Gerät oder Ding, das etwas tut",
+      "example": "نَظّارَة",
+      "exampleDe": "Brille"
+    },
+    {
+      "wazn": "فُعّال",
+      "de": "Mehrzahl von فاعِل (Personen)",
+      "example": "طُلّاب",
+      "exampleDe": "Studenten"
+    },
+    {
+      "wazn": "فُعول",
+      "de": "Mehrzahl oder Verbalnomen",
+      "example": "دُروس",
+      "exampleDe": "Lektionen"
+    },
+    {
+      "wazn": "فُعُل",
+      "de": "Mehrzahl",
+      "example": "كُتُب",
+      "exampleDe": "Bücher"
+    },
+    {
+      "wazn": "فِعال",
+      "de": "Substantiv, oft ein Ding; auch Mehrzahl von فَعيل",
+      "example": "كِتاب",
+      "exampleDe": "Buch"
+    },
+    {
+      "wazn": "فَعال",
+      "de": "Verbalnomen: das Tun selbst",
+      "example": "ذَهاب",
+      "exampleDe": "das Gehen"
+    },
+    {
+      "wazn": "فِعالَة",
+      "de": "Verbalnomen, oft eine Tätigkeit",
+      "example": "قِراءَة",
+      "exampleDe": "das Lesen"
+    },
+    {
+      "wazn": "فَعالَة",
+      "de": "Substantiv zum Verb",
+      "example": "حَضارَة",
+      "exampleDe": "Zivilisation"
+    },
+    {
+      "wazn": "فَعْل",
+      "de": "Verbalnomen: das Tun selbst",
+      "example": "دَرْس",
+      "exampleDe": "Unterricht, Lektion"
+    },
+    {
+      "wazn": "فَعَل",
+      "de": "Verbalnomen: das Tun oder sein Ergebnis",
+      "example": "عَمَل",
+      "exampleDe": "Arbeit"
+    },
+    {
+      "wazn": "فَعْلَة",
+      "de": "Einmaliges Tun",
+      "example": "جَلْسَة",
+      "exampleDe": "Sitzung"
+    },
+    {
+      "wazn": "تَفْعيل",
+      "de": "Verbalnomen zu Stamm II",
+      "example": "تَعْليم",
+      "exampleDe": "Unterricht, Bildung"
+    },
+    {
+      "wazn": "مُفَعِّل",
+      "de": "Wer etwas bewirkt (Partizip Stamm II)",
+      "example": "مُدَرِّس",
+      "exampleDe": "Lehrer"
+    },
+    {
+      "wazn": "مُفَعِّلَة",
+      "de": "Weibliche Form von مُفَعِّل",
+      "example": "مُدَرِّسَة",
+      "exampleDe": "Lehrerin"
+    },
+    {
+      "wazn": "مُفَعَّل",
+      "de": "Was bewirkt wurde (passives Partizip Stamm II)",
+      "example": "مُنَظَّم",
+      "exampleDe": "geordnet"
+    },
+    {
+      "wazn": "مُفاعِل",
+      "de": "Wer etwas tut (Partizip Stamm III)",
+      "example": "مُسافِر",
+      "exampleDe": "Reisender"
+    },
+    {
+      "wazn": "مُفاعَلَة",
+      "de": "Verbalnomen zu Stamm III",
+      "example": "مُحاضَرَة",
+      "exampleDe": "Vorlesung"
+    },
+    {
+      "wazn": "مُفْعِل",
+      "de": "Wer etwas tut (Partizip Stamm IV)",
+      "example": "مُسْلِم",
+      "exampleDe": "Muslim: wer sich hingibt"
+    },
+    {
+      "wazn": "إِفْعال",
+      "de": "Verbalnomen zu Stamm IV",
+      "example": "إِسْلام",
+      "exampleDe": "Islam: Hingabe"
+    },
+    {
+      "wazn": "مَفاعِل",
+      "de": "Mehrzahl von Wörtern mit مَـ",
+      "example": "مَلابِس",
+      "exampleDe": "Kleidung"
+    },
+    {
+      "wazn": "فُعْلان",
+      "de": "Substantiv (Verbalnomen)",
+      "example": "القُرْآن",
+      "exampleDe": "der Koran: die Lesung"
+    },
+    {
+      "wazn": "فَعْلان",
+      "de": "Vorübergehender Zustand (Adjektiv)",
+      "example": "عَطْشان",
+      "exampleDe": "durstig"
+    }
+  ]
+}

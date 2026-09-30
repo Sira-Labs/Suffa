@@ -8,7 +8,7 @@ import { migrateLegacyHashUrl } from './services/legacyHashUrl';
 import { RouteError } from './components';
 import { Dashboard } from './modules/dashboard';
 import { VocabTrainer } from './modules/vocab';
-import { RootExplorer } from './modules/roots';
+import { PatternTrainer, RootExplorer } from './modules/roots';
 import { Reading } from './modules/reading';
 import { Writing } from './modules/writing';
 import { Speaking } from './modules/speaking';
@@ -47,6 +47,7 @@ export const router = createBrowserRouter([
       { path: 'alphabet/:lesson', element: <AlphabetLessonPage /> },
       { path: 'vocab', element: <VocabTrainer /> },
       { path: 'roots', element: <RootExplorer /> },
+      { path: 'roots/muster', element: <PatternTrainer /> },
       { path: 'reading', element: <Reading /> },
       { path: 'writing', element: <Writing /> },
       { path: 'speaking', element: <Speaking /> },

@@ -1,106 +1,218 @@
 import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { Vokabel } from '@/types';
 import { ArabicText } from '@/components';
 import { wurzelFamilien } from '@/content';
 import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { speakArabic } from '@/services/speech';
+import { PATTERNS, patternWords, type FamilyWord, type RootFamily } from './family';
+import { RootWheel, WHEEL_SIZE } from './RootWheel';
+import { RootWord } from './RootWord';
+import { useAllRootFamilies, useRootFamilies } from './useRootFamilies';
+
+/** Root chips shown before the learner searches. */
+const CHIPS = 12;
 
 /**
- * Root/morphology explorer – the backbone of retention.
- * Shows the linked derivations (vocabulary + verbs) for each root
- * and offers the "Gleiche Wurzel?" (same root?) exercise.
+ * Root families (design step 5): the root in the centre with every word built from it, the
+ * root letters coloured inside each word, and what its pattern means. Words and grammar are the
+ * course's; further derivations and all explanations are our own (ADR-0023).
  */
 export function RootExplorer() {
-  const { keep } = useReachedUnits();
-  // Only words and verbs of the units reached so far.
-  const families = useMemo(
-    () =>
-      [...wurzelFamilien.values()]
-        .map((f) => ({
-          ...f,
-          vokabeln: f.vokabeln.filter(keep),
-          verben: f.verben.filter(keep),
-        }))
-        .filter((f) => f.vokabeln.length + f.verben.length > 0),
-    [keep]
-  );
-  const [selected, setSelected] = useState(families[0]?.wurzel ?? '');
-  const active = families.find((f) => f.wurzel === selected);
+  const families = useRootFamilies();
+  const [query, setQuery] = useState('');
+  const [rootId, setRootId] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const family = families.find((f) => f.root === rootId) ?? families[0];
+  const selected = family?.words.find((w) => w.key === selectedKey) ?? family?.words[0];
+  // Examples of a pattern may come from any root; learned ones are shown first.
+  const allFamilies = useAllRootFamilies();
+  const byPattern = useMemo(() => patternWords(allFamilies), [allFamilies]);
+  const drillWords = useLearnedRootWords();
+
+  const chips = useMemo(() => {
+    // Root letters match without spaces or dashes; German meanings keep their spaces.
+    const text = query.trim().toLowerCase();
+    const letters = text.replace(/[\s-]/g, '');
+    if (!letters) return families.slice(0, CHIPS);
+    return families.filter(
+      (f) =>
+        f.letters.join('').includes(letters) ||
+        f.words.some((w) => w.de.toLowerCase().includes(text))
+    );
+  }, [families, query]);
+
+  const choose = (f: RootFamily) => {
+    setRootId(f.root);
+    setSelectedKey(null);
+  };
 
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Wurzel-Explorer (الجذر والوزن)</h1>
-      <p className="muted">
-        Wörter mit derselben Wurzel teilen eine Grundbedeutung. Das Vernetzen über die
-        Wurzel ist der stärkste Hebel fürs Langzeitgedächtnis.
-      </p>
+      <header className="stack" style={{ gap: '0.25rem' }}>
+        <span className="eyebrow">Wurzelfamilie</span>
+        <h1 style={{ margin: 0 }}>Wurzeln & Muster (الجذر والوزن)</h1>
+        <p className="muted" style={{ margin: 0 }}>
+          Aus drei Buchstaben entstehen viele Wörter. Die Wurzel trägt die Bedeutung, das
+          Muster sagt, was für ein Wort es ist.
+        </p>
+      </header>
 
-      <div className="row">
-        {families.map((f) => (
-          <button
-            key={f.wurzel}
-            className={`btn arabic-inline ${f.wurzel === selected ? 'btn-accent' : ''}`}
-            style={{ fontSize: '1.2rem' }}
-            onClick={() => setSelected(f.wurzel)}
-          >
-            {f.wurzel}
-          </button>
+      <label className="stack" style={{ gap: '0.3rem' }}>
+        <span className="muted">Wurzel oder Bedeutung suchen</span>
+        <input
+          className="input"
+          type="search"
+          value={query}
+          placeholder="z. B. كتب oder schreiben"
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </label>
+      <div className="row" role="list" aria-label="Wurzeln">
+        {chips.map((f) => (
+          <span role="listitem" key={f.root}>
+            <button
+              type="button"
+              className={`btn btn-small arabic-inline ${f.root === family?.root ? 'btn-accent' : ''}`}
+              aria-pressed={f.root === family?.root}
+              onClick={() => choose(f)}
+            >
+              {f.letters.join(' ')}
+            </button>
+          </span>
         ))}
+        {chips.length === 0 && <span className="muted">Keine Wurzel gefunden.</span>}
       </div>
 
-      {active && (
-        <div className="card stack">
-          <div className="row" style={{ justifyContent: 'space-between' }}>
-            <ArabicText size="lg">{active.wurzel}</ArabicText>
-            <span className="badge">
-              {active.vokabeln.length + active.verben.length} Ableitungen
-            </span>
-          </div>
+      {family && selected && (
+        <>
+          <RootWheel
+            family={family}
+            meaning={rootMeaning(family)}
+            selected={selected.key}
+            onSelect={(w) => setSelectedKey(w.key)}
+          />
+          <p className="muted root-legend" style={{ margin: 0 }}>
+            Durchgezogen: schon gelernt · gestrichelt: noch nicht gelernt
+          </p>
+          {family.words.length > WHEEL_SIZE && (
+            <div className="row" aria-label="Weitere Wörter der Familie">
+              {family.words.slice(WHEEL_SIZE).map((w) => (
+                <button
+                  key={w.key}
+                  type="button"
+                  className={`btn btn-small ${w.key === selected.key ? 'btn-accent' : ''}`}
+                  aria-pressed={w.key === selected.key}
+                  onClick={() => setSelectedKey(w.key)}
+                >
+                  <ArabicText>{w.ar}</ArabicText>
+                </button>
+              ))}
+            </div>
+          )}
+          <WordCard
+            key={selected.key}
+            word={selected}
+            root={family.root}
+            samePattern={byPattern.filter(
+              (w) => w.wazn === selected.wazn && w.root !== family.root
+            )}
+          />
+        </>
+      )}
 
-          <div
-            className="grid"
-            style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}
-          >
-            {active.vokabeln.map((v) => (
-              <div key={v.id} className="card" style={{ background: 'var(--bg-elev-2)' }}>
-                <ArabicText onClick={() => speakArabic(v.ar)}>{v.ar}</ArabicText>
-                <div className="muted">{v.de}</div>
-                {v.wazn && (
-                  <div className="muted">
-                    Wazn: <span className="arabic-inline">{v.wazn}</span>
-                  </div>
-                )}
-                {v.plural && (
-                  <div className="muted">
-                    Pl.: <span className="arabic-inline">{v.plural}</span>
-                  </div>
-                )}
-              </div>
-            ))}
-            {active.verben.map((verb) => (
-              <div
-                key={verb.id}
-                className="card"
-                style={{ background: 'var(--bg-elev-2)' }}
-              >
-                <ArabicText onClick={() => speakArabic(verb.lemma)}>
-                  {verb.lemma}
-                </ArabicText>
-                <div className="muted">{verb.de}</div>
-                <div className="badge">Verb · {verb.wazn}</div>
-              </div>
-            ))}
+      <Link className="btn btn-primary btn-lg" to="/roots/muster">
+        Muster-Trainer: Wörter selbst bilden
+      </Link>
+
+      <SameRootDrill words={drillWords} />
+    </div>
+  );
+}
+
+/** The root's meaning: its verb, else its first learned word. */
+function rootMeaning(family: RootFamily): string {
+  const verb = family.words.find((w) => w.source === 'verb');
+  return (verb ?? family.words.find((w) => w.learned) ?? family.words[0]!).de;
+}
+
+/** The selected word: root letters coloured, its pattern explained, more of the same pattern. */
+function WordCard({
+  word,
+  root,
+  samePattern,
+}: {
+  word: FamilyWord;
+  root: string;
+  samePattern: (FamilyWord & { root: string })[];
+}) {
+  const pattern = word.wazn ? PATTERNS.get(word.wazn) : undefined;
+  // Learned examples first, at most three.
+  const examples = [...samePattern]
+    .sort((a, b) => Number(b.learned) - Number(a.learned))
+    .slice(0, 3);
+  return (
+    <section
+      className="paper stack"
+      aria-label="Gewähltes Wort"
+      style={{ gap: '0.6rem' }}
+    >
+      <div
+        className="row"
+        style={{ justifyContent: 'space-between', alignItems: 'center' }}
+      >
+        <button
+          type="button"
+          className="btn btn-small"
+          aria-label={`${word.ar} anhören`}
+          onClick={() => speakArabic(word.ar)}
+        >
+          Anhören
+        </button>
+        <RootWord word={word.ar} root={root} size="lg" />
+      </div>
+      <strong>{word.de}</strong>
+      <span className="muted">
+        {word.source === 'extra'
+          ? 'Nicht im Buch – ein weiteres Wort dieser Wurzel.'
+          : word.learned
+            ? `Gelernt in Einheit ${word.unit}.`
+            : `Kommt in Einheit ${word.unit}.`}
+      </span>
+      {pattern ? (
+        <div className="stack" style={{ gap: '0.3rem' }}>
+          <div className="row" style={{ justifyContent: 'space-between' }}>
+            <span className="eyebrow">Muster</span>
+            <ArabicText size="lg">{pattern.wazn}</ArabicText>
           </div>
-          {active.verben[0]?.hinweis && (
-            <p className="muted" style={{ margin: 0 }}>
-              {active.verben[0].hinweis}
+          <p style={{ margin: 0 }}>{pattern.de}</p>
+          {examples.length > 0 && (
+            <p style={{ margin: 0 }}>
+              Genauso:{' '}
+              {examples.map((e, i) => (
+                <span key={e.key}>
+                  {i > 0 && ' · '}
+                  <RootWord word={e.ar} root={e.root} /> ({e.de})
+                </span>
+              ))}
             </p>
           )}
         </div>
+      ) : (
+        <p className="muted" style={{ margin: 0 }}>
+          Für dieses Wort ist noch kein Muster erklärt.
+        </p>
       )}
+    </section>
+  );
+}
 
-      <SameRootDrill words={families.flatMap((f) => f.vokabeln)} />
-    </div>
+/** Learned course words with a root, for the "same root?" exercise. */
+function useLearnedRootWords(): Vokabel[] {
+  const { keep } = useReachedUnits();
+  return useMemo(
+    () => [...wurzelFamilien.values()].flatMap((f) => f.vokabeln.filter(keep)),
+    [keep]
   );
 }
 

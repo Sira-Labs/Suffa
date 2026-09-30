@@ -98,8 +98,17 @@ and our own exercises, and no copied book texts or pictures in the repo.
     scans on archive.org carry "© Goodword Books" and no permission, unlike the old edition.
   - A page "Quellen & Lizenzen" (`/sources`) names every source with its terms.
   - Word ids are `md-<unit>-<n>`, so the words can become SRS cards later without new ids.
+- **Stage 2, second part (done): practising the words.**
+  - A lesson with our own words has a "Wörter üben" station: hear and read a word, choose its
+    meaning from four of the lesson. A wrong answer brings the word back at the end of the round.
+  - The first right answer is stored as practice (skill `words`, unit = the lesson's unit, item
+    = the word id) and earns XP once. The server accepts the new skill; nothing else in the sync
+    changes.
+  - The words are vocabulary (`madinahVokabeln`) with recognition and recall review cards. A word
+    joins the learner's reviews once practised in its lesson, so Medina learners review exactly
+    what they met, and bayna yadayk learners get no Medina cards they never saw.
 - **Stage 2 and later:**
-  - our own Madinah exercises, lesson by lesson;
+  - more Madinah exercises, lesson by lesson (dictation, gap texts, a lesson test);
   - stages and badges per course (`STAGES` gets a `course`);
   - content loaded per course (`content/courses/<id>/`);
   - the screens that still assume _bayna yadayk_ read the active course: dashboard level card,

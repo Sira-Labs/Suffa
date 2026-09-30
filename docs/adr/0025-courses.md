@@ -126,6 +126,13 @@ and our own exercises, and no copied book texts or pictures in the repo.
   - Rounds of words, dictation and the test are shuffled at random (`randomShuffle`).
     `stableShuffle` keeps one order per seed and hardly changes between similar seeds, so it is
     used only where an order must stay the same, such as the options of one question.
+- **Stage 2, fifth part (done): all 23 lessons of book 1 have our content.** Lessons 6–23 got
+  their words (the words each lesson introduces, read from the book pages: facts), German
+  meanings, grammar in our own words with own examples and own gap sentences, so every lesson
+  has word practice, dictation, gap text and a lesson test. A word an earlier lesson already
+  has is not repeated; the comparison keeps inner vowels and hamza forms, so رَجُلٌ (man) and
+  رِجْلٌ (foot) or إِمَامٌ and أَمَامَ stay apart. An independent review of the Arabic found
+  six errors, all fixed. The content stays `draft` until a teacher has reviewed it.
 - **Stage 2 and later:**
   - more Madinah exercises, lesson by lesson;
   - stages and badges per course (`STAGES` gets a `course`);

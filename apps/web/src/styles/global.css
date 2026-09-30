@@ -2465,3 +2465,132 @@ button.quiz-option:disabled {
   color: #fff;
   flex: none;
 }
+
+/* ---------- Roots & patterns (design step 5) ---------- */
+.root-letter {
+  color: var(--accent);
+}
+.paper .root-letter {
+  color: #9a5d06;
+}
+.root-wheel {
+  position: relative;
+  width: 100%;
+  max-width: 26rem;
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+.root-wheel-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.root-wheel-orbit {
+  fill: none;
+  stroke: var(--bg-elev-2);
+  stroke-width: 0.4;
+  stroke-dasharray: 1 2;
+}
+.root-wheel-line {
+  stroke: var(--border);
+  stroke-width: 0.4;
+}
+.root-wheel-line.active {
+  stroke: var(--accent);
+  stroke-width: 0.8;
+}
+.root-wheel-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 28%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.3rem;
+}
+.root-wheel-letters {
+  font-family: var(--font-arabic-display);
+  font-size: clamp(1.3rem, 6vw, 2rem);
+  font-weight: 600;
+  line-height: 1.2;
+}
+.root-wheel-meaning {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.root-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 24%;
+  min-height: var(--tap);
+  padding: 0.25rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  cursor: pointer;
+}
+.root-node .arabic {
+  font-size: clamp(1rem, 4.5vw, 1.4rem);
+  line-height: 1.3;
+}
+.root-node-de {
+  font-size: 0.68rem;
+  font-weight: 500;
+  line-height: 1.15;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.root-node.unlearned {
+  border-style: dashed;
+  background: transparent;
+}
+.root-node.selected {
+  border: 2px solid var(--accent);
+}
+.root-node.selected .root-node-de {
+  color: var(--accent);
+}
+.root-legend {
+  text-align: center;
+  font-size: 0.8rem;
+}
+.pattern-sum {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.25rem;
+}
+.pattern-plus {
+  font-size: 1.6rem;
+  color: var(--text-muted);
+}
+.pattern-options {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.pattern-option {
+  min-height: 3.5rem;
+}
+.pattern-option.right {
+  border-color: var(--good);
+  color: var(--good);
+}
+.pattern-option.wrong {
+  border-color: var(--bad);
+  color: var(--bad);
+}

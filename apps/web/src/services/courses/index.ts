@@ -17,6 +17,11 @@ export interface MadinahLesson {
   page: number;
   /** The author's recording of the lesson (archive.org). */
   audio: string;
+  /**
+   * Where the lesson starts in the printed "Madinah Arabic Reader" (Goodword Books), which
+   * splits the course into 8 books. A reference only; its pages are never shown.
+   */
+  goodword: { book: number; page: number };
 }
 
 export interface MadinahBook {
@@ -43,6 +48,8 @@ export interface MadinahBook {
     slideNotes: string;
     /** archive.org's page images of the PDF; `{leaf}` is the 0-based page, 4 digits. */
     archivePageImage: string;
+    /** Publisher of the printed "Madinah Arabic Reader". */
+    goodword: string;
   };
   lessons: MadinahLesson[];
 }

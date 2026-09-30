@@ -113,8 +113,21 @@ and our own exercises, and no copied book texts or pictures in the repo.
   end of the round. A word written right is stored once as practice with the existing skill
   `write` under the lesson's unit, so the daily "write" quest counts it and the sync needs no
   change.
+- **Stage 2, fourth part (done): gap sentences and a lesson test.**
+  - Each lesson with our content has five to seven gap sentences of our own
+    (`book1-lessons.json`, `gaps`). Each one trains the lesson's grammar: مَا or مَنْ, نَعَمْ or
+    لَا, هٰذَا or ذٰلِكَ, with or without the article, the ending -i after a preposition, and the
+    iḍāfa. The German sentence is shown as help. A right answer is stored once as practice
+    (skill `cloze`, item `gap-<n>`); a wrong one retries the same sentence.
+  - The "Lektionstest" asks up to six meanings (a new random choice on every attempt) and every
+    gap sentence, each answered once. It is stored like a unit test: exam format
+    `madinah_lesson`, units `[lesson unit]`. It passes from 80 % (`PASS_RATIO`), so
+    `passedTest(exams, unit)` already finds it, e.g. for unlocking lessons later.
+  - Rounds of words, dictation and the test are shuffled at random (`randomShuffle`).
+    `stableShuffle` keeps one order per seed and hardly changes between similar seeds, so it is
+    used only where an order must stay the same, such as the options of one question.
 - **Stage 2 and later:**
-  - more Madinah exercises, lesson by lesson (gap texts, a lesson test);
+  - more Madinah exercises, lesson by lesson;
   - stages and badges per course (`STAGES` gets a `course`);
   - content loaded per course (`content/courses/<id>/`);
   - the screens that still assume _bayna yadayk_ read the active course: dashboard level card,

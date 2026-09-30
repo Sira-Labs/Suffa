@@ -1,11 +1,15 @@
 /** A Medina lesson page (ADR-0025): own words and grammar, the recording, the book reader. */
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { MadinahLessonPage } from '@/modules/units/MadinahLesson';
 import { Sources } from '@/modules/sources';
-import { useSettingsStore } from '@/state';
+import { madinahLessonContent } from '@/services/courses';
+import { usePracticeStore, useSettingsStore } from '@/state';
+
+vi.mock('@/services/speech/tts', () => ({ speakArabic: vi.fn() }));
+vi.mock('@/services/speech', () => ({ speakArabic: vi.fn() }));
 
 function renderAt(path: string) {
   const router = createMemoryRouter(
@@ -81,6 +85,48 @@ describe('Medina lesson page', () => {
     const next = await screen.findByRole('region', { name: 'Im Buch' });
     expect(await within(next).findByText('Im Buch (S. 11–17)')).toBeTruthy();
     expect(within(next).queryByRole('img')).toBeNull();
+  });
+
+  it('practises the lesson words: right answers count once, wrong ones come back', async () => {
+    const user = userEvent.setup();
+    await usePracticeStore.getState().load();
+    const words = madinahLessonContent(101)!.words;
+    renderAt('/units/madinah/1');
+    const station = await screen.findByRole('region', { name: 'Wörter üben' });
+    const counter = `von ${words.length} geübt`;
+    expect(within(station).getByText(`0 ${counter}`)).toBeTruthy();
+    await user.click(within(station).getByRole('button', { name: 'Üben' }));
+
+    const shown = () => {
+      const listen = within(station).getByRole('button', { name: / anhören$/ });
+      const ar = listen.getAttribute('aria-label')!.replace(/ anhören$/, '');
+      return words.find((w) => w.ar === ar)!;
+    };
+    // First word: answer wrong, it comes back later in the round.
+    const first = shown();
+    const options = within(station).getByRole('group', { name: 'Bedeutung wählen' });
+    const wrong = within(options)
+      .getAllByRole('button')
+      .find((b) => b.textContent !== first.de)!;
+    await user.click(wrong);
+    expect(within(station).getByRole('status')).toHaveTextContent(
+      `Es heißt: ${first.de}`
+    );
+    await user.click(within(station).getByRole('button', { name: 'Weiter' }));
+    expect(
+      within(station).getByText(`Noch ${words.length} Wörter in dieser Runde`)
+    ).toBeTruthy();
+
+    // Next word: answer right, it is stored as practised.
+    const second = shown();
+    await user.click(within(station).getByRole('button', { name: second.de }));
+    expect(within(station).getByRole('status')).toHaveTextContent('Richtig!');
+    expect(usePracticeStore.getState().records[`101:words:${second.id}`]).toMatchObject({
+      unit: 101,
+      skill: 'words',
+      itemId: second.id,
+    });
+    expect(await within(station).findByText(`1 ${counter}`)).toBeTruthy();
   });
 
   it('ends the last lesson at the last page of the book', async () => {

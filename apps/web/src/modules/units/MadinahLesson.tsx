@@ -17,6 +17,7 @@ import {
   type MadinahWord,
 } from '@/services/courses';
 import { speakArabic } from '@/services/speech/tts';
+import { MadinahWordPractice } from './MadinahWordPractice';
 
 const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
 
@@ -55,6 +56,11 @@ export function MadinahLessonPage() {
       {content ? (
         <>
           <WordList words={content.words} />
+          <MadinahWordPractice
+            key={lesson.unit}
+            unit={lesson.unit}
+            words={content.words}
+          />
           <section className="stack" aria-label="Grammatik">
             <h2 style={{ margin: 0 }}>Grammatik</h2>
             {content.grammar.map((g) => (

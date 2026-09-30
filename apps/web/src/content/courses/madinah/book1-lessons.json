@@ -197,6 +197,44 @@
             }
           ]
         }
+      ],
+      "gaps": [
+        {
+          "ar": "___ هٰذَا؟ هٰذَا طَبِيبٌ.",
+          "answer": "مَنْ",
+          "options": ["مَنْ", "مَا"],
+          "de": "Wer ist das? Das ist ein Arzt."
+        },
+        {
+          "ar": "___ هٰذَا؟ هٰذَا قَمِيصٌ.",
+          "answer": "مَا",
+          "options": ["مَا", "مَنْ"],
+          "de": "Was ist das? Das ist ein Hemd."
+        },
+        {
+          "ar": "أَهٰذَا بَيْتٌ؟ ___، هٰذَا مَسْجِدٌ.",
+          "answer": "لَا",
+          "options": ["لَا", "نَعَمْ"],
+          "de": "Ist das ein Haus? Nein, das ist eine Moschee."
+        },
+        {
+          "ar": "أَهٰذَا قِطٌّ؟ ___، هٰذَا قِطٌّ.",
+          "answer": "نَعَمْ",
+          "options": ["نَعَمْ", "لَا"],
+          "de": "Ist das eine Katze? Ja, das ist eine Katze."
+        },
+        {
+          "ar": "هٰذَا ___.",
+          "answer": "مِفْتَاحٌ",
+          "options": ["مِفْتَاحٌ", "مِنْدِيلٌ", "مَكْتَبٌ", "كُرْسِيٌّ"],
+          "de": "Das ist ein Schlüssel."
+        },
+        {
+          "ar": "مَنْ هٰذَا؟ هٰذَا ___.",
+          "answer": "تَاجِرٌ",
+          "options": ["تَاجِرٌ", "طَالِبٌ", "طَبِيبٌ", "وَلَدٌ"],
+          "de": "Wer ist das? Das ist ein Händler."
+        }
       ]
     },
     {
@@ -260,6 +298,38 @@
               "de": "Zucker und Milch"
             }
           ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "هٰذَا بَيْتٌ وَ___ مَسْجِدٌ.",
+          "answer": "ذٰلِكَ",
+          "options": ["ذٰلِكَ", "هٰذَا"],
+          "de": "Das hier ist ein Haus, und das dort ist eine Moschee."
+        },
+        {
+          "ar": "___ حَجَرٌ.",
+          "answer": "ذٰلِكَ",
+          "options": ["ذٰلِكَ", "هٰذَا"],
+          "de": "Das dort ist ein Stein."
+        },
+        {
+          "ar": "مَنْ ذٰلِكَ؟ ذٰلِكَ ___.",
+          "answer": "إِمَامٌ",
+          "options": ["إِمَامٌ", "حَجَرٌ", "لَبَنٌ", "سُكَّرٌ"],
+          "de": "Wer ist das dort? Das ist ein Imam."
+        },
+        {
+          "ar": "أَذٰلِكَ لَبَنٌ؟ ___، ذٰلِكَ لَبَنٌ.",
+          "answer": "نَعَمْ",
+          "options": ["نَعَمْ", "لَا"],
+          "de": "Ist das dort Milch? Ja, das ist Milch."
+        },
+        {
+          "ar": "مَا ذٰلِكَ؟ ذٰلِكَ ___.",
+          "answer": "سُكَّرٌ",
+          "options": ["سُكَّرٌ", "لَبَنٌ", "حَجَرٌ", "إِمَامٌ"],
+          "de": "Was ist das dort? Das ist Zucker."
         }
       ]
     },
@@ -433,6 +503,44 @@
             }
           ]
         }
+      ],
+      "gaps": [
+        {
+          "ar": "___ جَدِيدٌ.",
+          "answer": "الْكِتَابُ",
+          "options": ["الْكِتَابُ", "كِتَابٌ"],
+          "de": "Das Buch ist neu."
+        },
+        {
+          "ar": "الْقَمَرُ ___.",
+          "answer": "جَمِيلٌ",
+          "options": ["جَمِيلٌ", "الْجَمِيلُ"],
+          "de": "Der Mond ist schön."
+        },
+        {
+          "ar": "اللَّبَنُ ___.",
+          "answer": "بَارِدٌ",
+          "options": ["بَارِدٌ", "حَارٌّ", "حُلْوٌ", "ثَقِيلٌ"],
+          "de": "Die Milch ist kalt."
+        },
+        {
+          "ar": "___ مَفْتُوحٌ.",
+          "answer": "الدُّكَّانُ",
+          "options": ["الدُّكَّانُ", "دُكَّانٌ"],
+          "de": "Der Laden ist offen."
+        },
+        {
+          "ar": "التُّفَّاحُ ___.",
+          "answer": "حُلْوٌ",
+          "options": ["حُلْوٌ", "مَرِيضٌ", "وَسِخٌ", "جَالِسٌ"],
+          "de": "Die Äpfel sind süß."
+        },
+        {
+          "ar": "الطَّالِبُ ___ وَالطَّبِيبُ جَالِسٌ.",
+          "answer": "وَاقِفٌ",
+          "options": ["وَاقِفٌ", "جَالِسٌ", "مَرِيضٌ", "غَنِيٌّ"],
+          "de": "Der Student steht, und der Arzt sitzt."
+        }
       ]
     },
     {
@@ -581,6 +689,50 @@
             }
           ]
         }
+      ],
+      "gaps": [
+        {
+          "ar": "أَيْنَ الْمُدِيرُ؟ الْمُدِيرُ فِي ___.",
+          "answer": "الْفَصْلِ",
+          "options": ["الْفَصْلِ", "الْفَصْلُ"],
+          "de": "Wo ist der Direktor? Der Direktor ist im Klassenzimmer."
+        },
+        {
+          "ar": "___ الْكِتَابُ؟ الْكِتَابُ عَلَى الْمَكْتَبِ.",
+          "answer": "أَيْنَ",
+          "options": ["أَيْنَ", "مَا", "مَنْ"],
+          "de": "Wo ist das Buch? Das Buch ist auf dem Schreibtisch."
+        },
+        {
+          "ar": "الْكِتَابُ ___ الْمَكْتَبِ.",
+          "answer": "عَلَى",
+          "options": ["عَلَى", "فِي", "إِلَى"],
+          "de": "Das Buch ist auf dem Schreibtisch."
+        },
+        {
+          "ar": "ذَهَبَ الْمُدِيرُ إِلَى ___.",
+          "answer": "الْجَامِعَةِ",
+          "options": ["الْجَامِعَةِ", "الْجَامِعَةُ"],
+          "de": "Der Direktor ging zur Universität."
+        },
+        {
+          "ar": "خَرَجَ الطَّالِبُ ___ الْفَصْلِ.",
+          "answer": "مِنَ",
+          "options": ["مِنَ", "إِلَى", "عَلَى"],
+          "de": "Der Student ging aus dem Klassenzimmer hinaus."
+        },
+        {
+          "ar": "الطَّبِيبُ مِنَ ___.",
+          "answer": "الْهِنْدِ",
+          "options": ["الْهِنْدِ", "الْهِنْدُ"],
+          "de": "Der Arzt ist aus Indien."
+        },
+        {
+          "ar": "___ الطَّالِبُ إِلَى الْمَسْجِدِ.",
+          "answer": "ذَهَبَ",
+          "options": ["ذَهَبَ", "خَرَجَ"],
+          "de": "Der Student ging zur Moschee."
+        }
       ]
     },
     {
@@ -678,6 +830,44 @@
               "de": "der Name des Jungen"
             }
           ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "هٰذَا كِتَابُ ___.",
+          "answer": "الطَّبِيبِ",
+          "options": ["الطَّبِيبِ", "الطَّبِيبُ"],
+          "de": "Das ist das Buch des Arztes."
+        },
+        {
+          "ar": "___ الْبَيْتِ مُغْلَقٌ.",
+          "answer": "بَابُ",
+          "options": ["بَابُ", "الْبَابُ", "بَابٌ"],
+          "de": "Die Tür des Hauses ist geschlossen."
+        },
+        {
+          "ar": "مَا ___ الْوَلَدِ؟",
+          "answer": "اسْمُ",
+          "options": ["اسْمُ", "الِاسْمُ", "اسْمٌ"],
+          "de": "Wie heißt der Junge?"
+        },
+        {
+          "ar": "الْكِتَابُ تَحْتَ ___.",
+          "answer": "السَّرِيرِ",
+          "options": ["السَّرِيرِ", "السَّرِيرُ"],
+          "de": "Das Buch ist unter dem Bett."
+        },
+        {
+          "ar": "أَيْنَ ابْنُ الْمُدِيرِ؟ ابْنُ الْمُدِيرِ ___.",
+          "answer": "هُنَاكَ",
+          "options": ["هُنَاكَ", "تَحْتَ", "أَيْنَ"],
+          "de": "Wo ist der Sohn des Direktors? Der Sohn des Direktors ist dort."
+        },
+        {
+          "ar": "بَيْتُ ___ كَبِيرٌ.",
+          "answer": "الْعَمِّ",
+          "options": ["الْعَمِّ", "الْعَمُّ", "عَمٌّ"],
+          "de": "Das Haus des Onkels ist groß."
         }
       ]
     }

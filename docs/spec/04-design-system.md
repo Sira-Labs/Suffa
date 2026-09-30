@@ -1,6 +1,6 @@
 # Suffa — Design system
 
-- Date: 2026-09-23 · Status: in progress (steps 1–3 of 5 shipped) · Mockups: the "Suffa Redesign"
+- Date: 2026-09-23 · Status: in progress (steps 1–3 and 5 of 5 shipped) · Mockups: the "Suffa Redesign"
   canvas (7 screens) · Code: `apps/web/src/styles/global.css`, `components/Icon.tsx`,
   `navigation.ts`
 
@@ -68,9 +68,16 @@ precached for offline use (≈ 370 kB); other scripts load on demand.
 | 2    | "Heute" (today's path, word of the day) and review focus mode | ✅     |
 | 3    | Unit as a learning path                                       | ✅     |
 | 4    | Listen & read along (player with transcript)                  | ☐      |
-| 5    | Root family and pattern trainer                               | ☐      |
+| 5    | Root family and pattern trainer                               | ✅     |
 
 Each step ships on its own, tested, so learners never see a half-migrated app.
+
+Step 5 (`/roots`, `/roots/muster`): the root in the centre with its words around it (learned
+solid, not yet learned dashed), root letters coloured inside every word, a card that explains
+the word's pattern with more words of that pattern, and a pattern trainer (root + pattern →
+word). Course words come from the units; further derivations of course roots
+(`content/roots/families.json`) and the pattern explanations (`content/roots/patterns.json`)
+are our own content.
 
 ### v2: the unit as a room (mockups: third row of the "Suffa Redesign" canvas)
 

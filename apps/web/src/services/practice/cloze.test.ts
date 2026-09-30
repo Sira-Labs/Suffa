@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { content } from '@/content';
 import examples from '@/content/sources/examples.json';
 import type { ExampleCatalog } from '@/types';
-import { clozeChoices, clozeFor, clozeWordIds, CLOZE_CHOICES } from './cloze';
+import {
+  clozeChoices,
+  clozeFor,
+  clozeWordIds,
+  CLOZE_CHOICES,
+  randomShuffle,
+} from './cloze';
 
 const catalog = examples as ExampleCatalog;
 
@@ -41,5 +47,18 @@ describe('cloze', () => {
     expect(choices).toHaveLength(CLOZE_CHOICES);
     expect(choices.map((c) => c.id)).toContain('a');
     expect(clozeChoices(pool[0]!, pool)).toEqual(choices);
+  });
+});
+
+describe('randomShuffle', () => {
+  it('returns every item once, in an order that changes with the random source', () => {
+    const items = Array.from({ length: 20 }, (_, i) => i);
+    let n = 1;
+    const seeded = () => (n = (n * 9301 + 49297) % 233280) / 233280;
+    const a = randomShuffle(items, seeded);
+    const b = randomShuffle(items, seeded);
+    expect([...a].sort((x, y) => x - y)).toEqual(items);
+    expect(a).not.toEqual(b);
+    expect(items[0]).toBe(0); // the input stays as it was
   });
 });

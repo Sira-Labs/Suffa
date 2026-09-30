@@ -945,7 +945,7 @@
         {
           "id": "md-106-14",
           "ar": "الْقِدْرُ",
-          "de": "der Kochtopf"
+          "de": "der Kochtopf (weiblich)"
         },
         {
           "id": "md-106-15",
@@ -1823,13 +1823,13 @@
         {
           "ar": "___ أَخٌ وَاحِدٌ.",
           "answer": "لِي",
-          "options": ["لِي", "عِنْدِي"],
+          "options": ["لِي", "لَكَ", "لَهَا"],
           "de": "Ich habe einen Bruder."
         },
         {
           "ar": "___ سَيَّارَةٌ جَدِيدَةٌ.",
           "answer": "عِنْدِي",
-          "options": ["عِنْدِي", "لِي"],
+          "options": ["عِنْدِي", "عِنْدَكَ", "عِنْدَهُ"],
           "de": "Ich habe ein neues Auto."
         },
         {
@@ -2094,7 +2094,7 @@
         },
         {
           "title": "Mann oder Frau ansprechen: -ka / -ki und يَا",
-          "text": "„Du“ heißt zu einem Mann أَنْتَ, zu einer Frau أَنْتِ. Genauso wird „dein“ unterschieden: -ka für einen Mann, -ki für eine Frau. Wer jemanden direkt anredet, setzt يَا davor; das angeredete Wort endet dann meist auf -u ohne -n.",
+          "text": "„Du“ heißt zu einem Mann أَنْتَ, zu einer Frau أَنْتِ. Genauso wird „dein“ unterschieden: -ka für einen Mann, -ki für eine Frau. Wer jemanden direkt anredet, setzt يَا davor. Ein Name endet dann auf -u ohne -n (يَا حَامِدُ); mit ـِي (mein) bleibt das Wort unverändert: يَا أَخِي, يَا سَيِّدِي, يَا خَالَتِي.",
           "examples": [
             {
               "ar": "كَيْفَ حَالُكِ يَا خَالَتِي؟",
@@ -2726,7 +2726,7 @@
         {
           "id": "md-116-02",
           "ar": "جُدُدٌ",
-          "de": "neu (Pl. von جَدِيدٌ, für Personen)"
+          "de": "neue (Pl. von جَدِيدٌ)"
         },
         {
           "id": "md-116-03",
@@ -3390,7 +3390,7 @@
         },
         {
           "title": "Nach dem Preis fragen: كَمْ ثَمَنُ …؟",
-          "text": "Mit كَمْ ثَمَنُ und einem Nomen im Genitiv fragt man nach dem Preis. In der Antwort steht meist ثَمَنُهُ bzw. ثَمَنُهَا mit einer Zahl; نِصْفٌ bedeutet „und ein halb“.",
+          "text": "Mit كَمْ ثَمَنُ und einem Nomen im Genitiv fragt man nach dem Preis. In der Antwort steht meist ثَمَنُهُ bzw. ثَمَنُهَا mit einer Zahl; وَنِصْفٌ bedeutet „und ein halb“ (نِصْفٌ allein = „Hälfte“).",
           "examples": [
             {
               "ar": "كَمْ ثَمَنُ هٰذِهِ السَّاعَةِ؟ ثَمَنُهَا عَشَرَةُ رِيَالَاتٍ.",

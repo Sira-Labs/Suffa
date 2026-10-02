@@ -12,7 +12,7 @@ import {
   type PermissionStatus,
   type VideoChannel,
 } from '@/services/videos/videosApi';
-import { COURSES } from '@suffa/engagement';
+import { COURSES, DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 import { unitLabel } from '@/services/courses';
 
 export function VideoAdmin({ api: injected }: { api?: VideosApi }) {
@@ -75,6 +75,7 @@ function ChannelCard({
   onChange: () => Promise<void>;
   onMessage: (m: string | null) => void;
 }) {
+  const [course, setCourse] = useState<CourseId>(channel.course ?? DEFAULT_COURSE);
   const [status, setStatus] = useState<PermissionStatus>(channel.permissionStatus);
   const [notes, setNotes] = useState(channel.permissionNotes);
   const [contacted, setContacted] = useState(channel.contactedAt ?? '');
@@ -84,6 +85,7 @@ function ChannelCard({
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await api.updateChannel(channel.id, {
+      course,
       permissionStatus: status,
       permissionNotes: notes,
       contactedAt: contacted || null,
@@ -132,6 +134,7 @@ function ChannelCard({
       )}
       <form className="stack" onSubmit={(e) => void save(e)}>
         <div className="row" style={{ gap: '0.75rem', flexWrap: 'wrap' }}>
+          <CourseSelect value={course} onChange={setCourse} />
           <label className="stack" style={{ gap: 2 }}>
             <span className="muted">Erlaubnis der Autoren</span>
             <select
@@ -252,12 +255,14 @@ function NewChannel({
   onCreated: () => Promise<void>;
 }) {
   const [name, setName] = useState('');
+  const [course, setCourse] = useState<CourseId>(DEFAULT_COURSE);
   const [playlist, setPlaylist] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = await api.createChannel({
       name: name.trim(),
+      course,
       playlists: playlist.trim() ? [playlist.trim()] : [],
     });
     if (!result.ok) return setMessage(result.message);
@@ -276,6 +281,7 @@ function NewChannel({
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
+      <CourseSelect value={course} onChange={setCourse} />
       <input
         className="input"
         placeholder="Playlist-ID (PL…)"
@@ -290,5 +296,31 @@ function NewChannel({
         {message && <span className="feedback-bad">{message}</span>}
       </div>
     </form>
+  );
+}
+
+/** The course a channel teaches: the import reads "Lesson n" as that course's lesson n. */
+function CourseSelect({
+  value,
+  onChange,
+}: {
+  value: CourseId;
+  onChange: (course: CourseId) => void;
+}) {
+  return (
+    <label className="stack" style={{ gap: 2 }}>
+      <span className="muted">Kurs des Kanals</span>
+      <select
+        className="input"
+        value={value}
+        onChange={(e) => onChange(e.target.value as CourseId)}
+      >
+        {COURSES.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

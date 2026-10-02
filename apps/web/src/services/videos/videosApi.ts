@@ -1,4 +1,5 @@
 /** Client for the video lessons (Sprint 12): the public catalog and the admin's tools. */
+import type { CourseId } from '@suffa/engagement';
 import { apiRequest, type Fetch } from '@/services/api/request';
 import type { Checkpoint, CheckpointData, Cue } from '@/services/media/checkpoints';
 
@@ -19,6 +20,8 @@ export interface VideoLesson {
 export interface VideoChannel {
   id: string;
   name: string;
+  /** The course its lessons belong to (ADR-0025). */
+  course: CourseId;
   youtubeChannelId: string | null;
   playlists: string[];
   permissionStatus: PermissionStatus;
@@ -78,7 +81,7 @@ export class VideosApi {
     }>('/api/v1/admin/videos');
   }
 
-  createChannel(input: { name: string; playlists: string[] }) {
+  createChannel(input: { name: string; course: CourseId; playlists: string[] }) {
     return this.call<{ id: string }>('/api/v1/admin/videos/channels', {
       method: 'POST',
       body: JSON.stringify(input),
@@ -89,6 +92,7 @@ export class VideosApi {
     id: string,
     patch: Partial<{
       name: string;
+      course: CourseId;
       playlists: string[];
       permissionStatus: PermissionStatus;
       permissionNotes: string;

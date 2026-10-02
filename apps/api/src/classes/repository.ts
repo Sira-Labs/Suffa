@@ -23,6 +23,8 @@ export interface ClassSummary {
   studentCount: number;
   /** Learners waiting for approval (for teachers). */
   pendingCount: number;
+  /** Who leads the class (its creator), as on the invite page. */
+  teacherName: string | null;
   createdAt: string;
 }
 
@@ -141,9 +143,12 @@ export class PgClassRepository implements ClassRepository {
       status: MemberStatus;
       student_count: string;
       pending_count: string;
+      teacher_name: string | null;
       created_at: Date;
     }>(
       `select c.id, c.name, c.course, m.class_role, m.status, c.created_at,
+              (select coalesce(nullif(u.name, ''), split_part(u.email, '@', 1))
+                 from users u where u.id = c.created_by) as teacher_name,
               (select count(*) from class_members s
                 where s.class_id = c.id and s.class_role = 'student' and s.status = 'active')
                 as student_count,
@@ -163,6 +168,7 @@ export class PgClassRepository implements ClassRepository {
       // Learners do not see who else is in the class (ADR-0009).
       studentCount: r.class_role === 'teacher' ? Number(r.student_count) : 0,
       pendingCount: r.class_role === 'teacher' ? Number(r.pending_count) : 0,
+      teacherName: r.teacher_name,
       createdAt: r.created_at.toISOString(),
     }));
   }

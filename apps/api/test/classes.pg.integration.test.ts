@@ -133,6 +133,8 @@ describe.skipIf(!url)('Classes (Postgres)', () => {
         classRole: 'student',
         status: 'active',
         studentCount: 0,
+        // The learner sees who leads the class, as on the invite page.
+        teacherName: 'Frau Yilmaz',
       }),
     ]);
     const audit = await pool.query('select action from audit_log order by id');

@@ -272,12 +272,21 @@ describe('Medina lesson page', () => {
     expect(within(second).getByText(/Buch 2, S\. 5$/)).toBeTruthy();
   });
 
-  it('points to the book for lessons without own content yet, and handles unknown ones', async () => {
+  it('gives every lesson of book 1 its words and stations, and handles unknown ones', async () => {
+    for (let lesson = 1; lesson <= 23; lesson++) {
+      expect(madinahLessonContent(100 + lesson), `lesson ${lesson}`).not.toBeNull();
+    }
     const { unmount } = renderAt('/units/madinah/7');
-    expect(
-      await screen.findByText(/Wörter und Grammatik zu dieser Lektion folgen/)
-    ).toBeTruthy();
-    expect(screen.getByRole('region', { name: 'Im Buch' })).toBeTruthy();
+    expect(await screen.findByRole('region', { name: 'Neue Wörter' })).toBeTruthy();
+    for (const name of [
+      'Wörter üben',
+      'Diktat',
+      'Lückentext',
+      'Lektionstest',
+      'Im Buch',
+    ]) {
+      expect(screen.getByRole('region', { name })).toBeTruthy();
+    }
     expect(screen.queryByRole('link', { name: /Lektion 8/ })).toBeTruthy();
     unmount();
     renderAt('/units/madinah/99');

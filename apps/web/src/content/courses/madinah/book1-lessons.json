@@ -870,6 +870,3258 @@
           "de": "Das Haus des Onkels ist groß."
         }
       ]
+    },
+    {
+      "unit": 106,
+      "lesson": 6,
+      "topic": "Weiblich: هٰذِهِ und die Endung ة",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-106-01",
+          "ar": "هٰذِهِ",
+          "de": "diese, das (hier), weiblich"
+        },
+        {
+          "id": "md-106-02",
+          "ar": "هِيَ",
+          "de": "sie"
+        },
+        {
+          "id": "md-106-03",
+          "ar": "بِنْتٌ",
+          "de": "Mädchen, Tochter"
+        },
+        {
+          "id": "md-106-04",
+          "ar": "أُخْتٌ",
+          "de": "Schwester"
+        },
+        {
+          "id": "md-106-05",
+          "ar": "مُهَنْدِسٌ",
+          "de": "Ingenieur"
+        },
+        {
+          "id": "md-106-06",
+          "ar": "أَيْضًا",
+          "de": "auch"
+        },
+        {
+          "id": "md-106-07",
+          "ar": "لِمَنْ",
+          "de": "wem gehört …?"
+        },
+        {
+          "id": "md-106-08",
+          "ar": "جِدًّا",
+          "de": "sehr"
+        },
+        {
+          "id": "md-106-09",
+          "ar": "سَرِيعٌ",
+          "de": "schnell"
+        },
+        {
+          "id": "md-106-10",
+          "ar": "الْمِكْوَاةُ",
+          "de": "das Bügeleisen"
+        },
+        {
+          "id": "md-106-11",
+          "ar": "الدَّرَّاجَةُ",
+          "de": "das Fahrrad"
+        },
+        {
+          "id": "md-106-12",
+          "ar": "السَّاعَةُ",
+          "de": "die Uhr"
+        },
+        {
+          "id": "md-106-13",
+          "ar": "الْمِلْعَقَةُ",
+          "de": "der Löffel"
+        },
+        {
+          "id": "md-106-14",
+          "ar": "الْقِدْرُ",
+          "de": "der Kochtopf (weiblich)"
+        },
+        {
+          "id": "md-106-15",
+          "ar": "الثَّلَّاجَةُ",
+          "de": "der Kühlschrank"
+        },
+        {
+          "id": "md-106-16",
+          "ar": "النَّافِذَةُ",
+          "de": "das Fenster"
+        },
+        {
+          "id": "md-106-17",
+          "ar": "الْبَقَرَةُ",
+          "de": "die Kuh"
+        },
+        {
+          "id": "md-106-18",
+          "ar": "دَجَاجَةٌ",
+          "de": "Huhn, Henne"
+        },
+        {
+          "id": "md-106-19",
+          "ar": "الْفَلَّاحُ",
+          "de": "der Bauer"
+        },
+        {
+          "id": "md-106-20",
+          "ar": "الْأَبُ",
+          "de": "der Vater"
+        },
+        {
+          "id": "md-106-21",
+          "ar": "الْأُمُّ",
+          "de": "die Mutter"
+        },
+        {
+          "id": "md-106-22",
+          "ar": "الْمُدَرِّسُ",
+          "de": "der Lehrer"
+        },
+        {
+          "id": "md-106-23",
+          "ar": "الْأَنْفُ",
+          "de": "die Nase"
+        },
+        {
+          "id": "md-106-24",
+          "ar": "الْفَمُ",
+          "de": "der Mund"
+        },
+        {
+          "id": "md-106-25",
+          "ar": "الْعَيْنُ",
+          "de": "das Auge (weiblich)"
+        },
+        {
+          "id": "md-106-26",
+          "ar": "الْأُذُنُ",
+          "de": "das Ohr (weiblich)"
+        },
+        {
+          "id": "md-106-27",
+          "ar": "الْيَدُ",
+          "de": "die Hand (weiblich)"
+        },
+        {
+          "id": "md-106-28",
+          "ar": "الرِّجْلُ",
+          "de": "der Fuß, das Bein (weiblich)"
+        },
+        {
+          "id": "md-106-29",
+          "ar": "الشَّايُ",
+          "de": "der Tee"
+        },
+        {
+          "id": "md-106-30",
+          "ar": "الْقَهْوَةُ",
+          "de": "der Kaffee"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "هٰذِهِ – „dies“ für weibliche Nomen",
+          "text": "Arabisch hat nur zwei Geschlechter: männlich und weiblich. Für weibliche Nomen sagt man هٰذِهِ statt هٰذَا. Die meisten weiblichen Nomen enden auf ة (tā' marbūṭa), einige sind aber ohne ة weiblich, z. B. يَدٌ, عَيْنٌ, أُذُنٌ, رِجْلٌ, أُمٌّ, بِنْتٌ.",
+          "examples": [
+            {
+              "ar": "هٰذِهِ سَيَّارَةٌ وَهٰذَا بَيْتٌ.",
+              "de": "Das ist ein Auto, und das ist ein Haus."
+            },
+            {
+              "ar": "هٰذِهِ عَيْنٌ وَهٰذَا فَمٌ.",
+              "de": "Das ist ein Auge, und das ist ein Mund."
+            },
+            {
+              "ar": "مَا هٰذِهِ؟ هٰذِهِ ثَلَّاجَةٌ.",
+              "de": "Was ist das? Das ist ein Kühlschrank."
+            }
+          ]
+        },
+        {
+          "title": "Die weibliche Form mit ة und هِيَ",
+          "text": "Aus vielen männlichen Wörtern wird durch ة eine weibliche Form: طَبِيبٌ → طَبِيبَةٌ (Ärztin), كَبِيرٌ → كَبِيرَةٌ. Die Eigenschaft richtet sich nach dem Geschlecht des Nomens. Für ein weibliches Nomen steht das Fürwort هِيَ (sie), auch wenn es im Deutschen „er“ oder „es“ heißt.",
+          "examples": [
+            {
+              "ar": "الْبِنْتُ مَرِيضَةٌ.",
+              "de": "Das Mädchen ist krank."
+            },
+            {
+              "ar": "أُخْتُ الْمُدَرِّسِ طَبِيبَةٌ.",
+              "de": "Die Schwester des Lehrers ist Ärztin."
+            },
+            {
+              "ar": "أَيْنَ الْمِكْوَاةُ؟ هِيَ عَلَى الْمَكْتَبِ.",
+              "de": "Wo ist das Bügeleisen? Es ist auf dem Schreibtisch."
+            }
+          ]
+        },
+        {
+          "title": "لِمَنْ – „Wem gehört …?“ und جِدًّا",
+          "text": "لِمَنْ fragt nach dem Besitzer. In der Antwort steht لِـ direkt vor dem Namen, der dann die Endung -i bzw. -in bekommt. جِدًّا (sehr) steht hinter der Eigenschaft.",
+          "examples": [
+            {
+              "ar": "لِمَنْ هٰذَا؟ هٰذَا لِحَامِدٍ.",
+              "de": "Wem gehört das? Das gehört Hamid."
+            },
+            {
+              "ar": "الْبَقَرَةُ كَبِيرَةٌ جِدًّا.",
+              "de": "Die Kuh ist sehr groß."
+            },
+            {
+              "ar": "الشَّايُ حَارٌّ جِدًّا.",
+              "de": "Der Tee ist sehr heiß."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "___ نَافِذَةٌ.",
+          "answer": "هٰذِهِ",
+          "options": ["هٰذِهِ", "هٰذَا"],
+          "de": "Das ist ein Fenster."
+        },
+        {
+          "ar": "___ أَنْفٌ.",
+          "answer": "هٰذَا",
+          "options": ["هٰذَا", "هٰذِهِ"],
+          "de": "Das ist eine Nase."
+        },
+        {
+          "ar": "الْقَهْوَةُ ___.",
+          "answer": "حَارَّةٌ",
+          "options": ["حَارَّةٌ", "حَارٌّ"],
+          "de": "Der Kaffee ist heiß."
+        },
+        {
+          "ar": "أُخْتُ حَامِدٍ ___.",
+          "answer": "مُهَنْدِسَةٌ",
+          "options": ["مُهَنْدِسَةٌ", "مُهَنْدِسٌ"],
+          "de": "Hamids Schwester ist Ingenieurin."
+        },
+        {
+          "ar": "أَيْنَ السَّاعَةُ؟ ___ عَلَى الْمَكْتَبِ.",
+          "answer": "هِيَ",
+          "options": ["هِيَ", "هُوَ"],
+          "de": "Wo ist die Uhr? Sie ist auf dem Schreibtisch."
+        },
+        {
+          "ar": "___ هٰذَا؟ هٰذَا لِحَامِدٍ.",
+          "answer": "لِمَنْ",
+          "options": ["لِمَنْ", "مَنْ", "مَا"],
+          "de": "Wem gehört das? Das gehört Hamid."
+        },
+        {
+          "ar": "الثَّلَّاجَةُ كَبِيرَةٌ ___.",
+          "answer": "جِدًّا",
+          "options": ["جِدًّا", "أَيْضًا"],
+          "de": "Der Kühlschrank ist sehr groß."
+        }
+      ]
+    },
+    {
+      "unit": 107,
+      "lesson": 7,
+      "topic": "Das dort, weiblich: تِلْكَ",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-107-01",
+          "ar": "تِلْكَ",
+          "de": "jene, das (dort), weiblich"
+        },
+        {
+          "id": "md-107-02",
+          "ar": "الْمُمَرِّضَةُ",
+          "de": "die Krankenschwester"
+        },
+        {
+          "id": "md-107-03",
+          "ar": "الْحَدِيقَةُ",
+          "de": "der Garten"
+        },
+        {
+          "id": "md-107-04",
+          "ar": "الْبَطَّةُ",
+          "de": "die Ente"
+        },
+        {
+          "id": "md-107-05",
+          "ar": "الْمُؤَذِّنُ",
+          "de": "der Muezzin"
+        },
+        {
+          "id": "md-107-06",
+          "ar": "النَّاقَةُ",
+          "de": "die Kamelstute"
+        },
+        {
+          "id": "md-107-07",
+          "ar": "الْبَيْضَةُ",
+          "de": "das Ei"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "تِلْكَ – „das dort“ für weibliche Nomen",
+          "text": "So wie ذٰلِكَ auf ein männliches Nomen in der Ferne zeigt, zeigt تِلْكَ auf ein weibliches. Entscheidend ist das arabische Geschlecht, nicht das deutsche: تِلْكَ سَيَّارَةٌ heißt „Das dort ist ein Auto“.",
+          "examples": [
+            {
+              "ar": "تِلْكَ نَاقَةٌ وَذٰلِكَ جَمَلٌ.",
+              "de": "Das dort ist eine Kamelstute, und das dort ist ein Kamel."
+            },
+            {
+              "ar": "أَتِلْكَ بَقَرَةٌ؟ نَعَمْ، تِلْكَ بَقَرَةٌ.",
+              "de": "Ist das dort eine Kuh? Ja, das ist eine Kuh."
+            }
+          ]
+        },
+        {
+          "title": "Die vier Zeigewörter im Überblick",
+          "text": "Nah: هٰذَا (männlich), هٰذِهِ (weiblich). Fern: ذٰلِكَ (männlich), تِلْكَ (weiblich). Man wählt nach zwei Fragen: Ist das Ding nah oder fern? Ist das Wort männlich oder weiblich?",
+          "examples": [
+            {
+              "ar": "هٰذَا مُؤَذِّنٌ وَتِلْكَ مُمَرِّضَةٌ.",
+              "de": "Das hier ist ein Muezzin, und das dort ist eine Krankenschwester."
+            },
+            {
+              "ar": "ذٰلِكَ مَسْجِدٌ وَتِلْكَ حَدِيقَةٌ.",
+              "de": "Das dort ist eine Moschee, und das dort ist ein Garten."
+            },
+            {
+              "ar": "هٰذِهِ بَيْضَةٌ وَذٰلِكَ دِيكٌ.",
+              "de": "Das hier ist ein Ei, und das dort ist ein Hahn."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "___ نَاقَةٌ وَذٰلِكَ جَمَلٌ.",
+          "answer": "تِلْكَ",
+          "options": ["تِلْكَ", "ذٰلِكَ"],
+          "de": "Das dort ist eine Kamelstute, und das dort ist ein Kamel."
+        },
+        {
+          "ar": "___ بَيْضَةٌ.",
+          "answer": "هٰذِهِ",
+          "options": ["هٰذِهِ", "تِلْكَ", "هٰذَا", "ذٰلِكَ"],
+          "de": "Das hier ist ein Ei."
+        },
+        {
+          "ar": "___ مُؤَذِّنٌ.",
+          "answer": "ذٰلِكَ",
+          "options": ["ذٰلِكَ", "تِلْكَ", "هٰذَا", "هٰذِهِ"],
+          "de": "Das dort ist ein Muezzin."
+        },
+        {
+          "ar": "أَتِلْكَ مُمَرِّضَةٌ؟ لَا، ___ طَبِيبَةٌ.",
+          "answer": "تِلْكَ",
+          "options": ["تِلْكَ", "ذٰلِكَ"],
+          "de": "Ist das dort eine Krankenschwester? Nein, das ist eine Ärztin."
+        },
+        {
+          "ar": "___ حَدِيقَةُ الْمُدِيرِ.",
+          "answer": "تِلْكَ",
+          "options": ["تِلْكَ", "ذٰلِكَ"],
+          "de": "Das dort ist der Garten des Direktors."
+        },
+        {
+          "ar": "هٰذِهِ بَطَّةٌ وَ___ دِيكٌ.",
+          "answer": "ذٰلِكَ",
+          "options": ["ذٰلِكَ", "تِلْكَ"],
+          "de": "Das hier ist eine Ente, und das dort ist ein Hahn."
+        },
+        {
+          "ar": "مَا ___؟ تِلْكَ سَاعَةٌ.",
+          "answer": "تِلْكَ",
+          "options": ["تِلْكَ", "ذٰلِكَ"],
+          "de": "Was ist das dort? Das ist eine Uhr."
+        }
+      ]
+    },
+    {
+      "unit": 108,
+      "lesson": 8,
+      "topic": "Dieser Mann: هٰذَا الرَّجُلُ, لِـ und Ortsangaben",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-108-01",
+          "ar": "لِـ",
+          "de": "für, gehört (Besitz)"
+        },
+        {
+          "id": "md-108-02",
+          "ar": "أَمَامَ",
+          "de": "vor"
+        },
+        {
+          "id": "md-108-03",
+          "ar": "خَلْفَ",
+          "de": "hinter"
+        },
+        {
+          "id": "md-108-04",
+          "ar": "الْآنَ",
+          "de": "jetzt"
+        },
+        {
+          "id": "md-108-05",
+          "ar": "جَلَسَ",
+          "de": "er setzte sich"
+        },
+        {
+          "id": "md-108-06",
+          "ar": "السِّكِّينُ",
+          "de": "das Messer"
+        },
+        {
+          "id": "md-108-07",
+          "ar": "السَّبُّورَةُ",
+          "de": "die Tafel"
+        },
+        {
+          "id": "md-108-08",
+          "ar": "الْمِحْرَابُ",
+          "de": "die Gebetsnische"
+        },
+        {
+          "id": "md-108-09",
+          "ar": "الْمُسْتَشْفَى",
+          "de": "das Krankenhaus"
+        },
+        {
+          "id": "md-108-10",
+          "ar": "أَمْرِيكَا",
+          "de": "Amerika"
+        },
+        {
+          "id": "md-108-11",
+          "ar": "سُوِيسْرَا",
+          "de": "die Schweiz"
+        },
+        {
+          "id": "md-108-12",
+          "ar": "أَلْمَانِيَا",
+          "de": "Deutschland"
+        },
+        {
+          "id": "md-108-13",
+          "ar": "إِنْكِلْتَرَّا",
+          "de": "England"
+        },
+        {
+          "id": "md-108-14",
+          "ar": "فَرَنْسَا",
+          "de": "Frankreich"
+        },
+        {
+          "id": "md-108-15",
+          "ar": "الْعِرَاقُ",
+          "de": "der Irak"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "„Dieser Mann“: Zeigewort + Artikel",
+          "text": "هٰذَا رَجُلٌ ist ein ganzer Satz: „Das ist ein Mann.“ Steht nach dem Zeigewort ein Nomen mit اَلْ, bedeutet es „dieser Mann“ – das ist noch kein Satz, es fehlt die Aussage: هٰذَا الرَّجُلُ طَبِيبٌ. Das gilt genauso für هٰذِهِ, ذٰلِكَ und تِلْكَ.",
+          "examples": [
+            {
+              "ar": "هٰذَا الْوَلَدُ طَالِبٌ.",
+              "de": "Dieser Junge ist Schüler."
+            },
+            {
+              "ar": "تِلْكَ السَّيَّارَةُ جَدِيدَةٌ.",
+              "de": "Jenes Auto ist neu."
+            },
+            {
+              "ar": "ذٰلِكَ الْمُهَنْدِسُ مِنْ أَلْمَانِيَا.",
+              "de": "Jener Ingenieur ist aus Deutschland."
+            }
+          ]
+        },
+        {
+          "title": "لِـ – „gehört …“",
+          "text": "لِـ wird direkt an das Nomen geschrieben, das danach im Genitiv (-i) steht. Vor dem Artikel fällt das Alif weg: لِ + الطَّالِبِ → لِلطَّالِبِ.",
+          "examples": [
+            {
+              "ar": "هٰذَا الْقَلَمُ لِلطَّالِبِ.",
+              "de": "Dieser Stift gehört dem Schüler."
+            },
+            {
+              "ar": "تِلْكَ الدَّرَّاجَةُ لِحَامِدٍ.",
+              "de": "Jenes Fahrrad gehört Hamid."
+            },
+            {
+              "ar": "لِمَنْ هٰذَا السِّكِّينُ؟ هُوَ لِلْفَلَّاحِ.",
+              "de": "Wem gehört dieses Messer? Es gehört dem Bauern."
+            }
+          ]
+        },
+        {
+          "title": "أَمَامَ, خَلْفَ und unveränderliche Namen",
+          "text": "Nach أَمَامَ (vor) und خَلْفَ (hinter) steht das Nomen im Genitiv (-i), wie nach فِي. Wörter, die auf ا oder ى enden, z. B. أَمْرِيكَا, فَرَنْسَا oder الْمُسْتَشْفَى, zeigen keine Endung und verändern sich nicht.",
+          "examples": [
+            {
+              "ar": "السَّيَّارَةُ أَمَامَ الْبَيْتِ.",
+              "de": "Das Auto steht vor dem Haus."
+            },
+            {
+              "ar": "الْحَدِيقَةُ خَلْفَ الْمُسْتَشْفَى.",
+              "de": "Der Garten ist hinter dem Krankenhaus."
+            },
+            {
+              "ar": "ذَهَبَ الْمُهَنْدِسُ إِلَى فَرَنْسَا.",
+              "de": "Der Ingenieur ging nach Frankreich."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "هٰذَا ___ مِنَ الْعِرَاقِ.",
+          "answer": "الطَّالِبُ",
+          "options": ["الطَّالِبُ", "طَالِبٌ"],
+          "de": "Dieser Student ist aus dem Irak."
+        },
+        {
+          "ar": "هٰذِهِ السَّاعَةُ ___.",
+          "answer": "لِلْمُدِيرِ",
+          "options": ["لِلْمُدِيرِ", "لِلْمُدِيرُ"],
+          "de": "Diese Uhr gehört dem Direktor."
+        },
+        {
+          "ar": "لِمَنْ ___ الْكِتَابُ؟ هُوَ لِلْمُهَنْدِسِ.",
+          "answer": "هٰذَا",
+          "options": ["هٰذَا", "هٰذِهِ"],
+          "de": "Wem gehört dieses Buch? Es gehört dem Ingenieur."
+        },
+        {
+          "ar": "الْمُدَرِّسُ ___ السَّبُّورَةِ.",
+          "answer": "أَمَامَ",
+          "options": ["أَمَامَ", "خَلْفَ"],
+          "de": "Der Lehrer steht vor der Tafel."
+        },
+        {
+          "ar": "جَلَسَ الْوَلَدُ ___ الْإِمَامِ.",
+          "answer": "خَلْفَ",
+          "options": ["خَلْفَ", "أَمَامَ"],
+          "de": "Der Junge setzte sich hinter den Imam."
+        },
+        {
+          "ar": "الطَّبِيبُ الْآنَ فِي ___.",
+          "answer": "الْمُسْتَشْفَى",
+          "options": ["الْمُسْتَشْفَى", "الْمَطْبَخِ", "السُّوقِ"],
+          "de": "Der Arzt ist jetzt im Krankenhaus."
+        },
+        {
+          "ar": "ذَهَبَ التَّاجِرُ مِنْ فَرَنْسَا إِلَى ___.",
+          "answer": "سُوِيسْرَا",
+          "options": ["سُوِيسْرَا", "إِنْكِلْتَرَّا", "أَلْمَانِيَا", "أَمْرِيكَا"],
+          "de": "Der Händler ging von Frankreich in die Schweiz."
+        }
+      ]
+    },
+    {
+      "unit": 109,
+      "lesson": 9,
+      "topic": "Nomen mit Eigenschaft und الَّذِي",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-109-01",
+          "ar": "اللُّغَةُ",
+          "de": "die Sprache"
+        },
+        {
+          "id": "md-109-02",
+          "ar": "شَهِيرٌ",
+          "de": "berühmt, bekannt"
+        },
+        {
+          "id": "md-109-03",
+          "ar": "الْمَدِينَةُ",
+          "de": "die Stadt"
+        },
+        {
+          "id": "md-109-04",
+          "ar": "الطَّائِرُ",
+          "de": "der Vogel"
+        },
+        {
+          "id": "md-109-05",
+          "ar": "الْيَوْمُ",
+          "de": "der Tag; heute"
+        },
+        {
+          "id": "md-109-06",
+          "ar": "كَسْلَانُ",
+          "de": "faul"
+        },
+        {
+          "id": "md-109-07",
+          "ar": "جَوْعَانُ",
+          "de": "hungrig"
+        },
+        {
+          "id": "md-109-08",
+          "ar": "عَطْشَانُ",
+          "de": "durstig"
+        },
+        {
+          "id": "md-109-09",
+          "ar": "غَضْبَانُ",
+          "de": "wütend, verärgert"
+        },
+        {
+          "id": "md-109-10",
+          "ar": "مَلْآنُ",
+          "de": "voll"
+        },
+        {
+          "id": "md-109-11",
+          "ar": "الْعُصْفُورُ",
+          "de": "der Spatz"
+        },
+        {
+          "id": "md-109-12",
+          "ar": "أَنَا",
+          "de": "ich"
+        },
+        {
+          "id": "md-109-13",
+          "ar": "أَنْتَ",
+          "de": "du (m.)"
+        },
+        {
+          "id": "md-109-14",
+          "ar": "لِمَاذَا",
+          "de": "warum?"
+        },
+        {
+          "id": "md-109-15",
+          "ar": "فَاكِهَةٌ",
+          "de": "Obst"
+        },
+        {
+          "id": "md-109-16",
+          "ar": "لَذِيذٌ",
+          "de": "lecker"
+        },
+        {
+          "id": "md-109-17",
+          "ar": "سَهْلٌ",
+          "de": "leicht, einfach"
+        },
+        {
+          "id": "md-109-18",
+          "ar": "صَعْبٌ",
+          "de": "schwer, schwierig"
+        },
+        {
+          "id": "md-109-19",
+          "ar": "مُجْتَهِدٌ",
+          "de": "fleißig"
+        },
+        {
+          "id": "md-109-20",
+          "ar": "الْعَرَبِيَّةُ",
+          "de": "Arabisch (die arabische Sprache)"
+        },
+        {
+          "id": "md-109-21",
+          "ar": "الْإِنْكِلِيزِيَّةُ",
+          "de": "Englisch (die englische Sprache)"
+        },
+        {
+          "id": "md-109-22",
+          "ar": "الْكُوبُ",
+          "de": "das Glas, der Becher"
+        },
+        {
+          "id": "md-109-23",
+          "ar": "عِنْدَ",
+          "de": "bei"
+        },
+        {
+          "id": "md-109-24",
+          "ar": "الْمَكْتَبَةُ",
+          "de": "die Bibliothek, die Buchhandlung"
+        },
+        {
+          "id": "md-109-25",
+          "ar": "الَّذِي",
+          "de": "der, welcher (Relativwort, m.)"
+        },
+        {
+          "id": "md-109-26",
+          "ar": "الْمِرْوَحَةُ",
+          "de": "der Ventilator"
+        },
+        {
+          "id": "md-109-27",
+          "ar": "حَادٌّ",
+          "de": "scharf"
+        },
+        {
+          "id": "md-109-28",
+          "ar": "الْمُسْتَوْصَفُ",
+          "de": "die Ambulanz, die Klinik"
+        },
+        {
+          "id": "md-109-29",
+          "ar": "الْوَزِيرُ",
+          "de": "der Minister"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Die Eigenschaft steht hinter dem Nomen",
+          "text": "Eine Eigenschaft (نَعْتٌ) folgt ihrem Nomen und passt sich ihm an: bestimmt oder unbestimmt, männlich oder weiblich (ة), und im Fall (-u, -i). اَلْبَيْتُ الْكَبِيرُ heißt nur „das große Haus“; erst اَلْبَيْتُ كَبِيرٌ ist der Satz „Das Haus ist groß“.",
+          "examples": [
+            {
+              "ar": "هٰذَا مُهَنْدِسٌ شَهِيرٌ.",
+              "de": "Das ist ein bekannter Ingenieur."
+            },
+            {
+              "ar": "الْكِتَابُ الْجَدِيدُ عَلَى الْمَكْتَبِ.",
+              "de": "Das neue Buch liegt auf dem Schreibtisch."
+            },
+            {
+              "ar": "ذَهَبَ الطَّالِبُ الْمُجْتَهِدُ إِلَى الْمَكْتَبَةِ الْكَبِيرَةِ.",
+              "de": "Der fleißige Student ging zur großen Bibliothek."
+            }
+          ]
+        },
+        {
+          "title": "Eigenschaften auf -ān: ohne Tanwīn",
+          "text": "Wörter wie كَسْلَانُ, جَوْعَانُ, عَطْشَانُ, غَضْبَانُ und مَلْآنُ beschreiben meist einen Zustand. Sie enden auf -ānu und bekommen nie die Endung -un, auch wenn sie unbestimmt sind.",
+          "examples": [
+            {
+              "ar": "أَنَا جَوْعَانُ وَأَنْتَ عَطْشَانُ.",
+              "de": "Ich bin hungrig, und du bist durstig."
+            },
+            {
+              "ar": "لِمَاذَا أَنْتَ غَضْبَانُ الْيَوْمَ؟",
+              "de": "Warum bist du heute wütend?"
+            }
+          ]
+        },
+        {
+          "title": "الَّذِي – „der, welcher“",
+          "text": "الَّذِي verbindet ein bestimmtes männliches Nomen mit einer näheren Beschreibung, etwa einem Verb oder einer Ortsangabe. Es entspricht dem deutschen Relativpronomen „der“.",
+          "examples": [
+            {
+              "ar": "مَنِ الرَّجُلُ الَّذِي خَرَجَ مِنَ الْمَكْتَبَةِ؟",
+              "de": "Wer ist der Mann, der aus der Bibliothek hinausgegangen ist?"
+            },
+            {
+              "ar": "الْقَلَمُ الَّذِي فِي الْحَقِيبَةِ لِلْمُدَرِّسِ.",
+              "de": "Der Stift, der in der Tasche ist, gehört dem Lehrer."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "هٰذِهِ لُغَةٌ ___.",
+          "answer": "سَهْلَةٌ",
+          "options": ["سَهْلَةٌ", "سَهْلٌ"],
+          "de": "Das ist eine leichte Sprache."
+        },
+        {
+          "ar": "أَيْنَ الْمُدَرِّسُ ___؟",
+          "answer": "الْجَدِيدُ",
+          "options": ["الْجَدِيدُ", "جَدِيدٌ"],
+          "de": "Wo ist der neue Lehrer?"
+        },
+        {
+          "ar": "الْمُدَرِّسُ ___.",
+          "answer": "جَدِيدٌ",
+          "options": ["جَدِيدٌ", "الْجَدِيدُ"],
+          "de": "Der Lehrer ist neu."
+        },
+        {
+          "ar": "ذَهَبَ الْوَلَدُ إِلَى الْمَدِينَةِ ___.",
+          "answer": "الْكَبِيرَةِ",
+          "options": ["الْكَبِيرَةِ", "الْكَبِيرَةُ", "كَبِيرَةٍ"],
+          "de": "Der Junge ging in die große Stadt."
+        },
+        {
+          "ar": "أَنَا ___ جِدًّا.",
+          "answer": "جَوْعَانُ",
+          "options": ["جَوْعَانُ", "عَطْشَانُ", "كَسْلَانُ", "غَضْبَانُ"],
+          "de": "Ich bin sehr hungrig."
+        },
+        {
+          "ar": "الرَّجُلُ ___ فِي الْمَكْتَبَةِ وَزِيرٌ.",
+          "answer": "الَّذِي",
+          "options": ["الَّذِي", "مَنْ", "أَيْنَ"],
+          "de": "Der Mann, der in der Bibliothek ist, ist Minister."
+        },
+        {
+          "ar": "هٰذَا سِكِّينٌ ___.",
+          "answer": "حَادٌّ",
+          "options": ["حَادٌّ", "مَلْآنُ", "شَهِيرٌ", "لَذِيذٌ"],
+          "de": "Das ist ein scharfes Messer."
+        }
+      ]
+    },
+    {
+      "unit": 110,
+      "lesson": 10,
+      "topic": "Mein, dein, sein, ihr: angehängte Pronomen",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-110-01",
+          "ar": "الزَّمِيلُ",
+          "de": "der Kollege, der Mitschüler"
+        },
+        {
+          "id": "md-110-02",
+          "ar": "الزَّوْجُ",
+          "de": "der Ehemann"
+        },
+        {
+          "id": "md-110-03",
+          "ar": "وَاحِدٌ",
+          "de": "ein, einer (Zahl)"
+        },
+        {
+          "id": "md-110-04",
+          "ar": "فَتًى",
+          "de": "junger Mann"
+        },
+        {
+          "id": "md-110-05",
+          "ar": "مَعَ",
+          "de": "mit"
+        },
+        {
+          "id": "md-110-06",
+          "ar": "الطِّفْلُ",
+          "de": "das Kind"
+        },
+        {
+          "id": "md-110-07",
+          "ar": "الْكُوَيْتُ",
+          "de": "Kuwait"
+        },
+        {
+          "id": "md-110-08",
+          "ar": "أَخٌ",
+          "de": "Bruder"
+        },
+        {
+          "id": "md-110-09",
+          "ar": "هُنَا",
+          "de": "hier"
+        },
+        {
+          "id": "md-110-10",
+          "ar": "يَا",
+          "de": "o … (Anrede vor einem Namen)"
+        },
+        {
+          "id": "md-110-11",
+          "ar": "الْأُرْدِيَّةُ",
+          "de": "Urdu"
+        },
+        {
+          "id": "md-110-12",
+          "ar": "الْيَابَانِيَّةُ",
+          "de": "Japanisch"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Angehängte Pronomen: ـِي, ـكَ, ـهُ, ـهَا",
+          "text": "„Mein, dein, sein, ihr“ werden an das Nomen angehängt: ـِي (mein), ـكَ (dein, m.), ـهُ (sein), ـهَا (ihr). Das Nomen ist dann bestimmt und hat weder اَلْ noch -un. Aus ة wird dabei ت: حَقِيبَةٌ → حَقِيبَتُهَا.",
+          "examples": [
+            {
+              "ar": "هٰذَا قَلَمِي وَذٰلِكَ قَلَمُكَ.",
+              "de": "Das ist mein Stift, und das dort ist dein Stift."
+            },
+            {
+              "ar": "كِتَابُهُ جَدِيدٌ وَحَقِيبَتُهَا قَدِيمَةٌ.",
+              "de": "Sein Buch ist neu, und ihre Tasche ist alt."
+            },
+            {
+              "ar": "أَيْنَ زَمِيلُكَ؟ هُوَ هُنَا مَعِي.",
+              "de": "Wo ist dein Mitschüler? Er ist hier bei mir."
+            }
+          ]
+        },
+        {
+          "title": "أَبٌ und أَخٌ mit Pronomen",
+          "text": "Vater und Bruder bekommen vor ـكَ, ـهُ und ـهَا ein langes -ū: أَبُوكَ, أَبُوهُ, أَبُوهَا; أَخُوكَ, أَخُوهُ, أَخُوهَا. Mit ـِي heißt es einfach أَبِي und أَخِي.",
+          "examples": [
+            {
+              "ar": "أَبِي فِي الْبَيْتِ.",
+              "de": "Mein Vater ist zu Hause."
+            },
+            {
+              "ar": "أَيْنَ أَبُوكَ؟",
+              "de": "Wo ist dein Vater?"
+            },
+            {
+              "ar": "أَخُوهَا طَبِيبٌ فِي الْكُوَيْتِ.",
+              "de": "Ihr Bruder ist Arzt in Kuwait."
+            }
+          ]
+        },
+        {
+          "title": "„Haben“: لِي und عِنْدِي",
+          "text": "Ein Verb „haben“ gibt es nicht. Für Verwandte und Menschen nimmt man لِ mit Pronomen (لِي, لَكَ, لَهُ, لَهَا), für Dinge عِنْدَ (عِنْدِي, عِنْدَكَ, عِنْدَهُ, عِنْدَهَا). Mit مَا davor wird es verneint.",
+          "examples": [
+            {
+              "ar": "لَهَا طِفْلٌ وَاحِدٌ.",
+              "de": "Sie hat ein Kind."
+            },
+            {
+              "ar": "عِنْدِي دَرَّاجَةٌ جَدِيدَةٌ.",
+              "de": "Ich habe ein neues Fahrrad."
+            },
+            {
+              "ar": "أَعِنْدَكَ سِكِّينٌ؟ لَا، مَا عِنْدِي سِكِّينٌ.",
+              "de": "Hast du ein Messer? Nein, ich habe kein Messer."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "هٰذَا ___ يَا أَخِي.",
+          "answer": "قَلَمُكَ",
+          "options": ["قَلَمُكَ", "قَلَمِي", "قَلَمُهُ", "قَلَمُهَا"],
+          "de": "Das ist dein Stift, mein Bruder."
+        },
+        {
+          "ar": "أَيْنَ ___؟ هُوَ فِي الْكُوَيْتِ.",
+          "answer": "أَبُوكَ",
+          "options": ["أَبُوكَ", "أَبُوهُ", "أَبُوهَا", "أَبِي"],
+          "de": "Wo ist dein Vater? Er ist in Kuwait."
+        },
+        {
+          "ar": "هٰذِهِ مُمَرِّضَةٌ وَ___ طَبِيبٌ.",
+          "answer": "زَوْجُهَا",
+          "options": ["زَوْجُهَا", "زَوْجِي", "زَوْجُكَ"],
+          "de": "Das ist eine Krankenschwester, und ihr Mann ist Arzt."
+        },
+        {
+          "ar": "___ أَخٌ وَاحِدٌ.",
+          "answer": "لِي",
+          "options": ["لِي", "لَكَ", "لَهَا"],
+          "de": "Ich habe einen Bruder."
+        },
+        {
+          "ar": "___ سَيَّارَةٌ جَدِيدَةٌ.",
+          "answer": "عِنْدِي",
+          "options": ["عِنْدِي", "عِنْدَكَ", "عِنْدَهُ"],
+          "de": "Ich habe ein neues Auto."
+        },
+        {
+          "ar": "الطِّفْلُ مَعَ ___.",
+          "answer": "أُمِّهِ",
+          "options": ["أُمِّهِ", "أُمُّهُ"],
+          "de": "Das Kind ist bei seiner Mutter."
+        },
+        {
+          "ar": "زَمِيلِي مِنَ الْيَابَانِ، ___ الْيَابَانِيَّةُ.",
+          "answer": "لُغَتُهُ",
+          "options": ["لُغَتُهُ", "لُغَتُهَا", "لُغَتِي"],
+          "de": "Mein Mitschüler ist aus Japan, seine Sprache ist Japanisch."
+        }
+      ]
+    },
+    {
+      "unit": 111,
+      "lesson": 11,
+      "topic": "Darin: فِيهِ und فِيهَا; أُحِبُّ",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-111-01",
+          "ar": "فِيهِ",
+          "de": "darin (m.)"
+        },
+        {
+          "id": "md-111-02",
+          "ar": "فِيهَا",
+          "de": "darin (f.)"
+        },
+        {
+          "id": "md-111-03",
+          "ar": "مَاذَا",
+          "de": "was?"
+        },
+        {
+          "id": "md-111-04",
+          "ar": "أَحَدٌ",
+          "de": "jemand; (verneint) niemand"
+        },
+        {
+          "id": "md-111-05",
+          "ar": "أُحِبُّ",
+          "de": "ich liebe, ich mag"
+        },
+        {
+          "id": "md-111-06",
+          "ar": "أُسْتَاذٌ",
+          "de": "Lehrer, Professor"
+        },
+        {
+          "id": "md-111-07",
+          "ar": "النَّبِيُّ",
+          "de": "der Prophet"
+        },
+        {
+          "id": "md-111-08",
+          "ar": "دَفْتَرٌ",
+          "de": "Heft"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "فِيهِ und فِيهَا – „darin“",
+          "text": "Auch an فِي kann ein Pronomen treten: فِيهِ (darin, für ein männliches Nomen) und فِيهَا (darin, für ein weibliches). Steht es am Satzanfang, bedeutet es oft „darin gibt es …“.",
+          "examples": [
+            {
+              "ar": "هٰذَا مَطْبَخٌ كَبِيرٌ، فِيهِ ثَلَّاجَةٌ جَدِيدَةٌ.",
+              "de": "Das ist eine große Küche, darin steht ein neuer Kühlschrank."
+            },
+            {
+              "ar": "هٰذِهِ غُرْفَتِي، فِيهَا سَرِيرٌ وَمَكْتَبٌ.",
+              "de": "Das ist mein Zimmer, darin sind ein Bett und ein Schreibtisch."
+            }
+          ]
+        },
+        {
+          "title": "مَاذَا فِي …؟ und „niemand“",
+          "text": "مَاذَا فِي …؟ fragt, was sich in etwas befindet, مَنْ فِي …؟ wer darin ist. Die Antwort مَا فِيهِ أَحَدٌ (oder مَا فِيهَا أَحَدٌ) bedeutet „niemand ist darin“.",
+          "examples": [
+            {
+              "ar": "مَاذَا فِي الثَّلَّاجَةِ؟ فِيهَا لَبَنٌ وَتُفَّاحٌ.",
+              "de": "Was ist im Kühlschrank? Darin sind Milch und Äpfel."
+            },
+            {
+              "ar": "مَنْ فِي الْمَكْتَبَةِ؟ مَا فِيهَا أَحَدٌ.",
+              "de": "Wer ist in der Bibliothek? Niemand ist darin."
+            }
+          ]
+        },
+        {
+          "title": "أُحِبُّ – „ich liebe, ich mag“",
+          "text": "أُحِبُّ ist ein Verb in der Gegenwart, Ich-Form. Das, was man liebt, ist das Objekt und bekommt die Endung -a (Akkusativ); eine Eigenschaft dahinter bekommt sie ebenfalls.",
+          "examples": [
+            {
+              "ar": "أُحِبُّ التُّفَّاحَ.",
+              "de": "Ich mag Äpfel."
+            },
+            {
+              "ar": "أُحِبُّ الْقَهْوَةَ الْحُلْوَةَ.",
+              "de": "Ich mag süßen Kaffee."
+            },
+            {
+              "ar": "أَنَا أُحِبُّ الْمَدِينَةَ الْكَبِيرَةَ.",
+              "de": "Ich liebe die große Stadt."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "هٰذِهِ غُرْفَةُ أُخْتِي، ___ مِرْوَحَةٌ جَدِيدَةٌ.",
+          "answer": "فِيهَا",
+          "options": ["فِيهَا", "فِيهِ"],
+          "de": "Das ist das Zimmer meiner Schwester, darin ist ein neuer Ventilator."
+        },
+        {
+          "ar": "هٰذَا بَيْتُ عَمِّي، ___ حَدِيقَةٌ كَبِيرَةٌ.",
+          "answer": "فِيهِ",
+          "options": ["فِيهِ", "فِيهَا"],
+          "de": "Das ist das Haus meines Onkels, darin gibt es einen großen Garten."
+        },
+        {
+          "ar": "___ فِي الْحَقِيبَةِ؟ فِيهَا دَفْتَرٌ وَقَلَمٌ.",
+          "answer": "مَاذَا",
+          "options": ["مَاذَا", "مَنْ"],
+          "de": "Was ist in der Tasche? Darin sind ein Heft und ein Stift."
+        },
+        {
+          "ar": "مَنْ فِي الْفَصْلِ؟ مَا فِيهِ ___.",
+          "answer": "أَحَدٌ",
+          "options": ["أَحَدٌ", "طِفْلٌ", "أُسْتَاذٌ"],
+          "de": "Wer ist im Klassenzimmer? Niemand ist darin."
+        },
+        {
+          "ar": "مَنْ فِي الْمَطْبَخِ؟ ___ أُمِّي.",
+          "answer": "فِيهِ",
+          "options": ["فِيهِ", "فِيهَا"],
+          "de": "Wer ist in der Küche? Meine Mutter ist darin."
+        },
+        {
+          "ar": "أُحِبُّ ___.",
+          "answer": "اللَّبَنَ",
+          "options": ["اللَّبَنَ", "اللَّبَنُ", "اللَّبَنِ"],
+          "de": "Ich mag Milch."
+        },
+        {
+          "ar": "أُحِبُّ الْأُسْتَاذَ ___.",
+          "answer": "الْجَدِيدَ",
+          "options": ["الْجَدِيدَ", "الْجَدِيدُ", "جَدِيدًا"],
+          "de": "Ich mag den neuen Lehrer."
+        }
+      ]
+    },
+    {
+      "unit": 112,
+      "lesson": 12,
+      "topic": "Anrede, „sie ging“ und „der/die, welche“",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-112-01",
+          "ar": "كَيْفَ",
+          "de": "wie?"
+        },
+        {
+          "id": "md-112-02",
+          "ar": "حَالٌ",
+          "de": "Befinden, Zustand"
+        },
+        {
+          "id": "md-112-03",
+          "ar": "بِخَيْرٍ",
+          "de": "gut (es geht gut)"
+        },
+        {
+          "id": "md-112-04",
+          "ar": "الْحَمْدُ لِلّٰهِ",
+          "de": "Gott sei Dank"
+        },
+        {
+          "id": "md-112-05",
+          "ar": "سَيِّدِي",
+          "de": "mein Herr"
+        },
+        {
+          "id": "md-112-06",
+          "ar": "سَيِّدَتِي",
+          "de": "meine Dame"
+        },
+        {
+          "id": "md-112-07",
+          "ar": "الْعَمَّةُ",
+          "de": "die Tante (väterlicherseits)"
+        },
+        {
+          "id": "md-112-08",
+          "ar": "الْخَالَةُ",
+          "de": "die Tante (mütterlicherseits)"
+        },
+        {
+          "id": "md-112-09",
+          "ar": "زَمِيلَةٌ",
+          "de": "Mitschülerin, Kollegin"
+        },
+        {
+          "id": "md-112-10",
+          "ar": "الْفَتَاةُ",
+          "de": "das Mädchen, die junge Frau"
+        },
+        {
+          "id": "md-112-11",
+          "ar": "مُفَتِّشٌ",
+          "de": "Inspektor, Schulrat"
+        },
+        {
+          "id": "md-112-12",
+          "ar": "الْمَدْرَسَةُ الْمُتَوَسِّطَةُ",
+          "de": "die Mittelschule"
+        },
+        {
+          "id": "md-112-13",
+          "ar": "الْمَدْرَسَةُ الثَّانَوِيَّةُ",
+          "de": "die Oberschule"
+        },
+        {
+          "id": "md-112-14",
+          "ar": "مُسْتَشْفَى الْوِلَادَةِ",
+          "de": "die Geburtsklinik"
+        },
+        {
+          "id": "md-112-15",
+          "ar": "الَّتِي",
+          "de": "die, welche (f.)"
+        },
+        {
+          "id": "md-112-16",
+          "ar": "ذَهَبَتْ",
+          "de": "sie ging"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "„Sie ging“: die Endung -at",
+          "text": "Ist das Subjekt weiblich, bekommt das Verb in der Vergangenheit die Endung -at: ذَهَبَ (er ging) → ذَهَبَتْ (sie ging). Folgt direkt ein Wort mit Artikel, wird aus dem stummen -t ein -ti, damit man es gut sprechen kann: خَرَجَتِ الْبِنْتُ.",
+          "examples": [
+            {
+              "ar": "ذَهَبَتْ أُخْتِي إِلَى الْمُسْتَشْفَى.",
+              "de": "Meine Schwester ging ins Krankenhaus."
+            },
+            {
+              "ar": "خَرَجَتِ الْبِنْتُ مِنَ الْمَطْبَخِ.",
+              "de": "Das Mädchen ging aus der Küche hinaus."
+            },
+            {
+              "ar": "جَلَسَتِ الْعَمَّةُ عَلَى الْكُرْسِيِّ.",
+              "de": "Die Tante setzte sich auf den Stuhl."
+            }
+          ]
+        },
+        {
+          "title": "Mann oder Frau ansprechen: -ka / -ki und يَا",
+          "text": "„Du“ heißt zu einem Mann أَنْتَ, zu einer Frau أَنْتِ. Genauso wird „dein“ unterschieden: -ka für einen Mann, -ki für eine Frau. Wer jemanden direkt anredet, setzt يَا davor. Ein Name endet dann auf -u ohne -n (يَا حَامِدُ); mit ـِي (mein) bleibt das Wort unverändert: يَا أَخِي, يَا سَيِّدِي, يَا خَالَتِي.",
+          "examples": [
+            {
+              "ar": "كَيْفَ حَالُكِ يَا خَالَتِي؟",
+              "de": "Wie geht es dir, Tante?"
+            },
+            {
+              "ar": "أَيْنَ قَلَمُكَ يَا سَيِّدِي؟",
+              "de": "Wo ist Ihr Stift, mein Herr?"
+            },
+            {
+              "ar": "مِنْ أَيْنَ أَنْتِ يَا سَيِّدَتِي؟",
+              "de": "Woher kommen Sie, meine Dame?"
+            }
+          ]
+        },
+        {
+          "title": "„Der/die, welche“: الَّذِي und الَّتِي",
+          "text": "Mit الَّذِي (männlich) und الَّتِي (weiblich) hängt man einen Nebensatz an ein bestimmtes Nomen an – wie das deutsche „der“ oder „die“ in „das Kind, das …“. Das Wort richtet sich nach dem Geschlecht des Nomens davor.",
+          "examples": [
+            {
+              "ar": "الْكُرْسِيُّ الَّذِي فِي الْمَطْبَخِ مَكْسُورٌ.",
+              "de": "Der Stuhl, der in der Küche steht, ist kaputt."
+            },
+            {
+              "ar": "السَّيَّارَةُ الَّتِي فِي الشَّارِعِ جَدِيدَةٌ.",
+              "de": "Das Auto, das auf der Straße steht, ist neu."
+            },
+            {
+              "ar": "الطِّفْلُ الَّذِي مَعَ الْمُفَتِّشِ صَغِيرٌ.",
+              "de": "Das Kind, das beim Inspektor ist, ist klein."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "___ أُخْتِي إِلَى الْجَامِعَةِ.",
+          "answer": "ذَهَبَتْ",
+          "options": ["ذَهَبَتْ", "ذَهَبَ"],
+          "de": "Meine Schwester ging zur Universität."
+        },
+        {
+          "ar": "___ الْمُفَتِّشُ مِنَ الْمَدْرَسَةِ.",
+          "answer": "خَرَجَ",
+          "options": ["خَرَجَ", "خَرَجَتْ"],
+          "de": "Der Inspektor ging aus der Schule hinaus."
+        },
+        {
+          "ar": "أَيْنَ ___ يَا سَيِّدَتِي؟",
+          "answer": "بَيْتُكِ",
+          "options": ["بَيْتُكِ", "بَيْتُكَ"],
+          "de": "Wo ist Ihr Haus, meine Dame?"
+        },
+        {
+          "ar": "كَيْفَ ___ يَا أَخِي؟",
+          "answer": "حَالُكَ",
+          "options": ["حَالُكَ", "حَالُكِ"],
+          "de": "Wie geht es dir, mein Bruder?"
+        },
+        {
+          "ar": "مِنْ أَيْنَ ___ يَا زَمِيلَتِي؟",
+          "answer": "أَنْتِ",
+          "options": ["أَنْتِ", "أَنْتَ"],
+          "de": "Woher kommst du, meine Mitschülerin?"
+        },
+        {
+          "ar": "الْقَمِيصُ ___ فِي الْحَقِيبَةِ نَظِيفٌ.",
+          "answer": "الَّذِي",
+          "options": ["الَّذِي", "الَّتِي"],
+          "de": "Das Hemd, das in der Tasche ist, ist sauber."
+        },
+        {
+          "ar": "الْبِنْتُ ___ خَرَجَتْ مِنَ الْفَصْلِ أُخْتِي.",
+          "answer": "الَّتِي",
+          "options": ["الَّتِي", "الَّذِي"],
+          "de": "Das Mädchen, das aus dem Klassenzimmer hinausging, ist meine Schwester."
+        }
+      ]
+    },
+    {
+      "unit": 113,
+      "lesson": 13,
+      "topic": "Mehrzahl: هٰؤُلَاءِ und أُولٰئِكَ",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-113-01",
+          "ar": "هٰؤُلَاءِ",
+          "de": "diese (hier), Pl."
+        },
+        {
+          "id": "md-113-02",
+          "ar": "أُولٰئِكَ",
+          "de": "jene (dort), Pl."
+        },
+        {
+          "id": "md-113-03",
+          "ar": "هُمْ",
+          "de": "sie (m. Pl.)"
+        },
+        {
+          "id": "md-113-04",
+          "ar": "هُنَّ",
+          "de": "sie (f. Pl.)"
+        },
+        {
+          "id": "md-113-05",
+          "ar": "بَعْضٌ",
+          "de": "ein Teil, einige"
+        },
+        {
+          "id": "md-113-06",
+          "ar": "الْمَرْأَةُ",
+          "de": "die Frau (ohne Artikel: اِمْرَأَةٌ; Pl. نِسَاءٌ)"
+        },
+        {
+          "id": "md-113-07",
+          "ar": "النَّاسُ",
+          "de": "die Leute, die Menschen"
+        },
+        {
+          "id": "md-113-08",
+          "ar": "الضَّيْفُ",
+          "de": "der Gast (Pl. ضُيُوفٌ)"
+        },
+        {
+          "id": "md-113-09",
+          "ar": "الشَّيْخُ",
+          "de": "der alte Mann, Scheich (Pl. شُيُوخٌ)"
+        },
+        {
+          "id": "md-113-10",
+          "ar": "حَاجٌّ",
+          "de": "Pilger (Pl. حُجَّاجٌ)"
+        },
+        {
+          "id": "md-113-11",
+          "ar": "عَالِمٌ",
+          "de": "Gelehrter (Pl. عُلَمَاءُ)"
+        },
+        {
+          "id": "md-113-12",
+          "ar": "مُسْلِمٌ",
+          "de": "Muslim"
+        },
+        {
+          "id": "md-113-13",
+          "ar": "قَوِيٌّ",
+          "de": "stark (Pl. أَقْوِيَاءُ)"
+        },
+        {
+          "id": "md-113-14",
+          "ar": "ضَعِيفٌ",
+          "de": "schwach (Pl. ضِعَافٌ)"
+        },
+        {
+          "id": "md-113-15",
+          "ar": "قَرِيبٌ",
+          "de": "nah"
+        },
+        {
+          "id": "md-113-16",
+          "ar": "الْحَقْلُ",
+          "de": "das Feld (Pl. حُقُولٌ)"
+        },
+        {
+          "id": "md-113-17",
+          "ar": "الْقَرْيَةُ",
+          "de": "das Dorf"
+        },
+        {
+          "id": "md-113-18",
+          "ar": "الْمَطْعَمُ",
+          "de": "das Restaurant, die Mensa"
+        },
+        {
+          "id": "md-113-19",
+          "ar": "الْمَدْرَسَةُ الِابْتِدَائِيَّةُ",
+          "de": "die Grundschule"
+        },
+        {
+          "id": "md-113-20",
+          "ar": "ذَهَبُوا",
+          "de": "sie gingen (m. Pl.)"
+        },
+        {
+          "id": "md-113-21",
+          "ar": "ذَهَبْنَ",
+          "de": "sie gingen (f. Pl.)"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "„Diese“ und „jene“ in der Mehrzahl",
+          "text": "Für mehrere Personen gibt es nur je ein Wort, egal ob männlich oder weiblich: هٰؤُلَاءِ (diese hier) und أُولٰئِكَ (jene dort). Die Personalpronomen unterscheiden dagegen: هُمْ für Männer oder gemischte Gruppen, هُنَّ nur für Frauen.",
+          "examples": [
+            {
+              "ar": "هٰؤُلَاءِ ضُيُوفٌ مِنَ الْقَرْيَةِ.",
+              "de": "Das hier sind Gäste aus dem Dorf."
+            },
+            {
+              "ar": "أُولٰئِكَ النِّسَاءُ مُدَرِّسَاتٌ.",
+              "de": "Jene Frauen sind Lehrerinnen."
+            },
+            {
+              "ar": "مَنْ هٰؤُلَاءِ الرِّجَالُ؟ هُمْ عُلَمَاءُ.",
+              "de": "Wer sind diese Männer? Sie sind Gelehrte."
+            }
+          ]
+        },
+        {
+          "title": "Drei Wege zur Mehrzahl",
+          "text": "Viele männliche Personenwörter bilden die Mehrzahl mit -ūna (مُسْلِمٌ → مُسْلِمُونَ), weibliche Wörter auf ة mit -āt (طَالِبَةٌ → طَالِبَاتٌ). Sehr viele Wörter haben aber eine „gebrochene“ Mehrzahl, bei der sich das Wort innen verändert (رَجُلٌ → رِجَالٌ, ضَيْفٌ → ضُيُوفٌ); diese Formen lernt man am besten gleich mit. Formen wie أَقْوِيَاءُ oder عُلَمَاءُ bekommen kein -un am Ende.",
+          "examples": [
+            {
+              "ar": "الْمُهَنْدِسُونَ فِي الْمَطْعَمِ.",
+              "de": "Die Ingenieure sind im Restaurant."
+            },
+            {
+              "ar": "الطَّبِيبَاتُ مُسْلِمَاتٌ.",
+              "de": "Die Ärztinnen sind Musliminnen."
+            },
+            {
+              "ar": "هٰؤُلَاءِ رِجَالٌ أَقْوِيَاءُ.",
+              "de": "Das hier sind starke Männer."
+            }
+          ]
+        },
+        {
+          "title": "„Sie gingen“ und „ihr“ in der Mehrzahl",
+          "text": "In der Vergangenheit bekommt das Verb für mehrere Männer die Endung -ū (ذَهَبُوا), für mehrere Frauen -na (ذَهَبْنَ). Auch „ihr/ihre“ wird unterschieden: -hum für Männer, -hunna für Frauen. بَعْضُهُمْ heißt „einige von ihnen“.",
+          "examples": [
+            {
+              "ar": "الضُّيُوفُ خَرَجُوا مِنَ الْمَسْجِدِ.",
+              "de": "Die Gäste gingen aus der Moschee hinaus."
+            },
+            {
+              "ar": "الْبَنَاتُ ذَهَبْنَ إِلَى السُّوقِ، وَأُمُّهُنَّ فِي الْبَيْتِ.",
+              "de": "Die Mädchen gingen zum Markt, und ihre Mutter ist zu Hause."
+            },
+            {
+              "ar": "بَعْضُهُمْ مِنَ الْهِنْدِ وَبَعْضُهُمْ مِنَ الْفِلِبِّينِ.",
+              "de": "Einige von ihnen sind aus Indien und einige von den Philippinen."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "___ طُلَّابٌ مِنْ أَمْرِيكَا.",
+          "answer": "هٰؤُلَاءِ",
+          "options": ["هٰؤُلَاءِ", "هٰذَا", "هٰذِهِ"],
+          "de": "Das hier sind Studenten aus Amerika."
+        },
+        {
+          "ar": "مَنْ ___ الرِّجَالُ هُنَاكَ؟",
+          "answer": "أُولٰئِكَ",
+          "options": ["أُولٰئِكَ", "ذٰلِكَ", "تِلْكَ"],
+          "de": "Wer sind jene Männer dort?"
+        },
+        {
+          "ar": "الْمُدَرِّسُونَ ___ إِلَى الْمَسْجِدِ.",
+          "answer": "ذَهَبُوا",
+          "options": ["ذَهَبُوا", "ذَهَبْنَ", "ذَهَبَ"],
+          "de": "Die Lehrer gingen zur Moschee."
+        },
+        {
+          "ar": "الطَّالِبَاتُ ___ مِنَ الْجَامِعَةِ.",
+          "answer": "خَرَجْنَ",
+          "options": ["خَرَجْنَ", "خَرَجُوا", "خَرَجَتْ"],
+          "de": "Die Studentinnen gingen aus der Universität hinaus."
+        },
+        {
+          "ar": "أَيْنَ أَخَوَاتُكَ؟ ___ فِي السُّوقِ.",
+          "answer": "هُنَّ",
+          "options": ["هُنَّ", "هُمْ"],
+          "de": "Wo sind deine Schwestern? Sie sind auf dem Markt."
+        },
+        {
+          "ar": "هٰؤُلَاءِ الْفَلَّاحُونَ ___.",
+          "answer": "فُقَرَاءُ",
+          "options": ["فُقَرَاءُ", "فَقِيرٌ"],
+          "de": "Diese Bauern sind arm."
+        },
+        {
+          "ar": "هٰؤُلَاءِ الْبَنَاتُ أَخَوَاتٌ، وَ___ قَرِيبٌ مِنَ الْمَسْجِدِ.",
+          "answer": "بَيْتُهُنَّ",
+          "options": ["بَيْتُهُنَّ", "بَيْتُهُمْ"],
+          "de": "Diese Mädchen sind Schwestern, und ihr Haus ist nahe bei der Moschee."
+        }
+      ]
+    },
+    {
+      "unit": 114,
+      "lesson": 14,
+      "topic": "Wir und ihr: نَحْنُ und أَنْتُمْ",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-114-01",
+          "ar": "نَحْنُ",
+          "de": "wir"
+        },
+        {
+          "id": "md-114-02",
+          "ar": "أَنْتُمْ",
+          "de": "ihr (Männer oder gemischte Gruppe)"
+        },
+        {
+          "id": "md-114-03",
+          "ar": "إِخْوَةٌ",
+          "de": "Brüder, Geschwister (Pl. von أَخٌ)"
+        },
+        {
+          "id": "md-114-04",
+          "ar": "إِخْوَانٌ",
+          "de": "Brüder (Pl. von أَخٌ)"
+        },
+        {
+          "id": "md-114-05",
+          "ar": "الْحَفِيدُ",
+          "de": "der Enkel"
+        },
+        {
+          "id": "md-114-06",
+          "ar": "حَفَدَةٌ",
+          "de": "Enkel (Pl.)"
+        },
+        {
+          "id": "md-114-07",
+          "ar": "الْكُلِّيَّةُ",
+          "de": "die Fakultät, das College"
+        },
+        {
+          "id": "md-114-08",
+          "ar": "كُلِّيَّاتٌ",
+          "de": "Fakultäten"
+        },
+        {
+          "id": "md-114-09",
+          "ar": "كُلِّيَّةُ الطِّبِّ",
+          "de": "die medizinische Fakultät"
+        },
+        {
+          "id": "md-114-10",
+          "ar": "كُلِّيَّةُ الشَّرِيعَةِ",
+          "de": "die Fakultät für islamisches Recht"
+        },
+        {
+          "id": "md-114-11",
+          "ar": "كُلِّيَّةُ الْهَنْدَسَةِ",
+          "de": "die Fakultät für Ingenieurwesen"
+        },
+        {
+          "id": "md-114-12",
+          "ar": "كُلِّيَّةُ التِّجَارَةِ",
+          "de": "die Fakultät für Wirtschaft"
+        },
+        {
+          "id": "md-114-13",
+          "ar": "الدُّسْتُورُ",
+          "de": "die Verfassung"
+        },
+        {
+          "id": "md-114-14",
+          "ar": "أَهْلًا وَسَهْلًا وَمَرْحَبًا",
+          "de": "herzlich willkommen"
+        },
+        {
+          "id": "md-114-15",
+          "ar": "الْيُونَانُ",
+          "de": "Griechenland"
+        },
+        {
+          "id": "md-114-16",
+          "ar": "نَصْرَانِيٌّ",
+          "de": "Christ"
+        },
+        {
+          "id": "md-114-17",
+          "ar": "نَصَارَى",
+          "de": "Christen"
+        },
+        {
+          "id": "md-114-18",
+          "ar": "أَيُّ",
+          "de": "welcher? welche? welches?"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "„Wir“ und „ihr“: نَحْنُ und أَنْتُمْ",
+          "text": "نَحْنُ heißt „wir“, أَنْتُمْ heißt „ihr“ und wird für eine Gruppe von Männern oder eine gemischte Gruppe benutzt. Wie bei أَنَا und هُوَ braucht der Satz kein „sind“.",
+          "examples": [
+            {
+              "ar": "نَحْنُ فِي كُلِّيَّةِ الطِّبِّ.",
+              "de": "Wir sind an der medizinischen Fakultät."
+            },
+            {
+              "ar": "مِنْ أَيْنَ أَنْتُمْ؟ نَحْنُ مِنَ الْيُونَانِ.",
+              "de": "Woher seid ihr? Wir sind aus Griechenland."
+            }
+          ]
+        },
+        {
+          "title": "„Unser“ und „euer“: die Endungen ـنَا und ـكُمْ",
+          "text": "ـنَا (unser) und ـكُمْ (euer) werden direkt an das Nomen gehängt. Das Nomen verliert dann Artikel und Tanwīn: سَيَّارَةٌ → سَيَّارَتُنَا. Bei أَخٌ und أَبٌ kommt ein langes u dazu: أَخُونَا, أَبُوكُمْ.",
+          "examples": [
+            {
+              "ar": "سَيَّارَتُكُمْ جَمِيلَةٌ.",
+              "de": "Euer Auto ist schön."
+            },
+            {
+              "ar": "أَيْنَ أَخُوكُمْ؟ أَخُونَا فِي كُلِّيَّةِ التِّجَارَةِ.",
+              "de": "Wo ist euer Bruder? Unser Bruder ist an der Wirtschaftsfakultät."
+            }
+          ]
+        },
+        {
+          "title": "„Wir gingen“, „ihr gingt“: ذَهَبْنَا und ذَهَبْتُمْ",
+          "text": "Auch das Verb bekommt Endungen für die Person. Für „wir“ hängt man ـنَا an (ذَهَبْنَا), für „ihr“ ـتُمْ (ذَهَبْتُمْ). Das geht genauso mit خَرَجَ.",
+          "examples": [
+            {
+              "ar": "ذَهَبْنَا إِلَى الْجَامِعَةِ.",
+              "de": "Wir gingen zur Universität."
+            },
+            {
+              "ar": "أَخَرَجْتُمْ مِنَ الْمَسْجِدِ؟ نَعَمْ، خَرَجْنَا.",
+              "de": "Seid ihr aus der Moschee gegangen? Ja, wir sind hinausgegangen."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "___ مِنَ الْيُونَانِ.",
+          "answer": "نَحْنُ",
+          "options": ["نَحْنُ", "أَنْتُمْ"],
+          "de": "Wir sind aus Griechenland."
+        },
+        {
+          "ar": "مِنْ أَيْنَ ___؟",
+          "answer": "أَنْتُمْ",
+          "options": ["أَنْتُمْ", "نَحْنُ"],
+          "de": "Woher seid ihr?"
+        },
+        {
+          "ar": "هٰذَا ___.",
+          "answer": "بَيْتُنَا",
+          "options": ["بَيْتُنَا", "بَيْتُكُمْ"],
+          "de": "Das ist unser Haus."
+        },
+        {
+          "ar": "أَيْنَ ___ يَا إِخْوَانُ؟",
+          "answer": "سَيَّارَتُكُمْ",
+          "options": ["سَيَّارَتُكُمْ", "سَيَّارَتُنَا"],
+          "de": "Wo ist euer Auto, Brüder?"
+        },
+        {
+          "ar": "___ فِي كُلِّيَّةِ التِّجَارَةِ.",
+          "answer": "أَخُونَا",
+          "options": ["أَخُونَا", "أَخُوكُمْ"],
+          "de": "Unser Bruder ist an der Wirtschaftsfakultät."
+        },
+        {
+          "ar": "نَحْنُ ___ إِلَى كُلِّيَّةِ الشَّرِيعَةِ.",
+          "answer": "ذَهَبْنَا",
+          "options": ["ذَهَبْنَا", "ذَهَبْتُمْ", "ذَهَبَ"],
+          "de": "Wir gingen zur Fakultät für islamisches Recht."
+        },
+        {
+          "ar": "أَخَرَجْتُمْ مِنَ الْمَسْجِدِ؟ نَعَمْ، ___.",
+          "answer": "خَرَجْنَا",
+          "options": ["خَرَجْنَا", "خَرَجْتُمْ"],
+          "de": "Seid ihr aus der Moschee gegangen? Ja, wir sind hinausgegangen."
+        }
+      ]
+    },
+    {
+      "unit": 115,
+      "lesson": 15,
+      "topic": "Ihr (Frauen): أَنْتُنَّ – Wann? Vor und nach",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-115-01",
+          "ar": "أَنْتُنَّ",
+          "de": "ihr (Frauen)"
+        },
+        {
+          "id": "md-115-02",
+          "ar": "مَتَى",
+          "de": "wann?"
+        },
+        {
+          "id": "md-115-03",
+          "ar": "قَبْلَ",
+          "de": "vor (zeitlich)"
+        },
+        {
+          "id": "md-115-04",
+          "ar": "بَعْدَ",
+          "de": "nach (zeitlich)"
+        },
+        {
+          "id": "md-115-05",
+          "ar": "الْأُسْبُوعُ",
+          "de": "die Woche"
+        },
+        {
+          "id": "md-115-06",
+          "ar": "الشَّهْرُ",
+          "de": "der Monat"
+        },
+        {
+          "id": "md-115-07",
+          "ar": "الْأَذَانُ",
+          "de": "der Gebetsruf"
+        },
+        {
+          "id": "md-115-08",
+          "ar": "الصَّلَاةُ",
+          "de": "das Gebet"
+        },
+        {
+          "id": "md-115-09",
+          "ar": "رَجَعَ",
+          "de": "er kam zurück"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "„Ihr“ für Frauen: أَنْتُنَّ und ـكُنَّ",
+          "text": "Spricht man eine Gruppe von Frauen an, sagt man أَنْتُنَّ statt أَنْتُمْ. Genauso wird „euer“ zu ـكُنَّ statt ـكُمْ: حَقِيبَتُكُنَّ = eure Tasche (zu Frauen).",
+          "examples": [
+            {
+              "ar": "أَنْتُنَّ فِي الْجَامِعَةِ.",
+              "de": "Ihr (Frauen) seid an der Universität."
+            },
+            {
+              "ar": "أَيْنَ سَيَّارَتُكُنَّ يَا أَخَوَاتُ؟",
+              "de": "Wo ist euer Auto, Schwestern?"
+            }
+          ]
+        },
+        {
+          "title": "Das Verb in der Vergangenheit: alle Personen",
+          "text": "An die Grundform ذَهَبَ (er ging) hängt man Endungen: ذَهَبْتُ (ich), ذَهَبْتَ (du, m.), ذَهَبْتِ (du, w.), ذَهَبْنَا (wir), ذَهَبْتُمْ (ihr, m.), ذَهَبْتُنَّ (ihr, w.). Dieselben Endungen gelten für رَجَعَ und خَرَجَ.",
+          "examples": [
+            {
+              "ar": "أَرَجَعْتُنَّ مِنَ السُّوقِ؟ نَعَمْ، رَجَعْنَا.",
+              "de": "Seid ihr (Frauen) vom Markt zurückgekommen? Ja, wir sind zurückgekommen."
+            },
+            {
+              "ar": "رَجَعْتُ مِنَ الْجَامِعَةِ.",
+              "de": "Ich kam von der Universität zurück."
+            }
+          ]
+        },
+        {
+          "title": "Zeitangaben: مَتَى, قَبْلَ, بَعْدَ",
+          "text": "مَتَى fragt nach der Zeit, كَيْفَ nach dem Wie. قَبْلَ (vor) und بَعْدَ (nach) verhalten sich wie das erste Wort einer Iḍāfa: Das Nomen danach steht im Genitiv (-i bzw. -in).",
+          "examples": [
+            {
+              "ar": "مَتَى رَجَعَ الْمُدِيرُ؟ رَجَعَ قَبْلَ أُسْبُوعٍ.",
+              "de": "Wann kam der Direktor zurück? Er kam vor einer Woche zurück."
+            },
+            {
+              "ar": "خَرَجَ الْإِمَامُ مِنَ الْمَسْجِدِ بَعْدَ الصَّلَاةِ.",
+              "de": "Der Imam ging nach dem Gebet aus der Moschee."
+            },
+            {
+              "ar": "كَيْفَ حَالُ الْمُدِيرِ؟",
+              "de": "Wie geht es dem Direktor?"
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "أَيْنَ ___ يَا أَخَوَاتُ؟ نَحْنُ فِي الْمَطْبَخِ.",
+          "answer": "أَنْتُنَّ",
+          "options": ["أَنْتُنَّ", "أَنْتُمْ", "أَنْتِ"],
+          "de": "Wo seid ihr, Schwestern? Wir sind in der Küche."
+        },
+        {
+          "ar": "أَيْنَ ___ يَا أَخَوَاتُ؟",
+          "answer": "حَقِيبَتُكُنَّ",
+          "options": ["حَقِيبَتُكُنَّ", "حَقِيبَتُكُمْ"],
+          "de": "Wo ist eure Tasche, Schwestern?"
+        },
+        {
+          "ar": "مَتَى ___ مِنَ السُّوقِ يَا أَخَوَاتُ؟",
+          "answer": "رَجَعْتُنَّ",
+          "options": ["رَجَعْتُنَّ", "رَجَعْتُمْ"],
+          "de": "Wann seid ihr vom Markt zurückgekommen, Schwestern?"
+        },
+        {
+          "ar": "___ خَرَجَ الْمُدِيرُ؟ خَرَجَ بَعْدَ الصَّلَاةِ.",
+          "answer": "مَتَى",
+          "options": ["مَتَى", "أَيْنَ", "كَيْفَ"],
+          "de": "Wann ging der Direktor hinaus? Er ging nach dem Gebet hinaus."
+        },
+        {
+          "ar": "خَرَجْنَا مِنَ الْبَيْتِ ___ الْأَذَانِ.",
+          "answer": "قَبْلَ",
+          "options": ["قَبْلَ", "بَعْدَ"],
+          "de": "Wir gingen vor dem Gebetsruf aus dem Haus."
+        },
+        {
+          "ar": "رَجَعَ التَّاجِرُ مِنَ الصِّينِ بَعْدَ ___.",
+          "answer": "شَهْرٍ",
+          "options": ["شَهْرٍ", "شَهْرٌ"],
+          "de": "Der Händler kam nach einem Monat aus China zurück."
+        }
+      ]
+    },
+    {
+      "unit": 116,
+      "lesson": 16,
+      "topic": "Mehrzahl von Dingen: هٰذِهِ كُتُبٌ",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-116-01",
+          "ar": "لِي",
+          "de": "mir, gehört mir"
+        },
+        {
+          "id": "md-116-02",
+          "ar": "جُدُدٌ",
+          "de": "neue (Pl. von جَدِيدٌ)"
+        },
+        {
+          "id": "md-116-03",
+          "ar": "بُيُوتٌ",
+          "de": "Häuser"
+        },
+        {
+          "id": "md-116-04",
+          "ar": "نُجُومٌ",
+          "de": "Sterne"
+        },
+        {
+          "id": "md-116-05",
+          "ar": "دُرُوسٌ",
+          "de": "Lektionen (Sg. دَرْسٌ)"
+        },
+        {
+          "id": "md-116-06",
+          "ar": "أَقْلَامٌ",
+          "de": "Stifte"
+        },
+        {
+          "id": "md-116-07",
+          "ar": "أَبْوَابٌ",
+          "de": "Türen"
+        },
+        {
+          "id": "md-116-08",
+          "ar": "أَنْهَارٌ",
+          "de": "Flüsse (Sg. نَهْرٌ)"
+        },
+        {
+          "id": "md-116-09",
+          "ar": "جِبَالٌ",
+          "de": "Berge (Sg. جَبَلٌ)"
+        },
+        {
+          "id": "md-116-10",
+          "ar": "كِلَابٌ",
+          "de": "Hunde"
+        },
+        {
+          "id": "md-116-11",
+          "ar": "بِحَارٌ",
+          "de": "Meere (Sg. بَحْرٌ)"
+        },
+        {
+          "id": "md-116-12",
+          "ar": "كُتُبٌ",
+          "de": "Bücher"
+        },
+        {
+          "id": "md-116-13",
+          "ar": "حُمُرٌ",
+          "de": "Esel (Pl.)"
+        },
+        {
+          "id": "md-116-14",
+          "ar": "سُرُرٌ",
+          "de": "Betten"
+        },
+        {
+          "id": "md-116-15",
+          "ar": "دَفَاتِرُ",
+          "de": "Hefte (Sg. دَفْتَرٌ)"
+        },
+        {
+          "id": "md-116-16",
+          "ar": "مَكَاتِبُ",
+          "de": "Schreibtische, Büros"
+        },
+        {
+          "id": "md-116-17",
+          "ar": "فَنَادِقُ",
+          "de": "Hotels (Sg. فُنْدُقٌ)"
+        },
+        {
+          "id": "md-116-18",
+          "ar": "سَاعَاتٌ",
+          "de": "Uhren, Stunden"
+        },
+        {
+          "id": "md-116-19",
+          "ar": "سَيَّارَاتٌ",
+          "de": "Autos"
+        },
+        {
+          "id": "md-116-20",
+          "ar": "طَائِرَاتٌ",
+          "de": "Flugzeuge (Sg. طَائِرَةٌ)"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Mehrzahl von Dingen wird wie „sie“ (Einzahl, weiblich) behandelt",
+          "text": "Bei Dingen und Tieren in der Mehrzahl benutzt man هٰذِهِ bzw. تِلْكَ, das Pronomen هِيَ und die weibliche Eigenschaft in der Einzahl: هٰذِهِ كُتُبٌ جَدِيدَةٌ. Mit لِمَنْ fragt man, wem etwas gehört.",
+          "examples": [
+            {
+              "ar": "تِلْكَ جِبَالٌ كَبِيرَةٌ.",
+              "de": "Das dort sind große Berge."
+            },
+            {
+              "ar": "أَيْنَ الدَّفَاتِرُ؟ هِيَ هُنَا عَلَى السَّرِيرِ.",
+              "de": "Wo sind die Hefte? Sie liegen hier auf dem Bett."
+            },
+            {
+              "ar": "لِمَنْ هٰذِهِ السَّاعَاتُ؟ هِيَ لِي.",
+              "de": "Wem gehören diese Uhren? Sie gehören mir."
+            }
+          ]
+        },
+        {
+          "title": "Gebrochene Plurale",
+          "text": "Viele arabische Nomen bilden die Mehrzahl, indem sich die Vokale im Wortinneren ändern: نَجْمٌ → نُجُومٌ, قَلَمٌ → أَقْلَامٌ. Diese Formen lernt man am besten gleich mit dem Wort. Manche Plurale wie فَنَادِقُ oder دَفَاتِرُ haben keine Endung -un.",
+          "examples": [
+            {
+              "ar": "بَيْتٌ ← بُيُوتٌ",
+              "de": "ein Haus → Häuser"
+            },
+            {
+              "ar": "فُنْدُقٌ ← فَنَادِقُ",
+              "de": "ein Hotel → Hotels"
+            },
+            {
+              "ar": "هٰذِهِ الْأَبْوَابُ مَفْتُوحَةٌ.",
+              "de": "Diese Türen sind offen."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "___ مُهَنْدِسُونَ مِنَ الْيُونَانِ.",
+          "answer": "هٰؤُلَاءِ",
+          "options": ["هٰؤُلَاءِ", "هٰذِهِ", "هٰذَا"],
+          "de": "Das hier sind Ingenieure aus Griechenland."
+        },
+        {
+          "ar": "___ كُتُبٌ جَدِيدَةٌ.",
+          "answer": "هٰذِهِ",
+          "options": ["هٰذِهِ", "هٰؤُلَاءِ", "هٰذَا"],
+          "de": "Das hier sind neue Bücher."
+        },
+        {
+          "ar": "___ جِبَالٌ كَبِيرَةٌ.",
+          "answer": "تِلْكَ",
+          "options": ["تِلْكَ", "أُولٰئِكَ", "ذٰلِكَ"],
+          "de": "Das dort sind große Berge."
+        },
+        {
+          "ar": "___ طَبِيبَاتٌ.",
+          "answer": "أُولٰئِكَ",
+          "options": ["أُولٰئِكَ", "تِلْكَ", "هٰؤُلَاءِ"],
+          "de": "Das dort sind Ärztinnen."
+        },
+        {
+          "ar": "هٰذِهِ سَيَّارَاتٌ ___.",
+          "answer": "جَدِيدَةٌ",
+          "options": ["جَدِيدَةٌ", "جَدِيدٌ"],
+          "de": "Das hier sind neue Autos."
+        },
+        {
+          "ar": "أَيْنَ الدَّفَاتِرُ؟ ___ عَلَى الْمَكْتَبِ.",
+          "answer": "هِيَ",
+          "options": ["هِيَ", "هُمْ", "هُوَ"],
+          "de": "Wo sind die Hefte? Sie liegen auf dem Schreibtisch."
+        },
+        {
+          "ar": "هٰذَا نَجْمٌ وَتِلْكَ ___.",
+          "answer": "نُجُومٌ",
+          "options": ["نُجُومٌ", "نَجْمٌ"],
+          "de": "Das hier ist ein Stern, und das dort sind Sterne."
+        }
+      ]
+    },
+    {
+      "unit": 117,
+      "lesson": 17,
+      "topic": "Plural von Dingen: هٰذِهِ الْكُتُبُ",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-117-01",
+          "ar": "الشَّرِكَةُ",
+          "de": "die Firma"
+        },
+        {
+          "id": "md-117-02",
+          "ar": "شَرِكَاتٌ",
+          "de": "Firmen"
+        },
+        {
+          "id": "md-117-03",
+          "ar": "مُدِيرُ الشَّرِكَةِ",
+          "de": "der Direktor der Firma"
+        },
+        {
+          "id": "md-117-04",
+          "ar": "رَخِيصٌ",
+          "de": "billig"
+        },
+        {
+          "id": "md-117-05",
+          "ar": "قُمْصَانٌ",
+          "de": "Hemden"
+        },
+        {
+          "id": "md-117-06",
+          "ar": "حَمِيرٌ",
+          "de": "Esel (Pl.)"
+        },
+        {
+          "id": "md-117-07",
+          "ar": "لُغَاتٌ",
+          "de": "Sprachen"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Dinge im Plural: grammatisch „sie“ (Singular, weiblich)",
+          "text": "Ist der Plural ein Ding oder Tier (kein Mensch), behandelt ihn das Arabische wie ein weibliches Wort im Singular. Man sagt dann هٰذِهِ oder تِلْكَ, das Pronomen ist هِيَ, und die Eigenschaft bekommt die Endung ـَةٌ.",
+          "examples": [
+            {
+              "ar": "هٰذِهِ الْبُيُوتُ كَبِيرَةٌ.",
+              "de": "Diese Häuser sind groß."
+            },
+            {
+              "ar": "تِلْكَ السَّيَّارَاتُ رَخِيصَةٌ.",
+              "de": "Jene Autos sind billig."
+            },
+            {
+              "ar": "أَيْنَ الْكِلَابُ؟ هِيَ فِي الشَّارِعِ.",
+              "de": "Wo sind die Hunde? Sie sind auf der Straße."
+            }
+          ]
+        },
+        {
+          "title": "Gebrochene Plurale",
+          "text": "Viele Nomen bilden den Plural nicht mit einer Endung, sondern durch Veränderung im Wortinneren (جَمْعُ التَّكْسِيرِ). Eine feste Regel gibt es dafür nicht; darum lernt man jeden Plural zusammen mit seinem Singular. Manche Plurale wie مَكَاتِبُ oder فَنَادِقُ bekommen kein -un.",
+          "examples": [
+            {
+              "ar": "بَابٌ – أَبْوَابٌ",
+              "de": "Tür – Türen"
+            },
+            {
+              "ar": "كِتَابٌ – كُتُبٌ",
+              "de": "Buch – Bücher"
+            },
+            {
+              "ar": "مَكْتَبٌ – مَكَاتِبُ",
+              "de": "Schreibtisch – Schreibtische"
+            }
+          ]
+        },
+        {
+          "title": "Menschen im Plural bleiben Plural",
+          "text": "Nur bei Menschen bleibt der Plural auch grammatisch Plural: Das Pronomen ist dann هُمْ. Für Dinge und Tiere im Plural steht dagegen هِيَ.",
+          "examples": [
+            {
+              "ar": "أَيْنَ الطُّلَّابُ؟ هُمْ فِي الْمَسْجِدِ.",
+              "de": "Wo sind die Schüler? Sie sind in der Moschee."
+            },
+            {
+              "ar": "أَيْنَ الْكُتُبُ؟ هِيَ فِي الْحَقِيبَةِ.",
+              "de": "Wo sind die Bücher? Sie sind in der Tasche."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "هٰذِهِ الْقُمْصَانُ ___.",
+          "answer": "رَخِيصَةٌ",
+          "options": ["رَخِيصَةٌ", "رَخِيصٌ"],
+          "de": "Diese Hemden sind billig."
+        },
+        {
+          "ar": "___ الْكُتُبُ جَدِيدَةٌ.",
+          "answer": "هٰذِهِ",
+          "options": ["هٰذِهِ", "هٰذَا"],
+          "de": "Diese Bücher sind neu."
+        },
+        {
+          "ar": "أَيْنَ السَّيَّارَاتُ؟ ___ فِي الشَّارِعِ.",
+          "answer": "هِيَ",
+          "options": ["هِيَ", "هُمْ", "هُوَ"],
+          "de": "Wo sind die Autos? Sie stehen auf der Straße."
+        },
+        {
+          "ar": "أَيْنَ الطُّلَّابُ؟ ___ فِي الْفَصْلِ.",
+          "answer": "هُمْ",
+          "options": ["هُمْ", "هِيَ", "هُوَ"],
+          "de": "Wo sind die Schüler? Sie sind im Klassenzimmer."
+        },
+        {
+          "ar": "لِمَنْ هٰذِهِ ___؟ هِيَ لِمُدِيرِ الشَّرِكَةِ.",
+          "answer": "السَّيَّارَاتُ",
+          "options": ["السَّيَّارَاتُ", "السَّيَّارَةُ"],
+          "de": "Wem gehören diese Autos? Sie gehören dem Direktor der Firma."
+        },
+        {
+          "ar": "الْبُيُوتُ فِي هٰذَا الشَّارِعِ ___.",
+          "answer": "قَدِيمَةٌ",
+          "options": ["قَدِيمَةٌ", "قَدِيمٌ", "جَدِيدَةٌ"],
+          "de": "Die Häuser in dieser Straße sind alt."
+        },
+        {
+          "ar": "فِي الْغُرْفَةِ ___ جَدِيدَةٌ.",
+          "answer": "سُرُرٌ",
+          "options": ["سُرُرٌ", "سَرِيرٌ"],
+          "de": "Im Zimmer stehen neue Betten."
+        }
+      ]
+    },
+    {
+      "unit": 118,
+      "lesson": 18,
+      "topic": "Zwei: der Dual und كَمْ",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-118-01",
+          "ar": "كَمْ",
+          "de": "wie viel(e)?"
+        },
+        {
+          "id": "md-118-02",
+          "ar": "الْعِيدُ",
+          "de": "das Fest"
+        },
+        {
+          "id": "md-118-03",
+          "ar": "عِيدُ الْفِطْرِ",
+          "de": "das Fest des Fastenbrechens"
+        },
+        {
+          "id": "md-118-04",
+          "ar": "عِيدُ الْأَضْحَى",
+          "de": "das Opferfest"
+        },
+        {
+          "id": "md-118-05",
+          "ar": "السَّنَةُ",
+          "de": "das Jahr"
+        },
+        {
+          "id": "md-118-06",
+          "ar": "الْعَجَلَةُ",
+          "de": "das Rad"
+        },
+        {
+          "id": "md-118-07",
+          "ar": "الْحَيُّ",
+          "de": "das Wohnviertel"
+        },
+        {
+          "id": "md-118-08",
+          "ar": "الرِّيَالُ",
+          "de": "der Riyal (Währung)"
+        },
+        {
+          "id": "md-118-09",
+          "ar": "الرَّكْعَةُ",
+          "de": "die Rakʿa (Gebetseinheit)"
+        },
+        {
+          "id": "md-118-10",
+          "ar": "الْفَجْرُ",
+          "de": "die Morgendämmerung"
+        },
+        {
+          "id": "md-118-11",
+          "ar": "الْمِسْطَرَةُ",
+          "de": "das Lineal"
+        },
+        {
+          "id": "md-118-12",
+          "ar": "هُمَا",
+          "de": "sie beide"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Der Dual: genau zwei",
+          "text": "Für genau zwei Dinge oder Personen hat das Arabische eine eigene Form, den Dual. Man hängt ـَانِ an das Wort; aus der Endung ة wird dabei ت, also ـَتَانِ. Eine Eigenschaft steht ebenfalls im Dual.",
+          "examples": [
+            {
+              "ar": "بَيْتٌ – بَيْتَانِ",
+              "de": "ein Haus – zwei Häuser"
+            },
+            {
+              "ar": "سَيَّارَةٌ – سَيَّارَتَانِ",
+              "de": "ein Auto – zwei Autos"
+            },
+            {
+              "ar": "فِي الشَّارِعِ سَيَّارَتَانِ جَدِيدَتَانِ.",
+              "de": "Auf der Straße stehen zwei neue Autos."
+            }
+          ]
+        },
+        {
+          "title": "هٰذَانِ, هَاتَانِ und هُمَا",
+          "text": "Auch „dies“ hat einen Dual: هٰذَانِ für zwei männliche, هَاتَانِ für zwei weibliche Wörter. Das Pronomen für zwei ist immer هُمَا, egal ob männlich oder weiblich.",
+          "examples": [
+            {
+              "ar": "هٰذَانِ الْقَلَمَانِ لِلْمُدَرِّسِ.",
+              "de": "Diese beiden Stifte gehören dem Lehrer."
+            },
+            {
+              "ar": "هَاتَانِ مِسْطَرَتَانِ.",
+              "de": "Das sind zwei Lineale."
+            },
+            {
+              "ar": "أَيْنَ الْمِسْطَرَتَانِ؟ هُمَا فِي الْحَقِيبَةِ.",
+              "de": "Wo sind die beiden Lineale? Sie sind in der Tasche."
+            }
+          ]
+        },
+        {
+          "title": "„Wie viele?“: كَمْ + Akkusativ",
+          "text": "Nach كَمْ steht das gefragte Nomen im Singular, unbestimmt und im Akkusativ, also mit -an (ـًا, bei ة: ـَةً). In der Antwort kann ein Dual oder وَاحِدٌ stehen.",
+          "examples": [
+            {
+              "ar": "كَمْ رِيَالًا عِنْدَكَ؟ عِنْدِي رِيَالٌ وَاحِدٌ.",
+              "de": "Wie viele Riyal hast du? Ich habe einen Riyal."
+            },
+            {
+              "ar": "كَمْ مِسْطَرَةً فِي الْحَقِيبَةِ؟ فِيهَا مِسْطَرَتَانِ.",
+              "de": "Wie viele Lineale sind in der Tasche? Es sind zwei darin."
+            },
+            {
+              "ar": "كَمْ أُذُنًا لِلْقِطِّ؟ لَهُ أُذُنَانِ.",
+              "de": "Wie viele Ohren hat die Katze? Sie hat zwei Ohren."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "عِنْدِي ___ جَدِيدَانِ.",
+          "answer": "قَلَمَانِ",
+          "options": ["قَلَمَانِ", "قَلَمٌ", "أَقْلَامٌ"],
+          "de": "Ich habe zwei neue Stifte."
+        },
+        {
+          "ar": "___ السَّيَّارَتَانِ لِلتَّاجِرِ.",
+          "answer": "هَاتَانِ",
+          "options": ["هَاتَانِ", "هٰذَانِ"],
+          "de": "Diese beiden Autos gehören dem Händler."
+        },
+        {
+          "ar": "كَمْ ___ عِنْدَكَ؟",
+          "answer": "رِيَالًا",
+          "options": ["رِيَالًا", "رِيَالٌ", "رِيَالَاتٌ"],
+          "de": "Wie viele Riyal hast du?"
+        },
+        {
+          "ar": "أَيْنَ الْوَلَدَانِ؟ ___ فِي الْمَسْجِدِ.",
+          "answer": "هُمَا",
+          "options": ["هُمَا", "هُوَ", "هُمْ"],
+          "de": "Wo sind die beiden Jungen? Sie sind in der Moschee."
+        },
+        {
+          "ar": "فِي هٰذَا الْحَيِّ مَسْجِدَانِ ___.",
+          "answer": "كَبِيرَانِ",
+          "options": ["كَبِيرَانِ", "كَبِيرَتَانِ", "كَبِيرٌ"],
+          "de": "In diesem Viertel gibt es zwei große Moscheen."
+        },
+        {
+          "ar": "عَلَى الْمَكْتَبِ ___ صَغِيرَتَانِ.",
+          "answer": "مِسْطَرَتَانِ",
+          "options": ["مِسْطَرَتَانِ", "مِسْطَرَةٌ", "مِسْطَرَانِ"],
+          "de": "Auf dem Schreibtisch liegen zwei kleine Lineale."
+        },
+        {
+          "ar": "لِلْقِطِّ عَيْنَانِ ___.",
+          "answer": "جَمِيلَتَانِ",
+          "options": ["جَمِيلَتَانِ", "جَمِيلَانِ"],
+          "de": "Die Katze hat zwei schöne Augen."
+        }
+      ]
+    },
+    {
+      "unit": 119,
+      "lesson": 19,
+      "topic": "Zahlen von 3 bis 10",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-119-01",
+          "ar": "ثَلَاثَةٌ",
+          "de": "drei"
+        },
+        {
+          "id": "md-119-02",
+          "ar": "أَرْبَعَةٌ",
+          "de": "vier"
+        },
+        {
+          "id": "md-119-03",
+          "ar": "خَمْسَةٌ",
+          "de": "fünf"
+        },
+        {
+          "id": "md-119-04",
+          "ar": "سِتَّةٌ",
+          "de": "sechs"
+        },
+        {
+          "id": "md-119-05",
+          "ar": "سَبْعَةٌ",
+          "de": "sieben"
+        },
+        {
+          "id": "md-119-06",
+          "ar": "ثَمَانِيَةٌ",
+          "de": "acht"
+        },
+        {
+          "id": "md-119-07",
+          "ar": "تِسْعَةٌ",
+          "de": "neun"
+        },
+        {
+          "id": "md-119-08",
+          "ar": "عَشَرَةٌ",
+          "de": "zehn"
+        },
+        {
+          "id": "md-119-09",
+          "ar": "الثَّمَنُ",
+          "de": "der Preis"
+        },
+        {
+          "id": "md-119-10",
+          "ar": "نِصْفٌ",
+          "de": "halb, Hälfte"
+        },
+        {
+          "id": "md-119-11",
+          "ar": "أَيَّامٌ",
+          "de": "Tage"
+        },
+        {
+          "id": "md-119-12",
+          "ar": "رِيَالَاتٌ",
+          "de": "Riyals"
+        },
+        {
+          "id": "md-119-13",
+          "ar": "الْقِرْشُ",
+          "de": "der Piaster (kleine Münze)"
+        },
+        {
+          "id": "md-119-14",
+          "ar": "قُرُوشٌ",
+          "de": "Piaster (Pl.)"
+        },
+        {
+          "id": "md-119-15",
+          "ar": "الْحَافِلَةُ",
+          "de": "der Bus"
+        },
+        {
+          "id": "md-119-16",
+          "ar": "رَاكِبٌ",
+          "de": "Fahrgast"
+        },
+        {
+          "id": "md-119-17",
+          "ar": "رُكَّابٌ",
+          "de": "Fahrgäste"
+        },
+        {
+          "id": "md-119-18",
+          "ar": "السُّؤَالُ",
+          "de": "die Frage"
+        },
+        {
+          "id": "md-119-19",
+          "ar": "أَسْئِلَةٌ",
+          "de": "Fragen"
+        },
+        {
+          "id": "md-119-20",
+          "ar": "الْبَلَدُ",
+          "de": "das Land, die Stadt"
+        },
+        {
+          "id": "md-119-21",
+          "ar": "بِلَادٌ",
+          "de": "Länder"
+        },
+        {
+          "id": "md-119-22",
+          "ar": "الْجَيْبُ",
+          "de": "die Tasche (am Kleid, Hose)"
+        },
+        {
+          "id": "md-119-23",
+          "ar": "قُدَامَى",
+          "de": "alt, bisherig (Pl. von قَدِيمٌ)"
+        },
+        {
+          "id": "md-119-24",
+          "ar": "مُخْتَلِفَةٌ",
+          "de": "verschieden"
+        },
+        {
+          "id": "md-119-25",
+          "ar": "أُورُبَّا",
+          "de": "Europa"
+        },
+        {
+          "id": "md-119-26",
+          "ar": "مَالِيزِيَا",
+          "de": "Malaysia"
+        },
+        {
+          "id": "md-119-27",
+          "ar": "شُكْرًا",
+          "de": "danke"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Zahlen 3–10: das „umgekehrte“ Geschlecht",
+          "text": "Die Zahlen von 3 bis 10 tragen vor einem männlichen Nomen die Endung ة, obwohl diese sonst weiblich ist: ثَلَاثَةُ طُلَّابٍ. Maßgeblich ist das Geschlecht des Singulars (طَالِبٌ ist männlich). Vor weiblichen Nomen fällt das ة weg – das kommt später.",
+          "examples": [
+            {
+              "ar": "فِي الْحَافِلَةِ ثَمَانِيَةُ رُكَّابٍ.",
+              "de": "Im Bus sind acht Fahrgäste."
+            },
+            {
+              "ar": "لِلْمُدِيرِ ثَلَاثَةُ أَبْنَاءٍ.",
+              "de": "Der Direktor hat drei Söhne."
+            },
+            {
+              "ar": "فِي الدَّرْسِ خَمْسَةُ أَسْئِلَةٍ.",
+              "de": "In der Lektion sind fünf Fragen."
+            }
+          ]
+        },
+        {
+          "title": "Das Gezählte: Plural im Genitiv",
+          "text": "Nach 3 bis 10 folgt das Nomen im Plural, unbestimmt und im Genitiv (-in), wie das zweite Glied einer Iḍāfa. Die Zahl selbst hat kein -un und nimmt den Fall an, den der Satz verlangt.",
+          "examples": [
+            {
+              "ar": "فِي حَقِيبَتِي سِتَّةُ كُتُبٍ.",
+              "de": "In meiner Tasche sind sechs Bücher."
+            },
+            {
+              "ar": "عِنْدِي أَرْبَعَةُ قُمْصَانٍ.",
+              "de": "Ich habe vier Hemden."
+            },
+            {
+              "ar": "فِي هٰذِهِ الشَّرِكَةِ تِسْعَةُ تُجَّارٍ.",
+              "de": "In dieser Firma sind neun Händler."
+            }
+          ]
+        },
+        {
+          "title": "Nach dem Preis fragen: كَمْ ثَمَنُ …؟",
+          "text": "Mit كَمْ ثَمَنُ und einem Nomen im Genitiv fragt man nach dem Preis. In der Antwort steht meist ثَمَنُهُ bzw. ثَمَنُهَا mit einer Zahl; وَنِصْفٌ bedeutet „und ein halb“ (نِصْفٌ allein = „Hälfte“).",
+          "examples": [
+            {
+              "ar": "كَمْ ثَمَنُ هٰذِهِ السَّاعَةِ؟ ثَمَنُهَا عَشَرَةُ رِيَالَاتٍ.",
+              "de": "Was kostet diese Uhr? Sie kostet zehn Riyal."
+            },
+            {
+              "ar": "كَمْ ثَمَنُ الْقَلَمِ؟ ثَمَنُهُ رِيَالٌ وَنِصْفٌ.",
+              "de": "Was kostet der Stift? Er kostet eineinhalb Riyal."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "فِي الْفَصْلِ ___ طُلَّابٍ.",
+          "answer": "سَبْعَةُ",
+          "options": ["سَبْعَةُ", "تِسْعَةُ", "سِتَّةُ"],
+          "de": "Im Klassenzimmer sind sieben Schüler."
+        },
+        {
+          "ar": "عِنْدِي أَرْبَعَةُ ___.",
+          "answer": "أَقْلَامٍ",
+          "options": ["أَقْلَامٍ", "أَقْلَامٌ", "قَلَمٍ"],
+          "de": "Ich habe vier Stifte."
+        },
+        {
+          "ar": "ثَمَنُ هٰذَا الْقَمِيصِ ___ رِيَالَاتٍ.",
+          "answer": "ثَمَانِيَةُ",
+          "options": ["ثَمَانِيَةُ", "ثَلَاثَةُ", "عَشَرَةُ"],
+          "de": "Dieses Hemd kostet acht Riyal."
+        },
+        {
+          "ar": "كَمْ ___ فِي هٰذَا الْحَيِّ؟",
+          "answer": "مَسْجِدًا",
+          "options": ["مَسْجِدًا", "مَسْجِدٌ", "مَسْجِدَانِ"],
+          "de": "Wie viele Moscheen gibt es in diesem Viertel?"
+        },
+        {
+          "ar": "فِي هٰذَا الدَّرْسِ خَمْسَةُ ___.",
+          "answer": "أَسْئِلَةٍ",
+          "options": ["أَسْئِلَةٍ", "أَسْئِلَةٌ", "سُؤَالٍ"],
+          "de": "In dieser Lektion sind fünf Fragen."
+        },
+        {
+          "ar": "فِي الْجَامِعَةِ طُلَّابٌ مِنْ بِلَادٍ ___.",
+          "answer": "مُخْتَلِفَةٍ",
+          "options": ["مُخْتَلِفَةٍ", "مُخْتَلِفَةٌ"],
+          "de": "An der Universität gibt es Studenten aus verschiedenen Ländern."
+        },
+        {
+          "ar": "فِي الْفَصْلِ خَمْسَةُ طُلَّابٍ ___ مِنْ أَلْمَانِيَا.",
+          "answer": "جُدُدٍ",
+          "options": ["جُدُدٍ", "قُدَامَى"],
+          "de": "In der Klasse sind fünf neue Schüler aus Deutschland."
+        }
+      ]
+    },
+    {
+      "unit": 120,
+      "lesson": 20,
+      "topic": "Zahlen 3–10 mit weiblichen Nomen",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-120-01",
+          "ar": "ثَلَاثُ",
+          "de": "drei (vor weiblichem Nomen)"
+        },
+        {
+          "id": "md-120-02",
+          "ar": "أَرْبَعُ",
+          "de": "vier (vor weiblichem Nomen)"
+        },
+        {
+          "id": "md-120-03",
+          "ar": "خَمْسُ",
+          "de": "fünf (vor weiblichem Nomen)"
+        },
+        {
+          "id": "md-120-04",
+          "ar": "سِتُّ",
+          "de": "sechs (vor weiblichem Nomen)"
+        },
+        {
+          "id": "md-120-05",
+          "ar": "سَبْعُ",
+          "de": "sieben (vor weiblichem Nomen)"
+        },
+        {
+          "id": "md-120-06",
+          "ar": "ثَمَانِي",
+          "de": "acht (vor weiblichem Nomen)"
+        },
+        {
+          "id": "md-120-07",
+          "ar": "تِسْعُ",
+          "de": "neun (vor weiblichem Nomen)"
+        },
+        {
+          "id": "md-120-08",
+          "ar": "عَشْرُ",
+          "de": "zehn (vor weiblichem Nomen)"
+        },
+        {
+          "id": "md-120-09",
+          "ar": "الْمَجَلَّةُ",
+          "de": "die Zeitschrift (Pl. مَجَلَّاتٌ)"
+        },
+        {
+          "id": "md-120-10",
+          "ar": "الْحَرْفُ",
+          "de": "der Buchstabe (Pl. حُرُوفٌ)"
+        },
+        {
+          "id": "md-120-11",
+          "ar": "الْكَلِمَةُ",
+          "de": "das Wort (Pl. كَلِمَاتٌ)"
+        },
+        {
+          "id": "md-120-12",
+          "ar": "إِنْدُونِيسِيَا",
+          "de": "Indonesien"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Zahlen 3–10: bei weiblichen Nomen ohne ة",
+          "text": "Die Zahlen von 3 bis 10 verhalten sich „umgekehrt“: Ist das gezählte Nomen im Singular weiblich, steht die Zahl ohne ة (ثَلَاثُ). Ist es männlich, bekommt die Zahl ein ة (ثَلَاثَةُ). Maßgeblich ist immer das Geschlecht des Singulars.",
+          "examples": [
+            {
+              "ar": "عِنْدِي أَرْبَعُ مَجَلَّاتٍ.",
+              "de": "Ich habe vier Zeitschriften."
+            },
+            {
+              "ar": "فِي هٰذِهِ الْكَلِمَةِ خَمْسَةُ حُرُوفٍ.",
+              "de": "Dieses Wort hat fünf Buchstaben."
+            },
+            {
+              "ar": "لِأُخْتِي سِتُّ بَنَاتٍ.",
+              "de": "Meine Schwester hat sechs Töchter."
+            }
+          ]
+        },
+        {
+          "title": "Das gezählte Nomen: Plural im Genitiv",
+          "text": "Nach den Zahlen 3 bis 10 steht das Nomen im Plural, unbestimmt und im Genitiv (Endung -in). Zahl und Nomen bilden zusammen eine Iḍāfa, deshalb hat die Zahl selbst keinen Tanwīn.",
+          "examples": [
+            {
+              "ar": "فِي الْفَصْلِ سَبْعُ طَالِبَاتٍ.",
+              "de": "Im Klassenzimmer sind sieben Studentinnen."
+            },
+            {
+              "ar": "لِلْمُدِيرِ ثَلَاثُ سَيَّارَاتٍ.",
+              "de": "Der Direktor hat drei Autos."
+            }
+          ]
+        },
+        {
+          "title": "كَمْ – wie viele?",
+          "text": "Nach كَمْ folgt das Nomen im Singular, unbestimmt und im Akkusativ (Endung -an). Bei Wörtern auf ة schreibt man dabei kein zusätzliches Alif: مَجَلَّةً.",
+          "examples": [
+            {
+              "ar": "كَمْ مَجَلَّةً عِنْدَكَ؟",
+              "de": "Wie viele Zeitschriften hast du?"
+            },
+            {
+              "ar": "كَمْ أُخْتًا لَكِ؟",
+              "de": "Wie viele Schwestern hast du (Frau)?"
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "فِي فَصْلِنَا ___ طَالِبَاتٍ.",
+          "answer": "خَمْسُ",
+          "options": ["خَمْسُ", "خَمْسَةُ"],
+          "de": "In unserer Klasse sind fünf Studentinnen."
+        },
+        {
+          "ar": "لِي ___ أَخَوَاتٍ.",
+          "answer": "ثَلَاثُ",
+          "options": ["ثَلَاثُ", "ثَلَاثَةُ"],
+          "de": "Ich habe drei Schwestern."
+        },
+        {
+          "ar": "عِنْدِي سَبْعُ ___.",
+          "answer": "مَجَلَّاتٍ",
+          "options": ["مَجَلَّاتٍ", "مَجَلَّةٍ", "مَجَلَّاتٌ"],
+          "de": "Ich habe sieben Zeitschriften."
+        },
+        {
+          "ar": "كَمْ ___ فِي هٰذَا الْكِتَابِ؟",
+          "answer": "كَلِمَةً",
+          "options": ["كَلِمَةً", "كَلِمَاتٍ", "كَلِمَةٌ"],
+          "de": "Wie viele Wörter sind in diesem Buch?"
+        },
+        {
+          "ar": "فِي هٰذِهِ الْكَلِمَةِ ___ حُرُوفٍ.",
+          "answer": "أَرْبَعَةُ",
+          "options": ["أَرْبَعَةُ", "أَرْبَعُ"],
+          "de": "Dieses Wort hat vier Buchstaben."
+        },
+        {
+          "ar": "لِلْمُدِيرِ ___ بَنَاتٍ.",
+          "answer": "ثَمَانِي",
+          "options": ["سِتُّ", "سَبْعُ", "ثَمَانِي", "عَشْرُ"],
+          "de": "Der Direktor hat acht Töchter."
+        }
+      ]
+    },
+    {
+      "unit": 121,
+      "lesson": 21,
+      "topic": "Meine Schule: ذَاكَ und Pluralformen",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-121-01",
+          "ar": "ذَاكَ",
+          "de": "jenes, das (dort) – Kurzform von ذٰلِكَ"
+        },
+        {
+          "id": "md-121-02",
+          "ar": "الْقِبْلَةُ",
+          "de": "die Gebetsrichtung (Qibla)"
+        },
+        {
+          "id": "md-121-03",
+          "ar": "اللَّوْنُ",
+          "de": "die Farbe (Pl. أَلْوَانٌ)"
+        },
+        {
+          "id": "md-121-04",
+          "ar": "كَرَاسِيُّ",
+          "de": "Stühle (Pl. von كُرْسِيٌّ)"
+        },
+        {
+          "id": "md-121-05",
+          "ar": "مُخْتَلِفٌ",
+          "de": "verschieden"
+        },
+        {
+          "id": "md-121-06",
+          "ar": "دِينٌ",
+          "de": "Religion"
+        },
+        {
+          "id": "md-121-07",
+          "ar": "رَبٌّ",
+          "de": "Herr (Gott)"
+        },
+        {
+          "id": "md-121-08",
+          "ar": "وَاسِعٌ",
+          "de": "geräumig, weit"
+        },
+        {
+          "id": "md-121-09",
+          "ar": "صَالِحٌ",
+          "de": "rechtschaffen, fromm"
+        },
+        {
+          "id": "md-121-10",
+          "ar": "غَانَا",
+          "de": "Ghana"
+        },
+        {
+          "id": "md-121-11",
+          "ar": "نَيْجِيرِيَا",
+          "de": "Nigeria"
+        },
+        {
+          "id": "md-121-12",
+          "ar": "تُرْكِيَا",
+          "de": "die Türkei"
+        },
+        {
+          "id": "md-121-13",
+          "ar": "يُوغُسْلَافِيَا",
+          "de": "Jugoslawien"
+        },
+        {
+          "id": "md-121-14",
+          "ar": "سُورِيَا",
+          "de": "Syrien"
+        },
+        {
+          "id": "md-121-15",
+          "ar": "آسِيَا",
+          "de": "Asien"
+        },
+        {
+          "id": "md-121-16",
+          "ar": "إِفْرِيقِيَا",
+          "de": "Afrika"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "ذَاكَ – dasselbe wie ذٰلِكَ",
+          "text": "ذَاكَ ist eine kürzere Form von ذٰلِكَ und bedeutet ebenfalls „jenes, das dort“. Es zeigt auf männliche Dinge oder Personen, die weiter entfernt sind; für Weibliches bleibt تِلْكَ.",
+          "examples": [
+            {
+              "ar": "ذَاكَ مَكْتَبُ الْمُدِيرِ.",
+              "de": "Das dort ist der Schreibtisch des Direktors."
+            },
+            {
+              "ar": "ذَاكَ رَجُلٌ صَالِحٌ.",
+              "de": "Das dort ist ein rechtschaffener Mann."
+            }
+          ]
+        },
+        {
+          "title": "Plural von Sachen: Adjektiv weiblich Singular",
+          "text": "Viele Nomen bilden den Plural durch Veränderung im Wortinneren, z. B. مَكْتَبٌ → مَكَاتِبُ, كُرْسِيٌّ → كَرَاسِيُّ. Bezeichnet ein Plural Dinge (keine Menschen), steht das Adjektiv dazu im weiblichen Singular.",
+          "examples": [
+            {
+              "ar": "الْكَرَاسِيُّ مَكْسُورَةٌ.",
+              "de": "Die Stühle sind kaputt."
+            },
+            {
+              "ar": "الْأَلْوَانُ جَمِيلَةٌ.",
+              "de": "Die Farben sind schön."
+            },
+            {
+              "ar": "فِي فَصْلِنَا مَكَاتِبُ جَدِيدَةٌ.",
+              "de": "In unserem Klassenzimmer gibt es neue Schreibtische."
+            }
+          ]
+        },
+        {
+          "title": "Herkunft: مِنْ + Land",
+          "text": "Mit مِنْ sagt man, woher jemand kommt. Ländernamen auf ـا wie تُرْكِيَا oder غَانَا bleiben nach مِنْ unverändert; Namen mit Artikel bekommen die Genitivendung -i.",
+          "examples": [
+            {
+              "ar": "الْمُدَرِّسُ مِنْ غَانَا.",
+              "de": "Der Lehrer kommt aus Ghana."
+            },
+            {
+              "ar": "هِيَ مِنْ مَالِيزِيَا.",
+              "de": "Sie kommt aus Malaysia."
+            },
+            {
+              "ar": "الطَّبِيبُ مِنَ الْعِرَاقِ.",
+              "de": "Der Arzt kommt aus dem Irak."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "___ كُرْسِيُّ الْمُدِيرِ.",
+          "answer": "ذَاكَ",
+          "options": ["ذَاكَ", "تِلْكَ"],
+          "de": "Das dort ist der Stuhl des Direktors."
+        },
+        {
+          "ar": "الْمَكَاتِبُ ___.",
+          "answer": "نَظِيفَةٌ",
+          "options": ["نَظِيفَةٌ", "نَظِيفٌ"],
+          "de": "Die Schreibtische sind sauber."
+        },
+        {
+          "ar": "لُغَاتُهُمْ ___.",
+          "answer": "مُخْتَلِفَةٌ",
+          "options": ["مُخْتَلِفَةٌ", "مُخْتَلِفٌ"],
+          "de": "Ihre Sprachen sind verschieden."
+        },
+        {
+          "ar": "الطَّالِبُ مِنْ ___.",
+          "answer": "تُرْكِيَا",
+          "options": ["تُرْكِيَا", "غَانَا", "سُورِيَا", "أَمْرِيكَا"],
+          "de": "Der Student kommt aus der Türkei."
+        },
+        {
+          "ar": "الْكَعْبَةُ ___ الْمُسْلِمِينَ.",
+          "answer": "قِبْلَةُ",
+          "options": ["قِبْلَةُ", "الْقِبْلَةُ"],
+          "de": "Die Kaaba ist die Gebetsrichtung der Muslime."
+        },
+        {
+          "ar": "___ لَوْنُ سَيَّارَتِكَ؟",
+          "answer": "مَا",
+          "options": ["مَا", "مَنْ"],
+          "de": "Welche Farbe hat dein Auto?"
+        }
+      ]
+    },
+    {
+      "unit": 122,
+      "lesson": 22,
+      "topic": "Nomen ohne Tanwīn (الْمَمْنُوعُ مِنَ الصَّرْفِ)",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-122-01",
+          "ar": "الْفِنْجَانُ",
+          "de": "die Tasse (Pl. فَنَاجِينُ)"
+        },
+        {
+          "id": "md-122-02",
+          "ar": "الدَّقِيقَةُ",
+          "de": "die Minute (Pl. دَقَائِقُ)"
+        },
+        {
+          "id": "md-122-03",
+          "ar": "قَالَ",
+          "de": "er sagte"
+        },
+        {
+          "id": "md-122-04",
+          "ar": "أَبْيَضُ",
+          "de": "weiß"
+        },
+        {
+          "id": "md-122-05",
+          "ar": "أَحْمَرُ",
+          "de": "rot"
+        },
+        {
+          "id": "md-122-06",
+          "ar": "أَخْضَرُ",
+          "de": "grün"
+        },
+        {
+          "id": "md-122-07",
+          "ar": "أَسْوَدُ",
+          "de": "schwarz"
+        },
+        {
+          "id": "md-122-08",
+          "ar": "أَزْرَقُ",
+          "de": "blau"
+        },
+        {
+          "id": "md-122-09",
+          "ar": "أَصْفَرُ",
+          "de": "gelb"
+        },
+        {
+          "id": "md-122-10",
+          "ar": "مَدَارِسُ",
+          "de": "Schulen (Pl. von مَدْرَسَةٌ)"
+        },
+        {
+          "id": "md-122-11",
+          "ar": "مَسَاجِدُ",
+          "de": "Moscheen (Pl. von مَسْجِدٌ)"
+        },
+        {
+          "id": "md-122-12",
+          "ar": "مَنَادِيلُ",
+          "de": "Taschentücher (Pl. von مِنْدِيلٌ)"
+        },
+        {
+          "id": "md-122-13",
+          "ar": "مَفَاتِيحُ",
+          "de": "Schlüssel (Pl. von مِفْتَاحٌ)"
+        },
+        {
+          "id": "md-122-14",
+          "ar": "فُنْدُقٌ",
+          "de": "Hotel (Pl. فَنَادِقُ)"
+        },
+        {
+          "id": "md-122-15",
+          "ar": "أَطِبَّاءُ",
+          "de": "Ärzte (Pl. von طَبِيبٌ)"
+        },
+        {
+          "id": "md-122-16",
+          "ar": "عُلَمَاءُ",
+          "de": "Gelehrte"
+        },
+        {
+          "id": "md-122-17",
+          "ar": "شَبْعَانُ",
+          "de": "satt"
+        },
+        {
+          "id": "md-122-18",
+          "ar": "قَلِيلٌ",
+          "de": "wenig"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Nomen ohne Tanwīn",
+          "text": "Einige Nomen bekommen nie Tanwīn, auch wenn sie unbestimmt sind: Sie enden im Nominativ nur auf -u. Dazu gehören weibliche Namen (زَيْنَبُ), Namen auf ة (حَمْزَةُ), Namen und Adjektive auf ـَانُ (عُثْمَانُ، كَسْلَانُ), Wörter nach dem Muster أَفْعَلُ (أَحْمَدُ، أَحْمَرُ) sowie viele fremde Namen (لَنْدَنُ، إِبْرَاهِيمُ).",
+          "examples": [
+            {
+              "ar": "الْوَلَدُ جَوْعَانُ.",
+              "de": "Der Junge ist hungrig."
+            },
+            {
+              "ar": "زَيْنَبُ طَالِبَةٌ مُجْتَهِدَةٌ.",
+              "de": "Zainab ist eine fleißige Studentin."
+            }
+          ]
+        },
+        {
+          "title": "Farben nach dem Muster أَفْعَلُ",
+          "text": "Die Grundfarben haben die Form أَفْعَلُ: أَبْيَضُ، أَسْوَدُ، أَحْمَرُ، أَخْضَرُ، أَزْرَقُ، أَصْفَرُ. Als Adjektiv nach einem unbestimmten männlichen Nomen stehen sie ohne Tanwīn: قَمِيصٌ أَبْيَضُ.",
+          "examples": [
+            {
+              "ar": "هٰذَا قَمِيصٌ أَبْيَضُ.",
+              "de": "Das ist ein weißes Hemd."
+            },
+            {
+              "ar": "عِنْدِي حِصَانٌ أَسْوَدُ.",
+              "de": "Ich habe ein schwarzes Pferd."
+            },
+            {
+              "ar": "بَابُ بَيْتِنَا أَزْرَقُ.",
+              "de": "Die Tür unseres Hauses ist blau."
+            }
+          ]
+        },
+        {
+          "title": "Plurale ohne Tanwīn",
+          "text": "Auch bestimmte Pluralformen haben keinen Tanwīn: Plurale mit langem ā nach den ersten beiden Buchstaben (مَسَاجِدُ، مَفَاتِيحُ، كَرَاسِيُّ) und Plurale auf ـَاءُ (أَطِبَّاءُ، عُلَمَاءُ).",
+          "examples": [
+            {
+              "ar": "فِي هٰذَا الشَّارِعِ فَنَادِقُ جَدِيدَةٌ.",
+              "de": "In dieser Straße gibt es neue Hotels."
+            },
+            {
+              "ar": "فِي حَقِيبَتِي مَنَادِيلُ نَظِيفَةٌ.",
+              "de": "In meiner Tasche sind saubere Taschentücher."
+            },
+            {
+              "ar": "هٰؤُلَاءِ عُلَمَاءُ.",
+              "de": "Das sind Gelehrte."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "هٰذَا قَمِيصٌ ___.",
+          "answer": "أَخْضَرُ",
+          "options": ["أَخْضَرُ", "أَخْضَرٌ"],
+          "de": "Das ist ein grünes Hemd."
+        },
+        {
+          "ar": "عِنْدِي قَلَمٌ ___ وَقَلَمٌ أَسْوَدُ.",
+          "answer": "أَزْرَقُ",
+          "options": ["أَزْرَقُ", "أَحْمَرُ", "أَصْفَرُ", "أَبْيَضُ"],
+          "de": "Ich habe einen blauen Stift und einen schwarzen Stift."
+        },
+        {
+          "ar": "الطَّالِبُ ___.",
+          "answer": "كَسْلَانُ",
+          "options": ["كَسْلَانُ", "كَسْلَانٌ"],
+          "de": "Der Student ist faul."
+        },
+        {
+          "ar": "الْوَلَدُ ___.",
+          "answer": "عَطْشَانُ",
+          "options": ["جَوْعَانُ", "عَطْشَانُ", "شَبْعَانُ"],
+          "de": "Der Junge ist durstig."
+        },
+        {
+          "ar": "فِي هٰذِهِ الْمَدِينَةِ ___ جَمِيلَةٌ.",
+          "answer": "مَسَاجِدُ",
+          "options": ["مَسَاجِدُ", "مَسَاجِدٌ"],
+          "de": "In dieser Stadt gibt es schöne Moscheen."
+        },
+        {
+          "ar": "هٰؤُلَاءِ ___.",
+          "answer": "أَطِبَّاءُ",
+          "options": ["أَطِبَّاءُ", "أَطِبَّاءٌ"],
+          "de": "Das sind Ärzte."
+        }
+      ]
+    },
+    {
+      "unit": 123,
+      "lesson": 23,
+      "topic": "Nomen ohne Tanwīn im Genitiv",
+      "status": "draft",
+      "words": [
+        {
+          "id": "md-123-01",
+          "ar": "هَاتِ",
+          "de": "gib her!"
+        },
+        {
+          "id": "md-123-02",
+          "ar": "مَكَّةُ",
+          "de": "Mekka"
+        },
+        {
+          "id": "md-123-03",
+          "ar": "جُدَّةُ",
+          "de": "Dschidda"
+        },
+        {
+          "id": "md-123-04",
+          "ar": "الرِّيَاضُ",
+          "de": "Riad"
+        },
+        {
+          "id": "md-123-05",
+          "ar": "الطَّائِفُ",
+          "de": "Taif"
+        },
+        {
+          "id": "md-123-06",
+          "ar": "بَغْدَادُ",
+          "de": "Bagdad"
+        },
+        {
+          "id": "md-123-07",
+          "ar": "إِصْطَنْبُولُ",
+          "de": "Istanbul"
+        },
+        {
+          "id": "md-123-08",
+          "ar": "لَنْدَنُ",
+          "de": "London"
+        },
+        {
+          "id": "md-123-09",
+          "ar": "بَارِيسُ",
+          "de": "Paris"
+        },
+        {
+          "id": "md-123-10",
+          "ar": "وَاشِنْطُنُ",
+          "de": "Washington"
+        },
+        {
+          "id": "md-123-11",
+          "ar": "بَاكِسْتَانُ",
+          "de": "Pakistan"
+        }
+      ],
+      "grammar": [
+        {
+          "title": "Genitiv mit -a statt -i",
+          "text": "Nomen ohne Tanwīn haben auch im Genitiv eine Besonderheit: Nach einer Präposition oder als zweites Glied einer Iḍāfa enden sie auf -a statt auf -i. Man sagt also مِنْ مُحَمَّدٍ, aber مِنْ أَحْمَدَ.",
+          "examples": [
+            {
+              "ar": "ذَهَبَ الْمُدِيرُ إِلَى بَغْدَادَ.",
+              "de": "Der Direktor ist nach Bagdad gegangen."
+            },
+            {
+              "ar": "هٰذِهِ حَقِيبَةُ فَاطِمَةَ.",
+              "de": "Das ist Fatimas Tasche."
+            },
+            {
+              "ar": "الطَّبِيبُ مِنْ بَاكِسْتَانَ.",
+              "de": "Der Arzt kommt aus Pakistan."
+            }
+          ]
+        },
+        {
+          "title": "Mit اَلْ oder als erstes Glied: wieder -i",
+          "text": "Bekommt ein solches Nomen den Artikel اَلْ oder steht es als erstes Glied einer Iḍāfa, gilt die Regel nicht mehr: Der Genitiv endet dann ganz normal auf -i.",
+          "examples": [
+            {
+              "ar": "الطُّلَّابُ فِي الْمَسَاجِدِ.",
+              "de": "Die Studenten sind in den Moscheen."
+            },
+            {
+              "ar": "ذَهَبْنَا إِلَى مَسَاجِدِ الْمَدِينَةِ.",
+              "de": "Wir sind zu den Moscheen der Stadt gegangen."
+            }
+          ]
+        },
+        {
+          "title": "مَتَى und قَبْلَ",
+          "text": "مَتَى fragt nach der Zeit („wann?“). قَبْلَ („vor“) steht vor einem Nomen im Genitiv; nach einer Zahl ist das z. B. دَقَائِقَ – ein Plural ohne Tanwīn, also mit -a.",
+          "examples": [
+            {
+              "ar": "مَتَى خَرَجَ الْمُدِيرُ؟",
+              "de": "Wann ist der Direktor hinausgegangen?"
+            },
+            {
+              "ar": "خَرَجَ قَبْلَ عَشْرِ دَقَائِقَ.",
+              "de": "Er ist vor zehn Minuten hinausgegangen."
+            }
+          ]
+        }
+      ],
+      "gaps": [
+        {
+          "ar": "ذَهَبَ الطَّبِيبُ إِلَى ___.",
+          "answer": "بَغْدَادَ",
+          "options": ["بَغْدَادَ", "بَغْدَادِ"],
+          "de": "Der Arzt ist nach Bagdad gegangen."
+        },
+        {
+          "ar": "هٰذَا قَلَمُ ___.",
+          "answer": "زَيْنَبَ",
+          "options": ["زَيْنَبَ", "زَيْنَبٍ"],
+          "de": "Das ist Zainabs Stift."
+        },
+        {
+          "ar": "أَنَا مِنْ ___.",
+          "answer": "لَنْدَنَ",
+          "options": ["لَنْدَنَ", "لَنْدَنِ"],
+          "de": "Ich komme aus London."
+        },
+        {
+          "ar": "بَيْتُ خَالِي فِي ___.",
+          "answer": "جُدَّةَ",
+          "options": ["جُدَّةَ", "جُدَّةٍ"],
+          "de": "Das Haus meines Onkels ist in Dschidda."
+        },
+        {
+          "ar": "___ ذَهَبْتَ إِلَى إِصْطَنْبُولَ؟",
+          "answer": "مَتَى",
+          "options": ["مَتَى", "مَنْ", "مَا"],
+          "de": "Wann bist du nach Istanbul gegangen?"
+        },
+        {
+          "ar": "خَرَجَ الْمُدَرِّسُ قَبْلَ عَشْرِ ___.",
+          "answer": "دَقَائِقَ",
+          "options": ["دَقَائِقَ", "دَقَائِقٍ"],
+          "de": "Der Lehrer ist vor zehn Minuten hinausgegangen."
+        },
+        {
+          "ar": "هٰذَا بَيْتُ ___ وَذٰلِكَ بَيْتُ حَامِدٍ.",
+          "answer": "عُثْمَانَ",
+          "options": ["عُثْمَانَ", "عُثْمَانٍ"],
+          "de": "Das ist Uthmans Haus, und das dort ist Hamids Haus."
+        }
+      ]
     }
   ]
 }

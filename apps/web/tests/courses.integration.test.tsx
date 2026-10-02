@@ -39,12 +39,12 @@ describe('Course switch and Medina path', () => {
 
     const lessons = await screen.findAllByRole('listitem', { name: /^Lektion \d+$/ });
     expect(lessons).toHaveLength(23);
-    // Lessons with our own content say what they cover; the others point to the book.
+    // Every lesson has our own content and says what it covers.
     const first = screen.getByRole('listitem', { name: 'Lektion 1' });
     expect(within(first).getByRole('link')).toHaveAttribute('href', '/units/madinah/1');
     expect(within(first).getByText(/Was ist das\? .* · \d+ Wörter/)).toBeTruthy();
     const seventh = screen.getByRole('listitem', { name: 'Lektion 7' });
-    expect(within(seventh).getByText('Buch S. 36 · Aufnahme')).toBeTruthy();
+    expect(within(seventh).getByText(/تِلْكَ · \d+ Wörter/)).toBeTruthy();
     // Links open outside the app and name the source.
     expect(screen.getByRole('link', { name: 'Lösungen (arabisch)' })).toHaveAttribute(
       'rel',

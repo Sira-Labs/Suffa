@@ -156,8 +156,9 @@ export function stageCompleted<E extends ExamEntry>(
   if (stage.test !== null) return stageTestPassed(exams, stage);
   const passed = stage.units.map((u) => passedTest(exams, u));
   if (passed.some((p) => p === null)) return null;
-  return (
-    (passed as E[]).sort((a, b) => b.finishedAt.localeCompare(a.finishedAt))[0] ?? null
+  // Every stage has units, so there is at least one passed test to compare.
+  return (passed as E[]).reduce((latest, e) =>
+    e.finishedAt.localeCompare(latest.finishedAt) > 0 ? e : latest
   );
 }
 

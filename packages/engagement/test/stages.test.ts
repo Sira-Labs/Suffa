@@ -50,6 +50,9 @@ describe('stages per course', () => {
     expect(stageCompleted(twelve, one)?.finishedAt).toBe('2026-10-12T10:00:00.000Z');
     expect(stageState(one, twelve).state).toBe('done');
     expect(stageState(two, twelve)).toEqual({ state: 'running', unitsPassed: 0 });
+    // The date is the latest lesson test, also when an early lesson was passed last.
+    const late = exam([101], 10, 10, '2026-11-01T10:00:00.000Z');
+    expect(stageCompleted([...passLessons(102, 112), late], one)).toBe(late);
     expect(stageXpEvents(twelve)).toEqual([
       {
         at: '2026-10-12T10:00:00.000Z',

@@ -163,8 +163,8 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
             }}
           />
           <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-            Gespeichert wird dein Text, diese Seite ({reportedPage(pathname, '')}) und –
-            wenn du angemeldet bist – dein Konto, damit wir nachfragen können.
+            Gespeichert wird dein Text, diese Seite ({reportedPage(pathname, search)}) und
+            – wenn du angemeldet bist – dein Konto, damit wir nachfragen können.
           </p>
           {error && <span className="feedback-bad">{error}</span>}
           <button

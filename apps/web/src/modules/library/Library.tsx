@@ -3,6 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { BookVideos } from './BookVideos';
 import { PublisherAudio } from './PublisherAudio';
+import { MadinahLibrary } from './MadinahLibrary';
+import { useActiveCourse } from '@/services/courses';
 
 const UNITS = 16;
 
@@ -12,6 +14,10 @@ const UNITS = 16;
  * `?unit=4&lesson=24` or `?unit=4&section=videos` come from a unit's learning path.
  */
 export function Library() {
+  return useActiveCourse() === 'madinah' ? <MadinahLibrary /> : <BookLibrary />;
+}
+
+function BookLibrary() {
   const [params] = useSearchParams();
   const initialUnit = Number(params.get('unit')) || 1;
   const lesson = Number(params.get('lesson')) || undefined;

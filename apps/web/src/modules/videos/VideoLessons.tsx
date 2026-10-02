@@ -1,11 +1,14 @@
 /**
  * Video lessons (Sprint 12): the catalog of YouTube lessons (e.g. Muhammad al-Andalusi's
- * series to the book), filtered by unit. The videos play on YouTube's own embed.
+ * series to the book), filtered by unit. The videos play on YouTube's own embed. Only the
+ * learner's course is shown: its units, and the videos not tied to a unit.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { VideosApi, type VideoLesson } from '@/services/videos/videosApi';
 import { useListenStore } from '@/state';
+import { courseOfUnit } from '@suffa/engagement';
+import { unitLabel, useActiveCourse } from '@/services/courses';
 
 const duration = (sec: number | null) =>
   sec ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` : '';
@@ -25,10 +28,14 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
     });
   }, [api]);
 
-  const units = [
-    ...new Set((videos ?? []).flatMap((v) => (v.unit ? [v.unit] : []))),
-  ].sort((a, b) => a - b);
-  const shown = (videos ?? []).filter((v) => unit === null || v.unit === unit);
+  const course = useActiveCourse();
+  const ofCourse = (videos ?? []).filter(
+    (v) => !v.unit || courseOfUnit(v.unit)?.id === course
+  );
+  const units = [...new Set(ofCourse.flatMap((v) => (v.unit ? [v.unit] : [])))].sort(
+    (a, b) => a - b
+  );
+  const shown = ofCourse.filter((v) => unit === null || v.unit === unit);
 
   return (
     <div className="stack">
@@ -42,7 +49,7 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
         <div
           className="row"
           role="group"
-          aria-label="Einheit wählen"
+          aria-label={course === 'madinah' ? 'Lektion wählen' : 'Einheit wählen'}
           style={{ flexWrap: 'wrap', gap: '0.4rem' }}
         >
           <button
@@ -61,12 +68,18 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
               aria-pressed={unit === u}
               onClick={() => setParams({ unit: String(u) })}
             >
-              Einheit {u}
+              {unitLabel(u)}
             </button>
           ))}
         </div>
       )}
-      {videos?.length === 0 && <p className="muted">Noch keine Videolektionen.</p>}
+      {videos && shown.length === 0 && (
+        <p className="muted">
+          {ofCourse.length === 0
+            ? 'Noch keine Videolektionen zu deinem Kurs.'
+            : `Noch keine Videolektionen zu ${unitLabel(unit!)}.`}
+        </p>
+      )}
       <div className="video-grid">
         {shown.map((v) => {
           const heard = progress[`yt/${v.id}`];
@@ -83,7 +96,7 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
               )}
               <strong dir="auto">{v.title}</strong>
               <span className="muted">
-                {v.unit ? `Einheit ${v.unit} · ` : ''}
+                {v.unit ? `${unitLabel(v.unit)} · ` : ''}
                 {duration(v.durationSec)}
                 {v.interactive ? ' · mit Fragen' : ''}
                 {heard?.completedAt ? ' · ✓ angesehen' : ''}

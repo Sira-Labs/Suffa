@@ -133,12 +133,25 @@ and our own exercises, and no copied book texts or pictures in the repo.
   has is not repeated; the comparison keeps inner vowels and hamza forms, so رَجُلٌ (man) and
   رِجْلٌ (foot) or إِمَامٌ and أَمَامَ stay apart. An independent review of the Arabic found
   six errors, all fixed. The content stays `draft` until a teacher has reviewed it.
-- **Stage 2 and later:**
+- **Stage 3, first part (done): the screens follow the learner's course.** A Medina learner
+  sees their own book everywhere:
+  - "Heute": the next lesson (the first one whose lesson test is not passed) and "Medina-Kurs ·
+    Buch 1" with the lesson tests passed;
+  - "Prüfung": the lesson tests with their result, leading to the next one (each lesson is tested
+    on its own page);
+  - "Hören & Sehen": the author's recording per lesson and the links to the collection and the
+    videos;
+  - video lessons: only the learner's course, labelled "Lektion n" for Medina units; the video
+    admin offers both courses' units;
+  - Medina unit numbers (`/units/103`, stations) lead to the lesson page.
+
+  `madinahProgress(exams)` computes the lessons, the tests passed and the next lesson.
+
+- **Stage 3 and later:**
   - more Madinah exercises, lesson by lesson;
   - stages and badges per course (`STAGES` gets a `course`);
   - content loaded per course (`content/courses/<id>/`);
-  - the screens that still assume _bayna yadayk_ read the active course: dashboard level card,
-    unit station, exam, library, video admin, YouTube unit guess;
+  - the YouTube unit guess knows the channel's course;
   - homework references;
   - the LLM prompts name the class's course instead of _bayna yadayk_.
 - **Only with the rights holders' permission:** book exercises and pictures, served from private

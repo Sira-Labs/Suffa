@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import type { PracticeSkill, UnitPracticeScope } from '@/types';
 import { Icon } from '@/components/Icon';
 import { content } from '@/content';
@@ -12,6 +12,8 @@ import {
 } from '@/services/practice';
 import { useCelebrationStore, useEnrollmentStore, usePracticeStore } from '@/state';
 import { isUnlocked } from '@/services/enrollment';
+import { courseOfUnit } from '@suffa/engagement';
+import { madinahLessonPath } from '@/services/courses';
 import { LockedPanel } from './UnitGate';
 import { BookVideos } from '@/modules/library/BookVideos';
 import { PublisherAudio } from '@/modules/library/PublisherAudio';
@@ -106,6 +108,11 @@ export function UnitStation() {
       },
     };
   }, [skill, unit, section, openSections, items, practise, celebrate]);
+
+  // A Medina unit (101+) has no stations; its exercises are on the lesson page.
+  if (courseOfUnit(unit)?.id === 'madinah') {
+    return <Navigate to={madinahLessonPath(unit)} replace />;
+  }
 
   if (!Number.isInteger(unit) || unit < 1 || unit > UNITS || !isStationKey(station)) {
     return (

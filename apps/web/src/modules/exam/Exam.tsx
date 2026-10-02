@@ -22,6 +22,8 @@ import {
 } from '@/services/enrollment';
 import { XP_RULES } from '@/services/engagement/xp';
 import { generateExam, type ExamQuestion } from './examEngine';
+import { MadinahExams } from './MadinahExams';
+import { useActiveCourse } from '@/services/courses';
 
 const FORMAT_LABELS: Record<ExamFormat, string> = {
   vocab_ar_de: 'Vokabel AR→DE',
@@ -57,6 +59,11 @@ const PRESET_FORMATS: ExamFormat[] = [
 ];
 
 export function Exam() {
+  // The Medina course tests each lesson on its own page (ADR-0025).
+  return useActiveCourse() === 'madinah' ? <MadinahExams /> : <BookExam />;
+}
+
+function BookExam() {
   const [stage, setStage] = useState<Stage>('config');
   const [selectedFormats, setSelectedFormats] = useState<ExamFormat[]>([
     'vocab_ar_de',

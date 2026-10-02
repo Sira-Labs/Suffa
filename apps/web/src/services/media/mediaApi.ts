@@ -31,6 +31,8 @@ export interface Playback extends MediaItem {
 
 export interface RecordingListening {
   mediaId: string;
+  title: string;
+  publishedAt: string;
   /** Active learners of the class. */
   learners: number;
   started: number;

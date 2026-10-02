@@ -3,10 +3,10 @@
  * in "Prüfung" and in "Hören & Sehen", and Medina unit numbers lead to the lesson pages.
  */
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider, useParams } from 'react-router-dom';
-import { Dashboard } from '@/modules/dashboard';
+import { Dashboard, Progress } from '@/modules/dashboard';
 import { Exam } from '@/modules/exam/Exam';
 import { Library } from '@/modules/library/Library';
 import { UnitPath } from '@/modules/units/UnitPath';
@@ -31,6 +31,7 @@ function renderAt(path: string) {
   const router = createMemoryRouter(
     [
       { path: '/', element: <Dashboard /> },
+      { path: '/progress', element: <Progress /> },
       { path: '/exam', element: <Exam /> },
       { path: '/library', element: <Library /> },
       { path: '/units/madinah/:lesson', element: <LessonStub /> },
@@ -92,7 +93,7 @@ describe('Course-aware screens (Medina course)', () => {
     expect(progress.next?.lesson.lesson).toBe(2);
   });
 
-  it('shows the next Medina lesson and Book 1 on "Heute"', async () => {
+  it('shows the next Medina lesson on "Heute" and Book 1 on "Fortschritt"', async () => {
     await lessonTest(101, 10);
     renderAt('/');
     const card = (await screen.findByRole('heading', { name: /^Lektion 2/ })).closest(
@@ -103,6 +104,8 @@ describe('Course-aware screens (Medina course)', () => {
       'href',
       '/units/madinah/2'
     );
+    cleanup();
+    renderAt('/progress');
     expect(await screen.findByText('Medina-Kurs · Buch 1')).toBeTruthy();
     expect(screen.getByText('1 von 23 Lektionen')).toBeTruthy();
     expect(screen.getByText('Als Nächstes: Lektionstest Lektion 2')).toBeTruthy();

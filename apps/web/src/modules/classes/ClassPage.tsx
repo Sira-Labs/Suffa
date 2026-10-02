@@ -3,7 +3,7 @@
  * Learners: the class feed with the weekly challenge, shout-outs and badges.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ClassesApi, type ClassSummary } from '@/services/classes/classesApi';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { useSyncStore } from '@/state';
@@ -32,7 +32,10 @@ export function ClassPage() {
   const auth = useSyncStore((s) => s.auth);
   const api = useMemo(() => new ClassesApi(), []);
   const [summary, setSummary] = useState<ClassSummary | null | undefined>(undefined);
-  const [tab, setTab] = useState<Tab>('progress');
+  // Links from "Heute" open a tab directly (?tab=recordings).
+  const [params] = useSearchParams();
+  const asked = params.get('tab');
+  const [tab, setTab] = useState<Tab>(TABS.find((t) => t.id === asked)?.id ?? 'progress');
 
   const load = useCallback(async () => {
     const result = await api.list();

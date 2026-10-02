@@ -2,7 +2,16 @@
  * Courses in the app (ADR-0025): which textbook stream the learner follows, and the Medina
  * course's lesson index (links to the book, its keys and the author's audio, no book text).
  */
-import { COURSES, DEFAULT_COURSE, isCourseId, type CourseId } from '@suffa/engagement';
+import {
+  COURSES,
+  courseOfUnit,
+  DEFAULT_COURSE,
+  isCourseId,
+  passedTest,
+  unitLabelNumber,
+  type CourseId,
+} from '@suffa/engagement';
+import type { ExamResult } from '@/types';
 import { useSettingsStore } from '@/state';
 import madinahBook1 from '@/content/courses/madinah/book1.json';
 import madinahBook1Lessons from '@/content/courses/madinah/book1-lessons.json';
@@ -160,4 +169,49 @@ export function useActiveCourse(): CourseId {
 export function useSetCourse(): (course: CourseId) => Promise<void> {
   const update = useSettingsStore((s) => s.update);
   return (course) => update({ course });
+}
+
+/** The page of a Medina unit (101 → lesson 1 of book 1). */
+export function madinahLessonPath(unit: number): string {
+  return `/units/madinah/${unitLabelNumber(unit)}`;
+}
+
+/** Where a learner stands in one Medina lesson. */
+export interface MadinahLessonState {
+  book: MadinahBook;
+  lesson: MadinahLesson;
+  /** Our topic for the lesson, where its content is written. */
+  topic: string | null;
+  /** Its lesson test is passed (80 %). */
+  passed: boolean;
+}
+
+/**
+ * The learner's way through the Medina books: every lesson with its test result, how many are
+ * passed and the lesson to work on next (the first one not passed; none once all are).
+ */
+export function madinahProgress(exams: readonly ExamResult[]): {
+  lessons: MadinahLessonState[];
+  passed: number;
+  next: MadinahLessonState | null;
+} {
+  const lessons = MADINAH_BOOKS.flatMap((book) =>
+    book.lessons.map<MadinahLessonState>((lesson) => ({
+      book,
+      lesson,
+      topic: madinahLessonContent(lesson.unit)?.topic ?? null,
+      passed: passedTest(exams, lesson.unit) !== null,
+    }))
+  );
+  return {
+    lessons,
+    passed: lessons.filter((l) => l.passed).length,
+    next: lessons.find((l) => !l.passed) ?? null,
+  };
+}
+
+/** "Einheit 3" for a Bayna Yadayk unit, "Lektion 3" for a Medina unit (103). */
+export function unitLabel(unit: number): string {
+  const madinah = courseOfUnit(unit)?.id === 'madinah';
+  return `${madinah ? 'Lektion' : 'Einheit'} ${unitLabelNumber(unit)}`;
 }

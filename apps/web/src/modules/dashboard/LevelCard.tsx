@@ -4,24 +4,15 @@ import { Icon } from '@/components/Icon';
 import { STAGES, stageState } from '@/services/enrollment';
 import { useBookProgress } from '@/modules/units/useBookProgress';
 import { useEnrollmentStore } from '@/state';
+import { MADINAH_BOOKS, madinahProgress, useActiveCourse } from '@/services/courses';
 
 /**
- * Where the learner stands: the XP level with the way to the next one, level 1 (Book 1), the
- * running stage with its badge and the units passed.
+ * Where the learner stands: the XP level with the way to the next one, then the book of the
+ * course they follow (ADR-0025): for Bayna Yadayk level 1 (Book 1) with the running stage and
+ * its badge, for the Medina course Book 1 with its lesson tests.
  */
 export function LevelCard({ totalXp, level }: { totalXp: number; level: Level }) {
-  const exams = useEnrollmentStore((s) => s.exams);
-  const { units } = useBookProgress();
-  const passed = units.filter((u) => u.status.state === 'completed').length;
-  const stage =
-    STAGES.find((s) => stageState(s, exams).state !== 'done') ??
-    STAGES[STAGES.length - 1]!;
-  const state = stageState(stage, exams);
-  const stagePassed = units.filter(
-    (u) => stage.units.includes(u.unit.unit) && u.status.state === 'completed'
-  ).length;
-  const total = units.length || 16;
-
+  const course = useActiveCourse();
   return (
     <Link to="/units" className="card stack level-card" aria-labelledby="level-title">
       <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -46,6 +37,69 @@ export function LevelCard({ totalXp, level }: { totalXp: number; level: Level })
           noch {level.span - level.into} XP bis Level {level.level + 1}
         </span>
       </div>
+      {course === 'madinah' ? <MadinahBookLevel /> : <BookLevel />}
+    </Link>
+  );
+}
+
+/** The Medina course: Book 1 and its lesson tests passed. */
+function MadinahBookLevel() {
+  const exams = useEnrollmentStore((s) => s.exams);
+  const book = MADINAH_BOOKS[0]!;
+  const { lessons, passed, next } = madinahProgress(exams);
+  const total = lessons.length;
+  return (
+    <>
+      <strong
+        id="level-title"
+        className="level-card-title"
+        style={{ fontSize: '1.3rem' }}
+      >
+        Medina-Kurs · Buch {book.book}
+      </strong>
+      <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
+        <div
+          className="review-progress"
+          role="progressbar"
+          aria-label={`Fortschritt Buch ${book.book}`}
+          aria-valuemin={0}
+          aria-valuemax={total}
+          aria-valuenow={passed}
+        >
+          <div style={{ width: `${(passed / total) * 100}%` }} />
+        </div>
+        <span className="muted" style={{ whiteSpace: 'nowrap' }}>
+          {passed} von {total} Lektionen
+        </span>
+      </div>
+      <span className="row muted level-card-stage">
+        <Icon name="path" size={16} />
+        <span>
+          {next
+            ? `Als Nächstes: Lektionstest Lektion ${next.lesson.lesson}`
+            : `Buch ${book.book} geschafft`}
+        </span>
+      </span>
+    </>
+  );
+}
+
+/** Al-Arabiyya bayna Yadayk: level 1 (Book 1), its running stage and the units passed. */
+function BookLevel() {
+  const exams = useEnrollmentStore((s) => s.exams);
+  const { units } = useBookProgress();
+  const passed = units.filter((u) => u.status.state === 'completed').length;
+  const stage =
+    STAGES.find((s) => stageState(s, exams).state !== 'done') ??
+    STAGES[STAGES.length - 1]!;
+  const state = stageState(stage, exams);
+  const stagePassed = units.filter(
+    (u) => stage.units.includes(u.unit.unit) && u.status.state === 'completed'
+  ).length;
+  const total = units.length || 16;
+
+  return (
+    <>
       <strong
         id="level-title"
         className="level-card-title"
@@ -81,6 +135,6 @@ export function LevelCard({ totalXp, level }: { totalXp: number; level: Level })
               : `${stage.name}: ${stagePassed} von ${stage.units.length} Einheiten bis zum Abzeichen „${stage.badge}“`}
         </span>
       </span>
-    </Link>
+    </>
   );
 }

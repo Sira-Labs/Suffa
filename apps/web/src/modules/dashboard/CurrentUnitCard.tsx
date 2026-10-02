@@ -6,12 +6,60 @@ import { useEnrollmentStore } from '@/state';
 import { daysLeftLabel } from '@/modules/units/UnitGate';
 import { unitToContinue, useBookProgress } from '@/modules/units/useBookProgress';
 import { splitUnitTitle } from '@/services/units';
+import { madinahProgress, useActiveCourse } from '@/services/courses';
 
 /**
  * "Heute" opens with the learner's unit: the started unit (or the next one to start), the
  * section and station that come next, its countdown and one button to continue right there.
  */
 export function CurrentUnitCard() {
+  return useActiveCourse() === 'madinah' ? <MadinahLessonCard /> : <BookUnitCard />;
+}
+
+/** The Medina course: the first lesson whose test is not passed yet. */
+function MadinahLessonCard() {
+  const exams = useEnrollmentStore((s) => s.exams);
+  const { next, passed } = madinahProgress(exams);
+  if (!next) {
+    return (
+      <section className="card stack current-unit-card" aria-labelledby="current-unit">
+        <span className="eyebrow" style={{ color: 'var(--accent)' }}>
+          Medina-Kurs
+        </span>
+        <h2 id="current-unit" style={{ margin: 0 }}>
+          Buch 1 geschafft
+        </h2>
+        <p className="muted" style={{ margin: 0 }}>
+          Alle {passed} Lektionstests bestanden. Wiederhole die Wörter im Training.
+        </p>
+      </section>
+    );
+  }
+  const { lesson, topic } = next;
+  return (
+    <section className="card stack current-unit-card" aria-labelledby="current-unit">
+      <span className="eyebrow" style={{ color: 'var(--accent)' }}>
+        Deine Lektion
+      </span>
+      <h2 id="current-unit" style={{ margin: 0 }}>
+        Lektion {lesson.lesson}
+        {topic && <span className="muted current-unit-name"> · {topic}</span>}
+      </h2>
+      <p className="muted" style={{ margin: 0 }}>
+        {passed === 0
+          ? 'Lies die Lektion im Buch, übe die Wörter und mach den Lektionstest.'
+          : `${passed} Lektionen bestanden. Weiter mit Wörtern, Diktat, Lückentext und dem Lektionstest.`}
+      </p>
+      <Link to={`/units/madinah/${lesson.lesson}`} className="btn btn-primary btn-lg">
+        Lektion {lesson.lesson} öffnen
+        <Icon name="arrowRight" size={20} />
+      </Link>
+    </section>
+  );
+}
+
+/** Al-Arabiyya bayna Yadayk: the started unit, or the next one to start. */
+function BookUnitCard() {
   const enrollments = useEnrollmentStore((s) => s.enrollments);
   const exams = useEnrollmentStore((s) => s.exams);
   const { units } = useBookProgress();

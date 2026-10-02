@@ -1,5 +1,7 @@
 import type { CSSProperties } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, Navigate, useParams } from 'react-router-dom';
+import { courseOfUnit } from '@suffa/engagement';
+import { madinahLessonPath } from '@/services/courses';
 import { Icon, type IconName } from '@/components/Icon';
 import {
   arabicNumber,
@@ -53,6 +55,10 @@ export function UnitPath() {
   const { unit: param } = useParams();
   const number = Number(param);
   const { index, units } = useBookProgress();
+  // A Medina unit (101+) has its own lesson page.
+  if (courseOfUnit(number)?.id === 'madinah') {
+    return <Navigate to={madinahLessonPath(number)} replace />;
+  }
   if (!index) return <p className="muted">Lade Einheit …</p>;
   const entry = units.find((u) => u.unit.unit === number);
   if (!entry) {

@@ -29,8 +29,11 @@ export interface WeeklyRecap {
 }
 
 export interface RecapRepository {
-  /** Learners active in the week (anything in the ledger), with their time zone. */
-  learners(): Promise<{ userId: string; timeZone: string }[]>;
+  /**
+   * Learners active in the week (anything in the ledger in the 8 days before `now`, the run's
+   * clock rather than the database's), with their time zone.
+   */
+  learners(now: Date): Promise<{ userId: string; timeZone: string }[]>;
   exists(userId: string, weekStart: string): Promise<boolean>;
   compute(userId: string, weekStart: string, timeZone: string): Promise<WeeklyRecap>;
   save(userId: string, recap: WeeklyRecap): Promise<void>;
@@ -40,12 +43,13 @@ export interface RecapRepository {
 export class PgRecapRepository implements RecapRepository {
   constructor(private readonly pool: pg.Pool) {}
 
-  async learners() {
+  async learners(now: Date) {
     const { rows } = await this.pool.query(
       `select u.id, coalesce(u.time_zone, 'UTC') as tz from users u
         where u.disabled_at is null
           and exists (select 1 from xp_ledger x where x.user_id = u.id
-                       and x.earned_at > now() - interval '8 days')`
+                       and x.earned_at > $1::timestamptz - interval '8 days')`,
+      [now]
     );
     return rows.map((r) => ({ userId: r.id as string, timeZone: r.tz as string }));
   }
@@ -153,7 +157,7 @@ export async function runWeeklyRecaps(
   now: Date = new Date()
 ): Promise<number> {
   let generated = 0;
-  for (const { userId, timeZone } of await recaps.learners()) {
+  for (const { userId, timeZone } of await recaps.learners(now)) {
     const week = recapWeekDue(now, timeZone);
     if (!week || (await recaps.exists(userId, week))) continue;
     const recap = await recaps.compute(userId, week, timeZone);

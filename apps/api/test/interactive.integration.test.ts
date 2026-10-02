@@ -339,15 +339,26 @@ describe.skipIf(!dbUrl || !s3)(
       expect((await add({ kind: 'unit', ref: '3', title: 'x', dueAt: due })).status).toBe(
         400
       );
-      // The Medina course has no unit tests yet, so its lessons cannot be assigned either.
+      // A Medina class assigns its lessons (lesson test, ADR-0025); unit 124 is beyond book 1.
       expect(
-        (await add({ kind: 'unit', ref: '101', title: 'x', dueAt: due })).status
+        (
+          await add({
+            kind: 'unit',
+            ref: '102',
+            title: 'Lektion 2: Test bestehen',
+            dueAt: due,
+          })
+        ).status
+      ).toBe(201);
+      expect(
+        (await add({ kind: 'unit', ref: '124', title: 'x', dueAt: due })).status
       ).toBe(400);
       await pool.query(`update classes set course = 'bayna-yadayk' where id = $1`, [
         classId,
       ]);
 
-      // Amina passed unit 3 and heard the recording; Bilal did nothing.
+      // Amina passed unit 3, the lesson test of Medina lesson 2 and heard the recording;
+      // Bilal did nothing.
       const sync = new PgSyncRepository(pool);
       await sync.upsert(users.amina!.id, 'exam_results', [
         {
@@ -355,6 +366,18 @@ describe.skipIf(!dbUrl || !s3)(
           format: 'mixed_chapter',
           units: [3],
           score: 9,
+          total: 10,
+          items: [],
+          startedAt: due,
+          finishedAt: due,
+          updated_at: due,
+          deleted: false,
+        },
+        {
+          id: 'e2',
+          format: 'madinah_lesson',
+          units: [102],
+          score: 8,
           total: 10,
           items: [],
           startedAt: due,
@@ -383,15 +406,17 @@ describe.skipIf(!dbUrl || !s3)(
       expect(mine.assignments.map((a) => [a.title, a.done, a.doneCount])).toEqual([
         ['Einheit 3 abschließen', true, null],
         ['Stunde 1 anhören', true, null],
+        ['Lektion 2: Test bestehen', true, null],
       ]);
       const bilal = (await (await call('bilal', 'GET', '/assignments')).json()) as {
         assignments: { done: boolean }[];
       };
-      expect(bilal.assignments.map((a) => a.done)).toEqual([false, false]);
+      expect(bilal.assignments.map((a) => a.done)).toEqual([false, false, false]);
       const teacher = (await (await call('teacher', 'GET', '/assignments')).json()) as {
         assignments: { id: string; doneCount: number; learners: number; done: null }[];
       };
       expect(teacher.assignments.map((a) => [a.doneCount, a.learners, a.done])).toEqual([
+        [1, 2, null],
         [1, 2, null],
         [1, 2, null],
       ]);

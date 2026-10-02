@@ -40,10 +40,10 @@ export const COURSES: readonly Course[] = [
     textbook: 'دروس اللغة العربية – Buch 1',
     // Book 1 has 23 lessons; book n will take (n)01–(n)99.
     units: range(101, 123),
-    // Offered with links to the book, the solutions and the author's audio per lesson; our own
-    // exercises follow lesson by lesson (ADR-0025, stage 2).
+    // Every lesson has our own word list, gap sentences, grammar and a lesson test (ADR-0025,
+    // stage 2), so classes can assign its lessons.
     available: true,
-    exercises: false,
+    exercises: true,
   },
 ];
 

@@ -1,0 +1,90 @@
+name: github release
+
+# Publishes a versioned GitHub release for every main commit that reached staging (see
+# docs/ops/releases.md). It runs after the `release` workflow and only when that run succeeded,
+# so a release always names a version staging has verified.
+#
+# Version: the latest tag v<major>.<minor>.<patch> plus one patch. A merge commit whose message
+# contains `[minor]` (a finished roadmap item) or `[major]` raises that part instead. Run by
+# hand, the part to raise can be chosen.
+on:
+  workflow_run:
+    workflows: [release]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Which part of the version to raise
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+
+permissions:
+  contents: write
+
+# One release at a time, so two quick merges never claim the same version.
+concurrency:
+  group: github-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish release
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: next version
+        id: version
+        env:
+          BUMP_INPUT: ${{ inputs.bump }}
+        run: |
+          set -euo pipefail
+          sha=$(git rev-parse HEAD)
+          if git tag --points-at "$sha" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Commit $sha is already released; nothing to do."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          last=$(git tag --list 'v*.*.*' --sort=-v:refname | head -n1)
+          last=${last:-v1.0.0}
+          IFS=. read -r major minor patch <<< "${last#v}"
+          message=$(git log -1 --format=%B "$sha")
+          bump=${BUMP_INPUT:-patch}
+          if [ -z "$BUMP_INPUT" ]; then
+            if grep -q '\[major\]' <<< "$message"; then bump=major
+            elif grep -q '\[minor\]' <<< "$message"; then bump=minor
+            fi
+          fi
+          case "$bump" in
+            major) next="v$((major + 1)).0.0" ;;
+            minor) next="v${major}.$((minor + 1)).0" ;;
+            *) next="v${major}.${minor}.$((patch + 1))" ;;
+          esac
+          echo "Releasing $next ($bump) at $sha, after $last"
+          {
+            echo "skip=false"
+            echo "tag=$next"
+            echo "previous=$last"
+            echo "sha=$sha"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: publish
+        if: steps.version.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+          PREVIOUS: ${{ steps.version.outputs.previous }}
+          SHA: ${{ steps.version.outputs.sha }}
+        run: |
+          set -euo pipefail
+          start=()
+          if git rev-parse -q --verify "refs/tags/$PREVIOUS" > /dev/null; then
+            start=(--notes-start-tag "$PREVIOUS")
+          fi
+          gh release create "$TAG" --target "$SHA" --title "$TAG" --generate-notes "${start[@]}"

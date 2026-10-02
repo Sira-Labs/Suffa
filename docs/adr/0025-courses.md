@@ -147,11 +147,21 @@ and our own exercises, and no copied book texts or pictures in the repo.
 
   `madinahProgress(exams)` computes the lessons, the tests passed and the next lesson.
 
+- **Stage 3, second part (done): stages, badges and videos per course.**
+  - Every stage names its course. The Medina course has two stages in book 1: lessons 1–12,
+    badge "Erste Schritte" (الخُطُواتُ الأُولى), and lessons 13–23, badge "Medina Buch 1"
+    (كِتابُ المَدِينَةِ الأوَّل). Such a stage has no stage test: it is done when every lesson
+    test in it is passed (`stageCompleted`), and it gives the stage XP once.
+  - Badge ids and XP references stay `stage-1` and `stage-2` for _bayna yadayk_, so stored
+    unlocks keep their meaning; the Medina stages use `madinah-stage-1` and `madinah-stage-2`.
+  - The first unit of every course is open.
+  - The level card names the running Medina stage and its badge.
+  - Every video channel names its course (migration 0033; existing channels keep _bayna
+    yadayk_). On import, "Lesson 5" becomes unit 5 or unit 105 by the channel's course, and the
+    video admin sets the course.
 - **Stage 3 and later:**
   - more Madinah exercises, lesson by lesson;
-  - stages and badges per course (`STAGES` gets a `course`);
   - content loaded per course (`content/courses/<id>/`);
-  - the YouTube unit guess knows the channel's course;
   - homework references;
   - the LLM prompts name the class's course instead of _bayna yadayk_.
 - **Only with the rights holders' permission:** book exercises and pictures, served from private

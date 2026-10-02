@@ -12,8 +12,8 @@ import {
   type PermissionStatus,
   type VideoChannel,
 } from '@/services/videos/videosApi';
-
-const UNITS = Array.from({ length: 16 }, (_, i) => i + 1);
+import { COURSES } from '@suffa/engagement';
+import { unitLabel } from '@/services/courses';
 
 export function VideoAdmin({ api: injected }: { api?: VideosApi }) {
   const api = useMemo(() => injected ?? new VideosApi(), [injected]);
@@ -213,10 +213,14 @@ function ChannelCard({
                       }
                     >
                       <option value="">–</option>
-                      {UNITS.map((u) => (
-                        <option key={u} value={u}>
-                          Einheit {u}
-                        </option>
+                      {COURSES.map((course) => (
+                        <optgroup key={course.id} label={course.name}>
+                          {course.units.map((u) => (
+                            <option key={u} value={u}>
+                              {unitLabel(u)}
+                            </option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                   </td>

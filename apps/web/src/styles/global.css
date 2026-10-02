@@ -679,6 +679,40 @@ textarea.input {
   justify-content: center;
 }
 
+/* ---------- Who listened to a class recording ---------- */
+
+.listening summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.listening-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.listening-bar {
+  width: 6rem;
+}
+
+/* ---------- Destructive actions ---------- */
+
+.danger-zone {
+  padding: 1rem;
+  border: 1px solid var(--bad);
+  border-radius: var(--radius);
+}
+/* The page background as text colour keeps the contrast in both themes. */
+.btn-danger {
+  background: var(--bad);
+  border-color: var(--bad);
+  color: var(--bg);
+}
+.btn-danger:disabled {
+  opacity: 0.5;
+}
+
 /* ---------- Feedback while testing ---------- */
 
 /* Small and out of the way: above the phone's nav bar, bottom right on wide screens. */

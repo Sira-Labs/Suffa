@@ -29,6 +29,15 @@ export interface Playback extends MediaItem {
   video: string | null;
 }
 
+export interface RecordingListening {
+  mediaId: string;
+  /** Active learners of the class. */
+  learners: number;
+  started: number;
+  finished: number;
+  people: { userId: string; name: string; percent: number; completedAt: string | null }[];
+}
+
 const MESSAGES: Record<string, string> = {
   too_large: 'Die Datei ist zu groß (höchstens 10 GB).',
   quota_exceeded: 'Der Speicher dieser Klasse ist voll (50 GB). Lösche alte Aufnahmen.',
@@ -40,6 +49,13 @@ const MESSAGES: Record<string, string> = {
 
 export class MediaApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
+
+  /** Who listened to the class's published recordings (teachers of the class). */
+  listening(classId: string) {
+    return this.call<{ recordings: RecordingListening[] }>(
+      `/api/v1/classes/${encodeURIComponent(classId)}/listening`
+    );
+  }
 
   list(classId: string) {
     return this.call<{ items: MediaItem[] }>(this.base(classId));

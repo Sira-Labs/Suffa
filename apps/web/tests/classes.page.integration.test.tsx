@@ -126,9 +126,13 @@ async function signIn(
 }
 
 function renderClass() {
-  const router = createMemoryRouter([{ path: '/classes/:id', element: <ClassPage /> }], {
-    initialEntries: [`/classes/${CLASS_ID}`],
-  });
+  const router = createMemoryRouter(
+    [
+      { path: '/classes/:id', element: <ClassPage /> },
+      { path: '/classes', element: <h1>Deine Klassen</h1> },
+    ],
+    { initialEntries: [`/classes/${CLASS_ID}`] }
+  );
   return render(<RouterProvider router={router} />);
 }
 
@@ -164,6 +168,26 @@ describe('Class page (integration)', () => {
 
     await userEvent.click(screen.getByRole('tab', { name: 'Mitglieder' }));
     expect(await screen.findByText(/Einladungslink/)).toBeInTheDocument();
+  });
+
+  it('lets the teacher delete the class after typing its name', async () => {
+    const requests = await signIn('teacher', 'teacher');
+    renderClass();
+    await userEvent.click(await screen.findByRole('tab', { name: 'Mitglieder' }));
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Klasse löschen …' })
+    );
+    const form = screen.getByRole('form', { name: 'Klasse löschen bestätigen' });
+    const confirm = within(form).getByRole('button', { name: 'Endgültig löschen' });
+    expect(confirm).toBeDisabled();
+    await userEvent.type(within(form).getByRole('textbox'), 'Arabisch 1');
+    expect(confirm).toBeDisabled();
+    await userEvent.type(within(form).getByRole('textbox'), 'a');
+    await userEvent.click(confirm);
+    expect(await screen.findByRole('heading', { name: 'Deine Klassen' })).toBeTruthy();
+    expect(requests.filter((r) => r.method === 'DELETE')).toEqual([
+      { method: 'DELETE', path: `/api/v1/classes/${CLASS_ID}`, body: null },
+    ]);
   });
 
   it('shows a learner the challenge with their share and shout-outs to them', async () => {

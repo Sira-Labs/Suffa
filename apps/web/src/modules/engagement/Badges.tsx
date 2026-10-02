@@ -3,12 +3,7 @@ import type { BadgeProgress, Tier } from '@suffa/engagement';
 import { Icon } from '@/components/Icon';
 import { useEngagement } from './useEngagement';
 import { MyCertificates } from './MyCertificates';
-
-const TIER_LABEL: Record<Tier, string> = {
-  bronze: 'Bronze',
-  silver: 'Silber',
-  gold: 'Gold',
-};
+import { TIER_LABEL } from './HomeBadges';
 const TIERS: readonly Tier[] = ['bronze', 'silver', 'gold'];
 const DATE = new Intl.DateTimeFormat('de-DE', {
   day: 'numeric',

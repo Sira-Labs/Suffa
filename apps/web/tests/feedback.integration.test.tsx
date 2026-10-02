@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { FeedbackButton } from '@/modules/feedback/FeedbackButton';
+import { FeedbackButton, reportedPage } from '@/modules/feedback/FeedbackButton';
 import { FeedbackAdmin } from '@/modules/admin/FeedbackAdmin';
 import { loadClientConfig, resetClientConfigForTests } from '@/services/clientConfig';
 import { FeedbackApi, type FeedbackItem } from '@/services/feedback/feedbackApi';
@@ -221,6 +221,12 @@ describe('Feedback while testing', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('never sends an invite token or sign-in code with the page', () => {
+    expect(reportedPage('/join/abcdefghijklmnopqrstuvwxyz', '')).toBe('/join/…');
+    expect(reportedPage('/login', '?code=123456')).toBe('/login');
+    expect(reportedPage('/units/3', '?section=2')).toBe('/units/3?section=2');
   });
 
   it('asks for the configuration again after a server error', async () => {

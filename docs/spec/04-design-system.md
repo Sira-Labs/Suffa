@@ -1,6 +1,6 @@
 # Suffa — Design system
 
-- Date: 2026-09-23 · Status: in progress (steps 1–3 and 5 of 5 shipped) · Mockups: the "Suffa Redesign"
+- Date: 2026-09-23 · Status: in progress (steps 1–5 of 5 shipped) · Mockups: the "Suffa Redesign"
   canvas (7 screens) · Code: `apps/web/src/styles/global.css`, `components/Icon.tsx`,
   `navigation.ts`
 

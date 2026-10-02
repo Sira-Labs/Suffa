@@ -33,6 +33,9 @@ interface PracticeState {
 const REPEAT: PracticeOutcome = { first: false, stationComplete: false, xp: 0 };
 const log = logger.child('practice');
 
+/** Items shown as done in memory whose IndexedDB write has not settled yet. */
+const pending = new Set<string>();
+
 export const usePracticeStore = create<PracticeState>((set, get) => ({
   records: {},
   loaded: false,
@@ -56,8 +59,8 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
       deleted: false,
     };
     // Memory first, synchronously, so quick successive answers build on each other.
-    const records = { ...get().records, [id]: record };
-    set({ records });
+    set({ records: { ...get().records, [id]: record } });
+    pending.add(id);
     try {
       await practiceRepo.put(record);
     } catch (error) {
@@ -72,9 +75,18 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
         throw error;
       log.error('save_failed', { id, error: error.name });
       return REPEAT;
+    } finally {
+      pending.delete(id);
     }
+    // Complete only from stored items: an item still being written could yet fail. With two
+    // quick answers, the write that settles last reports the completed station.
+    const stored = get().records;
     const stationComplete =
-      items.length > 0 && items.every((item) => records[practiceId(unit, skill, item)]);
+      items.length > 0 &&
+      items.every((item) => {
+        const key = practiceId(unit, skill, item);
+        return Boolean(stored[key]) && !pending.has(key);
+      });
     return { first: true, stationComplete, xp: XP_RULES.itemPractised };
   },
 }));

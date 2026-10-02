@@ -66,4 +66,31 @@ describe('practice store', () => {
     ).rejects.toThrow('bug');
     expect(usePracticeStore.getState().records['4:read:d1']).toBeUndefined();
   });
+
+  it('reports the completed station only once every item is stored', async () => {
+    const { practise } = usePracticeStore.getState();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const put = vi.spyOn(practiceRepo, 'put');
+    // Two quick answers that complete the station: the first write fails after the second
+    // one was stored.
+    let failFirst: (error: Error) => void = () => {};
+    put.mockImplementationOnce(
+      () => new Promise<void>((_, reject) => (failFirst = reject)) as never
+    );
+    const first = practise(5, 'write', 'w1', ['w1', 'w2']);
+    const second = await practise(5, 'write', 'w2', ['w1', 'w2']);
+    expect(second).toMatchObject({ first: true, stationComplete: false });
+    failFirst(new Dexie.QuotaExceededError('storage full'));
+    expect(await first).toMatchObject({ first: false, stationComplete: false });
+
+    // Both stored: the write that settles last reports the completed station.
+    let storeLater: () => void = () => {};
+    put.mockImplementationOnce(
+      () => new Promise<void>((resolve) => (storeLater = resolve)) as never
+    );
+    const again = practise(5, 'write', 'w1', ['w1', 'w2']);
+    await Promise.resolve();
+    storeLater();
+    expect(await again).toMatchObject({ first: true, stationComplete: true });
+  });
 });

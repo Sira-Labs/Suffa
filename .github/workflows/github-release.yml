@@ -4,8 +4,8 @@ name: github release
 # docs/ops/releases.md). It runs after the `release` workflow and only when that run succeeded,
 # so a release always names a version staging has verified.
 #
-# Version: the latest tag v<major>.<minor>.<patch> plus one patch. A merge commit whose message
-# contains `[minor]` (a finished roadmap item) or `[major]` raises that part instead. Run by
+# Version: the latest tag v<major>.<minor>.<patch> plus one patch. A merge commit with a line
+# starting `[minor]` (a finished roadmap item) or `[major]` raises that part instead. Run by
 # hand, the part to raise can be chosen.
 on:
   workflow_run:
@@ -57,8 +57,8 @@ jobs:
           message=$(git log -1 --format=%B "$sha")
           bump=${BUMP_INPUT:-patch}
           if [ -z "$BUMP_INPUT" ]; then
-            if grep -q '\[major\]' <<< "$message"; then bump=major
-            elif grep -q '\[minor\]' <<< "$message"; then bump=minor
+            if grep -q '^\[major\]' <<< "$message"; then bump=major
+            elif grep -q '^\[minor\]' <<< "$message"; then bump=minor
             fi
           fi
           case "$bump" in
@@ -83,8 +83,10 @@ jobs:
           SHA: ${{ steps.version.outputs.sha }}
         run: |
           set -euo pipefail
-          start=()
           if git rev-parse -q --verify "refs/tags/$PREVIOUS" > /dev/null; then
-            start=(--notes-start-tag "$PREVIOUS")
+            notes=(--generate-notes --notes-start-tag "$PREVIOUS")
+          else
+            # The first release: its own merge commit only, not the whole history.
+            notes=(--notes "$(git log -1 --format=%B "$SHA")")
           fi
-          gh release create "$TAG" --target "$SHA" --title "$TAG" --generate-notes "${start[@]}"
+          gh release create "$TAG" --target "$SHA" --title "$TAG" "${notes[@]}"

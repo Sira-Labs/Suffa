@@ -23,6 +23,7 @@ import {
 } from '../src/media/service.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
 import { S3ObjectStorage } from '../src/storage/s3Storage.js';
+import { PgListeningRepository } from '../src/media/listening.js';
 
 const dbUrl = process.env.SUFFA_TEST_DATABASE_URL;
 const s3 = process.env.SUFFA_TEST_S3_ENDPOINT;
@@ -117,6 +118,7 @@ describe.skipIf(!dbUrl || !s3 || !hasFfmpeg)(
           audit: pool,
           auth,
           log: quiet,
+          listening: new PgListeningRepository(pool),
         },
       });
       dir = await mkdtemp(join(tmpdir(), 'suffa-rec-'));
@@ -256,6 +258,63 @@ describe.skipIf(!dbUrl || !s3 || !hasFfmpeg)(
         mediaId,
       ]);
       expect(renamed.rows[0].title).toBe('Stunde 5 – Wiederholung');
+
+      // The teacher sees who listened: Amina heard about half of it so far.
+      const listening = (who: string) =>
+        app.request(`/api/v1/classes/${classId}/listening`, {
+          headers: { 'x-test-user': who },
+        });
+      expect((await listening('amina')).status).toBe(403);
+      const before = (await (await listening('teacher')).json()) as {
+        recordings: {
+          mediaId: string;
+          learners: number;
+          started: number;
+          finished: number;
+        }[];
+      };
+      expect(before.recordings).toEqual([
+        expect.objectContaining({ mediaId, learners: 1, started: 0, finished: 0 }),
+      ]);
+      await pool.query(
+        `insert into media_progress (user_id, id, source, ref, "lessonKey", "durationSec",
+                                     "listenedSec", updated_at)
+         values ($1, $2, 'recording', $3, $4, 120, 61, now())`,
+        [users.amina!.id, `rec/${mediaId}`, `recording:${mediaId}`, `rec/${classId}`]
+      );
+      const after = (await (await listening('teacher')).json()) as {
+        recordings: {
+          started: number;
+          finished: number;
+          people: { name: string; percent: number; completedAt: string | null }[];
+        }[];
+      };
+      expect(after.recordings[0]).toMatchObject({
+        started: 1,
+        finished: 0,
+        people: [{ percent: 51, completedAt: null }],
+      });
+      await pool.query(
+        `update media_progress set "completedAt" = now() where user_id = $1`,
+        [users.amina!.id]
+      );
+      const done = (await (await listening('teacher')).json()) as typeof after;
+      // Finished, but the bar still shows what was actually heard.
+      expect(done.recordings[0]).toMatchObject({
+        finished: 1,
+        people: [{ percent: 51, completedAt: expect.any(String) }],
+      });
+      // Without active learners the recording is still listed, with nobody in it.
+      await pool.query("update class_members set status = 'pending' where user_id = $1", [
+        users.amina!.id,
+      ]);
+      const empty = (await (await listening('teacher')).json()) as typeof after;
+      expect(empty.recordings).toEqual([
+        expect.objectContaining({ learners: 0, started: 0, finished: 0, people: [] }),
+      ]);
+      await pool.query("update class_members set status = 'active' where user_id = $1", [
+        users.amina!.id,
+      ]);
 
       expect((await call('teacher', 'DELETE', `/${mediaId}`)).status).toBe(204);
       expect(

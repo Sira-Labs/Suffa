@@ -8,13 +8,13 @@
  *   stays `connect-src 'self'`, GlitchTip never sees a learner's IP.
  * - No personal data is collected (no user data, cookies, headers, query parameters).
  */
+import { loadClientConfig, resetClientConfigForTests } from './clientConfig';
 import { logger, setErrorSink } from './logger';
 
 const log = logger.child('errors');
 
-export const CLIENT_CONFIG_URL = '/api/client-config';
+export { CLIENT_CONFIG_URL } from './clientConfig';
 export const ERROR_TUNNEL_URL = '/api/errors';
-const CONFIG_TIMEOUT_MS = 5000;
 
 type Context = Record<string, unknown>;
 type Reporter = (error: unknown, context?: Context) => void;
@@ -38,13 +38,7 @@ export interface ErrorTrackingDeps {
 }
 
 async function defaultFetchConfig(): Promise<{ errorDsn: string | null }> {
-  const res = await fetch(CLIENT_CONFIG_URL, {
-    signal: AbortSignal.timeout(CONFIG_TIMEOUT_MS),
-    cache: 'no-store',
-  });
-  if (!res.ok) return { errorDsn: null };
-  const body = (await res.json()) as { errorDsn?: unknown };
-  return { errorDsn: typeof body.errorDsn === 'string' ? body.errorDsn : null };
+  return loadClientConfig();
 }
 
 /**
@@ -94,4 +88,5 @@ export async function initErrorTracking(deps: ErrorTrackingDeps = {}): Promise<b
 export function resetErrorTrackingForTests(): void {
   reporter = null;
   setErrorSink(null);
+  resetClientConfigForTests();
 }

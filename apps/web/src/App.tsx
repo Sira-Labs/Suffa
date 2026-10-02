@@ -33,6 +33,7 @@ import {
   useSyncStore,
 } from './state';
 import './styles/global.css';
+import { FeedbackButton } from '@/modules/feedback/FeedbackButton';
 
 /**
  * App shell: loads all local stores (offline-first) and initialises sync.
@@ -139,6 +140,7 @@ function Shell() {
         <ScrollRestoration />
         <Outlet />
         <CelebrationToast />
+        <FeedbackButton />
       </main>
     );
   }
@@ -188,6 +190,7 @@ function Shell() {
           <Outlet />
         </main>
         <CelebrationToast />
+        <FeedbackButton />
       </div>
     </div>
   );

@@ -679,6 +679,87 @@ textarea.input {
   justify-content: center;
 }
 
+/* ---------- Who listened to a class recording ---------- */
+
+.listening summary {
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.listening-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.listening-bar {
+  width: 6rem;
+}
+
+/* ---------- Destructive actions ---------- */
+
+.danger-zone {
+  padding: 1rem;
+  border: 1px solid var(--bad);
+  border-radius: var(--radius);
+}
+/* The page background as text colour keeps the contrast in both themes. */
+.btn-danger {
+  background: var(--bad);
+  border-color: var(--bad);
+  color: var(--bg);
+}
+.btn-danger:disabled {
+  opacity: 0.5;
+}
+
+/* ---------- Feedback while testing ---------- */
+
+/* Small and out of the way: above the phone's nav bar, bottom right on wide screens. */
+.feedback-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(var(--nav-height) + 1.75rem + env(safe-area-inset-bottom, 0px));
+  z-index: 55;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.feedback-panel {
+  position: fixed;
+  right: 1rem;
+  left: 1rem;
+  bottom: calc(var(--nav-height) + 1.25rem + env(safe-area-inset-bottom, 0px));
+  z-index: 70;
+  max-width: 420px;
+  margin-left: auto;
+  /* With the on-screen keyboard up, the panel scrolls instead of leaving the screen. */
+  max-height: calc(
+    100dvh - var(--nav-height) - 2.5rem - env(safe-area-inset-bottom, 0px)
+  );
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.focus-main .feedback-fab,
+.focus-main .feedback-panel {
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+.focus-main .feedback-panel {
+  max-height: calc(100dvh - 2rem - env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 960px) {
+  .feedback-fab {
+    bottom: 1.5rem;
+  }
+  .feedback-panel {
+    left: auto;
+    width: 420px;
+    bottom: 1.5rem;
+    max-height: calc(100dvh - 3rem);
+  }
+}
+
 /* ---------- Celebration ("+5 XP") ---------- */
 
 .celebration-region {

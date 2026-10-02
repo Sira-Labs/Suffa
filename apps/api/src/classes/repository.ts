@@ -71,6 +71,11 @@ export interface ClassRepository {
   members(classId: string): Promise<Member[]>;
   approve(actor: Actor, classId: string, userId: string): Promise<boolean>;
   remove(actor: Actor, classId: string, userId: string): Promise<boolean>;
+  /**
+   * Deletes the class for everyone: it is archived (hidden, no access), its data stays for
+   * recovery by an admin. False when it does not exist or is already archived.
+   */
+  archive(actor: Actor, classId: string): Promise<boolean>;
   preview(token: string): Promise<InvitePreview | null>;
   join(actor: Actor, token: string): Promise<JoinResult>;
 }
@@ -163,9 +168,11 @@ export class PgClassRepository implements ClassRepository {
   }
 
   async scope(classId: string, userId: string): Promise<ClassScope> {
+    // An archived (deleted) class has no members any more, also for direct links.
     const { rows } = await this.pool.query<{ class_role: ClassRole }>(
-      `select class_role from class_members
-        where class_id = $1 and user_id = $2 and status = 'active'`,
+      `select m.class_role from class_members m join classes c on c.id = m.class_id
+        where m.class_id = $1 and m.user_id = $2 and m.status = 'active'
+          and c.archived_at is null`,
       [classId, userId]
     );
     return { classRole: rows[0]?.class_role ?? null };
@@ -266,6 +273,29 @@ export class PgClassRepository implements ClassRepository {
         targetType: 'class',
         targetId: classId,
         details: { userId },
+        ipAddress: actor.ip,
+      });
+      return true;
+    });
+  }
+
+  async archive(actor: Actor, classId: string): Promise<boolean> {
+    return this.tx(async (client) => {
+      const { rows } = await client.query<{ name: string }>(
+        `update classes set archived_at = now()
+          where id = $1 and archived_at is null
+        returning name`,
+        [classId]
+      );
+      if (!rows[0]) return false;
+      // Open invite links stop working at once.
+      await client.query('delete from class_invites where class_id = $1', [classId]);
+      await writeAudit(client, {
+        actorId: actor.id,
+        action: 'class.archived',
+        targetType: 'class',
+        targetId: classId,
+        details: { name: rows[0].name },
         ipAddress: actor.ip,
       });
       return true;

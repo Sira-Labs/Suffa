@@ -61,6 +61,8 @@ export const RBAC_MATRIX = {
   'admin:ai:write': ['admin'],
   /** Manage the video catalog: channels, permission, import, units, checkpoints. */
   'admin:videos': ['admin'],
+  /** Read testers' feedback and mark it done. */
+  'admin:feedback': ['admin'],
 } as const satisfies Record<string, readonly Role[]>;
 
 export type Action = keyof typeof RBAC_MATRIX;
@@ -77,6 +79,7 @@ export const SECOND_FACTOR_ACTIONS: ReadonlySet<Action> = new Set<Action>([
   'admin:ai:read',
   'admin:ai:write',
   'admin:videos',
+  'admin:feedback',
 ]);
 
 /** Allowed by role, but the session still has to confirm the second factor. */

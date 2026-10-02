@@ -16,6 +16,7 @@ import {
 } from '@/services/admin/adminApi';
 import { useSyncStore } from '@/state';
 import { AiAdmin } from './AiAdmin';
+import { FeedbackAdmin } from './FeedbackAdmin';
 import { VideoAdmin } from './VideoAdmin';
 
 const dateTime = (iso: string) =>
@@ -146,7 +147,9 @@ function SecondFactor({
 }
 
 function AdminTabs({ api }: { api: AdminApi }) {
-  const [tab, setTab] = useState<'users' | 'audit' | 'ai' | 'videos'>('users');
+  const [tab, setTab] = useState<'users' | 'audit' | 'ai' | 'videos' | 'feedback'>(
+    'users'
+  );
   return (
     <>
       <div className="row" role="tablist">
@@ -182,11 +185,20 @@ function AdminTabs({ api }: { api: AdminApi }) {
         >
           Videos
         </button>
+        <button
+          role="tab"
+          aria-selected={tab === 'feedback'}
+          className={`btn ${tab === 'feedback' ? 'btn-primary' : ''}`}
+          onClick={() => setTab('feedback')}
+        >
+          Feedback
+        </button>
       </div>
       {tab === 'users' && <Users api={api} />}
       {tab === 'audit' && <Audit api={api} />}
       {tab === 'ai' && <AiAdmin />}
       {tab === 'videos' && <VideoAdmin />}
+      {tab === 'feedback' && <FeedbackAdmin />}
     </>
   );
 }

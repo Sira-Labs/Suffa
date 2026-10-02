@@ -116,6 +116,7 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     path: '/api/v1/classes/:id/members/:userId',
     action: 'class:manage',
   },
+  { method: 'DELETE', path: '/api/v1/classes/:id', action: 'class:manage' },
   { method: 'GET', path: '/api/v1/classes/:id/progress', action: 'class:progress:read' },
   { method: 'GET', path: '/api/v1/classes/:id/feed', action: 'class:read' },
   { method: 'GET', path: '/api/v1/classes/:id/league', action: 'class:read' },
@@ -152,6 +153,7 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     path: '/api/v1/classes/:id/shoutouts/:shoutoutId',
     action: 'class:manage',
   },
+  { method: 'GET', path: '/api/v1/classes/:id/listening', action: 'class:progress:read' },
   { method: 'GET', path: '/api/v1/classes/:id/media', action: 'class:read' },
   { method: 'POST', path: '/api/v1/classes/:id/media', action: 'class:manage' },
   {
@@ -251,6 +253,8 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   { method: 'DELETE', path: '/api/v1/account', action: 'profile:write' },
   { method: 'POST', path: '/api/v1/account/2fa/setup', action: 'profile:write' },
   { method: 'POST', path: '/api/v1/account/2fa/confirm', action: 'profile:write' },
+  { method: 'GET', path: '/api/v1/admin/feedback', action: 'admin:feedback' },
+  { method: 'PATCH', path: '/api/v1/admin/feedback/:id', action: 'admin:feedback' },
 ];
 
 /**
@@ -263,6 +267,8 @@ export const PUBLIC_ROUTES: readonly string[] = [
   'GET /api/version',
   'GET /api/client-config',
   'POST /api/errors',
+  // Testers' feedback (rate-limited; a signed-in sender is linked).
+  'POST /api/v1/feedback',
   'GET /api/v1/auth/*',
   'POST /api/v1/auth/*',
   // The video catalog is public (ADR-0012); interactive parts depend on the creator's permission.

@@ -75,6 +75,7 @@ const privacyRepo: PrivacyRepository = {
     },
     notifications: { prefs: null, devices: [], recaps: [] },
     auditLog: [],
+    feedback: [],
   }),
   delete: async () => true,
 };
@@ -98,6 +99,7 @@ const classRepo: ClassRepository = {
   members: async () => [],
   approve: async () => false,
   remove: async () => false,
+  archive: async () => false,
   preview: async () => null,
   join: async () => ({ ok: false, reason: 'invalid_invite' }),
 };
@@ -156,6 +158,7 @@ function buildApp() {
         rename: async () => {},
         remove: async () => {},
       },
+      listening: { forClass: async () => [] },
       media: {
         start: async () => ({ ok: false, reason: 'unsupported_type' }),
         partUrls: async () => ({}),
@@ -302,6 +305,16 @@ function buildApp() {
       log: quiet,
     },
     admin: { repo: adminRepo, auth: resolver, log: quiet },
+    feedback: {
+      repo: {
+        add: async () => 'f',
+        list: async () => ({ items: [], next: null, open: 0 }),
+        setStatus: async () => true,
+      },
+      auth: resolver,
+      log: quiet,
+      enabled: true,
+    },
     tutor: {
       service: { turn: async function* () {} } as unknown as TutorService,
       repo: {

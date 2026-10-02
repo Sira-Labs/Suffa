@@ -36,6 +36,28 @@ function stubApi() {
           video: null,
         });
       }
+      if (path.endsWith('/listening')) {
+        return Response.json({
+          recordings: [
+            {
+              mediaId: MEDIA,
+              learners: 3,
+              started: 2,
+              finished: 1,
+              people: [
+                {
+                  userId: 'a',
+                  name: 'Amina',
+                  percent: 100,
+                  completedAt: '2026-09-25T10:00:00Z',
+                },
+                { userId: 'b', name: 'Bilal', percent: 40, completedAt: null },
+                { userId: 'c', name: 'Chadi', percent: 0, completedAt: null },
+              ],
+            },
+          ],
+        });
+      }
       if (path.endsWith('/media')) {
         return Response.json({
           items: [
@@ -80,6 +102,61 @@ describe('Recordings (integration)', () => {
       '40'
     );
     expect(screen.getByRole('form', { name: 'Aufnahme hochladen' })).toBeInTheDocument();
+  });
+
+  it('shows the teacher who of the class has listened to a recording', async () => {
+    const router = createMemoryRouter(
+      [{ path: '/', element: <ClassRecordings classId={CLASS} teacher /> }],
+      { initialEntries: ['/'] }
+    );
+    render(<RouterProvider router={router} />);
+    const summary = await screen.findByText(/von 3/);
+    expect(summary.closest('summary')?.textContent).toBe('1 von 3 gehört · 1 angefangen');
+    await userEvent.click(summary);
+    const list = screen.getByRole('list', { name: 'Wer „Stunde 1“ gehört hat' });
+    expect(list.textContent).toContain('Amina✓ gehört');
+    expect(list.textContent).toContain('Bilal40 %');
+    expect(list.textContent).toContain('Chadinoch nicht');
+    expect(
+      screen.getByRole('progressbar', { name: 'Bilal: 40 % gehört' })
+    ).toHaveAttribute('aria-valuenow', '40');
+  });
+
+  it('tells the teacher when the listening report fails, and loads it again', async () => {
+    const base = globalThis.fetch;
+    let fail = true;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (fail && String(input).endsWith('/listening')) {
+          return Response.json({ error: 'internal' }, { status: 500 });
+        }
+        return base(input, init);
+      })
+    );
+    const router = createMemoryRouter(
+      [{ path: '/', element: <ClassRecordings classId={CLASS} teacher /> }],
+      { initialEntries: ['/'] }
+    );
+    render(<RouterProvider router={router} />);
+    expect(await screen.findByText(/Wer zugehört hat, lässt sich gerade nicht laden/));
+    fail = false;
+    await userEvent.click(screen.getByRole('button', { name: 'Erneut laden' }));
+    expect(await screen.findByText(/von 3/)).toBeTruthy();
+    expect(screen.queryByText(/lässt sich gerade nicht laden/)).toBeNull();
+  });
+
+  it('shows learners no listening statistics', async () => {
+    const router = createMemoryRouter(
+      [{ path: '/', element: <ClassRecordings classId={CLASS} teacher={false} /> }],
+      { initialEntries: ['/'] }
+    );
+    render(<RouterProvider router={router} />);
+    await screen.findByRole('link', { name: 'Stunde 1' });
+    expect(screen.queryByText(/von 3/)).toBeNull();
+    const calls = (globalThis.fetch as unknown as { mock: { calls: unknown[][] } }).mock
+      .calls;
+    expect(calls.some(([url]) => String(url).endsWith('/listening'))).toBe(false);
   });
 
   it('lets the teacher rename a recording uploaded under the wrong title', async () => {

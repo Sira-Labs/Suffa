@@ -1,11 +1,16 @@
 /**
  * Class recordings (Sprint 7): teachers upload session recordings (large files in resumable
- * parts), see the processing progress, publish after confirming consent, and delete. Learners
- * see the published ones and open the player.
+ * parts), see the processing progress, publish after confirming consent, delete, and see who
+ * of the class has listened to each published one. Learners see the published ones and open
+ * the player.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MediaApi, type MediaItem } from '@/services/media/mediaApi';
+import {
+  MediaApi,
+  type MediaItem,
+  type RecordingListening,
+} from '@/services/media/mediaApi';
 import { putPart, uploadRecording } from '@/services/media/uploader';
 import { useListenStore } from '@/state';
 import { DriveImport } from './DriveImport';
@@ -38,13 +43,50 @@ export function ClassRecordings({
   const api = useMemo(() => new MediaApi(), []);
   const [items, setItems] = useState<MediaItem[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [listening, setListening] = useState<Map<string, RecordingListening>>(new Map());
+  const [listeningError, setListeningError] = useState<string | null>(null);
   const progress = useListenStore((s) => s.progress);
+  // Loads overlap (polling, actions); only the newest one may write its answers.
+  const latest = useRef(0);
+  const inFlight = useRef(0);
+
+  const loadInto = useCallback(
+    async (request: number) => {
+      const result = await api.list(classId);
+      if (request !== latest.current) return;
+      if (result.ok) setItems(result.value.items);
+      else setMessage(result.message);
+      if (teacher) {
+        const heard = await api.listening(classId);
+        if (request !== latest.current) return;
+        if (heard.ok) {
+          setListening(new Map(heard.value.recordings.map((r) => [r.mediaId, r])));
+          setListeningError(null);
+        } else {
+          setListeningError(heard.message);
+        }
+      }
+    },
+    [api, classId, teacher]
+  );
 
   const load = useCallback(async () => {
-    const result = await api.list(classId);
-    if (result.ok) setItems(result.value.items);
-    else setMessage(result.message);
-  }, [api, classId]);
+    const request = ++latest.current;
+    inFlight.current += 1;
+    try {
+      await loadInto(request);
+    } finally {
+      inFlight.current -= 1;
+    }
+  }, [loadInto]);
+
+  // A new class (or role) makes answers still on their way stale.
+  useEffect(
+    () => () => {
+      latest.current += 1;
+    },
+    [classId, teacher]
+  );
 
   useEffect(() => {
     void load();
@@ -54,7 +96,10 @@ export function ClassRecordings({
   const busy = items?.some((i) => i.status === 'processing' || i.status === 'importing');
   useEffect(() => {
     if (!busy) return;
-    const timer = window.setInterval(() => void load(), 5000);
+    // A slow answer is waited for, not overtaken (it would be discarded as stale).
+    const timer = window.setInterval(() => {
+      if (inFlight.current === 0) void load();
+    }, 5000);
     return () => window.clearInterval(timer);
   }, [busy, load]);
 
@@ -75,6 +120,14 @@ export function ClassRecordings({
       {teacher && <DriveImport classId={classId} onImported={() => void load()} />}
       {teacher && <AiSwitch classId={classId} />}
       {message && <p className="feedback-bad">{message}</p>}
+      {teacher && listeningError && (
+        <p className="feedback-bad row" style={{ flexWrap: 'wrap' }}>
+          <span>Wer zugehört hat, lässt sich gerade nicht laden: {listeningError}</span>
+          <button type="button" className="btn" onClick={() => void load()}>
+            Erneut laden
+          </button>
+        </p>
+      )}
       {items.length === 0 ? (
         <p className="muted">
           {teacher
@@ -110,6 +163,12 @@ export function ClassRecordings({
                         : ' · nur für dich sichtbar')}
                     {item.error && ` · ${item.error}`}
                   </span>
+                )}
+                {teacher && listening.get(item.id) && (
+                  <ListeningSummary
+                    title={item.title}
+                    listening={listening.get(item.id)!}
+                  />
                 )}
                 {teacher && item.status === 'processing' && (
                   <span
@@ -386,5 +445,62 @@ function AiSwitch({ classId }: { classId: string }) {
         }}
       />
     </label>
+  );
+}
+
+/** Who of the class has listened: counts at a glance, each learner's share on request. */
+function ListeningSummary({
+  title,
+  listening,
+}: {
+  title: string;
+  listening: RecordingListening;
+}) {
+  if (listening.learners === 0) {
+    return (
+      <span className="muted" style={{ fontSize: '0.85rem' }}>
+        Noch keine Lernenden in der Klasse.
+      </span>
+    );
+  }
+  return (
+    <details className="listening">
+      <summary>
+        <strong>
+          {listening.finished} von {listening.learners}
+        </strong>{' '}
+        gehört
+        {listening.started > listening.finished &&
+          ` · ${listening.started - listening.finished} angefangen`}
+      </summary>
+      <ul className="listening-list" aria-label={`Wer „${title}“ gehört hat`}>
+        {listening.people.map((p) => (
+          <li key={p.userId} className="row" style={{ justifyContent: 'space-between' }}>
+            <span>{p.name}</span>
+            <span className="row" style={{ gap: '0.5rem' }}>
+              <span
+                className="review-progress listening-bar"
+                role="progressbar"
+                aria-label={`${p.name}: ${p.percent} % gehört`}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={p.percent}
+              >
+                <span
+                  style={{ display: 'block', height: '100%', width: `${p.percent}%` }}
+                />
+              </span>
+              <span className="muted" style={{ fontSize: '0.85rem', minWidth: '4.5rem' }}>
+                {p.completedAt
+                  ? '✓ gehört'
+                  : p.percent > 0
+                    ? `${p.percent} %`
+                    : 'noch nicht'}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </details>
   );
 }

@@ -9,6 +9,8 @@
  *   POST   /classes/:id/media/:mediaId/publish { consent: true } → 204       (class:manage)
  *   DELETE /classes/:id/media/:mediaId             → 204                      (class:manage)
  *   GET    /classes/:id/media/:mediaId/play        → { audio, video, … }      (class:read)
+ *   GET    /classes/:id/listening                  → { recordings }  who heard what
+ *                                                    (class:progress:read: the class's teachers)
  */
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
@@ -17,6 +19,7 @@ import { authorize, type ActorEnv, type AuthorizeLog } from '../authz/middleware
 import type { Actor as PolicyActor, ClassScope } from '../authz/policies.js';
 import { writeAudit, type Queryable } from '../audit/log.js';
 import { MAX_PART_URLS, MAX_RECORDING_BYTES, type Media } from './service.js';
+import type { ListeningRepository } from './listening.js';
 import type { MediaItem, MediaRepository } from './repository.js';
 
 export interface MediaRouteDeps {
@@ -26,6 +29,8 @@ export interface MediaRouteDeps {
   audit: Queryable;
   auth: AuthResolver;
   log: AuthorizeLog;
+  /** Who listened to the class's recordings (teachers only). */
+  listening: ListeningRepository;
 }
 
 const Uuid = z.string().uuid();
@@ -71,6 +76,12 @@ export function createMediaRoutes(deps: MediaRouteDeps): Hono<ActorEnv> {
   };
   const manage = authorize(deps.auth, 'class:manage', deps.log, scope);
   const read = authorize(deps.auth, 'class:read', deps.log, scope);
+  const progress = authorize(deps.auth, 'class:progress:read', deps.log, scope);
+
+  app.get('/classes/:id/listening', progress, async (c) => {
+    c.header('Cache-Control', 'no-store');
+    return c.json({ recordings: await deps.listening.forClass(c.req.param('id')) });
+  });
 
   /** Teachers of the class (and admins) see unpublished items too. */
   const isManager = async (c: Context<ActorEnv>) => {

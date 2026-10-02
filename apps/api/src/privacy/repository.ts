@@ -52,6 +52,8 @@ export interface AccountExport {
     grades: Record<string, unknown>[];
   };
   auditLog: Record<string, unknown>[];
+  /** Feedback sent while testing (story R6). */
+  feedback: Record<string, unknown>[];
 }
 
 export interface PrivacyRepository {
@@ -210,6 +212,10 @@ export class PgPrivacyRepository implements PrivacyRepository {
            from audit_log
           where actor_id = $1 or (target_type = 'user' and target_id = $1::text)
           order by id`
+      ),
+      feedback: await q(
+        `select kind, message, page, app_version, status, created_at
+           from feedback where user_id = $1 order by created_at`
       ),
     };
   }

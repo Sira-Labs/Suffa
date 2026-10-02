@@ -201,6 +201,13 @@ export class ClassesApi {
     );
   }
 
+  /** Deletes the class for everyone (teachers of the class only). */
+  archive(classId: string) {
+    return this.call<void>(`/api/v1/classes/${encodeURIComponent(classId)}`, {
+      method: 'DELETE',
+    });
+  }
+
   preview(token: string) {
     return this.call<{ className: string; teacherName: string | null }>(
       `/api/v1/invites/${encodeURIComponent(token)}`

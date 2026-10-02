@@ -1,7 +1,8 @@
 /**
  * Browser error reporting through our own origin (sprint story 2.4):
  *
- *   GET  /api/client-config   → { errorDsn } for the PWA (a DSN is public by design)
+ *   GET  /api/client-config   → { errorDsn, feedback } for the PWA (a DSN is public by design;
+ *                               feedback says whether the feedback button is shown)
  *   POST /api/errors          → forwards a Sentry envelope to GlitchTip
  *
  * Why a tunnel: ad blockers drop requests to error-tracking endpoints, the CSP can stay at
@@ -57,6 +58,8 @@ export class RateLimiter {
 
 export interface ErrorTunnelDeps {
   webDsn: string | undefined;
+  /** The feedback button is on (SUFFA_FEEDBACK); reported to the PWA with the DSN. */
+  feedback?: boolean;
   /** Injected for tests. */
   fetch?: typeof fetch;
   limiter?: RateLimiter;
@@ -71,7 +74,10 @@ export function createErrorTunnel(deps: ErrorTunnelDeps): Hono {
 
   app.get('/client-config', (c) => {
     c.header('Cache-Control', 'no-store');
-    return c.json({ errorDsn: target ? deps.webDsn : null });
+    return c.json({
+      errorDsn: target ? deps.webDsn : null,
+      feedback: deps.feedback ?? false,
+    });
   });
 
   app.post(

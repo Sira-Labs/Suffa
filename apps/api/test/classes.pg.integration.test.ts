@@ -227,4 +227,37 @@ describe.skipIf(!url)('Classes (Postgres)', () => {
     );
     expect(audit.rows.map((r) => r.action)).toEqual(['class.member_rejected']);
   });
+
+  it('the teacher deletes a class: hidden and closed for everyone, data kept', async () => {
+    const { id, token } = await newClassWithInvite();
+    await call('amina', 'POST', `/invites/${token}/join`);
+    await call('teacher', 'POST', `/classes/${id}/members/${users.amina!.id}/approve`);
+
+    // Learners cannot delete it; the teacher can, once.
+    expect((await call('amina', 'DELETE', `/classes/${id}`)).status).toBe(403);
+    expect((await call('teacher', 'DELETE', `/classes/${id}`)).status).toBe(204);
+    expect((await call('teacher', 'DELETE', `/classes/${id}`)).status).toBe(403);
+
+    // Gone from both lists, closed for direct links, the invite no longer works.
+    for (const who of ['teacher', 'amina']) {
+      const { classes } = (await (await call(who, 'GET', '/classes')).json()) as {
+        classes: { id: string }[];
+      };
+      expect(classes.map((c) => c.id)).not.toContain(id);
+    }
+    expect((await call('teacher', 'GET', `/classes/${id}/members`)).status).toBe(403);
+    expect((await call('amina', 'GET', `/invites/${token}`)).status).toBe(404);
+
+    // Kept for an admin to restore, and audited.
+    const { rows } = await pool.query(
+      'select archived_at is not null as archived from classes where id = $1',
+      [id]
+    );
+    expect(rows[0]).toEqual({ archived: true });
+    const audit = await pool.query(
+      "select details from audit_log where action = 'class.archived' and target_id = $1",
+      [id]
+    );
+    expect(audit.rows).toEqual([{ details: { name: 'Arabisch 1a' } }]);
+  });
 });

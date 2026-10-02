@@ -68,7 +68,8 @@ and our own exercises, and no copied book texts or pictures in the repo.
   and wider unit limits.
 - **Stage 1 (done):**
   - Both courses are offered. A course has an `exercises` flag: only courses with our own
-    exercises and a unit test accept unit assignments. The Medina course starts without one.
+    exercises and a unit test accept unit assignments. The Medina course started without one
+    (stage 4 turned it on).
   - The learner's own course is a synced setting, `settings.course` (migration 0032). The
     learning path shows a course switch.
   - A learner on the page of a class that follows another course is offered to switch to it.
@@ -159,11 +160,22 @@ and our own exercises, and no copied book texts or pictures in the repo.
   - Every video channel names its course (migration 0033; existing channels keep _bayna
     yadayk_). On import, "Lesson 5" becomes unit 5 or unit 105 by the channel's course, and the
     video admin sets the course.
-- **Stage 3 and later:**
+- **Stage 4 (done): homework and LLM prompts per course.**
+  - Every Medina lesson has its lesson test, so the Medina course sets `exercises: true` and
+    classes assign its lessons ("Lektion n: Test bestehen"). A passed `madinah_lesson` test
+    marks the assignment done, and its link leads straight to the lesson page.
+  - The server's content catalog also reads `content/courses/madinah/book1-lessons.json` (the
+    API image copies it). A Madinah lesson has its own curriculum pack: the words, grammar and
+    filled-in gap sentences.
+  - The tutor and the grader name the learner's course (their setting) and say "Lesson n" for
+    Madinah units. The learner snapshot finds a Madinah learner's lesson as the first one
+    whose test is not passed, because Madinah lessons have no enrolments. Trouble words
+    resolve in both courses.
+  - The recording prompts (suggestions, proofreading, summary) name the class's course.
+- **Stage 5 and later:**
   - more Madinah exercises, lesson by lesson;
-  - content loaded per course (`content/courses/<id>/`);
-  - homework references;
-  - the LLM prompts name the class's course instead of _bayna yadayk_.
+  - the word tools of the tutor (`lookup_vocab`, `get_root_family`) for Madinah words, which
+    need roots and transliteration in our own lesson content first.
 - **Only with the rights holders' permission:** book exercises and pictures, served from private
   storage and never from the repo.
 

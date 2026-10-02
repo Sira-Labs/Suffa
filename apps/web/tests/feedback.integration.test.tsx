@@ -199,6 +199,30 @@ describe('Feedback while testing', () => {
     expect(await screen.findByText('0 offene Rückmeldungen')).toBeTruthy();
   });
 
+  it('shows the button once the server answers after a failed start', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(new Response(null, { status: 503 }))
+        .mockResolvedValue(Response.json({ errorDsn: null, feedback: true }));
+      vi.stubGlobal('fetch', fetchMock);
+      const { api } = fakeApi();
+      render(
+        <MemoryRouter>
+          <FeedbackButton api={api} />
+        </MemoryRouter>
+      );
+      await vi.advanceTimersByTimeAsync(0);
+      expect(screen.queryByRole('button', { name: 'Feedback' })).toBeNull();
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(await screen.findByRole('button', { name: 'Feedback' })).toBeTruthy();
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('asks for the configuration again after a server error', async () => {
     const fetchMock = vi
       .fn()

@@ -14,6 +14,9 @@ import {
   type FeedbackKind,
 } from '@/services/feedback/feedbackApi';
 
+/** How often a failed client-config request is retried (after 2 s, 4 s, 8 s). */
+const CONFIG_RETRIES = 3;
+
 export function FeedbackButton({ api }: { api?: FeedbackApi }) {
   const client = useMemo(() => api ?? new FeedbackApi(), [api]);
   const [enabled, setEnabled] = useState(false);
@@ -28,13 +31,25 @@ export function FeedbackButton({ api }: { api?: FeedbackApi }) {
 
   useEffect(() => {
     let alive = true;
-    loadClientConfig().then(
-      (config) => alive && setEnabled(config.feedback),
-      // Offline or no backend: no button, nothing could be sent anyway.
-      () => alive && setEnabled(false)
-    );
+    let retry: number | undefined;
+    // A failed request (offline, server restarting) is tried again a few times; a server
+    // that answers "feedback: false" is final.
+    const load = (attempt: number) => {
+      loadClientConfig().then(
+        (config) => alive && setEnabled(config.feedback),
+        () => {
+          if (!alive) return;
+          setEnabled(false);
+          if (attempt < CONFIG_RETRIES) {
+            retry = window.setTimeout(() => load(attempt + 1), 2000 * 2 ** attempt);
+          }
+        }
+      );
+    };
+    load(0);
     return () => {
       alive = false;
+      window.clearTimeout(retry);
     };
   }, []);
 

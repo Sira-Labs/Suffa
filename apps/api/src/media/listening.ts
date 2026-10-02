@@ -9,7 +9,7 @@ import type pg from 'pg';
 export interface LearnerListening {
   userId: string;
   name: string;
-  /** Share of the recording heard, 0–100. */
+  /** Share of the recording heard, 0–100 (a finished learner may show less than 100). */
   percent: number;
   /** When the learner finished it (85 % heard); null while not finished. */
   completedAt: string | null;
@@ -48,7 +48,7 @@ export class PgListeningRepository implements ListeningRepository {
               greatest(coalesce(p."durationSec", 0), r.duration_sec) as duration,
               p."completedAt" as completed_at
          from recordings r
-         cross join learners l
+         left join learners l on true
          left join media_progress p
            on p.user_id = l.user_id and p.id = 'rec/' || r.id and not p.deleted`,
       [classId]
@@ -61,14 +61,18 @@ export class PgListeningRepository implements ListeningRepository {
         entry = { mediaId, learners: 0, started: 0, finished: 0, people: [] };
         byRecording.set(mediaId, entry);
       }
+      // A class without learners still lists its recordings (one row, no learner).
+      if (row.user_id === null) continue;
       const listened = Number(row.listened);
       const duration = Number(row.duration);
       const completedAt = (row.completed_at as Date | null)?.toISOString() ?? null;
-      const percent = completedAt
-        ? 100
-        : duration > 0
-          ? Math.min(99, Math.round((listened / duration) * 100))
-          : 0;
+      // The share actually heard; finishing (at 85 %) is reported apart, in completedAt.
+      const percent =
+        duration > 0
+          ? Math.min(100, Math.round((listened / duration) * 100))
+          : completedAt
+            ? 100
+            : 0;
       entry.learners += 1;
       if (listened > 0 || completedAt) entry.started += 1;
       if (completedAt) entry.finished += 1;
@@ -81,7 +85,10 @@ export class PgListeningRepository implements ListeningRepository {
     }
     for (const entry of byRecording.values()) {
       entry.people.sort(
-        (a, b) => b.percent - a.percent || a.name.localeCompare(b.name, 'de')
+        (a, b) =>
+          Number(Boolean(b.completedAt)) - Number(Boolean(a.completedAt)) ||
+          b.percent - a.percent ||
+          a.name.localeCompare(b.name, 'de')
       );
     }
     return [...byRecording.values()];

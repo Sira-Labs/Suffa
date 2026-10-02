@@ -44,19 +44,36 @@ export function ClassRecordings({
   const [items, setItems] = useState<MediaItem[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [listening, setListening] = useState<Map<string, RecordingListening>>(new Map());
+  const [listeningError, setListeningError] = useState<string | null>(null);
   const progress = useListenStore((s) => s.progress);
+  // Loads overlap (polling, actions); only the newest one may write its answers.
+  const latest = useRef(0);
 
   const load = useCallback(async () => {
+    const request = ++latest.current;
     const result = await api.list(classId);
+    if (request !== latest.current) return;
     if (result.ok) setItems(result.value.items);
     else setMessage(result.message);
     if (teacher) {
       const heard = await api.listening(classId);
+      if (request !== latest.current) return;
       if (heard.ok) {
         setListening(new Map(heard.value.recordings.map((r) => [r.mediaId, r])));
+        setListeningError(null);
+      } else {
+        setListeningError(heard.message);
       }
     }
   }, [api, classId, teacher]);
+
+  // A new class (or role) makes answers still on their way stale.
+  useEffect(
+    () => () => {
+      latest.current += 1;
+    },
+    [classId, teacher]
+  );
 
   useEffect(() => {
     void load();
@@ -87,6 +104,14 @@ export function ClassRecordings({
       {teacher && <DriveImport classId={classId} onImported={() => void load()} />}
       {teacher && <AiSwitch classId={classId} />}
       {message && <p className="feedback-bad">{message}</p>}
+      {teacher && listeningError && (
+        <p className="feedback-bad row" style={{ flexWrap: 'wrap' }}>
+          <span>Wer zugehört hat, lässt sich gerade nicht laden: {listeningError}</span>
+          <button type="button" className="btn" onClick={() => void load()}>
+            Erneut laden
+          </button>
+        </p>
+      )}
       {items.length === 0 ? (
         <p className="muted">
           {teacher

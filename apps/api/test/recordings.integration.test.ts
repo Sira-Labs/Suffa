@@ -299,10 +299,22 @@ describe.skipIf(!dbUrl || !s3 || !hasFfmpeg)(
         [users.amina!.id]
       );
       const done = (await (await listening('teacher')).json()) as typeof after;
+      // Finished, but the bar still shows what was actually heard.
       expect(done.recordings[0]).toMatchObject({
         finished: 1,
-        people: [{ percent: 100 }],
+        people: [{ percent: 51, completedAt: expect.any(String) }],
       });
+      // Without active learners the recording is still listed, with nobody in it.
+      await pool.query("update class_members set status = 'pending' where user_id = $1", [
+        users.amina!.id,
+      ]);
+      const empty = (await (await listening('teacher')).json()) as typeof after;
+      expect(empty.recordings).toEqual([
+        expect.objectContaining({ learners: 0, started: 0, finished: 0, people: [] }),
+      ]);
+      await pool.query("update class_members set status = 'active' where user_id = $1", [
+        users.amina!.id,
+      ]);
 
       expect((await call('teacher', 'DELETE', `/${mediaId}`)).status).toBe(204);
       expect(

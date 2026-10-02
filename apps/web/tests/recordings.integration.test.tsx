@@ -122,6 +122,30 @@ describe('Recordings (integration)', () => {
     ).toHaveAttribute('aria-valuenow', '40');
   });
 
+  it('tells the teacher when the listening report fails, and loads it again', async () => {
+    const base = globalThis.fetch;
+    let fail = true;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        if (fail && String(input).endsWith('/listening')) {
+          return Response.json({ error: 'internal' }, { status: 500 });
+        }
+        return base(input, init);
+      })
+    );
+    const router = createMemoryRouter(
+      [{ path: '/', element: <ClassRecordings classId={CLASS} teacher /> }],
+      { initialEntries: ['/'] }
+    );
+    render(<RouterProvider router={router} />);
+    expect(await screen.findByText(/Wer zugehört hat, lässt sich gerade nicht laden/));
+    fail = false;
+    await userEvent.click(screen.getByRole('button', { name: 'Erneut laden' }));
+    expect(await screen.findByText(/von 3/)).toBeTruthy();
+    expect(screen.queryByText(/lässt sich gerade nicht laden/)).toBeNull();
+  });
+
   it('shows learners no listening statistics', async () => {
     const router = createMemoryRouter(
       [{ path: '/', element: <ClassRecordings classId={CLASS} teacher={false} /> }],

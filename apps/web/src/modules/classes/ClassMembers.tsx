@@ -153,11 +153,15 @@ function DeleteClass({ api, summary }: { api: ClassesApi; summary: ClassSummary 
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const remove = async () => {
+    if (busy) return;
+    setBusy(true);
     const result = await api.archive(summary.id);
-    if (result.ok) navigate('/classes', { replace: true });
-    else setError(result.message);
+    if (result.ok) return navigate('/classes', { replace: true });
+    setBusy(false);
+    setError(result.message);
   };
 
   return (
@@ -185,7 +189,7 @@ function DeleteClass({ api, summary }: { api: ClassesApi; summary: ClassSummary 
           aria-label="Klasse löschen bestätigen"
           onSubmit={(e) => {
             e.preventDefault();
-            if (typed.trim() === summary.name) void remove();
+            if (typed.trim() === summary.name && !busy) void remove();
           }}
         >
           <label className="stack" style={{ gap: '0.3rem' }}>
@@ -204,9 +208,9 @@ function DeleteClass({ api, summary }: { api: ClassesApi; summary: ClassSummary 
             <button
               type="submit"
               className="btn btn-danger"
-              disabled={typed.trim() !== summary.name}
+              disabled={busy || typed.trim() !== summary.name}
             >
-              Endgültig löschen
+              {busy ? 'Wird gelöscht …' : 'Endgültig löschen'}
             </button>
             <button
               type="button"

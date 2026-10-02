@@ -1,11 +1,16 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { db } from '@/services/storage';
+import Dexie from 'dexie';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { db, practiceRepo } from '@/services/storage';
 import { usePracticeStore } from './practiceStore';
 
 describe('practice store', () => {
   beforeEach(async () => {
     await db.practice_progress.clear();
     await usePracticeStore.getState().load();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('rewards the first success per item and detects the completed station', async () => {
@@ -31,5 +36,34 @@ describe('practice store', () => {
     usePracticeStore.setState({ records: {}, loaded: false });
     await usePracticeStore.getState().load();
     expect(Object.keys(usePracticeStore.getState().records)).toEqual(['2:read:d1']);
+  });
+
+  it('forgets an item IndexedDB could not store, and gives no XP for it', async () => {
+    const { practise } = usePracticeStore.getState();
+    await practise(3, 'write', 'w1', ['w1', 'w2']);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(practiceRepo, 'put').mockRejectedValueOnce(
+      new Dexie.QuotaExceededError('storage full')
+    );
+    expect(await practise(3, 'write', 'w2', ['w1', 'w2'])).toEqual({
+      first: false,
+      stationComplete: false,
+      xp: 0,
+    });
+    // The saved item stays; the unsaved one counts again on the next answer.
+    expect(Object.keys(usePracticeStore.getState().records)).toEqual(['3:write:w1']);
+    expect(await practise(3, 'write', 'w2', ['w1', 'w2'])).toEqual({
+      first: true,
+      stationComplete: true,
+      xp: 2,
+    });
+  });
+
+  it('does not swallow errors that are not storage errors', async () => {
+    vi.spyOn(practiceRepo, 'put').mockRejectedValueOnce(new TypeError('bug'));
+    await expect(
+      usePracticeStore.getState().practise(4, 'read', 'd1', [])
+    ).rejects.toThrow('bug');
+    expect(usePracticeStore.getState().records['4:read:d1']).toBeUndefined();
   });
 });

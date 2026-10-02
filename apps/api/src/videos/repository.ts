@@ -4,6 +4,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
+import { DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 import { writeAudit } from '../audit/log.js';
 import { inTransaction } from '../db/transaction.js';
 import type { CheckpointData, Cue } from '../media/interactive.js';
@@ -14,6 +15,8 @@ export type PermissionStatus = 'unknown' | 'requested' | 'granted' | 'declined';
 export interface VideoChannel {
   id: string;
   name: string;
+  /** The course its lessons belong to (ADR-0025). */
+  course: CourseId;
   youtubeChannelId: string | null;
   playlists: string[];
   permissionStatus: PermissionStatus;
@@ -56,6 +59,7 @@ export interface Change {
 const channelOf = (r: Record<string, unknown>): VideoChannel => ({
   id: r.id as string,
   name: r.name as string,
+  course: (r.course as CourseId | undefined) ?? DEFAULT_COURSE,
   youtubeChannelId: (r.youtube_channel_id as string | null) ?? null,
   playlists: r.playlists as string[],
   permissionStatus: r.permission_status as PermissionStatus,
@@ -100,22 +104,34 @@ export class PgVideoRepository {
   }
 
   async createChannel(
-    input: { name: string; youtubeChannelId: string | null; playlists: string[] },
+    input: {
+      name: string;
+      course: CourseId;
+      youtubeChannelId: string | null;
+      playlists: string[];
+    },
     change: Change
   ): Promise<string> {
     const id = randomUUID();
     await inTransaction(this.pool, async (db) => {
       await db.query(
-        `insert into video_channels (id, name, youtube_channel_id, playlists, updated_by)
-         values ($1, $2, $3, $4, $5)`,
-        [id, input.name, input.youtubeChannelId, input.playlists, change.actorId]
+        `insert into video_channels (id, name, course, youtube_channel_id, playlists, updated_by)
+         values ($1, $2, $3, $4, $5, $6)`,
+        [
+          id,
+          input.name,
+          input.course,
+          input.youtubeChannelId,
+          input.playlists,
+          change.actorId,
+        ]
       );
       await writeAudit(db, {
         actorId: change.actorId,
         action: 'video.channel_created',
         targetType: 'video_channel',
         targetId: id,
-        details: { name: input.name, playlists: input.playlists },
+        details: { name: input.name, course: input.course, playlists: input.playlists },
         ipAddress: change.ipAddress,
       });
     });
@@ -127,6 +143,7 @@ export class PgVideoRepository {
     id: string,
     patch: Partial<{
       name: string;
+      course: CourseId;
       playlists: string[];
       permissionStatus: PermissionStatus;
       permissionNotes: string;
@@ -147,7 +164,8 @@ export class PgVideoRepository {
            permission_status = coalesce($4, permission_status),
            permission_notes = coalesce($5, permission_notes),
            contacted_at = case when $6::boolean then $7::date else contacted_at end,
-           updated_by = $8, updated_at = now()
+           updated_by = $8, updated_at = now(),
+           course = coalesce($9, course)
          where id = $1`,
         [
           id,
@@ -158,6 +176,7 @@ export class PgVideoRepository {
           patch.contactedAt !== undefined,
           patch.contactedAt ?? null,
           change.actorId,
+          patch.course ?? null,
         ]
       );
       await writeAudit(db, {
@@ -188,6 +207,11 @@ export class PgVideoRepository {
 
   /** Inserts new videos and refreshes known ones; a unit set by an admin is kept. */
   async upsertVideos(channelId: string, videos: YouTubeVideo[]): Promise<number> {
+    const channel = await this.pool.query(
+      'select course from video_channels where id = $1',
+      [channelId]
+    );
+    const course = (channel.rows[0]?.course as CourseId | undefined) ?? DEFAULT_COURSE;
     let added = 0;
     for (const v of videos) {
       const { rows } = await this.pool.query(
@@ -211,7 +235,7 @@ export class PgVideoRepository {
           v.publishedAt,
           v.playlistId,
           v.position,
-          guessUnit(v.title),
+          guessUnit(v.title, course),
         ]
       );
       if (rows[0]?.inserted) added += 1;

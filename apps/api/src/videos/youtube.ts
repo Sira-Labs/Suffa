@@ -3,6 +3,8 @@
  * Two calls per 50 videos (playlistItems.list, videos.list): 2 quota units, far below the
  * 10,000 a day.
  */
+import { courseById, DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
+
 const API = 'https://www.googleapis.com/youtube/v3';
 
 export interface YouTubeVideo {
@@ -128,15 +130,21 @@ export class YouTubeClient {
 const ARABIC_DIGITS = '٠١٢٣٤٥٦٧٨٩';
 
 /**
- * A unit number from a lesson title ("الدرس ٥", "Lesson 5", "Einheit 12"), or null. Only
- * numbers up to `maxUnit` count; admins correct or set the rest.
+ * A unit number from a lesson title ("الدرس ٥", "Lesson 5", "Einheit 12"), or null. The
+ * number is read within the channel's course (ADR-0025): "Lesson 5" is unit 5 in Al-Arabiyya
+ * bayna Yadayk and unit 105 in the Medina course. Numbers beyond the course's units do not
+ * count; admins correct or set the rest.
  */
-export function guessUnit(title: string, maxUnit = 16): number | null {
+export function guessUnit(
+  title: string,
+  course: CourseId = DEFAULT_COURSE
+): number | null {
+  const { units } = courseById(course);
   const western = title.replace(/[٠-٩]/g, (d) => String(ARABIC_DIGITS.indexOf(d)));
   const m = /(?:الدرس|الوحدة|lesson|unit|lektion|einheit)\s*(?:رقم\s*)?(\d{1,3})/i.exec(
     western
   );
   if (!m) return null;
   const n = Number(m[1]);
-  return n >= 1 && n <= maxUnit ? n : null;
+  return n >= 1 && n <= units.length ? units[n - 1]! : null;
 }

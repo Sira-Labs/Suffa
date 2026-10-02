@@ -27,6 +27,10 @@ describe('guessUnit', () => {
     expect(guessUnit('Einheit 16')).toBe(16);
     expect(guessUnit('Lesson 42')).toBeNull();
     expect(guessUnit('Vorwort')).toBeNull();
+    // A Medina channel: "Lesson n" is lesson n of book 1 (unit 100 + n), up to its 23 lessons.
+    expect(guessUnit('Madinah Arabic Book 1 – Lesson 5', 'madinah')).toBe(105);
+    expect(guessUnit('الدرس ٢٣', 'madinah')).toBe(123);
+    expect(guessUnit('Lesson 24', 'madinah')).toBeNull();
   });
 });
 

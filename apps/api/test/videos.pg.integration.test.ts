@@ -192,6 +192,51 @@ describe.skipIf(!url)('Video catalog (Postgres)', () => {
     expect((await app.request(`/api/v1/videos/${intro.id}`)).status).toBe(404);
   });
 
+  it("reads lesson numbers in the channel's course", async () => {
+    const created = await call('POST', '/admin/videos/channels', {
+      name: 'Madinah Arabic',
+      course: 'madinah',
+      playlists: ['PLmadinah-book1'],
+    });
+    expect(created.status).toBe(201);
+    const { id: channelId } = (await created.json()) as { id: string };
+    playlist = [
+      {
+        ...video('mmmmmmmmmm5', 'Madinah Arabic Book 1 – Lesson 5', 0),
+        playlistId: 'PLmadinah-book1',
+      },
+      { ...video('mmmmmmmmm24', 'Lesson 24', 1), playlistId: 'PLmadinah-book1' },
+    ];
+    const youtube = { playlist: async () => playlist };
+    expect(await importChannel({ videos: repo, youtube, log: quiet }, channelId)).toBe(2);
+    const admin = (await (await call('GET', '/admin/videos')).json()) as {
+      channels: { id: string; course: string }[];
+      videos: { youtubeId: string; unit: number | null }[];
+    };
+    expect(admin.channels.find((c) => c.id === channelId)?.course).toBe('madinah');
+    expect(
+      admin.videos
+        .filter((v) => v.youtubeId.startsWith('mmmm'))
+        .map((v) => [v.youtubeId, v.unit])
+    ).toEqual([
+      ['mmmmmmmmmm5', 105],
+      ['mmmmmmmmm24', null],
+    ]);
+
+    // The course can be changed; an unknown course is refused.
+    expect(
+      (
+        await call('PATCH', `/admin/videos/channels/${channelId}`, {
+          course: 'bayna-yadayk',
+        })
+      ).status
+    ).toBe(204);
+    expect(
+      (await call('PATCH', `/admin/videos/channels/${channelId}`, { course: 'latin' }))
+        .status
+    ).toBe(400);
+  });
+
   it('keeps the catalog tools to admins and validates input', async () => {
     expect((await call('GET', '/admin/videos', undefined, 'student')).status).toBe(403);
     expect((await call('GET', '/admin/videos', undefined, '')).status).toBe(401);

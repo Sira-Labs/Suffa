@@ -301,6 +301,17 @@ jobs:
           done
           echo "::error::staging did not report $TAG within 10 minutes"; echo "$api"; echo "$web"; exit 1
 
+  # A versioned GitHub release for what staging now runs (docs/ops/releases.md). It needs only the
+  # staging check, so it never waits for the production approval below.
+  github-release:
+    name: github release
+    needs: verify-staging
+    permissions:
+      contents: write
+    uses: ./.github/workflows/github-release.yml
+    with:
+      sha: ${{ github.sha }}
+
   # Production: its own server (ADR-0024). Waits for the owner's approval (required reviewer on
   # the GitHub environment `production`), then deploys the digests staging runs
   # (deploy-production.yml). Rolling back: rollback-production.yml.

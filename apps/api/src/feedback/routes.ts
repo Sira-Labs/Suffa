@@ -39,7 +39,8 @@ const NewFeedback = z
       .trim()
       .min(1)
       .max(300)
-      .regex(/^\/[^\s]*$/, 'page must be an app path'),
+      // Not `//host` or `/\host`: a browser would read those as another site.
+      .regex(/^\/(?![/\\])[^\s]*$/, 'page must be an app path'),
     appVersion: z.string().trim().max(60).default(''),
   })
   .strict();
@@ -73,9 +74,10 @@ export function createFeedbackRoutes(deps: FeedbackRouteDeps): Hono<ActorEnv> {
     }),
     async (c) => {
       if (!deps.enabled) return c.json({ error: 'feedback_disabled' }, 404);
+      // Every request costs a token, also an invalid one, so floods stop before parsing.
+      if (!limiter.tryTake()) return c.json({ error: 'rate_limited' }, 429);
       const parsed = NewFeedback.safeParse(await jsonBody(c));
       if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
-      if (!limiter.tryTake()) return c.json({ error: 'rate_limited' }, 429);
       const actor = await deps.auth.actor(c.req.raw.headers);
       const id = await deps.repo.add({
         userId: actor?.id ?? null,

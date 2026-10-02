@@ -21,10 +21,14 @@ export function FeedbackAdmin({ api }: { api?: FeedbackApi }) {
   const [next, setNext] = useState<string | null>(null);
   const [open, setOpen] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
+  // Requests in flight: a second click must not repeat them (same cursor, same toggle).
+  const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
 
   const load = useCallback(
     async (before: string | null) => {
-      const result = await client.list(before);
+      setLoading(true);
+      const result = await client.list(before).finally(() => setLoading(false));
       if (!result.ok) return setMessage(result.message);
       setMessage(null);
       setItems((current) =>
@@ -41,8 +45,16 @@ export function FeedbackAdmin({ api }: { api?: FeedbackApi }) {
   }, [load]);
 
   const toggle = async (item: FeedbackItem) => {
+    if (pending.has(item.id)) return;
     const status = item.status === 'new' ? 'done' : 'new';
-    const result = await client.setStatus(item.id, status);
+    setPending((current) => new Set(current).add(item.id));
+    const result = await client.setStatus(item.id, status).finally(() =>
+      setPending((current) => {
+        const next = new Set(current);
+        next.delete(item.id);
+        return next;
+      })
+    );
     if (!result.ok) return setMessage(result.message);
     setItems((current) => current.map((i) => (i.id === item.id ? { ...i, status } : i)));
     setOpen((n) => n + (status === 'done' ? -1 : 1));
@@ -81,14 +93,24 @@ export function FeedbackAdmin({ api }: { api?: FeedbackApi }) {
                 : 'ohne Konto'}{' '}
               · {item.appVersion || 'Version unbekannt'}
             </p>
-            <button type="button" className="btn" onClick={() => void toggle(item)}>
+            <button
+              type="button"
+              className="btn"
+              disabled={pending.has(item.id)}
+              onClick={() => void toggle(item)}
+            >
               {item.status === 'new' ? 'Erledigt' : 'Wieder öffnen'}
             </button>
           </li>
         ))}
       </ul>
       {next && (
-        <button type="button" className="btn" onClick={() => void load(next)}>
+        <button
+          type="button"
+          className="btn"
+          disabled={loading}
+          onClick={() => void load(next)}
+        >
           Ältere laden
         </button>
       )}

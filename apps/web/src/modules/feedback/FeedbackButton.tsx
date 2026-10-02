@@ -4,7 +4,7 @@
  * is on goes along, so the team sees where it happened. Shown only when the server says so
  * (`/api/client-config` → feedback).
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { loadClientConfig } from '@/services/clientConfig';
 import {
@@ -18,6 +18,13 @@ export function FeedbackButton({ api }: { api?: FeedbackApi }) {
   const client = useMemo(() => api ?? new FeedbackApi(), [api]);
   const [enabled, setEnabled] = useState(false);
   const [open, setOpen] = useState(false);
+  // Focus goes into the form when it opens and back to the button when it closes.
+  const trigger = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
+  useEffect(() => {
+    if (!open && wasOpen.current) trigger.current?.focus();
+    wasOpen.current = open;
+  }, [open]);
 
   useEffect(() => {
     let alive = true;
@@ -36,6 +43,7 @@ export function FeedbackButton({ api }: { api?: FeedbackApi }) {
     <>
       {!open && (
         <button
+          ref={trigger}
           type="button"
           className="btn feedback-fab"
           onClick={() => setOpen(true)}
@@ -55,6 +63,8 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
   const [message, setMessage] = useState('');
   const [state, setState] = useState<'idle' | 'sending' | 'sent'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const field = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => field.current?.focus(), []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +89,9 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
       className="card stack feedback-panel"
       role="dialog"
       aria-labelledby="feedback-title"
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose();
+      }}
     >
       <div className="collapsible-head">
         <h2 id="feedback-title" className="eyebrow" style={{ margin: 0 }}>
@@ -122,6 +135,7 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
             ))}
           </div>
           <textarea
+            ref={field}
             className="input"
             rows={4}
             maxLength={4000}

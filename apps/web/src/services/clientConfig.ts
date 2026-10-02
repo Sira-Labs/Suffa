@@ -18,7 +18,8 @@ async function fetchClientConfig(): Promise<ClientConfig> {
     signal: AbortSignal.timeout(CONFIG_TIMEOUT_MS),
     cache: 'no-store',
   });
-  if (!res.ok) return { errorDsn: null, feedback: false };
+  // A server error is not a configuration: reject, so the next caller asks again.
+  if (!res.ok) throw new Error(`client-config ${res.status}`);
   const body = (await res.json()) as { errorDsn?: unknown; feedback?: unknown };
   return {
     errorDsn: typeof body.errorDsn === 'string' ? body.errorDsn : null,

@@ -58,7 +58,7 @@ describe.skipIf(!url)('Feedback (Postgres)', () => {
         auth,
         log: quiet,
         enabled: true,
-        limiter: new RateLimiter(5, 60_000),
+        limiter: new RateLimiter(20, 60_000),
       },
       errorTunnel: { webDsn: undefined, feedback: true, log: quiet },
     });
@@ -120,6 +120,9 @@ describe.skipIf(!url)('Feedback (Postgres)', () => {
       { kind: 'rant', message: 'x', page: '/' },
       { kind: 'bug', message: '   ', page: '/' },
       { kind: 'bug', message: 'x', page: 'https://evil.example/' },
+      // Network-path references would open another site from the admin inbox.
+      { kind: 'bug', message: 'x', page: '//evil.example/' },
+      { kind: 'bug', message: 'x', page: '/\\evil.example/' },
       { kind: 'bug', message: 'x', page: '/', userId: ADMIN },
     ]) {
       expect((await call('POST', '/api/v1/feedback', body)).status).toBe(400);
@@ -214,7 +217,8 @@ describe.skipIf(!url)('Feedback (Postgres)', () => {
   });
 
   it('keeps floods out and can be switched off', async () => {
-    // The limiter allows five per minute; two were sent above.
+    // The limiter allows 20 per minute; every request counts, also the 9 sent above (2 kept,
+    // 7 refused as invalid).
     const send = () =>
       call('POST', '/api/v1/feedback', {
         kind: 'idea',
@@ -222,8 +226,10 @@ describe.skipIf(!url)('Feedback (Postgres)', () => {
         page: '/',
       });
     const statuses = [];
-    for (let i = 0; i < 4; i++) statuses.push((await send()).status);
-    expect(statuses).toEqual([201, 201, 201, 429]);
+    for (let i = 0; i < 12; i++) statuses.push((await send()).status);
+    expect(statuses).toEqual([...Array<number>(11).fill(201), 429]);
+    // Over the limit, even an invalid body is not parsed any more.
+    expect((await call('POST', '/api/v1/feedback', { kind: 'rant' })).status).toBe(429);
 
     expect(
       (

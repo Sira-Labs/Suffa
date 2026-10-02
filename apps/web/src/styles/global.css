@@ -734,11 +734,19 @@ textarea.input {
   z-index: 70;
   max-width: 420px;
   margin-left: auto;
+  /* With the on-screen keyboard up, the panel scrolls instead of leaving the screen. */
+  max-height: calc(
+    100dvh - var(--nav-height) - 2.5rem - env(safe-area-inset-bottom, 0px)
+  );
+  overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 .focus-main .feedback-fab,
 .focus-main .feedback-panel {
   bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+}
+.focus-main .feedback-panel {
+  max-height: calc(100dvh - 2rem - env(safe-area-inset-bottom, 0px));
 }
 @media (min-width: 960px) {
   .feedback-fab {
@@ -748,6 +756,7 @@ textarea.input {
     left: auto;
     width: 420px;
     bottom: 1.5rem;
+    max-height: calc(100dvh - 3rem);
   }
 }
 

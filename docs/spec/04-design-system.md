@@ -67,10 +67,15 @@ precached for offline use (≈ 370 kB); other scripts load on demand.
 | 1    | Tokens, fonts, icons, app shell and navigation, "Mehr" page   | ✅     |
 | 2    | "Heute" (today's path, word of the day) and review focus mode | ✅     |
 | 3    | Unit as a learning path                                       | ✅     |
-| 4    | Listen & read along (player with transcript)                  | ☐      |
+| 4    | Listen & read along (player with transcript)                  | ✅     |
 | 5    | Root family and pattern trainer                               | ✅     |
 
 Each step ships on its own, tested, so learners never see a half-migrated app.
+
+Step 4 shipped with the class recordings (story 8.1) and the video lessons (story 12.3): the
+transcript under the player shows off, the line being spoken, or the whole list with the current
+line marked; a tap on a line jumps there, "Mitlaufen" keeps the list scrolling along, and video
+lessons add subtitles and the glossary (`TranscriptPanel`, `GlossTranscript`).
 
 Step 5 (`/roots`, `/roots/muster`): the root in the centre with its words around it (learned
 solid, not yet learned dashed), root letters coloured inside every word, a card that explains

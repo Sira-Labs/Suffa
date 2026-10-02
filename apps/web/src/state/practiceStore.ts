@@ -1,5 +1,7 @@
+import Dexie from 'dexie';
 import { create } from 'zustand';
 import type { CourseSkill, PracticeRecord, PracticeSkill } from '@/types';
+import { logger } from '@/services/logger';
 import { practiceRepo } from '@/services/storage';
 import { practiceId } from '@/services/practice';
 import { XP_RULES } from '@/services/engagement/xp';
@@ -29,6 +31,7 @@ interface PracticeState {
 }
 
 const REPEAT: PracticeOutcome = { first: false, stationComplete: false, xp: 0 };
+const log = logger.child('practice');
 
 export const usePracticeStore = create<PracticeState>((set, get) => ({
   records: {},
@@ -55,7 +58,21 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
     // Memory first, synchronously, so quick successive answers build on each other.
     const records = { ...get().records, [id]: record };
     set({ records });
-    await practiceRepo.put(record);
+    try {
+      await practiceRepo.put(record);
+    } catch (error) {
+      // The write failed (IndexedDB: quota, private mode, closed database). Forget the item in
+      // memory too: it counts again next time, and no XP is given for progress a reload would
+      // lose. Only this item is removed, so answers saved meanwhile stay. Anything but a
+      // storage error is a bug and goes on to the caller.
+      const rest = { ...get().records };
+      delete rest[id];
+      set({ records: rest });
+      if (!(error instanceof Dexie.DexieError || error instanceof DOMException))
+        throw error;
+      log.error('save_failed', { id, error: error.name });
+      return REPEAT;
+    }
     const stationComplete =
       items.length > 0 && items.every((item) => records[practiceId(unit, skill, item)]);
     return { first: true, stationComplete, xp: XP_RULES.itemPractised };

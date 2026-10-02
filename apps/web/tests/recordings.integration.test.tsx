@@ -41,6 +41,8 @@ function stubApi() {
           recordings: [
             {
               mediaId: MEDIA,
+              title: 'Stunde 1',
+              publishedAt: '2026-09-24T10:00:00.000Z',
               learners: 3,
               started: 2,
               finished: 1,

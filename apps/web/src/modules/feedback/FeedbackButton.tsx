@@ -88,7 +88,7 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
     const result = await api.send({
       kind,
       message: message.trim(),
-      page: pathname + search,
+      page: reportedPage(pathname, search),
     });
     if (result.ok) {
       setState('sent');
@@ -163,8 +163,8 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
             }}
           />
           <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-            Gespeichert wird dein Text, diese Seite ({pathname}) und – wenn du angemeldet
-            bist – dein Konto, damit wir nachfragen können.
+            Gespeichert wird dein Text, diese Seite ({reportedPage(pathname, search)}) und
+            – wenn du angemeldet bist – dein Konto, damit wir nachfragen können.
           </p>
           {error && <span className="feedback-bad">{error}</span>}
           <button
@@ -178,4 +178,13 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
       )}
     </div>
   );
+}
+
+/**
+ * The page sent with a report, without secrets: an invite link carries its token in the path,
+ * a sign-in link its code in the query, so both are cut off.
+ */
+export function reportedPage(pathname: string, search: string): string {
+  if (/^\/join\//.test(pathname)) return '/join/…';
+  return /^\/login(\/|$)/.test(pathname) ? pathname : pathname + search;
 }

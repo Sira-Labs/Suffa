@@ -2,7 +2,7 @@ import { beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { Dashboard } from '@/modules/dashboard';
+import { Dashboard, Progress } from '@/modules/dashboard';
 import { FocusReview } from '@/modules/review';
 import { db } from '@/services/storage';
 import { XP_RULES } from '@/services/engagement/xp';
@@ -21,6 +21,13 @@ import {
 
 function renderHome() {
   const router = createMemoryRouter([{ path: '/', element: <Dashboard /> }], {
+    initialEntries: ['/'],
+  });
+  return render(<RouterProvider router={router} />);
+}
+
+function renderProgress() {
+  const router = createMemoryRouter([{ path: '/', element: <Progress /> }], {
     initialEntries: ['/'],
   });
   return render(<RouterProvider router={router} />);
@@ -93,8 +100,17 @@ describe('Home (integration)', () => {
     expect(again).toEqual({ first: false, xp: 0 });
   });
 
-  it('shows the level instead of the mastery bar', async () => {
+  it('keeps the statistics one row away, on "Fortschritt"', async () => {
     renderHome();
+    const row = await screen.findByRole('link', { name: /Dein Fortschritt/ });
+    expect(row).toHaveAttribute('href', '/progress');
+    expect(row.textContent).toContain('Level 1');
+    expect(screen.queryByText('Wackelige Wörter')).toBeNull();
+    expect(screen.queryByText(/Aktivität \(letzte 28 Tage\)/)).toBeNull();
+  });
+
+  it('shows the level instead of the mastery bar', async () => {
+    renderProgress();
     expect(
       await screen.findByRole('progressbar', { name: 'Fortschritt Stufe 1' })
     ).toHaveAttribute('aria-valuenow', '0');
@@ -109,7 +125,7 @@ describe('Home (integration)', () => {
         (c) => c.kind === 'vocab_ar_de' && c.contentRef === content.vokabeln[0]!.id
       )!;
     await useSrsStore.getState().review(card, 'hard', 1000);
-    renderHome();
+    renderProgress();
     expect(await screen.findByText('3 Wochen und länger gemerkt')).toBeInTheDocument();
     const weak = screen.getByText('Wackelige Wörter').closest('details')!;
     await waitFor(() =>
@@ -128,7 +144,7 @@ describe('Home (integration)', () => {
     await useSrsStore.getState().review(card, 'hard', 1000);
     const router = createMemoryRouter(
       [
-        { path: '/', element: <Dashboard /> },
+        { path: '/', element: <Progress /> },
         { path: '/review', element: <FocusReview /> },
       ],
       { initialEntries: ['/'] }

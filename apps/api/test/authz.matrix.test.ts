@@ -90,6 +90,7 @@ const classRepo: ClassRepository = {
     status: 'active',
     studentCount: 0,
     pendingCount: 0,
+    teacherName: null,
     createdAt: '2026-09-24T00:00:00.000Z',
   }),
   listFor: async () => [],

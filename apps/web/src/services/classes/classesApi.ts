@@ -14,6 +14,8 @@ export interface ClassSummary {
   status: MemberStatus;
   studentCount: number;
   pendingCount: number;
+  /** Who leads the class; older servers send none. */
+  teacherName?: string | null;
   createdAt: string;
 }
 

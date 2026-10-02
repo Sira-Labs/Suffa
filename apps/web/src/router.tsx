@@ -6,7 +6,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { migrateLegacyHashUrl } from './services/legacyHashUrl';
 import { RouteError } from './components';
-import { Dashboard } from './modules/dashboard';
+import { Dashboard, Progress } from './modules/dashboard';
 import { VocabTrainer } from './modules/vocab';
 import { PatternTrainer, RootExplorer } from './modules/roots';
 import { Reading } from './modules/reading';
@@ -66,6 +66,7 @@ export const router = createBrowserRouter([
       { path: 'videos', element: <VideoLessons /> },
       { path: 'videos/:id', element: <VideoLesson /> },
       { path: 'badges', element: <Badges /> },
+      { path: 'progress', element: <Progress /> },
       { path: 'join/:token', element: <Join /> },
       { path: 'more', element: <More /> },
       { path: 'training', element: <Training /> },

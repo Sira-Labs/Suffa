@@ -274,7 +274,13 @@ describe.skipIf(!dbUrl || !s3 || !hasFfmpeg)(
         }[];
       };
       expect(before.recordings).toEqual([
-        expect.objectContaining({ mediaId, learners: 1, started: 0, finished: 0 }),
+        expect.objectContaining({
+          mediaId,
+          title: 'Stunde 5 – Wiederholung',
+          learners: 1,
+          started: 0,
+          finished: 0,
+        }),
       ]);
       await pool.query(
         `insert into media_progress (user_id, id, source, ref, "lessonKey", "durationSec",

@@ -10,13 +10,16 @@ import {
 import { CelebrationToast, SyncBadge } from './components';
 import { Icon } from './components/Icon';
 import {
+  CLASSES_PATH,
   isFocusPath,
+  isUnderClasses,
   isUnderMore,
   isUnderTraining,
   MORE_PATH,
-  NAV_ITEMS,
+  navItemsFor,
   TRAINING_PATH,
 } from './navigation';
+import { useRole } from './modules/account/useRole';
 import { logger } from './services/logger';
 import { useTrainingScope } from './modules/units/useReachedUnits';
 import { EngagementWatcher } from './modules/engagement/EngagementWatcher';
@@ -131,6 +134,7 @@ function Brand() {
 function Shell() {
   const { pathname } = useLocation();
   const moreActive = isUnderMore(pathname);
+  const items = navItemsFor(useRole());
   // Not signed in: the sign-in page comes first (it also offers "ohne Konto weiter").
   const signInFirst = useSignInGate();
   if (signInFirst) return <Navigate to={signInFirst} replace />;
@@ -150,15 +154,17 @@ function Shell() {
         <div className="nav-brand">
           <Brand />
         </div>
-        {NAV_ITEMS.map((item) => (
+        {items.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.end}
             className={({ isActive }) => {
-              // The Training tab stays lit on every training page (phone bar).
+              // "Üben" and "Klasse" stay lit on every page below them (phone bar).
               const active =
-                isActive || (item.to === TRAINING_PATH && isUnderTraining(pathname));
+                isActive ||
+                (item.to === TRAINING_PATH && isUnderTraining(pathname)) ||
+                (item.to === CLASSES_PATH && isUnderClasses(pathname));
               return `nav-link${item.tier !== 'primary' ? ' nav-link-secondary' : ''}${active ? ' nav-link-active' : ''}`;
             }}
           >

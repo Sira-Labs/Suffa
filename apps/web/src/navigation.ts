@@ -1,25 +1,38 @@
 import type { IconName } from './components/Icon';
 
+/** Sections of the "Mehr" page. */
+export type MoreGroup = 'media' | 'help' | 'me';
+
 export interface NavItem {
   to: string;
   label: string;
   icon: IconName;
-  /** Short explanation, shown on the hub pages ("Training", "Mehr"). */
+  /** Short explanation, shown on the hub pages ("Üben", "Mehr"). */
   description: string;
   /**
-   * primary: bottom bar on phones. training: listed on the "Training" hub (practice across
-   * all units). secondary: listed under "Mehr". The desktop sidebar shows everything.
+   * primary: bottom bar on phones. training: listed on the "Üben" hub (practice across
+   * all units). secondary: listed under "Mehr", in its group. The desktop sidebar shows
+   * everything.
    */
   tier: 'primary' | 'training' | 'secondary';
+  group?: MoreGroup;
   end?: boolean;
 }
 
 export const TRAINING_PATH = '/training';
+export const CLASSES_PATH = '/classes';
+
+export const MORE_GROUP_LABEL: Record<MoreGroup, string> = {
+  media: 'Medien',
+  help: 'Hilfe',
+  me: 'Ich',
+};
 
 /**
  * Every destination of the app, in sidebar order. Labels are learner-facing (German).
- * Redesign v2: learners work inside a unit ("Einheit"); "Entdecken" is the curated media
- * library; "Training" gathers practice across all units.
+ * Redesign v3 (tester feedback R6): the class gets its own tab, so learners and teachers
+ * find it at once; practice of every kind sits under "Üben"; "Mehr" keeps only media,
+ * help and the learner's own pages.
  */
 export const NAV_ITEMS: readonly NavItem[] = [
   {
@@ -38,15 +51,15 @@ export const NAV_ITEMS: readonly NavItem[] = [
     tier: 'primary',
   },
   {
-    to: '/discover',
-    label: 'Entdecken',
-    icon: 'compass',
-    description: 'Ausgewählte Videos und Podcasts',
+    to: CLASSES_PATH,
+    label: 'Klasse',
+    icon: 'people',
+    description: 'Deine Klasse: Aufgaben, Aufnahmen, Challenge',
     tier: 'primary',
   },
   {
     to: TRAINING_PATH,
-    label: 'Training',
+    label: 'Üben',
     icon: 'dumbbell',
     description: 'Üben über alle Einheiten',
     tier: 'primary',
@@ -73,6 +86,27 @@ export const NAV_ITEMS: readonly NavItem[] = [
     tier: 'training',
   },
   {
+    to: '/reading',
+    label: 'Lesen',
+    icon: 'read',
+    description: 'Dialoge mit Worterklärungen',
+    tier: 'training',
+  },
+  {
+    to: '/writing',
+    label: 'Schreiben',
+    icon: 'write',
+    description: 'Abschreiben, Diktat und Übersetzung',
+    tier: 'training',
+  },
+  {
+    to: '/speaking',
+    label: 'Sprechen',
+    icon: 'speak',
+    description: 'Nachsprechen, Aufnahme, Minimalpaare',
+    tier: 'training',
+  },
+  {
     to: '/roots',
     label: 'Wurzeln',
     icon: 'roots',
@@ -94,32 +128,20 @@ export const NAV_ITEMS: readonly NavItem[] = [
     tier: 'training',
   },
   {
+    to: '/discover',
+    label: 'Entdecken',
+    icon: 'compass',
+    description: 'Ausgewählte Videos und Podcasts',
+    tier: 'secondary',
+    group: 'media',
+  },
+  {
     to: '/videos',
     label: 'Videolektionen',
     icon: 'play',
     description: 'Lektionen zum Buch auf YouTube, mit Fragen zwischendurch',
     tier: 'secondary',
-  },
-  {
-    to: '/tutor',
-    label: 'al-Muʿallim',
-    icon: 'chat',
-    description: 'Dein KI-Lehrer: fragen, üben, erklären lassen',
-    tier: 'secondary',
-  },
-  {
-    to: '/badges',
-    label: 'Abzeichen',
-    icon: 'award',
-    description: 'Deine Erfolge und der Weg zur nächsten Stufe',
-    tier: 'secondary',
-  },
-  {
-    to: '/classes',
-    label: 'Klassen',
-    icon: 'path',
-    description: 'Deine Klasse beitreten oder als Lehrkraft führen',
-    tier: 'secondary',
+    group: 'media',
   },
   {
     to: '/library',
@@ -127,38 +149,53 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: 'listen',
     description: 'Alle Verlagsvideos und -audios zu Buch 1',
     tier: 'secondary',
+    group: 'media',
   },
   {
-    to: '/reading',
-    label: 'Lesen',
-    icon: 'read',
-    description: 'Dialoge mit Worterklärungen',
+    to: '/tutor',
+    label: 'al-Muʿallim',
+    icon: 'chat',
+    description: 'Dein KI-Lehrer: fragen, üben, erklären lassen',
     tier: 'secondary',
+    group: 'help',
   },
   {
-    to: '/writing',
-    label: 'Schreiben',
-    icon: 'write',
-    description: 'Abschreiben, Diktat und Übersetzung',
+    to: '/progress',
+    label: 'Fortschritt',
+    icon: 'chart',
+    description: 'Stufe, Statistik, wackelige Wörter und Abzeichen',
     tier: 'secondary',
-  },
-  {
-    to: '/speaking',
-    label: 'Sprechen',
-    icon: 'speak',
-    description: 'Nachsprechen, Aufnahme, Minimalpaare',
-    tier: 'secondary',
+    group: 'me',
   },
   {
     to: '/settings',
     label: 'Einstellungen',
     icon: 'settings',
-    description: 'Darstellung, Tagesziel, Konto',
+    description: 'Konto, Darstellung, Erinnerungen',
     tier: 'secondary',
+    group: 'me',
   },
 ];
 
+/**
+ * The navigation for a role. Teachers mostly lead classes: their tab reads "Klassen" and
+ * comes right after "Heute".
+ */
+export function navItemsFor(role: string | null | undefined): NavItem[] {
+  if (role !== 'teacher' && role !== 'admin') return [...NAV_ITEMS];
+  const classes = NAV_ITEMS.find((i) => i.to === CLASSES_PATH)!;
+  const rest = NAV_ITEMS.filter((i) => i !== classes);
+  return [
+    rest[0]!,
+    { ...classes, label: 'Klassen', description: 'Deine Klassen führen' },
+    ...rest.slice(1),
+  ];
+}
+
 export const MORE_PATH = '/more';
+
+/** Pages reached from a "Mehr" page that are not listed there themselves. */
+const MORE_SUBPAGES: readonly string[] = ['/badges', '/sources', '/admin'];
 
 /** Full-screen routes without navigation (one task at a time). */
 export const FOCUS_PATHS: readonly string[] = ['/review', '/milestone', '/login'];
@@ -172,18 +209,20 @@ function under(pathname: string, to: string): boolean {
   return pathname === to || pathname.startsWith(`${to}/`);
 }
 
-/** True when the "Training" tab should be highlighted on mobile. */
+/** True when the "Üben" tab should be highlighted on mobile. */
 export function isUnderTraining(pathname: string): boolean {
   if (under(pathname, TRAINING_PATH)) return true;
   return NAV_ITEMS.some((item) => item.tier === 'training' && under(pathname, item.to));
 }
 
+/** True when the "Klasse" tab should be highlighted (invite links included). */
+export function isUnderClasses(pathname: string): boolean {
+  return under(pathname, CLASSES_PATH) || under(pathname, '/join');
+}
+
 /** True when the "Mehr" tab should be highlighted on mobile. */
 export function isUnderMore(pathname: string): boolean {
   if (pathname === MORE_PATH) return true;
-  return NAV_ITEMS.some(
-    (item) =>
-      item.tier === 'secondary' &&
-      (pathname === item.to || pathname.startsWith(`${item.to}/`))
-  );
+  if (MORE_SUBPAGES.some((p) => under(pathname, p))) return true;
+  return NAV_ITEMS.some((item) => item.tier === 'secondary' && under(pathname, item.to));
 }

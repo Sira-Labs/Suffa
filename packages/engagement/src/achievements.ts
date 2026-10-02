@@ -5,7 +5,7 @@
  */
 import { dayKey, localHour } from './day.js';
 import type { EngagementInput } from './records.js';
-import { STAGES, stageTestPassed } from './units.js';
+import { ALL_STAGES, stageCompleted } from './units.js';
 
 export type Tier = 'bronze' | 'silver' | 'gold';
 const TIERS: readonly Tier[] = ['bronze', 'silver', 'gold'];
@@ -116,12 +116,18 @@ export const BADGES: readonly BadgeDef[] = [
     rule: '{n} Klassen-Challenges mitgeschafft',
     thresholds: [1, 5, 10],
   },
-  ...STAGES.map((stage) => ({
-    id: `stage-${stage.id}`,
+  ...ALL_STAGES.map((stage) => ({
+    id: stage.ref,
     name: stage.badge,
-    arabic: stage.id === 1 ? 'حَجَر الأساس' : 'الكِتاب الأوَّل',
-    meaning: `${stage.name} geschafft`,
-    rule: `${stage.test} bestanden`,
+    arabic: stage.arabic,
+    meaning:
+      stage.course === 'madinah'
+        ? `Medina-Kurs: ${stage.name} geschafft`
+        : `${stage.name} geschafft`,
+    rule:
+      stage.test === null
+        ? `Alle Lektionstests der ${stage.name} bestanden`
+        : `${stage.test} bestanden`,
     thresholds: [1],
   })),
 ];
@@ -201,9 +207,9 @@ function steps(input: EngagementInput, facts: AchievementFacts, timeZone: string
     najm: perfectAt,
     ruh: [...(facts.classChallengesOn ?? [])],
   };
-  for (const stage of STAGES) {
-    const passed = stageTestPassed(input.exams, stage);
-    result[`stage-${stage.id}`] = passed ? [passed.finishedAt] : [];
+  for (const stage of ALL_STAGES) {
+    const passed = stageCompleted(input.exams, stage);
+    result[stage.ref] = passed ? [passed.finishedAt] : [];
   }
   for (const list of Object.values(result)) list.sort();
   return result;

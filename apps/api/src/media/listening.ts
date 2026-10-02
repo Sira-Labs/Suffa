@@ -17,6 +17,8 @@ export interface LearnerListening {
 
 export interface RecordingListening {
   mediaId: string;
+  title: string;
+  publishedAt: string;
   /** Active learners of the class. */
   learners: number;
   started: number;
@@ -26,6 +28,7 @@ export interface RecordingListening {
 }
 
 export interface ListeningRepository {
+  /** Newest published recording first. */
   forClass(classId: string): Promise<RecordingListening[]>;
 }
 
@@ -40,17 +43,19 @@ export class PgListeningRepository implements ListeningRepository {
           where m.class_id = $1 and m.status = 'active' and m.class_role = 'student'
        ),
        recordings as (
-         select id, coalesce(duration_sec, 0) as duration_sec from media_items
+         select id, title, published_at, coalesce(duration_sec, 0) as duration_sec
+           from media_items
           where class_id = $1 and status = 'ready' and published_at is not null
        )
-       select r.id as media_id, l.user_id, l.name,
+       select r.id as media_id, r.title, r.published_at, l.user_id, l.name,
               coalesce(p."listenedSec", 0) as listened,
               greatest(coalesce(p."durationSec", 0), r.duration_sec) as duration,
               p."completedAt" as completed_at
          from recordings r
          left join learners l on true
          left join media_progress p
-           on p.user_id = l.user_id and p.id = 'rec/' || r.id and not p.deleted`,
+           on p.user_id = l.user_id and p.id = 'rec/' || r.id and not p.deleted
+        order by r.published_at desc, r.id`,
       [classId]
     );
     const byRecording = new Map<string, RecordingListening>();
@@ -58,7 +63,15 @@ export class PgListeningRepository implements ListeningRepository {
       const mediaId = row.media_id as string;
       let entry = byRecording.get(mediaId);
       if (!entry) {
-        entry = { mediaId, learners: 0, started: 0, finished: 0, people: [] };
+        entry = {
+          mediaId,
+          title: row.title as string,
+          publishedAt: (row.published_at as Date).toISOString(),
+          learners: 0,
+          started: 0,
+          finished: 0,
+          people: [],
+        };
         byRecording.set(mediaId, entry);
       }
       // A class without learners still lists its recordings (one row, no learner).

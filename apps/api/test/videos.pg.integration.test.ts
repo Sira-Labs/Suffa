@@ -223,7 +223,18 @@ describe.skipIf(!url)('Video catalog (Postgres)', () => {
       ['mmmmmmmmm24', null],
     ]);
 
-    // The course can be changed; an unknown course is refused.
+    // Changing the course moves the videos with it: units outside the new course are read
+    // again from the title, units already within it stay (also those an admin set).
+    const units = async () =>
+      (
+        (await (await call('GET', '/admin/videos')).json()) as {
+          videos: { id: string; youtubeId: string; unit: number | null }[];
+        }
+      ).videos.filter((v) => v.youtubeId.startsWith('mmmm'));
+    const lesson24 = (await units()).find((v) => v.youtubeId === 'mmmmmmmmm24')!;
+    expect(
+      (await call('PATCH', `/admin/videos/${lesson24.id}`, { unit: 7 })).status
+    ).toBe(204);
     expect(
       (
         await call('PATCH', `/admin/videos/channels/${channelId}`, {
@@ -231,6 +242,20 @@ describe.skipIf(!url)('Video catalog (Postgres)', () => {
         })
       ).status
     ).toBe(204);
+    expect((await units()).map((v) => [v.youtubeId, v.unit])).toEqual([
+      ['mmmmmmmmmm5', 5],
+      ['mmmmmmmmm24', 7],
+    ]);
+    expect(
+      (await call('PATCH', `/admin/videos/channels/${channelId}`, { course: 'madinah' }))
+        .status
+    ).toBe(204);
+    expect((await units()).map((v) => [v.youtubeId, v.unit])).toEqual([
+      ['mmmmmmmmmm5', 105],
+      ['mmmmmmmmm24', null],
+    ]);
+
+    // An unknown course is refused.
     expect(
       (await call('PATCH', `/admin/videos/channels/${channelId}`, { course: 'latin' }))
         .status

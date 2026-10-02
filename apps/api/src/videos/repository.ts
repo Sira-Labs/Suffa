@@ -4,7 +4,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
-import { DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
+import { courseOfUnit, DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 import { writeAudit } from '../audit/log.js';
 import { inTransaction } from '../db/transaction.js';
 import type { CheckpointData, Cue } from '../media/interactive.js';
@@ -153,7 +153,7 @@ export class PgVideoRepository {
   ): Promise<boolean> {
     return inTransaction(this.pool, async (db) => {
       const before = await db.query(
-        'select permission_status, name, playlists from video_channels where id = $1 for update',
+        'select permission_status, name, playlists, course from video_channels where id = $1 for update',
         [id]
       );
       if (!before.rows[0]) return false;
@@ -179,6 +179,10 @@ export class PgVideoRepository {
           patch.course ?? null,
         ]
       );
+      const remapped =
+        patch.course && patch.course !== before.rows[0].course
+          ? await remapUnits(db, id, patch.course)
+          : 0;
       await writeAudit(db, {
         actorId: change.actorId,
         action:
@@ -191,6 +195,7 @@ export class PgVideoRepository {
         details: {
           from: before.rows[0].permission_status,
           ...patch,
+          ...(remapped > 0 ? { unitsRemapped: remapped } : {}),
         },
         ipAddress: change.ipAddress,
       });
@@ -356,4 +361,25 @@ export class PgVideoRepository {
       [videoId, JSON.stringify(cues), by]
     );
   }
+}
+
+/**
+ * After a channel changes its course, its videos must not stay under the old course: every
+ * video whose unit lies outside the new course gets the unit read from its title in the new
+ * course (or none). Units already within the new course stay, also those an admin set.
+ */
+async function remapUnits(db: pg.PoolClient, channelId: string, course: CourseId) {
+  const { rows } = await db.query<{ id: string; title: string; unit: number | null }>(
+    'select id, title, unit from videos where channel_id = $1 for update',
+    [channelId]
+  );
+  let changed = 0;
+  for (const v of rows) {
+    if (v.unit !== null && courseOfUnit(v.unit)?.id === course) continue;
+    const unit = guessUnit(v.title, course);
+    if (unit === v.unit) continue;
+    await db.query('update videos set unit = $2 where id = $1', [v.id, unit]);
+    changed += 1;
+  }
+  return changed;
 }

@@ -7,6 +7,8 @@
  *   GET    /classes/:id/members                  → { members }            (class:manage)
  *   POST   /classes/:id/members/:userId/approve  → 204                    (class:manage)
  *   DELETE /classes/:id/members/:userId          → 204                    (class:manage)
+ *   DELETE /classes/:id                          → 204                    (class:manage)
+ *          deletes the class for everyone (archived: hidden, data kept for an admin)
  *   GET    /invites/:token                       → { className, teacherName } (class:join)
  *   POST   /invites/:token/join                  → { classId, className, status }
  *
@@ -101,6 +103,13 @@ export function createClassRoutes(deps: ClassRouteDeps): Hono<ActorEnv> {
     const actor = { id: c.get('actor').id, ip: clientIp(c) };
     const done = await deps.repo.remove(actor, c.req.param('id'), userId.data);
     return done ? c.body(null, 204) : c.json({ error: 'not_found' }, 404);
+  });
+
+  app.delete('/classes/:id', manage, async (c) => {
+    const actor = { id: c.get('actor').id, ip: clientIp(c) };
+    return (await deps.repo.archive(actor, c.req.param('id')))
+      ? c.body(null, 204)
+      : c.json({ error: 'not_found' }, 404);
   });
 
   app.get('/invites/:token', join, async (c) => {

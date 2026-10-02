@@ -57,6 +57,7 @@ import {
 } from './observability/errors.js';
 import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/resolver.js';
 import { PgSyncRepository } from './sync/repository.js';
+import { PgListeningRepository } from './media/listening.js';
 import { PgFeedbackRepository } from './feedback/repository.js';
 import { PgAdminRepository } from './admin/repository.js';
 import { AiGateway } from './ai/gateway.js';
@@ -448,6 +449,7 @@ async function main(): Promise<void> {
           audit: pool,
           auth,
           log,
+          listening: new PgListeningRepository(pool),
         }
       : undefined,
     assignments: {

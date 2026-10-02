@@ -99,6 +99,7 @@ const classRepo: ClassRepository = {
   members: async () => [],
   approve: async () => false,
   remove: async () => false,
+  archive: async () => false,
   preview: async () => null,
   join: async () => ({ ok: false, reason: 'invalid_invite' }),
 };
@@ -157,6 +158,7 @@ function buildApp() {
         rename: async () => {},
         remove: async () => {},
       },
+      listening: { forClass: async () => [] },
       media: {
         start: async () => ({ ok: false, reason: 'unsupported_type' }),
         partUrls: async () => ({}),

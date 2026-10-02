@@ -18,6 +18,7 @@ import {
 import { CurrentUnitCard, currentUnit } from './CurrentUnitCard';
 import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { TodayQuests } from '@/modules/engagement/TodayQuests';
+import { HomeBadges } from '@/modules/engagement/HomeBadges';
 import { HomeClassCard } from '@/modules/classes/HomeClassCard';
 import { TeacherHome } from '@/modules/classes/TeacherHome';
 import { useRole } from '@/modules/account/useRole';
@@ -161,6 +162,7 @@ function LearnerHome() {
         )}
       </div>
 
+      <HomeBadges badges={engagement.badges} />
       <WeeklyRecapCard />
       <ForgettingReminder cards={cards} logs={logs} />
 

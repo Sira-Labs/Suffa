@@ -1960,6 +1960,38 @@ textarea.input {
   background: var(--accent-2);
 }
 
+/* Badges on "Heute" */
+.home-medals {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.6rem;
+}
+.home-medal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev-2);
+  text-align: center;
+  font-size: 0.9rem;
+}
+.home-medal .muted {
+  font-size: 0.8rem;
+}
+.home-close {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
 /* Mastery ring on unit tiles (story 5.3) */
 .unit-tile-top {
   display: flex;

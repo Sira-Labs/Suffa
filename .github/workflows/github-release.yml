@@ -1,17 +1,20 @@
 name: github release
 
-# Publishes a versioned GitHub release for every main commit that reached staging (see
-# docs/ops/releases.md). It runs after the `release` workflow and only when that run succeeded,
-# so a release always names a version staging has verified.
+# Publishes a versioned GitHub release for a main commit that reached staging (see
+# docs/ops/releases.md). The `release` workflow calls it right after "verify staging" succeeded,
+# so a release always names a version staging has verified, and it never waits for the
+# production approval that follows.
 #
 # Version: the latest tag v<major>.<minor>.<patch> plus one patch. A merge commit with a line
 # starting `[minor]` (a finished roadmap item) or `[major]` raises that part instead. Run by
 # hand, the part to raise can be chosen.
 on:
-  workflow_run:
-    workflows: [release]
-    types: [completed]
-    branches: [main]
+  workflow_call:
+    inputs:
+      sha:
+        description: The commit staging verified
+        type: string
+        required: true
   workflow_dispatch:
     inputs:
       bump:
@@ -23,21 +26,21 @@ on:
 permissions:
   contents: write
 
-# One release at a time, so two quick merges never claim the same version.
-concurrency:
-  group: github-release
-  cancel-in-progress: false
-
 jobs:
   publish:
     name: publish release
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
+    # One release at a time, so two quick merges never claim the same version. A run that waits
+    # here and is replaced by a newer one loses nothing: the newer release's notes list its pull
+    # requests too.
+    concurrency:
+      group: github-release
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ inputs.sha || github.sha }}
 
       - name: next version
         id: version
@@ -45,13 +48,15 @@ jobs:
           BUMP_INPUT: ${{ inputs.bump }}
         run: |
           set -euo pipefail
+          version='^v[0-9]+\.[0-9]+\.[0-9]+$'
           sha=$(git rev-parse HEAD)
-          if git tag --points-at "$sha" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+          if git tag --points-at "$sha" | grep -qE "$version"; then
             echo "Commit $sha is already released; nothing to do."
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          last=$(git tag --list 'v*.*.*' --sort=-v:refname | head -n1)
+          # Only plain versions count; a pre-release tag such as v2.0.0-rc1 is ignored.
+          last=$(git tag --list 'v*' --sort=-v:refname | grep -E "$version" | head -n1 || true)
           last=${last:-v1.0.0}
           IFS=. read -r major minor patch <<< "${last#v}"
           message=$(git log -1 --format=%B "$sha")

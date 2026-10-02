@@ -12,9 +12,10 @@ How a change becomes a version, and who hears about it.
 
 ## Versions
 
-- When a `release` run on `main` succeeds, the `github release` workflow
-  (`.github/workflows/github-release.yml`) publishes a GitHub release with the next version and
-  notes generated from the merged pull requests.
+- Right after "verify staging" succeeds, the `release` workflow calls the `github release`
+  workflow (`.github/workflows/github-release.yml`). It publishes a GitHub release with the next
+  version and notes generated from the merged pull requests. It does not wait for the production
+  approval.
 - The version is `v<major>.<minor>.<patch>`. The first release follows `v1.0.0`, the version in
   `package.json`.
   - **Patch** (`v1.0.1`): every merge that reaches staging.
@@ -22,7 +23,8 @@ How a change becomes a version, and who hears about it.
     is used when a roadmap item (R1, R2, …) is complete.
   - **Major** (`v2.0.0`): a merge whose message has a line starting with `[major]`, only when
     the owner asks for it.
-- A commit that already has a version tag is not released again.
+- A commit that already has a version tag is not released again. Only plain versions count;
+  pre-release tags such as `v2.0.0-rc1` are ignored.
 - The workflow can also be run by hand ("Run workflow") to choose the part to raise.
 
 ## Who hears about it

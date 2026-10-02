@@ -313,9 +313,16 @@ describe.skipIf(!url)('al-Muʿallim (Postgres)', () => {
     );
     await pool.query(
       `insert into exam_results (user_id, id, format, units, score, total, "startedAt", "finishedAt", updated_at)
-       values ($1, 'l1', 'madinah_lesson', '[101]', 9, 10, now(), now(), now()),
-              ($1, 'l2', 'madinah_lesson', '[102]', 8, 10, now(), now(), now()),
-              ($1, 'l3', 'madinah_lesson', '[103]', 5, 10, now(), now(), now())`,
+       values ($1, 'l1', 'madinah_lesson', '[101]', 9, 10, now(), now() - interval '2 hours', now()),
+              ($1, 'l2', 'madinah_lesson', '[102]', 8, 10, now(), now() - interval '2 hours', now()),
+              ($1, 'l3', 'madinah_lesson', '[103]', 5, 10, now(), now() - interval '1 hour', now()),
+              ($1, 'b4', 'mixed_chapter', '[4]', 9, 10, now(), now(), now())`,
+      [BILAL]
+    );
+    // Earlier Bayna Yadayk progress stays stored, but out of the Medina snapshot.
+    await pool.query(
+      `insert into unit_enrollments (user_id, id, book, unit, pace, "startedAt", "dueAt", updated_at)
+       values ($1, 'b1-u4', 1, 4, 'normal', now(), now() + interval '14 days', now())`,
       [BILAL]
     );
     await pool.query(
@@ -328,6 +335,8 @@ describe.skipIf(!url)('al-Muʿallim (Postgres)', () => {
       course: 'madinah',
       tashkilLevel: 'partial',
       currentUnit: 103,
+      enrolledUnits: [],
+      lastExam: { units: [103], score: 5, total: 10 },
       troubleWords: [{ ar: 'الْقَمَرُ', de: 'der Mond' }],
     });
     // Without a course setting: the first course, at the latest started unit.

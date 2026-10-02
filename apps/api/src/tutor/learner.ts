@@ -58,8 +58,10 @@ export class PgLearnerState implements LearnerState {
         [userId]
       ),
       this.pool.query(
+        // The latest tests of any course; the snapshot keeps the latest one of the learner's
+        // course (the course is read in parallel, from settings).
         `select units, score, total, "finishedAt" from exam_results
-          where user_id = $1 and not deleted order by "finishedAt" desc limit 1`,
+          where user_id = $1 and not deleted order by "finishedAt" desc limit 50`,
         [userId]
       ),
       this.pool.query(
@@ -78,6 +80,10 @@ export class PgLearnerState implements LearnerState {
     const courseUnits = courseById(course).units;
     const enrolled = [...new Set(units.rows.map((r) => r.unit as number))];
     const passedUnits = new Set(passed.rows.map((r) => r.unit as number));
+    // Progress context stays inside the learner's course: units and tests of another course
+    // would sit beside this course's pack in the prompt.
+    const ofCourse = (list: number[]) =>
+      list.length > 0 && list.every((u) => courseUnits.includes(u));
     const seen = new Set<string>();
     const troubleWords: LearnerSnapshot['troubleWords'] = [];
     for (const row of trouble.rows) {
@@ -88,7 +94,7 @@ export class PgLearnerState implements LearnerState {
       troubleWords.push({ ar: word.ar, de: word.de });
       if (troubleWords.length === 8) break;
     }
-    const e = exam.rows[0];
+    const e = exam.rows.find((r) => ofCourse(r.units as number[]));
     const name = (user.rows[0]?.name as string | null | undefined)?.trim();
     return {
       firstName: name ? name.split(/\s+/)[0]!.slice(0, 40) : null,
@@ -102,7 +108,9 @@ export class PgLearnerState implements LearnerState {
         enrolled.find((u) => courseUnits.includes(u)) ??
         courseUnits.find((u) => !passedUnits.has(u)) ??
         courseUnits.at(-1)!,
-      enrolledUnits: [...enrolled].sort((a, b) => a - b),
+      enrolledUnits: enrolled
+        .filter((u) => courseUnits.includes(u))
+        .sort((a, b) => a - b),
       cards: cards.rows[0] as LearnerSnapshot['cards'],
       troubleWords,
       lastExam: e

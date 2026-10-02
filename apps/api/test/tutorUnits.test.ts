@@ -151,8 +151,11 @@ describe('buildSystem', () => {
     expect(parts[1]!.text).toBe(catalog.pack(103));
     expect(parts[2]!.text).toContain('Now at: Lesson 3; started: none yet');
     expect(parts[2]!.text).toContain('Last test: Lesson 2, 9/10');
-    // A lesson asked from its page is followed like a unit.
+    // A lesson asked from its page is followed like a unit; a unit of the other course is
+    // not, since its pack would not match the course the persona names.
     expect(buildSystem(catalog, madinah, { unit: 110 })[1]!.text).toBe(catalog.pack(110));
+    expect(buildSystem(catalog, madinah, { unit: 5 })[1]!.text).toBe(catalog.pack(103));
+    expect(buildSystem(catalog, snapshot, { unit: 103 })[1]!.text).toBe(catalog.pack(2));
     // Persona bytes differ per course, but stay stable within one.
     expect(buildSystem(catalog, { ...madinah, firstName: 'Bilal' }, {})[0]!.text).toBe(
       parts[0]!.text
@@ -181,6 +184,13 @@ describe('gradeRequest', () => {
     expect(madinah.system![0]!.text).toContain('"Durūs al-lugha al-ʿarabiyya"');
     expect(madinah.system![1]!.text).toBe(catalog.pack(104));
     expect(madinah.system![2]!.text).toBe('The learner is at Lesson 5 (started: none).');
+    // A unit of the other course falls back to the learner's own lesson.
+    const crossed = gradeRequest(
+      catalog,
+      { ...snapshot, course: 'madinah', currentUnit: 105, enrolledUnits: [] },
+      { ...input, unit: 3 }
+    );
+    expect(crossed.system![1]!.text).toBe(catalog.pack(105));
   });
 });
 

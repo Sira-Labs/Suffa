@@ -5,6 +5,7 @@
  */
 import {
   DEFAULT_COURSE,
+  courseById,
   courseOfUnit,
   isCourseId,
   unitLabelNumber,
@@ -30,4 +31,9 @@ export function courseOrDefault(value: unknown): CourseId {
 export function unitName(unit: number): string {
   const lesson = courseOfUnit(unit)?.id === 'madinah';
   return `${lesson ? 'Lesson' : 'Unit'} ${unitLabelNumber(unit)}`;
+}
+
+/** The unit belongs to the course, so its pack fits a prompt that names this course. */
+export function inCourse(unit: number, course: CourseId): boolean {
+  return courseById(course).units.includes(unit);
 }

@@ -6,7 +6,7 @@
 import type { CourseId } from '@suffa/engagement';
 import type { SystemPart } from '@suffa/llm';
 import type { ContentCatalog } from './content.js';
-import { courseBook, unitName } from './course.js';
+import { courseBook, inCourse, unitName } from './course.js';
 import type { LearnerSnapshot, TutorLanguage } from './learner.js';
 
 export interface TurnContext {
@@ -51,8 +51,11 @@ export function buildSystem(
   snapshot: LearnerSnapshot,
   context: TurnContext
 ): SystemPart[] {
+  // Only a unit of the learner's course: its pack must match the course the persona names.
   const unit =
-    context.unit && catalog.has(context.unit) ? context.unit : snapshot.currentUnit;
+    context.unit && inCourse(context.unit, snapshot.course) && catalog.has(context.unit)
+      ? context.unit
+      : snapshot.currentUnit;
   const learner = [
     '# The learner now',
     snapshot.firstName ? `First name: ${snapshot.firstName}` : 'Name: not shared',

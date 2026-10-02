@@ -12,7 +12,7 @@ import { z } from 'zod';
 import type { Actor } from '../authz/policies.js';
 import type { AiGateway } from '../ai/gateway.js';
 import { foldArabic, type ContentCatalog } from './content.js';
-import { courseBook, unitName } from './course.js';
+import { courseBook, inCourse, unitName } from './course.js';
 import type { LearnerSnapshot, LearnerState } from './learner.js';
 
 export type GradeKind = 'writing' | 'speech';
@@ -230,7 +230,11 @@ export function gradeRequest(
   >,
   input: GradeInput
 ): TaskInput {
-  const unit = input.unit && catalog.has(input.unit) ? input.unit : learner.currentUnit;
+  // Only a unit of the learner's course, so the pack matches the course the grader names.
+  const unit =
+    input.unit && inCourse(input.unit, learner.course) && catalog.has(input.unit)
+      ? input.unit
+      : learner.currentUnit;
   return {
     system: [
       {

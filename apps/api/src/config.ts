@@ -93,6 +93,11 @@ const RawEnvSchema = z.object({
   /** DSN of the suffa-web project, handed to the PWA and used by the /api/errors tunnel. */
   SUFFA_WEB_ERROR_DSN: optionalDsn('SUFFA_WEB_ERROR_DSN'),
   /**
+   * The feedback button for testers (on while Suffa is tested on staging). Set `off` on a
+   * server where learners should not see it; the admin inbox stays readable.
+   */
+  SUFFA_FEEDBACK: z.enum(['on', 'off']).default('on'),
+  /**
    * Web Push (story 6.3): a VAPID key pair (`npx web-push generate-vapid-keys`) and a
    * contact (mailto: or https:). Reminders stay off until all three are set.
    */
@@ -231,6 +236,8 @@ export interface Config {
   mailDir: string | undefined;
   /** Public DSN of the web project; undefined disables browser error reporting. */
   webErrorDsn: string | undefined;
+  /** Testers can send feedback from every page (SUFFA_FEEDBACK). */
+  feedbackEnabled: boolean;
   /** Object storage; undefined turns recordings and uploads off. */
   storage: S3Settings | undefined;
   /** Transcription service; undefined turns automatic transcripts off. */
@@ -452,6 +459,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
         }
       : undefined,
     webErrorDsn: raw.SUFFA_WEB_ERROR_DSN,
+    feedbackEnabled: raw.SUFFA_FEEDBACK === 'on',
     storage: s3Complete
       ? {
           endpoint: raw.SUFFA_S3_ENDPOINT!.replace(/\/$/, ''),

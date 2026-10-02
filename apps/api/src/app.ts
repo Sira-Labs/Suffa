@@ -44,6 +44,7 @@ const SIGN_IN_ANSWERS = new Set([
 ]);
 import { createAppLinkRoutes, type AppLinks } from './apps/links.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
+import { createFeedbackRoutes, type FeedbackRouteDeps } from './feedback/routes.js';
 import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
 import { createTutorRoutes, type TutorRouteDeps } from './tutor/routes.js';
 import { createReviewRoutes, type ReviewRouteDeps } from './tutor/reviewRoutes.js';
@@ -116,6 +117,8 @@ export interface AppDeps {
   classes?: ClassRouteDeps;
   /** Admin area (users); every route needs an admin. */
   admin?: AdminRouteDeps;
+  /** Testers' feedback and the admins' inbox for it. */
+  feedback?: FeedbackRouteDeps;
   /** al-Muʿallim, the AI teacher (ADR-0011). */
   tutor?: TutorRouteDeps;
   /** Teacher review of AI grades (story 11.2). */
@@ -239,6 +242,7 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.summaries) app.route('/api/v1', createSummaryRoutes(deps.summaries));
   if (deps.aiAdmin) app.route('/api/v1/admin/ai', createAiAdminRoutes(deps.aiAdmin));
   if (deps.videos) app.route('/api/v1', createVideoRoutes(deps.videos));
+  if (deps.feedback) app.route('/api/v1', createFeedbackRoutes(deps.feedback));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));
   if (deps.errorTunnel) app.route('/api', createErrorTunnel(deps.errorTunnel));
   app.notFound((c) => c.json({ error: 'not_found' }, 404));

@@ -72,7 +72,19 @@ describe.skipIf(!url)('Privacy: export and delete (Postgres)', () => {
   });
 
   it('exports profile, devices, learning data and classes – never tokens or secrets', async () => {
+    await pool.query(
+      `insert into feedback (id, user_id, kind, message, page)
+       values (gen_random_uuid(), $1, 'idea', 'Mehr Hörübungen bitte', '/')`,
+      [amina]
+    );
     const data = await repo.export(amina);
+    expect(data.feedback).toEqual([
+      expect.objectContaining({
+        kind: 'idea',
+        message: 'Mehr Hörübungen bitte',
+        page: '/',
+      }),
+    ]);
     expect(data.profile).toMatchObject({ email: 'amina@example.org', role: 'student' });
     expect(data.learningData.practice_progress).toEqual([
       expect.objectContaining({ id: '1:read:d-1', unit: 1, skill: 'read' }),

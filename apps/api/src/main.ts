@@ -57,6 +57,7 @@ import {
 } from './observability/errors.js';
 import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/resolver.js';
 import { PgSyncRepository } from './sync/repository.js';
+import { PgFeedbackRepository } from './feedback/repository.js';
 import { PgAdminRepository } from './admin/repository.js';
 import { AiGateway } from './ai/gateway.js';
 import { buildProviders } from './ai/providers.js';
@@ -530,6 +531,12 @@ async function main(): Promise<void> {
       log,
     },
     admin: { repo: new PgAdminRepository(pool), auth, log },
+    feedback: {
+      repo: new PgFeedbackRepository(pool),
+      auth,
+      log,
+      enabled: config.feedbackEnabled,
+    },
     aiAdmin: ai,
     videos: {
       videos: new PgVideoRepository(pool),
@@ -558,7 +565,7 @@ async function main(): Promise<void> {
     allowedOrigin: config.trustedOrigins,
     appOrigins: config.appOrigins,
     appLinks: config.appLinks,
-    errorTunnel: { webDsn: config.webErrorDsn, log },
+    errorTunnel: { webDsn: config.webErrorDsn, feedback: config.feedbackEnabled, log },
     onUnhandledError: (error, path) => {
       log.error({ err: error, path }, 'http.unhandled_error');
       errors.capture(error, { path });

@@ -44,13 +44,14 @@ describe('error tunnel', () => {
   it('hands the web DSN to the PWA, uncached', async () => {
     const res = await tunnel().app.request('/client-config');
     expect(res.headers.get('cache-control')).toBe('no-store');
-    expect(await res.json()).toEqual({ errorDsn: WEB_DSN });
+    expect(await res.json()).toEqual({ errorDsn: WEB_DSN, feedback: false });
   });
 
   it('reports null and refuses envelopes when error tracking is off', async () => {
     const { app, post, upstream } = tunnel({ webDsn: undefined });
     expect(await (await app.request('/client-config')).json()).toEqual({
       errorDsn: null,
+      feedback: false,
     });
     expect((await post(envelope(WEB_DSN))).status).toBe(404);
     expect(upstream).not.toHaveBeenCalled();

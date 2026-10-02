@@ -54,6 +54,7 @@ COPY apps/api/migrations ./migrations
 # Course content for al-Muʿallim's grounding (the same files the web app bundles).
 COPY apps/web/src/content/meta.json /app/apps/web/src/content/meta.json
 COPY apps/web/src/content/units /app/apps/web/src/content/units
+COPY apps/web/src/content/courses/madinah/book1-lessons.json /app/apps/web/src/content/courses/madinah/book1-lessons.json
 ARG SUFFA_VERSION=dev
 ENV SUFFA_VERSION=$SUFFA_VERSION
 USER node

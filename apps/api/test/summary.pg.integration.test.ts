@@ -189,6 +189,9 @@ describe.skipIf(!url)('Recording summaries (Postgres)', () => {
 
     const sent = model.requests[0]!;
     expect(sent.model).toBe('ministral-14b-latest');
+    expect(sent.system?.[0]?.text).toContain(
+      'the book series "al-ʿArabiyya bayna yadayk"'
+    );
     expect((sent.messages[0] as { content: string }).content).toContain(
       '[6] اِسْمِي هُدى'
     );
@@ -222,10 +225,15 @@ describe.skipIf(!url)('Recording summaries (Postgres)', () => {
     const teacher = await summaryOf('teacher');
     expect(teacher.summary?.status).toBe('failed');
     model.reply = JSON.stringify(SUMMARY);
+    // The class now follows the Medina course: the summary prompt names its book.
+    await pool.query(`update classes set course = 'madinah' where id = $1`, [classId]);
     await call('POST', '/summary');
     await run();
     const again = await summaryOf('teacher');
     expect(again.summary).toMatchObject({ status: 'ready', publishedAt: null });
+    expect(model.requests.at(-1)!.system?.[0]?.text).toContain(
+      '"Durūs al-lugha al-ʿarabiyya"'
+    );
   });
 
   it('calls the model once when two jobs run for the same request', async () => {

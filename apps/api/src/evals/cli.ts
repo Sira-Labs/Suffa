@@ -35,6 +35,7 @@ export function learnerAt(unit: number): LearnerSnapshot {
     firstName: null,
     tutorLanguage: 'de',
     tashkilLevel: 'full',
+    course: 'bayna-yadayk',
     currentUnit: unit,
     enrolledUnits: Array.from({ length: unit }, (_, i) => i + 1),
     cards: { total: 0, due: 0, leeches: 0 },

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ContentCatalog, foldArabic, foldRoot } from '../src/tutor/content.js';
 import type { LearnerSnapshot } from '../src/tutor/learner.js';
+import { gradeRequest } from '../src/tutor/grading.js';
 import { buildSystem } from '../src/tutor/prompt.js';
 import { runTool, TUTOR_TOOLS, type MediaAccess } from '../src/tutor/tools.js';
 import {
@@ -22,6 +23,7 @@ const snapshot: LearnerSnapshot = {
   firstName: 'Amina',
   tutorLanguage: 'de',
   tashkilLevel: 'full',
+  course: 'bayna-yadayk',
   currentUnit: 2,
   enrolledUnits: [1, 2],
   cards: { total: 40, due: 5, leeches: 1 },
@@ -66,6 +68,24 @@ describe('ContentCatalog', () => {
     expect(catalog.pack(999)).toBe('');
   });
 
+  it('gives every Madinah lesson a pack and its words a meaning (ADR-0025)', () => {
+    expect(catalog.lessons).toHaveLength(23);
+    expect(catalog.has(103)).toBe(true);
+    expect(catalog.has(124)).toBe(false);
+    const pack = catalog.pack(103);
+    expect(pack).toMatch(/^# Lektion 3 \(Medina-Kurs, Buch 1\): /);
+    expect(pack).toContain('## Wortschatz (ar | Deutsch)');
+    expect(pack).toContain('الْقَمَرُ | der Mond');
+    expect(pack).toContain('## Grammatik');
+    // The gap sentences appear filled in, never with the blank.
+    expect(pack).toContain('## Beispielsätze');
+    expect(pack).not.toContain('___');
+    expect(catalog.pack(103)).toBe(pack);
+    expect(catalog.meaning('md-103-01')).toEqual({ ar: 'الْقَمَرُ', de: 'der Mond' });
+    expect(catalog.meaning('v-ism')?.de).toBe('Name');
+    expect(catalog.meaning('nope')).toBeUndefined();
+  });
+
   it('folds Arabic spelling variants and roots', () => {
     expect(foldArabic('إِسْلامٌ')).toBe('اسلام');
     expect(foldArabic('مَدْرَسَةٌ')).toBe('مدرسه');
@@ -107,6 +127,60 @@ describe('buildSystem', () => {
     expect(buildSystem(catalog, { ...snapshot, firstName: 'Bilal' }, {})[0]!.text).toBe(
       buildSystem(catalog, snapshot, {})[0]!.text
     );
+  });
+
+  it("names the learner's course and its lessons (Madinah)", () => {
+    expect(buildSystem(catalog, snapshot, {})[0]!.text).toContain(
+      'the book series "al-ʿArabiyya bayna yadayk"'
+    );
+    const madinah: LearnerSnapshot = {
+      ...snapshot,
+      course: 'madinah',
+      currentUnit: 103,
+      enrolledUnits: [],
+      lastExam: {
+        units: [102],
+        score: 9,
+        total: 10,
+        finishedAt: snapshot.lastExam!.finishedAt,
+      },
+    };
+    const parts = buildSystem(catalog, madinah, {});
+    expect(parts[0]!.text).toContain('"Durūs al-lugha al-ʿarabiyya"');
+    expect(parts[0]!.text).not.toContain('bayna yadayk');
+    expect(parts[1]!.text).toBe(catalog.pack(103));
+    expect(parts[2]!.text).toContain('Now at: Lesson 3; started: none yet');
+    expect(parts[2]!.text).toContain('Last test: Lesson 2, 9/10');
+    // A lesson asked from its page is followed like a unit.
+    expect(buildSystem(catalog, madinah, { unit: 110 })[1]!.text).toBe(catalog.pack(110));
+    // Persona bytes differ per course, but stay stable within one.
+    expect(buildSystem(catalog, { ...madinah, firstName: 'Bilal' }, {})[0]!.text).toBe(
+      parts[0]!.text
+    );
+  });
+});
+
+describe('gradeRequest', () => {
+  it("grades against the learner's course and lesson", () => {
+    const input = {
+      kind: 'writing' as const,
+      task: 'Beschreibe dein Haus.',
+      answer: 'هَذَا بَيْتٌ',
+    };
+    const bayna = gradeRequest(catalog, snapshot, input);
+    expect(bayna.system![0]!.text).toContain('"al-ʿArabiyya bayna yadayk"');
+    expect(bayna.system![1]!.text).toBe(catalog.pack(2));
+    expect(bayna.system![2]!.text).toBe(
+      'The learner is at Unit 2 (started: Unit 1, Unit 2).'
+    );
+    const madinah = gradeRequest(
+      catalog,
+      { ...snapshot, course: 'madinah', currentUnit: 105, enrolledUnits: [] },
+      { ...input, unit: 104 }
+    );
+    expect(madinah.system![0]!.text).toContain('"Durūs al-lugha al-ʿarabiyya"');
+    expect(madinah.system![1]!.text).toBe(catalog.pack(104));
+    expect(madinah.system![2]!.text).toBe('The learner is at Lesson 5 (started: none).');
   });
 });
 

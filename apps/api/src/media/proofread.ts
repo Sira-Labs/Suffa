@@ -7,6 +7,8 @@
  */
 import { z } from 'zod';
 import type { Cue } from './interactive.js';
+import type { CourseId } from '@suffa/engagement';
+import { courseBook } from '../tutor/course.js';
 
 export const PROOFREAD_TASK = 'recording.proofread';
 /** Transcript text per model call: small pieces keep the answers short and complete. */
@@ -45,7 +47,10 @@ const Raw = z.object({
   fixes: z.array(z.object({ line: z.number().int(), text: z.string() })).max(400),
 });
 
-export const PROOFREAD_PROMPT = `You proofread the automatic transcript of a recorded Arabic lesson for German-speaking adult beginners (Modern Standard Arabic, course "al-ʿArabiyya bayna yadayk"). The teacher explains in German and speaks Arabic words and sentences.
+/** The proofreading rules for a class of the given course (byte-stable per course). */
+export const proofreadPrompt = (
+  course: CourseId
+) => `You proofread the automatic transcript of a recorded Arabic lesson for German-speaking adult beginners (Modern Standard Arabic; the class follows ${courseBook(course)}). The teacher explains in German and speaks Arabic words and sentences.
 
 The speech recognition sometimes wrote spoken Arabic in Latin letters or German-sounding spelling, e.g. "Hather Beiton" for هٰذَا بَيْتٌ, "Ma hada" for مَا هٰذَا, "Ana ismi" for أَنَا اسْمِي, or misheard an Arabic word.
 

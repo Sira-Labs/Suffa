@@ -109,6 +109,9 @@ jobs:
           # Without SMTP the api runs, but sign-in stays off (ADR-0008) and says so in the log.
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/api/v1/me)" = 404
           docker logs api 2>&1 | grep -q 'auth.disabled' || { docker logs api; exit 1; }
+          # The course content of both courses is in the image (tutor grounding, class tools).
+          ! docker logs api 2>&1 | grep -qE 'tutor.content_missing|class_content.missing' \
+            || { docker logs api; exit 1; }
           # With SMTP set, sign-in (Better Auth and its plugins) loads from the slim install:
           # no session is 401, not 404. Test tooling must not be in the image.
           run -d --name api-auth -e SUFFA_PORT=8001 -e SUFFA_SMTP_HOST=127.0.0.1 \

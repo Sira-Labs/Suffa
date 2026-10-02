@@ -210,6 +210,7 @@ function buildApp() {
         addCheckpoint: async () => ({}) as never,
         removeCheckpoint: async () => false,
         aiEnabled: async () => true,
+        classCourse: async () => 'bayna-yadayk',
         setAiEnabled: async () => {},
       },
       auth: resolver,

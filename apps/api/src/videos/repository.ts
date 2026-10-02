@@ -210,17 +210,25 @@ export class PgVideoRepository {
     );
   }
 
-  /** Inserts new videos and refreshes known ones; a unit set by an admin is kept. */
+  /**
+   * Inserts new videos and refreshes known ones; a unit set by an admin is kept.
+   *
+   * Runs in one transaction that holds a share lock on the channel row. A course change in
+   * `updateChannel` takes the row lock `for update`, so it waits for a running import, and an
+   * import waits for a course change. Units are therefore always read in the course that is
+   * committed when the videos are written.
+   */
   async upsertVideos(channelId: string, videos: YouTubeVideo[]): Promise<number> {
-    const channel = await this.pool.query(
-      'select course from video_channels where id = $1',
-      [channelId]
-    );
-    const course = (channel.rows[0]?.course as CourseId | undefined) ?? DEFAULT_COURSE;
-    let added = 0;
-    for (const v of videos) {
-      const { rows } = await this.pool.query(
-        `insert into videos (id, channel_id, youtube_id, title, duration_sec, thumbnail_url,
+    return inTransaction(this.pool, async (db) => {
+      const channel = await db.query(
+        'select course from video_channels where id = $1 for share',
+        [channelId]
+      );
+      const course = (channel.rows[0]?.course as CourseId | undefined) ?? DEFAULT_COURSE;
+      let added = 0;
+      for (const v of videos) {
+        const { rows } = await db.query(
+          `insert into videos (id, channel_id, youtube_id, title, duration_sec, thumbnail_url,
            published_at, playlist_id, position, unit)
          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          on conflict (youtube_id) do update set
@@ -230,22 +238,23 @@ export class PgVideoRepository {
            unit = coalesce(videos.unit, excluded.unit), imported_at = now()
          where videos.channel_id = excluded.channel_id
          returning (xmax = 0) as inserted`,
-        [
-          randomUUID(),
-          channelId,
-          v.youtubeId,
-          v.title,
-          v.durationSec,
-          v.thumbnailUrl,
-          v.publishedAt,
-          v.playlistId,
-          v.position,
-          guessUnit(v.title, course),
-        ]
-      );
-      if (rows[0]?.inserted) added += 1;
-    }
-    return added;
+          [
+            randomUUID(),
+            channelId,
+            v.youtubeId,
+            v.title,
+            v.durationSec,
+            v.thumbnailUrl,
+            v.publishedAt,
+            v.playlistId,
+            v.position,
+            guessUnit(v.title, course),
+          ]
+        );
+        if (rows[0]?.inserted) added += 1;
+      }
+      return added;
+    });
   }
 
   async adminVideos(): Promise<Video[]> {

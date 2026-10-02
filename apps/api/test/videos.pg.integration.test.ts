@@ -255,6 +255,36 @@ describe.skipIf(!url)('Video catalog (Postgres)', () => {
       ['mmmmmmmmm24', null],
     ]);
 
+    // An import that starts while a course change is still open waits for it and reads the
+    // titles in the course that change commits.
+    const change = await pool.connect();
+    try {
+      await change.query('begin');
+      await change.query('select id from video_channels where id = $1 for update', [
+        channelId,
+      ]);
+      await change.query(
+        `update video_channels set course = 'bayna-yadayk' where id = $1`,
+        [channelId]
+      );
+      let done = false;
+      const importing = repo
+        .upsertVideos(channelId, [
+          { ...video('mmmmmmmmmm6', 'Lesson 6', 2), playlistId: 'PLmadinah-book1' },
+        ])
+        .then((added) => {
+          done = true;
+          return added;
+        });
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(done).toBe(false);
+      await change.query('commit');
+      expect(await importing).toBe(1);
+    } finally {
+      change.release();
+    }
+    expect((await units()).find((v) => v.youtubeId === 'mmmmmmmmmm6')?.unit).toBe(6);
+
     // An unknown course is refused.
     expect(
       (await call('PATCH', `/admin/videos/channels/${channelId}`, { course: 'latin' }))

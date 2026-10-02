@@ -48,24 +48,37 @@ export function ClassRecordings({
   const progress = useListenStore((s) => s.progress);
   // Loads overlap (polling, actions); only the newest one may write its answers.
   const latest = useRef(0);
+  const inFlight = useRef(0);
+
+  const loadInto = useCallback(
+    async (request: number) => {
+      const result = await api.list(classId);
+      if (request !== latest.current) return;
+      if (result.ok) setItems(result.value.items);
+      else setMessage(result.message);
+      if (teacher) {
+        const heard = await api.listening(classId);
+        if (request !== latest.current) return;
+        if (heard.ok) {
+          setListening(new Map(heard.value.recordings.map((r) => [r.mediaId, r])));
+          setListeningError(null);
+        } else {
+          setListeningError(heard.message);
+        }
+      }
+    },
+    [api, classId, teacher]
+  );
 
   const load = useCallback(async () => {
     const request = ++latest.current;
-    const result = await api.list(classId);
-    if (request !== latest.current) return;
-    if (result.ok) setItems(result.value.items);
-    else setMessage(result.message);
-    if (teacher) {
-      const heard = await api.listening(classId);
-      if (request !== latest.current) return;
-      if (heard.ok) {
-        setListening(new Map(heard.value.recordings.map((r) => [r.mediaId, r])));
-        setListeningError(null);
-      } else {
-        setListeningError(heard.message);
-      }
+    inFlight.current += 1;
+    try {
+      await loadInto(request);
+    } finally {
+      inFlight.current -= 1;
     }
-  }, [api, classId, teacher]);
+  }, [loadInto]);
 
   // A new class (or role) makes answers still on their way stale.
   useEffect(
@@ -83,7 +96,10 @@ export function ClassRecordings({
   const busy = items?.some((i) => i.status === 'processing' || i.status === 'importing');
   useEffect(() => {
     if (!busy) return;
-    const timer = window.setInterval(() => void load(), 5000);
+    // A slow answer is waited for, not overtaken (it would be discarded as stale).
+    const timer = window.setInterval(() => {
+      if (inFlight.current === 0) void load();
+    }, 5000);
     return () => window.clearInterval(timer);
   }, [busy, load]);
 

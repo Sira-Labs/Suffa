@@ -17,7 +17,7 @@
  *   POST   /:videoId/checkpoints           { atSec, data } → 201
  *   DELETE /:videoId/checkpoints/:cpId     → 204
  */
-import { MAX_UNIT } from '@suffa/engagement';
+import { COURSE_IDS, DEFAULT_COURSE, MAX_UNIT, type CourseId } from '@suffa/engagement';
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
 import type { AuthResolver } from '../auth/resolver.js';
@@ -37,9 +37,11 @@ const Uuid = z.string().uuid();
 const PlaylistId = z
   .string()
   .regex(/^(PL|UU|OL|FL|LL)[A-Za-z0-9_-]{10,40}$/, 'playlist id');
+const Course = z.enum(COURSE_IDS as [CourseId, ...CourseId[]]);
 const NewChannel = z
   .object({
     name: z.string().trim().min(1).max(120),
+    course: Course.default(DEFAULT_COURSE),
     youtubeChannelId: z
       .string()
       .regex(/^UC[A-Za-z0-9_-]{22}$/)
@@ -51,6 +53,7 @@ const NewChannel = z
 const ChannelPatch = z
   .object({
     name: z.string().trim().min(1).max(120).optional(),
+    course: Course.optional(),
     playlists: z.array(PlaylistId).max(20).optional(),
     permissionStatus: z.enum(['unknown', 'requested', 'granted', 'declined']).optional(),
     permissionNotes: z.string().max(4000).optional(),

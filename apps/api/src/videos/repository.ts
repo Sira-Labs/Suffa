@@ -4,6 +4,7 @@
  */
 import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
+import { courseOfUnit, DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 import { writeAudit } from '../audit/log.js';
 import { inTransaction } from '../db/transaction.js';
 import type { CheckpointData, Cue } from '../media/interactive.js';
@@ -14,6 +15,8 @@ export type PermissionStatus = 'unknown' | 'requested' | 'granted' | 'declined';
 export interface VideoChannel {
   id: string;
   name: string;
+  /** The course its lessons belong to (ADR-0025). */
+  course: CourseId;
   youtubeChannelId: string | null;
   playlists: string[];
   permissionStatus: PermissionStatus;
@@ -56,6 +59,7 @@ export interface Change {
 const channelOf = (r: Record<string, unknown>): VideoChannel => ({
   id: r.id as string,
   name: r.name as string,
+  course: (r.course as CourseId | undefined) ?? DEFAULT_COURSE,
   youtubeChannelId: (r.youtube_channel_id as string | null) ?? null,
   playlists: r.playlists as string[],
   permissionStatus: r.permission_status as PermissionStatus,
@@ -100,22 +104,34 @@ export class PgVideoRepository {
   }
 
   async createChannel(
-    input: { name: string; youtubeChannelId: string | null; playlists: string[] },
+    input: {
+      name: string;
+      course: CourseId;
+      youtubeChannelId: string | null;
+      playlists: string[];
+    },
     change: Change
   ): Promise<string> {
     const id = randomUUID();
     await inTransaction(this.pool, async (db) => {
       await db.query(
-        `insert into video_channels (id, name, youtube_channel_id, playlists, updated_by)
-         values ($1, $2, $3, $4, $5)`,
-        [id, input.name, input.youtubeChannelId, input.playlists, change.actorId]
+        `insert into video_channels (id, name, course, youtube_channel_id, playlists, updated_by)
+         values ($1, $2, $3, $4, $5, $6)`,
+        [
+          id,
+          input.name,
+          input.course,
+          input.youtubeChannelId,
+          input.playlists,
+          change.actorId,
+        ]
       );
       await writeAudit(db, {
         actorId: change.actorId,
         action: 'video.channel_created',
         targetType: 'video_channel',
         targetId: id,
-        details: { name: input.name, playlists: input.playlists },
+        details: { name: input.name, course: input.course, playlists: input.playlists },
         ipAddress: change.ipAddress,
       });
     });
@@ -127,6 +143,7 @@ export class PgVideoRepository {
     id: string,
     patch: Partial<{
       name: string;
+      course: CourseId;
       playlists: string[];
       permissionStatus: PermissionStatus;
       permissionNotes: string;
@@ -136,7 +153,7 @@ export class PgVideoRepository {
   ): Promise<boolean> {
     return inTransaction(this.pool, async (db) => {
       const before = await db.query(
-        'select permission_status, name, playlists from video_channels where id = $1 for update',
+        'select permission_status, name, playlists, course from video_channels where id = $1 for update',
         [id]
       );
       if (!before.rows[0]) return false;
@@ -147,7 +164,8 @@ export class PgVideoRepository {
            permission_status = coalesce($4, permission_status),
            permission_notes = coalesce($5, permission_notes),
            contacted_at = case when $6::boolean then $7::date else contacted_at end,
-           updated_by = $8, updated_at = now()
+           updated_by = $8, updated_at = now(),
+           course = coalesce($9, course)
          where id = $1`,
         [
           id,
@@ -158,8 +176,13 @@ export class PgVideoRepository {
           patch.contactedAt !== undefined,
           patch.contactedAt ?? null,
           change.actorId,
+          patch.course ?? null,
         ]
       );
+      const remapped =
+        patch.course && patch.course !== before.rows[0].course
+          ? await remapUnits(db, id, patch.course)
+          : 0;
       await writeAudit(db, {
         actorId: change.actorId,
         action:
@@ -172,6 +195,7 @@ export class PgVideoRepository {
         details: {
           from: before.rows[0].permission_status,
           ...patch,
+          ...(remapped > 0 ? { unitsRemapped: remapped } : {}),
         },
         ipAddress: change.ipAddress,
       });
@@ -186,12 +210,25 @@ export class PgVideoRepository {
     );
   }
 
-  /** Inserts new videos and refreshes known ones; a unit set by an admin is kept. */
+  /**
+   * Inserts new videos and refreshes known ones; a unit set by an admin is kept.
+   *
+   * Runs in one transaction that holds a share lock on the channel row. A course change in
+   * `updateChannel` takes the row lock `for update`, so it waits for a running import, and an
+   * import waits for a course change. Units are therefore always read in the course that is
+   * committed when the videos are written.
+   */
   async upsertVideos(channelId: string, videos: YouTubeVideo[]): Promise<number> {
-    let added = 0;
-    for (const v of videos) {
-      const { rows } = await this.pool.query(
-        `insert into videos (id, channel_id, youtube_id, title, duration_sec, thumbnail_url,
+    return inTransaction(this.pool, async (db) => {
+      const channel = await db.query(
+        'select course from video_channels where id = $1 for share',
+        [channelId]
+      );
+      const course = (channel.rows[0]?.course as CourseId | undefined) ?? DEFAULT_COURSE;
+      let added = 0;
+      for (const v of videos) {
+        const { rows } = await db.query(
+          `insert into videos (id, channel_id, youtube_id, title, duration_sec, thumbnail_url,
            published_at, playlist_id, position, unit)
          values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          on conflict (youtube_id) do update set
@@ -201,22 +238,23 @@ export class PgVideoRepository {
            unit = coalesce(videos.unit, excluded.unit), imported_at = now()
          where videos.channel_id = excluded.channel_id
          returning (xmax = 0) as inserted`,
-        [
-          randomUUID(),
-          channelId,
-          v.youtubeId,
-          v.title,
-          v.durationSec,
-          v.thumbnailUrl,
-          v.publishedAt,
-          v.playlistId,
-          v.position,
-          guessUnit(v.title),
-        ]
-      );
-      if (rows[0]?.inserted) added += 1;
-    }
-    return added;
+          [
+            randomUUID(),
+            channelId,
+            v.youtubeId,
+            v.title,
+            v.durationSec,
+            v.thumbnailUrl,
+            v.publishedAt,
+            v.playlistId,
+            v.position,
+            guessUnit(v.title, course),
+          ]
+        );
+        if (rows[0]?.inserted) added += 1;
+      }
+      return added;
+    });
   }
 
   async adminVideos(): Promise<Video[]> {
@@ -332,4 +370,25 @@ export class PgVideoRepository {
       [videoId, JSON.stringify(cues), by]
     );
   }
+}
+
+/**
+ * After a channel changes its course, its videos must not stay under the old course: every
+ * video whose unit lies outside the new course gets the unit read from its title in the new
+ * course (or none). Units already within the new course stay, also those an admin set.
+ */
+async function remapUnits(db: pg.PoolClient, channelId: string, course: CourseId) {
+  const { rows } = await db.query<{ id: string; title: string; unit: number | null }>(
+    'select id, title, unit from videos where channel_id = $1 for update',
+    [channelId]
+  );
+  let changed = 0;
+  for (const v of rows) {
+    if (v.unit !== null && courseOfUnit(v.unit)?.id === course) continue;
+    const unit = guessUnit(v.title, course);
+    if (unit === v.unit) continue;
+    await db.query('update videos set unit = $2 where id = $1', [v.id, unit]);
+    changed += 1;
+  }
+  return changed;
 }

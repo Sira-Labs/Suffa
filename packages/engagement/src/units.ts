@@ -3,6 +3,7 @@
  * with their tests, and whether a unit was finished by its target date. Soft deadlines: an
  * overdue unit stays open and only loses the on-time bonus.
  */
+import { courseOfUnit, type CourseId } from './courses.js';
 import type { EnrollmentEntry, ExamEntry } from './records.js';
 
 /** Share of a unit test that counts as passed. */
@@ -12,40 +13,90 @@ export const STAGE_TEST_FORMAT = 'stage_test';
 export const BOOK_UNITS = 16;
 
 /**
- * A level is a book; each book has two stages of eight units that end with a stage test
- * (the publisher's mid-term and final test cover the same halves).
+ * A level is a book, split into stages that each end with a badge (ADR-0025: per course).
+ * Al-Arabiyya bayna Yadayk: two stages of eight units, each closed by a stage test (the
+ * publisher's mid-term and final test cover the same halves). Medina course: a stage is done
+ * once every lesson test in it is passed; it has no separate stage test.
  */
 export interface Stage {
+  /** Number within the course (1, 2, …). */
   id: number;
+  course: CourseId;
   book: number;
   units: readonly number[];
   /** Learner-facing names (German). */
   name: string;
-  test: string;
+  /** The stage test, or null when passing all lesson tests completes the stage. */
+  test: string | null;
   badge: string;
+  /** The badge in Arabic. */
+  arabic: string;
+  /** Badge id and XP reference ("stage-1" stays as stored before courses existed). */
+  ref: string;
 }
 
 const range = (from: number, to: number) =>
   Array.from({ length: to - from + 1 }, (_, i) => from + i);
 
+/** Al-Arabiyya bayna Yadayk, Book 1. */
 export const STAGES: readonly Stage[] = [
   {
     id: 1,
+    course: 'bayna-yadayk',
     book: 1,
     units: range(1, 8),
     name: 'Etappe 1',
     test: 'Zwischentest',
     badge: 'Grundstein',
+    arabic: 'حَجَر الأساس',
+    ref: 'stage-1',
   },
   {
     id: 2,
+    course: 'bayna-yadayk',
     book: 1,
     units: range(9, 16),
     name: 'Etappe 2',
     test: 'Abschlusstest',
     badge: 'Buch 1',
+    arabic: 'الكِتاب الأوَّل',
+    ref: 'stage-2',
   },
 ];
+
+/** Medina course, Book 1: lessons 1–12 and 13–23 (units 101–112, 113–123). */
+export const MADINAH_STAGES: readonly Stage[] = [
+  {
+    id: 1,
+    course: 'madinah',
+    book: 1,
+    units: range(101, 112),
+    name: 'Etappe 1',
+    test: null,
+    badge: 'Erste Schritte',
+    arabic: 'الخُطُواتُ الأُولى',
+    ref: 'madinah-stage-1',
+  },
+  {
+    id: 2,
+    course: 'madinah',
+    book: 1,
+    units: range(113, 123),
+    name: 'Etappe 2',
+    test: null,
+    badge: 'Medina Buch 1',
+    arabic: 'كِتابُ المَدِينَةِ الأوَّل',
+    ref: 'madinah-stage-2',
+  },
+];
+
+/** Every course's stages (badges and stage XP cover all of them). */
+export const ALL_STAGES: readonly Stage[] = [...STAGES, ...MADINAH_STAGES];
+
+/** The stages of one course, in order. */
+export function stagesOf(course: CourseId): readonly Stage[] {
+  return ALL_STAGES.filter((s) => s.course === course);
+}
 
 const passing = (e: ExamEntry) =>
   !e.deleted && e.total > 0 && e.score / e.total >= PASS_RATIO;
@@ -70,7 +121,12 @@ export function passedTest<E extends ExamEntry>(
 }
 
 export function stageOf(unit: number): Stage | undefined {
-  return STAGES.find((s) => s.units.includes(unit));
+  return ALL_STAGES.find((s) => s.units.includes(unit));
+}
+
+/** The stage before `stage` in its course, if any. */
+function previousStage(stage: Stage): Stage | undefined {
+  return ALL_STAGES.find((s) => s.course === stage.course && s.id === stage.id - 1);
 }
 
 /** The first passing stage test of `stage` (format stage_test, units within the stage). */
@@ -89,6 +145,23 @@ export function stageTestPassed<E extends ExamEntry>(
   );
 }
 
+/**
+ * When `stage` was completed: its first passing stage test, or, for a stage without one, the
+ * lesson test that passed its last open lesson. Null while it is not complete.
+ */
+export function stageCompleted<E extends ExamEntry>(
+  exams: readonly E[],
+  stage: Stage
+): E | null {
+  if (stage.test !== null) return stageTestPassed(exams, stage);
+  const passed = stage.units.map((u) => passedTest(exams, u));
+  if (passed.some((p) => p === null)) return null;
+  // Every stage has units, so there is at least one passed test to compare.
+  return (passed as E[]).reduce((latest, e) =>
+    e.finishedAt.localeCompare(latest.finishedAt) > 0 ? e : latest
+  );
+}
+
 export type StageState<E extends ExamEntry = ExamEntry> =
   | { state: 'locked' }
   | { state: 'running'; unitsPassed: number }
@@ -99,10 +172,10 @@ export function stageState<E extends ExamEntry>(
   stage: Stage,
   exams: readonly E[]
 ): StageState<E> {
-  const passed = stageTestPassed(exams, stage);
+  const passed = stageCompleted(exams, stage);
   if (passed) return { state: 'done', passed };
-  const previous = STAGES.find((s) => s.id === stage.id - 1);
-  if (previous && !stageTestPassed(exams, previous)) return { state: 'locked' };
+  const previous = previousStage(stage);
+  if (previous && !stageCompleted(exams, previous)) return { state: 'locked' };
   const unitsPassed = stage.units.filter((u) => passedTest(exams, u)).length;
   return unitsPassed === stage.units.length
     ? { state: 'test-ready', unitsPassed }
@@ -110,16 +183,16 @@ export function stageState<E extends ExamEntry>(
 }
 
 /**
- * Unit 1 is always open; every further unit opens with the previous unit's test, and the
- * first unit of a stage also needs the previous stage's test.
+ * The first unit of a course is always open; every further unit opens with the previous unit's
+ * test, and the first unit of a stage also needs the previous stage's test.
  */
 export function isUnlocked(unit: number, exams: readonly ExamEntry[]): boolean {
-  if (unit <= 1) return true;
+  if (unit <= 1 || courseOfUnit(unit)?.units[0] === unit) return true;
   if (!passedTest(exams, unit - 1)) return false;
   const stage = stageOf(unit);
-  const previous = stage && STAGES.find((s) => s.id === stage.id - 1);
+  const previous = stage && previousStage(stage);
   if (stage && previous && stage.units[0] === unit) {
-    return stageTestPassed(exams, previous) !== null;
+    return stageCompleted(exams, previous) !== null;
   }
   return true;
 }

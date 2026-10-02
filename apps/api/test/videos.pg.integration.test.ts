@@ -192,6 +192,106 @@ describe.skipIf(!url)('Video catalog (Postgres)', () => {
     expect((await app.request(`/api/v1/videos/${intro.id}`)).status).toBe(404);
   });
 
+  it("reads lesson numbers in the channel's course", async () => {
+    const created = await call('POST', '/admin/videos/channels', {
+      name: 'Madinah Arabic',
+      course: 'madinah',
+      playlists: ['PLmadinah-book1'],
+    });
+    expect(created.status).toBe(201);
+    const { id: channelId } = (await created.json()) as { id: string };
+    playlist = [
+      {
+        ...video('mmmmmmmmmm5', 'Madinah Arabic Book 1 – Lesson 5', 0),
+        playlistId: 'PLmadinah-book1',
+      },
+      { ...video('mmmmmmmmm24', 'Lesson 24', 1), playlistId: 'PLmadinah-book1' },
+    ];
+    const youtube = { playlist: async () => playlist };
+    expect(await importChannel({ videos: repo, youtube, log: quiet }, channelId)).toBe(2);
+    const admin = (await (await call('GET', '/admin/videos')).json()) as {
+      channels: { id: string; course: string }[];
+      videos: { youtubeId: string; unit: number | null }[];
+    };
+    expect(admin.channels.find((c) => c.id === channelId)?.course).toBe('madinah');
+    expect(
+      admin.videos
+        .filter((v) => v.youtubeId.startsWith('mmmm'))
+        .map((v) => [v.youtubeId, v.unit])
+    ).toEqual([
+      ['mmmmmmmmmm5', 105],
+      ['mmmmmmmmm24', null],
+    ]);
+
+    // Changing the course moves the videos with it: units outside the new course are read
+    // again from the title, units already within it stay (also those an admin set).
+    const units = async () =>
+      (
+        (await (await call('GET', '/admin/videos')).json()) as {
+          videos: { id: string; youtubeId: string; unit: number | null }[];
+        }
+      ).videos.filter((v) => v.youtubeId.startsWith('mmmm'));
+    const lesson24 = (await units()).find((v) => v.youtubeId === 'mmmmmmmmm24')!;
+    expect(
+      (await call('PATCH', `/admin/videos/${lesson24.id}`, { unit: 7 })).status
+    ).toBe(204);
+    expect(
+      (
+        await call('PATCH', `/admin/videos/channels/${channelId}`, {
+          course: 'bayna-yadayk',
+        })
+      ).status
+    ).toBe(204);
+    expect((await units()).map((v) => [v.youtubeId, v.unit])).toEqual([
+      ['mmmmmmmmmm5', 5],
+      ['mmmmmmmmm24', 7],
+    ]);
+    expect(
+      (await call('PATCH', `/admin/videos/channels/${channelId}`, { course: 'madinah' }))
+        .status
+    ).toBe(204);
+    expect((await units()).map((v) => [v.youtubeId, v.unit])).toEqual([
+      ['mmmmmmmmmm5', 105],
+      ['mmmmmmmmm24', null],
+    ]);
+
+    // An import that starts while a course change is still open waits for it and reads the
+    // titles in the course that change commits.
+    const change = await pool.connect();
+    try {
+      await change.query('begin');
+      await change.query('select id from video_channels where id = $1 for update', [
+        channelId,
+      ]);
+      await change.query(
+        `update video_channels set course = 'bayna-yadayk' where id = $1`,
+        [channelId]
+      );
+      let done = false;
+      const importing = repo
+        .upsertVideos(channelId, [
+          { ...video('mmmmmmmmmm6', 'Lesson 6', 2), playlistId: 'PLmadinah-book1' },
+        ])
+        .then((added) => {
+          done = true;
+          return added;
+        });
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      expect(done).toBe(false);
+      await change.query('commit');
+      expect(await importing).toBe(1);
+    } finally {
+      change.release();
+    }
+    expect((await units()).find((v) => v.youtubeId === 'mmmmmmmmmm6')?.unit).toBe(6);
+
+    // An unknown course is refused.
+    expect(
+      (await call('PATCH', `/admin/videos/channels/${channelId}`, { course: 'latin' }))
+        .status
+    ).toBe(400);
+  });
+
   it('keeps the catalog tools to admins and validates input', async () => {
     expect((await call('GET', '/admin/videos', undefined, 'student')).status).toBe(403);
     expect((await call('GET', '/admin/videos', undefined, '')).status).toBe(401);

@@ -13,7 +13,7 @@ import type {
   ReviewEntry,
   TrackEntry,
 } from './records.js';
-import { STAGES, enrollmentStatus, stageTestPassed } from './units.js';
+import { ALL_STAGES, enrollmentStatus, stageCompleted } from './units.js';
 
 /** Bump when a weight changes: the server then recomputes every ledger. */
 export const RULES_VERSION = 1;
@@ -169,17 +169,17 @@ export function checkInXpEvents(checkIns: readonly CheckInEntry[]): XpEvent[] {
   }));
 }
 
-/** Stage bonus: once per stage, at its first passing stage test. */
+/** Stage bonus: once per stage of any course, when the stage is completed. */
 export function stageXpEvents(exams: readonly ExamEntry[]): XpEvent[] {
-  return STAGES.flatMap((stage) => {
-    const passed = stageTestPassed(exams, stage);
+  return ALL_STAGES.flatMap((stage) => {
+    const passed = stageCompleted(exams, stage);
     return passed
       ? [
           {
             at: passed.finishedAt,
             points: XP_RULES.stageComplete,
             kind: 'stage' as const,
-            ref: `stage-${stage.id}`,
+            ref: stage.ref,
           },
         ]
       : [];

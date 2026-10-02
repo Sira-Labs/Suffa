@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { Level } from '@suffa/engagement';
 import { Icon } from '@/components/Icon';
-import { STAGES, stageState } from '@/services/enrollment';
+import { MADINAH_STAGES, STAGES, stageState } from '@/services/enrollment';
 import { useBookProgress } from '@/modules/units/useBookProgress';
 import { useEnrollmentStore } from '@/state';
 import { MADINAH_BOOKS, madinahProgress, useActiveCourse } from '@/services/courses';
@@ -48,6 +48,10 @@ function MadinahBookLevel() {
   const book = MADINAH_BOOKS[0]!;
   const { lessons, passed, next } = madinahProgress(exams);
   const total = lessons.length;
+  const stage =
+    MADINAH_STAGES.find((s) => stageState(s, exams).state !== 'done') ??
+    MADINAH_STAGES[MADINAH_STAGES.length - 1]!;
+  const state = stageState(stage, exams);
   return (
     <>
       <strong
@@ -72,12 +76,17 @@ function MadinahBookLevel() {
           {passed} von {total} Lektionen
         </span>
       </div>
+      {next && (
+        <span className="muted">
+          Als Nächstes: Lektionstest Lektion {next.lesson.lesson}
+        </span>
+      )}
       <span className="row muted level-card-stage">
         <Icon name="path" size={16} />
         <span>
-          {next
-            ? `Als Nächstes: Lektionstest Lektion ${next.lesson.lesson}`
-            : `Buch ${book.book} geschafft`}
+          {state.state === 'done'
+            ? `Buch ${book.book} geschafft – Abzeichen „${stage.badge}“`
+            : `${stage.name}: ${state.state === 'locked' ? 0 : state.unitsPassed} von ${stage.units.length} Lektionen bis zum Abzeichen „${stage.badge}“`}
         </span>
       </span>
     </>

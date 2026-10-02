@@ -233,6 +233,7 @@ describe('Admin videos tab', () => {
           {
             id: 'c1',
             name: 'Muhammad al-Andalusi',
+            course: 'bayna-yadayk',
             youtubeChannelId: null,
             playlists: ['PLandalusi-book1'],
             permissionStatus: 'unknown',
@@ -272,8 +273,13 @@ describe('Admin videos tab', () => {
       within(card).getByLabelText('Notizen zur Anfrage'),
       'E-Mail gesendet'
     );
+    await userEvent.selectOptions(
+      within(card).getByLabelText('Kurs des Kanals'),
+      'madinah'
+    );
     await userEvent.click(within(card).getByRole('button', { name: 'Speichern' }));
     expect(requests.find((r) => r.method === 'PATCH')?.body).toEqual({
+      course: 'madinah',
       permissionStatus: 'requested',
       permissionNotes: 'E-Mail gesendet',
       contactedAt: null,
@@ -290,5 +296,24 @@ describe('Admin videos tab', () => {
     expect(requests.find((r) => r.path === '/api/v1/admin/videos/v1')?.body).toEqual({
       unit: 1,
     });
+
+    // A new channel is created for a chosen course.
+    const form = screen
+      .getByRole('textbox', { name: 'Name des Kanals' })
+      .closest('form')!;
+    await userEvent.type(
+      within(form).getByLabelText('Name des Kanals'),
+      'Madinah Arabic'
+    );
+    await userEvent.selectOptions(
+      within(form).getByLabelText('Kurs des Kanals'),
+      'madinah'
+    );
+    await userEvent.click(within(form).getByRole('button', { name: 'Anlegen' }));
+    expect(
+      requests.find(
+        (r) => r.method === 'POST' && r.path === '/api/v1/admin/videos/channels'
+      )?.body
+    ).toEqual({ name: 'Madinah Arabic', course: 'madinah', playlists: [] });
   });
 });

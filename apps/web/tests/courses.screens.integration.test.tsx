@@ -106,6 +106,9 @@ describe('Course-aware screens (Medina course)', () => {
     expect(await screen.findByText('Medina-Kurs · Buch 1')).toBeTruthy();
     expect(screen.getByText('1 von 23 Lektionen')).toBeTruthy();
     expect(screen.getByText('Als Nächstes: Lektionstest Lektion 2')).toBeTruthy();
+    expect(
+      screen.getByText('Etappe 1: 1 von 12 Lektionen bis zum Abzeichen „Erste Schritte“')
+    ).toBeTruthy();
     // Nothing of the other course's level map.
     expect(screen.queryByText(/Stufe 1/)).toBeNull();
     expect(screen.queryByText('Deine Einheit')).toBeNull();

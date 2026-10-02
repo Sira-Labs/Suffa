@@ -73,7 +73,13 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
           ))}
         </div>
       )}
-      {videos?.length === 0 && <p className="muted">Noch keine Videolektionen.</p>}
+      {videos && shown.length === 0 && (
+        <p className="muted">
+          {ofCourse.length === 0
+            ? 'Noch keine Videolektionen zu deinem Kurs.'
+            : `Noch keine Videolektionen zu ${unitLabel(unit!)}.`}
+        </p>
+      )}
       <div className="video-grid">
         {shown.map((v) => {
           const heard = progress[`yt/${v.id}`];

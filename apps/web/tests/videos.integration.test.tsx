@@ -10,7 +10,7 @@ import { VideoLessons } from '@/modules/videos/VideoLessons';
 import type { YouTubeNamespace } from '@/services/discover/youtubeApi';
 import { glossFor } from '@/services/videos/gloss';
 import { VideosApi } from '@/services/videos/videosApi';
-import { useListenStore, usePracticeStore } from '@/state';
+import { useListenStore, usePracticeStore, useSettingsStore } from '@/state';
 
 const LESSON = {
   id: '11111111-1111-4111-8111-111111111111',
@@ -74,6 +74,37 @@ describe('Video lessons list', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Einheit 3' }));
     expect(screen.queryByText('الدرس ١ – التحية')).toBeNull();
     expect(screen.getByText('Lesson 3')).toBeTruthy();
+  });
+
+  it("shows only the learner's course and says when it has no videos yet", async () => {
+    await useSettingsStore.getState().update({ course: 'madinah' });
+    const { api } = apiWith({
+      'GET /api/v1/videos': {
+        videos: [LESSON, { ...LESSON, id: 'm', title: 'Madinah 2', unit: 102 }],
+      },
+    });
+    renderAt('/videos', <VideoLessons api={api} />, '/videos');
+    expect(await screen.findByText('Madinah 2')).toBeTruthy();
+    expect(screen.queryByText('الدرس ١ – التحية')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Lektion 2' })).toBeTruthy();
+    expect(screen.getByText(/Lektion 2 ·/)).toBeTruthy();
+
+    renderAt('/videos?unit=105', <VideoLessons api={api} />, '/videos');
+    expect(
+      await screen.findByText('Noch keine Videolektionen zu Lektion 5.')
+    ).toBeTruthy();
+    await useSettingsStore.getState().update({ course: 'bayna-yadayk' });
+  });
+
+  it('says so when the course has no videos at all', async () => {
+    await useSettingsStore.getState().update({ course: 'madinah' });
+    const { api } = apiWith({ 'GET /api/v1/videos': { videos: [LESSON] } });
+    renderAt('/videos', <VideoLessons api={api} />, '/videos');
+    expect(
+      await screen.findByText('Noch keine Videolektionen zu deinem Kurs.')
+    ).toBeTruthy();
+    expect(screen.queryByText('الدرس ١ – التحية')).toBeNull();
+    await useSettingsStore.getState().update({ course: 'bayna-yadayk' });
   });
 });
 

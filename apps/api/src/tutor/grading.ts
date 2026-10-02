@@ -5,12 +5,14 @@
  * teacher's review (story 11.2).
  */
 import { randomUUID } from 'node:crypto';
+import type { CourseId } from '@suffa/engagement';
 import type { TaskInput } from '@suffa/llm';
 import type pg from 'pg';
 import { z } from 'zod';
 import type { Actor } from '../authz/policies.js';
 import type { AiGateway } from '../ai/gateway.js';
 import { foldArabic, type ContentCatalog } from './content.js';
+import { courseBook, inCourse, unitName } from './course.js';
 import type { LearnerSnapshot, LearnerState } from './learner.js';
 
 export type GradeKind = 'writing' | 'speech';
@@ -197,9 +199,9 @@ export class PgGradeRepository implements GradeRepository {
   }
 }
 
-function graderPrompt(language: 'de' | 'en', kind: GradeKind): string {
+function graderPrompt(language: 'de' | 'en', kind: GradeKind, course: CourseId): string {
   const lang = language === 'en' ? 'English' : 'German';
-  return `You are al-Muʿallim, grading a learner's Arabic (Modern Standard Arabic, course "al-ʿArabiyya bayna yadayk") for Suffa.
+  return `You are al-Muʿallim, grading a learner's Arabic (Modern Standard Arabic; the learner follows ${courseBook(course)}) for Suffa.
 
 Grade fairly for the learner's level: judge what they could know from the units they have reached (the unit content follows). Be encouraging and precise.
 - score: 0–100 overall. rubric: 0–4 each for task fulfilment, grammar, vocabulary and spelling.
@@ -222,16 +224,26 @@ export const gradeTask = (kind: GradeKind) =>
  */
 export function gradeRequest(
   catalog: ContentCatalog,
-  learner: Pick<LearnerSnapshot, 'tutorLanguage' | 'currentUnit' | 'enrolledUnits'>,
+  learner: Pick<
+    LearnerSnapshot,
+    'tutorLanguage' | 'course' | 'currentUnit' | 'enrolledUnits'
+  >,
   input: GradeInput
 ): TaskInput {
-  const unit = input.unit && catalog.unit(input.unit) ? input.unit : learner.currentUnit;
+  // Only a unit of the learner's course, so the pack matches the course the grader names.
+  const unit =
+    input.unit && inCourse(input.unit, learner.course) && catalog.has(input.unit)
+      ? input.unit
+      : learner.currentUnit;
   return {
     system: [
-      { text: graderPrompt(learner.tutorLanguage, input.kind), cache: true },
+      {
+        text: graderPrompt(learner.tutorLanguage, input.kind, learner.course),
+        cache: true,
+      },
       { text: catalog.pack(unit), cache: true },
       {
-        text: `The learner is in unit ${learner.currentUnit} (started: ${learner.enrolledUnits.join(', ') || 'none'}).`,
+        text: `The learner is at ${unitName(learner.currentUnit)} (started: ${learner.enrolledUnits.map(unitName).join(', ') || 'none'}).`,
       },
     ],
     messages: [

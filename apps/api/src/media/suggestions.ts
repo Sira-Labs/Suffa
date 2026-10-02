@@ -12,7 +12,7 @@ import { AiQuotaError, type AiGateway } from '../ai/gateway.js';
 import { foldArabic, type ContentCatalog } from '../tutor/content.js';
 import { CheckpointData, type Cue, type InteractiveRepository } from './interactive.js';
 import {
-  PROOFREAD_PROMPT,
+  proofreadPrompt,
   PROOFREAD_SCHEMA,
   PROOFREAD_TASK,
   toFixes,
@@ -21,6 +21,8 @@ import {
 } from './proofread.js';
 import type { MediaRepository } from './repository.js';
 import { removeAndReopen } from './suggestionLinks.js';
+import type { CourseId } from '@suffa/engagement';
+import { courseBook } from '../tutor/course.js';
 
 export const SUGGEST_TASK = 'recording.suggest';
 /** Transcript sent to the model at most (about an hour of speech). */
@@ -345,7 +347,9 @@ const Raw = z.object({
     .max(40),
 });
 
-const PROMPT = `You help an Arabic teacher turn a recorded lesson into an interactive one for adult beginners (Modern Standard Arabic, course "al-ʿArabiyya bayna yadayk"). You get the transcript with timestamps in seconds.
+const suggestPrompt = (
+  course: CourseId
+) => `You help an Arabic teacher turn a recorded lesson into an interactive one for adult beginners (Modern Standard Arabic; the class follows ${courseBook(course)}). You get the transcript with timestamps in seconds.
 
 Propose:
 - chapters: 3–10 parts of the lesson with a short German title each, at the second the part starts.
@@ -410,7 +414,7 @@ export async function suggestForRecording(
     gateway: AiGateway;
     suggestions: SuggestionRepository;
     media: Pick<MediaRepository, 'byId'>;
-    interactive: Pick<InteractiveRepository, 'transcript' | 'aiEnabled'>;
+    interactive: Pick<InteractiveRepository, 'transcript' | 'aiEnabled' | 'classCourse'>;
     catalog: ContentCatalog | null;
     log: Pick<Logger, 'info' | 'warn'>;
   },
@@ -433,11 +437,12 @@ export async function suggestForRecording(
   }
   await deps.suggestions.setRun(mediaId, 'running');
   try {
+    const course = await deps.interactive.classCourse(item.classId);
     const result = await deps.gateway.complete(
       { id: run.requestedBy, role: 'teacher' },
       SUGGEST_TASK,
       {
-        system: [{ text: PROMPT, cache: true }],
+        system: [{ text: suggestPrompt(course), cache: true }],
         messages: [
           {
             role: 'user',
@@ -452,7 +457,13 @@ export async function suggestForRecording(
       item.durationSec,
       deps.catalog
     );
-    const fixes = await proofread(deps, run.requestedBy, mediaId, transcript.cues);
+    const fixes = await proofread(
+      deps,
+      run.requestedBy,
+      mediaId,
+      transcript.cues,
+      course
+    );
     await deps.suggestions.replacePending(mediaId, [...suggestions, ...fixes]);
     await deps.suggestions.setRun(mediaId, 'ready');
     deps.log.info(
@@ -487,7 +498,8 @@ async function proofread(
   deps: { gateway: AiGateway; log: Pick<Logger, 'info' | 'warn'> },
   requestedBy: string,
   mediaId: string,
-  cues: readonly Cue[]
+  cues: readonly Cue[],
+  course: CourseId
 ): Promise<Omit<Suggestion, 'id'>[]> {
   const out: Omit<Suggestion, 'id'>[] = [];
   for (const piece of transcriptPieces(cues)) {
@@ -496,7 +508,7 @@ async function proofread(
         { id: requestedBy, role: 'teacher' },
         PROOFREAD_TASK,
         {
-          system: [{ text: PROOFREAD_PROMPT, cache: true }],
+          system: [{ text: proofreadPrompt(course), cache: true }],
           messages: [{ role: 'user', content: `Transcript lines:\n${piece}` }],
           jsonSchema: PROOFREAD_SCHEMA as unknown as Record<string, unknown>,
         }

@@ -6,6 +6,8 @@ import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
 import { z } from 'zod';
 import { removeAndReopen } from './suggestionLinks.js';
+import type { CourseId } from '@suffa/engagement';
+import { courseOrDefault } from '../tutor/course.js';
 
 export const Cue = z.object({
   start: z
@@ -78,6 +80,8 @@ export interface InteractiveRepository {
   ): Promise<Checkpoint>;
   removeCheckpoint(mediaId: string, id: string): Promise<boolean>;
   aiEnabled(classId: string): Promise<boolean>;
+  /** The course the class follows (ADR-0025), named in the recording prompts. */
+  classCourse(classId: string): Promise<CourseId>;
   setAiEnabled(classId: string, enabled: boolean): Promise<void>;
 }
 
@@ -160,6 +164,13 @@ export class PgInteractiveRepository implements InteractiveRepository {
       [classId]
     );
     return rows[0]?.ai_enabled === true;
+  }
+
+  async classCourse(classId: string) {
+    const { rows } = await this.pool.query('select course from classes where id = $1', [
+      classId,
+    ]);
+    return courseOrDefault(rows[0]?.course);
   }
 
   async setAiEnabled(classId: string, enabled: boolean) {

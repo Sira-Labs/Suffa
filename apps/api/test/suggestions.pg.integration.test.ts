@@ -227,6 +227,10 @@ describe.skipIf(!url)('Recording suggestions (Postgres)', () => {
     expect(queued).toEqual([mediaId]);
     await run();
     const sent = model.requests[0]!;
+    // The class follows the first course unless it chose another (ADR-0025).
+    expect(sent.system?.[0]?.text).toContain(
+      'the book series "al-ʿArabiyya bayna yadayk"'
+    );
     expect(sent.messages[0]).toMatchObject({ role: 'user' });
     expect((sent.messages[0] as { content: string }).content).toContain(
       '[95] ما اسْمُكِ؟'
@@ -329,6 +333,8 @@ describe.skipIf(!url)('Recording suggestions (Postgres)', () => {
       ],
     });
     model.requests = [];
+    // A Medina class: suggestions and proofreading name its book.
+    await pool.query(`update classes set course = 'madinah' where id = $1`, [classId]);
     model.fixes = JSON.stringify({
       fixes: [
         { line: 0, text: 'Heute lernen wir: هٰذَا بَيْتٌ.' },
@@ -344,6 +350,10 @@ describe.skipIf(!url)('Recording suggestions (Postgres)', () => {
     const proofreading = model.requests.find((r) =>
       JSON.stringify(r.jsonSchema).includes('"fixes"')
     )!;
+    for (const request of model.requests) {
+      expect(request.system?.[0]?.text).toContain('"Durūs al-lugha al-ʿarabiyya"');
+      expect(request.system?.[0]?.text).not.toContain('bayna yadayk');
+    }
     expect((proofreading.messages[0] as { content: string }).content).toContain(
       '[0] Heute lernen wir: Hather Beiton.'
     );

@@ -11,6 +11,8 @@ import { AiQuotaError, type AiGateway } from '../ai/gateway.js';
 import type { InteractiveRepository } from './interactive.js';
 import type { MediaRepository } from './repository.js';
 import { transcriptText, type RunStatus } from './suggestions.js';
+import type { CourseId } from '@suffa/engagement';
+import { courseBook } from '../tutor/course.js';
 
 export const SUMMARY_TASK = 'recording.summarize';
 
@@ -161,7 +163,9 @@ export const SUMMARY_SCHEMA = {
   },
 } as const;
 
-const PROMPT = `You summarise a recorded Arabic lesson for the teacher's adult learners (German speakers, Modern Standard Arabic, course "al-ʿArabiyya bayna yadayk"). You get the transcript with timestamps in seconds; the teacher may speak German and Arabic.
+const summaryPrompt = (
+  course: CourseId
+) => `You summarise a recorded Arabic lesson for the teacher's adult learners (German speakers, Modern Standard Arabic; the class follows ${courseBook(course)}). You get the transcript with timestamps in seconds; the teacher may speak German and Arabic.
 
 Write in German:
 - overview: what the lesson was about, 3–6 sentences;
@@ -204,7 +208,7 @@ export async function summarizeRecording(
     gateway: AiGateway;
     summaries: SummaryRepository;
     media: Pick<MediaRepository, 'byId'>;
-    interactive: Pick<InteractiveRepository, 'transcript' | 'aiEnabled'>;
+    interactive: Pick<InteractiveRepository, 'transcript' | 'aiEnabled' | 'classCourse'>;
     log: Pick<Logger, 'info' | 'warn'>;
   },
   mediaId: string
@@ -232,7 +236,12 @@ export async function summarizeRecording(
       { id: record.requestedBy, role: 'teacher' },
       SUMMARY_TASK,
       {
-        system: [{ text: PROMPT, cache: true }],
+        system: [
+          {
+            text: summaryPrompt(await deps.interactive.classCourse(item.classId)),
+            cache: true,
+          },
+        ],
         messages: [
           {
             role: 'user',

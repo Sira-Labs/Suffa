@@ -304,6 +304,48 @@ describe.skipIf(!url)('al-Muʿallim (Postgres)', () => {
     });
   });
 
+  it("reads each learner's course: lesson, trouble words and level (ADR-0025)", async () => {
+    // Bilal follows the Medina course, passed lessons 1 and 2 and failed lesson 3.
+    await pool.query(
+      `insert into settings (user_id, id, key, "tashkilLevel", course, updated_at)
+       values ($1, 'settings', 'settings', 'partial', 'madinah', now())`,
+      [BILAL]
+    );
+    await pool.query(
+      `insert into exam_results (user_id, id, format, units, score, total, "startedAt", "finishedAt", updated_at)
+       values ($1, 'l1', 'madinah_lesson', '[101]', 9, 10, now(), now() - interval '2 hours', now()),
+              ($1, 'l2', 'madinah_lesson', '[102]', 8, 10, now(), now() - interval '2 hours', now()),
+              ($1, 'l3', 'madinah_lesson', '[103]', 5, 10, now(), now() - interval '1 hour', now()),
+              ($1, 'b4', 'mixed_chapter', '[4]', 9, 10, now(), now(), now())`,
+      [BILAL]
+    );
+    // Earlier Bayna Yadayk progress stays stored, but out of the Medina snapshot.
+    await pool.query(
+      `insert into unit_enrollments (user_id, id, book, unit, pace, "startedAt", "dueAt", updated_at)
+       values ($1, 'b1-u4', 1, 4, 'normal', now(), now() + interval '14 days', now())`,
+      [BILAL]
+    );
+    await pool.query(
+      `insert into srs_cards (user_id, id, "contentRef", kind, due, leech, lapses, updated_at)
+       values ($1, 'md:md-103-01', 'md-103-01', 'vocab_ar_de', now(), true, 4, now())`,
+      [BILAL]
+    );
+    const learner = new PgLearnerState(pool, catalog);
+    expect(await learner.snapshot(BILAL)).toMatchObject({
+      course: 'madinah',
+      tashkilLevel: 'partial',
+      currentUnit: 103,
+      enrolledUnits: [],
+      lastExam: { units: [103], score: 5, total: 10 },
+      troubleWords: [{ ar: 'الْقَمَرُ', de: 'der Mond' }],
+    });
+    // Without a course setting: the first course, at the latest started unit.
+    expect(await learner.snapshot(AMINA)).toMatchObject({
+      course: 'bayna-yadayk',
+      currentUnit: 3,
+    });
+  });
+
   it('continues a conversation with its history and stores 👍/👎', async () => {
     model.steps = [{ text: 'أَهْلًا!' }, { text: 'جَيِّدٌ جِدًّا!' }];
     const first = await readSse(await call('POST', '/tutor/turn', { message: 'Hallo' }));

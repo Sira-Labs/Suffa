@@ -2,6 +2,10 @@
  * The course content on the server (ADR-0011 grounding): the same JSON files the app bundles
  * (apps/web/src/content), read once at start. Gives the tutor a byte-stable curriculum pack
  * per unit (cacheable prompt prefix) and the lookups behind its tools.
+ *
+ * Both courses (ADR-0025): the Bayna Yadayk units (`units/einheit-*.json`, units 1–16) and the
+ * Madinah lessons (`courses/madinah/book1-lessons.json`, units 101–123). The word tools search
+ * the Bayna Yadayk words; Madinah lessons give their pack and the meanings of their words.
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -49,6 +53,18 @@ export interface UnitContent {
   grammatik?: GrammarPoint[];
 }
 
+/** One Madinah lesson of our own content (the web's `book1-lessons.json`). */
+export interface LessonContent {
+  unit: number;
+  lesson: number;
+  topic: string;
+  words: { id: string; ar: string; de: string }[];
+  grammar: { title: string; text: string; examples: { ar: string; de: string }[] }[];
+  gaps: { ar: string; answer: string; de: string }[];
+}
+
+export const MADINAH_LESSONS_FILE = join('courses', 'madinah', 'book1-lessons.json');
+
 const TASHKIL = /[ً-ٰٟۖ-ۭ]/g;
 
 /** Arabic without vowel marks and with folded letter variants, for matching. */
@@ -80,13 +96,18 @@ export function foldRoot(root: string): string {
 
 export class ContentCatalog {
   private readonly byId = new Map<string, Word>();
+  private readonly lessonWords = new Map<string, { ar: string; de: string }>();
   private readonly packs = new Map<number, string>();
 
   constructor(
     readonly units: UnitContent[],
-    readonly verbs: VerbEntry[]
+    readonly verbs: VerbEntry[],
+    readonly lessons: LessonContent[] = []
   ) {
     for (const unit of units) for (const w of unit.vokabeln) this.byId.set(w.id, w);
+    for (const lesson of lessons) {
+      for (const w of lesson.words) this.lessonWords.set(w.id, { ar: w.ar, de: w.de });
+    }
   }
 
   static async load(dir: string): Promise<ContentCatalog> {
@@ -102,16 +123,33 @@ export class ContentCatalog {
     const meta = JSON.parse(await readFile(join(dir, 'meta.json'), 'utf8')) as {
       verben?: VerbEntry[];
     };
+    const madinah = JSON.parse(
+      await readFile(join(dir, MADINAH_LESSONS_FILE), 'utf8')
+    ) as { lessons: LessonContent[] };
     units.sort((a, b) => a.einheit - b.einheit);
-    return new ContentCatalog(units, meta.verben ?? []);
+    return new ContentCatalog(units, meta.verben ?? [], madinah.lessons);
   }
 
   word(id: string): Word | undefined {
     return this.byId.get(id);
   }
 
+  /** Arabic and German of any course word: a Bayna Yadayk word or a Madinah lesson word. */
+  meaning(id: string): { ar: string; de: string } | undefined {
+    return this.byId.get(id) ?? this.lessonWords.get(id);
+  }
+
   unit(n: number): UnitContent | undefined {
     return this.units.find((u) => u.einheit === n);
+  }
+
+  lesson(n: number): LessonContent | undefined {
+    return this.lessons.find((l) => l.unit === n);
+  }
+
+  /** The unit has content in either course, so it has a curriculum pack. */
+  has(n: number): boolean {
+    return this.unit(n) !== undefined || this.lesson(n) !== undefined;
   }
 
   /** Words matching Arabic (vowels optional), transliteration or German; best matches first. */
@@ -158,6 +196,12 @@ export class ContentCatalog {
   pack(n: number): string {
     const cached = this.packs.get(n);
     if (cached !== undefined) return cached;
+    const lesson = this.lesson(n);
+    if (lesson) {
+      const text = lessonPack(lesson);
+      this.packs.set(n, text);
+      return text;
+    }
     const unit = this.unit(n);
     if (!unit) return '';
     const lines = [
@@ -196,4 +240,29 @@ export class ContentCatalog {
     this.packs.set(n, text);
     return text;
   }
+}
+
+/** A Madinah lesson as prompt text: its words, grammar rules and gap sentences (filled in). */
+function lessonPack(lesson: LessonContent): string {
+  const lines = [
+    `# Lektion ${lesson.lesson} (Medina-Kurs, Buch 1): ${lesson.topic}`,
+    '## Wortschatz (ar | Deutsch)',
+    ...lesson.words.map((w) => `${w.ar} | ${w.de}`),
+  ];
+  if (lesson.grammar.length) {
+    lines.push(
+      '## Grammatik',
+      ...lesson.grammar.map(
+        (g) =>
+          `- ${g.title}: ${g.text}${g.examples[0] ? ` (z. B. ${g.examples[0].ar} = ${g.examples[0].de})` : ''}`
+      )
+    );
+  }
+  if (lesson.gaps.length) {
+    lines.push(
+      '## Beispielsätze',
+      ...lesson.gaps.map((g) => `${g.ar.replace('___', g.answer)} — ${g.de}`)
+    );
+  }
+  return lines.join('\n');
 }

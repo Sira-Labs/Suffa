@@ -41,8 +41,8 @@ describe('courses', () => {
     expect(() => courseById('x' as never)).toThrow();
   });
 
-  it('offers the Medina course with links first, before its own exercises exist', () => {
-    expect(courseById('madinah')).toMatchObject({ available: true, exercises: false });
+  it('offers both courses with their own exercises, so classes can assign their units', () => {
+    expect(courseById('madinah')).toMatchObject({ available: true, exercises: true });
     expect(courseById('bayna-yadayk')).toMatchObject({
       available: true,
       exercises: true,

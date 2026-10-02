@@ -1,10 +1,12 @@
 /**
  * The tutor's system prompt in cache-friendly order (tech spec §7): persona and pedagogy,
- * then the unit's curriculum pack (both byte-stable per language/unit, cache breakpoint after
- * the pack), then the volatile learner snapshot and where the learner is asking from.
+ * then the unit's curriculum pack (both byte-stable per language/course/unit, cache breakpoint
+ * after the pack), then the volatile learner snapshot and where the learner is asking from.
  */
+import type { CourseId } from '@suffa/engagement';
 import type { SystemPart } from '@suffa/llm';
 import type { ContentCatalog } from './content.js';
+import { courseBook, inCourse, unitName } from './course.js';
 import type { LearnerSnapshot, TutorLanguage } from './learner.js';
 
 export interface TurnContext {
@@ -15,8 +17,8 @@ export interface TurnContext {
 
 const LANGUAGE_NAME: Record<TutorLanguage, string> = { de: 'German', en: 'English' };
 
-function persona(language: TutorLanguage): string {
-  return `You are al-Muʿallim, the Arabic teacher inside Suffa, a course app for Modern Standard Arabic built on the book series "al-ʿArabiyya bayna yadayk". Learners are adults and teenagers in German-speaking countries, mostly beginners.
+function persona(language: TutorLanguage, course: CourseId): string {
+  return `You are al-Muʿallim, the Arabic teacher inside Suffa, a course app for Modern Standard Arabic. This learner follows ${courseBook(course)}. Learners are adults and teenagers in German-speaking countries, mostly beginners.
 
 How you teach:
 - Explain in ${LANGUAGE_NAME[language]}; Arabic examples stay in Arabic script. Teach Modern Standard Arabic; mention dialect only when asked.
@@ -49,18 +51,21 @@ export function buildSystem(
   snapshot: LearnerSnapshot,
   context: TurnContext
 ): SystemPart[] {
+  // Only a unit of the learner's course: its pack must match the course the persona names.
   const unit =
-    context.unit && catalog.unit(context.unit) ? context.unit : snapshot.currentUnit;
+    context.unit && inCourse(context.unit, snapshot.course) && catalog.has(context.unit)
+      ? context.unit
+      : snapshot.currentUnit;
   const learner = [
     '# The learner now',
     snapshot.firstName ? `First name: ${snapshot.firstName}` : 'Name: not shared',
-    `Current unit: ${snapshot.currentUnit}; started units: ${snapshot.enrolledUnits.join(', ') || 'none yet'}`,
+    `Now at: ${unitName(snapshot.currentUnit)}; started: ${snapshot.enrolledUnits.map(unitName).join(', ') || 'none yet'}`,
     `Cards: ${snapshot.cards.total}, due now: ${snapshot.cards.due}, leeches: ${snapshot.cards.leeches}`,
     snapshot.troubleWords.length
       ? `Often forgotten: ${snapshot.troubleWords.map((w) => `${w.ar} (${w.de})`).join(', ')}`
       : 'Often forgotten: none',
     snapshot.lastExam
-      ? `Last test: units ${snapshot.lastExam.units.join(', ')}, ${snapshot.lastExam.score}/${snapshot.lastExam.total}`
+      ? `Last test: ${snapshot.lastExam.units.map(unitName).join(', ')}, ${snapshot.lastExam.score}/${snapshot.lastExam.total}`
       : 'Last test: none',
     `Tashkīl: ${tashkilRule(snapshot.tashkilLevel)}`,
   ];
@@ -70,9 +75,9 @@ export function buildSystem(
     );
   }
   return [
-    { text: persona(snapshot.tutorLanguage), cache: true },
+    { text: persona(snapshot.tutorLanguage, snapshot.course), cache: true },
     {
-      text: catalog.pack(unit) || `Unit ${unit} has no course content yet.`,
+      text: catalog.pack(unit) || `${unitName(unit)} has no course content yet.`,
       cache: true,
     },
     { text: learner.join('\n') },

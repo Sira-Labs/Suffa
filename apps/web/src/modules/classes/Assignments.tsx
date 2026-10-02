@@ -8,9 +8,10 @@ import { Link } from 'react-router-dom';
 import {
   DEFAULT_COURSE,
   courseById,
-  unitLabelNumber,
+  courseOfUnit,
   type CourseId,
 } from '@suffa/engagement';
+import { madinahLessonPath, unitLabel } from '@/services/courses';
 import { InteractiveApi, type Assignment } from '@/services/media/interactiveApi';
 import { MediaApi, type MediaItem } from '@/services/media/mediaApi';
 
@@ -20,25 +21,22 @@ const DATE = new Intl.DateTimeFormat('de-DE', {
   month: 'short',
 });
 
-/** Where an assignment is done. */
+/** Where an assignment is done: a Medina lesson has its own page with the lesson test. */
 export function assignmentLink(
   classId: string,
   a: Pick<Assignment, 'kind' | 'ref'>
 ): string {
-  return a.kind === 'unit'
-    ? `/units/${a.ref}`
-    : `/classes/${classId}/recordings/${a.ref}`;
+  if (a.kind === 'recording') return `/classes/${classId}/recordings/${a.ref}`;
+  const unit = Number(a.ref);
+  return courseOfUnit(unit)?.id === 'madinah'
+    ? madinahLessonPath(unit)
+    : `/units/${unit}`;
 }
 
 /** End of the chosen local day, as an ISO instant. */
 export function endOfDay(date: string): string {
   const d = new Date(`${date}T23:59:00`);
   return d.toISOString();
-}
-
-/** "Einheit 3" in the first course, "Lektion 3" in the Medina course (unit 103). */
-export function unitName(course: CourseId, unit: number): string {
-  return `${course === 'madinah' ? 'Lektion' : 'Einheit'} ${unitLabelNumber(unit)}`;
 }
 
 export function Assignments({
@@ -166,7 +164,7 @@ function AssignmentForm({
     const [kind, ref] = choice.split(':') as ['unit' | 'recording', string];
     const title =
       kind === 'unit'
-        ? `${unitName(course, Number(ref))}: Test bestehen`
+        ? `${unitLabel(Number(ref))}: Test bestehen`
         : `Anhören: ${recordings.find((r) => r.id === ref)?.title ?? 'Aufnahme'}`;
     const result = await api.addAssignment(classId, {
       kind,
@@ -198,7 +196,7 @@ function AssignmentForm({
           >
             {units.map((u) => (
               <option key={u} value={`unit:${u}`}>
-                {unitName(course, u)}
+                {unitLabel(u)}
               </option>
             ))}
           </optgroup>

@@ -95,6 +95,26 @@ export function Settings() {
             ))}
           </select>
         </label>
+        <label className="row" style={{ justifyContent: 'space-between' }}>
+          <span className="stack" style={{ gap: 0 }}>
+            <span>Wiederholungsplan</span>
+            <span className="muted" style={{ fontSize: '0.85rem' }}>
+              FSRS plant jede Karte nach deinem Gedächtnis (Pilot). Heute fällige Karten
+              bleiben fällig; zurückwechseln geht jederzeit ohne Verlust.
+            </span>
+          </span>
+          <select
+            className="input"
+            value={settings.srsAlgorithm ?? 'sm2'}
+            onChange={(e) =>
+              void update({ srsAlgorithm: e.target.value === 'fsrs' ? 'fsrs' : 'sm2' })
+            }
+            style={{ width: 160, flexShrink: 0 }}
+          >
+            <option value="sm2">Klassisch</option>
+            <option value="fsrs">FSRS (Pilot)</option>
+          </select>
+        </label>
       </div>
 
       <PrivacyCard />

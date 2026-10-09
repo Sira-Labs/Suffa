@@ -369,6 +369,8 @@ results are deleted after 30 days. Open for the PO: 14.1 store release, 14.5 sto
 
 ### Sprint 15 — _"Hear yourself"_ (plan: Apr 19 – May 2; now: week of Sep 28)
 
+Status: 15.1 ✅ (`packages/phonology`, 100 % branch coverage, every unit and course text converts).
+
 | #    | Story                                                                                                                                                                                                                                             | Pts | Acceptance                                                                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | 15.1 | `packages/phonology`: rule-based G2P for vocalised MSA (shadda, sun letters, hamzat al-waṣl, tanwīn, tāʾ marbūṭa, alif maqṣūra, long vowels) with an index back to the letters (ADR-0022)                                                         | 5   | Every Book 1 word and dialogue line converts; tests for each rule; the letter index points at the right letter.                         |

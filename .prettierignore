@@ -4,3 +4,5 @@ dist
 node_modules
 apps/web/public/fonts
 package-lock.json
+# Xcode writes these files itself (asset catalogs, project files).
+mobile/ios

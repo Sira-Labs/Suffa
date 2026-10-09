@@ -378,6 +378,10 @@ feedback (`assessLetters`).
 recording, uploads bucket); the class's teachers (not admins) hear it in the "Hörliste" and leave a
 comment; withdrawing, leaving the class, revoked parents' consent and account deletion delete the
 file (trigger-queued, purged at once or by the worker every 10 minutes); in the export.
+15.5 ✅: pronunciation eval next to the AI evals: Spearman ρ, letter F1, false rejections, p95
+latency and cost per minute (`evaluate` in `@suffa/phonology`); an own fixture set with a baseline
+runs in CI; pilot recordings (January) run through the recogniser with the same command
+(`docs/pilot/pronunciation-eval.md`).
 
 | #    | Story                                                                                                                                                                                                                                             | Pts | Acceptance                                                                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------- |

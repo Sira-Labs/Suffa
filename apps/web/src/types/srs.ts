@@ -48,7 +48,14 @@ export interface SrsCard extends Syncable {
   lastReviewed: string | null;
   /** Set automatically when the card counts as "difficult" (mistake log). */
   leech: boolean;
+  /** FSRS memory state (story 15.6): days until recall drops to 90 %; none before FSRS. */
+  stability?: number | null;
+  /** FSRS difficulty 1–10; none before FSRS. */
+  difficulty?: number | null;
 }
+
+/** How reviews are scheduled: classic SM-2 (default) or FSRS-5 (story 15.6, pilot). */
+export type SrsAlgorithm = 'sm2' | 'fsrs';
 
 export interface ReviewLog extends Syncable {
   cardId: string;
@@ -116,6 +123,8 @@ export interface SettingsRecord extends Syncable {
   dialectNotes: boolean;
   /** The learner's own course (ADR-0025); none or null means the default course. */
   course?: CourseId | null;
+  /** Review scheduling (story 15.6); none or null means SM-2. */
+  srsAlgorithm?: SrsAlgorithm | null;
 }
 
 export type TashkilLevel = 'full' | 'partial' | 'none';

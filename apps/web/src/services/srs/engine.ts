@@ -1,5 +1,5 @@
 /**
- * SRS scheduling engine (SM-2 style with FSRS-like adjustments).
+ * SRS scheduling engine (SM-2 style; FSRS-5 behind the same `schedule()`, story 15.6).
  *
  * Design decisions (see ADR-0001):
  *  - SM-2 as the basis: robust, computable offline, well understood.
@@ -8,7 +8,8 @@
  *  - First two successful reps: fixed learning intervals (1 day, then 6 days).
  *  - All date math in UTC; `due` is an ISO date (day resolution).
  */
-import type { ReviewRating, SrsCard } from '@/types';
+import type { ReviewRating, SrsAlgorithm, SrsCard } from '@/types';
+import { scheduleFsrs } from './fsrs';
 
 export const MIN_EASE = 1.3;
 export const DEFAULT_EASE = 2.5;
@@ -67,6 +68,15 @@ export interface ScheduleOptions {
   now?: Date;
   /** Random spread (±%) against cards piling up on the same day. 0 = deterministic. */
   fuzz?: number;
+  /** SM-2 (default) or FSRS-5 (story 15.6). */
+  algorithm?: SrsAlgorithm | null;
+}
+
+/** The interval with a random spread of ±fuzz (from 2 days on). */
+function withFuzz(interval: number, fuzz: number): number {
+  if (fuzz <= 0 || interval < 2) return interval;
+  const jitter = (Math.random() * 2 - 1) * interval * fuzz;
+  return Math.max(1, Math.round(interval + jitter));
 }
 
 /**
@@ -80,6 +90,19 @@ export function schedule(
 ): SrsCard {
   const now = options.now ?? new Date();
   const fuzz = options.fuzz ?? 0;
+  if (options.algorithm === 'fsrs') {
+    const next = scheduleFsrs(card, rating, now);
+    const interval = withFuzz(next.interval, fuzz);
+    return {
+      ...next,
+      interval,
+      due:
+        interval === next.interval
+          ? next.due
+          : startOfDayIso(new Date(now.getTime() + interval * DAY_MS)),
+      leech: card.leech || next.lapses >= LEECH_LAPSE_THRESHOLD,
+    };
+  }
   const ease = nextEase(card.ease, rating);
 
   let interval: number;
@@ -111,11 +134,7 @@ export function schedule(
     }
   }
 
-  if (fuzz > 0 && interval >= 2) {
-    const spread = interval * fuzz;
-    const jitter = (Math.random() * 2 - 1) * spread;
-    interval = Math.max(1, Math.round(interval + jitter));
-  }
+  interval = withFuzz(interval, fuzz);
 
   const due = new Date(now.getTime() + interval * DAY_MS);
   const iso = now.toISOString();
@@ -153,12 +172,13 @@ export function isDue(card: SrsCard, now: Date = new Date()): boolean {
  */
 export function previewIntervals(
   card: SrsCard,
-  now: Date = new Date()
+  now: Date = new Date(),
+  algorithm: SrsAlgorithm | null = 'sm2'
 ): Record<ReviewRating, number> {
   const ratings: ReviewRating[] = ['again', 'hard', 'good', 'easy'];
   const result = {} as Record<ReviewRating, number>;
   for (const r of ratings) {
-    result[r] = schedule(card, r, { now, fuzz: 0 }).interval;
+    result[r] = schedule(card, r, { now, fuzz: 0, algorithm }).interval;
   }
   return result;
 }

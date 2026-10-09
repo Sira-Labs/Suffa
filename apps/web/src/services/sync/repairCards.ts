@@ -7,7 +7,7 @@
  * replaying a card's logs in order yields exactly the state the reviews produced – on every
  * device alike, which lets two devices converge without talking to each other.
  */
-import type { ReviewLog, SrsCard } from '@/types';
+import type { ReviewLog, SrsAlgorithm, SrsCard } from '@/types';
 import { createCard, schedule } from '@/services/srs';
 
 /**
@@ -16,7 +16,8 @@ import { createCard, schedule } from '@/services/srs';
  */
 export function rebuildFromLogs(
   card: SrsCard,
-  logs: readonly ReviewLog[]
+  logs: readonly ReviewLog[],
+  algorithm: SrsAlgorithm | null = 'sm2'
 ): SrsCard | null {
   const own = logs
     .filter((l) => l.cardId === card.id && !l.deleted)
@@ -33,7 +34,11 @@ export function rebuildFromLogs(
     now: new Date(own[0]!.reviewedAt),
   });
   for (const log of own) {
-    state = schedule(state, log.rating, { now: new Date(log.reviewedAt), fuzz: 0 });
+    state = schedule(state, log.rating, {
+      now: new Date(log.reviewedAt),
+      fuzz: 0,
+      algorithm,
+    });
   }
   // Keep what reviews do not record: a leech mark set elsewhere (e.g. from the exam).
   return { ...state, leech: state.leech || card.leech, deleted: card.deleted };
@@ -42,7 +47,8 @@ export function rebuildFromLogs(
 /** All cards whose logs are ahead of them, rebuilt. */
 export function cardsToRepair(
   cards: readonly SrsCard[],
-  logs: readonly ReviewLog[]
+  logs: readonly ReviewLog[],
+  algorithm: SrsAlgorithm | null = 'sm2'
 ): SrsCard[] {
   const byCard = new Map<string, ReviewLog[]>();
   for (const log of logs) {
@@ -54,7 +60,7 @@ export function cardsToRepair(
   for (const card of cards) {
     const own = byCard.get(card.id);
     if (!own) continue;
-    const rebuilt = rebuildFromLogs(card, own);
+    const rebuilt = rebuildFromLogs(card, own, algorithm);
     if (rebuilt) repaired.push(rebuilt);
   }
   return repaired;

@@ -18,6 +18,7 @@ import {
   cardRepo,
   db,
   reviewLogRepo,
+  settingsRepo,
   syncableTables,
   type AppDatabase,
   type OutboxEntry,
@@ -263,11 +264,13 @@ export class SyncEngine {
 
   /** Rebuilds cards whose review logs are ahead of them; returns how many. */
   private async repairCards(): Promise<number> {
-    const [cards, logs] = await Promise.all([
+    const [cards, logs, settings] = await Promise.all([
       cardRepo.all(this.database),
       reviewLogRepo.all(this.database),
+      settingsRepo.get(this.database),
     ]);
-    const repaired: SrsCard[] = cardsToRepair(cards, logs);
+    // Replayed with the learner's algorithm, so every device rebuilds the same state.
+    const repaired: SrsCard[] = cardsToRepair(cards, logs, settings.srsAlgorithm);
     for (const card of repaired) await cardRepo.put(card, this.database);
     if (repaired.length > 0)
       log.info('cards rebuilt from review logs', { count: repaired.length });

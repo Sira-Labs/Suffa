@@ -22,17 +22,49 @@ bundle has no native dependency and behaves as the PWA in a browser.
 Prerequisites: Node 22, Xcode (iOS, on macOS), Android Studio (Android), a Firebase project
 for FCM.
 
+The iOS project (`ios/`, Swift Package Manager, no CocoaPods) is committed; Android is added
+with `npx cap add android` when it is needed.
+
 ```bash
 cd mobile
-npm install
-export VITE_SUFFA_API_ORIGIN=https://suffa.example.org   # the server this build talks to
-npx cap add ios && npx cap add android                   # once; commit the generated projects
-npm run sync                                             # web build + copy into the shells
-npm run open:ios                                         # or open:android
+npm ci
+export VITE_SUFFA_API_ORIGIN=https://suffa.siralabs.org   # the server this build talks to
+npm run sync                                              # web build + copy into the shells
+npm run open:ios                                          # Xcode: run on a connected iPhone
 ```
 
 Place the Firebase files from the Firebase console (not committed):
 `android/app/google-services.json` and `ios/App/App/GoogleService-Info.plist`.
+
+## iOS: TestFlight from GitHub Actions
+
+The `ios-testflight` workflow (Actions → ios-testflight → Run workflow, on `main`) builds the
+app on a macOS runner and uploads it to TestFlight. Signing is automatic with an App Store
+Connect API key: no certificates or profiles to manage. Version = latest release tag, build
+number = the run number.
+
+One-time setup (account holder):
+
+1. developer.apple.com → Certificates, Identifiers & Profiles → Identifiers → **+** → App IDs →
+   App, bundle id `org.siralabs.suffa` (explicit), capability **Associated Domains**.
+2. appstoreconnect.apple.com → Apps → **+** → New App: iOS, name "Suffa", primary language
+   German, bundle id `org.siralabs.suffa`, SKU `suffa`.
+3. App Store Connect → Users and Access → Integrations → App Store Connect API → generate a
+   key with the **Admin** role (cloud signing needs it); download the `.p8` once.
+4. GitHub → repository → Settings → Secrets and variables → Actions → new repository secrets:
+   `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`, `APP_STORE_CONNECT_KEY_P8` (the
+   whole file content) and `APPLE_TEAM_ID` (Membership details).
+5. Server (CapRover, staging): `SUFFA_IOS_APP_IDS=<TEAMID>.org.siralabs.suffa`, so magic links
+   and invitations open the app (Universal Links).
+6. Run the workflow; after Apple's processing the build appears under TestFlight → add an
+   internal testing group with your Apple ID → install it with the TestFlight app on the iPhone.
+
+A Mac with Xcode stays useful for debugging: run the app on a cable-connected iPhone and inspect
+the web view with Safari → Develop → (iPhone) → Suffa.
+
+Push on iOS (FCM through APNs) is a later step: it needs an APNs key in Firebase, the Firebase
+Messaging SDK and the Push Notifications capability. Until then the app plans the daily
+reminder on the device.
 
 ## Background audio
 

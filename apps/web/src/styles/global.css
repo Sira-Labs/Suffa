@@ -2880,3 +2880,15 @@ button.quiz-option:disabled {
   border-inline-start: 3px solid var(--good);
   padding-inline-start: 0.6rem;
 }
+
+/* The sync badge must fit next to the logo on phones (no sideways scrolling). */
+.sync-badge {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 480px) {
+  .sync-badge-extra {
+    display: none;
+  }
+}

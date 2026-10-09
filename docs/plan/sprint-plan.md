@@ -382,6 +382,10 @@ file (trigger-queued, purged at once or by the worker every 10 minutes); in the 
 latency and cost per minute (`evaluate` in `@suffa/phonology`); an own fixture set with a baseline
 runs in CI; pilot recordings (January) run through the recogniser with the same command
 (`docs/pilot/pronunciation-eval.md`).
+15.6 ✅: FSRS-5 behind `schedule()`, chosen per learner in the settings (pilot); stability and
+difficulty sync (migration 0037); SM-2 cards convert on their first FSRS review and no due date
+moves, so the same cards are due on the day of the switch; switching back loses nothing
+(ADR-0001 amendment). Sprint 15 complete.
 
 | #    | Story                                                                                                                                                                                                                                             | Pts | Acceptance                                                                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------- |

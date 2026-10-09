@@ -32,3 +32,21 @@ We implement an SM-2 variant (`src/services/srs/engine.ts`):
 
 Predictable, explainable behaviour; per-button interval preview is possible. Slightly less
 optimal than FSRS for very large decks — irrelevant at the size of a textbook course.
+
+## Amendment (2026-10, story 15.6): FSRS-5 as a per-learner option
+
+FSRS-5 (`src/services/srs/fsrs.ts`, default weights, desired retention 90 %) now sits behind the
+same `schedule()` (`algorithm: 'fsrs'`); SM-2 stays the default. Learners switch in
+"Einstellungen → Wiederholungsplan" for the pilot.
+
+- **State:** each card carries an FSRS stability and difficulty next to the SM-2 fields; both are
+  synced (migration 0037). Older app versions that do not send them keep the stored values.
+- **Converting SM-2 history:** a card's first FSRS review starts from its SM-2 state (stability =
+  interval, difficulty from the ease, linearly: ease 2.5 ↔ 5, 1.3 ↔ 9). Switching never moves a
+  due date, so the same cards are due on the day of the switch.
+- **Switching back loses nothing:** FSRS keeps interval, reps, lapses and an ease derived from the
+  difficulty up to date, so SM-2 continues from them; the FSRS state stays on the card.
+- **Sync:** cards rebuilt from review logs replay with the learner's algorithm, deterministically,
+  so devices converge.
+- Lapses and leeches work as before. Whether FSRS stays optional or becomes the default is decided
+  with the pilot data (review load, retention in later reviews).

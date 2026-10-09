@@ -2866,3 +2866,29 @@ button.quiz-option:disabled {
   text-align: left;
   max-width: 36rem;
 }
+
+/* ---------- Recordings shared with the teacher (story 15.4) ---------- */
+
+.shared-item-new {
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+}
+.shared-item audio,
+.shared-item textarea {
+  width: 100%;
+}
+.shared-comment {
+  border-inline-start: 3px solid var(--good);
+  padding-inline-start: 0.6rem;
+}
+
+/* The sync badge must fit next to the logo on phones (no sideways scrolling). */
+.sync-badge {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 480px) {
+  .sync-badge-extra {
+    display: none;
+  }
+}

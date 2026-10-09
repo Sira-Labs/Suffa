@@ -32,6 +32,28 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   { method: 'POST', path: '/api/v1/speech/assess', action: 'speech:assess' },
   { method: 'GET', path: '/api/v1/classes/:id/speech', action: 'class:manage' },
   { method: 'PUT', path: '/api/v1/classes/:id/speech', action: 'class:manage' },
+  { method: 'GET', path: '/api/v1/me/shared-recordings', action: 'recording:share' },
+  { method: 'POST', path: '/api/v1/me/shared-recordings', action: 'recording:share' },
+  {
+    method: 'DELETE',
+    path: '/api/v1/me/shared-recordings/:id',
+    action: 'recording:share',
+  },
+  {
+    method: 'GET',
+    path: '/api/v1/classes/:id/shared-recordings',
+    action: 'class:recordings:listen',
+  },
+  {
+    method: 'PATCH',
+    path: '/api/v1/classes/:id/shared-recordings/:recordingId',
+    action: 'class:recordings:listen',
+  },
+  {
+    method: 'PUT',
+    path: '/api/v1/classes/:id/members/:userId/consent',
+    action: 'class:manage',
+  },
   { method: 'POST', path: '/api/v1/tutor/turn', action: 'tutor:use' },
   { method: 'GET', path: '/api/v1/tutor/conversations/:id', action: 'tutor:use' },
   { method: 'DELETE', path: '/api/v1/tutor/conversations/:id', action: 'tutor:use' },

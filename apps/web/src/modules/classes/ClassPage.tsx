@@ -15,14 +15,25 @@ import { ClassRecordings } from './ClassRecordings';
 import { ClassProgressView } from './ClassProgressView';
 import { SpeechSettingCard } from './SpeechSettingCard';
 import { SpeechApi } from '@/services/speech';
+import { SharingApi } from '@/services/sharing/sharingApi';
+import { MySharedRecordings } from './MySharedRecordings';
+import { SharedRecordingsList } from './SharedRecordingsList';
 import { courseById, type CourseId } from '@suffa/engagement';
 import { useActiveCourse, useSetCourse } from '@/services/courses';
 
-type Tab = 'progress' | 'life' | 'recordings' | 'grades' | 'certificates' | 'members';
+type Tab =
+  | 'progress'
+  | 'life'
+  | 'recordings'
+  | 'shared'
+  | 'grades'
+  | 'certificates'
+  | 'members';
 const TABS: { id: Tab; label: string }[] = [
   { id: 'progress', label: 'Fortschritt' },
   { id: 'life', label: 'Klassenleben' },
   { id: 'recordings', label: 'Aufnahmen' },
+  { id: 'shared', label: 'Hörliste' },
   { id: 'grades', label: 'Bewertungen' },
   { id: 'certificates', label: 'Zertifikate' },
   { id: 'members', label: 'Mitglieder' },
@@ -34,6 +45,7 @@ export function ClassPage() {
   const auth = useSyncStore((s) => s.auth);
   const api = useMemo(() => new ClassesApi(), []);
   const speechApi = useMemo(() => new SpeechApi(), []);
+  const sharingApi = useMemo(() => new SharingApi(), []);
   const [summary, setSummary] = useState<ClassSummary | null | undefined>(undefined);
   // Links from "Heute" open a tab directly (?tab=recordings).
   const [params] = useSearchParams();
@@ -99,13 +111,21 @@ export function ClassPage() {
               <ClassLife api={api} classId={summary.id} teacher course={summary.course} />
             )}
             {tab === 'recordings' && <ClassRecordings classId={summary.id} teacher />}
+            {tab === 'shared' && (
+              <SharedRecordingsList api={sharingApi} classId={summary.id} />
+            )}
             {tab === 'grades' && <ClassGrades classId={summary.id} />}
             {tab === 'certificates' && (
               <ClassCertificates api={api} classId={summary.id} />
             )}
             {tab === 'members' && (
               <div className="stack" style={{ gap: '1rem' }}>
-                <ClassMembers api={api} summary={summary} onChange={load} />
+                <ClassMembers
+                  api={api}
+                  sharing={sharingApi}
+                  summary={summary}
+                  onChange={load}
+                />
                 <SpeechSettingCard api={speechApi} classId={summary.id} />
               </div>
             )}
@@ -125,6 +145,7 @@ export function ClassPage() {
             </h2>
             <ClassRecordings classId={summary.id} teacher={false} />
           </section>
+          <MySharedRecordings api={sharingApi} classId={summary.id} />
         </>
       )}
     </div>

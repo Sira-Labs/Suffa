@@ -16,6 +16,8 @@ const EXPECTED: Record<Action, readonly Role[]> = {
   'class:read': ['admin'], // without a class scope only admins
   'tutor:use': ['student', 'teacher', 'admin'],
   'speech:assess': ['student', 'teacher', 'admin'],
+  'recording:share': ['student', 'teacher', 'admin'],
+  'class:recordings:listen': [], // only the class's teachers, never without a scope
   'admin:users:read': ['admin'],
   'admin:users:write': ['admin'],
   'admin:audit:read': ['admin'],
@@ -62,5 +64,16 @@ describe('authz policies', () => {
     expect(can(student, 'class:read', { classRole: 'teacher' })).toBe(true);
     expect(can(student, 'class:read', { classRole: null })).toBe(false);
     expect(can(student, 'class:read')).toBe(false);
+  });
+
+  it("lets only a class's own teachers hear what its learners shared, not admins", () => {
+    const teacher = { id: 't', role: 'teacher' } as const;
+    const admin = { id: 'a', role: 'admin' } as const;
+    const student = { id: 's', role: 'student' } as const;
+    expect(can(teacher, 'class:recordings:listen', { classRole: 'teacher' })).toBe(true);
+    expect(can(teacher, 'class:recordings:listen', { classRole: 'student' })).toBe(false);
+    expect(can(admin, 'class:recordings:listen', { classRole: null })).toBe(false);
+    expect(can(admin, 'class:recordings:listen', { classRole: 'teacher' })).toBe(true);
+    expect(can(student, 'class:recordings:listen', { classRole: 'teacher' })).toBe(false);
   });
 });

@@ -76,6 +76,7 @@ const privacyRepo: PrivacyRepository = {
     notifications: { prefs: null, devices: [], recaps: [] },
     auditLog: [],
     feedback: [],
+    sharedRecordings: [],
   }),
   delete: async () => true,
 };
@@ -91,6 +92,7 @@ const classRepo: ClassRepository = {
     studentCount: 0,
     pendingCount: 0,
     teacherName: null,
+    minors: false,
     createdAt: '2026-09-24T00:00:00.000Z',
   }),
   listFor: async () => [],
@@ -326,6 +328,27 @@ function buildApp() {
       },
       classes: classRepo,
       transcribe: async () => '',
+    },
+    sharing: {
+      auth: resolver,
+      log: quiet,
+      repo: {
+        targets: async () => [],
+        check: async () => 'not_member',
+        add: async () => {},
+        mine: async () => [],
+        withdraw: async () => false,
+        forClass: async () => [],
+        review: async () => false,
+        setConsent: async () => false,
+      },
+      classes: classRepo,
+      storage: {
+        put: async () => {},
+        delete: async () => {},
+        presignGet: async () => '/media/x',
+      },
+      purge: async () => 0,
     },
     tutor: {
       service: { turn: async function* () {} } as unknown as TutorService,

@@ -31,7 +31,7 @@ export function SyncBadge() {
   return (
     <button
       type="button"
-      className="badge"
+      className="badge sync-badge"
       onClick={() => void syncNow()}
       title="Automatischer Abgleich – tippen zum sofortigen Abgleichen"
       style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}
@@ -48,7 +48,10 @@ export function SyncBadge() {
       />
       {meta.label}
       {pending > 0 && <span className="muted">· {pending} offen</span>}
-      {auth.status === 'signed-in' && <span className="muted">· angemeldet</span>}
+      {auth.status === 'signed-in' && (
+        // Hidden on phones: the header has no room for it next to the logo.
+        <span className="muted sync-badge-extra">· angemeldet</span>
+      )}
     </button>
   );
 }

@@ -599,6 +599,13 @@ switches it under Klasse → Mitglieder → "Aussprache-Bewertung" (default on, 
 of minors, migration 0035). Without `SUFFA_TRANSCRIBE_URL` the button is hidden and the
 browser's own speech recognition rates live speech.
 
+**Recordings shared with the teacher** (story 15.4) need object storage: they are stored in the
+uploads bucket under `shared/<class>/<learner>/`, played through presigned `/media/…` URLs, and
+only the class's teachers can list them (admins cannot). Rows that disappear (withdrawn, account
+deleted, learner removed, parents' consent revoked, class marked as minors) queue their file in
+`object_deletions` (migration 0036); the api deletes it right away where it can, and the
+worker's `purge-files` task (every 10 minutes) deletes the rest.
+
 The api speaks the OpenAI-compatible transcription protocol, so another EU service needs
 only a new URL, model and `SUFFA_TRANSCRIBE_TOKEN`. Recordings go out over https only
 (plain http is accepted for localhost, in development). `SUFFA_TRANSCRIBE_LANGUAGE` is

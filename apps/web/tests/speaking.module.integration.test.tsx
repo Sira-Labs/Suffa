@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Speaking } from '@/modules/speaking';
 import { SpeechApi, type Assessment } from '@/services/speech';
+import { SharingApi } from '@/services/sharing/sharingApi';
 
 /**
  * iPhone scenario end to end on the real speaking page: iOS speech recognition
@@ -126,6 +127,39 @@ describe('Speaking (integration, letter feedback)', () => {
     const [, recording] = assess.mock.calls[0]!;
     expect(recording.mimeType).toBe('audio/mp4');
     expect(recording.blob.size).toBe(4096);
+  });
+
+  it('shares the rated recording with the class teacher, score included', async () => {
+    fakeMicrophone();
+    const api = new SpeechApi();
+    vi.spyOn(api, 'settings').mockResolvedValue({ ok: true, value: { server: true } });
+    vi.spyOn(api, 'assess').mockResolvedValue({ ok: true, value: assessment });
+    const sharing = new SharingApi();
+    vi.spyOn(sharing, 'mine').mockResolvedValue({
+      ok: true,
+      value: {
+        targets: [{ classId: 'c1', name: 'Arabisch 1a', allowed: true }],
+        items: [],
+      },
+    });
+    const share = vi
+      .spyOn(sharing, 'share')
+      .mockResolvedValue({ ok: true, value: { id: 'r1' } });
+    const user = userEvent.setup();
+
+    render(<Speaking speechApi={api} sharingApi={sharing} />);
+    await user.click(screen.getByRole('button', { name: /Aufnehmen/ }));
+    await user.click(await screen.findByRole('button', { name: /Aufnahme stoppen/ }));
+    await user.click(await screen.findByRole('button', { name: /Aufnahme bewerten/ }));
+    await screen.findByText(/75 % der Laute erkannt/);
+    await user.click(
+      screen.getByRole('button', { name: /Mit Lehrkraft von Arabisch 1a teilen/ })
+    );
+
+    expect(await screen.findByRole('status')).toHaveTextContent(/geteilt/);
+    const [input] = share.mock.calls[0]!;
+    expect(input).toMatchObject({ classId: 'c1', score: 0.75 });
+    expect(input.recording.mimeType).toBe('audio/mp4');
   });
 
   it('says why the server could not rate it', async () => {

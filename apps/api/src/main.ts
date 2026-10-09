@@ -60,6 +60,9 @@ import { PgSyncRepository } from './sync/repository.js';
 import { PgListeningRepository } from './media/listening.js';
 import { PgFeedbackRepository } from './feedback/repository.js';
 import { PgSpeechRepository } from './speech/repository.js';
+import { PgSharingRepository, purgeDeletedFiles } from './sharing/repository.js';
+import type { SharingRouteDeps } from './sharing/routes.js';
+import type { ObjectStorage } from './storage/objectStorage.js';
 import { PgAdminRepository } from './admin/repository.js';
 import { AiGateway } from './ai/gateway.js';
 import { buildProviders } from './ai/providers.js';
@@ -178,7 +181,13 @@ async function main(): Promise<void> {
             log,
             onError: (error) => errors.capture(error, { source: 'pg-boss' }),
           });
-          await registerMaintenance(boss, pool, log, errors);
+          await registerMaintenance(
+            boss,
+            pool,
+            log,
+            errors,
+            config.storage ? new S3ObjectStorage(config.storage) : undefined
+          );
           if (config.youtubeApiKey) {
             await registerImports(
               boss,
@@ -549,6 +558,9 @@ async function main(): Promise<void> {
         ? (clip) => transcribeClip(config.transcribe!, clip)
         : undefined,
     },
+    sharing: config.storage
+      ? sharingParts(pool, new S3ObjectStorage(config.storage), auth, log)
+      : undefined,
     aiAdmin: ai,
     videos: {
       videos: new PgVideoRepository(pool),
@@ -725,5 +737,22 @@ async function classContentDeps(
       log,
     },
     quiz: { classes, quiz: new PgLiveQuizRepository(pool, words), auth, log },
+  };
+}
+
+/** Sharing recordings with the teacher (story 15.4): files in the uploads bucket. */
+function sharingParts(
+  pool: pg.Pool,
+  storage: ObjectStorage,
+  auth: SharingRouteDeps['auth'],
+  log: SharingRouteDeps['log']
+): SharingRouteDeps {
+  return {
+    auth,
+    log,
+    repo: new PgSharingRepository(pool),
+    classes: new PgClassRepository(pool),
+    storage,
+    purge: () => purgeDeletedFiles(pool, storage),
   };
 }

@@ -6,15 +6,19 @@ import { useCallback, useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { useNavigate } from 'react-router-dom';
 import type { ClassesApi, ClassSummary, Member } from '@/services/classes/classesApi';
+import type { SharingApi } from '@/services/sharing/sharingApi';
 
 const date = (iso: string) => new Date(iso).toLocaleDateString('de-DE');
 
 export function ClassMembers({
   api,
+  sharing,
   summary,
   onChange,
 }: {
   api: ClassesApi;
+  /** Parents' consent for sharing recordings in classes of minors (story 15.4). */
+  sharing?: SharingApi;
   summary: ClassSummary;
   onChange: () => Promise<void>;
 }) {
@@ -117,6 +121,12 @@ export function ClassMembers({
         </div>
       ))}
       {students.length > 0 && <strong style={{ fontSize: '0.95rem' }}>Lernende</strong>}
+      {students.length > 0 && summary.minors && sharing && (
+        <span className="muted" style={{ fontSize: '0.85rem' }}>
+          Klasse mit Minderjährigen: Aufnahmen mit dir teilen kann nur, wessen Eltern
+          zugestimmt haben. Hake das Einverständnis ab, sobald es dir vorliegt.
+        </span>
+      )}
       {students.map((m) => (
         <div key={m.userId} className="row" style={{ justifyContent: 'space-between' }}>
           <span>
@@ -126,16 +136,42 @@ export function ClassMembers({
               · seit {date(m.joinedAt)}
             </span>
           </span>
-          <button
-            className="btn"
-            onClick={() => {
-              if (window.confirm(`${m.name ?? m.email} aus der Klasse entfernen?`)) {
-                void act(() => api.remove(summary.id, m.userId));
-              }
-            }}
-          >
-            Entfernen
-          </button>
+          <span className="row">
+            {summary.minors && sharing && (
+              <label
+                className="row muted"
+                style={{ gap: '0.35rem', fontSize: '0.85rem' }}
+              >
+                <input
+                  type="checkbox"
+                  checked={m.parentalConsent ?? false}
+                  onChange={(e) => {
+                    const consent = e.target.checked;
+                    if (
+                      !consent &&
+                      !window.confirm(
+                        'Einverständnis entfernen? Was dieses Kind geteilt hat, wird gelöscht.'
+                      )
+                    ) {
+                      return;
+                    }
+                    void act(() => sharing.setConsent(summary.id, m.userId, consent));
+                  }}
+                />
+                Einverständnis der Eltern
+              </label>
+            )}
+            <button
+              className="btn"
+              onClick={() => {
+                if (window.confirm(`${m.name ?? m.email} aus der Klasse entfernen?`)) {
+                  void act(() => api.remove(summary.id, m.userId));
+                }
+              }}
+            >
+              Entfernen
+            </button>
+          </span>
         </div>
       ))}
       {message && <span className="feedback-bad">{message}</span>}

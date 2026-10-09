@@ -50,6 +50,13 @@ export const RBAC_MATRIX = {
   /** Talk to al-Muʿallim; every learner reaches only their own conversations. */
   'tutor:use': ['student', 'teacher', 'admin'],
   'speech:assess': ['student', 'teacher', 'admin'],
+  /** Share one's own recordings with a class's teachers, see and withdraw them. */
+  'recording:share': ['student', 'teacher', 'admin'],
+  /**
+   * Hear and comment on what a class's learners shared; scoped: teacher of that class.
+   * Admins do not get in: learners shared with their teacher, nobody else (story 15.4).
+   */
+  'class:recordings:listen': ['teacher', 'admin'],
   /** List and search users in the admin area. */
   'admin:users:read': ['admin'],
   /** Change a user's role or disable them (audit-logged). */
@@ -105,6 +112,8 @@ export function can(actor: Actor | null, action: Action, scope?: ClassScope): bo
     case 'class:manage':
       // Admins oversee every class; teachers only classes they teach.
       return actor.role === 'admin' || scope?.classRole === 'teacher';
+    case 'class:recordings:listen':
+      return scope?.classRole === 'teacher';
     case 'class:read':
       // Any active member of the class (pending learners wait for approval first).
       return actor.role === 'admin' || (scope?.classRole ?? null) !== null;

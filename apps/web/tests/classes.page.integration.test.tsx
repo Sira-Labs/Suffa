@@ -115,6 +115,9 @@ async function signIn(
         ],
       });
     }
+    if (path.endsWith('/shared-recordings')) {
+      return Response.json({ targets: [], items: [] });
+    }
     if (path.endsWith('/speech')) {
       return method === 'PUT'
         ? new Response(null, { status: 204 })

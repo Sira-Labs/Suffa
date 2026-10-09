@@ -374,6 +374,10 @@ Status: 15.1 ✅ (`packages/phonology`, 100 % branch coverage, every unit and co
 memory only, 20 per minute); the class teacher switches it per class (default on, off for classes of
 minors); without a server recogniser the browser rates live speech. Both show the same letter
 feedback (`assessLetters`).
+15.4 ✅: after recording, a learner shares it with the teacher of one class (opt-in per
+recording, uploads bucket); the class's teachers (not admins) hear it in the "Hörliste" and leave a
+comment; withdrawing, leaving the class, revoked parents' consent and account deletion delete the
+file (trigger-queued, purged at once or by the worker every 10 minutes); in the export.
 
 | #    | Story                                                                                                                                                                                                                                             | Pts | Acceptance                                                                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------- |

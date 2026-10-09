@@ -61,7 +61,11 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
 
   it('round-trips every table with ISO timestamps, nulls and json', async () => {
     const records: Record<string, SyncRecord> = {
-      srs_cards: card('vocab_ar_de:v-balad', '2026-09-23T10:00:00.000Z'),
+      srs_cards: {
+        ...card('vocab_ar_de:v-balad', '2026-09-23T10:00:00.000Z'),
+        stability: 12.5,
+        difficulty: 4.25,
+      },
       review_logs: {
         id: 'log-1',
         updated_at: '2026-09-23T10:00:00.000Z',
@@ -99,6 +103,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
         showTransliteration: false,
         dialectNotes: true,
         course: 'madinah',
+        srsAlgorithm: 'fsrs',
       },
       user_vocab: {
         id: 'uv-1',
@@ -208,6 +213,33 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
     expect(records[0]).toMatchObject({ reps: 2, updated_at: '2026-09-23T11:00:00.000Z' });
   });
 
+  it('keeps the FSRS state when an older app version syncs a card without it', async () => {
+    const pull = async () =>
+      (await repo.pull(BOB, 'srs_cards', { since: null, afterId: null, limit: 10 }))
+        .records[0];
+    await repo.upsert(BOB, 'srs_cards', [
+      {
+        ...card('fsrs-card', '2026-09-23T10:00:00.000Z'),
+        stability: 20,
+        difficulty: 3.5,
+      },
+    ]);
+    // An older device reviews the card with SM-2: its fields change, the FSRS state stays.
+    await repo.upsert(BOB, 'srs_cards', [
+      { ...card('fsrs-card', '2026-09-23T11:00:00.000Z'), reps: 5 },
+    ]);
+    expect(await pull()).toMatchObject({ reps: 5, stability: 20, difficulty: 3.5 });
+    // A newer device moves the state on.
+    await repo.upsert(BOB, 'srs_cards', [
+      {
+        ...card('fsrs-card', '2026-09-23T12:00:00.000Z'),
+        stability: 31.2,
+        difficulty: 3.4,
+      },
+    ]);
+    expect(await pull()).toMatchObject({ stability: 31.2, difficulty: 3.4 });
+  });
+
   it('keeps the chosen course when an older app version sends settings without it', async () => {
     const settings = (at: string, extra: Record<string, unknown> = {}): SyncRecord => ({
       id: 'user-settings',
@@ -251,6 +283,17 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
       settings('2026-09-23T12:00:00.000Z', { course: 'bayna-yadayk' }),
     ]);
     expect(await pullCourse()).toBe('bayna-yadayk');
+    // The scheduling choice (story 15.6) is kept the same way.
+    await repo.upsert(BOB, 'settings', [
+      settings('2026-09-23T13:00:00.000Z', { srsAlgorithm: 'fsrs' }),
+    ]);
+    await repo.upsert(BOB, 'settings', [settings('2026-09-23T14:00:00.000Z')]);
+    const latest = await repo.pull(BOB, 'settings', {
+      since: null,
+      afterId: null,
+      limit: 10,
+    });
+    expect(latest.records[0]).toMatchObject({ srsAlgorithm: 'fsrs' });
   });
 
   it('never lets a merely created card replace a reviewed one', async () => {

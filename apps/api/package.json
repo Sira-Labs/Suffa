@@ -12,8 +12,8 @@
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "prebuild": "npm run build -w @suffa/engagement -w @suffa/llm",
-    "pretypecheck": "npm run build -w @suffa/engagement -w @suffa/llm",
+    "prebuild": "npm run build -w @suffa/engagement -w @suffa/llm -w @suffa/phonology",
+    "pretypecheck": "npm run build -w @suffa/engagement -w @suffa/llm -w @suffa/phonology",
     "eval": "node dist/evals/cli.js",
     "eval:import": "node dist/evals/import.js"
   },
@@ -25,6 +25,7 @@
     "@sentry/core": "^11.0.0",
     "@suffa/engagement": "0.1.0",
     "@suffa/llm": "0.1.0",
+    "@suffa/phonology": "0.1.0",
     "better-auth": "1.7.6",
     "hono": "^4.13.8",
     "nodemailer": "^10.0.10",

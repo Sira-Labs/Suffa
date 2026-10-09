@@ -147,6 +147,56 @@ export async function transcribeFile(
   return text ? [{ start: 0, end: data.duration ?? 0, text }] : [];
 }
 
+/** File name extensions the speech services recognise a short clip's format by. */
+const CLIP_EXTENSIONS: Readonly<Record<string, string>> = {
+  'audio/webm': 'webm',
+  'audio/ogg': 'ogg',
+  'audio/mp4': 'm4a',
+  'audio/mpeg': 'mp3',
+  'audio/aac': 'aac',
+  'audio/wav': 'wav',
+};
+
+/** The file extension for a recorder's MIME type (codecs dropped), or null if unknown. */
+export function clipExtension(mimeType: string): string | null {
+  return CLIP_EXTENSIONS[mimeType.split(';')[0]!.trim().toLowerCase()] ?? null;
+}
+
+/**
+ * Transcribes a short Arabic clip (a learner reading a word or sentence) held in memory:
+ * no file, no timestamps, plain text back. Used for pronunciation feedback; the audio is
+ * not kept anywhere.
+ */
+export async function transcribeClip(
+  settings: TranscriberSettings,
+  clip: { bytes: Uint8Array; mimeType: string },
+  fetchImpl: Fetch = fetch
+): Promise<string> {
+  const extension = clipExtension(clip.mimeType) ?? 'webm';
+  const form = new FormData();
+  form.append(
+    'file',
+    new Blob([clip.bytes], { type: clip.mimeType }),
+    `clip.${extension}`
+  );
+  form.append('model', settings.model);
+  // The learner reads Arabic: saying so keeps the recogniser from "hearing" another language.
+  form.append('language', 'ar');
+  if (!isMistral(settings.url)) form.append('response_format', 'json');
+  const response = await fetchImpl(settings.url, {
+    method: 'POST',
+    headers: settings.token ? { authorization: `Bearer ${settings.token}` } : undefined,
+    body: form,
+  });
+  if (!response.ok) {
+    throw new Error(
+      `transcription failed: ${response.status} ${(await response.text()).slice(0, 300)}`
+    );
+  }
+  const data = (await response.json()) as { text?: string };
+  return (data.text ?? '').trim();
+}
+
 /** Cuts audio into CHUNK_SECONDS pieces without re-encoding; returns them in order. */
 export async function splitAudio(file: string, dir: string): Promise<string[]> {
   await new Promise<void>((resolve, reject) => {

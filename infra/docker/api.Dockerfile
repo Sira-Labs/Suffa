@@ -8,11 +8,14 @@ COPY apps/web/package.json apps/web/
 COPY apps/api/package.json apps/api/
 COPY packages/engagement/package.json packages/engagement/
 COPY packages/llm/package.json packages/llm/
+COPY packages/phonology/package.json packages/phonology/
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 COPY packages/engagement packages/engagement
 COPY packages/llm packages/llm
+COPY packages/phonology packages/phonology
 COPY apps/api apps/api
-# prebuild compiles @suffa/engagement (shared rules) and @suffa/llm (AI gateway) first.
+# prebuild compiles @suffa/engagement (shared rules), @suffa/llm (AI gateway) and
+# @suffa/phonology (pronunciation rules) first.
 RUN npm run build -w @suffa/api
 
 # Production dependencies of the api workspace only.
@@ -23,6 +26,7 @@ COPY apps/web/package.json apps/web/
 COPY apps/api/package.json apps/api/
 COPY packages/engagement/package.json packages/engagement/
 COPY packages/llm/package.json packages/llm/
+COPY packages/phonology/package.json packages/phonology/
 # npm nests packages it cannot hoist (e.g. better-auth) under the workspace; keep that
 # directory even when it is empty so the runtime stage can always copy it.
 # --omit=optional keeps test tooling out of the image: better-auth names vitest as an optional
@@ -49,6 +53,8 @@ COPY --from=build /app/packages/engagement/package.json /app/packages/engagement
 COPY --from=build /app/packages/engagement/dist /app/packages/engagement/dist
 COPY --from=build /app/packages/llm/package.json /app/packages/llm/
 COPY --from=build /app/packages/llm/dist /app/packages/llm/dist
+COPY --from=build /app/packages/phonology/package.json /app/packages/phonology/
+COPY --from=build /app/packages/phonology/dist /app/packages/phonology/dist
 COPY apps/api/package.json ./
 COPY apps/api/migrations ./migrations
 # Course content for al-Muʿallim's grounding (the same files the web app bundles).

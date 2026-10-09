@@ -1,0 +1,317 @@
+{
+  "about": "Own fixture set for the pronunciation eval (story 15.5): everyday words and phrases, a teacher's rating (1–5) and the letters they marked wrong, and what a recogniser heard. Not recordings: the pilot data (January, consented) adds audio and runs through the recogniser. Mark wrong letters as {letter, nth} (nth = which occurrence, default 1).",
+  "cases": [
+    {
+      "id": "kitab-ok",
+      "text": "كِتَابٌ",
+      "transcript": "كتاب",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "qalam-q-as-k",
+      "text": "قَلَمٌ",
+      "transcript": "كلم",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "ق"
+          }
+        ]
+      }
+    },
+    {
+      "id": "arabi-ok",
+      "text": "عَرَبِيٌّ",
+      "transcript": "عربي",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "arabi-ain-as-alif",
+      "text": "عَرَبِيٌّ",
+      "transcript": "اربي",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "ع"
+          }
+        ]
+      }
+    },
+    {
+      "id": "halib-ha-as-h",
+      "text": "حَلِيبٌ",
+      "transcript": "هليب",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "ح"
+          }
+        ]
+      }
+    },
+    {
+      "id": "sabah-ok",
+      "text": "صَبَاحُ الْخَيْرِ",
+      "transcript": "صباح الخير",
+      "durationSeconds": 2.5,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "sabah-sad-as-sin",
+      "text": "صَبَاحُ الْخَيْرِ",
+      "transcript": "سباح الخير",
+      "durationSeconds": 2.5,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "ص"
+          }
+        ]
+      }
+    },
+    {
+      "id": "talib-ta-as-t",
+      "text": "طَالِبٌ",
+      "transcript": "تالب",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "ط"
+          }
+        ]
+      }
+    },
+    {
+      "id": "madrasa-ok",
+      "text": "مَدْرَسَةٌ",
+      "transcript": "مدرسه",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "masjid-ok",
+      "text": "أَيْنَ الْمَسْجِدُ",
+      "transcript": "اين المسجد",
+      "durationSeconds": 2.5,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "shukran-ok",
+      "text": "شُكْرًا",
+      "transcript": "شكرا",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "dhahaba-dh-as-z",
+      "text": "ذَهَبَ",
+      "transcript": "زهب",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "ذ"
+          }
+        ]
+      }
+    },
+    {
+      "id": "thalatha-th-as-s",
+      "text": "ثَلَاثَةٌ",
+      "transcript": "سلاسه",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 2,
+        "wrong": [
+          {
+            "letter": "ث"
+          },
+          {
+            "letter": "ث",
+            "nth": 2
+          }
+        ]
+      }
+    },
+    {
+      "id": "ghurfa-gh-dropped",
+      "text": "غُرْفَةٌ",
+      "transcript": "رفه",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 2,
+        "wrong": [
+          {
+            "letter": "غ"
+          }
+        ]
+      }
+    },
+    {
+      "id": "bayt-ok",
+      "text": "بَيْتٌ كَبِيرٌ",
+      "transcript": "بيت كبير",
+      "durationSeconds": 2.5,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "salam-ok",
+      "text": "السَّلَامُ عَلَيْكُمْ",
+      "transcript": "السلام عليكم",
+      "durationSeconds": 3.0,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "salam-ain-as-alif",
+      "text": "السَّلَامُ عَلَيْكُمْ",
+      "transcript": "السلام اليكم",
+      "durationSeconds": 3.0,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "ع"
+          }
+        ]
+      }
+    },
+    {
+      "id": "khubz-kh-as-h",
+      "text": "خُبْزٌ",
+      "transcript": "هبز",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "خ"
+          }
+        ]
+      }
+    },
+    {
+      "id": "zuhr-za-as-z",
+      "text": "ظُهْرٌ",
+      "transcript": "زهر",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "ظ"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dayf-dad-as-d",
+      "text": "ضَيْفٌ",
+      "transcript": "ديف",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 3,
+        "wrong": [
+          {
+            "letter": "ض"
+          }
+        ]
+      }
+    },
+    {
+      "id": "naam-ok",
+      "text": "نَعَمْ",
+      "transcript": "نعم",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "ana-talib-ok",
+      "text": "أَنَا طَالِبٌ",
+      "transcript": "انا طالب",
+      "durationSeconds": 2.5,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "hadha-cut-off",
+      "text": "هَذَا بَابٌ",
+      "transcript": "هذا",
+      "durationSeconds": 1.5,
+      "teacher": {
+        "rating": 2,
+        "wrong": []
+      }
+    },
+    {
+      "id": "walad-ok",
+      "text": "وَلَدٌ",
+      "transcript": "ولد",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    },
+    {
+      "id": "maa-hamza-soft",
+      "text": "مَاءٌ",
+      "transcript": "ما",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 4,
+        "wrong": []
+      }
+    },
+    {
+      "id": "hasanan-asr-error",
+      "text": "حَسَنًا",
+      "transcript": "هسنا",
+      "durationSeconds": 2.0,
+      "teacher": {
+        "rating": 5,
+        "wrong": []
+      }
+    }
+  ]
+}

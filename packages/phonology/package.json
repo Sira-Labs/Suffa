@@ -1,0 +1,19 @@
+{
+  "name": "@suffa/phonology",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Rule-based grapheme-to-phoneme conversion for vocalised Modern Standard Arabic, with an index back to the letters (ADR-0022).",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
+  }
+}

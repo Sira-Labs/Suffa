@@ -18,7 +18,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "npm test --workspaces --if-present && npm run test:tools",
-    "test:coverage": "npm run test:coverage -w @suffa/web && npm run test:coverage -w @suffa/engagement",
+    "test:coverage": "npm run test:coverage -w @suffa/web && npm run test:coverage -w @suffa/engagement && npm run test:coverage -w @suffa/phonology",
     "test:tools": "node --test \"tools/**/*.test.mjs\""
   },
   "devDependencies": {

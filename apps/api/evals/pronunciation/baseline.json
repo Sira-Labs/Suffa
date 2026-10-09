@@ -1,0 +1,7 @@
+{
+  "about": "Thresholds for the pronunciation eval (story 15.5); a run below them fails. The fixture set guards the letter assessor against regressions. ADR-0022 targets for the pilot recordings: false rejections at most 5 %, p95 latency at most 3 s per word. Raise these as the assessor gets better, never lower them silently.",
+  "minSpearman": 0.7,
+  "minLetterF1": 0.8,
+  "maxFalseRejectionRate": 0.08,
+  "maxLatencyP95Ms": 3000
+}

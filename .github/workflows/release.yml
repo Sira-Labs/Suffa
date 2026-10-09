@@ -45,7 +45,7 @@ jobs:
     # Real database for the api smoke test (unused by the web job).
     services:
       postgres:
-        image: postgres:17
+        image: public.ecr.aws/docker/library/postgres:17
         env:
           POSTGRES_USER: suffa
           POSTGRES_PASSWORD: smoke0123456789abcdef

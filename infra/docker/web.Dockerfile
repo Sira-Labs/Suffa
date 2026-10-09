@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 # suffa-web: builds the offline-first PWA (apps/web) and serves it with Caddy.
 # Build context is the repository root (npm workspaces, one lockfile).
-FROM node:22-bookworm-slim AS build
+FROM public.ecr.aws/docker/library/node:22-bookworm-slim AS build
 WORKDIR /app
 
 # Sync goes to suffa-api on the same origin; `off` builds the pure offline variant.
@@ -26,7 +26,7 @@ COPY apps/web apps/web
 ARG SUFFA_VERSION="dev"
 RUN VITE_SUFFA_VERSION=$SUFFA_VERSION npm run build -w @suffa/web
 
-FROM caddy:2-alpine AS web
+FROM public.ecr.aws/docker/library/caddy:2-alpine AS web
 # Reported by /healthz-web, so deploy checks can see which web image is live.
 ARG SUFFA_VERSION="dev"
 ENV SUFFA_VERSION=$SUFFA_VERSION

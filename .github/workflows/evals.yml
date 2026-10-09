@@ -2,6 +2,7 @@
 # prompts, the gateway or the sets change. A drop below evals/baseline.json fails the job.
 # Needs the repository secret SUFFA_EVAL_ANTHROPIC_API_KEY (use a key with a low spend limit);
 # without it the job passes with a notice. Each run spends at most SUFFA_EVAL_BUDGET_USD.
+# The pronunciation eval (story 15.5) rates the fixture set without any model and costs nothing.
 name: evals
 
 on:
@@ -11,6 +12,7 @@ on:
       - 'apps/api/src/evals/**'
       - 'apps/api/evals/**'
       - 'packages/llm/src/**'
+      - 'packages/phonology/src/**'
   workflow_dispatch:
 
 permissions:
@@ -37,3 +39,4 @@ jobs:
       - run: npm ci
       - run: npm run build -w @suffa/api
       - run: npm run eval -w @suffa/api
+      - run: npm run eval:pronunciation -w @suffa/api

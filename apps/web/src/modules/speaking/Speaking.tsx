@@ -21,7 +21,9 @@ import {
   type Recording,
 } from '@/services/audio';
 import { isIOS, isStandalonePwa } from '@/services/platform';
+import { SharingApi, type ShareTarget } from '@/services/sharing/sharingApi';
 import { LetterFeedback } from './LetterFeedback';
+import { ShareRecording } from './ShareRecording';
 import { MinimalPairDrill } from './MinimalPairDrill';
 import { recognitionHelp, recorderHelp, type HelpContext } from './speechHelp';
 
@@ -30,13 +32,16 @@ type Tab = 'shadowing' | 'phonologie';
 /**
  * Speaking practice. With a `scope` (inside a unit) shadowing uses only that unit's (or section's)
  * dialogue lines; a line counts once the learner recorded it or had it scored. `speechApi`
- * rates recordings on the server when the learner's classes allow it (tests pass a fake).
+ * rates recordings on the server when the learner's classes allow it; `sharingApi` shares a
+ * recording with the class teacher (tests pass fakes).
  */
 export function Speaking({
   scope,
   speechApi,
-}: { scope?: UnitPracticeScope; speechApi?: SpeechApi } = {}) {
+  sharingApi,
+}: { scope?: UnitPracticeScope; speechApi?: SpeechApi; sharingApi?: SharingApi } = {}) {
   const api = useMemo(() => speechApi ?? new SpeechApi(), [speechApi]);
+  const sharing = useMemo(() => sharingApi ?? new SharingApi(), [sharingApi]);
   const [tab, setTab] = useState<Tab>('shadowing');
   const { keep } = useReachedUnits();
   // Outside a unit: the dialogue lines of every unit reached so far.
@@ -69,6 +74,7 @@ export function Speaking({
         lines.length > 0 ? (
           <Shadowing
             api={api}
+            sharing={sharing}
             lines={lines}
             isPractised={(id) => scope?.isPractised?.(id) ?? false}
             onPractised={(id) => scope?.onPractised(id)}
@@ -106,13 +112,30 @@ function useServerSpeech(api: SpeechApi): boolean {
   return server;
 }
 
+/** Classes the learner could share recordings with (none when signed out or offline). */
+function useShareTargets(api: SharingApi): ShareTarget[] {
+  const [targets, setTargets] = useState<ShareTarget[]>([]);
+  useEffect(() => {
+    let alive = true;
+    void api.mine().then((result) => {
+      if (alive && result.ok) setTargets(result.value.targets);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [api]);
+  return targets;
+}
+
 function Shadowing({
   api,
+  sharing,
   lines,
   isPractised,
   onPractised,
 }: {
   api: SpeechApi;
+  sharing: SharingApi;
   lines: ShadowLine[];
   isPractised(lineId: string): boolean;
   onPractised(lineId: string): void;
@@ -141,8 +164,11 @@ function Shadowing({
   const [score, setScore] = useState<{
     lineId: string;
     assessment: Assessment;
+    /** The recording it rated (server), or null for live speech in the browser. */
+    recordingUrl: string | null;
   } | null>(null);
   const server = useServerSpeech(api);
+  const shareTargets = useShareTargets(sharing);
   const asr = useMemo(() => new AsrAssessor(api), [api]);
   const browser = useMemo(() => new BrowserAssessor(), []);
   const [scoring, setScoring] = useState(false);
@@ -192,9 +218,9 @@ function Shadowing({
     }
   };
 
-  const show = (lineId: string, outcome: AssessOutcome) => {
+  const show = (lineId: string, recordingUrl: string | null, outcome: AssessOutcome) => {
     if (outcome.ok) {
-      setScore({ lineId, assessment: outcome.assessment });
+      setScore({ lineId, assessment: outcome.assessment, recordingUrl });
       markPractised(lineId);
     } else if (outcome.failure.source === 'browser') {
       setScoreHint(recognitionHelp(outcome.failure.reason, help));
@@ -204,21 +230,25 @@ function Shadowing({
       setScoreHint('Dieser Satz lässt sich nicht Buchstabe für Buchstabe bewerten.');
     }
   };
-  const run = async (lineId: string, assess: () => Promise<AssessOutcome>) => {
+  const run = async (
+    lineId: string,
+    recordingUrl: string | null,
+    assess: () => Promise<AssessOutcome>
+  ) => {
     setScoring(true);
     setScore(null);
     setScoreHint(null);
     try {
-      show(lineId, await assess());
+      show(lineId, recordingUrl, await assess());
     } finally {
       setScoring(false);
     }
   };
   // Called directly from the tap: iOS only allows recognition inside the user gesture.
-  const scoreLive = () => run(target.id, () => browser.assess(target.ar));
+  const scoreLive = () => run(target.id, null, () => browser.assess(target.ar));
   // The recording the learner just made: no second speaking.
   const scoreRecording = (made: NonNullable<typeof recorded>) =>
-    run(made.lineId, () => asr.assess(target.ar, made.recording));
+    run(made.lineId, made.url, () => asr.assess(target.ar, made.recording));
   const recordedHere = recorded?.lineId === target.id ? recorded : null;
 
   return (
@@ -275,6 +305,18 @@ function Shadowing({
         >
           {scoring ? 'Bewerte…' : '✨ Aufnahme bewerten'}
         </button>
+      )}
+      {recordedHere && (
+        <ShareRecording
+          // A new recording starts a new, unshared offer.
+          key={recordedHere.url}
+          api={sharing}
+          targets={shareTargets}
+          text={target.ar}
+          recording={recordedHere.recording}
+          // Only the rating of this very recording goes along.
+          score={score?.recordingUrl === recordedHere.url ? score.assessment.score : null}
+        />
       )}
       {recordHint && (
         <p className="feedback-warn" role="alert" style={{ margin: 0 }}>

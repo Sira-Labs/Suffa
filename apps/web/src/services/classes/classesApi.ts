@@ -16,6 +16,8 @@ export interface ClassSummary {
   pendingCount: number;
   /** Who leads the class; older servers send none. */
   teacherName?: string | null;
+  /** A class of minors (stricter defaults); older servers send none. */
+  minors?: boolean;
   createdAt: string;
 }
 
@@ -26,6 +28,8 @@ export interface Member {
   classRole: ClassRole;
   status: MemberStatus;
   joinedAt: string;
+  /** The teacher recorded the parents' consent (classes of minors); older servers send none. */
+  parentalConsent?: boolean;
 }
 
 /** Class dashboard (story 6.1): aggregates of the active learners, last 7 days. */

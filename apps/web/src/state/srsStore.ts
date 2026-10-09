@@ -13,6 +13,7 @@ import {
   type DueSummary,
 } from '@/services/srs';
 import { cardRepo, reviewLogRepo, userVocabRepo } from '@/services/storage';
+import { useSettingsStore } from './settingsStore';
 
 interface SrsState {
   cards: SrsCard[];
@@ -62,7 +63,9 @@ export const useSrsStore = create<SrsState>((set, get) => ({
   },
 
   async review(card, rating, durationMs) {
-    const updated = schedule(card, rating);
+    const updated = schedule(card, rating, {
+      algorithm: useSettingsStore.getState().settings.srsAlgorithm,
+    });
     await cardRepo.put(updated);
     await reviewLogRepo.add({
       cardId: updated.id,

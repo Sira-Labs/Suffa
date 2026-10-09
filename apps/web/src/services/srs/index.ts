@@ -5,3 +5,4 @@ export * from './deck';
 export * from './resolve';
 export * from './translation';
 export * from './recall';
+export * from './fsrs';

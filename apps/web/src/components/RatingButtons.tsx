@@ -1,5 +1,6 @@
 import type { ReviewRating, SrsCard } from '@/types';
 import { previewIntervals } from '@/services/srs';
+import { useSettingsStore } from '@/state/settingsStore';
 
 interface RatingButtonsProps {
   card: SrsCard;
@@ -24,9 +25,10 @@ function intervalLabel(days: number): string {
   return months <= 1 ? '~1 Monat' : `~${months} Monate`;
 }
 
-/** SM-2 rating with an interval preview per button. */
+/** Rating with an interval preview per button (SM-2 or FSRS, as the learner chose). */
 export function RatingButtons({ card, onRate, disabled }: RatingButtonsProps) {
-  const preview = previewIntervals(card);
+  const algorithm = useSettingsStore((s) => s.settings.srsAlgorithm);
+  const preview = previewIntervals(card, new Date(), algorithm);
   return (
     <div className="rating-grid" role="group" aria-label="Wie gut wusstest du es?">
       {ORDER.map((r) => (

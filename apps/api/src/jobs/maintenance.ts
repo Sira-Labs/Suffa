@@ -6,6 +6,8 @@
  * `prune-conversations` deletes tutor conversations untouched for 90 days (ADR-0011 privacy).
  * `prune-quizzes` ends live quizzes left running for 12 hours (a teacher closed the tab) and
  * deletes finished ones after 30 days with their answers (story 14.4).
+ * `purge-files` deletes files from object storage whose rows are gone, e.g. recordings shared
+ * with a teacher when the account is deleted or the learner leaves the class (story 15.4).
  */
 import type { PgBoss, Job } from 'pg-boss';
 import type { Logger } from 'pino';
@@ -13,6 +15,8 @@ import { z } from 'zod';
 import type { SqlPool } from '../migrate.js';
 import type { ErrorReporter } from '../observability/errors.js';
 import type { QueueName } from './queue.js';
+import { purgeDeletedFiles } from '../sharing/repository.js';
+import type { ObjectStorage } from '../storage/objectStorage.js';
 
 export const MAINTENANCE_QUEUE: QueueName = 'maintenance';
 
@@ -25,6 +29,7 @@ export const MaintenanceJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('prune-heartbeats') }),
   z.object({ task: z.literal('prune-conversations') }),
   z.object({ task: z.literal('prune-quizzes') }),
+  z.object({ task: z.literal('purge-files') }),
 ]);
 export type MaintenanceJob = z.infer<typeof MaintenanceJob>;
 
@@ -34,6 +39,8 @@ export const MAINTENANCE_SCHEDULES: ReadonlyArray<{ cron: string; job: Maintenan
     { cron: '17 3 * * *', job: { task: 'prune-heartbeats' } },
     { cron: '27 3 * * *', job: { task: 'prune-conversations' } },
     { cron: '37 3 * * *', job: { task: 'prune-quizzes' } },
+    // Files of deleted accounts should not outlive them by long.
+    { cron: '*/10 * * * *', job: { task: 'purge-files' } },
   ];
 
 export async function pruneHeartbeats(pool: SqlPool): Promise<number> {
@@ -91,7 +98,8 @@ export async function pruneQuizzes(
 export async function runMaintenance(
   pool: SqlPool,
   raw: unknown,
-  log: Pick<Logger, 'info'>
+  log: Pick<Logger, 'info'>,
+  storage?: Pick<ObjectStorage, 'delete'>
 ): Promise<void> {
   const job = MaintenanceJob.parse(raw);
   switch (job.task) {
@@ -110,6 +118,17 @@ export async function runMaintenance(
       log.info({ task: job.task, ...result }, 'maintenance.done');
       return;
     }
+    case 'purge-files': {
+      // Without object storage nothing was ever stored.
+      if (!storage) return;
+      let removed = 0;
+      for (let batch = await purgeDeletedFiles(pool, storage); batch > 0; ) {
+        removed += batch;
+        batch = await purgeDeletedFiles(pool, storage);
+      }
+      log.info({ task: job.task, removed }, 'maintenance.done');
+      return;
+    }
   }
 }
 
@@ -118,7 +137,8 @@ export async function registerMaintenance(
   boss: PgBoss,
   pool: SqlPool,
   log: Pick<Logger, 'info'>,
-  errors: ErrorReporter
+  errors: ErrorReporter,
+  storage?: Pick<ObjectStorage, 'delete'>
 ): Promise<void> {
   for (const { cron, job } of MAINTENANCE_SCHEDULES) {
     await boss.schedule(MAINTENANCE_QUEUE, cron, job, { key: job.task, tz: 'UTC' });
@@ -126,7 +146,7 @@ export async function registerMaintenance(
   await boss.work(MAINTENANCE_QUEUE, async (jobs: Job<unknown>[]) => {
     for (const job of jobs) {
       try {
-        await runMaintenance(pool, job.data, log);
+        await runMaintenance(pool, job.data, log, storage);
       } catch (error) {
         // Reported on every attempt; pg-boss still retries and finally dead-letters it.
         errors.capture(error, { queue: MAINTENANCE_QUEUE, jobId: job.id });

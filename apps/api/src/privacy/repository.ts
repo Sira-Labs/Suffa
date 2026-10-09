@@ -54,6 +54,8 @@ export interface AccountExport {
   auditLog: Record<string, unknown>[];
   /** Feedback sent while testing (story R6). */
   feedback: Record<string, unknown>[];
+  /** Recordings shared with a teacher (story 15.4): what, where, the teacher's comment. */
+  sharedRecordings: Record<string, unknown>[];
 }
 
 export interface PrivacyRepository {
@@ -216,6 +218,13 @@ export class PgPrivacyRepository implements PrivacyRepository {
       feedback: await q(
         `select kind, message, page, app_version, status, created_at
            from feedback where user_id = $1 order by created_at`
+      ),
+      // The audio itself stays in the app: play or withdraw it there.
+      sharedRecordings: await q(
+        `select c.name as class, r.text, r.score, r.size_bytes, r.comment, r.commented_at,
+                r.heard_at, r.created_at
+           from shared_recordings r join classes c on c.id = r.class_id
+          where r.user_id = $1 order by r.created_at`
       ),
     };
   }

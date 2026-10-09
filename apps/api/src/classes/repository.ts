@@ -25,6 +25,8 @@ export interface ClassSummary {
   pendingCount: number;
   /** Who leads the class (its creator), as on the invite page. */
   teacherName: string | null;
+  /** A class of minors: stricter defaults (league off, sharing needs parents' consent). */
+  minors: boolean;
   createdAt: string;
 }
 
@@ -35,6 +37,8 @@ export interface Member {
   classRole: ClassRole;
   status: MemberStatus;
   joinedAt: string;
+  /** The teacher recorded the parents' consent (classes of minors, story 15.4). */
+  parentalConsent: boolean;
 }
 
 export interface InvitePreview {
@@ -144,9 +148,10 @@ export class PgClassRepository implements ClassRepository {
       student_count: string;
       pending_count: string;
       teacher_name: string | null;
+      minors: boolean;
       created_at: Date;
     }>(
-      `select c.id, c.name, c.course, m.class_role, m.status, c.created_at,
+      `select c.id, c.name, c.course, m.class_role, m.status, c.created_at, c.minors,
               (select coalesce(nullif(u.name, ''), split_part(u.email, '@', 1))
                  from users u where u.id = c.created_by) as teacher_name,
               (select count(*) from class_members s
@@ -169,6 +174,7 @@ export class PgClassRepository implements ClassRepository {
       studentCount: r.class_role === 'teacher' ? Number(r.student_count) : 0,
       pendingCount: r.class_role === 'teacher' ? Number(r.pending_count) : 0,
       teacherName: r.teacher_name,
+      minors: r.minors,
       createdAt: r.created_at.toISOString(),
     }));
   }
@@ -225,8 +231,10 @@ export class PgClassRepository implements ClassRepository {
       class_role: ClassRole;
       status: MemberStatus;
       joined_at: Date;
+      parental_consent_at: Date | null;
     }>(
-      `select m.user_id, u.email, u.name, m.class_role, m.status, m.joined_at
+      `select m.user_id, u.email, u.name, m.class_role, m.status, m.joined_at,
+              m.parental_consent_at
          from class_members m join users u on u.id = m.user_id
         where m.class_id = $1
         order by m.status desc, m.class_role desc, u.email`,
@@ -239,6 +247,7 @@ export class PgClassRepository implements ClassRepository {
       classRole: r.class_role,
       status: r.status,
       joinedAt: r.joined_at.toISOString(),
+      parentalConsent: r.parental_consent_at !== null,
     }));
   }
 

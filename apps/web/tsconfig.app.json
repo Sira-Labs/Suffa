@@ -32,7 +32,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@suffa/engagement": ["../../packages/engagement/src/index.ts"]
+      "@suffa/engagement": ["../../packages/engagement/src/index.ts"],
+      "@suffa/phonology": ["../../packages/phonology/src/index.ts"]
     }
   },
   "include": ["src", "tests", "vitest.setup.ts"]

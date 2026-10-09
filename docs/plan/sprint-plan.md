@@ -370,6 +370,10 @@ results are deleted after 30 days. Open for the PO: 14.1 store release, 14.5 sto
 ### Sprint 15 — _"Hear yourself"_ (plan: Apr 19 – May 2; now: week of Sep 28)
 
 Status: 15.1 ✅ (`packages/phonology`, 100 % branch coverage, every unit and course text converts).
+15.2 ✅ and 15.3 ✅: `POST /api/v1/speech/assess` rates the learner's own recording (Mistral EU, in
+memory only, 20 per minute); the class teacher switches it per class (default on, off for classes of
+minors); without a server recogniser the browser rates live speech. Both show the same letter
+feedback (`assessLetters`).
 
 | #    | Story                                                                                                                                                                                                                                             | Pts | Acceptance                                                                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------------------------------------------------------- |

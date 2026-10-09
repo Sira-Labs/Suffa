@@ -15,6 +15,7 @@ const EXPECTED: Record<Action, readonly Role[]> = {
   'class:progress:read': ['admin'], // without a class scope only admins
   'class:read': ['admin'], // without a class scope only admins
   'tutor:use': ['student', 'teacher', 'admin'],
+  'speech:assess': ['student', 'teacher', 'admin'],
   'admin:users:read': ['admin'],
   'admin:users:write': ['admin'],
   'admin:audit:read': ['admin'],

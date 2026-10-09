@@ -591,6 +591,14 @@ transcript (`recording.proofread`, same Mistral routes, migration 0030): lines w
 came out in Latin letters ("Hather Beiton") are proposed in Arabic letters, and an accepted
 correction replaces the line in the transcript. Correct lines are left alone.
 
+**Pronunciation feedback** (Sprechen → Shadowing → "Aufnahme bewerten", stories 15.2/15.3)
+uses the same recogniser: the learner's recording of one sentence goes to it in memory, with
+the language set to Arabic, and is rated letter by letter. Neither the audio nor the
+transcript is stored or logged; each learner gets 20 ratings per minute. The class teacher
+switches it under Klasse → Mitglieder → "Aussprache-Bewertung" (default on, off for classes
+of minors, migration 0035). Without `SUFFA_TRANSCRIBE_URL` the button is hidden and the
+browser's own speech recognition rates live speech.
+
 The api speaks the OpenAI-compatible transcription protocol, so another EU service needs
 only a new URL, model and `SUFFA_TRANSCRIBE_TOKEN`. Recordings go out over https only
 (plain http is accepted for localhost, in development). `SUFFA_TRANSCRIBE_LANGUAGE` is

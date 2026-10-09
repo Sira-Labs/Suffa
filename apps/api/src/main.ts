@@ -13,7 +13,7 @@ import {
   registerMedia,
 } from './media/jobs.js';
 import { PgInteractiveRepository, transcribeRecording } from './media/interactive.js';
-import { OpenAiCompatibleTranscriber } from './media/transcribe.js';
+import { OpenAiCompatibleTranscriber, transcribeClip } from './media/transcribe.js';
 import { HttpGoogleClient } from './drive/google.js';
 import { DriveService, importFromDrive, PgDriveConnections } from './drive/service.js';
 import { PgMediaRepository } from './media/repository.js';
@@ -59,6 +59,7 @@ import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/res
 import { PgSyncRepository } from './sync/repository.js';
 import { PgListeningRepository } from './media/listening.js';
 import { PgFeedbackRepository } from './feedback/repository.js';
+import { PgSpeechRepository } from './speech/repository.js';
 import { PgAdminRepository } from './admin/repository.js';
 import { AiGateway } from './ai/gateway.js';
 import { buildProviders } from './ai/providers.js';
@@ -538,6 +539,15 @@ async function main(): Promise<void> {
       auth,
       log,
       enabled: config.feedbackEnabled,
+    },
+    speech: {
+      auth,
+      log,
+      speech: new PgSpeechRepository(pool),
+      classes: new PgClassRepository(pool),
+      transcribe: config.transcribe
+        ? (clip) => transcribeClip(config.transcribe!, clip)
+        : undefined,
     },
     aiAdmin: ai,
     videos: {

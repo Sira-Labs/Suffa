@@ -16,8 +16,10 @@ COPY apps/web/package.json apps/web/
 COPY apps/api/package.json apps/api/
 COPY packages/engagement/package.json packages/engagement/
 COPY packages/llm/package.json packages/llm/
+COPY packages/phonology/package.json packages/phonology/
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 COPY packages/engagement packages/engagement
+COPY packages/phonology packages/phonology
 COPY apps/web apps/web
 # Release tag (sha-…) attached to browser error reports, matching the api's SUFFA_VERSION.
 # Declared this late because it changes on every commit and would bust the npm ci cache.

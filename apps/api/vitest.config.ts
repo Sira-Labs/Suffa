@@ -11,6 +11,9 @@ export default defineConfig({
       '@suffa/llm': fileURLToPath(
         new URL('../../packages/llm/src/index.ts', import.meta.url)
       ),
+      '@suffa/phonology': fileURLToPath(
+        new URL('../../packages/phonology/src/index.ts', import.meta.url)
+      ),
     },
   },
   test: {

@@ -13,6 +13,8 @@ import { ClassMembers } from './ClassMembers';
 import { ClassGrades } from './ClassGrades';
 import { ClassRecordings } from './ClassRecordings';
 import { ClassProgressView } from './ClassProgressView';
+import { SpeechSettingCard } from './SpeechSettingCard';
+import { SpeechApi } from '@/services/speech';
 import { courseById, type CourseId } from '@suffa/engagement';
 import { useActiveCourse, useSetCourse } from '@/services/courses';
 
@@ -31,6 +33,7 @@ export function ClassPage() {
   const provider = useSyncStore((s) => s.provider);
   const auth = useSyncStore((s) => s.auth);
   const api = useMemo(() => new ClassesApi(), []);
+  const speechApi = useMemo(() => new SpeechApi(), []);
   const [summary, setSummary] = useState<ClassSummary | null | undefined>(undefined);
   // Links from "Heute" open a tab directly (?tab=recordings).
   const [params] = useSearchParams();
@@ -101,7 +104,10 @@ export function ClassPage() {
               <ClassCertificates api={api} classId={summary.id} />
             )}
             {tab === 'members' && (
-              <ClassMembers api={api} summary={summary} onChange={load} />
+              <div className="stack" style={{ gap: '1rem' }}>
+                <ClassMembers api={api} summary={summary} onChange={load} />
+                <SpeechSettingCard api={speechApi} classId={summary.id} />
+              </div>
             )}
           </div>
         </>

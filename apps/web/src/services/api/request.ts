@@ -27,7 +27,11 @@ export async function apiRequest<T>(
     response = await fetchImpl(path, {
       ...init,
       credentials: 'same-origin',
-      headers: init.body ? { 'content-type': 'application/json' } : undefined,
+      // JSON bodies are strings; a FormData body sets its own multipart boundary.
+      headers:
+        typeof init.body === 'string'
+          ? { 'content-type': 'application/json' }
+          : undefined,
     });
   } catch {
     return { ok: false, status: 0, code: 'offline', message: 'Keine Verbindung.' };

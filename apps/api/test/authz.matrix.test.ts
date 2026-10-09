@@ -316,6 +316,17 @@ function buildApp() {
       log: quiet,
       enabled: true,
     },
+    speech: {
+      auth: resolver,
+      log: quiet,
+      speech: {
+        allowedFor: async () => true,
+        classSetting: async () => true,
+        setClassSetting: async () => {},
+      },
+      classes: classRepo,
+      transcribe: async () => '',
+    },
     tutor: {
       service: { turn: async function* () {} } as unknown as TutorService,
       repo: {

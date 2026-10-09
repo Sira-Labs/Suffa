@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { UnitPracticeScope } from '@/types';
 import { lineId, scopedDialogues } from '@/services/practice';
 import { ArabicText } from '@/components';
@@ -6,17 +6,22 @@ import { content } from '@/content';
 import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { speakArabic, isTtsSupported } from '@/services/speech';
 import {
+  AsrAssessor,
+  BrowserAssessor,
   isRecognitionSupported,
-  recognizeOnce,
-  type RecognitionResult,
+  SpeechApi,
+  type AssessOutcome,
+  type Assessment,
 } from '@/services/speech';
 import {
   createRecorder,
   EmptyRecordingError,
   isRecordingSupported,
   type ActiveRecorder,
+  type Recording,
 } from '@/services/audio';
 import { isIOS, isStandalonePwa } from '@/services/platform';
+import { LetterFeedback } from './LetterFeedback';
 import { MinimalPairDrill } from './MinimalPairDrill';
 import { recognitionHelp, recorderHelp, type HelpContext } from './speechHelp';
 
@@ -24,9 +29,14 @@ type Tab = 'shadowing' | 'phonologie';
 
 /**
  * Speaking practice. With a `scope` (inside a unit) shadowing uses only that unit's (or section's)
- * dialogue lines; a line counts once the learner recorded it or had it scored.
+ * dialogue lines; a line counts once the learner recorded it or had it scored. `speechApi`
+ * rates recordings on the server when the learner's classes allow it (tests pass a fake).
  */
-export function Speaking({ scope }: { scope?: UnitPracticeScope } = {}) {
+export function Speaking({
+  scope,
+  speechApi,
+}: { scope?: UnitPracticeScope; speechApi?: SpeechApi } = {}) {
+  const api = useMemo(() => speechApi ?? new SpeechApi(), [speechApi]);
   const [tab, setTab] = useState<Tab>('shadowing');
   const { keep } = useReachedUnits();
   // Outside a unit: the dialogue lines of every unit reached so far.
@@ -58,6 +68,7 @@ export function Speaking({ scope }: { scope?: UnitPracticeScope } = {}) {
       {tab === 'shadowing' ? (
         lines.length > 0 ? (
           <Shadowing
+            api={api}
             lines={lines}
             isPractised={(id) => scope?.isPractised?.(id) ?? false}
             onPractised={(id) => scope?.onPractised(id)}
@@ -80,11 +91,28 @@ interface ShadowLine {
   de: string;
 }
 
+/** Whether the server may rate this learner's recordings (false offline or signed out). */
+function useServerSpeech(api: SpeechApi): boolean {
+  const [server, setServer] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    void api.settings().then((result) => {
+      if (alive) setServer(result.ok && result.value.server);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [api]);
+  return server;
+}
+
 function Shadowing({
+  api,
   lines,
   isPractised,
   onPractised,
 }: {
+  api: SpeechApi;
   lines: ShadowLine[];
   isPractised(lineId: string): boolean;
   onPractised(lineId: string): void;
@@ -104,12 +132,19 @@ function Shadowing({
     recorder: ActiveRecorder;
     lineId: string;
   } | null>(null);
-  const [recordedUrl, setRecordedUrl] = useState<string | null>(null);
+  const [recorded, setRecorded] = useState<{
+    lineId: string;
+    url: string;
+    recording: Recording;
+  } | null>(null);
   // Tied to its sentence: a late answer never shows under another one.
   const [score, setScore] = useState<{
     lineId: string;
-    result: RecognitionResult;
+    assessment: Assessment;
   } | null>(null);
+  const server = useServerSpeech(api);
+  const asr = useMemo(() => new AsrAssessor(api), [api]);
+  const browser = useMemo(() => new BrowserAssessor(), []);
   const [scoring, setScoring] = useState(false);
   const [recordHint, setRecordHint] = useState<string | null>(null);
   const [scoreHint, setScoreHint] = useState<string | null>(null);
@@ -123,7 +158,7 @@ function Shadowing({
   const go = (step: number) => {
     setI((x) => (x + step + lines.length) % lines.length);
     setScore(null);
-    setRecordedUrl(null);
+    setRecorded(null);
     setRecordHint(null);
     setScoreHint(null);
   };
@@ -137,13 +172,17 @@ function Shadowing({
       return;
     }
     setRecording({ recorder: started.recorder, lineId: target.id });
-    setRecordedUrl(null);
+    setRecorded(null);
   };
   const stopRecording = async () => {
     if (!recording) return;
     try {
-      const { blob } = await recording.recorder.stop();
-      setRecordedUrl(URL.createObjectURL(blob));
+      const made = await recording.recorder.stop();
+      setRecorded({
+        lineId: recording.lineId,
+        url: URL.createObjectURL(made.blob),
+        recording: made,
+      });
       markPractised(recording.lineId);
     } catch (error) {
       if (!(error instanceof EmptyRecordingError)) throw error;
@@ -153,18 +192,34 @@ function Shadowing({
     }
   };
 
-  const scorePronunciation = async () => {
+  const show = (lineId: string, outcome: AssessOutcome) => {
+    if (outcome.ok) {
+      setScore({ lineId, assessment: outcome.assessment });
+      markPractised(lineId);
+    } else if (outcome.failure.source === 'browser') {
+      setScoreHint(recognitionHelp(outcome.failure.reason, help));
+    } else if (outcome.failure.source === 'server') {
+      setScoreHint(outcome.failure.message);
+    } else {
+      setScoreHint('Dieser Satz lässt sich nicht Buchstabe für Buchstabe bewerten.');
+    }
+  };
+  const run = async (lineId: string, assess: () => Promise<AssessOutcome>) => {
     setScoring(true);
     setScore(null);
     setScoreHint(null);
-    // Called directly from the tap: iOS only allows recognition inside the user gesture.
-    const outcome = await recognizeOnce({ target: target.ar });
-    if (outcome.ok) {
-      setScore({ lineId: target.id, result: outcome.result });
-      markPractised(target.id);
-    } else setScoreHint(recognitionHelp(outcome.reason, help));
-    setScoring(false);
+    try {
+      show(lineId, await assess());
+    } finally {
+      setScoring(false);
+    }
   };
+  // Called directly from the tap: iOS only allows recognition inside the user gesture.
+  const scoreLive = () => run(target.id, () => browser.assess(target.ar));
+  // The recording the learner just made: no second speaking.
+  const scoreRecording = (made: NonNullable<typeof recorded>) =>
+    run(made.lineId, () => asr.assess(target.ar, made.recording));
+  const recordedHere = recorded?.lineId === target.id ? recorded : null;
 
   return (
     <div className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
@@ -210,8 +265,17 @@ function Shadowing({
         ) : (
           <span className="muted">{recorderHelp('unsupported', help)}</span>
         )}
-        {recordedUrl && <audio controls src={recordedUrl} />}
+        {recordedHere && <audio controls src={recordedHere.url} />}
       </div>
+      {server && recordedHere && (
+        <button
+          className="btn btn-primary"
+          onClick={() => void scoreRecording(recordedHere)}
+          disabled={scoring}
+        >
+          {scoring ? 'Bewerte…' : '✨ Aufnahme bewerten'}
+        </button>
+      )}
       {recordHint && (
         <p className="feedback-warn" role="alert" style={{ margin: 0 }}>
           {recordHint}
@@ -222,13 +286,14 @@ function Shadowing({
         {isRecognitionSupported() ? (
           <button
             className="btn btn-primary"
-            onClick={() => void scorePronunciation()}
+            onClick={() => void scoreLive()}
             disabled={scoring}
           >
             {scoring ? 'Höre zu…' : '🎤 Aussprache bewerten'}
           </button>
         ) : (
-          <span className="muted">{recognitionHelp('unsupported', help)}</span>
+          // With the server, a recording can be rated instead.
+          !server && <span className="muted">{recognitionHelp('unsupported', help)}</span>
         )}
       </div>
       {scoreHint && (
@@ -238,16 +303,7 @@ function Shadowing({
       )}
 
       {score?.lineId === target.id && (
-        <div className="stack" style={{ alignItems: 'center' }}>
-          <span>
-            Erkannt: <span className="arabic-inline">{score.result.transcript}</span>
-          </span>
-          <strong
-            className={score.result.similarity > 0.7 ? 'feedback-good' : 'feedback-warn'}
-          >
-            Ähnlichkeit: {Math.round(score.result.similarity * 100)} %
-          </strong>
-        </div>
+        <LetterFeedback text={target.ar} assessment={score.assessment} />
       )}
 
       <div className="row" style={{ justifyContent: 'center' }}>

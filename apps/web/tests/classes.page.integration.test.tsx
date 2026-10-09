@@ -115,6 +115,11 @@ async function signIn(
         ],
       });
     }
+    if (path.endsWith('/speech')) {
+      return method === 'PUT'
+        ? new Response(null, { status: 204 })
+        : Response.json({ serverSpeech: true });
+    }
     if (method === 'PUT') return Response.json({ ...feed.challenge, target: 200 });
     return new Response(null, { status: 204 });
   }) as unknown as typeof fetch;
@@ -168,6 +173,18 @@ describe('Class page (integration)', () => {
 
     await userEvent.click(screen.getByRole('tab', { name: 'Mitglieder' }));
     expect(await screen.findByText(/Einladungslink/)).toBeInTheDocument();
+
+    // Server pronunciation feedback for the class (story 15.2).
+    const speech = await screen.findByRole('checkbox', {
+      name: /Aufnahmen auf dem Server bewerten/,
+    });
+    expect(speech).toBeChecked();
+    await userEvent.click(speech);
+    await waitFor(() => expect(speech).not.toBeChecked());
+    expect(requests.filter((r) => r.path.endsWith('/speech')).at(-1)).toMatchObject({
+      method: 'PUT',
+      body: { serverSpeech: false },
+    });
   });
 
   it('lets the teacher delete the class after typing its name', async () => {

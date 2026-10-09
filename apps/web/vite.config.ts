@@ -78,6 +78,9 @@ export default defineConfig({
       '@suffa/engagement': fileURLToPath(
         new URL('../../packages/engagement/src/index.ts', import.meta.url)
       ),
+      '@suffa/phonology': fileURLToPath(
+        new URL('../../packages/phonology/src/index.ts', import.meta.url)
+      ),
     },
   },
   build: {

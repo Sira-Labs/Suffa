@@ -24,6 +24,8 @@ export const VocabSchema = z
     ar: short,
     tr: short,
     de: short,
+    // English gloss (story 16.4): drafted by the LLM, reviewed before it is published.
+    en: short.optional(),
     // Empty for pronouns and particles (no root family).
     wurzel: optionalShort,
     wazn: short.optional(),
@@ -41,7 +43,14 @@ export const DialogSchema = z
     titel: short,
     zeilen: z
       .array(
-        z.object({ sp: short, ar: z.string().trim().min(1).max(1000), de: long }).strict()
+        z
+          .object({
+            sp: short,
+            ar: z.string().trim().min(1).max(1000),
+            de: long,
+            en: long.optional(),
+          })
+          .strict()
       )
       .min(1)
       .max(60),
@@ -67,7 +76,15 @@ export const GrammarSchema = z
     regel: z.string().trim().min(1).max(1000),
     erklaerung: z.array(long).min(1).max(20),
     beispiele: z
-      .array(z.object({ ar: z.string().trim().min(1).max(1000), de: long }).strict())
+      .array(
+        z
+          .object({
+            ar: z.string().trim().min(1).max(1000),
+            de: long,
+            en: long.optional(),
+          })
+          .strict()
+      )
       .max(20),
     fragen: z.array(GrammarQuestionSchema).max(20),
   })
@@ -177,6 +194,33 @@ export interface ItemChanges {
   changed: string[];
   /** Title or culture note changed. */
   textChanged: boolean;
+  /** Items whose English (story 16.4) is new or changed: these need a teacher's check. */
+  english: string[];
+}
+
+/**
+ * The English texts of a unit by place: `<word id>`, `<dialogue id>#<line>`,
+ * `<grammar id>#<example>`.
+ */
+export function englishTexts(content: UnitContent | null): Map<string, string> {
+  const texts = new Map<string, string>();
+  if (!content) return texts;
+  for (const v of content.vokabeln) if (v.en) texts.set(v.id, v.en);
+  for (const d of content.dialoge) {
+    d.zeilen.forEach((line, i) => line.en && texts.set(`${d.id}#${i}`, line.en));
+  }
+  for (const g of content.grammatik) {
+    g.beispiele.forEach((ex, i) => ex.en && texts.set(`${g.id}#${i}`, ex.en));
+  }
+  return texts;
+}
+
+/** Places whose English the draft adds or changes against the published unit. */
+export function englishChanges(before: UnitContent | null, after: UnitContent): string[] {
+  const old = englishTexts(before);
+  return [...englishTexts(after)]
+    .filter(([place, text]) => old.get(place) !== text)
+    .map(([place]) => place);
 }
 
 /**
@@ -205,7 +249,7 @@ export function diffUnits(before: UnitContent | null, after: UnitContent): ItemC
     before === null ||
     before.titel !== after.titel ||
     (before.kulturnotiz ?? '') !== (after.kulturnotiz ?? '');
-  return { added, removed, changed, textChanged };
+  return { added, removed, changed, textChanged, english: englishChanges(before, after) };
 }
 
 /** JSON with sorted keys, so key order never counts as a change. */

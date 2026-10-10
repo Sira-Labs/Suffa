@@ -18,6 +18,7 @@ import {
   contentIds,
   contentOfFile,
   diffUnits,
+  englishChanges,
   type ItemChanges,
   type UnitContent,
   type UnitFile,
@@ -64,7 +65,10 @@ export interface ContentActor {
 
 export type TransitionResult =
   | { ok: true; revision: number }
-  | { ok: false; reason: 'not_found' | 'stale_revision' | 'wrong_state' };
+  | {
+      ok: false;
+      reason: 'not_found' | 'stale_revision' | 'wrong_state' | 'translation_unreviewed';
+    };
 
 export type SaveResult =
   | TransitionResult
@@ -358,6 +362,13 @@ export class PgContentRepository implements ContentRepository {
     // The published file is the draft with its number and review status: what learners get.
     return this.transition(id, actor, revision, {
       from: ['review'],
+      // New or changed English (LLM drafts, story 16.4) reaches learners only after a teacher
+      // checked this very revision; German-only changes may still be published unchecked.
+      guard: (current) =>
+        current.checkedRevision !== current.revision &&
+        englishChanges(current.published, current.draft).length > 0
+          ? 'translation_unreviewed'
+          : null,
       action: 'content.unit_published',
       update: `state = 'published', review_note = null,
                published = draft || jsonb_build_object(
@@ -433,6 +444,8 @@ export class PgContentRepository implements ContentRepository {
       details?: Record<string, unknown>;
       /** Runs after the update in the same transaction; its result joins the audit details. */
       after?: (client: pg.PoolClient) => Promise<Record<string, unknown>>;
+      /** Refuses the step for a reason of its own (checked after state and revision). */
+      guard?: (current: LockedUnit) => 'translation_unreviewed' | null;
     }
   ): Promise<TransitionResult> {
     return inTransaction(this.pool, async (client) => {
@@ -440,6 +453,8 @@ export class PgContentRepository implements ContentRepository {
       if (!current) return { ok: false, reason: 'not_found' };
       if (current.revision !== revision) return { ok: false, reason: 'stale_revision' };
       if (!step.from.includes(current.state)) return { ok: false, reason: 'wrong_state' };
+      const refused = step.guard?.(current);
+      if (refused) return { ok: false, reason: refused };
       await client.query(`update content_units set ${step.update} where id = $1`, [
         id,
         ...(step.params ?? []),
@@ -458,15 +473,20 @@ export class PgContentRepository implements ContentRepository {
   }
 }
 
-async function lockUnit(
-  client: pg.PoolClient,
-  id: string
-): Promise<{ state: UnitState; revision: number; draft: UnitContent } | null> {
-  const { rows } = await client.query<{
-    state: UnitState;
-    revision: number;
-    draft: UnitContent;
-  }>(`select state, revision, draft from content_units where id = $1 for update`, [id]);
+interface LockedUnit {
+  state: UnitState;
+  revision: number;
+  draft: UnitContent;
+  published: UnitContent | null;
+  checkedRevision: number | null;
+}
+
+async function lockUnit(client: pg.PoolClient, id: string): Promise<LockedUnit | null> {
+  const { rows } = await client.query<LockedUnit>(
+    `select state, revision, draft, published, checked_revision as "checkedRevision"
+       from content_units where id = $1 for update`,
+    [id]
+  );
   return rows[0] ?? null;
 }
 

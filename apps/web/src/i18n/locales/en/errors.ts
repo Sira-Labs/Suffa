@@ -38,6 +38,12 @@ export const errors: Messages<typeof de> = {
     invalid_content: 'The content is not valid like this:',
     id_taken: 'An ID already belongs to another unit:',
     payload_too_large: 'The unit is too large.',
+    translation_unreviewed:
+      'New or changed English texts reach learners only after a teacher has checked this version.',
+    nothing_to_translate: 'Every text of this unit already has an English version.',
+    ai_unavailable: 'No AI model is set up for translations on this server.',
+    ai_quota: "Today's AI quota is used up.",
+    ai_failed: 'The AI returned no usable translation. Please try again.',
   },
   videos: {
     import_unavailable: 'The import needs the YouTube key (SUFFA_YOUTUBE_API_KEY).',

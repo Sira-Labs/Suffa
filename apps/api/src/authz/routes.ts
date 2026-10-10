@@ -312,6 +312,11 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     path: '/api/v1/content/units/:course/:unit/publish',
     action: 'content:write',
   },
+  {
+    method: 'POST',
+    path: '/api/v1/content/units/:course/:unit/translate',
+    action: 'content:write',
+  },
 ];
 
 /**

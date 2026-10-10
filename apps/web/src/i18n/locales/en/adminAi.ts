@@ -14,7 +14,10 @@ export const adminAi: Messages<typeof de> = {
       speech: 'Grade pronunciation',
     },
     exercise: { generate: 'Generate exercises' },
-    content: { 'author-assist': 'Authoring help' },
+    content: {
+      'author-assist': 'Authoring help',
+      translate: 'Translate content (English drafts)',
+    },
     recording: {
       suggest: 'Suggestions for recordings',
       summarize: 'Summaries of recordings',

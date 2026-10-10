@@ -43,6 +43,14 @@ export const errors = {
     invalid_content: 'Der Inhalt ist so nicht gültig:',
     id_taken: 'Eine Kennung gehört schon zu einer anderen Einheit:',
     payload_too_large: 'Die Einheit ist zu groß.',
+    translation_unreviewed:
+      'Neue oder geänderte englische Texte gehen erst an die Lernenden, wenn eine Lehrkraft diese Fassung geprüft hat.',
+    nothing_to_translate: 'Alle Texte dieser Einheit haben schon eine englische Fassung.',
+    ai_unavailable:
+      'Für Übersetzungen ist auf diesem Server kein KI-Modell eingerichtet.',
+    ai_quota: 'Das KI-Kontingent für heute ist aufgebraucht.',
+    ai_failed:
+      'Die KI hat keine brauchbare Übersetzung geliefert. Versuche es noch einmal.',
   },
   videos: {
     import_unavailable:

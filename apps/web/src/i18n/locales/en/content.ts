@@ -43,6 +43,11 @@ export const content: Messages<typeof de> = {
     text: 'Title or culture note changed',
     markNew: 'new',
     markChanged: 'changed',
+    english_one:
+      'English new or changed: {{count}} text – please check it against Arabic and German',
+    english_other:
+      'English new or changed: {{count}} texts – please check them against Arabic and German',
+    markEnglish: 'check English',
   },
   view: {
     cultureNote: 'Culture note',
@@ -55,6 +60,7 @@ export const content: Messages<typeof de> = {
     arabic: 'Arabic',
     transliteration: 'Transliteration',
     german: 'German',
+    english: 'English',
     root: 'Root',
     plural: 'Plural',
     questions_one: '{{count}} quiz question',
@@ -78,7 +84,7 @@ export const content: Messages<typeof de> = {
     section: 'Section',
     rule: 'Rule',
     explanation: 'Explanation (one paragraph per line)',
-    examples: 'Examples (per line: Arabic | German)',
+    examples: 'Examples (per line: Arabic | German | English)',
     removePoint: 'Remove grammar point {{id}}',
     addPoint: 'Add a grammar point',
     questions: 'Quiz questions ({{n}})',
@@ -90,6 +96,10 @@ export const content: Messages<typeof de> = {
     addQuestion: 'Add a question',
   },
   workbench: {
+    translate_one: 'Draft English (AI) · {{count}} text open',
+    translate_other: 'Draft English (AI) · {{count}} texts open',
+    translated:
+      '{{filled}} English texts drafted, {{remaining}} still open. Check them and submit the unit: it is published only after a teacher has checked it.',
     region: 'Content',
     intro:
       'Edit drafts, submit them for review and publish them. The app downloads published units in the background; learners see them the next time they open it.',

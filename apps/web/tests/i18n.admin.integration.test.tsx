@@ -68,7 +68,13 @@ const unit: UnitDetail = {
   counts: { vokabeln: 1, dialoge: 0, grammatik: 1 },
   draft: content,
   published: { ...content, einheit: 1 },
-  changes: { added: ['v-new'], removed: [], changed: [], textChanged: false },
+  changes: {
+    added: ['v-new'],
+    removed: [],
+    changed: [],
+    textChanged: false,
+    english: [],
+  },
 };
 
 function contentApi() {

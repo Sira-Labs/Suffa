@@ -12,7 +12,10 @@ export const adminAi = {
       speech: 'Aussprache bewerten',
     },
     exercise: { generate: 'Übungen erzeugen' },
-    content: { 'author-assist': 'Autorenhilfe' },
+    content: {
+      'author-assist': 'Autorenhilfe',
+      translate: 'Inhalte übersetzen (Englisch-Entwürfe)',
+    },
     recording: {
       suggest: 'Vorschläge für Aufnahmen',
       summarize: 'Zusammenfassung von Aufnahmen',

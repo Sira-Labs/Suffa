@@ -44,6 +44,11 @@ export const content = {
     text: 'Titel oder Kulturnotiz geändert',
     markNew: 'neu',
     markChanged: 'geändert',
+    english_one:
+      'Englisch neu oder geändert: {{count}} Text – bitte gegen Arabisch und Deutsch prüfen',
+    english_other:
+      'Englisch neu oder geändert: {{count}} Texte – bitte gegen Arabisch und Deutsch prüfen',
+    markEnglish: 'Englisch prüfen',
   },
   view: {
     cultureNote: 'Kulturnotiz',
@@ -56,6 +61,7 @@ export const content = {
     arabic: 'Arabisch',
     transliteration: 'Umschrift',
     german: 'Deutsch',
+    english: 'Englisch',
     root: 'Wurzel',
     plural: 'Plural',
     questions_one: '{{count}} Quizfrage(n)',
@@ -79,7 +85,7 @@ export const content = {
     section: 'Abschnitt',
     rule: 'Regel',
     explanation: 'Erklärung (ein Absatz pro Zeile)',
-    examples: 'Beispiele (pro Zeile: Arabisch | Deutsch)',
+    examples: 'Beispiele (pro Zeile: Arabisch | Deutsch | Englisch)',
     removePoint: 'Grammatikpunkt {{id}} entfernen',
     addPoint: 'Grammatikpunkt hinzufügen',
     questions: 'Quizfragen ({{n}})',
@@ -91,6 +97,10 @@ export const content = {
     addQuestion: 'Frage hinzufügen',
   },
   workbench: {
+    translate_one: 'Englisch entwerfen (KI) · {{count}} Text offen',
+    translate_other: 'Englisch entwerfen (KI) · {{count}} Texte offen',
+    translated:
+      '{{filled}} englische Texte entworfen, {{remaining}} noch offen. Bitte prüfen und zur Prüfung geben: veröffentlicht wird erst nach dem Haken einer Lehrkraft.',
     region: 'Inhalte',
     intro:
       'Entwürfe bearbeiten, zur Prüfung geben und veröffentlichen. Veröffentlichte Einheiten lädt die App im Hintergrund; Lernende sehen sie ab dem nächsten Öffnen.',

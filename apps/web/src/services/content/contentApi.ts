@@ -40,6 +40,8 @@ export interface ItemChanges {
   removed: string[];
   changed: string[];
   textChanged: boolean;
+  /** Places whose English is new or changed (story 16.4): a teacher checks them. */
+  english: string[];
 }
 
 export interface UnitDetail extends UnitSummary {
@@ -92,6 +94,22 @@ export class ContentApi {
     );
   }
 
+  /**
+   * Drafts English for the texts that lack it (LLM, story 16.4); saved as the next draft
+   * revision, published only after a teacher's check.
+   */
+  translate(
+    id: string,
+    revision: number
+  ): Promise<ApiResult<{ revision: number; filled: number; remaining: number }>> {
+    return apiRequest(
+      this.fetchImpl,
+      `${unitPath(id)}/translate`,
+      { method: 'POST', body: JSON.stringify({ revision }) },
+      'content'
+    );
+  }
+
   /** A teacher sends the unit back to the editors. */
   returnToDraft(
     id: string,
@@ -111,6 +129,15 @@ export class ContentApi {
 function unitPath(id: string): string {
   const [course = '', unit = ''] = id.split('/');
   return `/api/v1/content/units/${encodeURIComponent(course)}/${encodeURIComponent(unit)}`;
+}
+
+/** Texts of a unit without English: words, dialogue lines, grammar examples. */
+export function missingEnglishCount(content: UnitContent): number {
+  return (
+    content.vokabeln.filter((v) => !v.en).length +
+    content.dialoge.reduce((n, d) => n + d.zeilen.filter((l) => !l.en).length, 0) +
+    content.grammatik.reduce((n, g) => n + g.beispiele.filter((e) => !e.en).length, 0)
+  );
 }
 
 /** An error message with the validation details, if the API sent any. */

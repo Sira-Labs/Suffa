@@ -6,6 +6,7 @@ import {
   contentIds,
   contentOfFile,
   diffUnits,
+  englishChanges,
   validateUnitContent,
   type UnitContent,
 } from '../src/content/schema.js';
@@ -115,6 +116,7 @@ describe('content schema (story 16.1)', () => {
       removed: ['v-b'],
       changed: ['v-a', 'g-1-1'],
       textChanged: false,
+      english: [],
     });
     // Key order is no change.
     const reordered = unit();
@@ -166,5 +168,23 @@ describe('content schema (story 16.1)', () => {
     expect(errors).toEqual(['content.seed_unreadable', 'content.seed_unreadable']);
     // The published units still get their bundle.
     expect(bundles).toBe(2);
+  });
+
+  it('accepts English beside German and lists where it is new or changed (16.4)', () => {
+    const before = unit();
+    const after = unit();
+    after.vokabeln[0]!.en = 'A in English';
+    after.dialoge[0]!.zeilen[0]!.en = 'Hello';
+    expect(validateUnitContent(1, after).ok).toBe(true);
+    expect(englishChanges(before, after)).toEqual([
+      after.vokabeln[0]!.id,
+      `${after.dialoge[0]!.id}#0`,
+    ]);
+    // The same English again is no change; an empty one is no English.
+    expect(englishChanges(after, structuredClone(after))).toEqual([]);
+    expect(
+      validateUnitContent(1, { ...after, vokabeln: [{ ...after.vokabeln[0]!, en: '' }] })
+        .ok
+    ).toBe(false);
   });
 });

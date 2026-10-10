@@ -1,6 +1,6 @@
 # ADR-0021: Learner languages — UI, tutoring and meaning language (German, English, later Arabic UI)
 
-- Status: accepted (tutoring language implemented in Sprint 10; UI language implemented in story 16.3, see `docs/i18n.md`; meaning language in story 16.4: learner side implemented, CMS translations in progress)
+- Status: accepted (tutoring language implemented in Sprint 10; UI language implemented in story 16.3, see `docs/i18n.md`; meaning language implemented in story 16.4)
 - Date: 2026-09-23
 - Related: ADR-0011 (al-Muʿallim), ADR-0014 (content CMS)
 
@@ -101,3 +101,20 @@ queue gets a "translations" view.
 - Not yet: Medina lesson meanings are static files without English (badge shown), nisba,
   verb and minimal-pair meanings, examples and the server side (tutor curriculum pack, live
   quiz options) stay German.
+
+## Implementation notes (story 16.4, CMS)
+
+- The CMS schema accepts `en` beside `de` (words, dialogue lines, grammar examples); the
+  editor has an English field next to each German one, examples are typed
+  `Arabic | German | English`.
+- "Englisch entwerfen (KI)" (admins, `POST /content/units/:course/:unit/translate`): the LLM
+  (task `content.translate`, routed to Mistral like the recording tasks, migration 0042) gets
+  the Arabic and the German of every text without English and answers with JSON. Only the
+  places it was asked for are filled, existing English is never overwritten, and the result
+  is saved as the next draft revision (audited like any save). Deviation from the plan: one
+  request per unit instead of the Batch API; a unit has at most a few hundred short texts.
+- Review: the teacher's view shows the English beside the German and marks every text whose
+  English is new or changed ("Englisch prüfen"); the change summary counts them.
+- Nothing unreviewed reaches learners: publishing refuses (`409 translation_unreviewed`) when
+  the draft adds or changes English and no teacher checked that revision. German-only changes
+  keep the existing "publish without a check" confirmation.

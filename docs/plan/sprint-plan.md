@@ -423,10 +423,11 @@ and English, including API error messages (`errors` namespace, resolved when the
 created) and labels from shared helpers. German course content is marked `lang="de"`; the e2e
 test `english.spec.ts` visits the learner pages in English, the Medina course included, and
 fails on German interface words outside it. Translating meanings is story 16.4.
-16.4 (in progress): learner side done – the synced setting `meaningLanguage` (migration 0041),
-English glosses next to German (`en`), German fallback with a "not yet translated" badge,
-reviews, exams, reading and writing in the meaning language, grading rules per locale
-(ADR-0021). Next: English fields in the CMS, drafts by the LLM, review before publish.
+16.4 (done): the synced setting `meaningLanguage` (migration 0041), English glosses next to
+German (`en`), German fallback with a "not yet translated" badge, reviews, exams, reading and
+writing in the meaning language, grading rules per locale. In the CMS: English fields, drafts
+by the LLM (`content.translate`, Mistral), English marked for the teacher's check, and no
+publish of new English without that check (ADR-0021).
 
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------- |

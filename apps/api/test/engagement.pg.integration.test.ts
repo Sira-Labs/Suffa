@@ -161,6 +161,45 @@ describe.skipIf(!url)('Engagement recompute (Postgres)', () => {
     ]);
   });
 
+  it("picks the quests of the learner's course", async () => {
+    const settings = (course: string | undefined) => ({
+      id: 'user-settings',
+      updated_at: new Date().toISOString(),
+      deleted: false,
+      key: 'user-settings',
+      tashkilLevel: 'full',
+      theme: 'dark',
+      arabicFontScale: 1,
+      dailyGoal: 20,
+      weeklyGoal: 5,
+      showTransliteration: true,
+      dialectNotes: false,
+      ...(course ? { course } : {}),
+    });
+    // No choice yet: the default course.
+    expect((await repo.load(AMINA))?.course).toBeNull();
+    await sync.upsert(AMINA, 'settings', [settings('madinah')]);
+    expect((await repo.load(AMINA))?.course).toBe('madinah');
+
+    // Over a month of Medina days no dialogue quest is stored, and the word quest comes up.
+    const days = Array.from(
+      { length: 30 },
+      (_, i) => new Date(Date.UTC(2026, 9, 11 + i, 18))
+    );
+    const ids = new Set<string>();
+    for (const now of days) {
+      await sync.upsert(AMINA, 'review_logs', reviews(1, now.toISOString()));
+      await recomputeEngagement(repo, AMINA, quiet, now, { videos: true });
+      const rows = await pool.query<{ quest_id: string }>(
+        'select quest_id from quest_progress where user_id = $1 and day = $2',
+        [AMINA, now.toISOString().slice(0, 10)]
+      );
+      rows.rows.forEach((r) => ids.add(r.quest_id));
+    }
+    expect(ids.has('words-5')).toBe(true);
+    expect(ids.has('listen-1') || ids.has('read-1')).toBe(false);
+  });
+
   it('does nothing for an account that is gone', async () => {
     await pool.query('truncate users cascade');
     expect(await recomputeEngagement(repo, AMINA, quiet, NOW)).toBe(false);

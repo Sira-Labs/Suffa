@@ -22,7 +22,8 @@ export async function recomputeEngagement(
     timeZone: data.timeZone,
     weeklyGoal: data.weeklyGoal,
     now,
-    features,
+    // Quests follow the learner's course, as in the app.
+    features: { ...features, course: data.course },
   });
   const rejectedCount = Object.values(rejected).reduce((n, c) => n + c, 0);
   await repo.save(userId, summary, {

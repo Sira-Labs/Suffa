@@ -4,12 +4,14 @@
  */
 import type pg from 'pg';
 import {
+  isCourseId,
   isTimeZone,
   isWeeklyGoal,
   DEFAULT_WEEKLY_GOAL,
   LESSON_SIZES,
   type EngagementInput,
   type EngagementSummary,
+  type CourseId,
   type Tier,
   type WeeklyGoal,
 } from '@suffa/engagement';
@@ -18,6 +20,8 @@ export interface LearnerData {
   input: EngagementInput;
   timeZone: string;
   weeklyGoal: WeeklyGoal;
+  /** The learner's own course choice (ADR-0025); null: not chosen, the default course. */
+  course: CourseId | null;
 }
 
 export interface EngagementState {
@@ -54,8 +58,9 @@ export class PgEngagementRepository implements EngagementRepository {
     const user = await this.pool.query<{
       time_zone: string | null;
       weekly: number | null;
+      course: string | null;
     }>(
-      `select u.time_zone, s."weeklyGoal" as weekly
+      `select u.time_zone, s."weeklyGoal" as weekly, s.course
          from users u left join settings s on s.user_id = u.id and not s.deleted
         where u.id = $1`,
       [userId]
@@ -82,6 +87,7 @@ export class PgEngagementRepository implements EngagementRepository {
     return {
       timeZone: row.time_zone && isTimeZone(row.time_zone) ? row.time_zone : 'UTC',
       weeklyGoal: isWeeklyGoal(row.weekly) ? row.weekly : DEFAULT_WEEKLY_GOAL,
+      course: isCourseId(row.course) ? row.course : null,
       input: {
         reviews: reviews.map((r) => ({ ...r, reviewedAt: iso(r.reviewedAt) as string })),
         tracks: tracks.map((t) => ({ ...t, completedAt: iso(t.completedAt) })),

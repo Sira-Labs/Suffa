@@ -21,9 +21,15 @@ export function CheckpointDialog({
   const [checked, setChecked] = useState(false);
   const correct = answer !== null && isCorrect(data, answer);
   // The question appears while the media pauses: keyboard and screen-reader users land in it
-  // (WCAG 2.4.3), instead of staying on the player controls.
+  // (WCAG 2.4.3), instead of staying on the player controls, and go back there afterwards.
   const card = useRef<HTMLDivElement>(null);
-  useEffect(() => card.current?.focus(), [checkpoint.id]);
+  useEffect(() => {
+    const before = document.activeElement;
+    card.current?.focus();
+    return () => {
+      if (before instanceof HTMLElement && before.isConnected) before.focus();
+    };
+  }, [checkpoint.id]);
 
   return (
     <div

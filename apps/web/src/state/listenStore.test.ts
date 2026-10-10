@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { db } from '@/services/storage';
 import { useListenStore, type TrackRef } from './listenStore';
+import { usePracticeStore } from './practiceStore';
 
 const track = (id: string): TrackRef => ({
   id,
@@ -24,6 +25,27 @@ describe('listen store', () => {
     expect(useListenStore.getState().progress['t1']!.completedAt).not.toBeNull();
     // Listening again does not pay twice.
     expect(await record(track('t1'), 60, 60)).toMatchObject({ trackHeard: false, xp: 0 });
+  });
+
+  it('counts a track heard to the end again once a day, without XP', async () => {
+    await db.practice_progress.clear();
+    await usePracticeStore.getState().load();
+    const { record } = useListenStore.getState();
+    await record(track('t1'), 60, 60);
+    const repeats = () =>
+      Object.values(usePracticeStore.getState().records).filter(
+        (r) => r.skill === 'relisten'
+      );
+    // A few seconds again are not a second listen.
+    expect(await record(track('t1'), 20, 60)).toMatchObject({ xp: 0 });
+    expect(repeats()).toHaveLength(0);
+    await record(track('t1'), 35, 60);
+    expect(repeats()).toHaveLength(1);
+    expect(repeats()[0]).toMatchObject({ unit: 0 });
+    expect(repeats()[0]!.itemId).toMatch(/^t1@/);
+    // The same day counts once.
+    await record(track('t1'), 60, 60);
+    expect(repeats()).toHaveLength(1);
   });
 
   it('reports the lesson as complete with its last track', async () => {

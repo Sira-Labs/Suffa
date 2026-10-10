@@ -9,6 +9,7 @@ import type {
   GrammatikPunkt,
   PracticeRecord,
   PracticeSkill,
+  RepeatSkill,
   UnitPracticeScope,
 } from '@/types';
 
@@ -106,7 +107,7 @@ export function unitPracticeItems(
 
 export function practiceId(
   unit: number,
-  skill: PracticeSkill | CourseSkill,
+  skill: PracticeSkill | CourseSkill | RepeatSkill,
   itemId: string
 ): string {
   return `${unit}:${skill}:${itemId}`;

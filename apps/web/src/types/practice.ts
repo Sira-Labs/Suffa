@@ -12,6 +12,12 @@ export type PracticeSkill = 'read' | 'grammar' | 'cloze' | 'write' | 'speak' | '
 export type CourseSkill = 'letters' | 'checkpoint' | 'tutor' | 'words';
 
 /**
+ * A dialogue read or a track heard again after the first success, once per item and day
+ * (item `<id>@<day>`): counts for the daily quests, earns no XP.
+ */
+export type RepeatSkill = 'reread' | 'relisten';
+
+/**
  * One practised item of a unit skill (a dialogue read, a word written correctly, a dialogue
  * line spoken, a verb drilled correctly). Only the first success per item is stored; XP and
  * station progress are derived from these records. Local for now, like media_progress.
@@ -20,7 +26,7 @@ export interface PracticeRecord extends Syncable {
   /** `${unit}:${skill}:${itemId}` */
   id: string;
   unit: number;
-  skill: PracticeSkill | CourseSkill;
+  skill: PracticeSkill | CourseSkill | RepeatSkill;
   /** Content id: dialogue id, vocabulary id, `${dialogId}#${line}` or verb id. */
   itemId: string;
   practisedAt: string;

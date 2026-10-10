@@ -254,4 +254,22 @@ describe('practice_progress schema', () => {
       SYNC_SCHEMAS.practice_progress.safeParse({ ...record, skill: 'unknown' }).success
     ).toBe(false);
   });
+
+  it('accepts a dialogue read or a track heard again (once per day, for the quests)', () => {
+    const repeat = (skill: string, itemId: string) => ({
+      id: `3:${skill}:${itemId}`,
+      updated_at: '2026-10-12T10:00:00.000Z',
+      deleted: false,
+      unit: 3,
+      skill,
+      itemId,
+      practisedAt: '2026-10-12T10:00:00.000Z',
+    });
+    for (const record of [
+      repeat('reread', 'd-3-1@2026-10-12'),
+      repeat('relisten', 'b1/u3/t1@2026-10-12'),
+    ]) {
+      expect(SYNC_SCHEMAS.practice_progress.safeParse(record).success).toBe(true);
+    }
+  });
 });

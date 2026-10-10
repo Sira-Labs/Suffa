@@ -110,6 +110,9 @@ export const SYNC_SCHEMAS = {
       'checkpoint',
       'tutor',
       'words',
+      // Repeats for the daily quests, no XP (@suffa/engagement REPEAT_SKILLS).
+      'reread',
+      'relisten',
     ]),
     itemId: shortText.min(1),
     practisedAt: isoTimestamp,

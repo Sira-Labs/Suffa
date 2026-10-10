@@ -1,6 +1,6 @@
 # ADR-0021: Learner languages — UI, tutoring and meaning language (German, English, later Arabic UI)
 
-- Status: accepted (tutoring language implemented in Sprint 10; UI and meaning languages planned for Sprint 16)
+- Status: accepted (tutoring language implemented in Sprint 10; UI language in progress in story 16.3, see `docs/i18n.md`; meaning language planned for 16.4)
 - Date: 2026-09-23
 - Related: ADR-0011 (al-Muʿallim), ADR-0014 (content CMS)
 
@@ -49,3 +49,18 @@ Three separate, per-user settings (synced; a teacher can set a class default):
 String extraction touches every module once (planned in Sprint 16). Tutoring language is cheap
 and ships with the tutor (Sprint 10). Content grows by one field per language; the CMS review
 queue gets a "translations" view.
+
+## Implementation notes (story 16.3, first part)
+
+- `i18next` 25 + `react-i18next` 15. German catalogues are bundled and initialised
+  synchronously (tests and the first render need no async step); English is a separate chunk
+  loaded when chosen. Catalogue keys are typed (`CustomTypeOptions`), and the English
+  catalogues are typed against the German ones.
+- Deviation: namespaces are split per area, but only the language is lazy, not each
+  namespace: the PWA precaches every chunk anyway, and per-namespace loading would add a
+  Suspense boundary to every screen for no offline gain.
+- Instead of `eslint-plugin-i18next` a small local rule (`tools/eslint/no-hardcoded-ui-text.js`)
+  checks the translated areas; it knows Arabic is not interface text and honours `lang` and
+  `translate="no"`.
+- The setting syncs as `settings.uiLanguage`; the class default for teachers comes with the
+  meaning language (16.4).

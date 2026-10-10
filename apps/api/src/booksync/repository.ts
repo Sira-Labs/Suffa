@@ -33,6 +33,13 @@ export interface BookSyncRepository {
     revision: number,
     data: BookSyncData
   ): Promise<SyncSaveResult>;
+  /** The suggestion for a lesson without a sync; false when it has one (never overwritten). */
+  seed(
+    course: string,
+    book: number,
+    lesson: number,
+    data: BookSyncData
+  ): Promise<boolean>;
 }
 
 export class PgBookSyncRepository implements BookSyncRepository {
@@ -56,6 +63,31 @@ export class PgBookSyncRepository implements BookSyncRepository {
       pages: r.data.pages ?? [],
       lines: r.data.lines ?? [],
     }));
+  }
+
+  async seed(
+    course: string,
+    book: number,
+    lesson: number,
+    data: BookSyncData
+  ): Promise<boolean> {
+    return inTransaction(this.pool, async (client) => {
+      const inserted = await client.query(
+        `insert into book_sync (course, book, lesson, data, revision, updated_by)
+         values ($1, $2, $3, $4::jsonb, 1, null)
+         on conflict (course, book, lesson) do nothing`,
+        [course, book, lesson, JSON.stringify(data)]
+      );
+      if (inserted.rowCount === 0) return false;
+      await writeAudit(client, {
+        actorId: null,
+        action: 'content.book_sync_seeded',
+        targetType: 'book_sync',
+        targetId: `${course}/${book}/${lesson}`,
+        details: { revision: 1, pages: data.pages.length, lines: data.lines.length },
+      });
+      return true;
+    });
   }
 
   async save(

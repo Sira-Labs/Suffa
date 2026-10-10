@@ -56,12 +56,24 @@ function lineHeight(bands: Band[]): number {
 }
 
 class Page {
+  private readonly grey: ArrayLike<number>;
+  readonly width: number;
+  readonly height: number;
+  private readonly o: Required<LineDetectionOptions>;
+
   constructor(
-    private readonly grey: ArrayLike<number>,
-    readonly width: number,
-    readonly height: number,
-    private readonly o: Required<LineDetectionOptions>
-  ) {}
+    grey: ArrayLike<number>,
+    width: number,
+    pageHeight: number,
+    options: Required<LineDetectionOptions>
+  ) {
+    // Plain fields (no parameter properties): the content tools load this file with Node's
+    // type stripping.
+    this.grey = grey;
+    this.width = width;
+    this.height = pageHeight;
+    this.o = options;
+  }
 
   ink(x: number, y: number): boolean {
     return this.grey[y * this.width + x]! < this.o.inkBelow;

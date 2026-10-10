@@ -331,6 +331,9 @@ export const PUBLIC_ROUTES: readonly string[] = [
   // The video catalog is public (ADR-0012); interactive parts depend on the creator's permission.
   'GET /api/v1/videos',
   'GET /api/v1/videos/:id',
+  // Published course content, as the app itself ships it (story 16.2).
+  'GET /api/v1/content/manifest',
+  'GET /api/v1/content/bundles/:version',
   // Universal Links / App Links files for the native app (ADR-0019).
   'GET /api/v1/app-links/apple-app-site-association',
   'GET /api/v1/app-links/assetlinks.json',

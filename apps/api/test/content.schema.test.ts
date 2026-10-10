@@ -150,12 +150,21 @@ describe('content schema (story 16.1)', () => {
   it('logs an unreadable seed and keeps the API running', async () => {
     const errors: string[] = [];
     const log = { info: () => {}, error: (_: object, msg: string) => errors.push(msg) };
-    const repo = { seed: async () => 1 } as unknown as Parameters<typeof seedContent>[0];
+    let bundles = 0;
+    const repo = {
+      seed: async () => ({ inserted: 1, refreshed: 0 }),
+      ensureBundle: async () => {
+        bundles += 1;
+        return null;
+      },
+    } as unknown as Parameters<typeof seedContent>[0];
     expect(await seedContent(repo, join(tmpdir(), 'suffa-no-such-dir'), log)).toBe(0);
     const dir = await mkdtemp(join(tmpdir(), 'suffa-seed-'));
     await mkdir(dir, { recursive: true });
     await writeFile(join(dir, 'einheit-01.json'), '[]');
     expect(await seedContent(repo, dir, log)).toBe(0);
     expect(errors).toEqual(['content.seed_unreadable', 'content.seed_unreadable']);
+    // The published units still get their bundle.
+    expect(bundles).toBe(2);
   });
 });

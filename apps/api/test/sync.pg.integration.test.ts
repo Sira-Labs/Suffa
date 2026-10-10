@@ -104,6 +104,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
         dialectNotes: true,
         course: 'madinah',
         srsAlgorithm: 'fsrs',
+        uiLanguage: 'en',
       },
       user_vocab: {
         id: 'uv-1',
@@ -283,9 +284,10 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
       settings('2026-09-23T12:00:00.000Z', { course: 'bayna-yadayk' }),
     ]);
     expect(await pullCourse()).toBe('bayna-yadayk');
-    // The scheduling choice (story 15.6) is kept the same way.
+    // The scheduling choice (story 15.6) and the interface language (16.3) are kept the
+    // same way.
     await repo.upsert(BOB, 'settings', [
-      settings('2026-09-23T13:00:00.000Z', { srsAlgorithm: 'fsrs' }),
+      settings('2026-09-23T13:00:00.000Z', { srsAlgorithm: 'fsrs', uiLanguage: 'en' }),
     ]);
     await repo.upsert(BOB, 'settings', [settings('2026-09-23T14:00:00.000Z')]);
     const latest = await repo.pull(BOB, 'settings', {
@@ -293,7 +295,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
       afterId: null,
       limit: 10,
     });
-    expect(latest.records[0]).toMatchObject({ srsAlgorithm: 'fsrs' });
+    expect(latest.records[0]).toMatchObject({ srsAlgorithm: 'fsrs', uiLanguage: 'en' });
   });
 
   it('never lets a merely created card replace a reviewed one', async () => {

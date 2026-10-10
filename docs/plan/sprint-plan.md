@@ -428,6 +428,10 @@ German (`en`), German fallback with a "not yet translated" badge, reviews, exams
 writing in the meaning language, grading rules per locale. In the CMS: English fields, drafts
 by the LLM (`content.translate`, Mistral), English marked for the teacher's check, and no
 publish of new English without that check (ADR-0021).
+16.5 (done): axe checks (WCAG 2.2 AA) of every learner page in both themes, the Medina course
+and the teacher's class pages in the e2e run; skip link, focus checks and reflow at 320 px;
+contrast fixes (no faded text), focus kept clear of the phone's bottom bar, checkpoints take
+the focus. Audit and open points: `docs/accessibility.md`.
 
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------- |

@@ -3,7 +3,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import prettier from 'eslint-config-prettier';
-import suffa from './tools/eslint/no-hardcoded-ui-text.js';
+import suffa from './apps/web/eslint/no-hardcoded-ui-text.js';
 
 /**
  * Areas whose interface text already comes from the i18n catalogues (story 16.3). New
@@ -19,7 +19,8 @@ const TRANSLATED = [
 
 export default tseslint.config(
   {
-    ignores: ['**/dist', '**/dev-dist', '**/coverage', '**/node_modules'],
+    // .claude/worktrees: temporary checkouts of Claude Code agents, not part of the repo.
+    ignores: ['**/dist', '**/dev-dist', '**/coverage', '**/node_modules', '.claude/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

@@ -45,3 +45,4 @@ playwright-report/
 
 # Personal Claude Code settings
 .claude/settings.local.json
+.claude/worktrees/

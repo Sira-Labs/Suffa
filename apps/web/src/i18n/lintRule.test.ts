@@ -1,7 +1,7 @@
 /** The lint rule that keeps new interface text out of the code (story 16.3). */
 import { RuleTester } from 'eslint';
 import { describe, it } from 'vitest';
-import { noHardcodedUiText } from '../../../../tools/eslint/no-hardcoded-ui-text.js';
+import { noHardcodedUiText } from '../../eslint/no-hardcoded-ui-text.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;

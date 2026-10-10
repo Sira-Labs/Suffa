@@ -59,7 +59,7 @@ queue gets a "translations" view.
 - Deviation: namespaces are split per area, but only the language is lazy, not each
   namespace: the PWA precaches every chunk anyway, and per-namespace loading would add a
   Suspense boundary to every screen for no offline gain.
-- Instead of `eslint-plugin-i18next` a small local rule (`tools/eslint/no-hardcoded-ui-text.js`)
+- Instead of `eslint-plugin-i18next` a small local rule (`apps/web/eslint/no-hardcoded-ui-text.js`)
   checks the translated areas; it knows Arabic is not interface text and honours `lang` and
   `translate="no"`.
 - The setting syncs as `settings.uiLanguage`; the class default for teachers comes with the

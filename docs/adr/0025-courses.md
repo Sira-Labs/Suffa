@@ -120,13 +120,23 @@ and our own exercises, and no copied book texts or pictures in the repo.
     - Only boxes and seconds are saved; lines without a time are not. CSP `connect-src` allows
       `archive.org` and `*.archive.org` for the recording download.
   - **Suggested timings for every lesson (2026-10-10).** `tools/content/madinah-book-sync.mjs`
-    runs the same line and pause finding over every lesson's page images and recording (fetched
-    into a temporary folder and deleted again) and pairs lines and stretches of speech in reading
-    order; each page turn is its first line's start. The result
-    (`content/courses/madinah/book1-sync.json`, only boxes and seconds) is seeded at API start
-    for every lesson without a sync, so the book follows the recording from the first day. It is
-    a suggestion nobody has listened to: admins correct it in the line editor, and a lesson they
-    have saved is never overwritten by the seed.
+    computes, for every lesson, where the lines sit and when they are read. The result
+    (`content/courses/madinah/book1-sync.json`, only boxes and seconds) is seeded at API start,
+    so the book follows the recording from the first day. It is a suggestion: admins correct it
+    in the line editor.
+    - First version: lines paired with stretches of speech (pauses) in reading order. Wrong in
+      practice: the author repeats lines, announces exercises and pauses inside lines, so the
+      pairing drifted within the first page.
+    - Now (same day): the lines are read and matched with what is said. Pictures are wiped from
+      the page before lines are found (they reach into the text's rows), captions side by side
+      are lines of their own. Each line is read with Tesseract (Arabic) and the recording's
+      words are recognised with Whisper, both on the machine running the tool: no recording or
+      book text goes to any service. Both texts are reduced to bare letters and aligned in order
+      (`textAlign.mjs`); a line starts when its letters are first said, repeated or announced
+      speech matches nothing and is passed over, and boxes never heard (pictures, page numbers)
+      are dropped. The OCR text and the recognised words are deleted after the run.
+    - Rows the seed wrote are marked `suggested` (migration 0044). A new suggestion replaces
+      them at start-up as a new revision; a lesson an admin has saved is never replaced.
   - The same course is sold in print as "Madinah Arabic Reader" by Goodword Books, split into
     8 books (our book 1 = their books 1 and 2). Each lesson names its book and start page in
     that edition, so learners with the printed book find it. We show none of its pages: its

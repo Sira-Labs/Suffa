@@ -2,6 +2,7 @@
  * Google Drive import for teachers (story 7.2): connection status, the Google Picker (loaded
  * on demand from apis.google.com, allowed by the CSP) and the import request.
  */
+import i18n from '@/i18n';
 import { apiRequest, type Fetch } from '@/services/api/request';
 
 export interface DriveStatus {
@@ -121,15 +122,15 @@ export async function pickRecordings(status: DriveStatus, accessToken: string) {
         .setSelectFolderEnabled(false)
         .setLabel(label);
     new picker.PickerBuilder()
-      .addView(view('Meine Ablage').setOwnedByMe(true))
-      .addView(view('Für mich freigegeben').setOwnedByMe(false))
-      .addView(view('Geteilte Ablagen').setEnableDrives(true))
+      .addView(view(i18n.t('recordings:drive.myDrive')).setOwnedByMe(true))
+      .addView(view(i18n.t('recordings:drive.sharedWithMe')).setOwnedByMe(false))
+      .addView(view(i18n.t('recordings:drive.sharedDrives')).setEnableDrives(true))
       .enableFeature(picker.Feature.MULTISELECT_ENABLED)
       .enableFeature(picker.Feature.SUPPORT_DRIVES)
       .setOAuthToken(accessToken)
       .setDeveloperKey(status.apiKey)
       .setAppId(status.appId)
-      .setLocale('de')
+      .setLocale(i18n.language === 'en' ? 'en' : 'de')
       .setCallback((data) => {
         if (data.action === picker.Action.PICKED)
           resolve((data.docs ?? []).map((d) => d.id));

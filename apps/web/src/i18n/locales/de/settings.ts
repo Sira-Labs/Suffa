@@ -49,6 +49,8 @@ export const settings = {
     link: 'Alle Quellen & Lizenzen',
   },
   devices: {
+    unknownDevice: 'Unbekanntes Gerät',
+    browserOn: '{{browser}} auf {{system}}',
     openAdmin: 'Verwaltung öffnen',
     timeZone: 'Zeitzone (für Tagesziel und Serie)',
     title: 'Angemeldete Geräte',

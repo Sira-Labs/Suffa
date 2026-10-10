@@ -62,6 +62,9 @@ export const recordings: Messages<typeof de> = {
     disconnect: 'Disconnect',
     connect: 'Connect Google Drive',
     privacy: 'Suffa only sees the files you choose yourself.',
+    myDrive: 'My Drive',
+    sharedWithMe: 'Shared with me',
+    sharedDrives: 'Shared drives',
   },
   player: {
     loading: 'Loading recording …',

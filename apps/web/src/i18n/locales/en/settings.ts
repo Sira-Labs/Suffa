@@ -51,6 +51,8 @@ export const settings: Messages<typeof de> = {
     link: 'All sources & licences',
   },
   devices: {
+    unknownDevice: 'Unknown device',
+    browserOn: '{{browser}} on {{system}}',
     openAdmin: 'Open administration',
     timeZone: 'Time zone (for daily goal and streak)',
     title: 'Signed-in devices',

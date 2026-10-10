@@ -2,10 +2,11 @@
  * Helpers for the device list on the account card: a readable name for a session's browser
  * and the time zones to choose from. Pure, so they are tested without a DOM.
  */
+import i18n from '@/i18n';
 
-/** "Chrome auf Android", "Safari auf iPhone", … from a User-Agent string. */
+/** "Chrome auf Android", "Safari auf iPhone", … from a User-Agent string, in the interface language. */
 export function describeDevice(userAgent: string | null): string {
-  if (!userAgent) return 'Unbekanntes Gerät';
+  if (!userAgent) return i18n.t('settings:devices.unknownDevice');
   const ua = userAgent;
   const browser = /Edg\//.test(ua)
     ? 'Edge'
@@ -31,7 +32,7 @@ export function describeDevice(userAgent: string | null): string {
             : /Linux/.test(ua)
               ? 'Linux'
               : null;
-  return system ? `${browser} auf ${system}` : browser;
+  return system ? i18n.t('settings:devices.browserOn', { browser, system }) : browser;
 }
 
 /** The browser's own time zone, e.g. "Europe/Zurich". */

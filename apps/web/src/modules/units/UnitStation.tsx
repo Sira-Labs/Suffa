@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import type { PracticeSkill, UnitPracticeScope } from '@/types';
 import { Icon } from '@/components/Icon';
@@ -26,6 +27,7 @@ import { Grammar } from '@/modules/grammar';
 import { useClozeIds } from './useClozeIds';
 import { useBookProgress } from './useBookProgress';
 import { isStationKey, STATION_META } from './skills';
+import i18n from '@/i18n';
 
 const UNITS = 16;
 
@@ -35,6 +37,7 @@ const UNITS = 16;
  * a station celebrates it.
  */
 export function UnitStation() {
+  const { t } = useTranslation('units');
   const { unit: unitParam, station } = useParams();
   const [params] = useSearchParams();
   const unit = Number(unitParam);
@@ -94,12 +97,17 @@ export function UnitStation() {
       onPractised(itemId) {
         void practise(unit, skill, itemId, items[skill]).then((outcome) => {
           if (outcome.first && !outcome.stationComplete) {
-            celebrate({ title: 'Richtig', xp: outcome.xp, big: false });
+            celebrate({ title: i18n.t('units:correct'), xp: outcome.xp, big: false });
           }
           if (outcome.stationComplete) {
-            const where = section ? `Dialog ${section.no}` : `Einheit ${unit}`;
+            const where = section
+              ? i18n.t('units:dialogue', { n: section.no })
+              : i18n.t('units:unit', { n: unit });
             celebrate({
-              title: `${STATION_META[skill].label} geschafft · ${where}`,
+              title: i18n.t('units:station.complete', {
+                station: i18n.t(`units:stations.${skill}.label`),
+                where,
+              }),
               xp: outcome.xp,
               big: true,
             });
@@ -117,9 +125,9 @@ export function UnitStation() {
   if (!Number.isInteger(unit) || unit < 1 || unit > UNITS || !isStationKey(station)) {
     return (
       <div className="stack">
-        <h1>Station nicht gefunden</h1>
+        <h1>{t('station.notFound')}</h1>
         <Link to="/units" className="btn">
-          Zu allen Einheiten
+          {t('toAllUnits')}
         </Link>
       </div>
     );
@@ -130,7 +138,7 @@ export function UnitStation() {
       <div className="stack" style={{ gap: '1.25rem' }}>
         <Link to={`/units/${unit}`} className="back-link">
           <Icon name="arrowLeft" size={18} />
-          Einheit {unit}
+          {t('unit', { n: unit })}
         </Link>
         <LockedPanel unit={unit} />
       </div>
@@ -140,16 +148,16 @@ export function UnitStation() {
   if (openNos === null) {
     if (pathFailed) {
       return (
-        <section className="card stack" aria-label="Lernpfad nicht geladen">
-          <strong>Der Lernpfad konnte nicht geladen werden.</strong>
-          <span className="muted">Prüfe die Verbindung und versuch es noch einmal.</span>
+        <section className="card stack" aria-label={t('station.pathFailedLabel')}>
+          <strong>{t('station.pathFailed')}</strong>
+          <span className="muted">{t('station.pathFailedHint')}</span>
           <button className="btn btn-primary" type="button" onClick={retryPath}>
-            Erneut versuchen
+            {t('station.retry')}
           </button>
         </section>
       );
     }
-    return <p className="muted">Lade Lernpfad …</p>;
+    return <p className="muted">{t('station.pathLoading')}</p>;
   }
 
   if (sectionLocked) {
@@ -157,15 +165,15 @@ export function UnitStation() {
       <div className="stack" style={{ gap: '1.25rem' }}>
         <Link to={`/units/${unit}`} className="back-link">
           <Icon name="arrowLeft" size={18} />
-          Einheit {unit}
+          {t('unit', { n: unit })}
         </Link>
-        <section className="card stack" aria-label="Dialog gesperrt">
-          <strong>Dialog {section.no} ist noch gesperrt</strong>
+        <section className="card stack" aria-label={t('station.dialogueLockedLabel')}>
+          <strong>{t('station.dialogueLocked', { n: section.no })}</strong>
           <p className="muted" style={{ margin: 0 }}>
-            Schließe zuerst Dialog {section.no - 1} ab – dann geht es hier weiter.
+            {t('station.dialogueLockedHint', { previous: section.no - 1 })}
           </p>
           <Link to={`/units/${unit}`} className="btn btn-primary">
-            Zum Lernpfad
+            {t('toPath')}
           </Link>
         </section>
       </div>
@@ -173,6 +181,7 @@ export function UnitStation() {
   }
 
   const meta = STATION_META[station];
+  const label = t(`stations.${station}.label`);
   const total = skill ? items[skill].length : 0;
   const done = skill ? practiceCount(records, unit, skill, items[skill]) : 0;
   const lesson = Number(params.get('lesson')) || undefined;
@@ -184,26 +193,26 @@ export function UnitStation() {
     <div className="stack" style={{ gap: '1.25rem' }}>
       <Link to={`/units/${unit}`} className="back-link">
         <Icon name="arrowLeft" size={18} />
-        Einheit {unit}
+        {t('unit', { n: unit })}
       </Link>
       <header className="stack" style={{ gap: '0.35rem' }}>
         <span className="eyebrow" style={{ color: 'var(--accent)' }}>
-          Einheit {unit}
-          {section && ` · Dialog ${section.no}`}
+          {t('unit', { n: unit })}
+          {section && ` · ${t('dialogue', { n: section.no })}`}
         </span>
         <h1 style={{ margin: 0 }} className="row">
           <Icon name={meta.icon} size={26} />
-          {meta.label}
+          {label}
         </h1>
         <p className="muted" style={{ margin: 0 }}>
-          {(section && meta.sectionHint) || meta.hint}
+          {section ? t(`stations.${station}.sectionHint`) : t(`stations.${station}.hint`)}
         </p>
         {skill && total > 0 && (
           <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
             <div
               className="review-progress"
               role="progressbar"
-              aria-label={`Fortschritt ${meta.label}`}
+              aria-label={t('station.progress', { station: label })}
               aria-valuemin={0}
               aria-valuemax={total}
               aria-valuenow={done}
@@ -211,25 +220,23 @@ export function UnitStation() {
               <div style={{ width: `${(done / total) * 100}%` }} />
             </div>
             <span className="muted" style={{ whiteSpace: 'nowrap' }}>
-              {done} von {total}
+              {t('of', { done, total })}
             </span>
           </div>
         )}
       </header>
 
       {skill && total > 0 && done >= total && (
-        <section className="card row station-done" aria-label="Station geschafft">
+        <section className="card row station-done" aria-label={t('station.doneLabel')}>
           <span className="station-done-icon" aria-hidden>
             <Icon name="check" size={22} strokeWidth={2.5} />
           </span>
           <span className="stack" style={{ gap: '0.15rem', flex: 1, minWidth: 0 }}>
-            <strong>{meta.label} geschafft</strong>
-            <span className="muted">
-              Du kannst hier weiter üben oder zum nächsten Schritt gehen.
-            </span>
+            <strong>{t('station.done', { station: label })}</strong>
+            <span className="muted">{t('station.doneHint')}</span>
           </span>
           <Link to={`/units/${unit}`} className="btn btn-primary">
-            Weiter im Lernpfad
+            {t('station.continuePath')}
           </Link>
         </section>
       )}
@@ -237,12 +244,12 @@ export function UnitStation() {
       {station === 'listen' && (
         <>
           {!onlyLesson && (
-            <section className="card stack" aria-label="Buchseiten-Videos">
+            <section className="card stack" aria-label={t('station.bookVideos')}>
               <BookVideos unit={unit} />
             </section>
           )}
           {!videosOnly && (
-            <section className="card stack" aria-label="Offizielle Audios">
+            <section className="card stack" aria-label={t('station.officialAudio')}>
               <PublisherAudio
                 key={`${unit}-${lesson ?? ''}`}
                 unit={unit}

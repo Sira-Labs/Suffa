@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import type { CardKind, SrsCard } from '@/types';
 import { Icon } from '@/components/Icon';
@@ -31,6 +32,7 @@ const NEW_KINDS: CardKind[] = ['vocab_ar_de', 'vocab_de_ar'];
  * Introduces at most the new words "Heute" promised, minus those already learned today.
  */
 export function FocusReview() {
+  const { t } = useTranslation('review');
   const [newLimit, setNewLimit] = useState<number | null>(null);
   // ?focus=weak (from "Heute"): the wobbly words, due or not.
   const [weak, setWeak] = useState<SrsCard[] | null>(null);
@@ -45,14 +47,14 @@ export function FocusReview() {
   // &section=k narrows to dialogue k's words, &section=eigene to the learner's own words.
   const unitWords = unit ? sessionWords(unit, section, userVocab) : null;
   const title = weakOnly
-    ? 'Wackelige Wörter'
+    ? t('titles.weak')
     : !unit
-      ? 'Wiederholen'
+      ? t('titles.review')
       : section === 'eigene'
-        ? `Einheit ${unit} · Eigene Wörter`
+        ? t('titles.ownWords', { unit })
         : section
-          ? `Einheit ${unit} · Dialog ${section} · Wörter`
-          : `Einheit ${unit} · Vokabeln`;
+          ? t('titles.dialogueWords', { unit, section })
+          : t('titles.unitVocab', { unit });
 
   useEffect(() => {
     let cancelled = false;
@@ -73,7 +75,7 @@ export function FocusReview() {
       <Link
         to={unit ? `/units/${unit}` : '/'}
         className="icon-button focus-close"
-        aria-label="Sitzung beenden"
+        aria-label={t('endSession')}
       >
         <Icon name="close" />
       </Link>
@@ -109,6 +111,7 @@ export function FocusReview() {
  * (due or not) and another batch of new words. Both count as reviews for the quests.
  */
 function KeepPractising({ weakCount }: { weakCount: number }) {
+  const { t } = useTranslation('review');
   // The same selection the session makes (new vocabulary cards the learner may reach).
   const newCount = useSrsStore((s) => s.getQueue)(
     NEW_KINDS,
@@ -118,12 +121,12 @@ function KeepPractising({ weakCount }: { weakCount: number }) {
   return (
     <>
       <p className="muted" style={{ margin: 0 }}>
-        Für heute ist alles wiederholt. Weiterüben zählt trotzdem für deine Tagesaufgaben.
+        {t('allReviewed')}
       </p>
       <div className="row" style={{ justifyContent: 'center', flexWrap: 'wrap' }}>
         {weakCount > 0 && (
           <Link className="btn btn-primary" to="/review?focus=weak" replace>
-            Wackelige Wörter üben ({weakCount})
+            {t('practiseWeak', { count: weakCount })}
           </Link>
         )}
         {newCount > 0 && (
@@ -132,16 +135,16 @@ function KeepPractising({ weakCount }: { weakCount: number }) {
             to="/review?more=1"
             replace
           >
-            {Math.min(NEW_PER_DAY, newCount)} weitere neue Wörter
+            {t('moreNew', { count: Math.min(NEW_PER_DAY, newCount) })}
           </Link>
         )}
         {weakCount === 0 && newCount === 0 && (
           <Link className="btn btn-primary" to="/units">
-            Dialog hören
+            {t('listenDialogue')}
           </Link>
         )}
         <Link className="btn" to="/">
-          Zu Heute
+          {t('toToday')}
         </Link>
       </div>
     </>

@@ -4,13 +4,15 @@
  * row there leads here.
  */
 import { useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { dayKey } from '@suffa/engagement';
 import { Link } from 'react-router-dom';
 import type { SrsCard } from '@/types';
 import { content } from '@/content';
 import { Icon } from '@/components/Icon';
 import { masteryBuckets, weakCards } from '@/services/stats';
-import { activityHeatmap, activityLabel } from '@/services/activity';
+import { activityHeatmap, type ActivityCell } from '@/services/activity';
+import i18n from '@/i18n';
 import {
   useContentStore,
   useEngagementStore,
@@ -21,7 +23,20 @@ import {
 import { LevelCard } from './LevelCard';
 import { useEngagement, useLearnerTimeZone } from '@/modules/engagement/useEngagement';
 
+/** "2026-09-26: 2 Übungen, 1 Audio/Video" in the interface language. */
+function activityTitle(cell: ActivityCell): string {
+  if (cell.total === 0)
+    return i18n.t('dashboard:progress.noActivity', { date: cell.date });
+  const parts = [
+    cell.reviews > 0 && i18n.t('dashboard:progress.reviews', { count: cell.reviews }),
+    cell.practice > 0 && i18n.t('dashboard:progress.practice', { count: cell.practice }),
+    cell.tracks > 0 && i18n.t('dashboard:progress.tracks', { count: cell.tracks }),
+  ].filter(Boolean);
+  return `${cell.date}: ${parts.join(', ')}`;
+}
+
 export function Progress() {
+  const { t } = useTranslation('dashboard');
   const cards = useSrsStore((s) => s.cards);
   const summary = useSrsStore((s) => s.summary)();
   const logs = useEngagementStore((s) => s.logs);
@@ -56,33 +71,33 @@ export function Progress() {
 
   return (
     <div className="stack" style={{ gap: '1rem' }}>
-      <h1>Fortschritt</h1>
+      <h1>{t('progress.title')}</h1>
       <LevelCard totalXp={engagement.totalXp} level={engagement.level} />
       <div
         className="grid"
         style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}
       >
         <Stat
-          label="Fällig heute"
-          hint="heute zu wiederholen"
+          label={t('progress.dueToday')}
+          hint={t('progress.dueTodayHint')}
           value={summary.dueCount}
           accent="var(--info)"
         />
         <Stat
-          label="Neu verfügbar"
-          hint="aus deinen Einheiten"
+          label={t('progress.newAvailable')}
+          hint={t('progress.newAvailableHint')}
           value={summary.newCount}
           accent="var(--accent)"
         />
         <Stat
-          label="Lernend"
-          hint="gesehen, noch unter 3 Wochen"
+          label={t('progress.learning')}
+          hint={t('progress.learningHint')}
           value={mastery.lernend}
           accent="var(--text)"
         />
         <Stat
-          label="Sicher"
-          hint="3 Wochen und länger gemerkt"
+          label={t('progress.secure')}
+          hint={t('progress.secureHint')}
           value={mastery.reif}
           accent="var(--good)"
         />
@@ -90,14 +105,14 @@ export function Progress() {
       <WeakWords cards={weak} />
 
       <div className="card stack">
-        <strong>Aktivität (letzte 28 Tage)</strong>
-        <div className="row" style={{ gap: 4 }} aria-label="Lern-Aktivität je Tag">
+        <strong>{t('progress.activity')}</strong>
+        <div className="row" style={{ gap: 4 }} aria-label={t('progress.activityLabel')}>
           {heat.map((cell) => {
             const intensity = cell.total / maxHeat;
             return (
               <span
                 key={cell.date}
-                title={activityLabel(cell)}
+                title={activityTitle(cell)}
                 style={{
                   width: 16,
                   height: 16,
@@ -115,10 +130,8 @@ export function Progress() {
 
       <Link to="/badges" className="card row home-link-row">
         <span className="stack" style={{ gap: 0 }}>
-          <strong>Abzeichen</strong>
-          <span className="muted stat-tile-hint">
-            Deine Erfolge und was als Nächstes kommt
-          </span>
+          <strong>{t('progress.badges')}</strong>
+          <span className="muted stat-tile-hint">{t('progress.badgesHint')}</span>
         </span>
         <Icon name="award" />
       </Link>
@@ -151,6 +164,7 @@ function Stat({
  * back sooner (short intervals); the list shows which ones they are.
  */
 function WeakWords({ cards }: { cards: SrsCard[] }) {
+  const { t } = useTranslation('dashboard');
   const userVocab = useContentStore((s) => s.userVocab);
   const words = useMemo(() => {
     const byId = new Map<string, { ar: string; de: string }>(
@@ -170,21 +184,18 @@ function WeakWords({ cards }: { cards: SrsCard[] }) {
       <summary>
         <span className="weak-words-count">{words.length}</span>
         <span className="stack" style={{ gap: 0 }}>
-          <strong>Wackelige Wörter</strong>
-          <span className="muted stat-tile-hint">
-            zuletzt „Schwer“ oder „Nochmal“ – kommen schneller wieder dran
-          </span>
+          <strong>{t('progress.weakWords')}</strong>
+          <span className="muted stat-tile-hint">{t('progress.weakWordsHint')}</span>
         </span>
       </summary>
       {words.length === 0 ? (
         <p className="muted" style={{ margin: 0 }}>
-          Gerade keine. Sobald du ein Wort mit „Schwer“ oder „Nochmal“ bewertest, steht es
-          hier.
+          {t('progress.noWeakWords')}
         </p>
       ) : (
         <>
           <Link to="/review?focus=weak" className="btn btn-primary weak-words-cta">
-            Jetzt gezielt üben
+            {t('progress.practiseWeak')}
           </Link>
           <ul className="weak-words-list">
             {words.map((w) => (

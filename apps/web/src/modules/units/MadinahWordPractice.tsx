@@ -4,6 +4,7 @@
  * XP once and from then on joins the learner's review cards (see `useTrainingScope`).
  */
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArabicText } from '@/components';
 import { practiceId, randomShuffle, stableShuffle } from '@/services/practice';
 import type { MadinahWord } from '@/services/courses';
@@ -31,6 +32,7 @@ export function MadinahWordPractice({
   unit: number;
   words: readonly MadinahWord[];
 }) {
+  const { t } = useTranslation('units');
   const records = usePracticeStore((s) => s.records);
   const practise = usePracticeStore((s) => s.practise);
   const celebrate = useCelebrationStore((s) => s.show);
@@ -65,9 +67,9 @@ export function MadinahWordPractice({
     if (!missed.has(current.id)) setFirstTry((n) => n + 1);
     void practise(unit, 'words', current.id, ids).then((outcome) => {
       if (outcome.stationComplete) {
-        celebrate({ title: 'Alle Wörter der Lektion geübt', xp: outcome.xp, big: true });
+        celebrate({ title: t('words.allPractised'), xp: outcome.xp, big: true });
       } else if (outcome.first) {
-        celebrate({ title: 'Richtig', xp: outcome.xp, big: false });
+        celebrate({ title: t('correct'), xp: outcome.xp, big: false });
       }
     });
   };
@@ -83,22 +85,25 @@ export function MadinahWordPractice({
   };
 
   return (
-    <section className="card stack" aria-label="Wörter üben">
+    <section className="card stack" aria-label={t('words.title')}>
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <strong>Wörter üben</strong>
+        <strong>{t('words.title')}</strong>
         <span className="muted">
-          {done} von {words.length} geübt
+          {t('words.practised', { done, total: words.length })}
         </span>
       </div>
 
       {!queue && (
         <>
           <p className="muted" style={{ margin: 0 }}>
-            Hör das Wort und wähle die Bedeutung. Geübte Wörter kommen in deine tägliche
-            Wiederholung.
+            {t('words.intro')}
           </p>
           <button type="button" className="btn btn-primary" onClick={start}>
-            {done === 0 ? 'Üben' : done < words.length ? 'Weiter üben' : 'Nochmal üben'}
+            {done === 0
+              ? t('words.start')
+              : done < words.length
+                ? t('words.keepGoing')
+                : t('words.again')}
           </button>
         </>
       )}
@@ -110,16 +115,16 @@ export function MadinahWordPractice({
             <button
               type="button"
               className="btn btn-small"
-              aria-label={`${current.ar} anhören`}
+              aria-label={t('listenTo', { word: current.ar })}
               onClick={() => speakArabic(current.ar)}
             >
-              Anhören
+              {t('words.listen')}
             </button>
           </div>
           <div
             className="grid"
             role="group"
-            aria-label="Bedeutung wählen"
+            aria-label={t('words.choose')}
             style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
           >
             {meaningOptions(current, words).map((de) => {
@@ -150,25 +155,27 @@ export function MadinahWordPractice({
               style={{ alignItems: 'center', gap: '0.4rem' }}
             >
               <span className={chosen === current.de ? 'feedback-good' : 'feedback-bad'}>
-                {chosen === current.de ? '✓ Richtig!' : `✗ Es heißt: ${current.de}`}
+                {chosen === current.de
+                  ? t('correctAnswer')
+                  : t('words.itMeans', { answer: current.de })}
               </span>
               <button type="button" className="btn btn-primary" onClick={next}>
-                Weiter
+                {t('next')}
               </button>
             </div>
           )}
           <p className="muted" style={{ margin: 0, textAlign: 'center' }}>
-            Noch {queue.length} {queue.length === 1 ? 'Wort' : 'Wörter'} in dieser Runde
+            {t('roundLeft', { count: queue.length })}
           </p>
         </div>
       )}
 
       {queue && !current && (
         <div className="stack" role="status" style={{ gap: '0.5rem' }}>
-          <strong>Runde geschafft!</strong>
-          <span className="muted">{firstTry} Wörter beim ersten Versuch richtig.</span>
+          <strong>{t('words.roundDone')}</strong>
+          <span className="muted">{t('words.firstTry', { count: firstTry })}</span>
           <button type="button" className="btn" onClick={() => setQueue(null)}>
-            Fertig
+            {t('finished')}
           </button>
         </div>
       )}

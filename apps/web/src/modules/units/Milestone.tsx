@@ -1,9 +1,11 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { content } from '@/content';
 import { arabicNumber } from '@/services/units';
 import { STAGES, stageTestPassed } from '@/services/enrollment';
 import { XP_RULES } from '@/services/engagement/xp';
 import { useEnrollmentStore, useSrsStore } from '@/state';
+import { stageBadge, stageName, stageTest } from './labels';
 
 const PARTICLES = 14;
 
@@ -12,6 +14,7 @@ const PARTICLES = 14;
  * the stage bonus and the way on. Full screen, like the review focus mode.
  */
 export function Milestone() {
+  const { t } = useTranslation('units');
   const { stage: param } = useParams();
   const stage = STAGES.find((s) => s.id === Number(param));
   const exams = useEnrollmentStore((s) => s.exams);
@@ -21,10 +24,10 @@ export function Milestone() {
   if (!stage || !passed) {
     return (
       <div className="milestone stack">
-        <h1>Noch nicht geschafft</h1>
-        <p className="muted">Diese Etappe endet mit ihrem Test. Bestehe ihn mit 80 %.</p>
+        <h1>{t('milestone.notYet')}</h1>
+        <p className="muted">{t('milestone.notYetHint')}</p>
         <Link to="/units" className="btn btn-primary">
-          Zu den Stufen
+          {t('milestone.toLevels')}
         </Link>
       </div>
     );
@@ -51,41 +54,51 @@ export function Milestone() {
         <span className="arabic-display">{arabicNumber(stage.id)}</span>
       </div>
       <span className="eyebrow milestone-eyebrow">
-        {isLast ? 'Stufe geschafft' : 'Etappe geschafft'}
+        {isLast ? t('milestone.levelDone') : t('milestone.stageDone')}
       </span>
       <h1 className="milestone-title">
-        Stufe {stage.book} · {stage.name}
+        {t('milestone.title', { level: stage.book, stage: stageName(stage) })}
         <br />
-        abgeschlossen
+        {t('milestone.completed')}
       </h1>
       <p className="muted" style={{ margin: 0 }}>
-        {stage.units.length} Einheiten, {stage.test} bestanden mit {percent} %.
+        {t('milestone.summary', {
+          units: stage.units.length,
+          test: stageTest(stage),
+          percent,
+        })}
         {wordsLearned > 0 && (
           <>
             {' '}
-            <strong style={{ color: 'var(--text)' }}>{wordsLearned} Wörter</strong>{' '}
-            gelernt.
+            <Trans
+              t={t}
+              i18nKey="milestone.words"
+              count={wordsLearned}
+              components={{ 1: <strong style={{ color: 'var(--text)' }} /> }}
+            />
           </>
         )}
       </p>
       <div className="row" style={{ justifyContent: 'center' }}>
         <span className="badge header-chip milestone-xp">
-          +{XP_RULES.stageComplete} XP
+          {t('milestone.xp', { xp: XP_RULES.stageComplete })}
         </span>
-        <span className="badge header-chip">Abzeichen: {stage.badge}</span>
+        <span className="badge header-chip">
+          {t('milestone.badge', { badge: stageBadge(stage) })}
+        </span>
       </div>
       <div className="stack milestone-actions">
         {isLast ? (
           <Link to="/units" className="btn btn-primary btn-lg">
-            Zur Stufenkarte
+            {t('milestone.toLevelMap')}
           </Link>
         ) : (
           <Link to={`/units/${next.units[0]}`} className="btn btn-primary btn-lg">
-            {next.name} beginnen
+            {t('milestone.startStage', { stage: stageName(next) })}
           </Link>
         )}
         <Link to="/" className="btn">
-          Später
+          {t('later')}
         </Link>
       </div>
     </div>

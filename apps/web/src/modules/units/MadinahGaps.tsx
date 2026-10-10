@@ -5,6 +5,7 @@
  * (skill `cloze`, item `gap-<n>`) and earns XP.
  */
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { applyTashkilLevel } from '@/components';
 import type { MadinahGap } from '@/services/courses';
 import { practiceId, stableShuffle } from '@/services/practice';
@@ -18,6 +19,7 @@ export const gapId = (index: number) => `gap-${index + 1}`;
 
 /** The sentence with the gap shown, or filled in once answered. */
 export function GapSentence({ gap, filled }: { gap: MadinahGap; filled?: string }) {
+  const { t } = useTranslation('units');
   const level = useSettingsStore((s) => s.settings.tashkilLevel);
   const [before, after] = gap.ar.split(GAP) as [string, string];
   return (
@@ -30,7 +32,7 @@ export function GapSentence({ gap, filled }: { gap: MadinahGap; filled?: string 
       {applyTashkilLevel(before, level)}
       <span
         className={filled ? 'gap-filled' : 'gap-blank'}
-        aria-label={filled ? undefined : 'Lücke'}
+        aria-label={filled ? undefined : t('gaps.gap')}
       >
         {filled ? applyTashkilLevel(filled, level) : '_____'}
       </span>
@@ -51,6 +53,7 @@ export function MadinahGaps({
   unit: number;
   gaps: readonly MadinahGap[];
 }) {
+  const { t } = useTranslation('units');
   const records = usePracticeStore((s) => s.records);
   const practise = usePracticeStore((s) => s.practise);
   const celebrate = useCelebrationStore((s) => s.show);
@@ -69,12 +72,12 @@ export function MadinahGaps({
     void practise(unit, 'cloze', gapId(index), ids).then((outcome) => {
       if (outcome.stationComplete) {
         celebrate({
-          title: 'Alle Lücken der Lektion gefüllt',
+          title: t('gaps.allFilled'),
           xp: outcome.xp,
           big: true,
         });
       } else if (outcome.first) {
-        celebrate({ title: 'Richtig', xp: outcome.xp, big: false });
+        celebrate({ title: t('correct'), xp: outcome.xp, big: false });
       }
     });
   };
@@ -91,27 +94,25 @@ export function MadinahGaps({
   };
 
   return (
-    <section className="card stack" aria-label="Lückentext">
+    <section className="card stack" aria-label={t('gaps.title')}>
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <strong>Lückentext</strong>
-        <span className="muted">
-          {done} von {gaps.length} gelöst
-        </span>
+        <strong>{t('gaps.title')}</strong>
+        <span className="muted">{t('gaps.solved', { done, total: gaps.length })}</span>
       </div>
 
       {!gap ? (
         <>
           <p className="muted" style={{ margin: 0 }}>
-            Welches Wort fehlt? Die deutsche Übersetzung hilft dir.
+            {t('gaps.intro')}
           </p>
           <button type="button" className="btn btn-primary" onClick={() => setIndex(0)}>
-            {done === 0 ? 'Lückentext starten' : 'Lückentext üben'}
+            {done === 0 ? t('gaps.start') : t('gaps.practise')}
           </button>
         </>
       ) : (
         <div className="stack" style={{ gap: '0.75rem' }}>
           <span className="muted" style={{ textAlign: 'center' }}>
-            Satz {index! + 1} von {gaps.length}
+            {t('gaps.sentenceOf', { index: index! + 1, total: gaps.length })}
           </span>
           <GapSentence
             gap={gap}
@@ -123,7 +124,7 @@ export function MadinahGaps({
           <div
             className="grid"
             role="group"
-            aria-label="Fehlendes Wort wählen"
+            aria-label={t('gaps.choose')}
             style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
           >
             {gapOptions(gap, index!).map((option) => {
@@ -156,12 +157,10 @@ export function MadinahGaps({
               style={{ alignItems: 'center', gap: '0.4rem' }}
             >
               <span className={chosen === gap.answer ? 'feedback-good' : 'feedback-bad'}>
-                {chosen === gap.answer
-                  ? '✓ Richtig!'
-                  : '✗ Nicht ganz – versuch es noch einmal.'}
+                {chosen === gap.answer ? t('correctAnswer') : t('gaps.wrong')}
               </span>
               <button type="button" className="btn btn-primary" onClick={next}>
-                {chosen === gap.answer ? 'Weiter' : 'Nochmal'}
+                {chosen === gap.answer ? t('next') : t('gaps.again')}
               </button>
             </div>
           )}

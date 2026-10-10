@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { content } from '@/content';
 import { ArabicText } from '@/components';
@@ -25,12 +26,14 @@ import { TeacherHome } from '@/modules/classes/TeacherHome';
 import { useRole } from '@/modules/account/useRole';
 import { WeeklyRecapCard } from './WeeklyRecapCard';
 import { useEngagement } from '@/modules/engagement/useEngagement';
+import { dateLocale } from '@/i18n/format';
 
-const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
-  weekday: 'long',
-  day: 'numeric',
-  month: 'long',
-});
+const today = () =>
+  new Intl.DateTimeFormat(dateLocale(), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  }).format(new Date());
 
 /** "Heute": teachers see their classes first, learners their own day. */
 export function Dashboard() {
@@ -44,6 +47,7 @@ export function Dashboard() {
  * "Fortschritt", one row away.
  */
 function LearnerHome() {
+  const { t } = useTranslation('dashboard');
   const cards = useSrsStore((s) => s.cards);
   const summary = useSrsStore((s) => s.summary)();
   const logs = useEngagementStore((s) => s.logs);
@@ -74,7 +78,7 @@ function LearnerHome() {
   const onCheckIn = () => {
     if (!word) return;
     void checkIn(word.id).then(({ first, xp }) => {
-      if (first) celebrate({ title: 'Tages-Check-in', xp, big: false });
+      if (first) celebrate({ title: t('home.checkInTitle'), xp, big: false });
     });
   };
 
@@ -85,24 +89,26 @@ function LearnerHome() {
         style={{ justifyContent: 'space-between', alignItems: 'flex-end' }}
       >
         <div className="stack" style={{ gap: '0.25rem' }}>
-          <span className="muted">{DATE_FORMAT.format(new Date())}</span>
-          <h1>Ahlan wa sahlan</h1>
+          <span className="muted">{today()}</span>
+          <h1>{t('home.greeting')}</h1>
         </div>
         <div className="row" style={{ gap: '0.5rem' }}>
           <span className="badge header-chip">
-            <strong style={{ color: 'var(--accent)' }}>{weekXp} XP</strong>
-            <span>diese Woche</span>
+            <strong style={{ color: 'var(--accent)' }}>
+              {t('home.weekXp', { xp: weekXp })}
+            </strong>
+            <span>{t('home.thisWeek')}</span>
           </span>
           <span className="badge header-chip">
             <span style={{ color: 'var(--accent)', display: 'inline-flex' }}>
               <Icon name="flame" size={16} />
             </span>
             {streak === 0 ? (
-              'Heute starten'
+              t('home.startToday')
             ) : (
               <>
-                {streak === 1 ? '1 Tag' : `${streak} Tage`}
-                <span className="visually-hidden"> in Folge gelernt</span>
+                {t('home.streakDays', { count: streak })}
+                <span className="visually-hidden">{t('home.inARow')}</span>
               </>
             )}
           </span>
@@ -127,14 +133,14 @@ function LearnerHome() {
                 className="eyebrow"
                 style={{ color: 'var(--on-paper-muted)' }}
               >
-                Wort des Tages
+                {t('home.wordOfTheDay')}
               </h2>
               {isTtsSupported() && (
                 <button
                   type="button"
                   className="icon-button icon-button-paper"
                   onClick={() => speakArabic(word.ar)}
-                  aria-label={`${word.de} anhören`}
+                  aria-label={t('home.listenTo', { word: word.de })}
                 >
                   <Icon name="volume" size={20} />
                 </button>
@@ -145,21 +151,21 @@ function LearnerHome() {
             </ArabicText>
             <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>{word.de}</p>
             <p className="muted" style={{ margin: 0 }}>
-              Wurzel <span className="arabic-inline">{word.wurzel}</span>
+              {t('home.root')} <span className="arabic-inline">{word.wurzel}</span>
               {word.plural ? (
                 <>
-                  {' · Plural '}
+                  {` · ${t('home.plural')} `}
                   <span className="arabic-inline">{word.plural}</span>
                 </>
               ) : null}
             </p>
             {checkedIn ? (
               <p className="word-checkin-done" style={{ margin: 0 }}>
-                <Icon name="check" size={16} strokeWidth={2.6} /> Heute eingecheckt
+                <Icon name="check" size={16} strokeWidth={2.6} /> {t('home.checkedIn')}
               </p>
             ) : (
               <button type="button" className="btn btn-primary" onClick={onCheckIn}>
-                {`Wort gelernt · Check-in +${XP_RULES.dailyCheckIn} XP`}
+                {t('home.checkIn', { xp: XP_RULES.dailyCheckIn })}
               </button>
             )}
           </section>
@@ -172,10 +178,13 @@ function LearnerHome() {
 
       <Link to="/progress" className="card row home-link-row">
         <span className="stack" style={{ gap: 0 }}>
-          <strong>Dein Fortschritt</strong>
+          <strong>{t('home.yourProgress')}</strong>
           <span className="muted stat-tile-hint">
-            Level {engagement.level.level} · {summary.dueCount} fällig ·{' '}
-            {weak.length === 1 ? '1 wackeliges Wort' : `${weak.length} wackelige Wörter`}
+            {t('home.progressLine', {
+              level: engagement.level.level,
+              due: summary.dueCount,
+            })}{' '}
+            {t('home.weakWords', { count: weak.length })}
           </span>
         </span>
         <Icon name="chevron" />

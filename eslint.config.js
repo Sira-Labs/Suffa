@@ -16,13 +16,18 @@ const TRANSLATED = [
   'apps/web/src/modules/admin/**/*.tsx',
   'apps/web/src/modules/content/**/*.tsx',
   'apps/web/src/modules/classes/**/*.tsx',
+  'apps/web/src/modules/dashboard/**/*.tsx',
+  'apps/web/src/modules/engagement/**/*.tsx',
+  'apps/web/src/modules/feedback/**/*.tsx',
   'apps/web/src/modules/more/**/*.tsx',
+  'apps/web/src/modules/review/**/*.tsx',
   'apps/web/src/modules/settings/**/*.tsx',
   'apps/web/src/modules/library/**/*.tsx',
   'apps/web/src/modules/videos/**/*.tsx',
   'apps/web/src/modules/discover/**/*.tsx',
   'apps/web/src/modules/tutor/**/*.tsx',
   'apps/web/src/modules/sources/**/*.tsx',
+  'apps/web/src/modules/units/**/*.tsx',
 ];
 
 export default tseslint.config(

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   CartesianGrid,
@@ -47,6 +48,7 @@ export function ForgettingReminder({
   cards: SrsCard[];
   logs: ReviewLog[];
 }) {
+  const { t } = useTranslation('dashboard');
   const [hidden, setHidden] = useState(dismissedToday);
   if (hidden || !isStreakBroken(logs)) return null;
 
@@ -62,16 +64,25 @@ export function ForgettingReminder({
       aria-labelledby="forgetting-title"
     >
       <span className="eyebrow" style={{ color: 'var(--warn)' }}>
-        Serie unterbrochen
+        {t('forgetting.eyebrow')}
       </span>
       <h2 id="forgetting-title" style={{ margin: 0 }}>
-        {days} Tage ohne Wiederholung
+        {t('forgetting.title', { count: days })}
       </h2>
       <p style={{ margin: 0 }}>
-        Ohne Wiederholung verblasst Gelerntes schnell: nach einem Tag ist geschätzt{' '}
-        <strong>{afterOneDay} %</strong> vergessen, nach{' '}
-        {days > CURVE_DAYS ? 'einer Woche' : `${days} Tagen`} <strong>{now} %</strong>.
-        Eine kurze Wiederholung holt es zurück.
+        <Trans
+          t={t}
+          i18nKey="forgetting.text"
+          values={{
+            afterOneDay,
+            now,
+            when:
+              days > CURVE_DAYS
+                ? t('forgetting.aWeek')
+                : t('forgetting.days', { count: days }),
+          }}
+          components={{ 1: <strong />, 2: <strong /> }}
+        />
       </p>
       <div style={{ width: '100%', height: 160 }} aria-hidden>
         <ResponsiveContainer>
@@ -81,7 +92,9 @@ export function ForgettingReminder({
               dataKey="day"
               stroke="var(--text-muted)"
               tickLine={false}
-              tickFormatter={(d: number) => (d === 0 ? 'zuletzt' : `+${d}`)}
+              tickFormatter={(d: number) =>
+                d === 0 ? t('forgetting.lastTime') : `+${d}`
+              }
             />
             <YAxis
               domain={[0, 1]}
@@ -103,14 +116,18 @@ export function ForgettingReminder({
               r={6}
               fill="var(--bad)"
               stroke="var(--bg)"
-              label={{ value: 'heute', position: 'top', fill: 'var(--text)' }}
+              label={{
+                value: t('forgetting.today'),
+                position: 'top',
+                fill: 'var(--text)',
+              }}
             />
           </LineChart>
         </ResponsiveContainer>
       </div>
       <div className="row">
         <Link to="/review" className="btn btn-primary">
-          Jetzt wiederholen
+          {t('forgetting.reviewNow')}
         </Link>
         <button
           className="btn"
@@ -119,7 +136,7 @@ export function ForgettingReminder({
             setHidden(true);
           }}
         >
-          Heute ausblenden
+          {t('forgetting.hideToday')}
         </button>
       </div>
     </section>

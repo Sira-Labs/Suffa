@@ -3,11 +3,13 @@
  * savable as PDF. Shown only when signed in and at least one certificate exists.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useCertificatePrint } from '@/modules/classes/CertificateSheet';
 import { ClassesApi, type Certificate } from '@/services/classes/classesApi';
 import { useSyncStore } from '@/state';
 
 export function MyCertificates() {
+  const { t } = useTranslation('engagement');
   const signedIn = useSyncStore((s) => s.auth.status === 'signed-in');
   const api = useMemo(() => new ClassesApi(), []);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
@@ -28,16 +30,16 @@ export function MyCertificates() {
   return (
     <section className="stack" aria-labelledby="certificates-title">
       {sheet}
-      <h2 id="certificates-title">Zertifikate</h2>
+      <h2 id="certificates-title">{t('certificates.title')}</h2>
       <ul className="badge-grid">
         {certificates.map((c) => (
           <li key={c.id} className="card stack badge-card badge-card-gold">
-            <strong>Einheit {c.unit} abgeschlossen</strong>
+            <strong>{t('certificates.unitDone', { unit: c.unit })}</strong>
             <span className="muted" style={{ fontSize: '0.9rem' }}>
               {c.unitTitle} · {c.mastery} % · {c.className}
             </span>
             <button className="btn btn-small" onClick={() => print(c)}>
-              Drucken oder als PDF sichern
+              {t('certificates.print')}
             </button>
           </li>
         ))}

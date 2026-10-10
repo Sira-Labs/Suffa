@@ -4,6 +4,7 @@
  * sections already done when this was first seen are not celebrated again.
  */
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { arabicNumber, type PathSection } from '@/services/units';
 
@@ -34,6 +35,7 @@ export function SectionCelebration({
   unit: number;
   sections: PathSection[];
 }) {
+  const { t } = useTranslation('units');
   // Newly finished dialogues, shown one after another (lowest first).
   const [queue, setQueue] = useState<number[]>([]);
   const done = sections
@@ -128,22 +130,21 @@ export function SectionCelebration({
         <p className="arabic-display section-celebration-arabic" lang="ar" dir="rtl">
           مَا شَاءَ ٱللّٰهُ
         </p>
-        <span className="eyebrow milestone-eyebrow">Mā shāʾ Allāh!</span>
+        <span className="eyebrow milestone-eyebrow">{t('celebration.mashaAllah')}</span>
         <h1 id="section-celebration-title" className="milestone-title">
-          Dialog {shown} geschafft
+          {t('celebration.title', { n: shown })}
         </h1>
         <p className="muted" style={{ margin: 0 }}>
-          Einheit {unit}: Hören, Lesen, Grammatik, Wörter, Lücken und Schreiben zu diesem
-          Dialog sind erledigt.
+          {t('celebration.text', { unit })}
         </p>
         <div className="stack milestone-actions">
           {next && nextStation ? (
             <Link to={nextStation.to} className="btn btn-primary btn-lg" onClick={close}>
-              Weiter mit {next.label}
+              {t('celebration.continueWith', { section: next.label })}
             </Link>
           ) : null}
           <button type="button" className="btn" onClick={close}>
-            Zum Lernpfad
+            {t('toPath')}
           </button>
         </div>
       </div>

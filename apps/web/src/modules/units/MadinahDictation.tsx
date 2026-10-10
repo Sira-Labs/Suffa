@@ -4,6 +4,7 @@
  * stored once as practice (skill `write`, unit = the lesson unit) and earns XP.
  */
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArabicText, Feedback, RecallInput } from '@/components';
 import { practiceId, randomShuffle } from '@/services/practice';
 import type { MadinahWord } from '@/services/courses';
@@ -18,6 +19,7 @@ export function MadinahDictation({
   unit: number;
   words: readonly MadinahWord[];
 }) {
+  const { t } = useTranslation('units');
   const records = usePracticeStore((s) => s.records);
   const practise = usePracticeStore((s) => s.practise);
   const celebrate = useCelebrationStore((s) => s.show);
@@ -54,12 +56,12 @@ export function MadinahDictation({
     void practise(unit, 'write', current.id, ids).then((outcome) => {
       if (outcome.stationComplete) {
         celebrate({
-          title: 'Alle Wörter der Lektion geschrieben',
+          title: t('dictation.allWritten'),
           xp: outcome.xp,
           big: true,
         });
       } else if (outcome.first) {
-        celebrate({ title: 'Richtig geschrieben', xp: outcome.xp, big: false });
+        celebrate({ title: t('dictation.writtenRight'), xp: outcome.xp, big: false });
       }
     });
   };
@@ -72,25 +74,25 @@ export function MadinahDictation({
   };
 
   return (
-    <section className="card stack" aria-label="Diktat">
+    <section className="card stack" aria-label={t('dictation.title')}>
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <strong>Diktat</strong>
+        <strong>{t('dictation.title')}</strong>
         <span className="muted">
-          {done} von {words.length} geschrieben
+          {t('dictation.written', { done, total: words.length })}
         </span>
       </div>
 
       {!queue && (
         <>
           <p className="muted" style={{ margin: 0 }}>
-            Hör das Wort und schreib es auf Arabisch. Vokalzeichen sind freiwillig.
+            {t('dictation.intro')}
           </p>
           <button type="button" className="btn btn-primary" onClick={start}>
             {done === 0
-              ? 'Diktat starten'
+              ? t('dictation.start')
               : done < words.length
-                ? 'Weiter schreiben'
-                : 'Nochmal schreiben'}
+                ? t('dictation.keepGoing')
+                : t('dictation.again')}
           </button>
         </>
       )}
@@ -99,17 +101,17 @@ export function MadinahDictation({
         <div className="stack" style={{ gap: '0.75rem', alignItems: 'center' }}>
           <div className="row" style={{ justifyContent: 'center' }}>
             <button type="button" className="btn" onClick={() => speakArabic(current.ar)}>
-              Nochmal hören
+              {t('dictation.listenAgain')}
             </button>
             {!solved && (
               <button type="button" className="btn" onClick={() => setShown(true)}>
-                Wort zeigen
+                {t('dictation.showWord')}
               </button>
             )}
           </div>
           {(shown || !isTtsSupported()) && !solved && (
             <span className="muted">
-              {isTtsSupported() ? 'Das Wort:' : 'Keine Sprachausgabe – das Wort:'}{' '}
+              {isTtsSupported() ? t('dictation.theWord') : t('dictation.noSpeech')}{' '}
               <ArabicText>{current.ar}</ArabicText>
             </span>
           )}
@@ -118,22 +120,22 @@ export function MadinahDictation({
               value={value}
               onChange={setValue}
               onSubmit={solved ? next : check}
-              placeholder="Hier schreiben…"
+              placeholder={t('dictation.placeholder')}
               disabled={solved}
             />
           </div>
           <div className="row">
             {solved ? (
               <button type="button" className="btn btn-primary" onClick={next}>
-                Weiter
+                {t('next')}
               </button>
             ) : (
               <>
                 <button type="button" className="btn btn-primary" onClick={check}>
-                  Prüfen
+                  {t('dictation.check')}
                 </button>
                 <button type="button" className="btn" onClick={next}>
-                  Später
+                  {t('later')}
                 </button>
               </>
             )}
@@ -147,16 +149,16 @@ export function MadinahDictation({
             />
           )}
           <p className="muted" style={{ margin: 0 }}>
-            Noch {queue.length} {queue.length === 1 ? 'Wort' : 'Wörter'} in dieser Runde
+            {t('roundLeft', { count: queue.length })}
           </p>
         </div>
       )}
 
       {queue && !current && (
         <div className="stack" role="status" style={{ gap: '0.5rem' }}>
-          <strong>Diktat geschafft!</strong>
+          <strong>{t('dictation.done')}</strong>
           <button type="button" className="btn" onClick={() => setQueue(null)}>
-            Fertig
+            {t('finished')}
           </button>
         </div>
       )}

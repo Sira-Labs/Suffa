@@ -5,7 +5,7 @@ import { COURSE_QUESTS_SINCE, dailyQuests, dayKey } from '@suffa/engagement';
 import type { ReviewLog } from '@/types';
 import { Dashboard } from '@/modules/dashboard';
 import { EngagementWatcher } from '@/modules/engagement/EngagementWatcher';
-import { questLink, questMinutes } from '@/modules/engagement/TodayQuests';
+import { questIcon, questLink, questMinutes } from '@/modules/engagement/TodayQuests';
 import { browserTimeZone } from '@/modules/settings/devices';
 import { db } from '@/services/storage';
 import {
@@ -140,6 +140,12 @@ describe('Daily quests (integration)', () => {
     expect(
       questLink({ ...produce!, metric: { kind: 'practice', skills: ['tutor'] } }, 105)
     ).toBe('/tutor');
+
+    // Word quests show cards, not the headphones of listening.
+    expect(
+      questIcon({ ...learn!, metric: { kind: 'practice', skills: ['words'] } })
+    ).toBe('cards');
+    expect(questIcon({ ...learn!, metric: { kind: 'tracks' } })).toBe('listen');
 
     await act(() => useSettingsStore.getState().update({ course: 'madinah' }));
     // A day on which quests follow the course (only the clock is faked, timers stay real).

@@ -58,6 +58,15 @@ const SLOT_ICON: Record<QuestDef['slot'], IconName> = {
   produce: 'write',
 };
 
+/** The icon of a quest: what it is about where that differs from its slot. */
+export function questIcon(quest: QuestDef): IconName {
+  const metric = quest.metric;
+  if (metric.kind === 'videos') return 'play';
+  if (metric.kind === 'new-cards') return 'cards';
+  if (metric.kind === 'practice' && metric.skills?.[0] === 'words') return 'cards';
+  return SLOT_ICON[quest.slot];
+}
+
 /**
  * "Tagesaufgaben" (story 5.2): the day's three quests with progress, the bonus for all
  * three, and how the streak and the weekly goal stand. The one plan for today: the
@@ -144,7 +153,7 @@ function QuestItem({ status, to }: { status: QuestStatus; to: string }) {
     <li className={`quest${done ? ' quest-done' : ''}`}>
       <Link to={to} className="quest-body">
         <span className="quest-icon" aria-hidden>
-          <Icon name={done ? 'check' : SLOT_ICON[quest.slot]} size={18} />
+          <Icon name={done ? 'check' : questIcon(quest)} size={18} />
         </span>
         <span className="stack" style={{ gap: '0.3rem', flex: 1 }}>
           <span

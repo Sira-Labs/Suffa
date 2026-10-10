@@ -19,12 +19,13 @@ export function loadDiscover(): Promise<DiscoverCatalog> {
   return cached;
 }
 
-export const CATEGORY_LABELS: Record<DiscoverCategory, string> = {
-  sprache: 'Sprache',
-  quran: 'Quran',
-  geschichten: 'Geschichten',
-  podcasts: 'Podcasts',
-};
+/** The catalog's categories; their names are in the `discover` catalogue (`filters.*`). */
+export const DISCOVER_CATEGORIES: readonly DiscoverCategory[] = [
+  'sprache',
+  'quran',
+  'geschichten',
+  'podcasts',
+];
 
 /** "1-2" includes levels 1 and 2; "1" only level 1. */
 export function levelIncludes(level: string, stufe: number): boolean {

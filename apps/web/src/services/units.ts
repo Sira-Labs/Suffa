@@ -2,10 +2,17 @@
  * A unit as a learning path: one focused section per dialogue (listen, read, its words,
  * write, speak), then a closing section with the publisher's exercises, verbs and the unit
  * test. Only the current section is open, so the learner is never shown everything at once.
- * Pure, so pages stay thin views.
+ * Pure, so pages stay thin views; labels come in the interface language (story 16.3).
  */
+import i18n from '@/i18n';
 import type { AudioLesson, AudioUnit, AudioTrackKind, PracticeSkill } from '@/types';
 import type { UnitSection } from '@/services/practice/sections';
+
+/** Looks up an interface text; the path labels are `units:pathStations.*`. */
+export type Translate = (key: string, options?: Record<string, unknown>) => string;
+
+const defaultTranslate: Translate = (key, options) =>
+  (i18n as unknown as { t: Translate }).t(key, options);
 
 export type StationKind =
   | 'dialogue'
@@ -24,7 +31,7 @@ export type StationState = 'done' | 'current' | 'upcoming' | 'optional';
 export interface Station {
   id: string;
   kind: StationKind;
-  /** Learner-facing (German). */
+  /** Learner-facing, in the interface language. */
   label: string;
   detail: string;
   to: string;
@@ -63,6 +70,11 @@ export interface UnitPathInput {
   testPassed: boolean;
   /** The publisher's page videos for this unit, if any. */
   videos?: { count: number; from: number; to: number } | null;
+  /**
+   * Translates the labels; pages pass `t` from useTranslation so the path follows a language
+   * switch. Defaults to the current interface language.
+   */
+  t?: Translate;
 }
 
 /** Done sections fold away, the current one is open, later ones stay hidden until reached. */
@@ -72,7 +84,7 @@ export interface PathSection {
   id: string;
   /** Dialogue number, or null for the closing section (exercises, verbs, test). */
   no: number | null;
-  /** Learner-facing (German). */
+  /** Learner-facing, in the interface language. */
   label: string;
   /** Arabic dialogue title, if any. */
   title: string | null;
@@ -85,43 +97,44 @@ function has(lesson: AudioLesson, ...kinds: AudioTrackKind[]): boolean {
 }
 
 /** Station kind and label of a publisher lesson outside the dialogue sections. */
-function describeLesson(lesson: AudioLesson): {
+function describeLesson(
+  lesson: AudioLesson,
+  t: Translate
+): {
   kind: StationKind;
   label: string;
   detail: string;
 } {
-  if (has(lesson, 'dialogue')) {
-    return { kind: 'dialogue', label: 'Weiterer Dialog', detail: 'Hören' };
-  }
-  if (has(lesson, 'sounds', 'listening')) {
-    return {
-      kind: 'sounds',
-      label: 'Laute & Hörverstehen',
-      detail: 'Aussprache und Hörübungen',
-    };
-  }
-  if (has(lesson, 'exercise-example')) {
-    return { kind: 'practice', label: 'Übungen', detail: 'Beispiel hören, dann selbst' };
-  }
-  if (has(lesson, 'vocabulary')) {
-    return {
-      kind: 'words',
-      label: 'Wortschatz & Strukturen',
-      detail: 'Neue Wörter und Muster',
-    };
-  }
-  return { kind: 'review', label: 'Wiederholung', detail: 'Zum Abschluss der Einheit' };
+  const station = (kind: StationKind, key: string) => ({
+    kind,
+    label: t(`units:pathStations.${key}.label`),
+    detail: t(`units:pathStations.${key}.detail`),
+  });
+  if (has(lesson, 'dialogue')) return station('dialogue', 'moreDialogue');
+  if (has(lesson, 'sounds', 'listening')) return station('sounds', 'sounds');
+  if (has(lesson, 'exercise-example')) return station('practice', 'practice');
+  if (has(lesson, 'vocabulary')) return station('words', 'vocabulary');
+  return station('review', 'review');
 }
 
 type Draft = Omit<Station, 'state'>;
 
-function listenStation(input: UnitPathInput, lesson: AudioLesson, extra = ''): Draft {
+function listenStation(
+  input: UnitPathInput,
+  t: Translate,
+  lesson: AudioLesson,
+  extra = ''
+): Draft {
   const { unit } = input;
   return {
     id: `u${unit.unit}-l${lesson.lesson}`,
     kind: 'dialogue',
-    label: 'Dialog hören',
-    detail: has(lesson, 'vocabulary') ? 'Verlags-Audio mit Wortschatz' : 'Verlags-Audio',
+    label: t('units:pathStations.listen.label'),
+    detail: t(
+      has(lesson, 'vocabulary')
+        ? 'units:pathStations.listen.detailWords'
+        : 'units:pathStations.listen.detail'
+    ),
     to: `/units/${unit.unit}/listen?lesson=${lesson.lesson}${extra}`,
     done: lesson.tracks.filter((t) => input.isHeard(t.url)).length,
     total: lesson.tracks.length,
@@ -135,6 +148,7 @@ function count(ids: readonly string[], test: (id: string) => boolean): number {
 /** Stations of one dialogue section: listen, read, words, write, then speak (optional). */
 function sectionStations(
   input: UnitPathInput,
+  t: Translate,
   section: UnitSection,
   lesson: AudioLesson | undefined
 ): Draft[] {
@@ -145,21 +159,25 @@ function sectionStations(
     drafts.push({
       id: `u${u}-video`,
       kind: 'video',
-      label: 'Buchseiten-Videos',
-      detail: `${input.videos.count} Videos · Buch S. ${input.videos.from}–${input.videos.to}`,
+      label: t('units:pathStations.video.label'),
+      detail: t('units:pathStations.video.detail', {
+        count: input.videos.count,
+        from: input.videos.from,
+        to: input.videos.to,
+      }),
       to: `/units/${u}/listen?view=videos`,
       done: 0,
       total: 0,
       optional: true,
     });
   }
-  if (lesson) drafts.push(listenStation(input, lesson, `&${q}`));
+  if (lesson) drafts.push(listenStation(input, t, lesson, `&${q}`));
   const read = input.practised('read', section.dialogId) ? 1 : 0;
   drafts.push({
     id: `u${u}-s${section.no}-read`,
     kind: 'read',
-    label: 'Dialog lesen',
-    detail: read ? 'Gelesen und verstanden' : 'Lesen, dann die Verständnisfrage',
+    label: t('units:pathStations.read.label'),
+    detail: t(read ? 'units:pathStations.read.done' : 'units:pathStations.read.open'),
     to: `/units/${u}/read?${q}`,
     done: read,
     total: 1,
@@ -169,8 +187,11 @@ function sectionStations(
     drafts.push({
       id: `u${u}-s${section.no}-grammar`,
       kind: 'grammar',
-      label: 'Grammatik',
-      detail: `${answered} von ${section.grammarIds.length} Fragen richtig`,
+      label: t('units:pathStations.grammar.label'),
+      detail: t('units:pathStations.grammar.detail', {
+        done: answered,
+        total: section.grammarIds.length,
+      }),
       to: `/units/${u}/grammar?${q}`,
       done: answered,
       total: section.grammarIds.length,
@@ -181,8 +202,11 @@ function sectionStations(
     drafts.push({
       id: `u${u}-s${section.no}-vocab`,
       kind: 'vocab',
-      label: 'Wörter lernen',
-      detail: `${count(words, input.wordStarted)} von ${words.length} Wörtern gestartet`,
+      label: t('units:pathStations.vocab.label'),
+      detail: t('units:pathStations.vocab.detail', {
+        done: count(words, input.wordStarted),
+        total: words.length,
+      }),
       to: `/review?unit=${u}&${q}`,
       done: count(words, input.wordStarted),
       total: words.length,
@@ -194,8 +218,8 @@ function sectionStations(
     drafts.push({
       id: `u${u}-s${section.no}-cloze`,
       kind: 'cloze',
-      label: 'Lückentext',
-      detail: `${filled} von ${cloze.length} Sätzen ergänzt`,
+      label: t('units:pathStations.cloze.label'),
+      detail: t('units:pathStations.cloze.detail', { done: filled, total: cloze.length }),
       to: `/units/${u}/cloze?${q}`,
       done: filled,
       total: cloze.length,
@@ -206,8 +230,11 @@ function sectionStations(
     drafts.push({
       id: `u${u}-s${section.no}-write`,
       kind: 'write',
-      label: 'Schreiben',
-      detail: `${written} von ${section.writeIds.length} Aufgaben · Abschreiben bis Übersetzen`,
+      label: t('units:pathStations.write.label'),
+      detail: t('units:pathStations.write.detail', {
+        done: written,
+        total: section.writeIds.length,
+      }),
       to: `/units/${u}/write?${q}`,
       done: written,
       total: section.writeIds.length,
@@ -218,8 +245,11 @@ function sectionStations(
     drafts.push({
       id: `u${u}-s${section.no}-speak`,
       kind: 'speak',
-      label: 'Nachsprechen',
-      detail: `${spoken} von ${section.lineIds.length} Sätzen gesprochen`,
+      label: t('units:pathStations.speak.label'),
+      detail: t('units:pathStations.speak.detail', {
+        done: spoken,
+        total: section.lineIds.length,
+      }),
       to: `/units/${u}/speak?${q}`,
       done: spoken,
       total: section.lineIds.length,
@@ -230,11 +260,15 @@ function sectionStations(
 }
 
 /** The closing section: the publisher's remaining lessons, own words, verbs, the test. */
-function closingStations(input: UnitPathInput, lessons: AudioLesson[]): Draft[] {
+function closingStations(
+  input: UnitPathInput,
+  t: Translate,
+  lessons: AudioLesson[]
+): Draft[] {
   const u = input.unit.unit;
   const drafts: Draft[] = lessons.map((lesson) => ({
     id: `u${u}-l${lesson.lesson}`,
-    ...describeLesson(lesson),
+    ...describeLesson(lesson, t),
     to: `/units/${u}/listen?lesson=${lesson.lesson}`,
     done: lesson.tracks.filter((t) => input.isHeard(t.url)).length,
     total: lesson.tracks.length,
@@ -244,8 +278,11 @@ function closingStations(input: UnitPathInput, lessons: AudioLesson[]): Draft[] 
     drafts.push({
       id: `u${u}-own`,
       kind: 'vocab',
-      label: 'Eigene Wörter',
-      detail: `${count(own, input.wordStarted)} von ${own.length} Wörtern gestartet`,
+      label: t('units:pathStations.own.label'),
+      detail: t('units:pathStations.own.detail', {
+        done: count(own, input.wordStarted),
+        total: own.length,
+      }),
       to: `/review?unit=${u}&section=eigene`,
       done: count(own, input.wordStarted),
       total: own.length,
@@ -257,8 +294,11 @@ function closingStations(input: UnitPathInput, lessons: AudioLesson[]): Draft[] 
     drafts.push({
       id: `u${u}-verbs`,
       kind: 'verbs',
-      label: 'Konjugation',
-      detail: `${drilled} von ${verbs.length} Verben geübt`,
+      label: t('units:pathStations.verbs.label'),
+      detail: t('units:pathStations.verbs.detail', {
+        done: drilled,
+        total: verbs.length,
+      }),
       to: `/units/${u}/verbs`,
       done: drilled,
       total: verbs.length,
@@ -267,8 +307,10 @@ function closingStations(input: UnitPathInput, lessons: AudioLesson[]): Draft[] 
   drafts.push({
     id: `u${u}-test`,
     kind: 'test',
-    label: 'Einheitstest',
-    detail: input.testPassed ? 'Bestanden (≥ 80 %)' : 'Gemischte Prüfung zur Einheit',
+    label: t('units:pathStations.test.label'),
+    detail: t(
+      input.testPassed ? 'units:pathStations.test.passed' : 'units:pathStations.test.open'
+    ),
     to: `/exam?unit=${u}`,
     done: input.testPassed ? 1 : 0,
     total: 1,
@@ -286,6 +328,7 @@ function isDone(d: Draft): boolean {
  * section is open; the ones after it stay locked, so the learner sees one dialogue at a time.
  */
 export function unitPath(input: UnitPathInput): PathSection[] {
+  const t = input.t ?? defaultTranslate;
   const u = input.unit.unit;
   const dialogueLessons = input.unit.lessons.filter((l) => has(l, 'dialogue'));
   const used = new Set<number>();
@@ -297,15 +340,21 @@ export function unitPath(input: UnitPathInput): PathSection[] {
     groups.push({
       id: `u${u}-s${section.no}`,
       no: section.no,
-      label: `Dialog ${section.no}`,
+      label: t('units:dialogue', { n: section.no }),
       title: section.title,
     });
-    drafts.push(sectionStations(input, section, lesson));
+    drafts.push(sectionStations(input, t, section, lesson));
   }
-  groups.push({ id: `u${u}-close`, no: null, label: 'Abschluss', title: null });
+  groups.push({
+    id: `u${u}-close`,
+    no: null,
+    label: t('units:pathStations.closing'),
+    title: null,
+  });
   drafts.push(
     closingStations(
       input,
+      t,
       input.unit.lessons.filter((l) => !used.has(l.lesson))
     )
   );

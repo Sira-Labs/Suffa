@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { activityHeatmap, activityLabel } from './activity';
+import { activityHeatmap } from './activity';
 
 const review = (reviewedAt: string, id = 'c1') => ({
   id: `r-${reviewedAt}-${id}`,
@@ -41,8 +41,6 @@ describe('activityHeatmap', () => {
     expect(cells.map((c) => c.date)).toEqual(['2026-09-24', '2026-09-25', '2026-09-26']);
     expect(cells[1]).toMatchObject({ total: 1, reviews: 1 });
     expect(cells[2]).toMatchObject({ total: 3, practice: 2, tracks: 1, reviews: 0 });
-    expect(activityLabel(cells[2]!)).toBe('2026-09-26: 2 Übungen, 1 Audios/Videos');
-    expect(activityLabel(cells[0]!)).toBe('2026-09-24: keine Aktivität');
   });
 
   it("counts on the learner's own day, not the UTC day", () => {

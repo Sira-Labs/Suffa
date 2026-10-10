@@ -13,4 +13,27 @@ export const conjugation = {
   conjugate: 'Konjugiere',
   check: 'Prüfen',
   nextForm: 'Nächste Form',
+  /** Persons of the conjugation tables, next to the Arabic pronoun. */
+  persons: {
+    ana: 'ich',
+    nahnu: 'wir',
+    anta: 'du (m.)',
+    anti: 'du (f.)',
+    antuma: 'ihr beide',
+    antum: 'ihr (m.)',
+    antunna: 'ihr (f.)',
+    huwa: 'er',
+    hiya: 'sie',
+    huma_m: 'sie beide (m.)',
+    huma_f: 'sie beide (f.)',
+    hum: 'sie (m.)',
+    hunna: 'sie (f.)',
+  },
+  imperative: {
+    m_sg: 'du (m.)',
+    f_sg: 'du (f.)',
+    dual: 'ihr beide',
+    m_pl: 'ihr (m.)',
+    f_pl: 'ihr (f.)',
+  },
 };

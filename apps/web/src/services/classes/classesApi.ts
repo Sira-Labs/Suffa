@@ -102,15 +102,12 @@ export interface ClassFeed {
   badges: TeacherBadge[];
 }
 
-/** Challenge templates in words (German). */
-export const CHALLENGE_LABELS: Record<
-  ChallengeTemplate,
-  { title: string; unit: string; suggested: number }
-> = {
-  reviews: { title: 'Karten wiederholen', unit: 'Karten', suggested: 1000 },
-  quests: { title: 'Tagesaufgaben schaffen', unit: 'Aufgaben', suggested: 100 },
-  xp: { title: 'XP sammeln', unit: 'XP', suggested: 3000 },
-  'active-days': { title: 'Lerntage sammeln', unit: 'Lerntage', suggested: 60 },
+/** Suggested target per challenge template; the names are in the `classes` catalogue. */
+export const CHALLENGE_SUGGESTED: Record<ChallengeTemplate, number> = {
+  reviews: 1000,
+  quests: 100,
+  xp: 3000,
+  'active-days': 60,
 };
 
 /** The token of an invite URL `…/join/<token>`, or null. */

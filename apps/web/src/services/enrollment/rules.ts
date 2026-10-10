@@ -29,11 +29,6 @@ export const PACE_DAYS: Record<UnitPace, number> = {
   normal: 14,
   intensive: 7,
 };
-export const PACE_LABELS: Record<UnitPace, { label: string; minutes: string }> = {
-  relaxed: { label: 'Locker', minutes: 'ca. 15 Min. am Tag' },
-  normal: { label: 'Normal', minutes: 'ca. 25 Min. am Tag' },
-  intensive: { label: 'Intensiv', minutes: 'ca. 45 Min. am Tag' },
-};
 export const EXTENSION_DAYS = 7;
 
 export function enrollmentId(book: number, unit: number): string {

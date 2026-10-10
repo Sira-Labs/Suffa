@@ -124,6 +124,7 @@ export function Conjugation({ scope }: { scope?: UnitPracticeScope } = {}) {
 }
 
 function ConjugationGrid({ verb, tense }: { verb: Verb; tense: Tense }) {
+  const { t } = useTranslation('conjugation');
   if (tense === 'amr') {
     return (
       <div
@@ -133,7 +134,8 @@ function ConjugationGrid({ verb, tense }: { verb: Verb; tense: Tense }) {
         {(Object.keys(AMR_LABELS) as (keyof typeof AMR_LABELS)[]).map((p) => (
           <div key={p} className="card" style={{ background: 'var(--bg-elev-2)' }}>
             <div className="muted">
-              {AMR_LABELS[p].de} <span className="arabic-inline">{AMR_LABELS[p].ar}</span>
+              {t(`imperative.${p}`)}{' '}
+              <span className="arabic-inline">{AMR_LABELS[p].ar}</span>
             </div>
             <ArabicText onClick={() => speakArabic(verb.amr[p])}>
               {verb.amr[p]}
@@ -152,7 +154,7 @@ function ConjugationGrid({ verb, tense }: { verb: Verb; tense: Tense }) {
       {PERSON_ORDER.map((p) => (
         <div key={p} className="card" style={{ background: 'var(--bg-elev-2)' }}>
           <div className="muted">
-            {PERSON_LABELS[p].de}{' '}
+            {t(`persons.${p}`)}{' '}
             <span className="arabic-inline">{PERSON_LABELS[p].ar}</span>
           </div>
           <ArabicText onClick={() => speakArabic(table[p])}>{table[p]}</ArabicText>
@@ -191,8 +193,14 @@ function ConjugationDrill({
       : verb[tense][person as MadiPerson];
   const label =
     tense === 'amr'
-      ? AMR_LABELS[person as keyof typeof AMR_LABELS]
-      : PERSON_LABELS[person as MadiPerson];
+      ? {
+          ...AMR_LABELS[person as keyof typeof AMR_LABELS],
+          text: t(`imperative.${person as keyof typeof AMR_LABELS}`),
+        }
+      : {
+          ...PERSON_LABELS[person as MadiPerson],
+          text: t(`persons.${person as MadiPerson}`),
+        };
 
   const check = () => {
     if (verdict && verdict !== 'wrong') return; // a form counts once
@@ -215,7 +223,7 @@ function ConjugationDrill({
       <p className="muted">
         {t('conjugate')} <ArabicText>{verb.lemma}</ArabicText> · {t(`tenses.${tense}`)} ·{' '}
         <strong>
-          {label.de} <span className="arabic-inline">{label.ar}</span>
+          {label.text} <span className="arabic-inline">{label.ar}</span>
         </strong>
       </p>
       <div style={{ width: '100%' }}>

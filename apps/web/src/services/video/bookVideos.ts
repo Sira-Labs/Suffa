@@ -2,6 +2,7 @@
  * The publisher's page videos by unit. Pure helpers plus a lazy loader, so the video index
  * (≈ 20 kB) is only fetched on pages that show videos.
  */
+import i18n from '@/i18n';
 import type { BookPages, BookVideo, BookVideoIndex, UnitVideos } from '@/types';
 
 export interface BookVideoData {
@@ -53,7 +54,12 @@ export function thumbnailUrl(video: BookVideo): string {
   return `https://i.ytimg.com/vi/${encodeURIComponent(video.id)}/mqdefault.jpg`;
 }
 
-/** "S. 32" or "S. ~32" for a page placed between neighbours. */
+/** "S. 32" or "S. ~32" for a page placed between neighbours, in the interface language. */
 export function pageLabel(video: BookVideo): string {
-  return `S. ${video.approx ? '~' : ''}${video.page}`;
+  return i18n.t(
+    video.approx ? 'library:videos.pageChipApprox' : 'library:videos.pageChip',
+    {
+      page: video.page,
+    }
+  );
 }

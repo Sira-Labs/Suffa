@@ -43,13 +43,6 @@ export interface AdminVideo {
   hidden: boolean;
 }
 
-export const PERMISSION_LABELS: Record<PermissionStatus, string> = {
-  unknown: 'Noch nicht angefragt',
-  requested: 'Angefragt',
-  granted: 'Erlaubt',
-  declined: 'Abgelehnt',
-};
-
 export class VideosApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 

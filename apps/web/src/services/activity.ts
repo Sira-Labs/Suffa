@@ -33,14 +33,3 @@ export function activityHeatmap(
     return cell;
   });
 }
-
-/** Hover text: what the learner did that day (German). */
-export function activityLabel(cell: ActivityCell): string {
-  if (cell.total === 0) return `${cell.date}: keine Aktivität`;
-  const parts = [
-    cell.reviews > 0 && `${cell.reviews} Wiederholungen`,
-    cell.practice > 0 && `${cell.practice} Übungen`,
-    cell.tracks > 0 && `${cell.tracks} Audios/Videos`,
-  ].filter(Boolean);
-  return `${cell.date}: ${parts.join(', ')}`;
-}

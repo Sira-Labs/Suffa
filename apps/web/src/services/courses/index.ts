@@ -2,6 +2,7 @@
  * Courses in the app (ADR-0025): which textbook stream the learner follows, and the Medina
  * course's lesson index (links to the book, its keys and the author's audio, no book text).
  */
+import i18n from '@/i18n';
 import {
   COURSES,
   courseOfUnit,
@@ -210,8 +211,11 @@ export function madinahProgress(exams: readonly ExamResult[]): {
   };
 }
 
-/** "Einheit 3" for a Bayna Yadayk unit, "Lektion 3" for a Medina unit (103). */
+/**
+ * "Einheit 3" for a Bayna Yadayk unit, "Lektion 3" for a Medina unit (103), in the interface
+ * language ("Unit 3", "Lesson 3").
+ */
 export function unitLabel(unit: number): string {
   const madinah = courseOfUnit(unit)?.id === 'madinah';
-  return `${madinah ? 'Lektion' : 'Einheit'} ${unitLabelNumber(unit)}`;
+  return i18n.t(madinah ? 'units:lesson' : 'units:unit', { n: unitLabelNumber(unit) });
 }

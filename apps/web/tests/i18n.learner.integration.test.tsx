@@ -4,7 +4,7 @@
  * The German catalogue entries for that data must match @suffa/engagement, which stays German.
  */
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import {
@@ -147,6 +147,41 @@ describe('learner screens in English (integration)', () => {
     await user.click(screen.getByRole('button', { name: 'Start unit 1' }));
     expect(await screen.findByText('14 days left')).toBeInTheDocument();
     expect(screen.getByRole('progressbar', { name: 'Unit 1 progress' })).toBeTruthy();
+  });
+
+  it('labels the sections and stations of the unit path in English', async () => {
+    const user = userEvent.setup();
+    renderAt('/units/1');
+    await user.click(await screen.findByRole('button', { name: 'Start unit 1' }));
+    const path = await screen.findByRole('list', { name: 'Learning path, unit 1' });
+    expect(
+      await within(path).findByRole('link', { name: /Book page videos/ })
+    ).toHaveTextContent(/\d+ videos · book pp\. \d+–\d+/);
+    expect(within(path).getByRole('heading', { name: /Dialogue 1/ })).toBeTruthy();
+    expect(
+      within(path).getByRole('link', { name: /Listen to the dialogue \(up next\)/ })
+    ).toHaveAttribute('href', '/units/1/listen?lesson=1&section=1');
+    expect(
+      within(path).getByRole('link', { name: /Read the dialogue/ })
+    ).toHaveTextContent('Read, then answer the comprehension question');
+    expect(within(path).getByRole('link', { name: /Learn the words/ })).toHaveTextContent(
+      /0 of \d+ words started/
+    );
+    expect(within(path).getByText('Dialogue 2')).toBeInTheDocument();
+    expect(within(path).getByText('Wrap-up')).toBeInTheDocument();
+    expect(path.textContent).not.toMatch(/Dialog hören|Wörter lernen|Abschluss/);
+  });
+
+  it('names the next station on the current-unit card in English', async () => {
+    const user = userEvent.setup();
+    renderAt('/units/1');
+    await user.click(await screen.findByRole('button', { name: 'Start unit 1' }));
+    await screen.findByRole('list', { name: 'Learning path, unit 1' });
+    cleanup();
+    renderAt('/');
+    const card = await screen.findByRole('region', { name: /Unit 1/ });
+    expect(await within(card).findByText('Dialogue 1')).toBeInTheDocument();
+    expect(within(card).getByText(/Listen to the dialogue/)).toBeInTheDocument();
   });
 
   it('shows the badge gallery with English meanings and rules', async () => {

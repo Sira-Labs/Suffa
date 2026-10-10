@@ -112,32 +112,6 @@ export function isStreakBroken(logs: ReviewLog[], now: Date = new Date()): boole
   return days !== null && days >= 2;
 }
 
-export interface NextRecommendation {
-  text: string;
-  to: string;
-}
-
-/** "What next?" recommendation from the current state. */
-export function nextRecommendation(
-  dueCount: number,
-  newCount: number,
-  leechCount: number
-): NextRecommendation {
-  if (leechCount > 0) {
-    return {
-      text: `Du hast ${leechCount} schwierige Wörter – gezielt üben.`,
-      to: '/vocab',
-    };
-  }
-  if (dueCount > 0) {
-    return { text: `${dueCount} Karten sind fällig – jetzt wiederholen.`, to: '/vocab' };
-  }
-  if (newCount > 0) {
-    return { text: `Alles wiederholt! ${newCount} neue Karten warten.`, to: '/vocab' };
-  }
-  return { text: 'Alles erledigt – probier eine Kapitelprüfung.', to: '/exam' };
-}
-
 /**
  * Mastery ring per unit (engagement plan §2): the share of a unit's words with a mature card
  * (interval ≥ 21 days). This is the true progress measure; XP only rewards the work.

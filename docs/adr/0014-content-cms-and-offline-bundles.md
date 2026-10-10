@@ -1,7 +1,7 @@
 # ADR-0014: Content moves to a DB-backed CMS with versioned offline bundles
 
-- Status: proposed
-- Date: 2026-09-23
+- Status: accepted (16.1 implemented; bundles follow in 16.2)
+- Date: 2026-09-23 (accepted 2026-10-10)
 - Amends: ADR-0003
 
 ## Context
@@ -30,3 +30,21 @@ change needs a redeploy. Teachers and admin must author vocab, dialogues and vid
 
 Teachers can contribute without deploys; clients stay offline-first. Needs a schema validator
 (already implied by types) and a small editor UI in the admin panel.
+
+## Implementation notes (story 16.1)
+
+- One row per unit in `content_units` (`<course>/<unit>`, e.g. `bayna-yadayk/3`): the working
+  `draft`, a `revision` that every save bumps, `state` draft → review → published, the revision a
+  teacher checked, and `published`, the unit file learners will get (with `einheit` and
+  `status`). Saves and steps name the revision they act on; a stale one answers 409.
+- Roles: `content:review` (teachers and admins) reads, checks and sends back;
+  `content:write` (admins, second factor) edits, submits and publishes. A teacher's check belongs
+  to one revision: a later save makes it stale, and only a checked revision is published as
+  `geprueft`.
+- Seed: the API reads `apps/web/src/content/units/einheit-NN.json` at start-up and inserts units
+  that are missing, as published; existing rows are never touched. The schema in
+  `apps/api/src/content/schema.ts` mirrors the web types, and a test validates every seed file.
+- Stable IDs: `content_ids` records every ID with its unit and kind; a save that uses another
+  unit's ID is refused (422 `id_taken`). Removed IDs stay registered (the tombstones of 16.2).
+- Medina lessons (ADR-0025) keep their own JSON for now; they move into the CMS once their
+  shape is settled.

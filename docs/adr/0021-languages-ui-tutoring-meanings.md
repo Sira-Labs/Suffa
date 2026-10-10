@@ -1,6 +1,6 @@
 # ADR-0021: Learner languages — UI, tutoring and meaning language (German, English, later Arabic UI)
 
-- Status: accepted (tutoring language implemented in Sprint 10; UI language in progress in story 16.3, see `docs/i18n.md`; meaning language planned for 16.4)
+- Status: accepted (tutoring language implemented in Sprint 10; UI language implemented in story 16.3, see `docs/i18n.md`; meaning language planned for 16.4)
 - Date: 2026-09-23
 - Related: ADR-0011 (al-Muʿallim), ADR-0014 (content CMS)
 
@@ -64,3 +64,16 @@ queue gets a "translations" view.
   `translate="no"`.
 - The setting syncs as `settings.uiLanguage`; the class default for teachers comes with the
   meaning language (16.4).
+
+## Implementation notes (story 16.3, completion)
+
+- Every module is translated, one namespace per area; the lint rule covers
+  `apps/web/src/*.tsx`, `components/**` and `modules/**`.
+- Course data shared with the server (quest titles, badge texts, stage names) stays German in
+  `@suffa/engagement`; screens look it up by id, and a test fails if the German catalogue
+  drifts from the data. Titles that differ per course use `<id>@<course>` keys.
+- API errors: `apiRequest` takes an area and resolves `errors:<area>.<code>` in the current
+  language when the error is created; keys are the API's error codes.
+- German course content (meanings, unit titles, lesson topics) is marked `lang="de"`, so screen
+  readers pronounce it as German and the e2e check skips it until meanings follow the meaning
+  language (16.4).

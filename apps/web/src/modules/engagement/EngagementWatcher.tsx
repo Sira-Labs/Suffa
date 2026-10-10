@@ -1,5 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { BADGES, isCourseId, QUEST_XP, type CourseId, type Tier } from '@suffa/engagement';
+import {
+  BADGES,
+  isCourseId,
+  QUEST_XP,
+  type CourseId,
+  type Tier,
+} from '@suffa/engagement';
 import {
   useCelebrationStore,
   useEngagementStore,

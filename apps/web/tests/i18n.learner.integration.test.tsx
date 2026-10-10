@@ -7,12 +7,19 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { ALL_STAGES, BADGES, QUEST_POOL } from '@suffa/engagement';
+import {
+  ALL_STAGES,
+  BADGES,
+  QUEST_POOL,
+  type CourseId,
+  type QuestDef,
+} from '@suffa/engagement';
 import { setUiLanguage } from '@/i18n';
 import { de } from '@/i18n/locales/de';
 import { en } from '@/i18n/locales/en';
 import { Dashboard } from '@/modules/dashboard';
 import { Badges } from '@/modules/engagement/Badges';
+import { questTitle } from '@/modules/engagement/labels';
 import { UnitPath, Units } from '@/modules/units';
 import { db } from '@/services/storage';
 import {
@@ -159,15 +166,17 @@ describe('learner screens in English (integration)', () => {
 
 describe('catalogue entries for shared course data', () => {
   it('match the German texts of @suffa/engagement', () => {
-    const quests = Object.values(QUEST_POOL).flat();
-    expect(Object.keys(de.engagement.quests).sort()).toEqual(
-      quests.map((q) => q.id).sort()
-    );
-    for (const quest of quests) {
-      expect(de.engagement.quests[quest.id as keyof typeof de.engagement.quests]).toBe(
-        quest.title
-      );
-    }
+    // Every title, including the titles per course (`<id>@<course>`).
+    const titles = Object.values(QUEST_POOL)
+      .flat()
+      .flatMap((q) => [
+        [q.id, q.title],
+        ...Object.entries(q.titles ?? {}).map(([course, title]) => [
+          `${q.id}@${course}`,
+          title,
+        ]),
+      ]);
+    expect(Object.entries(de.engagement.quests).sort()).toEqual(titles.sort());
     expect(Object.keys(de.engagement.badges).sort()).toEqual(
       BADGES.map((b) => b.id).sort()
     );
@@ -187,4 +196,22 @@ describe('catalogue entries for shared course data', () => {
       }
     }
   });
+
+  it("titles a quest for the learner's course in either language", async () => {
+    const practice = QUEST_POOL.produce.find((q) => q.id === 'practice-5')!;
+    const medina = dailyQuestFor(practice, 'madinah');
+    expect(questTitle(medina)).toBe('5 Übungen in deiner Lektion');
+    await act(() => setUiLanguage('en'));
+    try {
+      expect(questTitle(medina)).toBe('5 exercises in your lesson');
+      expect(questTitle(practice)).toBe('5 exercises in your unit');
+    } finally {
+      await act(() => setUiLanguage('de'));
+    }
+  });
 });
+
+/** The quest as `dailyQuests` returns it for a learner of `course`. */
+function dailyQuestFor(quest: QuestDef, course: CourseId): QuestDef {
+  return { ...quest, title: quest.titles?.[course] ?? quest.title };
+}

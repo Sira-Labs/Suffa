@@ -15,6 +15,8 @@ export const engagement: Messages<typeof de> = {
     'read-1': 'Read a dialogue',
     'cloze-3': 'Complete 3 gap sentences',
     'practice-5': '5 exercises in your unit',
+    'practice-5@madinah': '5 exercises in your lesson',
+    'words-5': 'Practise 5 words of your lesson',
     'tutor-ar-1': 'Write something to al-Muʿallim in Arabic',
   },
   badges: {

@@ -1,7 +1,10 @@
 /** Daily quests, streak, weekly goal, badges and certificates. */
 export const engagement = {
   tiers: { bronze: 'Bronze', silver: 'Silber', gold: 'Gold' },
-  /** Quest titles by quest id (German as in @suffa/engagement). */
+  /**
+   * Quest titles by quest id (German as in @suffa/engagement); `<id>@<course>` is the title
+   * for learners of that course where it differs.
+   */
   quests: {
     'review-10': 'Wiederhole 10 Karten',
     'review-20': 'Wiederhole 20 Karten',
@@ -14,6 +17,8 @@ export const engagement = {
     'read-1': 'Lies einen Dialog',
     'cloze-3': 'Löse 3 Lückensätze',
     'practice-5': '5 Übungen in deiner Einheit',
+    'practice-5@madinah': '5 Übungen in deiner Lektion',
+    'words-5': 'Übe 5 Wörter deiner Lektion',
     'tutor-ar-1': 'Schreib al-Muʿallim etwas auf Arabisch',
   },
   /** Badge meanings and rules by badge id (German as in @suffa/engagement). */

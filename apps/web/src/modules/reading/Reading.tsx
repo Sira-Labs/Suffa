@@ -1,19 +1,20 @@
 import { useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import type { Dialog, UnitPracticeScope } from '@/types';
-import { TashkilToggle } from '@/components';
+import type { Dialog, DialogZeile, UnitPracticeScope, Vokabel } from '@/types';
+import { MeaningText, NotTranslated, TashkilToggle } from '@/components';
 import { applyTashkilLevel } from '@/components/ArabicText';
 import { content } from '@/content';
 import { useReachedUnits } from '@/modules/units/useReachedUnits';
 import { scopedDialogues } from '@/services/practice';
 import { normalizeArabic } from '@/services/srs';
 import { speakArabic } from '@/services/speech';
+import { consistentMeanings, meaningOf, useMeaningLanguage } from '@/services/meanings';
 import { useSettingsStore } from '@/state';
 
-// Glossary from all vocabulary: normalised form → meaning.
-const glossar = new Map<string, { de: string; tr: string; wurzel: string }>();
+// Glossary from all vocabulary: normalised form → word.
+const glossar = new Map<string, Vokabel>();
 for (const v of content.vokabeln) {
-  glossar.set(normalizeArabic(v.ar), { de: v.de, tr: v.tr, wurzel: v.wurzel });
+  glossar.set(normalizeArabic(v.ar), v);
 }
 
 /**
@@ -66,13 +67,7 @@ export function Reading({ scope }: { scope?: UnitPracticeScope } = {}) {
             {selected.titel}
           </h2>
           {selected.zeilen.map((zeile, i) => (
-            <GlossLine
-              key={i}
-              speaker={zeile.sp}
-              arabic={zeile.ar}
-              german={zeile.de}
-              showTranslation={showTranslation}
-            />
+            <GlossLine key={i} line={zeile} showTranslation={showTranslation} />
           ))}
         </div>
       )}
@@ -89,21 +84,17 @@ export function Reading({ scope }: { scope?: UnitPracticeScope } = {}) {
 }
 
 function GlossLine({
-  speaker,
-  arabic,
-  german,
+  line,
   showTranslation,
 }: {
-  speaker: string;
-  arabic: string;
-  german: string;
+  line: DialogZeile;
   showTranslation: boolean;
 }) {
   const { t } = useTranslation('reading');
   const level = useSettingsStore((s) => s.settings.tashkilLevel);
-  const [gloss, setGloss] = useState<{ word: string; de: string; wurzel: string } | null>(
-    null
-  );
+  const language = useMeaningLanguage();
+  const { sp: speaker, ar: arabic } = line;
+  const [gloss, setGloss] = useState<{ word: string; entry: Vokabel } | null>(null);
   const words = useMemo(() => arabic.split(/\s+/).filter(Boolean), [arabic]);
 
   return (
@@ -124,9 +115,7 @@ function GlossLine({
           return (
             <span
               key={i}
-              onClick={() =>
-                entry && setGloss({ word: w, de: entry.de, wurzel: entry.wurzel })
-              }
+              onClick={() => entry && setGloss({ word: w, entry })}
               role={entry ? 'button' : undefined}
               tabIndex={entry ? 0 : undefined}
               style={{
@@ -143,13 +132,13 @@ function GlossLine({
       {gloss && (
         <p className="muted" style={{ margin: 0 }}>
           <span className="arabic-inline">{gloss.word}</span> →{' '}
-          <span lang="de">{gloss.de}</span> ({t('root')}{' '}
-          <span className="arabic-inline">{gloss.wurzel}</span>)
+          <MeaningText meaning={meaningOf(gloss.entry, language)} /> ({t('root')}{' '}
+          <span className="arabic-inline">{gloss.entry.wurzel}</span>)
         </p>
       )}
       {showTranslation && (
-        <p className="muted" style={{ margin: 0 }} lang="de">
-          {german}
+        <p className="muted" style={{ margin: 0 }}>
+          <MeaningText meaning={meaningOf(line, language)} />
         </p>
       )}
     </div>
@@ -159,16 +148,31 @@ function GlossLine({
 /** Simple reading comprehension after the text. */
 function Comprehension({ dialog, onCorrect }: { dialog: Dialog; onCorrect(): void }) {
   const { t } = useTranslation('reading');
+  const language = useMeaningLanguage();
   const firstLine = dialog.zeilen[0];
-  const correct = firstLine?.de ?? '';
   const [answer, setAnswer] = useState<string | null>(null);
-  const options = useMemo(() => {
-    const distractors = content.dialoge
-      .flatMap((d) => d.zeilen.map((z) => z.de))
-      .filter((de) => de !== correct);
-    const picks = [...new Set(distractors)].sort(() => Math.random() - 0.5).slice(0, 2);
-    return [correct, ...picks].sort(() => Math.random() - 0.5);
-  }, [correct]);
+  // The right line and two others, all in one language (German if one lacks English).
+  const { correct, options, lang, missing } = useMemo(() => {
+    if (!firstLine)
+      return { correct: '', options: [], lang: 'de' as const, missing: false };
+    const others = [
+      ...new Map(
+        content.dialoge
+          .flatMap((d) => d.zeilen)
+          .filter((z) => z.de !== firstLine.de)
+          .map((z) => [z.de, z])
+      ).values(),
+    ]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2);
+    const glosses = consistentMeanings([firstLine, ...others], language);
+    return {
+      correct: glosses.texts[0]!,
+      options: [...glosses.texts].sort(() => Math.random() - 0.5),
+      lang: glosses.lang,
+      missing: glosses.missing,
+    };
+  }, [firstLine, language]);
 
   if (!firstLine) return null;
 
@@ -183,9 +187,11 @@ function Comprehension({ dialog, onCorrect }: { dialog: Dialog; onCorrect(): voi
           components={{ 1: <span className="arabic-inline" /> }}
         />
       </p>
+      {missing && <NotTranslated />}
       {options.map((opt) => (
         <button
           key={opt}
+          lang={lang}
           className={`btn ${answer ? (opt === correct ? 'btn-accent' : '') : ''}`}
           onClick={() => {
             setAnswer(opt);

@@ -2,6 +2,7 @@ export * from './ArabicText';
 export * from './TashkilToggle';
 export * from './ArabicKeyboard';
 export * from './Feedback';
+export * from './Meaning';
 export * from './RatingButtons';
 export * from './SyncBadge';
 export * from './RecallInput';

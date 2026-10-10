@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { DiffSegment } from '@/services/srs/tashkil';
 import type { RecallVerdict } from '@/services/srs/recall';
+import { NotTranslated } from './Meaning';
 
 interface FeedbackProps {
   verdict: RecallVerdict;
@@ -14,6 +15,10 @@ interface FeedbackProps {
   explanation?: string;
   /** Language of the explanation when it is course content (a German meaning: "de"). */
   explanationLang?: string;
+  /** Language of a Latin `expected` and `alsoCorrect` (the meaning language, story 16.4). */
+  expectedLang?: string;
+  /** The meaning shown is the German fallback for a missing English one. */
+  meaningMissing?: boolean;
 }
 
 const VERDICT: Record<
@@ -36,6 +41,8 @@ export function Feedback({
   diff,
   explanation,
   explanationLang,
+  expectedLang = 'de',
+  meaningMissing = false,
 }: FeedbackProps) {
   const { t } = useTranslation('components');
   const v = VERDICT[verdict];
@@ -43,8 +50,8 @@ export function Feedback({
     verdict === 'wrong' || verdict === 'typo' || verdict === 'tashkil-tolerant';
   const expectedStyle = expectedIsArabic
     ? { className: 'arabic-inline', style: { fontSize: '1.4rem' } }
-    : // A Latin answer is a German meaning: course content until story 16.4.
-      { style: { fontSize: '1.1rem', fontWeight: 600 }, lang: 'de' };
+    : // A Latin answer is a meaning, in the learner's meaning language.
+      { style: { fontSize: '1.1rem', fontWeight: 600 }, lang: expectedLang };
   return (
     <div className="stack" style={{ gap: '0.5rem' }} role="status" aria-live="polite">
       <strong className={v.cls}>{t(`feedback.${v.key}`)}</strong>
@@ -54,12 +61,18 @@ export function Feedback({
             {verdict === 'wrong' ? t('feedback.expected') : t('feedback.right')}
           </span>
           <span {...expectedStyle}>{expected}</span>
+          {meaningMissing && (
+            <>
+              {' '}
+              <NotTranslated />
+            </>
+          )}
         </div>
       )}
       {!showExpected && alsoCorrect.length > 0 && (
         <div>
           <span className="muted">{t('feedback.alsoCorrect')}</span>
-          <span style={{ fontWeight: 600 }} lang="de">
+          <span style={{ fontWeight: 600 }} lang={expectedLang}>
             {alsoCorrect.join(', ')}
           </span>
         </div>

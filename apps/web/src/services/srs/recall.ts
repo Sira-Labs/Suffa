@@ -4,7 +4,7 @@
  * meaning-aware matcher (`gradeTranslation`).
  */
 import { gradeAnswer, type AnswerVerdict } from './tashkil';
-import { gradeTranslation } from './translation';
+import { gradeTranslation, type TranslationLocale } from './translation';
 
 /** Every verdict a recall answer can get; all but `wrong` count as correct. */
 export type RecallVerdict = AnswerVerdict | 'accepted' | 'typo';
@@ -24,12 +24,14 @@ export function isCorrect(verdict: RecallVerdict): boolean {
 export function gradeRecall(
   input: string,
   expected: string,
-  answerIsArabic: boolean
+  answerIsArabic: boolean,
+  /** Language of `expected` when it is a meaning (story 16.4). */
+  locale: TranslationLocale = 'de'
 ): RecallGrade {
   if (answerIsArabic) {
     return { verdict: gradeAnswer(input, expected), matched: [], alsoCorrect: [] };
   }
-  const grade = gradeTranslation(input, expected);
+  const grade = gradeTranslation(input, expected, locale);
   return {
     verdict: grade.verdict,
     matched: grade.matched,

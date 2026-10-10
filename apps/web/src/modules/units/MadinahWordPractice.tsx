@@ -5,7 +5,8 @@
  */
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArabicText } from '@/components';
+import { ArabicText, NotTranslated } from '@/components';
+import { useMeaningLanguage } from '@/services/meanings';
 import { practiceId, randomShuffle, stableShuffle } from '@/services/practice';
 import type { MadinahWord } from '@/services/courses';
 import { speakArabic } from '@/services/speech';
@@ -33,6 +34,8 @@ export function MadinahWordPractice({
   words: readonly MadinahWord[];
 }) {
   const { t } = useTranslation('units');
+  // Our Medina meanings are German only so far (no CMS for them yet, story 16.4).
+  const untranslated = useMeaningLanguage() !== 'de';
   const records = usePracticeStore((s) => s.records);
   const practise = usePracticeStore((s) => s.practise);
   const celebrate = useCelebrationStore((s) => s.show);
@@ -127,6 +130,11 @@ export function MadinahWordPractice({
             aria-label={t('words.choose')}
             style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
           >
+            {untranslated && (
+              <span style={{ gridColumn: '1 / -1' }}>
+                <NotTranslated />
+              </span>
+            )}
             {meaningOptions(current, words).map((de) => {
               const state = !chosen
                 ? ''

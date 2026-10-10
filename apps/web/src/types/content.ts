@@ -29,6 +29,8 @@ export interface Vokabel {
   ar: string;
   tr: string;
   de: string;
+  /** English gloss, once reviewed in the CMS and published (story 16.4). */
+  en?: string;
   /** Root, e.g. "ك-ت-ب"; empty for pronouns and particles (no root cards for them). */
   wurzel: string;
   wazn?: string;
@@ -51,6 +53,8 @@ export interface DialogZeile {
   sp: string;
   ar: string;
   de: string;
+  /** English translation, once reviewed and published (story 16.4). */
+  en?: string;
 }
 
 export interface Dialog {
@@ -129,7 +133,7 @@ export interface GrammatikPunkt {
   /** The rule in one line. */
   regel: string;
   erklaerung: string[];
-  beispiele: { ar: string; de: string }[];
+  beispiele: { ar: string; de: string; en?: string }[];
   fragen: GrammatikFrage[];
 }
 

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import i18n from '@/i18n';
 import type { ExamFormat, ExamItemResult } from '@/types';
-import { ArabicText, RecallInput } from '@/components';
+import { ArabicText, NotTranslated, RecallInput } from '@/components';
 import { gradeRecall, isCorrect } from '@/services/srs';
 import { speakArabic } from '@/services/speech';
 import { examRepo, cardRepo } from '@/services/storage';
@@ -267,7 +267,9 @@ function ExamRunner({
     // tolerantly (tashkīl for Arabic, meanings/typos for translations).
     const correct = q.options
       ? given === q.expected
-      : isCorrect(gradeRecall(given, q.expected, q.expectedIsArabic).verdict);
+      : isCorrect(
+          gradeRecall(given, q.expected, q.expectedIsArabic, q.meaningLang).verdict
+        );
     const item: ExamItemResult = {
       contentRef: q.contentRef,
       format: q.format,
@@ -330,8 +332,11 @@ function ExamRunner({
             {q.prompt}
           </ArabicText>
         ) : (
-          <p style={{ fontSize: '1.3rem' }}>{q.prompt}</p>
+          <p style={{ fontSize: '1.3rem' }} lang={q.meaningLang}>
+            {q.prompt}
+          </p>
         )}
+        {q.meaningMissing && <NotTranslated />}
         {q.hint && <span className="muted">{q.hint}</span>}
 
         {q.options ? (
@@ -341,6 +346,7 @@ function ExamRunner({
                 key={opt}
                 className={`btn ${q.expectedIsArabic ? 'arabic-inline' : ''}`}
                 style={q.expectedIsArabic ? { fontSize: '1.3rem' } : undefined}
+                lang={q.expectedIsArabic ? 'ar' : q.meaningLang}
                 onClick={() => submit(opt)}
               >
                 {opt}

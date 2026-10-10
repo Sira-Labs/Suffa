@@ -10,6 +10,8 @@ import {
   WordExample,
 } from '@/components';
 import { Icon } from '@/components/Icon';
+import { NotTranslated } from '@/components/Meaning';
+import { useMeaningLanguage } from '@/services/meanings';
 import { diffArabic, gradeRecall, resolveCard, type RecallGrade } from '@/services/srs';
 import { speakArabic, isTtsSupported } from '@/services/speech';
 import { useContentStore, useSettingsStore, useSrsStore, useSyncStore } from '@/state';
@@ -81,9 +83,11 @@ export function ReviewSession({
   const [useAid, setUseAid] = useState(false);
 
   const card = queue[index];
+  const meaningLanguage = useMeaningLanguage();
   const resolved = useMemo(
-    () => (card ? resolveCard(card.kind, card.contentRef, userVocab) : null),
-    [card, userVocab]
+    () =>
+      card ? resolveCard(card.kind, card.contentRef, userVocab, meaningLanguage) : null,
+    [card, userVocab, meaningLanguage]
   );
 
   const choices = useMemo(() => {
@@ -91,13 +95,15 @@ export function ReviewSession({
     const others = useSrsStore
       .getState()
       .cards.filter((c) => c.kind === card?.kind && c.id !== card?.id)
-      .map((c) => resolveCard(c.kind, c.contentRef, userVocab))
+      .map((c) => resolveCard(c.kind, c.contentRef, userVocab, meaningLanguage))
       .filter((r): r is NonNullable<typeof r> => Boolean(r))
+      // Options in one language: a German fallback must not stand out among English ones.
+      .filter((r) => r.meaningLang === resolved.meaningLang)
       .map((r) => r.answer)
       .filter((a) => a !== resolved.answer);
     const pool = [...new Set(others)].sort(() => Math.random() - 0.5).slice(0, 3);
     return [resolved.answer, ...pool].sort(() => Math.random() - 0.5);
-  }, [resolved, useAid, card, userVocab]);
+  }, [resolved, useAid, card, userVocab, meaningLanguage]);
 
   if (!card || !resolved) {
     return (
@@ -132,7 +138,9 @@ export function ReviewSession({
 
   const check = (raw: string) => {
     setAnswer(raw);
-    setGrade(gradeRecall(raw, resolved.answer, resolved.answerIsArabic));
+    setGrade(
+      gradeRecall(raw, resolved.answer, resolved.answerIsArabic, resolved.meaningLang)
+    );
     setPhase('graded');
   };
 
@@ -184,12 +192,15 @@ export function ReviewSession({
         {resolved.promptIsArabic ? (
           <ArabicText size={focus ? 'hero' : 'lg'}>{resolved.prompt}</ArabicText>
         ) : (
-          // A German meaning on its own is course content (German until story 16.4).
-          <p
-            className="review-prompt-latin"
-            lang={resolved.kind === 'vocab_de_ar' ? 'de' : undefined}
-          >
+          // A meaning on its own is in the learner's meaning language (story 16.4).
+          <p className="review-prompt-latin" lang={resolved.meaningLang}>
             {resolved.prompt}
+            {resolved.kind === 'vocab_de_ar' && resolved.meaningMissing && (
+              <>
+                {' '}
+                <NotTranslated />
+              </>
+            )}
           </p>
         )}
         {showTr && resolved.transliteration && phase === 'graded' && (
@@ -247,7 +258,7 @@ export function ReviewSession({
                 key={choice}
                 className={`btn btn-lg ${resolved.answerIsArabic ? 'arabic-inline' : ''}`}
                 style={{ fontSize: '1.3rem' }}
-                lang={resolved.answerIsArabic ? 'ar' : 'de'}
+                lang={resolved.answerIsArabic ? 'ar' : resolved.meaningLang}
                 onClick={() => check(choice)}
               >
                 {choice}
@@ -263,6 +274,10 @@ export function ReviewSession({
                 verdict={grade.verdict}
                 expected={resolved.answer}
                 expectedIsArabic={resolved.answerIsArabic}
+                expectedLang={resolved.meaningLang}
+                meaningMissing={
+                  resolved.kind === 'vocab_ar_de' && resolved.meaningMissing
+                }
                 alsoCorrect={grade.alsoCorrect}
                 diff={
                   resolved.answerIsArabic

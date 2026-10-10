@@ -127,6 +127,11 @@ export interface SettingsRecord extends Syncable {
   srsAlgorithm?: SrsAlgorithm | null;
   /** Interface language (story 16.3); none or null means German. */
   uiLanguage?: 'de' | 'en' | null;
+  /**
+   * Language of glosses and translation answers (story 16.4); none or null follows the
+   * interface language.
+   */
+  meaningLanguage?: 'de' | 'en' | null;
 }
 
 export type TashkilLevel = 'full' | 'partial' | 'none';

@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { content } from '@/content';
-import { ArabicText } from '@/components';
+import { ArabicText, MeaningText } from '@/components';
+import { meaningOf, useMeaningLanguage } from '@/services/meanings';
 import { Icon } from '@/components/Icon';
 import { isTtsSupported, speakArabic } from '@/services/speech';
 import { weakCards } from '@/services/stats';
@@ -74,6 +75,7 @@ function LearnerHome() {
   const { weekXp } = engagement;
   // The word of the day comes from the units reached so far.
   const word = wordOfTheDay(content.vokabeln.filter(keep));
+  const meaningLanguage = useMeaningLanguage();
   const checkedIn = Boolean(checkIns[todayKey]);
   const onCheckIn = () => {
     if (!word) return;
@@ -140,7 +142,9 @@ function LearnerHome() {
                   type="button"
                   className="icon-button icon-button-paper"
                   onClick={() => speakArabic(word.ar)}
-                  aria-label={t('home.listenTo', { word: word.de })}
+                  aria-label={t('home.listenTo', {
+                    word: meaningOf(word, meaningLanguage).text,
+                  })}
                 >
                   <Icon name="volume" size={20} />
                 </button>
@@ -149,9 +153,8 @@ function LearnerHome() {
             <ArabicText size="hero" style={{ textAlign: 'right' }}>
               {word.ar}
             </ArabicText>
-            {/* The meaning is course content: German until story 16.4. */}
-            <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }} lang="de">
-              {word.de}
+            <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>
+              <MeaningText meaning={meaningOf(word, meaningLanguage)} />
             </p>
             <p className="muted" style={{ margin: 0 }}>
               {t('home.root')} <span className="arabic-inline">{word.wurzel}</span>

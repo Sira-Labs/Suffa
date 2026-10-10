@@ -6,7 +6,8 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import { ArabicText } from '@/components';
+import { ArabicText, NotTranslated } from '@/components';
+import { useMeaningLanguage } from '@/services/meanings';
 import {
   archivePdfUrl,
   bookPageImageUrl,
@@ -150,9 +151,19 @@ export function MadinahLessonPage() {
 
 function WordList({ words }: { words: MadinahWord[] }) {
   const { t } = useTranslation('units');
+  // Our Medina meanings are German only so far (story 16.4).
+  const untranslated = useMeaningLanguage() !== 'de';
   return (
     <section className="card stack" aria-label={t('lessonPage.newWords')}>
-      <strong>{t('lessonPage.newWordsCount', { count: words.length })}</strong>
+      <strong>
+        {t('lessonPage.newWordsCount', { count: words.length })}
+        {untranslated && (
+          <>
+            {' '}
+            <NotTranslated />
+          </>
+        )}
+      </strong>
       <ul
         style={{
           listStyle: 'none',

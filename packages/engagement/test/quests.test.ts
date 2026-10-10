@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  COURSE_QUESTS_SINCE,
   dailyQuests,
   evaluateDay,
   QUEST_POOL,
@@ -41,7 +42,7 @@ describe('daily quests', () => {
     );
     const all = Object.values(QUEST_POOL)
       .flat()
-      .filter((q) => !q.requires);
+      .filter((q) => !q.requires && (!q.courses || q.courses.includes('bayna-yadayk')));
     expect(all.every((q) => seen.has(q.id))).toBe(true);
   });
 
@@ -89,6 +90,78 @@ describe('daily quests', () => {
         .get('2026-10-01')
         ?.map((t) => t.video)
     ).toEqual([true, false]);
+  });
+
+  it("follows the learner's course from its start day, keeping earlier days", () => {
+    const days = (from: number, count: number) =>
+      Array.from({ length: count }, (_, i) =>
+        new Date(Date.UTC(2026, 9, from + i)).toISOString().slice(0, 10)
+      );
+    const before = days(-60, 70).filter((d) => d < COURSE_QUESTS_SINCE);
+    const after = days(11, 90);
+    const all = { tutor: true, videos: true };
+    // Earlier days: the same quests whatever the course (no quest or XP changes).
+    for (const day of before) {
+      expect(dailyQuests(day, { ...all, course: 'madinah' })).toEqual(
+        dailyQuests(day, all)
+      );
+    }
+    // Bayna Yadayk learners keep their pool; no course means the default course.
+    for (const day of after) {
+      expect(dailyQuests(day, { ...all, course: 'bayna-yadayk' })).toEqual(
+        dailyQuests(day, all)
+      );
+    }
+    const ids = (course: 'madinah' | 'bayna-yadayk') =>
+      new Set(after.flatMap((d) => dailyQuests(d, { ...all, course }).map((q) => q.id)));
+    const medina = ids('madinah');
+    const bayna = ids('bayna-yadayk');
+    // Medina lessons have no dialogues: no dialogue quests, a word quest instead.
+    expect(medina.has('listen-1')).toBe(false);
+    expect(medina.has('read-1')).toBe(false);
+    expect(medina.has('words-5')).toBe(true);
+    expect(bayna.has('listen-1')).toBe(true);
+    expect(bayna.has('words-5')).toBe(false);
+    // Wording: lesson for Medina, unit for Bayna Yadayk.
+    const titles = (course: 'madinah' | 'bayna-yadayk') =>
+      after
+        .flatMap((d) => dailyQuests(d, { ...all, course }))
+        .filter((q) => q.id === 'practice-5')
+        .map((q) => q.title);
+    expect(new Set(titles('madinah'))).toEqual(new Set(['5 Übungen in deiner Lektion']));
+    expect(new Set(titles('bayna-yadayk'))).toEqual(
+      new Set(['5 Übungen in deiner Einheit'])
+    );
+  });
+
+  it("offers the video quest only where the learner's course has lessons", () => {
+    const after = Array.from({ length: 90 }, (_, i) =>
+      new Date(Date.UTC(2026, 9, 11 + i)).toISOString().slice(0, 10)
+    );
+    const ids = (features: Parameters<typeof dailyQuests>[1]) =>
+      after.flatMap((d) => dailyQuests(d, features).map((q) => q.id));
+    const onlyBayna = { videos: true, videoCourses: ['bayna-yadayk'] as const };
+    expect(ids({ ...onlyBayna, course: 'madinah' })).not.toContain('video-1');
+    expect(ids({ ...onlyBayna, course: 'bayna-yadayk' })).toContain('video-1');
+    // Unknown catalog courses (older API): any lesson is enough, as before.
+    expect(ids({ videos: true, course: 'madinah' })).toContain('video-1');
+    // Before the start day the catalog's courses do not matter.
+    expect(dailyQuests('2026-10-05', { ...onlyBayna, course: 'madinah' })).toEqual(
+      dailyQuests('2026-10-05', { videos: true })
+    );
+  });
+
+  it('counts Medina word practice for the word quest', () => {
+    const words = QUEST_POOL.learn.find((q) => q.id === 'words-5')!;
+    const at = '2026-10-12T09:00:00.000Z';
+    const ticks = [
+      ...Array.from({ length: 4 }, () => tick(at, { kind: 'practice', skill: 'words' })),
+      tick(at, { kind: 'practice', skill: 'cloze' }),
+    ];
+    expect(questStatus(words, ticks)).toMatchObject({ progress: 4, done: false });
+    expect(
+      questStatus(words, [...ticks, tick(at, { kind: 'practice', skill: 'words' })]).done
+    ).toBe(true);
   });
 
   it('offers the tutor quest only from its start day and only with the tutor', () => {

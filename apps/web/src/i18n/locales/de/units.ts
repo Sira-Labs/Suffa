@@ -283,6 +283,20 @@ export const units = {
     previousPage: '← Seite',
     nextPage: 'Seite →',
     pageOf: 'S. {{page}} ({{index}} von {{total}})',
+    followBook: 'Buch folgt der Aufnahme',
+    sync: {
+      title: 'Seitenwechsel festlegen (Admin)',
+      intro:
+        'Spiel die Aufnahme ab und tippe auf „Jetzt“, sobald die nächste Seite beginnt. Die erste Seite beginnt bei 0:00. Gespeichert werden nur die Zeiten.',
+      startOf: 'Beginn S. {{page}} in Sekunden',
+      now: 'Jetzt',
+      clear: 'Leeren',
+      save: 'Zeiten speichern',
+      saving: 'Speichert …',
+      saved: 'Gespeichert (Stand {{revision}}).',
+      order: 'Die Seiten müssen in der Reihenfolge der Aufnahme beginnen.',
+      none: 'Noch keine Seitenwechsel festgelegt: Das Buch öffnet sich an der ersten Seite der Lektion und blättert nicht mit.',
+    },
     asPdf: 'Als PDF:',
     printed:
       'Gedruckt als „Madinah Arabic Reader“ (<1>Goodword</1>): Buch {{book}}, S. {{page}}',

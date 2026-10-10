@@ -52,6 +52,12 @@ export const errors = {
     ai_failed:
       'Die KI hat keine brauchbare Übersetzung geliefert. Versuche es noch einmal.',
   },
+  bookSync: {
+    stale_revision:
+      'Die Abgleichsdaten wurden inzwischen geändert. Lade die Seite neu und tippe dann erneut mit.',
+    invalid_sync: 'Die Zeiten passen so nicht:',
+    payload_too_large: 'Zu viele Zeilen für eine Lektion.',
+  },
   videos: {
     import_unavailable:
       'Für den Import fehlt der YouTube-Schlüssel (SUFFA_YOUTUBE_API_KEY).',

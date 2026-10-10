@@ -285,6 +285,20 @@ export const units: Messages<typeof de> = {
     previousPage: '← Page',
     nextPage: 'Page →',
     pageOf: 'p. {{page}} ({{index}} of {{total}})',
+    followBook: 'Book follows the recording',
+    sync: {
+      title: 'Set page turns (admin)',
+      intro:
+        'Play the recording and tap “Now” as soon as the next page begins. The first page begins at 0:00. Only the times are saved.',
+      startOf: 'Start of p. {{page}} in seconds',
+      now: 'Now',
+      clear: 'Clear',
+      save: 'Save times',
+      saving: 'Saving …',
+      saved: 'Saved (revision {{revision}}).',
+      order: 'The pages must begin in the order of the recording.',
+      none: 'No page turns set yet: the book opens at the lesson’s first page and does not turn along.',
+    },
     asPdf: 'As PDF:',
     printed:
       'Printed as “Madinah Arabic Reader” (<1>Goodword</1>): Book {{book}}, p. {{page}}',

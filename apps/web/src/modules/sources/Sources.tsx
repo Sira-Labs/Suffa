@@ -3,115 +3,109 @@
  * which terms, and a link to the original. Naming a source does not replace permission:
  * book texts and pictures stay at their sources until the rights holders allow more.
  */
+import { Trans, useTranslation } from 'react-i18next';
 import { MADINAH_BOOKS } from '@/services/courses';
 
 const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
 
+const listStyle = { margin: 0, paddingLeft: '1.1rem', gap: '0.3rem' } as const;
+
 export function Sources() {
+  const { t } = useTranslation('sources');
   const madinah = MADINAH_BOOKS[0]!;
   return (
     <div className="stack" style={{ gap: '1.25rem' }}>
       <header className="stack" style={{ gap: '0.25rem' }}>
-        <h1>Quellen & Lizenzen</h1>
+        <h1>{t('title')}</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Suffa ist kostenlos. Was wir selbst schreiben, steht hier als „eigene Inhalte“.
-          Bücher, Aufnahmen und Videos anderer zeigen wir an ihrer Quelle oder verlinken
-          sie; wir kopieren sie nicht.
+          {t('intro')}
         </p>
       </header>
 
       <section className="card stack" aria-labelledby="src-madinah">
         <h2 id="src-madinah" style={{ margin: 0 }}>
-          Medina-Kurs (دروس اللغة العربية)
+          {t('madinah.title')}
         </h2>
-        <p style={{ margin: 0 }}>
-          Von Dr. V. Abdur Rahim, früher Islamische Universität Medina. Das Buch, die
-          Lösungen und die Schlüssel werden laut den PDFs „nur zur persönlichen Nutzung,
-          mit freundlicher Erlaubnis von Dr. V. Abdur Rahim“ bereitgestellt.
-        </p>
-        <ul className="stack" style={{ margin: 0, paddingLeft: '1.1rem', gap: '0.3rem' }}>
+        <p style={{ margin: 0 }}>{t('madinah.about')}</p>
+        <ul className="stack" style={listStyle}>
           <li>
-            Buch, Lösungen, Schlüssel, Notizen:{' '}
-            <a href={madinah.sources.overview} {...external}>
-              AbdurRahman.org
-            </a>{' '}
-            und{' '}
-            <a
-              href={`https://archive.org/details/${madinah.sources.archiveItem}`}
-              {...external}
-            >
-              archive.org
-            </a>
-            ; in den Lektionen zeigen wir die Buchseiten als Seitenbilder, die archive.org
-            aus dem PDF erzeugt und von dort geladen werden.
+            <Trans
+              t={t}
+              i18nKey="madinah.book"
+              components={{
+                1: <a href={madinah.sources.overview} {...external} />,
+                3: (
+                  <a
+                    href={`https://archive.org/details/${madinah.sources.archiveItem}`}
+                    {...external}
+                  />
+                ),
+              }}
+            />
           </li>
           <li>
-            Dasselbe Buch gibt es gedruckt als „Madinah Arabic Reader“ bei{' '}
-            <a href={madinah.sources.goodword} {...external}>
-              Goodword Books
-            </a>{' '}
-            (© Goodword). Zu jeder Lektion nennen wir nur Buch und Seite dieser Ausgabe;
-            ihre Seiten zeigen wir nicht.
+            <Trans
+              t={t}
+              i18nKey="madinah.print"
+              components={{ 1: <a href={madinah.sources.goodword} {...external} /> }}
+            />
           </li>
           <li>
-            Aufnahmen der Lektionen von Dr. V. Abdur Rahim:{' '}
-            <a href={madinah.sources.audioCollection} {...external}>
-              archive.org
-            </a>
-            , direkt von dort abgespielt.
+            <Trans
+              t={t}
+              i18nKey="madinah.recordings"
+              components={{
+                1: <a href={madinah.sources.audioCollection} {...external} />,
+              }}
+            />
           </li>
-          <li>
-            Eigene Inhalte von Suffa: deutsche Wortbedeutungen, Grammatik-Erklärungen,
-            Beispielsätze und Übungen. Welche Wörter eine Lektion einführt, ist eine
-            Tatsache aus dem Buch.
-          </li>
+          <li>{t('madinah.own')}</li>
         </ul>
       </section>
 
       <section className="card stack" aria-labelledby="src-bayna">
         <h2 id="src-bayna" style={{ margin: 0 }}>
-          Al-Arabiyya bayna Yadayk (العربية بين يديك)
+          {t('bayna.title')}
         </h2>
-        <ul className="stack" style={{ margin: 0, paddingLeft: '1.1rem', gap: '0.3rem' }}>
+        <ul className="stack" style={listStyle}>
           <li>
-            Audio und Seitenvideos zum Buch: © Arabic for All (العربية للجميع), alle
-            Rechte beim Verlag; abgespielt vom Server des Verlags bzw. von YouTube.{' '}
-            <a href="https://www.arabicforall.net" {...external}>
-              arabicforall.net
-            </a>
+            <Trans
+              t={t}
+              i18nKey="bayna.media"
+              components={{ 1: <a href="https://www.arabicforall.net" {...external} /> }}
+            />
           </li>
-          <li>
-            Eigene Inhalte von Suffa: Wortlisten mit Bedeutungen, Dialoge, Verbtabellen,
-            Grammatik und Übungen.
-          </li>
+          <li>{t('bayna.own')}</li>
         </ul>
       </section>
 
       <section className="card stack" aria-labelledby="src-more">
         <h2 id="src-more" style={{ margin: 0 }}>
-          Weitere Quellen
+          {t('more.title')}
         </h2>
-        <ul className="stack" style={{ margin: 0, paddingLeft: '1.1rem', gap: '0.3rem' }}>
+        <ul className="stack" style={listStyle}>
           <li>
-            Beispielsätze:{' '}
-            <a href="https://tatoeba.org" {...external}>
-              Tatoeba
-            </a>{' '}
-            (
-            <a href="https://creativecommons.org/licenses/by/2.0/fr/" {...external}>
-              CC BY 2.0 FR
-            </a>
-            ), von Suffa vokalisiert und teils berichtigt; die Autorin oder der Autor
-            steht bei jedem Satz.
+            <Trans
+              t={t}
+              i18nKey="more.examples"
+              components={{
+                1: <a href="https://tatoeba.org" {...external} />,
+                3: (
+                  <a
+                    href="https://creativecommons.org/licenses/by/2.0/fr/"
+                    {...external}
+                  />
+                ),
+              }}
+            />
           </li>
-          <li>Entdecken: Videos gehören ihren Kanälen und laufen über YouTube.</li>
-          <li>Schriften: Amiri, Reem Kufi, Manrope, Fraunces (SIL Open Font License).</li>
+          <li>{t('more.discover')}</li>
+          <li>{t('more.fonts')}</li>
         </ul>
       </section>
 
       <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-        Wünscht ein Rechteinhaber etwas anderes, passen wir es umgehend an oder nehmen es
-        heraus.
+        {t('takedown')}
       </p>
     </div>
   );

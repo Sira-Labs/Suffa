@@ -1,0 +1,83 @@
+/**
+ * al-Muʿallim, the AI teacher: the page around the chat and the grade mode (16.3). What the
+ * tutor answers follows the tutoring language, not this catalogue.
+ */
+export const tutor = {
+  activity: {
+    lookup_vocab: 'al-Muʿallim schlägt im Wortschatz nach …',
+    get_root_family: 'al-Muʿallim sucht die Wortfamilie …',
+    get_learner_state: 'al-Muʿallim schaut auf deinen Lernstand …',
+    get_media_segment: 'al-Muʿallim hört in die Aufnahme …',
+    thinking: 'al-Muʿallim denkt nach …',
+  },
+  suggestions: {
+    grammar: 'Erklär mir die Grammatik meiner Einheit in drei Sätzen.',
+    quiz: 'Frag mich fünf Wörter meiner Einheit ab.',
+    review: 'Welche Wörter sollte ich heute wiederholen?',
+    phrase: 'Wie sage ich „Ich wohne in Zürich“ auf Arabisch?',
+  },
+  mediaQuestion: 'Was wird bei {{time}} gesagt, und was bedeutet es?',
+  signInNeeded:
+    'Dein KI-Lehrer braucht eine Anmeldung. Melde dich unter <1>Einstellungen</1> an.',
+  explainsIn: 'Erklärt auf',
+  explainLanguage: 'Sprache der Erklärungen',
+  ask: 'Fragen',
+  gradeTab: 'Text bewerten',
+  unavailable:
+    'al-Muʿallim ist auf diesem Server noch nicht eingeschaltet. Alle anderen Übungen funktionieren wie gewohnt.',
+  earlier: 'Frühere Gespräche ({{number}})',
+  newConversation: 'Neues Gespräch',
+  conversation: 'Gespräch',
+  aboutRecording: 'Frage zur Aufnahme bei {{time}}',
+  empty: 'Frag mich zu Wörtern, Grammatik oder deiner Einheit – gern auch auf Arabisch.',
+  helpful: 'Hilfreich',
+  notHelpful: 'Nicht hilfreich',
+  placeholder: 'Deine Frage – Deutsch, English oder عَرَبِيّ',
+  message: 'Deine Nachricht an al-Muʿallim',
+  stop: 'Stopp',
+  send: 'Senden',
+  grade: {
+    rubric: {
+      task: 'Aufgabe',
+      grammar: 'Grammatik',
+      vocabulary: 'Wortschatz',
+      spelling: 'Schreibung',
+    },
+    mistakes: {
+      spelling: 'Rechtschreibung',
+      grammar: 'Grammatik',
+      vocabulary: 'Wortschatz',
+      word_order: 'Satzstellung',
+      vocalisation: 'Vokalisierung',
+      other: 'Sonstiges',
+    },
+    prompts: {
+      introduce: 'Stell dich vor: Name, Herkunft, Wohnort.',
+      family: 'Beschreibe deine Familie in drei Sätzen.',
+      day: 'Was machst du an einem normalen Tag?',
+    },
+    notUnderstood:
+      'Ich habe nichts verstanden. Versuch es noch einmal oder tippe den Text.',
+    kindGroup: 'Art des Textes',
+    writing: 'Geschrieben',
+    speech: 'Gesprochen',
+    task: 'Aufgabe',
+    yourText: 'Dein Text auf Arabisch',
+    transcript: 'Was du gesagt hast (Transkript)',
+    listening: 'Ich höre zu …',
+    speak: '🎙 Sprechen',
+    grading: 'Bewerte …',
+    submit: 'Bewerten lassen',
+    result: 'Bewertung',
+    score: '{{score}} von 100 Punkten',
+    rubricScore: '{{label}}: {{value}} von 4',
+    adjusted: 'Von deiner Lehrkraft angepasst',
+    adjustedComment: 'Von deiner Lehrkraft angepasst: {{comment}}',
+    corrected: 'Verbessert',
+    mistakesTitle: 'Fehler ({{number}})',
+    reviewWords_one: 'Dieses Wort jetzt wiederholen',
+    reviewWords_other: '{{count}} Wörter jetzt wiederholen',
+    nowDue: 'Die Karten sind jetzt fällig.',
+    alreadyDue: 'Die Karten sind schon fällig.',
+  },
+};

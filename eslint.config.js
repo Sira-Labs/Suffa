@@ -15,6 +15,11 @@ const TRANSLATED = [
   'apps/web/src/modules/account/**/*.tsx',
   'apps/web/src/modules/more/**/*.tsx',
   'apps/web/src/modules/settings/**/*.tsx',
+  'apps/web/src/modules/library/**/*.tsx',
+  'apps/web/src/modules/videos/**/*.tsx',
+  'apps/web/src/modules/discover/**/*.tsx',
+  'apps/web/src/modules/tutor/**/*.tsx',
+  'apps/web/src/modules/sources/**/*.tsx',
 ];
 
 export default tseslint.config(

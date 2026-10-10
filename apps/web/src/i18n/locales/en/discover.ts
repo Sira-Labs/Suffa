@@ -1,0 +1,47 @@
+import type { Messages } from '../../types';
+import type { discover as de } from '../de/discover';
+
+export const discover: Messages<typeof de> = {
+  title: 'Discover',
+  intro:
+    'Selected videos and podcasts on the Arabic language and the Quran · suited to level {{level}}',
+  failed: 'The media library could not be loaded.',
+  loading: 'Loading media library …',
+  nowPlaying: 'Now playing',
+  closePlayer: 'Close player',
+  continue: 'Continue watching',
+  category: 'Category',
+  filters: {
+    mine: 'For you',
+    sprache: 'Language',
+    quran: 'Quran',
+    geschichten: 'Stories',
+    podcasts: 'Podcasts',
+  },
+  weeklyPick: 'Pick of the week',
+  minutes: '{{minutes}} min',
+  emptyCatalog: 'The selection is being put together – check back soon.',
+  restPinned: 'Everything else from this selection is above under “Continue watching”.',
+  emptyCategory: 'There are no recommendations in this category yet.',
+  recommendations: 'Recommendations',
+  footer:
+    'All videos belong to their channels and are played by YouTube (no cookies until you press play). The selection is checked regularly; suggestions are welcome – just tell your teacher.',
+  celebrateSeen: 'Video watched',
+  seen: 'Watched',
+  markSeen: 'Mark as watched',
+  pin: 'Pin',
+  unpin: 'Unpin',
+  pinNamed: 'Pin {{title}}',
+  unpinNamed: 'Unpin {{title}}',
+  started: 'Started',
+  startedPercent: 'Started · {{where}}{{percent}}% watched',
+  startedAt: 'Started · {{where}}at {{position}}',
+  playlistVideo: 'Video {{number}}: ',
+  play: 'Play {{title}}',
+  playingAbove: 'Playing above',
+  playlist: 'Playlist',
+  watched: '{{title}}: {{percent}}% watched',
+  meta: '{{category}} · Level {{level}} · {{variety}}',
+  inLanguage: '· in {{language}}',
+  why: '“{{why}}”',
+};

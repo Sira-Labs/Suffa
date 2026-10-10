@@ -4,33 +4,23 @@
  * version and the mistakes; mistakes that are course words can be brought up for review.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArabicText } from '@/components';
 import { isRecognitionSupported, recognizeOnce } from '@/services/speech/recognition';
-import {
-  MISTAKE_LABELS,
-  type Grade,
-  type GradeKind,
-  type TutorApi,
-} from '@/services/tutor/tutorApi';
+import type { Grade, GradeKind, TutorApi } from '@/services/tutor/tutorApi';
 import { useSrsStore } from '@/state';
 import { TutorText } from './TutorText';
 
-const RUBRIC_LABELS: Record<keyof Grade['rubric'], string> = {
-  task: 'Aufgabe',
-  grammar: 'Grammatik',
-  vocabulary: 'Wortschatz',
-  spelling: 'Schreibung',
-};
+/** Rubric rows in order; labels are `tutor:grade.rubric.<key>`. */
+const RUBRIC: (keyof Grade['rubric'])[] = ['task', 'grammar', 'vocabulary', 'spelling'];
 
-const PROMPTS = [
-  'Stell dich vor: Name, Herkunft, Wohnort.',
-  'Beschreibe deine Familie in drei Sätzen.',
-  'Was machst du an einem normalen Tag?',
-];
+/** Suggested tasks: `tutor:grade.prompts.<key>`. */
+const PROMPTS = ['introduce', 'family', 'day'] as const;
 
 export function GradePanel({ api, disabled }: { api: TutorApi; disabled: boolean }) {
+  const { t } = useTranslation('tutor');
   const [kind, setKind] = useState<GradeKind>('writing');
-  const [task, setTask] = useState(PROMPTS[0]!);
+  const [task, setTask] = useState<string>(() => t('grade.prompts.introduce'));
   const [answer, setAnswer] = useState('');
   const [busy, setBusy] = useState(false);
   const [listening, setListening] = useState(false);
@@ -47,9 +37,7 @@ export function GradePanel({ api, disabled }: { api: TutorApi; disabled: boolean
         [a.trim(), outcome.result.transcript.trim()].filter(Boolean).join(' ')
       );
     } else {
-      setMessage(
-        'Ich habe nichts verstanden. Versuch es noch einmal oder tippe den Text.'
-      );
+      setMessage(t('grade.notUnderstood'));
     }
   };
 
@@ -69,7 +57,7 @@ export function GradePanel({ api, disabled }: { api: TutorApi; disabled: boolean
         <div
           className="row"
           role="radiogroup"
-          aria-label="Art des Textes"
+          aria-label={t('grade.kindGroup')}
           style={{ gap: '0.5rem' }}
         >
           {(['writing', 'speech'] as const).map((k) => (
@@ -81,12 +69,12 @@ export function GradePanel({ api, disabled }: { api: TutorApi; disabled: boolean
               className={`btn ${kind === k ? 'btn-primary' : ''}`}
               onClick={() => setKind(k)}
             >
-              {k === 'writing' ? 'Geschrieben' : 'Gesprochen'}
+              {k === 'writing' ? t('grade.writing') : t('grade.speech')}
             </button>
           ))}
         </div>
         <label className="stack" style={{ gap: 4 }}>
-          <span className="muted">Aufgabe</span>
+          <span className="muted">{t('grade.task')}</span>
           <input
             className="input"
             list="grade-prompts"
@@ -96,15 +84,13 @@ export function GradePanel({ api, disabled }: { api: TutorApi; disabled: boolean
           />
           <datalist id="grade-prompts">
             {PROMPTS.map((p) => (
-              <option key={p} value={p} />
+              <option key={p} value={t(`grade.prompts.${p}`)} />
             ))}
           </datalist>
         </label>
         <label className="stack" style={{ gap: 4 }}>
           <span className="muted">
-            {kind === 'writing'
-              ? 'Dein Text auf Arabisch'
-              : 'Was du gesagt hast (Transkript)'}
+            {kind === 'writing' ? t('grade.yourText') : t('grade.transcript')}
           </span>
           <textarea
             className="input arabic"
@@ -124,7 +110,7 @@ export function GradePanel({ api, disabled }: { api: TutorApi; disabled: boolean
               disabled={listening}
               onClick={() => void listen()}
             >
-              {listening ? 'Ich höre zu …' : '🎙 Sprechen'}
+              {listening ? t('grade.listening') : t('grade.speak')}
             </button>
           )}
           <button
@@ -132,7 +118,7 @@ export function GradePanel({ api, disabled }: { api: TutorApi; disabled: boolean
             type="submit"
             disabled={disabled || busy || !answer.trim()}
           >
-            {busy ? 'Bewerte …' : 'Bewerten lassen'}
+            {busy ? t('grade.grading') : t('grade.submit')}
           </button>
           {message && <span className="feedback-bad">{message}</span>}
         </div>
@@ -143,24 +129,30 @@ export function GradePanel({ api, disabled }: { api: TutorApi; disabled: boolean
 }
 
 export function GradeCard({ grade }: { grade: Grade }) {
+  const { t } = useTranslation('tutor');
   const prioritise = useSrsStore((s) => s.prioritise);
   const [moved, setMoved] = useState<number | null>(null);
   const words = [...new Set(grade.mistakes.flatMap((m) => (m.wordId ? [m.wordId] : [])))];
   const score = grade.override?.score ?? grade.score;
 
   return (
-    <section className="card stack" aria-label="Bewertung">
+    <section className="card stack" aria-label={t('grade.result')}>
       <div className="row" style={{ gap: '1rem', alignItems: 'center' }}>
-        <div className="grade-score" aria-label={`${score} von 100 Punkten`}>
+        <div className="grade-score" aria-label={t('grade.score', { score })}>
           {score}
         </div>
         <div className="stack" style={{ gap: 4, flex: 1 }}>
-          {(Object.keys(RUBRIC_LABELS) as (keyof Grade['rubric'])[]).map((k) => (
+          {RUBRIC.map((k) => (
             <div key={k} className="row" style={{ gap: '0.5rem' }}>
               <span className="muted" style={{ width: '6.5rem' }}>
-                {RUBRIC_LABELS[k]}
+                {t(`grade.rubric.${k}`)}
               </span>
-              <span aria-label={`${RUBRIC_LABELS[k]}: ${grade.rubric[k]} von 4`}>
+              <span
+                aria-label={t('grade.rubricScore', {
+                  label: t(`grade.rubric.${k}`),
+                  value: grade.rubric[k],
+                })}
+              >
                 {'●'.repeat(grade.rubric[k])}
                 <span className="muted">{'○'.repeat(4 - grade.rubric[k])}</span>
               </span>
@@ -170,22 +162,23 @@ export function GradeCard({ grade }: { grade: Grade }) {
       </div>
       {grade.override && (
         <p className="badge" style={{ alignSelf: 'flex-start' }}>
-          Von deiner Lehrkraft angepasst
-          {grade.override.comment ? `: ${grade.override.comment}` : ''}
+          {grade.override.comment
+            ? t('grade.adjustedComment', { comment: grade.override.comment })
+            : t('grade.adjusted')}
         </p>
       )}
       <TutorText text={grade.summary} />
       <div className="stack" style={{ gap: 4 }}>
-        <strong>Verbessert</strong>
+        <strong>{t('grade.corrected')}</strong>
         <ArabicText size="lg">{grade.override?.corrected ?? grade.corrected}</ArabicText>
       </div>
       {grade.mistakes.length > 0 && (
         <div className="stack" style={{ gap: '0.5rem' }}>
-          <strong>Fehler ({grade.mistakes.length})</strong>
+          <strong>{t('grade.mistakesTitle', { number: grade.mistakes.length })}</strong>
           <ul className="grade-mistakes">
             {grade.mistakes.map((m, i) => (
               <li key={i}>
-                <span className="badge">{MISTAKE_LABELS[m.category]}</span>{' '}
+                <span className="badge">{t(`grade.mistakes.${m.category}`)}</span>{' '}
                 <s>
                   <ArabicText>{m.original}</ArabicText>
                 </s>{' '}
@@ -206,15 +199,11 @@ export function GradeCard({ grade }: { grade: Grade }) {
             disabled={moved !== null}
             onClick={() => void prioritise(words).then(setMoved)}
           >
-            {words.length === 1
-              ? 'Dieses Wort jetzt wiederholen'
-              : `${words.length} Wörter jetzt wiederholen`}
+            {t('grade.reviewWords', { count: words.length })}
           </button>
           {moved !== null && (
             <span className="muted">
-              {moved > 0
-                ? 'Die Karten sind jetzt fällig.'
-                : 'Die Karten sind schon fällig.'}
+              {moved > 0 ? t('grade.nowDue') : t('grade.alreadyDue')}
             </span>
           )}
         </div>

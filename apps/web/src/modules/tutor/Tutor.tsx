@@ -5,6 +5,7 @@
  * day's tutor quest.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { dayKey } from '@suffa/engagement';
 import { useLearnerTimeZone } from '@/modules/engagement/useEngagement';
@@ -30,24 +31,32 @@ interface ShownMessage {
   error?: boolean;
 }
 
-const TOOL_LABELS: Record<string, string> = {
-  lookup_vocab: 'schlägt im Wortschatz nach',
-  get_root_family: 'sucht die Wortfamilie',
-  get_learner_state: 'schaut auf deinen Lernstand',
-  get_media_segment: 'hört in die Aufnahme',
-};
+/** What the tutor is doing while a tool runs: `tutor:activity.<key>`. */
+type Activity =
+  | 'lookup_vocab'
+  | 'get_root_family'
+  | 'get_learner_state'
+  | 'get_media_segment'
+  | 'thinking';
 
-const SUGGESTIONS = [
-  'Erklär mir die Grammatik meiner Einheit in drei Sätzen.',
-  'Frag mich fünf Wörter meiner Einheit ab.',
-  'Welche Wörter sollte ich heute wiederholen?',
-  'Wie sage ich „Ich wohne in Zürich“ auf Arabisch?',
+const TOOLS: readonly string[] = [
+  'lookup_vocab',
+  'get_root_family',
+  'get_learner_state',
+  'get_media_segment',
 ];
+
+const activityOf = (tool: string): Activity =>
+  TOOLS.includes(tool) ? (tool as Activity) : 'thinking';
+
+/** Starter questions: `tutor:suggestions.<key>`. */
+const SUGGESTIONS = ['grammar', 'quiz', 'review', 'phrase'] as const;
 
 const clock = (sec: number) =>
   `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
 
 export function Tutor({ api: injected }: { api?: TutorApi }) {
+  const { t } = useTranslation('tutor');
   const api = useMemo(() => injected ?? new TutorApi(), [injected]);
   const provider = useSyncStore((s) => s.provider);
   const auth = useSyncStore((s) => s.auth);
@@ -66,11 +75,9 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ShownMessage[]>([]);
   const [draft, setDraft] = useState(() =>
-    context?.mediaId
-      ? `Was wird bei ${clock(context.atSec ?? 0)} gesagt, und was bedeutet es?`
-      : ''
+    context?.mediaId ? t('mediaQuestion', { time: clock(context.atSec ?? 0) }) : ''
   );
-  const [activity, setActivity] = useState<string | null>(null);
+  const [activity, setActivity] = useState<Activity | null>(null);
   const [busy, setBusy] = useState(false);
   const [mode, setMode] = useState<'chat' | 'grade'>('chat');
   const abort = useRef<AbortController | null>(null);
@@ -151,8 +158,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
         content += event.text;
         setActivity(null);
         update(answerKey, { content });
-      } else if (event.type === 'tool')
-        setActivity(TOOL_LABELS[event.name] ?? 'denkt nach');
+      } else if (event.type === 'tool') setActivity(activityOf(event.name));
       else if (event.type === 'replace') {
         content = event.text;
         update(answerKey, { content });
@@ -182,10 +188,13 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
   if (!signedIn) {
     return (
       <div className="stack">
-        <h1>al-Muʿallim</h1>
+        <h1 translate="no">al-Muʿallim</h1>
         <p className="muted">
-          Dein KI-Lehrer braucht eine Anmeldung. Melde dich unter{' '}
-          <Link to="/settings">Einstellungen</Link> an.
+          <Trans
+            t={t}
+            i18nKey="signInNeeded"
+            components={{ 1: <Link to="/settings" /> }}
+          />
         </p>
       </div>
     );
@@ -194,18 +203,24 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
   return (
     <div className="stack tutor">
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <h1 style={{ margin: 0 }}>al-Muʿallim</h1>
+        <h1 style={{ margin: 0 }} translate="no">
+          al-Muʿallim
+        </h1>
         <label className="row muted" style={{ gap: '0.4rem' }}>
-          Erklärt auf
+          {t('explainsIn')}
           <select
             className="input"
             value={language}
             onChange={(e) => void changeLanguage(e.target.value as TutorLanguage)}
-            aria-label="Sprache der Erklärungen"
+            aria-label={t('explainLanguage')}
             style={{ width: 'auto' }}
           >
-            <option value="de">Deutsch</option>
-            <option value="en">English</option>
+            <option value="de" lang="de">
+              Deutsch
+            </option>
+            <option value="en" lang="en">
+              English
+            </option>
           </select>
         </label>
       </div>
@@ -217,7 +232,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
           className={`btn ${mode === 'chat' ? 'btn-primary' : ''}`}
           onClick={() => setMode('chat')}
         >
-          Fragen
+          {t('ask')}
         </button>
         <button
           role="tab"
@@ -225,25 +240,20 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
           className={`btn ${mode === 'grade' ? 'btn-primary' : ''}`}
           onClick={() => setMode('grade')}
         >
-          Text bewerten
+          {t('gradeTab')}
         </button>
       </div>
 
-      {available === false && (
-        <p className="card muted">
-          al-Muʿallim ist auf diesem Server noch nicht eingeschaltet. Alle anderen Übungen
-          funktionieren wie gewohnt.
-        </p>
-      )}
+      {available === false && <p className="card muted">{t('unavailable')}</p>}
 
       {mode === 'grade' && <GradePanel api={api} disabled={available === false} />}
 
       {mode === 'chat' && conversations.length > 0 && (
         <details className="card">
-          <summary>Frühere Gespräche ({conversations.length})</summary>
+          <summary>{t('earlier', { number: conversations.length })}</summary>
           <div className="stack" style={{ marginTop: '0.5rem' }}>
             <button className="btn" type="button" onClick={startNew}>
-              Neues Gespräch
+              {t('newConversation')}
             </button>
             {conversations.map((c) => (
               <button
@@ -253,7 +263,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
                 onClick={() => void open(c.id)}
                 dir="auto"
               >
-                {c.title || 'Gespräch'}
+                {c.title || t('conversation')}
               </button>
             ))}
           </div>
@@ -262,7 +272,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
 
       {mode === 'chat' && context?.mediaId && !conversationId && (
         <p className="badge" style={{ alignSelf: 'flex-start' }}>
-          Frage zur Aufnahme bei {clock(context.atSec ?? 0)}
+          {t('aboutRecording', { time: clock(context.atSec ?? 0) })}
         </p>
       )}
 
@@ -272,8 +282,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
             {messages.length === 0 && (
               <div className="stack">
                 <p className="muted" style={{ margin: 0 }}>
-                  Frag mich zu Wörtern, Grammatik oder deiner Einheit – gern auch auf
-                  Arabisch.
+                  {t('empty')}
                 </p>
                 <div className="row" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
                   {SUGGESTIONS.map((s) => (
@@ -282,9 +291,9 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
                       type="button"
                       className="btn"
                       disabled={available === false || busy}
-                      onClick={() => void send(s)}
+                      onClick={() => void send(t(`suggestions.${s}`))}
                     >
-                      {s}
+                      {t(`suggestions.${s}`)}
                     </button>
                   ))}
                 </div>
@@ -303,7 +312,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
                   <TutorText text={m.content} />
                 ) : (
                   <span className="muted">
-                    {activity ? `al-Muʿallim ${activity} …` : '…'}
+                    {activity ? t(`activity.${activity}`) : '…'}
                   </span>
                 )}
                 {m.role === 'assistant' && m.id && !m.pending && (
@@ -312,7 +321,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
                       type="button"
                       className={`btn ${m.rating === 1 ? 'btn-primary' : ''}`}
                       aria-pressed={m.rating === 1}
-                      aria-label="Hilfreich"
+                      aria-label={t('helpful')}
                       onClick={() => void rate(m, 1)}
                     >
                       👍
@@ -321,7 +330,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
                       type="button"
                       className={`btn ${m.rating === -1 ? 'btn-primary' : ''}`}
                       aria-pressed={m.rating === -1}
-                      aria-label="Nicht hilfreich"
+                      aria-label={t('notHelpful')}
                       onClick={() => void rate(m, -1)}
                     >
                       👎
@@ -331,7 +340,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
               </div>
             ))}
             {activity && messages.at(-1)?.content && (
-              <span className="muted">al-Muʿallim {activity} …</span>
+              <span className="muted">{t(`activity.${activity}`)}</span>
             )}
             <div ref={bottom} />
           </div>
@@ -348,8 +357,8 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
               dir="auto"
               rows={2}
               maxLength={2000}
-              placeholder="Deine Frage – Deutsch, English oder عَرَبِيّ"
-              aria-label="Deine Nachricht an al-Muʿallim"
+              placeholder={t('placeholder')}
+              aria-label={t('message')}
               value={draft}
               disabled={available === false}
               onChange={(e) => setDraft(e.target.value)}
@@ -366,7 +375,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
                 type="button"
                 onClick={() => abort.current?.abort()}
               >
-                Stopp
+                {t('stop')}
               </button>
             ) : (
               <button
@@ -374,7 +383,7 @@ export function Tutor({ api: injected }: { api?: TutorApi }) {
                 type="submit"
                 disabled={!draft.trim() || available === false}
               >
-                Senden
+                {t('send')}
               </button>
             )}
           </form>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type {
   DiscoverCatalog,
   DiscoverCategory,
@@ -6,9 +7,9 @@ import type {
   DiscoverProgress,
 } from '@/types';
 import { Icon } from '@/components/Icon';
+import i18n from '@/i18n';
 import { logger } from '@/services/logger';
 import {
-  CATEGORY_LABELS,
   discoverEmbedUrl,
   formatPosition,
   watchedPercent,
@@ -36,13 +37,8 @@ const log = logger.child('discover');
 const CURRENT_LEVEL = 1;
 
 type Filter = 'mine' | DiscoverCategory;
-const FILTERS: { id: Filter; label: string }[] = [
-  { id: 'mine', label: 'Für dich' },
-  { id: 'sprache', label: CATEGORY_LABELS.sprache },
-  { id: 'quran', label: CATEGORY_LABELS.quran },
-  { id: 'geschichten', label: CATEGORY_LABELS.geschichten },
-  { id: 'podcasts', label: CATEGORY_LABELS.podcasts },
-];
+/** Labels come from the catalogue: `discover:filters.<id>`. */
+const FILTERS: Filter[] = ['mine', 'sprache', 'quran', 'geschichten', 'podcasts'];
 
 /**
  * "Entdecken": a curated library of YouTube videos and podcasts about the Arabic language and
@@ -52,6 +48,7 @@ const FILTERS: { id: Filter; label: string }[] = [
  * they are seen or unpinned, and any item can be pinned by hand.
  */
 export function Discover() {
+  const { t } = useTranslation('discover');
   const [catalog, setCatalog] = useState<DiscoverCatalog | null>(null);
   const [failed, setFailed] = useState(false);
   const [filter, setFilter] = useState<Filter>('mine');
@@ -101,16 +98,15 @@ export function Discover() {
       playerRef.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
   }, [playing]);
 
-  if (failed) return <p className="muted">Die Mediathek konnte nicht geladen werden.</p>;
-  if (!catalog) return <p className="muted">Lade Mediathek …</p>;
+  if (failed) return <p className="muted">{t('failed')}</p>;
+  if (!catalog) return <p className="muted">{t('loading')}</p>;
 
   return (
     <div className="stack" style={{ gap: '1.25rem' }}>
       <header className="stack" style={{ gap: '0.25rem' }}>
-        <h1 style={{ margin: 0 }}>Entdecken</h1>
+        <h1 style={{ margin: 0 }}>{t('title')}</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Ausgewählte Videos und Podcasts zur arabischen Sprache und zum Quran · passend
-          zu Stufe {CURRENT_LEVEL}
+          {t('intro', { level: CURRENT_LEVEL })}
         </p>
       </header>
 
@@ -118,17 +114,17 @@ export function Discover() {
         <section
           ref={playerRef}
           className="card stack discover-now"
-          aria-label="Jetzt läuft"
+          aria-label={t('nowPlaying')}
         >
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <span className="eyebrow" style={{ color: 'var(--accent)' }}>
-              Jetzt läuft
+              {t('nowPlaying')}
             </span>
             <button
               type="button"
               className="icon-button"
               onClick={() => setPlaying(null)}
-              aria-label="Player schließen"
+              aria-label={t('closePlayer')}
             >
               <Icon name="close" size={18} />
             </button>
@@ -149,9 +145,9 @@ export function Discover() {
           style={{ gap: '0.75rem' }}
         >
           <h2 id="pinned-title" className="eyebrow" style={{ margin: 0 }}>
-            Weiterschauen
+            {t('continue')}
           </h2>
-          <ul className="discover-list" aria-label="Weiterschauen">
+          <ul className="discover-list" aria-label={t('continue')}>
             {pinned.map((entry) => (
               <DiscoverCard
                 key={`${entry.channel.handle}-${entry.id}`}
@@ -164,15 +160,15 @@ export function Discover() {
         </section>
       )}
 
-      <div className="row discover-filters" role="group" aria-label="Kategorie">
+      <div className="row discover-filters" role="group" aria-label={t('category')}>
         {FILTERS.map((f) => (
           <button
-            key={f.id}
-            className={`btn${f.id === filter ? ' btn-accent' : ''}`}
-            aria-pressed={f.id === filter}
-            onClick={() => setFilter(f.id)}
+            key={f}
+            className={`btn${f === filter ? ' btn-accent' : ''}`}
+            aria-pressed={f === filter}
+            onClick={() => setFilter(f)}
           >
-            {f.label}
+            {t(`filters.${f}`)}
           </button>
         ))}
       </div>
@@ -180,14 +176,14 @@ export function Discover() {
       {filter === 'mine' && pick && (
         <section className="card stack discover-pick" aria-labelledby="pick-title">
           <span className="eyebrow" style={{ color: 'var(--accent-2)' }}>
-            Empfehlung der Woche
+            {t('weeklyPick')}
           </span>
           <h2 id="pick-title" style={{ margin: 0 }}>
             {pick.title}
           </h2>
           <span className="muted">
             {pick.channel.title}
-            {pick.minutes ? ` · ${pick.minutes} Min.` : ''}
+            {pick.minutes ? ` · ${t('minutes', { minutes: pick.minutes })}` : ''}
           </span>
           <p style={{ margin: 0 }}>{pick.why}</p>
         </section>
@@ -196,13 +192,13 @@ export function Discover() {
       {visible.length === 0 ? (
         <p className="muted">
           {list.length === 0
-            ? 'Die Auswahl wird gerade zusammengestellt – schau bald wieder vorbei.'
+            ? t('emptyCatalog')
             : pinned.length > 0
-              ? 'Alles Weitere aus dieser Auswahl steht oben unter „Weiterschauen“.'
-              : 'In dieser Kategorie gibt es noch keine Empfehlungen.'}
+              ? t('restPinned')
+              : t('emptyCategory')}
         </p>
       ) : (
-        <ul className="discover-list" aria-label="Empfehlungen">
+        <ul className="discover-list" aria-label={t('recommendations')}>
           {visible.map((entry) => (
             <DiscoverCard
               key={`${entry.channel.handle}-${entry.id}`}
@@ -215,9 +211,7 @@ export function Discover() {
       )}
 
       <p className="muted" style={{ fontSize: '0.85em', margin: 0 }}>
-        Alle Videos gehören ihren Kanälen und werden von YouTube abgespielt (ohne Cookies
-        bis zum Start). Die Auswahl wird regelmäßig geprüft; Vorschläge gern an deinen
-        Lehrer.
+        {t('footer')}
       </p>
     </div>
   );
@@ -298,6 +292,7 @@ function ResumablePlayer({ entry }: { entry: DiscoverEntry }) {
 
 /** Seen, started, pin/unpin: the same actions on a card and in the player. */
 function ItemActions({ entry }: { entry: DiscoverEntry }) {
+  const { t } = useTranslation('discover');
   const seen = useListenStore((s) => Boolean(s.progress[seenId(entry)]?.completedAt));
   const markSeen = useListenStore((s) => s.markSeen);
   const state = useDiscoverStore((s) => s.progress[seenId(entry)]);
@@ -306,14 +301,14 @@ function ItemActions({ entry }: { entry: DiscoverEntry }) {
 
   const confirmSeen = async () => {
     if (await markSeen(seenId(entry), youtubeUrl(entry))) {
-      celebrate({ title: 'Video gesehen', xp: XP_RULES.trackHeard, big: false });
+      celebrate({ title: t('celebrateSeen'), xp: XP_RULES.trackHeard, big: false });
     }
   };
 
   if (seen) {
     return (
       <span className="badge badge-done" style={{ alignSelf: 'start' }}>
-        <Icon name="check" size={14} strokeWidth={2.6} /> Gesehen
+        <Icon name="check" size={14} strokeWidth={2.6} /> {t('seen')}
       </span>
     );
   }
@@ -321,15 +316,15 @@ function ItemActions({ entry }: { entry: DiscoverEntry }) {
     <div className="row" style={{ gap: '0.5rem' }}>
       {state?.startedAt && <span className="badge">{startedLabel(state)}</span>}
       <button className="btn" onClick={() => void confirmSeen()}>
-        Als gesehen markieren
+        {t('markSeen')}
       </button>
       <button
         className="btn"
         aria-pressed={Boolean(state?.pinned)}
-        aria-label={`${entry.title} ${state?.pinned ? 'lösen' : 'anheften'}`}
+        aria-label={t(state?.pinned ? 'unpinNamed' : 'pinNamed', { title: entry.title })}
         onClick={() => void setPinned(seenId(entry), !state?.pinned)}
       >
-        {state?.pinned ? 'Lösen' : 'Anheften'}
+        {state?.pinned ? t('unpin') : t('pin')}
       </button>
     </div>
   );
@@ -338,13 +333,18 @@ function ItemActions({ entry }: { entry: DiscoverEntry }) {
 /** "Angefangen · 40 % geschaut" (with the video number for playlists). */
 function startedLabel(state: DiscoverProgress): string {
   const percent = watchedPercent(state);
-  const where = state.playlistIndex ? `Video ${state.playlistIndex + 1}: ` : '';
+  const where = state.playlistIndex
+    ? i18n.t('discover:playlistVideo', { number: state.playlistIndex + 1 })
+    : '';
   if (percent !== null && percent > 0)
-    return `Angefangen · ${where}${percent} % geschaut`;
+    return i18n.t('discover:startedPercent', { where, percent });
   if ((state.positionSec ?? 0) >= 5) {
-    return `Angefangen · ${where}bei ${formatPosition(state.positionSec!)}`;
+    return i18n.t('discover:startedAt', {
+      where,
+      position: formatPosition(state.positionSec!),
+    });
   }
-  return 'Angefangen';
+  return i18n.t('discover:started');
 }
 
 function DiscoverCard({
@@ -356,6 +356,7 @@ function DiscoverCard({
   playing: boolean;
   onPlay(): void;
 }) {
+  const { t } = useTranslation('discover');
   const thumb = discoverThumbnail(entry);
   const { channel } = entry;
   const percent = watchedPercent(useDiscoverStore((s) => s.progress[seenId(entry)]));
@@ -365,24 +366,28 @@ function DiscoverCard({
       <button
         className="discover-thumb"
         onClick={onPlay}
-        aria-label={`${entry.title} abspielen`}
+        aria-label={t('play', { title: entry.title })}
       >
         {thumb ? <img src={thumb} alt="" loading="lazy" /> : null}
         <span className="video-play">
           <Icon name="play" size={24} />
         </span>
-        {playing && <span className="discover-tag discover-tag-live">Läuft oben</span>}
+        {playing && (
+          <span className="discover-tag discover-tag-live">{t('playingAbove')}</span>
+        )}
         {!playing && entry.type === 'playlist' && (
-          <span className="discover-tag">Playlist</span>
+          <span className="discover-tag">{t('playlist')}</span>
         )}
         {entry.minutes ? (
-          <span className="discover-duration">{entry.minutes} Min.</span>
+          <span className="discover-duration">
+            {t('minutes', { minutes: entry.minutes })}
+          </span>
         ) : null}
         {percent !== null && percent > 0 && (
           <span
             className="discover-watched"
             role="progressbar"
-            aria-label={`${entry.title}: ${percent} % geschaut`}
+            aria-label={t('watched', { title: entry.title, percent })}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={percent}
@@ -392,17 +397,21 @@ function DiscoverCard({
         )}
       </button>
       <span className="eyebrow discover-category">
-        {CATEGORY_LABELS[channel.category]} · Stufe {channel.level} · {channel.variety}
+        {t('meta', {
+          category: t(`filters.${channel.category}`),
+          level: channel.level,
+          variety: channel.variety,
+        })}
       </span>
       <strong>{entry.title}</strong>
       <span className="muted" style={{ fontSize: '0.9rem' }}>
         <a href={channel.url} target="_blank" rel="noreferrer">
           {channel.title}
         </a>{' '}
-        · auf {channel.language}
+        {t('inLanguage', { language: channel.language })}
       </span>
       <p className="muted" style={{ margin: 0, fontStyle: 'italic' }}>
-        „{entry.why}“
+        {t('why', { why: entry.why })}
       </p>
       <ItemActions entry={entry} />
     </li>

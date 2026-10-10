@@ -5,6 +5,7 @@
  * creator allowed it. Watching to the end counts like a heard track (daily quests, XP).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { CheckpointDialog } from '@/modules/classes/player/CheckpointDialog';
 import {
@@ -41,6 +42,7 @@ export function VideoLesson({
   api?: VideosApi;
   loadApi?: () => Promise<YouTubeNamespace>;
 }) {
+  const { t } = useTranslation('videos');
   const { id = '' } = useParams();
   const api = useMemo(() => injected ?? new VideosApi(), [injected]);
   const [lesson, setLesson] = useState<Lesson | null>(null);
@@ -95,12 +97,12 @@ export function VideoLesson({
     );
     if (outcome.trackHeard) {
       celebrate({
-        title: `Videolektion angesehen: ${lesson.title}`,
+        title: t('celebrateWatched', { title: lesson.title }),
         xp: outcome.xp,
         big: false,
       });
     }
-  }, [lesson, record, celebrate]);
+  }, [lesson, record, celebrate, t]);
 
   // Attach the IFrame API once the embed is there; poll the position for checkpoints.
   useEffect(() => {
@@ -149,7 +151,7 @@ export function VideoLesson({
     if (correct && lesson) {
       const outcome = await practise(0, 'checkpoint', `yt/${lesson.id}/${cp.id}`, []);
       if (outcome.first)
-        celebrate({ title: 'Checkpoint geschafft', xp: outcome.xp, big: false });
+        celebrate({ title: t('celebrateCheckpoint'), xp: outcome.xp, big: false });
     }
     player.current?.playVideo?.();
   };
@@ -163,13 +165,13 @@ export function VideoLesson({
     return (
       <div className="stack">
         <Link to="/videos" className="muted">
-          ← Videolektionen
+          {t('back')}
         </Link>
-        <p className="muted">Diese Videolektion gibt es nicht (mehr).</p>
+        <p className="muted">{t('missing')}</p>
       </div>
     );
   }
-  if (!lesson) return <p className="muted">Lade …</p>;
+  if (!lesson) return <p className="muted">{t('loading')}</p>;
 
   // The editors of recordings, pointed at the video endpoints (admins only).
   const editorApi = {
@@ -193,13 +195,13 @@ export function VideoLesson({
         to={lesson.unit ? `/videos?unit=${lesson.unit}` : '/videos'}
         className="muted"
       >
-        ← Videolektionen
+        {t('back')}
       </Link>
       <h1 dir="auto">{lesson.title}</h1>
       <span className="muted">
         {lesson.channel.name}
-        {lesson.unit ? ` · Einheit ${lesson.unit}` : ''}
-        {heard?.completedAt ? ' · ✓ angesehen' : ''}
+        {lesson.unit ? ` · ${t('unit', { unit: lesson.unit })}` : ''}
+        {heard?.completedAt ? t('watched') : ''}
       </span>
       <div className="video-frame">
         <iframe
@@ -215,12 +217,12 @@ export function VideoLesson({
       )}
       {checkpoints.length > 0 && (
         <span className="muted" style={{ fontSize: '0.9rem' }}>
-          {checkpoints.length} Fragen im Video · {done.size} beantwortet
+          {t('questions', { count: checkpoints.length, done: done.size })}
         </span>
       )}
       {!lesson.interactive && (
         <p className="muted" style={{ margin: 0 }}>
-          Fragen und Transkript folgen, sobald die Autoren zugestimmt haben.
+          {t('pendingConsent')}
         </p>
       )}
       <GlossTranscript cues={cues} time={time} onSeek={seek} />
@@ -252,8 +254,7 @@ export function VideoLesson({
           />
           {!lesson.interactive && (
             <p className="muted" style={{ margin: 0 }}>
-              Admin: Fragen und Transkript sehen Lernende erst, wenn die Erlaubnis des
-              Kanals auf „Erlaubt“ steht (Verwaltung → Videos).
+              {t('adminConsent')}
             </p>
           )}
         </>

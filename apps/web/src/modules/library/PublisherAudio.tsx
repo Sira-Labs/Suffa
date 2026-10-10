@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import type {
   AudioLesson,
   AudioTrack,
@@ -8,37 +9,28 @@ import type {
   PublisherAudioIndex,
 } from '@/types';
 import { Icon } from '@/components/Icon';
+import i18n from '@/i18n';
 import { logger } from '@/services/logger';
 import { lessonKey, loadPublisherIndex, trackId } from '@/services/audio/publisherIndex';
 import { useCelebrationStore, useListenStore, type TrackRef } from '@/state';
 
 const log = logger.child('library:audio');
 
-/** Learner-facing labels for the track kinds. */
-export const KIND_LABELS: Record<AudioTrackKind, string> = {
-  dialogue: 'Dialog',
-  vocabulary: 'Vokabeln',
-  'exercise-example': 'Übung – Beispiel',
-  exercise: 'Übung',
-  listening: 'Hörverstehen',
-  sounds: 'Laute',
-  exam: 'Test',
-  other: 'Audio',
-};
+/** Learner-facing label for a track kind, in the interface language. */
+export function kindLabel(kind: AudioTrackKind): string {
+  return i18n.t(`library:audio.kinds.${kind}`);
+}
 
 type Filter = 'all' | 'open' | 'dialogue' | 'vocabulary' | 'listening' | 'practice';
 
-const FILTERS: { id: Filter; label: string; kinds: AudioTrackKind[] | null }[] = [
-  { id: 'all', label: 'Alle', kinds: null },
-  { id: 'open', label: 'Noch nicht gehört', kinds: null },
-  { id: 'dialogue', label: 'Dialoge', kinds: ['dialogue'] },
-  { id: 'vocabulary', label: 'Vokabeln', kinds: ['vocabulary'] },
-  { id: 'listening', label: 'Hörverstehen', kinds: ['listening'] },
-  {
-    id: 'practice',
-    label: 'Übungen & Laute',
-    kinds: ['exercise-example', 'exercise', 'sounds', 'exam'],
-  },
+/** Labels come from the catalogue: `library:audio.filters.<id>`. */
+const FILTERS: { id: Filter; kinds: AudioTrackKind[] | null }[] = [
+  { id: 'all', kinds: null },
+  { id: 'open', kinds: null },
+  { id: 'dialogue', kinds: ['dialogue'] },
+  { id: 'vocabulary', kinds: ['vocabulary'] },
+  { id: 'listening', kinds: ['listening'] },
+  { id: 'practice', kinds: ['exercise-example', 'exercise', 'sounds', 'exam'] },
 ];
 
 /** Played seconds are saved at least this often while a track runs. */
@@ -47,8 +39,10 @@ const FLUSH_EVERY_SEC = 5;
 const MAX_NATURAL_STEP_SEC = 1.5;
 
 function unitLabel(unit: AudioUnit): string {
-  if (unit.kind === 'unit') return `Einheit ${unit.unit}`;
-  return /النهائي/.test(unit.title) ? 'Abschlusstest' : 'Zwischentest';
+  if (unit.kind === 'unit') return i18n.t('library:unit', { unit: unit.unit });
+  return i18n.t(
+    /النهائي/.test(unit.title) ? 'library:audio.finalTest' : 'library:audio.midTest'
+  );
 }
 
 function isHeard(progress: Record<string, MediaProgress>, id: string): boolean {
@@ -80,6 +74,7 @@ export function PublisherAudio({
   /** Inside a unit: no book progress bar and no unit chips, only this unit's lessons. */
   hideUnitPicker?: boolean;
 }) {
+  const { t } = useTranslation('library');
   const [index, setIndex] = useState<PublisherAudioIndex | null>(null);
   const [failed, setFailed] = useState(false);
   const [ownUnit, setOwnUnit] = useState(initialUnit);
@@ -138,9 +133,8 @@ export function PublisherAudio({
   );
   const active = FILTERS.find((f) => f.id === filter)!;
 
-  if (failed)
-    return <p className="muted">Die Audio-Übersicht konnte nicht geladen werden.</p>;
-  if (!index || !unit || !stats) return <p className="muted">Lade Audio-Übersicht …</p>;
+  if (failed) return <p className="muted">{t('audio.failed')}</p>;
+  if (!index || !unit || !stats) return <p className="muted">{t('audio.loading')}</p>;
 
   const visible = (track: AudioTrack) =>
     filter === 'open'
@@ -156,20 +150,22 @@ export function PublisherAudio({
           <div className="stack" style={{ gap: '0.4rem' }}>
             <div className="row" style={{ justifyContent: 'space-between' }}>
               <span style={{ fontWeight: 600 }}>
-                {stats.heard} von {stats.total} Aufnahmen gehört
+                {t('audio.heardOfTotal', { heard: stats.heard, total: stats.total })}
               </span>
               <span className="muted">
-                {Math.round((stats.heard / Math.max(1, stats.total)) * 100)} %
+                {t('audio.percent', {
+                  percent: Math.round((stats.heard / Math.max(1, stats.total)) * 100),
+                })}
               </span>
             </div>
             <ProgressBar
               value={stats.heard}
               max={stats.total}
-              label="Fortschritt Buch 1"
+              label={t('audio.bookProgress')}
             />
           </div>
 
-          <div className="row" role="group" aria-label="Einheit wählen">
+          <div className="row" role="group" aria-label={t('audio.chooseUnit')}>
             {index.units.map((u) => {
               const s = stats.perUnit.get(u.unit)!;
               const done = s.total > 0 && s.heard === s.total;
@@ -178,7 +174,11 @@ export function PublisherAudio({
                   key={u.unit}
                   className={`btn unit-chip${u.unit === unit.unit ? ' btn-accent' : ''}${done ? ' unit-chip-done' : ''}`}
                   aria-pressed={u.unit === unit.unit}
-                  aria-label={`${unitLabel(u)}, ${s.heard} von ${s.total} gehört`}
+                  aria-label={t('audio.unitChip', {
+                    unit: unitLabel(u),
+                    heard: s.heard,
+                    total: s.total,
+                  })}
                   style={
                     {
                       '--p': `${(s.heard / Math.max(1, s.total)) * 100}%`,
@@ -194,7 +194,7 @@ export function PublisherAudio({
           </div>
         </>
       )}
-      <div className="row" role="group" aria-label="Art der Aufnahme">
+      <div className="row" role="group" aria-label={t('audio.kindGroup')}>
         {FILTERS.map((f) => (
           <button
             key={f.id}
@@ -202,7 +202,7 @@ export function PublisherAudio({
             aria-pressed={f.id === filter}
             onClick={() => setFilter(f.id)}
           >
-            {f.label}
+            {t(`audio.filters.${f.id}`)}
           </button>
         ))}
       </div>
@@ -221,12 +221,11 @@ export function PublisherAudio({
       ))}
       {filter === 'open' && lessons.every((l) => l.tracks.every((t) => !visible(t))) && (
         <p className="feedback-good" style={{ margin: 0, fontWeight: 600 }}>
-          {focused.length > 0 ? 'Alles gehört.' : 'Alles in dieser Einheit gehört.'}
+          {focused.length > 0 ? t('audio.allHeardLesson') : t('audio.allHeardUnit')}
         </p>
       )}
       <p className="muted" style={{ fontSize: '0.85em' }}>
-        Audio: © {index.source.publisher}, alle Rechte beim Verlag. Wird direkt vom
-        Verlagsserver abgespielt und braucht eine Internetverbindung.
+        {t('audio.credit', { publisher: index.source.publisher })}
       </p>
     </div>
   );
@@ -270,6 +269,7 @@ function LessonBlock({
   progress: Record<string, MediaProgress>;
   focused: boolean;
 }) {
+  const { t } = useTranslation('library');
   const tracks = lesson.tracks.filter(visible);
   if (tracks.length === 0) return null;
   const key = lessonKey(book, unit, lesson);
@@ -289,7 +289,7 @@ function LessonBlock({
         </strong>
         <span className={`badge${complete ? ' badge-done' : ''}`}>
           {complete && <Icon name="check" size={14} strokeWidth={2.6} />}
-          {heard}/{lesson.tracks.length} gehört
+          {t('audio.lessonHeard', { heard, total: lesson.tracks.length })}
         </span>
       </div>
       {tracks.map((track) => (
@@ -318,6 +318,7 @@ function TrackRow({
   trackRef: TrackRef;
   progress: MediaProgress | undefined;
 }) {
+  const { t } = useTranslation('library');
   const record = useListenStore((s) => s.record);
   const celebrate = useCelebrationStore((s) => s.show);
   const lastTime = useRef<number | null>(null);
@@ -331,8 +332,8 @@ function TrackRow({
     if (outcome.trackHeard) {
       celebrate({
         title: outcome.lessonComplete
-          ? 'Lektion komplett gehört!'
-          : `${KIND_LABELS[track.kind]} gehört`,
+          ? t('audio.celebrateLesson')
+          : t('audio.celebrateTrack', { kind: kindLabel(track.kind) }),
         xp: outcome.xp,
         big: outcome.lessonComplete,
       });
@@ -357,12 +358,12 @@ function TrackRow({
           {heard ? (
             <span className="badge badge-done">
               <Icon name="check" size={14} strokeWidth={2.6} />
-              Gehört
+              {t('audio.heard')}
             </span>
           ) : percent > 0 ? (
-            <span className="badge">{percent} %</span>
+            <span className="badge">{t('audio.percent', { percent })}</span>
           ) : null}
-          <span className="badge">{KIND_LABELS[track.kind]}</span>
+          <span className="badge">{kindLabel(track.kind)}</span>
         </span>
       </div>
       <audio
@@ -370,7 +371,10 @@ function TrackRow({
         preload="none"
         src={track.url}
         style={{ width: '100%' }}
-        aria-label={`${KIND_LABELS[track.kind]}: ${track.title}`}
+        aria-label={t('audio.trackLabel', {
+          kind: kindLabel(track.kind),
+          title: track.title,
+        })}
         onPlay={(e) => {
           lastTime.current = e.currentTarget.currentTime;
         }}

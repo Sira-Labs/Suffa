@@ -4,6 +4,7 @@
  * Only links and streams; nothing of the course is copied (ADR-0023).
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { MADINAH_BOOKS, madinahLessonContent } from '@/services/courses';
@@ -11,6 +12,7 @@ import { MADINAH_BOOKS, madinahLessonContent } from '@/services/courses';
 const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
 
 export function MadinahLibrary() {
+  const { t } = useTranslation('library');
   const book = MADINAH_BOOKS[0]!;
   const [params] = useSearchParams();
   const requested = book.lessons.findIndex(
@@ -22,10 +24,9 @@ export function MadinahLibrary() {
 
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Hören & Sehen</h1>
+      <h1 style={{ margin: 0 }}>{t('title')}</h1>
       <p className="muted" style={{ margin: 0 }}>
-        Die Aufnahmen von Dr. V. Abdur Rahim zu Buch {book.book}, Lektion für Lektion. Du
-        liest im Buch mit. Streams brauchen Internet.
+        {t('madinah.intro', { book: book.book })}
       </p>
 
       <section className="card stack" aria-labelledby="audio-heading">
@@ -34,13 +35,13 @@ export function MadinahLibrary() {
           style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}
         >
           <h2 id="audio-heading" style={{ margin: 0 }}>
-            Lektion {lesson.lesson}
+            {t('madinah.lesson', { lesson: lesson.lesson })}
             {topic && <span className="muted"> · {topic}</span>}
           </h2>
           <div className="row" style={{ gap: '0.4rem', flexShrink: 0 }}>
             <button
               className="btn icon-btn"
-              aria-label="Vorherige Lektion"
+              aria-label={t('madinah.previous')}
               disabled={index === 0}
               onClick={() => setIndex(index - 1)}
             >
@@ -48,7 +49,7 @@ export function MadinahLibrary() {
             </button>
             <button
               className="btn icon-btn"
-              aria-label="Nächste Lektion"
+              aria-label={t('madinah.next')}
               disabled={index === book.lessons.length - 1}
               onClick={() => setIndex(index + 1)}
             >
@@ -62,27 +63,27 @@ export function MadinahLibrary() {
           controls
           preload="none"
           src={lesson.audio}
-          aria-label={`Aufnahme Lektion ${lesson.lesson}`}
+          aria-label={t('madinah.recording', { lesson: lesson.lesson })}
           style={{ width: '100%' }}
         />
         <Link className="btn" to={`/units/madinah/${lesson.lesson}`}>
-          Zur Lektion mit Wörtern und Übungen
+          {t('madinah.toLesson')}
         </Link>
       </section>
 
       <section className="card stack" aria-labelledby="more-heading">
         <h2 id="more-heading" style={{ margin: 0 }}>
-          Mehr zum Buch
+          {t('madinah.more')}
         </h2>
         <div className="row" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
           <a className="btn btn-small" href={book.sources.audioCollection} {...external}>
-            Alle Aufnahmen
+            {t('madinah.allRecordings')}
           </a>
           <a className="btn btn-small" href={book.sources.videos} {...external}>
-            Video-Lektionen
+            {t('madinah.videos')}
           </a>
           <Link className="btn btn-small" to="/videos">
-            Videolektionen in der App
+            {t('madinah.videosInApp')}
           </Link>
         </div>
       </section>

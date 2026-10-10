@@ -25,6 +25,8 @@ const EXPECTED: Record<Action, readonly Role[]> = {
   'admin:ai:write': ['admin'],
   'admin:videos': ['admin'],
   'admin:feedback': ['admin'],
+  'content:review': ['teacher', 'admin'],
+  'content:write': ['admin'],
 };
 
 describe('authz policies', () => {

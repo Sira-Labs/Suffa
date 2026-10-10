@@ -98,6 +98,11 @@ const RawEnvSchema = z.object({
    */
   SUFFA_FEEDBACK: z.enum(['on', 'off']).default('on'),
   /**
+   * Folder with the unit files that seed the content CMS (story 16.1); defaults to the web
+   * app's `src/content/units`, which the API image copies to the same relative path.
+   */
+  SUFFA_CONTENT_SEED_DIR: z.string().min(1).optional(),
+  /**
    * Web Push (story 6.3): a VAPID key pair (`npx web-push generate-vapid-keys`) and a
    * contact (mailto: or https:). Reminders stay off until all three are set.
    */
@@ -238,6 +243,8 @@ export interface Config {
   webErrorDsn: string | undefined;
   /** Testers can send feedback from every page (SUFFA_FEEDBACK). */
   feedbackEnabled: boolean;
+  /** Unit files that seed the content CMS; undefined uses DEFAULT_SEED_DIR. */
+  contentSeedDir: string | undefined;
   /** Object storage; undefined turns recordings and uploads off. */
   storage: S3Settings | undefined;
   /** Transcription service; undefined turns automatic transcripts off. */
@@ -460,6 +467,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       : undefined,
     webErrorDsn: raw.SUFFA_WEB_ERROR_DSN,
     feedbackEnabled: raw.SUFFA_FEEDBACK === 'on',
+    contentSeedDir: raw.SUFFA_CONTENT_SEED_DIR,
     storage: s3Complete
       ? {
           endpoint: raw.SUFFA_S3_ENDPOINT!.replace(/\/$/, ''),

@@ -45,6 +45,7 @@ const SIGN_IN_ANSWERS = new Set([
 import { createAppLinkRoutes, type AppLinks } from './apps/links.js';
 import { createAdminRoutes, type AdminRouteDeps } from './admin/routes.js';
 import { createFeedbackRoutes, type FeedbackRouteDeps } from './feedback/routes.js';
+import { createContentRoutes, type ContentRouteDeps } from './content/routes.js';
 import { createSpeechRoutes, type SpeechRouteDeps } from './speech/routes.js';
 import { createSharingRoutes, type SharingRouteDeps } from './sharing/routes.js';
 import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
@@ -121,6 +122,8 @@ export interface AppDeps {
   admin?: AdminRouteDeps;
   /** Testers' feedback and the admins' inbox for it. */
   feedback?: FeedbackRouteDeps;
+  /** The content CMS: teachers check units, admins edit and publish them (story 16.1). */
+  content?: ContentRouteDeps;
   /** Pronunciation feedback from the learner's own recording (story 15.2). */
   speech?: SpeechRouteDeps;
   /** Learners share recordings with their teachers (story 15.4); needs object storage. */
@@ -249,6 +252,7 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.aiAdmin) app.route('/api/v1/admin/ai', createAiAdminRoutes(deps.aiAdmin));
   if (deps.videos) app.route('/api/v1', createVideoRoutes(deps.videos));
   if (deps.feedback) app.route('/api/v1', createFeedbackRoutes(deps.feedback));
+  if (deps.content) app.route('/api/v1', createContentRoutes(deps.content));
   if (deps.speech) app.route('/api/v1', createSpeechRoutes(deps.speech));
   if (deps.sharing) app.route('/api/v1', createSharingRoutes(deps.sharing));
   if (deps.admin) app.route('/api/v1/admin', createAdminRoutes(deps.admin));

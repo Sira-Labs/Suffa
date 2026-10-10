@@ -318,6 +318,20 @@ function buildApp() {
       log: quiet,
       enabled: true,
     },
+    content: {
+      repo: {
+        seed: async () => 0,
+        list: async () => [],
+        get: async () => null,
+        saveDraft: async () => ({ ok: false, reason: 'not_found' }),
+        submit: async () => ({ ok: false, reason: 'not_found' }),
+        check: async () => ({ ok: false, reason: 'not_found' }),
+        returnToDraft: async () => ({ ok: false, reason: 'not_found' }),
+        publish: async () => ({ ok: false, reason: 'not_found' }),
+      },
+      auth: resolver,
+      log: quiet,
+    },
     speech: {
       auth: resolver,
       log: quiet,

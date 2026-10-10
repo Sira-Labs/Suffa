@@ -61,7 +61,8 @@ COPY --from=build /app/packages/phonology/package.json /app/packages/phonology/
 COPY --from=build /app/packages/phonology/dist /app/packages/phonology/dist
 COPY apps/api/package.json ./
 COPY apps/api/migrations ./migrations
-# Course content for al-Muʿallim's grounding (the same files the web app bundles).
+# Course content for al-Muʿallim's grounding (the same files the web app bundles); the unit
+# files also seed the content CMS (story 16.1).
 COPY apps/web/src/content/meta.json /app/apps/web/src/content/meta.json
 COPY apps/web/src/content/units /app/apps/web/src/content/units
 COPY apps/web/src/content/courses/madinah/book1-lessons.json /app/apps/web/src/content/courses/madinah/book1-lessons.json

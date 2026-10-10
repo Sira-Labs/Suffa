@@ -62,6 +62,13 @@ Rules live in one tested package used by web and worker. New tables: `xp_ledger`
   one daily quest was done.
 - **Quests** depend on the day only (FNV hash of the date per slot), so all devices and the
   server agree, also offline. Every quest is doable without a microphone.
+- **Repeats count for quests (2026-10-10):** practice records store only the first success
+  per item, so a learner who had read or heard their unit's three dialogues could no longer
+  do "Lies einen Dialog" or "Höre einen Dialog ganz an". A dialogue read again (comprehension
+  question right) or a track heard to the end again is now stored once per item and day as
+  practice `reread` or `relisten` (item `<id>@<day>`). These count for the dialogue, track
+  and video quests but earn no XP (`REPEAT_SKILLS`), so no XP rule changes and earlier days
+  stay as they were.
 - **Badges** are measured on facts that only grow (cards that became mature, perfect
   tests, lessons heard, streak lengths reached), so recomputing never takes one away; the
   server additionally never deletes `achievement_unlocks` rows.

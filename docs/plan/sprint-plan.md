@@ -462,6 +462,10 @@ area; the e2e check for untranslated text comes with the last of them.
   course (ADR-0025). Medina learners get no dialogue quests, a word quest instead, "Lektion"
   instead of "Einheit", and their quests open the lesson page; the video quest needs videos
   of the learner's course. Earlier days keep their quests and XP.
+- **2026-10-10 — dialogue quests count repeats:** reading or hearing a dialogue again counts
+  for "Lies einen Dialog" and "Höre einen Dialog ganz an" (once per dialogue and day, no
+  extra XP); before, only the first time ever counted, so the quests got stuck once a unit's
+  dialogues were done (ADR-0016).
 
 ## Backlog (unscheduled)
 

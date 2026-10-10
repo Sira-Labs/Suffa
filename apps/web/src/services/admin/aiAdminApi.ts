@@ -80,6 +80,7 @@ export const AI_TASKS = [
   'exercise.generate',
   'tutor.coach',
   'content.author-assist',
+  'content.translate',
   'recording.suggest',
   'recording.summarize',
   'recording.proofread',

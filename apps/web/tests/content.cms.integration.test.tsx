@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { ContentReview } from '@/modules/content/ContentReview';
 import { ContentAdmin } from '@/modules/admin/ContentAdmin';
+import { parseExample } from '@/modules/content/UnitEditor';
 import { describeAudit, type AuditEntry } from '@/services/admin/adminApi';
 import {
   ContentApi,
@@ -86,6 +87,22 @@ function summary(patch: Partial<UnitSummary> = {}): UnitSummary {
   };
 }
 
+/** The unit with English beside every German text (as drafted by the LLM). */
+function withEnglish(unit: UnitContent): UnitContent {
+  return {
+    ...unit,
+    vokabeln: unit.vokabeln.map((v) => ({ ...v, en: `EN ${v.de}` })),
+    dialoge: unit.dialoge.map((d) => ({
+      ...d,
+      zeilen: d.zeilen.map((l) => ({ ...l, en: `EN ${l.de}` })),
+    })),
+    grammatik: unit.grammatik.map((g) => ({
+      ...g,
+      beispiele: g.beispiele.map((e) => ({ ...e, en: `EN ${e.de}` })),
+    })),
+  };
+}
+
 interface Sent {
   method: string;
   path: string;
@@ -93,14 +110,24 @@ interface Sent {
 }
 
 /** A fake CMS: one unit under review, one published; records every request. */
-function fakeApi(unit: Partial<UnitSummary> = {}) {
+function fakeApi(
+  unit: Partial<UnitSummary> = {},
+  english: { draft?: boolean; changed?: string[] } = {}
+) {
   const sent: Sent[] = [];
   let detail: UnitDetail = {
     ...summary(unit),
     draft: content(),
     published: { ...content(), einheit: 1, status: 'entwurf' },
-    changes: { added: ['v-new'], removed: [], changed: ['g-1-1'], textChanged: false },
+    changes: {
+      added: ['v-new'],
+      removed: [],
+      changed: ['g-1-1'],
+      textChanged: false,
+      english: english.changed ?? [],
+    },
   };
+  if (english.draft) detail = { ...detail, draft: withEnglish(detail.draft) };
   const other = summary({
     id: 'bayna-yadayk/2',
     unit: 2,
@@ -136,6 +163,13 @@ function fakeApi(unit: Partial<UnitSummary> = {}) {
       detail = { ...detail, state: 'published', publishedRevision: detail.revision };
     } else if (path.endsWith('/submit')) {
       detail = { ...detail, state: 'review' };
+    } else if (path.endsWith('/translate')) {
+      detail = {
+        ...detail,
+        revision: detail.revision + 1,
+        draft: withEnglish(detail.draft),
+      };
+      return Response.json({ revision: detail.revision, filled: 4, remaining: 0 });
     }
     return Response.json({ revision: detail.revision });
   });
@@ -190,6 +224,33 @@ describe('Inhalte prüfen (teachers)', () => {
       'disabled',
       true
     );
+  });
+
+  it('shows English beside German and marks new English to check (16.4)', async () => {
+    const { api } = fakeApi({}, { draft: true, changed: ['v-new', 'd-1-1#0'] });
+    render(
+      <MemoryRouter initialEntries={['/inhalte']}>
+        <ContentReview api={api} />
+      </MemoryRouter>
+    );
+    const waiting = await screen.findByRole('region', { name: 'Zur Prüfung' });
+    await userEvent.click(within(waiting).getByRole('button'));
+    expect(
+      await screen.findByText(
+        'Englisch neu oder geändert: 2 Texte – bitte gegen Arabisch und Deutsch prüfen'
+      )
+    ).toBeTruthy();
+    const newWord = screen.getByText('ǧadīd').closest('tr')!;
+    expect(within(newWord as HTMLElement).getByText('EN neu')).toHaveAttribute(
+      'lang',
+      'en'
+    );
+    expect(within(newWord as HTMLElement).getByText('Englisch prüfen')).toBeTruthy();
+    // English that did not change carries no mark.
+    const oldWord = screen.getByText('ism').closest('tr')!;
+    expect(within(oldWord as HTMLElement).getByText('EN Name')).toBeTruthy();
+    expect(within(oldWord as HTMLElement).queryByText('Englisch prüfen')).toBeNull();
+    expect(screen.getAllByText('Englisch prüfen')).toHaveLength(2);
   });
 
   it('sends a unit back only with a note', async () => {
@@ -283,6 +344,50 @@ describe('Inhalte im Admin-Bereich', () => {
     const saved = sent.find((s) => s.method === 'PUT')!.body!.content as UnitContent;
     expect(saved.grammatik[0]!.erklaerung).toEqual(['Erster Absatz.', 'Zweiter Absatz.']);
     expect(saved.vokabeln.at(-1)).toMatchObject({ id: 'v-kitab', einheit: 1 });
+  });
+
+  it('drafts English with the AI and edits it by hand (16.4)', async () => {
+    const { api, sent } = fakeApi({ state: 'draft' });
+    await openUnit(api);
+    const draft = screen.getByRole('button', {
+      name: 'Englisch entwerfen (KI) · 4 Texte offen',
+    });
+    await userEvent.click(draft);
+    await screen.findByText(/4 englische Texte entworfen, 0 noch offen/);
+    expect(sent.find((s) => s.path.endsWith('/translate'))).toEqual({
+      method: 'POST',
+      path: '/api/v1/content/units/bayna-yadayk/1/translate',
+      body: { revision: 3 },
+    });
+    expect(
+      await screen.findByRole('button', {
+        name: 'Englisch entwerfen (KI) · 0 Texte offen',
+      })
+    ).toHaveProperty('disabled', true);
+
+    // The drafted English is in the editor and can be corrected before the review.
+    const words = screen.getByRole('region', { name: 'Wörter' });
+    const english = within(words).getAllByLabelText('Englisch')[0]!;
+    expect(english).toHaveValue('EN Name');
+    await userEvent.clear(english);
+    await userEvent.type(english, 'name');
+    await userEvent.click(screen.getByRole('button', { name: 'Speichern' }));
+    await screen.findByText('Entwurf gespeichert.');
+    const saved = sent.find((s) => s.method === 'PUT')!.body!.content as UnitContent;
+    expect(saved.vokabeln[0]!.en).toBe('name');
+    expect(saved.grammatik[0]!.beispiele[0]!.en).toBe('EN Ich bin Yūsuf.');
+  });
+
+  it('reads grammar examples with optional English', () => {
+    expect(parseExample('أَنا يوسُفُ. | Ich bin Yūsuf.')).toEqual({
+      ar: 'أَنا يوسُفُ.',
+      de: 'Ich bin Yūsuf.',
+    });
+    expect(parseExample('أَنا يوسُفُ. | Ich bin Yūsuf. | I am Yusuf.')).toEqual({
+      ar: 'أَنا يوسُفُ.',
+      de: 'Ich bin Yūsuf.',
+      en: 'I am Yusuf.',
+    });
   });
 
   it('asks before dropping unsaved edits when switching units', async () => {

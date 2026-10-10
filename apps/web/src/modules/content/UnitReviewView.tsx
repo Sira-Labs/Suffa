@@ -36,8 +36,14 @@ export function UnitStatus({ unit }: { unit: UnitSummary }) {
 
 export function ChangesSummary({ changes }: { changes: ItemChanges }) {
   const { t } = useTranslation('content');
-  const { added, removed, changed, textChanged } = changes;
-  if (!added.length && !removed.length && !changed.length && !textChanged) {
+  const { added, removed, changed, textChanged, english } = changes;
+  if (
+    !added.length &&
+    !removed.length &&
+    !changed.length &&
+    !textChanged &&
+    !english.length
+  ) {
     return (
       <p className="muted" style={{ margin: 0 }}>
         {t('changes.none')}
@@ -53,7 +59,37 @@ export function ChangesSummary({ changes }: { changes: ItemChanges }) {
       {changed.length > 0 && <li>{t('changes.changed', { ids: changed.join(', ') })}</li>}
       {removed.length > 0 && <li>{t('changes.removed', { ids: removed.join(', ') })}</li>}
       {textChanged && <li>{t('changes.text')}</li>}
+      {english.length > 0 && (
+        <li>
+          <strong>{t('changes.english', { count: english.length })}</strong>
+        </li>
+      )}
     </ul>
+  );
+}
+
+/** English of one text (story 16.4): marked when it is new or changed and needs a check. */
+function English({
+  text,
+  place,
+  changes,
+}: {
+  text?: string;
+  place: string;
+  changes: ItemChanges;
+}) {
+  const { t } = useTranslation('content');
+  if (!text) return null;
+  return (
+    <>
+      <span lang="en">{text}</span>
+      {changes.english.includes(place) && (
+        <>
+          {' '}
+          <span className="badge feedback-warn">{t('changes.markEnglish')}</span>
+        </>
+      )}
+    </>
   );
 }
 
@@ -99,6 +135,7 @@ export function UnitReviewView({
                 <th>{t('view.arabic')}</th>
                 <th>{t('view.transliteration')}</th>
                 <th>{t('view.german')}</th>
+                <th>{t('view.english')}</th>
                 <th>{t('view.root')}</th>
                 <th>{t('view.plural')}</th>
                 <th />
@@ -114,6 +151,9 @@ export function UnitReviewView({
                   <td>
                     {word.de}
                     {word.hinweis && <span className="muted"> – {word.hinweis}</span>}
+                  </td>
+                  <td>
+                    <English text={word.en} place={word.id} changes={changes} />
                   </td>
                   <td className="arabic-inline" lang="ar">
                     {word.wurzel}
@@ -149,6 +189,18 @@ export function UnitReviewView({
                 </span>
                 <br />
                 <span className="muted">{line.de}</span>
+                {line.en && (
+                  <>
+                    <br />
+                    <span className="muted">
+                      <English
+                        text={line.en}
+                        place={`${dialog.id}#${i}`}
+                        changes={changes}
+                      />
+                    </span>
+                  </>
+                )}
               </p>
             ))}
           </article>
@@ -177,6 +229,18 @@ export function UnitReviewView({
                   {example.ar}
                 </span>{' '}
                 <span className="muted">{example.de}</span>
+                {example.en && (
+                  <>
+                    {' · '}
+                    <span className="muted">
+                      <English
+                        text={example.en}
+                        place={`${point.id}#${i}`}
+                        changes={changes}
+                      />
+                    </span>
+                  </>
+                )}
               </p>
             ))}
             {point.fragen.length > 0 && (

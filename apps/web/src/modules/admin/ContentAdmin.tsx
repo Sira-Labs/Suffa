@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import {
   ContentApi,
   errorText,
+  missingEnglishCount,
   stateLabel,
   type UnitContent,
   type UnitDetail,
@@ -141,6 +142,24 @@ function UnitWorkbench({
     await Promise.all([load(), onChanged()]);
   };
 
+  const missing = missingEnglishCount(draft);
+  // English drafts by the LLM land in the draft; a teacher checks them before publishing.
+  const translate = async () => {
+    setBusy(true);
+    const result = await api
+      .translate(unit.id, unit.revision)
+      .finally(() => setBusy(false));
+    if (!result.ok) return setMessage({ text: errorText(result) });
+    setMessage({
+      text: t('workbench.translated', {
+        filled: result.value.filled,
+        remaining: result.value.remaining,
+      }),
+      good: true,
+    });
+    await Promise.all([load(), onChanged()]);
+  };
+
   const publish = () => {
     if (!unit.checked && !window.confirm(t('workbench.confirmPublish'))) {
       return;
@@ -206,6 +225,14 @@ function UnitWorkbench({
           onClick={publish}
         >
           {t('workbench.publish')}
+        </button>
+        <button
+          type="button"
+          className="btn"
+          disabled={busy || dirty || missing === 0}
+          onClick={() => void translate()}
+        >
+          {t('workbench.translate', { count: missing })}
         </button>
       </div>
       {message && (

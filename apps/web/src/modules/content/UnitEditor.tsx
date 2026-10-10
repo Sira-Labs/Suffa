@@ -121,6 +121,11 @@ function VocabSection({
               onChange={(de) => update(index, { de })}
             />
             <TextField
+              label={t('view.english')}
+              value={word.en ?? ''}
+              onChange={(en) => update(index, { en: en.trim() ? en : undefined })}
+            />
+            <TextField
               label={t('view.root')}
               arabic
               value={word.wurzel}
@@ -222,6 +227,18 @@ function DialogSection({
                 onChange={(de) =>
                   update(index, {
                     zeilen: replaceAt(dialog.zeilen, lineIndex, { ...line, de }),
+                  })
+                }
+              />
+              <TextField
+                label={t('view.english')}
+                value={line.en ?? ''}
+                onChange={(en) =>
+                  update(index, {
+                    zeilen: replaceAt(dialog.zeilen, lineIndex, {
+                      ...line,
+                      en: en.trim() ? en : undefined,
+                    }),
                   })
                 }
               />
@@ -332,14 +349,11 @@ function GrammarSection({
           <TextArea
             label={t('editor.examples')}
             commitOnBlur
-            value={point.beispiele.map((b) => `${b.ar} | ${b.de}`).join('\n')}
+            value={point.beispiele
+              .map((b) => [b.ar, b.de, ...(b.en ? [b.en] : [])].join(' | '))
+              .join('\n')}
             onChange={(text) =>
-              update(index, {
-                beispiele: lines(text).map((line) => {
-                  const [ar = '', ...de] = line.split('|');
-                  return { ar: ar.trim(), de: de.join('|').trim() };
-                }),
-              })
+              update(index, { beispiele: lines(text).map(parseExample) })
             }
           />
           <QuestionList point={point} onChange={(fragen) => update(index, { fragen })} />
@@ -554,4 +568,14 @@ function RemoveButton({ label, onClick }: { label: string; onClick: () => void }
       {t('remove')}
     </button>
   );
+}
+
+/** "Arabic | German | English" (English optional) → an example. */
+export function parseExample(line: string): { ar: string; de: string; en?: string } {
+  const [ar = '', ...rest] = line.split('|').map((part) => part.trim());
+  if (rest.length >= 2) {
+    const en = rest[rest.length - 1]!;
+    return { ar, de: rest.slice(0, -1).join(' | '), ...(en ? { en } : {}) };
+  }
+  return { ar, de: rest.join(' | ') };
 }

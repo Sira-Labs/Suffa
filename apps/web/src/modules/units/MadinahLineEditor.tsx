@@ -48,8 +48,8 @@ const draftOf = (line: Omit<DraftLine, 'id'>): DraftLine => ({ ...line, id: next
 const LAST_LINE_SECONDS = 4;
 
 /**
- * The saved lines from the timed drafts: in order of time, each ending where the next one
- * starts, the last one at the end of its stretch of speech.
+ * The saved lines from the timed drafts: in order of time, each ending at its saved end or
+ * where the next one starts, the last one at the end of its stretch of speech.
  */
 export function linesFromDrafts(
   drafts: readonly DraftLine[],
@@ -61,9 +61,11 @@ export function linesFromDrafts(
   return timed.map((d, i) => {
     const next = timed[i + 1];
     const own = segments.find((s) => s.start <= d.start && d.start < s.end);
+    // A saved end stays (a pause between lines shows no line), never past the next start.
+    const kept = d.end != null && d.end > d.start ? d.end : null;
     const end = next
-      ? next.start
-      : (d.end ?? own?.end ?? Math.round((d.start + LAST_LINE_SECONDS) * 100) / 100);
+      ? Math.min(kept ?? next.start, next.start)
+      : (kept ?? own?.end ?? Math.round((d.start + LAST_LINE_SECONDS) * 100) / 100);
     return {
       page: d.page,
       box: d.box,

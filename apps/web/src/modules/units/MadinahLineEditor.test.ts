@@ -26,6 +26,24 @@ describe('line editor', () => {
     ]);
   });
 
+  it('keeps a saved end, but never past the next line', () => {
+    const lines = linesFromDrafts(
+      [
+        { ...draft(1, 2, 0.1, 1), end: 9 },
+        draft(2, 3, 0.1, 31),
+        { ...draft(3, 3, 0.2, 35), end: 50 },
+        draft(4, 3, 0.3, 40),
+      ],
+      []
+    );
+    expect(lines.map((l) => [l.start, l.end])).toEqual([
+      [1, 9],
+      [31, 35],
+      [35, 40],
+      [40, 44],
+    ]);
+  });
+
   it('gives the last line a few seconds when no pause tells its end', () => {
     expect(linesFromDrafts([draft(1, 2, 0.1, 5)], [])[0]).toMatchObject({
       start: 5,

@@ -12,7 +12,12 @@ import { Exam } from '@/modules/exam';
 import { Speaking } from '@/modules/speaking';
 import { recorderHelp } from '@/modules/speaking/speechHelp';
 import { ReviewSession } from '@/modules/vocab';
-import { ALPHABET_LESSONS, lessonItems, parseItem } from '@/services/alphabet';
+import {
+  ALPHABET_LESSONS,
+  lessonItems,
+  letterSound,
+  parseItem,
+} from '@/services/alphabet';
 import { db } from '@/services/storage';
 import {
   useCelebrationStore,
@@ -60,9 +65,14 @@ describe('practice modules in English (integration)', () => {
     expect(screen.getByRole('heading', { name: 'Alphabet' })).toBeInTheDocument();
     const list = screen.getByRole('list', { name: 'Lessons' });
     expect(within(list).getAllByText(/^0 of \d+ tasks$/)).toHaveLength(8);
+    expect(within(list).getByText('8. Vowel signs')).toBeInTheDocument();
 
     await user.click(within(list).getAllByRole('link')[0]!);
     expect(await screen.findByText('Lesson 1')).toBeInTheDocument();
+    expect(
+      screen.getByText('Same basic shape – only the dots tell them apart.')
+    ).toBeInTheDocument();
+    expect(screen.getByText('Sound: long a')).toBeInTheDocument();
     const forms = screen.getByRole('list', { name: 'Forms' });
     expect(within(forms).getByText('isolated')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'Practise' })).toBeInTheDocument();
@@ -71,7 +81,7 @@ describe('practice modules in English (integration)', () => {
     const choices = screen.getByRole('group', { name: 'Choices' });
     await user.click(within(choices).getByRole('button', { name: first.letter.name }));
     expect(
-      screen.getByText(`✓ Correct – ${first.letter.name} (${first.letter.sound})`)
+      screen.getByText(`✓ Correct – ${first.letter.name} (${letterSound(first.letter)})`)
     ).toBeInTheDocument();
     const progress = screen.getByRole('progressbar', { name: 'Progress of lesson 1' });
     await waitFor(() => expect(progress).toHaveAttribute('aria-valuenow', '1'));

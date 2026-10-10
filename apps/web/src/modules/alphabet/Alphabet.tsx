@@ -7,8 +7,11 @@ import {
   ALL_LETTERS,
   ALPHABET_LESSONS,
   ALPHABET_UNIT,
+  lessonHint,
   lessonItems,
+  lessonTitle,
   letterForms,
+  letterSound,
   parseItem,
   type AlphabetLesson,
   type Letter,
@@ -64,7 +67,7 @@ function LessonTile({ lesson }: { lesson: AlphabetLesson }) {
         </span>
         <span className="stack" style={{ gap: '0.1rem' }}>
           <strong>
-            {lesson.no}. {lesson.title}
+            {lesson.no}. {lessonTitle(lesson)}
           </strong>
           <span className="muted" style={{ fontSize: '0.9rem' }}>
             {finished ? (
@@ -136,9 +139,9 @@ export function AlphabetLessonPage() {
         <h1 lang="ar" dir="rtl" className="arabic-display alphabet-title">
           {lesson.letters.map((l) => l.char).join(' ')}
         </h1>
-        <p style={{ margin: 0, fontWeight: 600 }}>{lesson.title}</p>
+        <p style={{ margin: 0, fontWeight: 600 }}>{lessonTitle(lesson)}</p>
         <p className="muted" style={{ margin: 0 }}>
-          {lesson.hint}
+          {lessonHint(lesson)}
         </p>
         <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
           <div
@@ -225,7 +228,7 @@ function LetterCard({ letter }: { letter: Letter }) {
       >
         <span className="stack" style={{ gap: '0.15rem' }}>
           <strong style={{ fontSize: '1.2rem' }}>{letter.name}</strong>
-          <span className="muted">{t('sound', { sound: letter.sound })}</span>
+          <span className="muted">{t('sound', { sound: letterSound(letter) })}</span>
           {!letter.connects && letter.forms && (
             <span className="muted" style={{ fontSize: '0.9rem' }}>
               {t('noConnect')}
@@ -265,7 +268,10 @@ function LetterCard({ letter }: { letter: Letter }) {
         >
           {letter.example.ar}
         </span>
-        <span className="muted">{letter.example.de}</span>
+        {/* The meaning is course content: German until story 16.4. */}
+        <span className="muted" lang="de">
+          {letter.example.de}
+        </span>
       </button>
     </section>
   );
@@ -332,7 +338,7 @@ function LetterQuestion({
       ) : (
         <p className="alphabet-prompt-name">
           <strong>{letter.name}</strong>
-          <span className="muted"> · {letter.sound}</span>
+          <span className="muted"> · {letterSound(letter)}</span>
         </p>
       )}
       <div
@@ -358,7 +364,7 @@ function LetterQuestion({
       {correct ? (
         <>
           <span className="feedback-good">
-            {t('answerCorrect', { name: letter.name, sound: letter.sound })}
+            {t('answerCorrect', { name: letter.name, sound: letterSound(letter) })}
           </span>
           <button className="btn btn-primary" onClick={onNext}>
             {t('common:continue')}

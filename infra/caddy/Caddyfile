@@ -20,7 +20,7 @@
 
 	header {
 		# style-src needs 'unsafe-inline' for React style attributes.
-		Content-Security-Policy "default-src 'self'; script-src 'self' https://www.youtube.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com https://archive.org https://*.archive.org; font-src 'self'; media-src 'self' blob: https://old.arabicforall.net https://archive.org https://*.archive.org; connect-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://docs.google.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
+		Content-Security-Policy "default-src 'self'; script-src 'self' https://www.youtube.com https://apis.google.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://i.ytimg.com https://archive.org https://*.archive.org; font-src 'self'; media-src 'self' blob: https://old.arabicforall.net https://archive.org https://*.archive.org; connect-src 'self' https://archive.org https://*.archive.org; frame-src https://www.youtube.com https://www.youtube-nocookie.com https://docs.google.com; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'"
 		# The app is HTTPS-only (CapRover forces HTTPS); browsers must never try plain HTTP.
 		Strict-Transport-Security "max-age=31536000"
 		X-Content-Type-Options "nosniff"

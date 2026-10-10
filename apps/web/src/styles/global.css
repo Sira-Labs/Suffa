@@ -2995,3 +2995,58 @@ button.quiz-option:disabled {
   padding: 0.5rem 0;
   background: var(--bg);
 }
+
+/* Medina book following the recording: the page image with its marked lines on top. The page
+   is always a white scan, so the highlight colours do not follow the theme. */
+.book-page {
+  position: relative;
+}
+
+.book-lines {
+  position: absolute;
+  inset: 0;
+}
+
+.book-lines-draw {
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.book-line {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.book-line:focus-visible {
+  outline: 3px solid #1f5fbf;
+  outline-offset: 1px;
+}
+
+.book-line-current {
+  background: rgba(245, 197, 66, 0.4);
+  box-shadow: 0 0 0 2px #b37400;
+}
+
+.book-line-edit {
+  box-shadow: inset 0 0 0 2px rgba(31, 95, 191, 0.85);
+  background: rgba(31, 95, 191, 0.06);
+}
+
+.book-line-untimed {
+  box-shadow: inset 0 0 0 2px rgba(196, 61, 26, 0.9);
+}
+
+.book-line-selected {
+  background: rgba(31, 95, 191, 0.25);
+}
+
+.book-line-drawing {
+  position: absolute;
+  border: 2px dashed #1f5fbf;
+  pointer-events: none;
+}

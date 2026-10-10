@@ -102,11 +102,23 @@ and our own exercises, and no copied book texts or pictures in the repo.
     checked, audit-logged); everyone reads them (`GET /api/v1/book-sync/madinah/1`, public,
     ETag), and the app keeps the last answer for offline use. Only seconds and page
     coordinates are stored (table `book_sync`, migration 0043), no book text. The same record
-    has room for line marks (a box on the page image and the seconds it is read), which the
-    next step fills: lines found on the page image in the browser (archive.org's images and
-    recordings send CORS headers, checked 2026-10-10; its OCR of the Arabic is unusable),
-    pauses found in the recording, matched by an admin, and the line being read highlighted
-    on the page.
+    has room for line marks: a box on the page image and the seconds it is read.
+  - **Line marks (2026-10-10).** Where a lesson's lines are marked, the line being read is
+    highlighted on the page (also as `aria-current`), and tapping a line plays the recording
+    from there. Admins mark the lines on the lesson page ("Zeilen bearbeiten"):
+    - "Zeilen erkennen" finds the text lines on the page image in the admin's browser: bands of
+      rows with ink, diacritic bands joined to their line, blocks with a picture beside the
+      text split at the rightmost blank column gap, the footer left out. archive.org's images
+      and recordings send CORS headers (checked 2026-10-10); its OCR of the Arabic is unusable,
+      so no text is read. Text pages come out nearly right; picture pages need a few boxes
+      removed or drawn.
+    - "Pausen suchen" decodes the recording in the browser and finds the stretches of speech
+      between pauses (loudness per 20 ms, a level set by the recording itself).
+    - "Zeiten vorschlagen" gives each line of a page one stretch of speech within the page's
+      time (between its page turns). "Mittippen" corrects a start: a tap on a line while it
+      plays sets its start to the start of the stretch of speech the tap falls into.
+    - Only boxes and seconds are saved; lines without a time are not. CSP `connect-src` allows
+      `archive.org` and `*.archive.org` for the recording download.
   - The same course is sold in print as "Madinah Arabic Reader" by Goodword Books, split into
     8 books (our book 1 = their books 1 and 2). Each lesson names its book and start page in
     that edition, so learners with the printed book find it. We show none of its pages: its

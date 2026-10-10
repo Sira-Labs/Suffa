@@ -1,11 +1,12 @@
 /**
  * The author's recording of a Medina lesson with the book beside it: playing opens the book at
  * the lesson, and where an admin has set the page turns, the book turns its pages with the
- * recording. Flipping by hand while it plays lets the learner read on their own; "Book follows
- * the recording" brings it back. Book and recording stay at archive.org; only the times of the
- * page turns are ours (ADR-0023).
+ * recording; where the lines are marked, the line being read is highlighted and tapping a line
+ * plays it. Flipping by hand while it plays lets the learner read on their own; "Book follows
+ * the recording" brings it back. Book and recording stay at archive.org; only the times and
+ * the line boxes are ours (ADR-0023).
  */
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useRole } from '@/modules/account/useRole';
 import {
@@ -17,12 +18,16 @@ import {
   type MadinahLesson,
 } from '@/services/courses';
 import {
+  lineAt,
   pageAt,
   saveLessonSync,
   useLessonSync,
   type LessonSync,
   type PageStart,
+  type SyncLine,
 } from '@/services/courses/bookSync';
+import { EditOverlay, LineTools, useLineDraft } from './MadinahLineEditor';
+import { LineOverlay } from './MadinahLineOverlay';
 
 const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
 const COURSE = 'madinah';
@@ -35,23 +40,31 @@ export function RecordingWithBook({
   lesson: MadinahLesson;
 }) {
   const { t } = useTranslation('units');
-  const role = useRole();
+  const admin = useRole() === 'admin';
   const pages = lessonPages(book, lesson);
   const { sync, loaded, replace } = useLessonSync(COURSE, book.book, lesson.lesson);
   const starts = sync?.pages ?? [];
+  const lines = sync?.lines ?? [];
   const audio = useRef<HTMLAudioElement>(null);
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const [follow, setFollow] = useState(true);
+  const [playing, setPlaying] = useState(0);
+  const [editLines, setEditLines] = useState(false);
+  const draft = useLineDraft(sync, loaded);
+  const page = pages[index]!;
 
-  /** Shows the page the recording is on (only pages of this lesson). */
+  /** Shows the page the recording is on: the read line's page, else the page turn's. */
   const showPageAt = (seconds: number) => {
-    const page = pageAt(starts, seconds);
-    const i = page === null ? -1 : pages.indexOf(page);
+    const line = lineAt(lines, seconds);
+    const target = line !== null ? lines[line]!.page : pageAt(starts, seconds);
+    const i = target === null ? -1 : pages.indexOf(target);
     if (i >= 0) setIndex(i);
   };
   const onTime = () => {
-    if (follow && audio.current) showPageAt(audio.current.currentTime);
+    if (!audio.current) return;
+    setPlaying(audio.current.currentTime);
+    if (follow) showPageAt(audio.current.currentTime);
   };
   const flip = (to: number) => {
     setIndex(to);
@@ -63,6 +76,55 @@ export function RecordingWithBook({
     setFollow(next);
     if (next && audio.current) showPageAt(audio.current.currentTime);
   };
+  const playLine = (line: SyncLine) => {
+    const element = audio.current;
+    if (!element) return;
+    element.currentTime = line.start;
+    setFollow(true);
+    try {
+      void element.play()?.catch(() => undefined);
+    } catch {
+      // No playback here (e.g. a test browser): the position is set all the same.
+    }
+  };
+
+  const current = lineAt(lines, playing);
+  const currentLine =
+    current !== null && lines[current]!.page === page ? lines[current]! : null;
+  let overlay: ReactNode = (
+    <LineOverlay
+      lines={lines.filter((l) => l.page === page)}
+      current={currentLine}
+      onPlay={playLine}
+    />
+  );
+  let tools: ReactNode = null;
+  if (admin && editLines) {
+    overlay = (
+      <EditOverlay
+        page={page}
+        drafts={draft.drafts}
+        mode={draft.mode}
+        selected={draft.selected}
+        onSelect={(id) => draft.setSelected(draft.selected === id ? null : id)}
+        onTap={(id) => draft.tap(id, audio.current?.currentTime ?? 0)}
+        onDraw={(box) => draft.draw(page, box)}
+      />
+    );
+    tools = (
+      <LineTools
+        bookNo={book.book}
+        lesson={lesson.lesson}
+        page={page}
+        audioUrl={lesson.audio}
+        imageUrl={bookPageImageUrl(book, page, true)}
+        playing={playing}
+        sync={sync}
+        draft={draft}
+        onSaved={replace}
+      />
+    );
+  }
 
   return (
     <>
@@ -82,7 +144,7 @@ export function RecordingWithBook({
           onTimeUpdate={onTime}
           onSeeked={onTime}
         />
-        {starts.length > 0 && (
+        {(starts.length > 0 || lines.length > 0) && (
           <button
             type="button"
             className="btn btn-small"
@@ -102,14 +164,31 @@ export function RecordingWithBook({
         onToggle={() => setOpen((v) => !v)}
         index={index}
         onFlip={flip}
-        image={(page, reduced) => bookPageImageUrl(book, page, reduced)}
-        pdfUrl={(page) => archivePdfUrl(book, page)}
-        mirrorUrl={(page) => bookPageUrl(book, page)}
+        image={(p, reduced) => bookPageImageUrl(book, p, reduced)}
+        pdfUrl={(p) => archivePdfUrl(book, p)}
+        mirrorUrl={(p) => bookPageUrl(book, p)}
         printed={lesson.goodword}
         printedUrl={book.sources.goodword}
+        overlay={overlay}
+        below={
+          admin && loaded ? (
+            <div className="stack" style={{ gap: '0.5rem' }}>
+              <button
+                type="button"
+                className="btn btn-small"
+                aria-pressed={editLines}
+                onClick={() => setEditLines((v) => !v)}
+                style={{ alignSelf: 'flex-start' }}
+              >
+                {t('lessonPage.lines.edit')}
+              </button>
+              {tools}
+            </div>
+          ) : null
+        }
       />
 
-      {role === 'admin' && loaded && (
+      {admin && loaded && (
         <PageTurnEditor
           // Starts from the times saved for the lesson; a new lesson starts afresh.
           key={lesson.unit}
@@ -141,6 +220,8 @@ function BookPages({
   mirrorUrl,
   printed,
   printedUrl,
+  overlay,
+  below,
 }: {
   pages: number[];
   open: boolean;
@@ -152,6 +233,10 @@ function BookPages({
   mirrorUrl: (page: number) => string;
   printed: { book: number; page: number };
   printedUrl: string;
+  /** Drawn over the page image: the marked lines. */
+  overlay?: ReactNode;
+  /** Under the page: the admins' line tools. */
+  below?: ReactNode;
 }) {
   const { t } = useTranslation('units');
   // The page whose image archive.org could not deliver (the next page tries again).
@@ -191,7 +276,7 @@ function BookPages({
               {t('lessonPage.pageFailed', { page })}
             </p>
           ) : (
-            <a href={image(page, false)} {...external} title={t('lessonPage.openPage')}>
+            <div className="book-page">
               <img
                 key={page}
                 src={image(page, true)}
@@ -203,9 +288,11 @@ function BookPages({
                   aspectRatio: '1275 / 1651',
                   background: 'white',
                   borderRadius: '0.5rem',
+                  display: 'block',
                 }}
               />
-            </a>
+              {overlay}
+            </div>
           )}
           <figcaption className="row" style={{ justifyContent: 'space-between' }}>
             <button
@@ -228,6 +315,16 @@ function BookPages({
               {t('lessonPage.nextPage')}
             </button>
           </figcaption>
+          <a
+            href={image(page, false)}
+            {...external}
+            title={t('lessonPage.openPage')}
+            className="muted"
+            style={{ fontSize: '0.85rem', alignSelf: 'center' }}
+          >
+            {t('lessonPage.openPage')}
+          </a>
+          {below}
         </figure>
       )}
       <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>

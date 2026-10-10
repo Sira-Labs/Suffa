@@ -448,7 +448,9 @@ the focus. Audit and open points: `docs/accessibility.md`.
 
 - **2026-10-10 — Medina book follows the recording:** playing a lesson's recording opens the
   book at the lesson and turns its pages with the recording, from page turns an admin taps
-  along on the lesson page (ADR-0025). Line highlights on the page come next.
+  along on the lesson page (ADR-0025). Where an admin has marked the lines, the line being
+  read is highlighted and tapping a line plays it; lines and pauses are found in the browser
+  and corrected by tapping along.
 - **2026-09-23 — tolerant answer checking:** translations accept any one of several meanings,
   optional parts, articles, umlaut spellings and small typos; the other meanings are shown after
   answering; German answers are typed left-to-right (was: Arabic input style). Pilot data from

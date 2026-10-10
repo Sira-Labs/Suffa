@@ -47,4 +47,17 @@ export const vocab: Messages<typeof de> = {
     unitInvalid: 'The unit must be a positive number.',
     submit: 'Save & create cards',
   },
+  cards: {
+    root: 'Root {{root}}',
+    rootWazn: 'Root {{root}} · wazn {{wazn}}',
+    wazn: 'Wazn {{wazn}}',
+    pluralOf: 'Plural of “{{ar}}” ({{de}})',
+    singular: 'Singular {{ar}}',
+    singularRoot: 'Singular {{ar}} · root {{root}}',
+    rootToWord: 'Root {{root}} → word meaning “{{de}}”',
+    nisba: 'Nisba (masculine) for “{{land}}” ({{de}})',
+    nisbaHint: 'feminine {{f}} · plural {{pl}}',
+    conjugate: 'Conjugate “{{lemma}}” ({{de}}) – هُوَ, الماضي',
+    minimalPair: 'Minimal pair ({{contrast}}): {{de}}',
+  },
 };

@@ -76,7 +76,9 @@ export function RootWheel({
           onClick={() => onSelect(s.word)}
         >
           <ArabicText>{s.word.ar}</ArabicText>
-          <span className="root-node-de">{s.word.de}</span>
+          <span className="root-node-de" lang="de">
+            {s.word.de}
+          </span>
         </button>
       ))}
     </div>

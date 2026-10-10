@@ -3,6 +3,7 @@
  * Triggers a sync on login, on reconnect, when the app returns to the foreground, every few
  * minutes and soon after local changes (autoSync.ts), and manually.
  */
+import i18n from '@/i18n';
 import { create } from 'zustand';
 import { startAutoSync } from '@/services/sync/autoSync';
 import {
@@ -122,7 +123,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   async signInWithCode(email, code) {
     const p = get().provider;
     if (!(p instanceof ApiSyncProvider)) {
-      return { ok: false, message: 'Anmelden ist hier nicht eingerichtet.' };
+      return { ok: false, message: i18n.t('errors:signIn.notSetUp') };
     }
     const result = await p.signInWithCode(email, code);
     return result.ok ? { ok: true } : { ok: false, message: result.error.message };
@@ -131,7 +132,7 @@ export const useSyncStore = create<SyncState>((set, get) => ({
   async signInWithPasskey() {
     const p = get().provider;
     if (!(p instanceof ApiSyncProvider)) {
-      return { ok: false, message: 'Anmelden ist hier nicht eingerichtet.' };
+      return { ok: false, message: i18n.t('errors:signIn.notSetUp') };
     }
     const result = await passkeys.signIn();
     if (!result.ok) return { ok: false, message: result.message };

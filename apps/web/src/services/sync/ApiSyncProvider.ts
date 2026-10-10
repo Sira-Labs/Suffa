@@ -6,6 +6,7 @@
  * The API may run without sign-in (no SMTP configured): `/api/v1/me` then answers 404 and the
  * provider reports itself unavailable, so the app stays in offline mode.
  */
+import i18n from '@/i18n';
 import type { SyncTable } from '@/types';
 import { logger } from '@/services/logger';
 import type { Passkey } from '@/services/passkeys';
@@ -163,7 +164,7 @@ export class ApiSyncProvider implements SyncProvider {
   ): Promise<Result<void>> {
     const trimmed = email.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      return fail('invalid-email', 'Ungültige E-Mail-Adresse.');
+      return fail('invalid-email', i18n.t('errors:signIn.invalidEmail'));
     }
     let response: Response;
     try {
@@ -173,24 +174,18 @@ export class ApiSyncProvider implements SyncProvider {
         body: JSON.stringify({ email: trimmed, callbackURL: returnTo }),
       });
     } catch {
-      return fail('offline', 'Keine Verbindung – versuch es gleich noch einmal.');
+      return fail('offline', i18n.t('errors:signIn.offline'));
     }
     if (response.ok) return { ok: true, value: undefined };
     if (response.status === 429) {
-      return fail(
-        'rate-limited',
-        'Zu viele Anfragen – bitte in ein paar Minuten noch einmal.'
-      );
+      return fail('rate-limited', i18n.t('errors:signIn.rateLimited'));
     }
     if (response.status === 404) {
       this.available = false;
-      return fail(
-        'unavailable',
-        'Die Anmeldung ist auf diesem Server noch nicht eingerichtet.'
-      );
+      return fail('unavailable', i18n.t('errors:signIn.unavailable'));
     }
     log.warn('sign-in request failed', { status: response.status });
-    return fail('auth-failed', 'Der Anmeldelink konnte nicht gesendet werden.');
+    return fail('auth-failed', i18n.t('errors:signIn.linkFailed'));
   }
 
   /**
@@ -200,7 +195,7 @@ export class ApiSyncProvider implements SyncProvider {
   async signInWithCode(email: string, code: string): Promise<Result<void>> {
     const otp = code.replace(/\s/g, '');
     if (!/^\d{6}$/.test(otp)) {
-      return fail('invalid-code', 'Der Code hat 6 Ziffern.');
+      return fail('invalid-code', i18n.t('errors:signIn.codeFormat'));
     }
     let response: Response;
     try {
@@ -210,37 +205,25 @@ export class ApiSyncProvider implements SyncProvider {
         body: JSON.stringify({ email: email.trim(), otp }),
       });
     } catch {
-      return fail('offline', 'Keine Verbindung – versuch es gleich noch einmal.');
+      return fail('offline', i18n.t('errors:signIn.offline'));
     }
     if (response.ok) {
       await this.refresh();
       return { ok: true, value: undefined };
     }
     if (response.status === 403) {
-      return fail(
-        'too-many-attempts',
-        'Zu viele falsche Versuche. Fordere einen neuen Link an – er bringt einen neuen Code mit.'
-      );
+      return fail('too-many-attempts', i18n.t('errors:signIn.tooManyAttempts'));
     }
     if (response.status === 429) {
-      return fail(
-        'rate-limited',
-        'Zu viele Anfragen – bitte in ein paar Minuten noch einmal.'
-      );
+      return fail('rate-limited', i18n.t('errors:signIn.rateLimited'));
     }
     const { code: reason } = ((await response.json().catch(() => ({}))) ?? {}) as {
       code?: string;
     };
     if (reason === 'OTP_EXPIRED') {
-      return fail(
-        'code-expired',
-        'Der Code ist abgelaufen. Fordere einen neuen Link an.'
-      );
+      return fail('code-expired', i18n.t('errors:signIn.codeExpired'));
     }
-    return fail(
-      'invalid-code',
-      'Der Code stimmt nicht. Prüfe die Ziffern in der neuesten Mail.'
-    );
+    return fail('invalid-code', i18n.t('errors:signIn.codeWrong'));
   }
 
   async signOut(): Promise<Result<void>> {
@@ -250,9 +233,10 @@ export class ApiSyncProvider implements SyncProvider {
         headers: { 'content-type': 'application/json' },
         body: '{}',
       });
-      if (!response.ok) return fail('signout-failed', 'Abmelden hat nicht geklappt.');
+      if (!response.ok)
+        return fail('signout-failed', i18n.t('errors:signIn.signOutFailed'));
     } catch {
-      return fail('offline', 'Keine Verbindung – Abmelden geht nur online.');
+      return fail('offline', i18n.t('errors:signIn.signOutOffline'));
     }
     this.setUser(null);
     return { ok: true, value: undefined };

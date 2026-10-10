@@ -77,17 +77,6 @@ export interface Assignment {
   learners: number | null;
 }
 
-const MESSAGES: Record<string, string> = {
-  transcription_unavailable:
-    'Automatische Transkripte sind auf diesem Server nicht eingerichtet.',
-  ai_disabled: 'KI ist für diese Klasse ausgeschaltet (Klassen-Einstellungen).',
-  no_transcript: 'Dafür braucht die Aufnahme zuerst ein Transkript.',
-  ai_unavailable: 'Auf diesem Server ist kein KI-Modell eingerichtet.',
-  no_summary: 'Es gibt noch keine fertige Zusammenfassung.',
-  transcript_changed:
-    'Diese Transkript-Zeile wurde inzwischen geändert. Bitte verwirf den Vorschlag.',
-};
-
 export class InteractiveApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
@@ -200,6 +189,6 @@ export class InteractiveApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, 'interactive');
   }
 }

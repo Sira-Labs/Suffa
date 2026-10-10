@@ -28,16 +28,6 @@ export interface AuditEntry {
   createdAt: string;
 }
 
-/** API error codes in the interface language, read at call time (story 16.3). */
-const messages = (): Record<string, string> => ({
-  second_factor_required: i18n.t('admin:errors.secondFactorRequired'),
-  invalid_code: i18n.t('admin:errors.invalidCode'),
-  locked: i18n.t('admin:errors.locked'),
-  not_set_up: i18n.t('admin:errors.notSetUp'),
-  already_enabled: i18n.t('admin:errors.alreadyEnabled'),
-  cannot_change_self: i18n.t('admin:errors.cannotChangeSelf'),
-});
-
 export class AdminApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
@@ -81,7 +71,7 @@ export class AdminApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, messages());
+    return apiRequest<T>(this.fetchImpl, path, init, 'admin');
   }
 }
 

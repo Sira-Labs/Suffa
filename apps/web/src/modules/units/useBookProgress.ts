@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useClozeIds } from './useClozeIds';
 import type { AudioUnit, PracticeSkill, PublisherAudioIndex } from '@/types';
 import { content, unitInfos } from '@/content';
@@ -12,6 +13,7 @@ import {
   unitPath,
   unitProgress,
   type PathSection,
+  type Translate,
   type VocabStats,
 } from '@/services/units';
 import {
@@ -81,6 +83,8 @@ export function useBookProgress(): {
   const userVocab = useContentStore((s) => s.userVocab);
   const practiced = usePracticeStore((s) => s.records);
   const clozeIds = useClozeIds();
+  // The path's labels follow the interface language.
+  const { t } = useTranslation('units');
 
   useEffect(() => {
     let cancelled = false;
@@ -160,6 +164,7 @@ export function useBookProgress(): {
           ownWordIds,
           testPassed,
           videos: videoStation(videoData, unit.unit),
+          t: t as unknown as Translate,
         });
         return {
           unit,
@@ -182,6 +187,7 @@ export function useBookProgress(): {
     videoData,
     practiced,
     clozeIds,
+    t,
   ]);
 
   const retry = useCallback(() => setAttempt((n) => n + 1), []);

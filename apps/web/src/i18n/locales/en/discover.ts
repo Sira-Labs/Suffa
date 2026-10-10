@@ -43,5 +43,11 @@ export const discover: Messages<typeof de> = {
   watched: '{{title}}: {{percent}}% watched',
   meta: '{{category}} · Level {{level}} · {{variety}}',
   inLanguage: '· in {{language}}',
-  why: '“{{why}}”',
+  why: '“<1>{{why}}</1>”',
+  languages: {
+    de: 'German',
+    en: 'English',
+    ar: 'Arabic',
+    arPictures: 'Arabic (with pictures)',
+  },
 };

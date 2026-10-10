@@ -63,6 +63,10 @@ export const recordings = {
     disconnect: 'Trennen',
     connect: 'Google Drive verbinden',
     privacy: 'Suffa sieht nur die Dateien, die du selbst auswählst.',
+    /** The views of the Google Picker. */
+    myDrive: 'Meine Ablage',
+    sharedWithMe: 'Für mich freigegeben',
+    sharedDrives: 'Geteilte Ablagen',
   },
   player: {
     loading: 'Lade Aufnahme …',

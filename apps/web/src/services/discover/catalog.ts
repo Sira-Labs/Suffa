@@ -5,6 +5,7 @@
 import type {
   DiscoverCatalog,
   DiscoverCategory,
+  DiscoverChannel,
   DiscoverEntry,
   DiscoverItem,
   DiscoverProgress,
@@ -19,12 +20,27 @@ export function loadDiscover(): Promise<DiscoverCatalog> {
   return cached;
 }
 
-export const CATEGORY_LABELS: Record<DiscoverCategory, string> = {
-  sprache: 'Sprache',
-  quran: 'Quran',
-  geschichten: 'Geschichten',
-  podcasts: 'Podcasts',
+/** The catalog's categories; their names are in the `discover` catalogue (`filters.*`). */
+export const DISCOVER_CATEGORIES: readonly DiscoverCategory[] = [
+  'sprache',
+  'quran',
+  'geschichten',
+  'podcasts',
+];
+
+/** The channels' languages of instruction (German in the catalog) by catalogue key. */
+const CHANNEL_LANGUAGES: Record<string, string> = {
+  Deutsch: 'de',
+  Englisch: 'en',
+  Arabisch: 'ar',
+  'Arabisch (mit Bildern)': 'arPictures',
 };
+/** The key of a channel's language in the `discover` catalogue (`languages.*`), if known. */
+export function channelLanguageKey(
+  channel: Pick<DiscoverChannel, 'language'>
+): string | null {
+  return CHANNEL_LANGUAGES[channel.language] ?? null;
+}
 
 /** "1-2" includes levels 1 and 2; "1" only level 1. */
 export function levelIncludes(level: string, stufe: number): boolean {

@@ -141,6 +141,7 @@ export function MadinahWordPractice({
                   type="button"
                   className={`btn pattern-option ${state}`}
                   disabled={chosen !== null}
+                  lang="de"
                   onClick={() => answer(de)}
                 >
                   {de}

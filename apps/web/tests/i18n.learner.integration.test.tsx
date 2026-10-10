@@ -4,7 +4,7 @@
  * The German catalogue entries for that data must match @suffa/engagement, which stays German.
  */
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, cleanup, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import {
@@ -19,7 +19,7 @@ import { de } from '@/i18n/locales/de';
 import { en } from '@/i18n/locales/en';
 import { Dashboard } from '@/modules/dashboard';
 import { Badges } from '@/modules/engagement/Badges';
-import { questTitle } from '@/modules/engagement/labels';
+import { badgeRule, questTitle } from '@/modules/engagement/labels';
 import { UnitPath, Units } from '@/modules/units';
 import { db } from '@/services/storage';
 import {
@@ -149,6 +149,41 @@ describe('learner screens in English (integration)', () => {
     expect(screen.getByRole('progressbar', { name: 'Unit 1 progress' })).toBeTruthy();
   });
 
+  it('labels the sections and stations of the unit path in English', async () => {
+    const user = userEvent.setup();
+    renderAt('/units/1');
+    await user.click(await screen.findByRole('button', { name: 'Start unit 1' }));
+    const path = await screen.findByRole('list', { name: 'Learning path, unit 1' });
+    expect(
+      await within(path).findByRole('link', { name: /Book page videos/ })
+    ).toHaveTextContent(/\d+ videos · book pp\. \d+–\d+/);
+    expect(within(path).getByRole('heading', { name: /Dialogue 1/ })).toBeTruthy();
+    expect(
+      within(path).getByRole('link', { name: /Listen to the dialogue \(up next\)/ })
+    ).toHaveAttribute('href', '/units/1/listen?lesson=1&section=1');
+    expect(
+      within(path).getByRole('link', { name: /Read the dialogue/ })
+    ).toHaveTextContent('Read, then answer the comprehension question');
+    expect(within(path).getByRole('link', { name: /Learn the words/ })).toHaveTextContent(
+      /0 of \d+ words started/
+    );
+    expect(within(path).getByText('Dialogue 2')).toBeInTheDocument();
+    expect(within(path).getByText('Wrap-up')).toBeInTheDocument();
+    expect(path.textContent).not.toMatch(/Dialog hören|Wörter lernen|Abschluss/);
+  });
+
+  it('names the next station on the current-unit card in English', async () => {
+    const user = userEvent.setup();
+    renderAt('/units/1');
+    await user.click(await screen.findByRole('button', { name: 'Start unit 1' }));
+    await screen.findByRole('list', { name: 'Learning path, unit 1' });
+    cleanup();
+    renderAt('/');
+    const card = await screen.findByRole('region', { name: /Unit 1/ });
+    expect(await within(card).findByText('Dialogue 1')).toBeInTheDocument();
+    expect(within(card).getByText(/Listen to the dialogue/)).toBeInTheDocument();
+  });
+
   it('shows the badge gallery with English meanings and rules', async () => {
     renderAt('/badges');
     expect(await screen.findByRole('heading', { name: 'Badges' })).toBeInTheDocument();
@@ -181,9 +216,21 @@ describe('catalogue entries for shared course data', () => {
       BADGES.map((b) => b.id).sort()
     );
     for (const badge of BADGES) {
-      const entry = de.engagement.badges[badge.id as keyof typeof de.engagement.badges];
+      const entry: {
+        meaning: string;
+        rule?: string;
+        rule_one?: string;
+        rule_other?: string;
+      } = de.engagement.badges[badge.id as keyof typeof de.engagement.badges];
       expect(entry.meaning).toBe(badge.meaning);
-      expect(entry.rule).toBe(badge.rule.replace('{n}', '{{n}}'));
+      if (badge.rule.includes('{n}')) {
+        // A rule with a count: the plural form is the text of the data, plus a singular.
+        expect(entry.rule_other).toBe(badge.rule.replace('{n}', '{{count}}'));
+        expect(entry.rule_one).toContain('{{count}}');
+        expect(entry.rule).toBeUndefined();
+      } else {
+        expect(entry.rule).toBe(badge.rule);
+      }
     }
     for (const stage of ALL_STAGES) {
       const ref = stage.ref as keyof typeof de.units.stageBadges;
@@ -194,6 +241,25 @@ describe('catalogue entries for shared course data', () => {
           stage.test
         );
       }
+    }
+  });
+
+  it('says a badge rule in the singular for one and the plural for more', async () => {
+    const ruh = BADGES.find((b) => b.id === 'ruh')!;
+    const mudawim = BADGES.find((b) => b.id === 'mudawim')!;
+    expect(badgeRule(ruh, 1)).toBe('1 Klassen-Challenge mitgeschafft');
+    expect(badgeRule(ruh, 5)).toBe('5 Klassen-Challenges mitgeschafft');
+    await act(() => setUiLanguage('en'));
+    try {
+      expect(badgeRule(ruh, 1)).toBe('Helped complete 1 class challenge');
+      expect(badgeRule(ruh, 10)).toBe('Helped complete 10 class challenges');
+      expect(badgeRule(mudawim, 7)).toBe('Learned 7 days in a row');
+      // A stage badge has no count.
+      expect(badgeRule(BADGES.find((b) => b.id === 'stage-1')!, 1)).toBe(
+        'Passed the mid-level test'
+      );
+    } finally {
+      await act(() => setUiLanguage('de'));
     }
   });
 

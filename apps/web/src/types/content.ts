@@ -144,27 +144,30 @@ export interface ContentBundle {
   grammatik: GrammatikPunkt[];
 }
 
-/** Person labels for the UI (German + Arabic pronoun). */
-export const PERSON_LABELS: Record<MadiPerson, { ar: string; de: string }> = {
-  ana: { ar: 'أنا', de: 'ich' },
-  nahnu: { ar: 'نَحْنُ', de: 'wir' },
-  anta: { ar: 'أنتَ', de: 'du (m.)' },
-  anti: { ar: 'أنتِ', de: 'du (f.)' },
-  antuma: { ar: 'أنتُما', de: 'ihr beide' },
-  antum: { ar: 'أنتُم', de: 'ihr (m.)' },
-  antunna: { ar: 'أنتُنَّ', de: 'ihr (f.)' },
-  huwa: { ar: 'هُوَ', de: 'er' },
-  hiya: { ar: 'هِيَ', de: 'sie' },
-  huma_m: { ar: 'هُما (م)', de: 'sie beide (m.)' },
-  huma_f: { ar: 'هُما (ف)', de: 'sie beide (f.)' },
-  hum: { ar: 'هُم', de: 'sie (m.)' },
-  hunna: { ar: 'هُنَّ', de: 'sie (f.)' },
+/**
+ * The Arabic pronoun of each person; the interface label ("ich", "I") is in the
+ * `conjugation` catalogue (`persons.*`, `imperative.*`).
+ */
+export const PERSON_LABELS: Record<MadiPerson, { ar: string }> = {
+  ana: { ar: 'أنا' },
+  nahnu: { ar: 'نَحْنُ' },
+  anta: { ar: 'أنتَ' },
+  anti: { ar: 'أنتِ' },
+  antuma: { ar: 'أنتُما' },
+  antum: { ar: 'أنتُم' },
+  antunna: { ar: 'أنتُنَّ' },
+  huwa: { ar: 'هُوَ' },
+  hiya: { ar: 'هِيَ' },
+  huma_m: { ar: 'هُما (م)' },
+  huma_f: { ar: 'هُما (ف)' },
+  hum: { ar: 'هُم' },
+  hunna: { ar: 'هُنَّ' },
 };
 
-export const AMR_LABELS: Record<AmrPerson, { ar: string; de: string }> = {
-  m_sg: { ar: 'أنتَ', de: 'du (m.)' },
-  f_sg: { ar: 'أنتِ', de: 'du (f.)' },
-  dual: { ar: 'أنتُما', de: 'ihr beide' },
-  m_pl: { ar: 'أنتُم', de: 'ihr (m.)' },
-  f_pl: { ar: 'أنتُنَّ', de: 'ihr (f.)' },
+export const AMR_LABELS: Record<AmrPerson, { ar: string }> = {
+  m_sg: { ar: 'أنتَ' },
+  f_sg: { ar: 'أنتِ' },
+  dual: { ar: 'أنتُما' },
+  m_pl: { ar: 'أنتُم' },
+  f_pl: { ar: 'أنتُنَّ' },
 };

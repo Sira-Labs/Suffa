@@ -42,9 +42,13 @@ describe('Course switch and Medina path', () => {
     // Every lesson has our own content and says what it covers.
     const first = screen.getByRole('listitem', { name: 'Lektion 1' });
     expect(within(first).getByRole('link')).toHaveAttribute('href', '/units/madinah/1');
-    expect(within(first).getByText(/Was ist das\? .* · \d+ Wörter/)).toBeTruthy();
+    // The topic is course content, marked as German.
+    expect(within(first).getByRole('link')).toHaveTextContent(
+      /Was ist das\? .* · \d+ Wörter/
+    );
+    expect(within(first).getByText(/^Was ist das\?/)).toHaveAttribute('lang', 'de');
     const seventh = screen.getByRole('listitem', { name: 'Lektion 7' });
-    expect(within(seventh).getByText(/تِلْكَ · \d+ Wörter/)).toBeTruthy();
+    expect(within(seventh).getByRole('link')).toHaveTextContent(/تِلْكَ · \d+ Wörter/);
     // Links open outside the app and name the source.
     expect(screen.getByRole('link', { name: 'Lösungen (arabisch)' })).toHaveAttribute(
       'rel',

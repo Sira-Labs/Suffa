@@ -151,6 +151,45 @@ export const units = {
       sectionHint: 'Je Verb fünf Formen richtig bilden',
     },
   },
+  /** Sections and stations of the unit path (services/units.ts). */
+  pathStations: {
+    closing: 'Abschluss',
+    moreDialogue: { label: 'Weiterer Dialog', detail: 'Hören' },
+    sounds: { label: 'Laute & Hörverstehen', detail: 'Aussprache und Hörübungen' },
+    practice: { label: 'Übungen', detail: 'Beispiel hören, dann selbst' },
+    vocabulary: { label: 'Wortschatz & Strukturen', detail: 'Neue Wörter und Muster' },
+    review: { label: 'Wiederholung', detail: 'Zum Abschluss der Einheit' },
+    listen: {
+      label: 'Dialog hören',
+      detail: 'Verlags-Audio',
+      detailWords: 'Verlags-Audio mit Wortschatz',
+    },
+    video: {
+      label: 'Buchseiten-Videos',
+      detail_one: '{{count}} Video · Buch S. {{from}}–{{to}}',
+      detail_other: '{{count}} Videos · Buch S. {{from}}–{{to}}',
+    },
+    read: {
+      label: 'Dialog lesen',
+      done: 'Gelesen und verstanden',
+      open: 'Lesen, dann die Verständnisfrage',
+    },
+    grammar: { label: 'Grammatik', detail: '{{done}} von {{total}} Fragen richtig' },
+    vocab: { label: 'Wörter lernen', detail: '{{done}} von {{total}} Wörtern gestartet' },
+    cloze: { label: 'Lückentext', detail: '{{done}} von {{total}} Sätzen ergänzt' },
+    write: {
+      label: 'Schreiben',
+      detail: '{{done}} von {{total}} Aufgaben · Abschreiben bis Übersetzen',
+    },
+    speak: { label: 'Nachsprechen', detail: '{{done}} von {{total}} Sätzen gesprochen' },
+    own: { label: 'Eigene Wörter', detail: '{{done}} von {{total}} Wörtern gestartet' },
+    verbs: { label: 'Konjugation', detail: '{{done}} von {{total}} Verben geübt' },
+    test: {
+      label: 'Einheitstest',
+      passed: 'Bestanden (≥ 80 %)',
+      open: 'Gemischte Prüfung zur Einheit',
+    },
+  },
   station: {
     complete: '{{station}} geschafft · {{where}}',
     notFound: 'Station nicht gefunden',
@@ -213,8 +252,8 @@ export const units = {
     },
     credit:
       'Bereitgestellt von <1>AbdurRahman.org</1> und archive.org, mit freundlicher Erlaubnis von Dr. V. Abdur Rahim – nur zur persönlichen Nutzung. <2>Alle Quellen & Lizenzen</2>',
-    lessonWords_one: '{{topic}} · {{count}} Wort',
-    lessonWords_other: '{{topic}} · {{count}} Wörter',
+    lessonWords_one: '<1>{{topic}}</1> · {{count}} Wort',
+    lessonWords_other: '<1>{{topic}}</1> · {{count}} Wörter',
     lessonPage: 'Buch S. {{page}} · Aufnahme',
   },
   lessonPage: {

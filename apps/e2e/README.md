@@ -9,6 +9,8 @@ database:
 - a unit certificate awarded, printed and seen by the learner;
 - the weekly league: off by default, switched on by the teacher, opt-in for learners;
 - a live quiz with the projector and a phone.
+- the learner's main pages in English, with no German interface words outside course
+  content (marked `lang="de"`).
 
 Data a learner builds up over weeks (mature cards, finished daily quests) is written to the
 test database directly. Desktop Chrome runs all flows; a phone profile (Pixel 7) runs those

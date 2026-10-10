@@ -9,7 +9,7 @@ import { Icon } from '@/components/Icon';
 import { dateLocale } from '@/i18n/format';
 import {
   BADGE_ICONS,
-  CHALLENGE_LABELS,
+  CHALLENGE_SUGGESTED,
   type BadgeIcon,
   type Challenge,
   type ChallengeTemplate,
@@ -22,7 +22,7 @@ import { Assignments } from './Assignments';
 import { LeagueCard } from './LeagueCard';
 import { QuizEntry } from './QuizEntry';
 
-const TEMPLATES = Object.keys(CHALLENGE_LABELS) as ChallengeTemplate[];
+const TEMPLATES = Object.keys(CHALLENGE_SUGGESTED) as ChallengeTemplate[];
 
 export function ClassLife({
   api,
@@ -260,9 +260,7 @@ function ChallengeEditor({
   const [template, setTemplate] = useState<ChallengeTemplate>(
     current?.template ?? 'reviews'
   );
-  const [target, setTarget] = useState(
-    current?.target ?? CHALLENGE_LABELS.reviews.suggested
-  );
+  const [target, setTarget] = useState(current?.target ?? CHALLENGE_SUGGESTED.reviews);
   if (current?.reached) return null;
   return (
     <form
@@ -284,7 +282,7 @@ function ChallengeEditor({
           onChange={(e) => {
             const next = e.target.value as ChallengeTemplate;
             setTemplate(next);
-            setTarget(CHALLENGE_LABELS[next].suggested);
+            setTarget(CHALLENGE_SUGGESTED[next]);
           }}
         >
           {TEMPLATES.map((key) => (

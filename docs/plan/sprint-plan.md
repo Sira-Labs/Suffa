@@ -416,11 +416,13 @@ checksum and keeps it in localStorage for the next start, where its units replac
 ones. Removed items are tombstoned with their last content, carried from bundle to bundle until
 they come back, so SRS cards that point at them still resolve. Units nobody edited in the CMS
 follow their seed file, so fixes in the repository keep reaching learners.
-16.3 (in progress): i18next with typed German/English catalogues, the synced setting
+16.3 (done): i18next with typed German/English catalogues, the synced setting
 `uiLanguage` (migration 0040, also kept on the device for the next start) and a lint rule
-against new hard-coded text in translated areas (`docs/i18n.md`). Translated so far: the app
-shell and navigation, shared components, settings and sign-in. The other modules follow area by
-area; the e2e check for untranslated text comes with the last of them.
+against hard-coded text that now covers every module (`docs/i18n.md`). Every screen is in German
+and English, including API error messages (`errors` namespace, resolved when the error is
+created) and labels from shared helpers. German course content is marked `lang="de"`; the e2e
+test `english.spec.ts` visits the learner pages in English, the Medina course included, and
+fails on German interface words outside it. Translating meanings is story 16.4.
 
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------- |

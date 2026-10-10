@@ -2,6 +2,7 @@
  * This device's push subscription (story 6.3). Push needs a service worker and permission;
  * on iPhone and iPad only when Suffa is installed on the home screen.
  */
+import i18n from '@/i18n';
 import type { NotificationsApi } from './notificationsApi';
 
 export type PushOutcome =
@@ -33,8 +34,7 @@ export async function enablePush(
     return {
       ok: false,
       reason: 'unsupported',
-      message:
-        'Dieses Gerät kann keine Erinnerungen empfangen. Auf iPhone/iPad: Suffa zum Home-Bildschirm hinzufügen und von dort öffnen.',
+      message: i18n.t('errors:push.unsupported'),
     };
   }
   const permission = await Notification.requestPermission();
@@ -42,7 +42,7 @@ export async function enablePush(
     return {
       ok: false,
       reason: 'denied',
-      message: 'Mitteilungen sind blockiert. Erlaube sie in den Browser-Einstellungen.',
+      message: i18n.t('errors:push.denied'),
     };
   }
   const registration = await navigator.serviceWorker.ready;

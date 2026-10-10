@@ -142,12 +142,13 @@ function GlossLine({
       </p>
       {gloss && (
         <p className="muted" style={{ margin: 0 }}>
-          <span className="arabic-inline">{gloss.word}</span> → {gloss.de} ({t('root')}{' '}
+          <span className="arabic-inline">{gloss.word}</span> →{' '}
+          <span lang="de">{gloss.de}</span> ({t('root')}{' '}
           <span className="arabic-inline">{gloss.wurzel}</span>)
         </p>
       )}
       {showTranslation && (
-        <p className="muted" style={{ margin: 0 }}>
+        <p className="muted" style={{ margin: 0 }} lang="de">
           {german}
         </p>
       )}

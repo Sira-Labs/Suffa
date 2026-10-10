@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import catalog from '@/content/sources/discover.json';
 import type { DiscoverCatalog } from '@/types';
-import { CATEGORY_LABELS, entries } from './catalog';
+import { DISCOVER_CATEGORIES, entries } from './catalog';
 
 const data = catalog as DiscoverCatalog;
 
@@ -9,7 +9,7 @@ const data = catalog as DiscoverCatalog;
 describe('curated discover catalog', () => {
   it('has channels in every category with complete, unique entries', () => {
     const categories = new Set(data.channels.map((c) => c.category));
-    expect([...categories].sort()).toEqual(Object.keys(CATEGORY_LABELS).sort());
+    expect([...categories].sort()).toEqual([...DISCOVER_CATEGORIES].sort());
     const all = entries(data);
     expect(new Set(all.map((e) => e.id)).size).toBe(all.length);
     for (const e of all) {

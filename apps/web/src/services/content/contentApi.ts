@@ -53,26 +53,17 @@ export function stateLabel(state: UnitState): string {
   return i18n.t(`content:state.${state}`);
 }
 
-/** API error codes in the interface language, read at call time (story 16.3). */
-const messages = (): Record<string, string> => ({
-  stale_revision: i18n.t('content:errors.staleRevision'),
-  wrong_state: i18n.t('content:errors.wrongState'),
-  invalid_content: i18n.t('content:errors.invalidContent'),
-  id_taken: i18n.t('content:errors.idTaken'),
-  payload_too_large: i18n.t('content:errors.payloadTooLarge'),
-});
-
 export type UnitStep = 'submit' | 'check' | 'publish';
 
 export class ContentApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
   list(): Promise<ApiResult<{ units: UnitSummary[] }>> {
-    return apiRequest(this.fetchImpl, '/api/v1/content/units', {}, messages());
+    return apiRequest(this.fetchImpl, '/api/v1/content/units', {}, 'content');
   }
 
   get(id: string): Promise<ApiResult<UnitDetail>> {
-    return apiRequest(this.fetchImpl, unitPath(id), {}, messages());
+    return apiRequest(this.fetchImpl, unitPath(id), {}, 'content');
   }
 
   saveDraft(
@@ -84,7 +75,7 @@ export class ContentApi {
       this.fetchImpl,
       `${unitPath(id)}/draft`,
       { method: 'PUT', body: JSON.stringify({ revision, content }) },
-      messages()
+      'content'
     );
   }
 
@@ -97,7 +88,7 @@ export class ContentApi {
       this.fetchImpl,
       `${unitPath(id)}/${step}`,
       { method: 'POST', body: JSON.stringify({ revision }) },
-      messages()
+      'content'
     );
   }
 
@@ -111,7 +102,7 @@ export class ContentApi {
       this.fetchImpl,
       `${unitPath(id)}/return`,
       { method: 'POST', body: JSON.stringify({ revision, note }) },
-      messages()
+      'content'
     );
   }
 }

@@ -2,6 +2,7 @@
  * Google Drive import for teachers (story 7.2): connection status, the Google Picker (loaded
  * on demand from apis.google.com, allowed by the CSP) and the import request.
  */
+import i18n from '@/i18n';
 import { apiRequest, type Fetch } from '@/services/api/request';
 
 export interface DriveStatus {
@@ -10,19 +11,11 @@ export interface DriveStatus {
   appId: string;
 }
 
-const MESSAGES: Record<string, string> = {
-  not_connected: 'Google Drive ist nicht (mehr) verbunden. Bitte neu verbinden.',
-  unsupported_type: 'Bitte nur Audio- oder Videodateien auswählen.',
-  too_large: 'Eine Datei ist zu groß (höchstens 10 GB).',
-  quota_exceeded: 'Der Speicher dieser Klasse ist voll (50 GB).',
-  not_accessible: 'Auf eine Datei gibt es keinen Zugriff.',
-};
-
 export class DriveApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
   status() {
-    return apiRequest<DriveStatus>(this.fetchImpl, '/api/v1/drive', {}, MESSAGES);
+    return apiRequest<DriveStatus>(this.fetchImpl, '/api/v1/drive', {}, 'drive');
   }
 
   token() {
@@ -30,7 +23,7 @@ export class DriveApi {
       this.fetchImpl,
       '/api/v1/drive/token',
       { method: 'POST' },
-      MESSAGES
+      'drive'
     );
   }
 
@@ -39,7 +32,7 @@ export class DriveApi {
       this.fetchImpl,
       '/api/v1/drive',
       { method: 'DELETE' },
-      MESSAGES
+      'drive'
     );
   }
 
@@ -48,7 +41,7 @@ export class DriveApi {
       this.fetchImpl,
       `/api/v1/classes/${encodeURIComponent(classId)}/media/drive`,
       { method: 'POST', body: JSON.stringify({ fileIds }) },
-      MESSAGES
+      'drive'
     );
   }
 }
@@ -129,15 +122,15 @@ export async function pickRecordings(status: DriveStatus, accessToken: string) {
         .setSelectFolderEnabled(false)
         .setLabel(label);
     new picker.PickerBuilder()
-      .addView(view('Meine Ablage').setOwnedByMe(true))
-      .addView(view('Für mich freigegeben').setOwnedByMe(false))
-      .addView(view('Geteilte Ablagen').setEnableDrives(true))
+      .addView(view(i18n.t('recordings:drive.myDrive')).setOwnedByMe(true))
+      .addView(view(i18n.t('recordings:drive.sharedWithMe')).setOwnedByMe(false))
+      .addView(view(i18n.t('recordings:drive.sharedDrives')).setEnableDrives(true))
       .enableFeature(picker.Feature.MULTISELECT_ENABLED)
       .enableFeature(picker.Feature.SUPPORT_DRIVES)
       .setOAuthToken(accessToken)
       .setDeveloperKey(status.apiKey)
       .setAppId(status.appId)
-      .setLocale('de')
+      .setLocale(i18n.language === 'en' ? 'en' : 'de')
       .setCallback((data) => {
         if (data.action === picker.Action.PICKED)
           resolve((data.docs ?? []).map((d) => d.id));

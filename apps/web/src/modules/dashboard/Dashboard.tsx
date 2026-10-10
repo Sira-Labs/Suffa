@@ -149,7 +149,10 @@ function LearnerHome() {
             <ArabicText size="hero" style={{ textAlign: 'right' }}>
               {word.ar}
             </ArabicText>
-            <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }}>{word.de}</p>
+            {/* The meaning is course content: German until story 16.4. */}
+            <p style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600 }} lang="de">
+              {word.de}
+            </p>
             <p className="muted" style={{ margin: 0 }}>
               {t('home.root')} <span className="arabic-inline">{word.wurzel}</span>
               {word.plural ? (

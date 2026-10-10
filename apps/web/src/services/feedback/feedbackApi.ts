@@ -41,13 +41,6 @@ export interface FeedbackItem {
   sender: { id: string; name: string | null; email: string | null; role: string } | null;
 }
 
-/** API error codes in the interface language, read at call time (story 16.3). */
-const messages = (): Record<string, string> => ({
-  rate_limited: i18n.t('admin:errors.rateLimited'),
-  feedback_disabled: i18n.t('admin:errors.feedbackDisabled'),
-  second_factor_required: i18n.t('admin:errors.secondFactorRequired'),
-});
-
 export class FeedbackApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
@@ -75,6 +68,6 @@ export class FeedbackApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, messages());
+    return apiRequest<T>(this.fetchImpl, path, init, 'feedback');
   }
 }

@@ -222,7 +222,10 @@ function WordTask({
             {word.ar}
           </ArabicText>
           <span>
-            <strong>{word.tr}</strong> <span className="muted">· {word.de}</span>
+            <strong>{word.tr}</strong>{' '}
+            <span className="muted">
+              · <span lang="de">{word.de}</span>
+            </span>
           </span>
         </>
       )}
@@ -245,7 +248,9 @@ function WordTask({
       {mode === 'umschrift' && (
         <>
           <strong style={{ fontSize: '1.6rem' }}>{word.tr}</strong>
-          <span className="muted">({word.de})</span>
+          <span className="muted">
+            (<span lang="de">{word.de}</span>)
+          </span>
         </>
       )}
       <div style={{ width: '100%' }}>
@@ -264,6 +269,7 @@ function WordTask({
           expected={word.ar}
           diff={diffArabic(value, word.ar)}
           explanation={mode === 'abschreiben' ? undefined : word.de}
+          explanationLang="de"
         />
       )}
     </div>
@@ -382,7 +388,9 @@ function Translation({
       <p className="muted" style={{ margin: 0 }}>
         {t('translate', { position })}
       </p>
-      <strong style={{ fontSize: '1.2rem' }}>{line.de}</strong>
+      <strong style={{ fontSize: '1.2rem' }} lang="de">
+        {line.de}
+      </strong>
       <div style={{ width: '100%' }}>
         <RecallInput
           value={value}

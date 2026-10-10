@@ -151,6 +151,47 @@ export const units: Messages<typeof de> = {
       sectionHint: 'Form five forms of each verb correctly',
     },
   },
+  pathStations: {
+    closing: 'Wrap-up',
+    moreDialogue: { label: 'Another dialogue', detail: 'Listen' },
+    sounds: {
+      label: 'Sounds & listening',
+      detail: 'Pronunciation and listening exercises',
+    },
+    practice: { label: 'Exercises', detail: 'Hear the example, then try it yourself' },
+    vocabulary: { label: 'Vocabulary & structures', detail: 'New words and patterns' },
+    review: { label: 'Review', detail: 'To round off the unit' },
+    listen: {
+      label: 'Listen to the dialogue',
+      detail: 'Publisher audio',
+      detailWords: 'Publisher audio with vocabulary',
+    },
+    video: {
+      label: 'Book page videos',
+      detail_one: '{{count}} video · book p. {{from}}–{{to}}',
+      detail_other: '{{count}} videos · book pp. {{from}}–{{to}}',
+    },
+    read: {
+      label: 'Read the dialogue',
+      done: 'Read and understood',
+      open: 'Read, then answer the comprehension question',
+    },
+    grammar: { label: 'Grammar', detail: '{{done}} of {{total}} questions right' },
+    vocab: { label: 'Learn the words', detail: '{{done}} of {{total}} words started' },
+    cloze: { label: 'Gap fill', detail: '{{done}} of {{total}} sentences completed' },
+    write: {
+      label: 'Writing',
+      detail: '{{done}} of {{total}} tasks · from copying to translating',
+    },
+    speak: { label: 'Repeat aloud', detail: '{{done}} of {{total}} sentences spoken' },
+    own: { label: 'Your own words', detail: '{{done}} of {{total}} words started' },
+    verbs: { label: 'Conjugation', detail: '{{done}} of {{total}} verbs practised' },
+    test: {
+      label: 'Unit test',
+      passed: 'Passed (≥ 80%)',
+      open: 'Mixed test on the unit',
+    },
+  },
   station: {
     complete: '{{station}} done · {{where}}',
     notFound: 'Station not found',
@@ -213,8 +254,8 @@ export const units: Messages<typeof de> = {
     },
     credit:
       'Provided by <1>AbdurRahman.org</1> and archive.org, with the kind permission of Dr V. Abdur Rahim – for personal use only. <2>All sources & licences</2>',
-    lessonWords_one: '{{topic}} · {{count}} word',
-    lessonWords_other: '{{topic}} · {{count}} words',
+    lessonWords_one: '<1>{{topic}}</1> · {{count}} word',
+    lessonWords_other: '<1>{{topic}}</1> · {{count}} words',
     lessonPage: 'Book p. {{page}} · recording',
   },
   lessonPage: {

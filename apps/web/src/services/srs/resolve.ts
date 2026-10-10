@@ -1,8 +1,10 @@
 /**
  * Resolves an SRS card to its static (or user-created) content.
  * Returns a uniform prompt/answer pair per CardKind, the basis for all
- * recall modules and exam formats.
+ * recall modules and exam formats. Prompts and hints come in the interface language at call
+ * time (story 16.3); the German meanings inside them are course content and stay German.
  */
+import i18n from '@/i18n';
 import type {
   CardKind,
   Minimalpaar,
@@ -65,7 +67,9 @@ export function resolveCard(
         answerIsArabic: false,
         transliteration: v.tr || undefined,
         hint: v.wurzel
-          ? `Wurzel ${v.wurzel}${v.wazn ? ` · Wazn ${v.wazn}` : ''}`
+          ? v.wazn
+            ? i18n.t('vocab:cards.rootWazn', { root: v.wurzel, wazn: v.wazn })
+            : i18n.t('vocab:cards.root', { root: v.wurzel })
           : undefined,
         speakable: v.ar,
       };
@@ -81,7 +85,7 @@ export function resolveCard(
         answer: v.ar,
         answerIsArabic: true,
         transliteration: v.tr || undefined,
-        hint: v.wurzel ? `Wurzel ${v.wurzel}` : undefined,
+        hint: v.wurzel ? i18n.t('vocab:cards.root', { root: v.wurzel }) : undefined,
         speakable: v.ar,
       };
     }
@@ -91,11 +95,13 @@ export function resolveCard(
       return {
         contentRef,
         kind,
-        prompt: `Plural von „${v.ar}“ (${v.de})`,
+        prompt: i18n.t('vocab:cards.pluralOf', { ar: v.ar, de: v.de }),
         promptIsArabic: false,
         answer: v.plural,
         answerIsArabic: true,
-        hint: `Singular ${v.ar}${v.wurzel ? ` · Wurzel ${v.wurzel}` : ''}`,
+        hint: v.wurzel
+          ? i18n.t('vocab:cards.singularRoot', { ar: v.ar, root: v.wurzel })
+          : i18n.t('vocab:cards.singular', { ar: v.ar }),
         speakable: v.plural,
       };
     }
@@ -105,11 +111,11 @@ export function resolveCard(
       return {
         contentRef,
         kind,
-        prompt: `Wurzel ${v.wurzel} → Wort mit Bedeutung „${v.de}“`,
+        prompt: i18n.t('vocab:cards.rootToWord', { root: v.wurzel, de: v.de }),
         promptIsArabic: false,
         answer: v.ar,
         answerIsArabic: true,
-        hint: v.wazn ? `Wazn ${v.wazn}` : undefined,
+        hint: v.wazn ? i18n.t('vocab:cards.wazn', { wazn: v.wazn }) : undefined,
         speakable: v.ar,
       };
     }
@@ -119,11 +125,11 @@ export function resolveCard(
       return {
         contentRef,
         kind,
-        prompt: `Nisba (männlich) zu „${n.land}“ (${n.de})`,
+        prompt: i18n.t('vocab:cards.nisba', { land: n.land, de: n.de }),
         promptIsArabic: false,
         answer: n.m,
         answerIsArabic: true,
-        hint: `weiblich ${n.f} · Plural ${n.pl}`,
+        hint: i18n.t('vocab:cards.nisbaHint', { f: n.f, pl: n.pl }),
         speakable: n.m,
       };
     }
@@ -133,11 +139,11 @@ export function resolveCard(
       return {
         contentRef,
         kind,
-        prompt: `Konjugiere „${verb.lemma}“ (${verb.de}) – هُوَ, الماضي`,
+        prompt: i18n.t('vocab:cards.conjugate', { lemma: verb.lemma, de: verb.de }),
         promptIsArabic: false,
         answer: verb.madi.huwa,
         answerIsArabic: true,
-        hint: `Wurzel ${verb.wurzel} · Wazn ${verb.wazn}`,
+        hint: i18n.t('vocab:cards.rootWazn', { root: verb.wurzel, wazn: verb.wazn }),
         speakable: verb.madi.huwa,
       };
     }
@@ -147,7 +153,7 @@ export function resolveCard(
       return {
         contentRef,
         kind,
-        prompt: `Minimalpaar (${mp.kontrast}): ${mp.de}`,
+        prompt: i18n.t('vocab:cards.minimalPair', { contrast: mp.kontrast, de: mp.de }),
         promptIsArabic: false,
         answer: `${mp.a} / ${mp.b}`,
         answerIsArabic: true,

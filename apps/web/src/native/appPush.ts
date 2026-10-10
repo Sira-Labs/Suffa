@@ -3,6 +3,7 @@
  * hands its token to the server, which sends reminders, recaps and class news to it the same
  * way it does to web push subscriptions.
  */
+import i18n from '@/i18n';
 import { logger } from '@/services/logger';
 import type { NotificationsApi } from '@/services/notifications/notificationsApi';
 import type { PushOutcome } from '@/services/notifications/push';
@@ -51,8 +52,7 @@ export async function enableAppPush(
     return {
       ok: false,
       reason: 'denied',
-      message:
-        'Mitteilungen sind blockiert. Erlaube sie in den Einstellungen des Geräts.',
+      message: i18n.t('errors:push.deniedApp'),
     };
   }
   let token: string;
@@ -63,7 +63,7 @@ export async function enableAppPush(
     return {
       ok: false,
       reason: 'unsupported',
-      message: 'Dieses Gerät konnte sich nicht für Mitteilungen anmelden.',
+      message: i18n.t('errors:push.registerFailed'),
     };
   }
   const result = await api.registerDevice(token, platform);

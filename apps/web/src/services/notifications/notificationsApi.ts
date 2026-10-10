@@ -34,10 +34,6 @@ export interface WeeklyRecap {
   classChallenges: number;
 }
 
-const MESSAGES: Record<string, string> = {
-  push_disabled: 'Erinnerungen sind auf diesem Server noch nicht eingerichtet.',
-};
-
 export class NotificationsApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
@@ -86,6 +82,6 @@ export class NotificationsApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, 'notifications');
   }
 }

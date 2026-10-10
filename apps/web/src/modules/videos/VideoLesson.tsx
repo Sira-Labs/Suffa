@@ -197,7 +197,10 @@ export function VideoLesson({
       >
         {t('back')}
       </Link>
-      <h1 dir="auto">{lesson.title}</h1>
+      {/* Video titles stay as the channel wrote them. */}
+      <h1 dir="auto" translate="no">
+        {lesson.title}
+      </h1>
       <span className="muted">
         {lesson.channel.name}
         {lesson.unit ? ` · ${t('unit', { unit: lesson.unit })}` : ''}

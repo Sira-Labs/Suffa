@@ -173,7 +173,7 @@ function WordCard({
         </button>
         <RootWord word={word.ar} root={root} size="lg" />
       </div>
-      <strong>{word.de}</strong>
+      <strong lang="de">{word.de}</strong>
       <span className="muted">
         {word.source === 'extra'
           ? t('word.extra')
@@ -187,7 +187,9 @@ function WordCard({
             <span className="eyebrow">{t('word.pattern')}</span>
             <ArabicText size="lg">{pattern.wazn}</ArabicText>
           </div>
-          <p style={{ margin: 0 }}>{pattern.de}</p>
+          <p style={{ margin: 0 }} lang="de">
+            {pattern.de}
+          </p>
           {examples.length > 0 && (
             <p style={{ margin: 0 }}>
               {t('word.sameWay')}{' '}

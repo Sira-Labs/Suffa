@@ -118,7 +118,7 @@ export function MadinahGaps({
             gap={gap}
             filled={chosen === gap.answer ? gap.answer : undefined}
           />
-          <p className="muted" style={{ margin: 0, textAlign: 'center' }}>
+          <p className="muted" style={{ margin: 0, textAlign: 'center' }} lang="de">
             {gap.de}
           </p>
           <div

@@ -94,11 +94,4 @@ export const adminAi: Messages<typeof de> = {
     cached: 'from cache',
     cost: 'Cost',
   },
-  errors: {
-    invalidBody: 'Please check your input.',
-    paused: 'This month’s AI budget is used up – AI is paused.',
-    unavailable: 'No model answered. Are the keys set?',
-    quota: 'The daily quota is used up.',
-    badRequest: 'The model rejected the request (invalid request).',
-  },
 };

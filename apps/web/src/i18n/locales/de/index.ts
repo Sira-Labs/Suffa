@@ -15,6 +15,7 @@ import { content } from './content';
 import { dashboard } from './dashboard';
 import { discover } from './discover';
 import { engagement } from './engagement';
+import { errors } from './errors';
 import { exam } from './exam';
 import { feedback } from './feedback';
 import { grammar } from './grammar';
@@ -50,6 +51,7 @@ export const de = {
   dashboard,
   discover,
   engagement,
+  errors,
   exam,
   feedback,
   grammar,

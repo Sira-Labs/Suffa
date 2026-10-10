@@ -71,16 +71,6 @@ export const admin: Messages<typeof de> = {
     leagueOff: 'Weekly league switched off',
     leagueMinors: ' (class with minors)',
   },
-  errors: {
-    secondFactorRequired: 'Please confirm the code from your authenticator app first.',
-    invalidCode: 'The code is wrong. Use the current code from the app.',
-    locked: 'Too many wrong codes – please try again in 15 minutes.',
-    notSetUp: 'Two-factor sign-in is not set up yet.',
-    alreadyEnabled: 'Two-factor sign-in is already set up.',
-    cannotChangeSelf: 'Your own account cannot be changed here.',
-    rateLimited: 'A lot of feedback is coming in right now. Please try again shortly.',
-    feedbackDisabled: 'Feedback is switched off here.',
-  },
   videos: {
     importStarted: 'Import started – the list fills up within a minute.',
     channel: 'Channel {{name}}',

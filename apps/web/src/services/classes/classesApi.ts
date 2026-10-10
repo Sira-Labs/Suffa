@@ -102,25 +102,12 @@ export interface ClassFeed {
   badges: TeacherBadge[];
 }
 
-/** Challenge templates in words (German). */
-export const CHALLENGE_LABELS: Record<
-  ChallengeTemplate,
-  { title: string; unit: string; suggested: number }
-> = {
-  reviews: { title: 'Karten wiederholen', unit: 'Karten', suggested: 1000 },
-  quests: { title: 'Tagesaufgaben schaffen', unit: 'Aufgaben', suggested: 100 },
-  xp: { title: 'XP sammeln', unit: 'XP', suggested: 3000 },
-  'active-days': { title: 'Lerntage sammeln', unit: 'Lerntage', suggested: 60 },
-};
-
-const MESSAGES: Record<string, string> = {
-  invalid_invite:
-    'Dieser Einladungslink ist abgelaufen oder ungültig. Bitte frag nach einem neuen.',
-  forbidden: 'Das darf nur die Lehrkraft dieser Klasse.',
-  not_a_learner: 'Das geht nur für Lernende der Klasse.',
-  not_eligible: 'Die Meisterschaft der Einheit liegt noch unter 90 %.',
-  exists: 'Für diese Einheit gibt es schon ein Zertifikat.',
-  unknown_unit: 'Diese Einheit gibt es nicht.',
+/** Suggested target per challenge template; the names are in the `classes` catalogue. */
+export const CHALLENGE_SUGGESTED: Record<ChallengeTemplate, number> = {
+  reviews: 1000,
+  quests: 100,
+  xp: 3000,
+  'active-days': 60,
 };
 
 /** The token of an invite URL `…/join/<token>`, or null. */
@@ -332,6 +319,6 @@ export class ClassesApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, 'classes');
   }
 }

@@ -9,14 +9,6 @@ export const content = {
     review: 'In Prüfung',
     published: 'Veröffentlicht',
   },
-  errors: {
-    staleRevision:
-      'Die Einheit wurde inzwischen geändert. Lade sie neu und übernimm deine Änderung dann.',
-    wrongState: 'Dieser Schritt passt nicht zum Stand der Einheit. Lade sie neu.',
-    invalidContent: 'Der Inhalt ist so nicht gültig:',
-    idTaken: 'Eine Kennung gehört schon zu einer anderen Einheit:',
-    payloadTooLarge: 'Die Einheit ist zu groß.',
-  },
   review: {
     title: 'Inhalte prüfen',
     teachersOnly: 'Diese Seite ist für Lehrkräfte.',

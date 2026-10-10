@@ -46,4 +46,18 @@ export const vocab = {
     unitInvalid: 'Einheit muss eine positive Zahl sein.',
     submit: 'Speichern & Karten anlegen',
   },
+  /** Prompts and hints of a review card (services/srs/resolve.ts); meanings stay German. */
+  cards: {
+    root: 'Wurzel {{root}}',
+    rootWazn: 'Wurzel {{root}} · Wazn {{wazn}}',
+    wazn: 'Wazn {{wazn}}',
+    pluralOf: 'Plural von „{{ar}}“ ({{de}})',
+    singular: 'Singular {{ar}}',
+    singularRoot: 'Singular {{ar}} · Wurzel {{root}}',
+    rootToWord: 'Wurzel {{root}} → Wort mit Bedeutung „{{de}}“',
+    nisba: 'Nisba (männlich) zu „{{land}}“ ({{de}})',
+    nisbaHint: 'weiblich {{f}} · Plural {{pl}}',
+    conjugate: 'Konjugiere „{{lemma}}“ ({{de}}) – هُوَ, الماضي',
+    minimalPair: 'Minimalpaar ({{contrast}}): {{de}}',
+  },
 };

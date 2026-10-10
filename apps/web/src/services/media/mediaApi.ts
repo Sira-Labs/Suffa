@@ -40,15 +40,6 @@ export interface RecordingListening {
   people: { userId: string; name: string; percent: number; completedAt: string | null }[];
 }
 
-const MESSAGES: Record<string, string> = {
-  too_large: 'Die Datei ist zu groß (höchstens 10 GB).',
-  quota_exceeded: 'Der Speicher dieser Klasse ist voll (50 GB). Lösche alte Aufnahmen.',
-  unsupported_type:
-    'Dieses Dateiformat wird nicht unterstützt (Audio oder Video, z. B. MP3, M4A, MP4).',
-  parts_missing: 'Es fehlen noch Teile der Datei. Der Upload wird fortgesetzt.',
-  consent_required: 'Bitte bestätige, dass alle Aufgenommenen einverstanden sind.',
-};
-
 export class MediaApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
@@ -131,6 +122,6 @@ export class MediaApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, 'media');
   }
 }

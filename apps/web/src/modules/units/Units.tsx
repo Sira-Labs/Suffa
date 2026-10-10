@@ -109,8 +109,27 @@ function HeroTitle({ title }: { title: string }) {
           {ar}
         </span>
       )}
-      <strong style={{ fontSize: '1.05rem' }}>{de}</strong>
+      <strong style={{ fontSize: '1.05rem' }} lang="de">
+        {de}
+      </strong>
     </span>
+  );
+}
+
+/** ", التحية – Begrüßung" with each part in its language. */
+function TileTitle({ title }: { title: string }) {
+  const { ar, de } = splitUnitTitle(title);
+  return (
+    <>
+      {', '}
+      {ar && (
+        <>
+          <span lang="ar">{ar}</span>
+          {' – '}
+        </>
+      )}
+      <span lang="de">{de}</span>
+    </>
   );
 }
 
@@ -171,7 +190,6 @@ function StageCard({
             <Link
               to={`/units/${unit.unit}`}
               className={`unit-tile${unit.unit === currentUnit ? ' unit-tile-current' : ''}${status.state === 'completed' ? ' unit-tile-done' : ''}${unlocked ? '' : ' unit-tile-locked'}`}
-              aria-label={`${t('unit', { n: unit.unit })}${title ? `, ${title}` : ''}, ${unlocked ? t('levels.tileProgress', { done: progress.percent, mastered: mastery.get(unit.unit) ?? 0 }) : t('levels.state.locked')}`}
             >
               <span className="unit-tile-top">
                 <span className="unit-tile-number arabic-display" aria-hidden>
@@ -185,6 +203,18 @@ function StageCard({
                 )}
                 {!unlocked && <Icon name="lock" size={14} />}
                 {t('unit', { n: unit.unit })}
+                {/* For screen readers: the title (course content, German until 16.4) and state. */}
+                <span className="visually-hidden">
+                  {title && <TileTitle title={title} />}
+                  {`, ${
+                    unlocked
+                      ? t('levels.tileProgress', {
+                          done: progress.percent,
+                          mastered: mastery.get(unit.unit) ?? 0,
+                        })
+                      : t('levels.state.locked')
+                  }`}
+                </span>
               </span>
               <span className="unit-tile-bar" aria-hidden>
                 <span style={{ width: `${progress.percent}%` }} />

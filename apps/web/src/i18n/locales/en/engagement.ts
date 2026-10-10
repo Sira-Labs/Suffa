@@ -20,23 +20,61 @@ export const engagement: Messages<typeof de> = {
     'tutor-ar-1': 'Write something to al-Muʿallim in Arabic',
   },
   badges: {
-    mudawim: { meaning: 'the steadfast', rule: 'Learned {{n}} days in a row' },
-    talib: { meaning: 'the seeker of knowledge', rule: 'Reached {{n}} weekly goals' },
+    mudawim: {
+      meaning: 'the steadfast',
+      rule_one: 'Learned {{count}} day in a row',
+      rule_other: 'Learned {{count}} days in a row',
+    },
+    talib: {
+      meaning: 'the seeker of knowledge',
+      rule_one: 'Reached {{count}} weekly goal',
+      rule_other: 'Reached {{count}} weekly goals',
+    },
     mujtahid: {
       meaning: 'the diligent',
-      rule: 'Completed all three daily quests on {{n}} days',
+      rule_one: 'Completed all three daily quests on {{count}} day',
+      rule_other: 'Completed all three daily quests on {{count}} days',
     },
-    bukur: { meaning: 'early riser', rule: 'Learned before 8 am on {{n}} days' },
+    bukur: {
+      meaning: 'early riser',
+      rule_one: 'Learned before 8 am on {{count}} day',
+      rule_other: 'Learned before 8 am on {{count}} days',
+    },
     hafiz: {
       meaning: 'keeper of words',
-      rule: '{{n}} cards secured (interval ≥ 21 days)',
+      rule_one: '{{count}} card secured (interval ≥ 21 days)',
+      rule_other: '{{count}} cards secured (interval ≥ 21 days)',
     },
-    mustami: { meaning: 'the listener', rule: 'Listened to {{n}} whole lessons' },
-    khattat: { meaning: 'the scribe', rule: 'Wrote {{n}} words correctly' },
-    mutakallim: { meaning: 'the speaker', rule: 'Spoke {{n}} sentences' },
-    mutasarrif: { meaning: 'the conjugator', rule: 'Practised {{n}} verbs' },
-    najm: { meaning: 'star of the test', rule: 'Full marks in a test {{n}}×' },
-    ruh: { meaning: 'class spirit', rule: 'Helped complete {{n}} class challenges' },
+    mustami: {
+      meaning: 'the listener',
+      rule_one: 'Listened to {{count}} whole lesson',
+      rule_other: 'Listened to {{count}} whole lessons',
+    },
+    khattat: {
+      meaning: 'the scribe',
+      rule_one: 'Wrote {{count}} word correctly',
+      rule_other: 'Wrote {{count}} words correctly',
+    },
+    mutakallim: {
+      meaning: 'the speaker',
+      rule_one: 'Spoke {{count}} sentence',
+      rule_other: 'Spoke {{count}} sentences',
+    },
+    mutasarrif: {
+      meaning: 'the conjugator',
+      rule_one: 'Practised {{count}} verb',
+      rule_other: 'Practised {{count}} verbs',
+    },
+    najm: {
+      meaning: 'star of the test',
+      rule_one: 'Full marks in a test {{count}}×',
+      rule_other: 'Full marks in a test {{count}}×',
+    },
+    ruh: {
+      meaning: 'class spirit',
+      rule_one: 'Helped complete {{count}} class challenge',
+      rule_other: 'Helped complete {{count}} class challenges',
+    },
     'stage-1': { meaning: 'Stage 1 complete', rule: 'Passed the mid-level test' },
     'stage-2': { meaning: 'Stage 2 complete', rule: 'Passed the final test' },
     'madinah-stage-1': {

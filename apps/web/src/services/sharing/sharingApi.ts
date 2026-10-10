@@ -31,23 +31,11 @@ export interface ClassSharedRecording extends SharedRecording {
   learner: { id: string; name: string | null; email: string | null };
 }
 
-const MESSAGES: Record<string, string> = {
-  not_member: 'Du bist (noch) nicht Mitglied dieser Klasse.',
-  consent_needed:
-    'In dieser Klasse braucht es zuerst das Einverständnis deiner Eltern. Die Lehrkraft trägt es ein.',
-  too_many:
-    'Du hast schon sehr viele Aufnahmen geteilt. Zieh ältere zurück, um neue zu teilen.',
-  rate_limited: 'Gerade viele Aufnahmen auf einmal – bitte einen Moment warten.',
-  unsupported_audio: 'Dieses Aufnahmeformat kann der Server nicht speichern.',
-  audio_too_short: 'Die Aufnahme ist zu kurz.',
-  payload_too_large: 'Die Aufnahme ist zu lang. Nimm nur diesen Satz auf.',
-};
-
 export class SharingApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
   mine(): Promise<ApiResult<{ targets: ShareTarget[]; items: SharedRecording[] }>> {
-    return apiRequest(this.fetchImpl, '/api/v1/me/shared-recordings', {}, MESSAGES);
+    return apiRequest(this.fetchImpl, '/api/v1/me/shared-recordings', {}, 'sharing');
   }
 
   share(input: {
@@ -67,7 +55,7 @@ export class SharingApi {
       this.fetchImpl,
       '/api/v1/me/shared-recordings',
       { method: 'POST', body: form },
-      MESSAGES
+      'sharing'
     );
   }
 
@@ -76,7 +64,7 @@ export class SharingApi {
       this.fetchImpl,
       `/api/v1/me/shared-recordings/${encodeURIComponent(id)}`,
       { method: 'DELETE' },
-      MESSAGES
+      'sharing'
     );
   }
 
@@ -85,7 +73,7 @@ export class SharingApi {
       this.fetchImpl,
       `/api/v1/classes/${encodeURIComponent(classId)}/shared-recordings`,
       {},
-      MESSAGES
+      'sharing'
     );
   }
 
@@ -98,7 +86,7 @@ export class SharingApi {
       this.fetchImpl,
       `/api/v1/classes/${encodeURIComponent(classId)}/shared-recordings/${encodeURIComponent(id)}`,
       { method: 'PATCH', body: JSON.stringify(change) },
-      MESSAGES
+      'sharing'
     );
   }
 
@@ -111,7 +99,7 @@ export class SharingApi {
       this.fetchImpl,
       `/api/v1/classes/${encodeURIComponent(classId)}/members/${encodeURIComponent(userId)}/consent`,
       { method: 'PUT', body: JSON.stringify({ consent }) },
-      MESSAGES
+      'sharing'
     );
   }
 }

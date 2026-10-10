@@ -71,16 +71,6 @@ export interface TryResult {
   attempts: Array<{ provider: ProviderId; model: string; outcome: string }>;
 }
 
-/** API error codes in the interface language, read at call time (story 16.3). */
-const messages = (): Record<string, string> => ({
-  second_factor_required: i18n.t('admin:errors.secondFactorRequired'),
-  invalid_body: i18n.t('adminAi:errors.invalidBody'),
-  ai_paused: i18n.t('adminAi:errors.paused'),
-  ai_unavailable: i18n.t('adminAi:errors.unavailable'),
-  ai_quota: i18n.t('adminAi:errors.quota'),
-  ai_bad_request: i18n.t('adminAi:errors.badRequest'),
-});
-
 /** The AI tasks the server knows; each has a label in the `adminAi` catalogue. */
 export const AI_TASKS = [
   'tutor.converse',
@@ -149,6 +139,6 @@ export class AiAdminApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, messages());
+    return apiRequest<T>(this.fetchImpl, path, init, 'adminAi');
   }
 }

@@ -8,7 +8,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { classWithLearner } from './helpers';
 
-const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
+const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22a', 'wcag22aa'];
 
 interface Finding {
   page: string;
@@ -117,33 +117,42 @@ test('teacher pages have no serious WCAG findings', async ({ browser }) => {
   const learnerContext = await browser.newContext();
   const teacher = await teacherContext.newPage();
   const learner = await learnerContext.newPage();
-  const { classId } = await classWithLearner(teacher, learner, 'Barrierefrei 1');
-  const findings: Finding[] = [];
-  for (const path of ['/', '/classes', `/classes/${classId}`, '/settings', '/inhalte']) {
-    await teacher.goto(path);
-    findings.push(...(await audit(teacher, path)));
-  }
-  for (const tab of [
-    'Fortschritt',
-    'Aufgaben',
-    'Klassenleben',
-    'Aufnahmen',
-    'Mitglieder',
-  ]) {
-    await teacher.goto(`/classes/${classId}`);
-    const button = teacher.getByRole('tab', { name: tab });
-    if (await button.count()) {
-      await button.click();
-      findings.push(...(await audit(teacher, `/classes/:id ${tab}`)));
+  try {
+    const { classId } = await classWithLearner(teacher, learner, 'Barrierefrei 1');
+    const findings: Finding[] = [];
+    for (const path of [
+      '/',
+      '/classes',
+      `/classes/${classId}`,
+      '/settings',
+      '/inhalte',
+    ]) {
+      await teacher.goto(path);
+      findings.push(...(await audit(teacher, path)));
     }
+    for (const tab of [
+      'Fortschritt',
+      'Aufgaben',
+      'Klassenleben',
+      'Aufnahmen',
+      'Mitglieder',
+    ]) {
+      await teacher.goto(`/classes/${classId}`);
+      const button = teacher.getByRole('tab', { name: tab });
+      if (await button.count()) {
+        await button.click();
+        findings.push(...(await audit(teacher, `/classes/:id ${tab}`)));
+      }
+    }
+    await learner.goto('/');
+    findings.push(...(await audit(learner, '/ (learner in a class)')));
+    await learner.goto('/classes');
+    findings.push(...(await audit(learner, '/classes (learner)')));
+    expect(report(findings), 'serious or critical axe findings').toEqual([]);
+  } finally {
+    await teacherContext.close();
+    await learnerContext.close();
   }
-  await learner.goto('/');
-  findings.push(...(await audit(learner, '/ (learner in a class)')));
-  await learner.goto('/classes');
-  findings.push(...(await audit(learner, '/classes (learner)')));
-  expect(report(findings), 'serious or critical axe findings').toEqual([]);
-  await teacherContext.close();
-  await learnerContext.close();
 });
 
 test('the keyboard reaches the content first and always shows where it is', async ({

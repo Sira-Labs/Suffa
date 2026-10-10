@@ -6,7 +6,7 @@ same app).
 ## How it is checked
 
 - **Automated, on every CI run:** `apps/e2e/tests/a11y.spec.ts` runs axe-core 4.13
-  (`@axe-core/playwright`, tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`)
+  (`@axe-core/playwright`, tags `wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22a`, `wcag22aa`)
   against the production build with the real API, and fails on any serious or critical
   finding. It covers:
   - every learner page without an account, in the dark and the light theme: sign-in, Heute,

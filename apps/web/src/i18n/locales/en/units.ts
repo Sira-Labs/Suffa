@@ -297,6 +297,7 @@ export const units: Messages<typeof de> = {
       saving: 'Saving …',
       saved: 'Saved (revision {{revision}}).',
       order: 'The pages must begin in the order of the recording.',
+      invalid: 'The time for p. {{page}} is not a valid number of seconds.',
       none: 'No page turns set yet: the book opens at the lesson’s first page and does not turn along.',
     },
     asPdf: 'As PDF:',

@@ -208,4 +208,22 @@ describe('Medina book follows the recording', () => {
     await screen.findByRole('button', { name: /Buch folgt der Aufnahme/ });
     expect(screen.queryByRole('region', { name: /Seitenwechsel/ })).toBeNull();
   });
+
+  it('refuses a time that is not a number of seconds', async () => {
+    role.current = 'admin';
+    const fetchMock = stubApi([LESSON_3]);
+    renderLesson(3);
+    const editor = await screen.findByRole('region', {
+      name: 'Seitenwechsel festlegen (Admin)',
+    });
+    const input = within(editor).getByLabelText('Beginn S. 14 in Sekunden');
+    await userEvent.type(input, '-5');
+    await userEvent.click(
+      within(editor).getByRole('button', { name: 'Zeiten speichern' })
+    );
+    expect(
+      within(editor).getByText('Die Zeit für S. 14 ist keine gültige Sekundenzahl.')
+    ).toBeTruthy();
+    expect(fetchMock.mock.calls.some(([, init]) => init?.method === 'PUT')).toBe(false);
+  });
 });

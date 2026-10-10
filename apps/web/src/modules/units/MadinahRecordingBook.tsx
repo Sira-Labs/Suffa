@@ -302,7 +302,10 @@ function PageTurnEditor({
       const raw = times[page]?.trim();
       if (!raw) continue;
       const at = Number(raw);
-      if (!Number.isFinite(at) || at < 0) continue;
+      if (!Number.isFinite(at) || at < 0) {
+        setStatus({ kind: 'error', text: t('lessonPage.sync.invalid', { page }) });
+        return;
+      }
       starts.push({ page, at });
     }
     if (starts.some((s, i) => i > 0 && s.at <= starts[i - 1]!.at)) {

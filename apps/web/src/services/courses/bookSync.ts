@@ -96,7 +96,12 @@ export async function loadBookSync(
     if (res.ok) {
       const body: unknown = await res.json();
       if (isBookSync(body)) {
-        storage?.setItem(storageKey(course, book), JSON.stringify(body));
+        try {
+          storage?.setItem(storageKey(course, book), JSON.stringify(body));
+        } catch (error) {
+          // Storage full or blocked: the fresh answer still counts, only offline use is lost.
+          log.warn('could not keep book sync', { error: String(error) });
+        }
         return body;
       }
       log.warn('unexpected answer', { course, book });

@@ -295,6 +295,7 @@ export const units = {
       saving: 'Speichert …',
       saved: 'Gespeichert (Stand {{revision}}).',
       order: 'Die Seiten müssen in der Reihenfolge der Aufnahme beginnen.',
+      invalid: 'Die Zeit für S. {{page}} ist keine gültige Sekundenzahl.',
       none: 'Noch keine Seitenwechsel festgelegt: Das Buch öffnet sich an der ersten Seite der Lektion und blättert nicht mit.',
     },
     asPdf: 'Als PDF:',

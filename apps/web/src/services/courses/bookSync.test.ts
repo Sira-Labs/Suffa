@@ -67,4 +67,18 @@ describe('book sync', () => {
     );
     expect(await loadBookSync('madinah', 2, { fetchImpl: offline, storage })).toBeNull();
   });
+
+  it('uses a fresh answer even when the device cannot keep it', async () => {
+    const answer = { course: 'madinah', book: 1, lessons: [] };
+    const full = {
+      getItem: () => null,
+      setItem: () => {
+        throw new DOMException('full', 'QuotaExceededError');
+      },
+    };
+    const online = vi.fn(async () => new Response(JSON.stringify(answer)));
+    expect(
+      await loadBookSync('madinah', 1, { fetchImpl: online, storage: full })
+    ).toEqual(answer);
+  });
 });

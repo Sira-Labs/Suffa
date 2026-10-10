@@ -4,7 +4,14 @@
  */
 export type ApiResult<T> =
   | { ok: true; value: T }
-  | { ok: false; status: number; code: string; message: string };
+  | {
+      ok: false;
+      status: number;
+      code: string;
+      message: string;
+      /** Details some endpoints send along (e.g. which fields failed validation). */
+      issues?: string[];
+    };
 
 export type Fetch = typeof fetch;
 
@@ -37,14 +44,21 @@ export async function apiRequest<T>(
     return { ok: false, status: 0, code: 'offline', message: 'Keine Verbindung.' };
   }
   if (response.status === 204) return { ok: true, value: undefined as T };
-  const body = (await response.json().catch(() => null)) as { error?: string } | null;
+  const body = (await response.json().catch(() => null)) as {
+    error?: string;
+    issues?: unknown;
+  } | null;
   if (!response.ok) {
     const code = body?.error ?? '';
+    const issues = Array.isArray(body?.issues)
+      ? body.issues.filter((i): i is string => typeof i === 'string')
+      : undefined;
     return {
       ok: false,
       status: response.status,
       code,
       message: messages[code] ?? COMMON[code] ?? `Serverfehler (${response.status}).`,
+      ...(issues ? { issues } : {}),
     };
   }
   return { ok: true, value: body as T };

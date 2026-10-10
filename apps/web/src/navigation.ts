@@ -195,7 +195,7 @@ export function navItemsFor(role: string | null | undefined): NavItem[] {
 export const MORE_PATH = '/more';
 
 /** Pages reached from a "Mehr" page that are not listed there themselves. */
-const MORE_SUBPAGES: readonly string[] = ['/badges', '/sources', '/admin'];
+const MORE_SUBPAGES: readonly string[] = ['/badges', '/sources', '/admin', '/inhalte'];
 
 /** Full-screen routes without navigation (one task at a time). */
 export const FOCUS_PATHS: readonly string[] = ['/review', '/milestone', '/login'];

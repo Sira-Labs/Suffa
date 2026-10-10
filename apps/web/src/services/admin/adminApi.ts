@@ -109,6 +109,24 @@ export function describeAudit(entry: AuditEntry): string {
       return `Zertifikat Einheit ${String(d.unit ?? '')} vergeben (${String(d.mastery ?? '')} %)`;
     case 'certificate.revoked':
       return `Zertifikat Einheit ${String(d.unit ?? '')} zurückgenommen`;
+    case 'content.units_seeded':
+      return `Inhalte übernommen: ${Array.isArray(d.units) ? d.units.length : ''} Einheit(en)`;
+    case 'content.unit_saved': {
+      const c = (d.counts ?? {}) as {
+        added?: number;
+        removed?: number;
+        changed?: number;
+      };
+      return `Entwurf gespeichert (+${c.added ?? 0} neu, ${c.changed ?? 0} geändert, −${c.removed ?? 0} entfernt)`;
+    }
+    case 'content.unit_submitted':
+      return 'Einheit zur Prüfung gegeben';
+    case 'content.unit_checked':
+      return 'Einheit als geprüft markiert';
+    case 'content.unit_returned':
+      return `Einheit zurückgegeben: ${String(d.note ?? '')}`;
+    case 'content.unit_published':
+      return 'Einheit veröffentlicht';
     case 'class.league.settings':
       return `Wochenliga ${d.enabled ? 'eingeschaltet' : 'ausgeschaltet'}${d.minors ? ' (Klasse mit Minderjährigen)' : ''}`;
     default:

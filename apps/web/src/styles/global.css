@@ -2892,3 +2892,57 @@ button.quiz-option:disabled {
     display: none;
   }
 }
+
+/* Content CMS (story 16.1): the unit editor and the review list. */
+.cms-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  min-width: 0;
+}
+.cms-item > legend {
+  padding: 0 0.35rem;
+  font-size: 0.85rem;
+}
+.cms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.6rem;
+  align-items: end;
+}
+.cms-line {
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border);
+}
+.cms-field {
+  gap: 0.2rem;
+  min-width: 0;
+}
+.cms-field > label {
+  font-size: 0.85rem;
+}
+.cms-textarea {
+  min-height: 5.5rem;
+  padding: 0.6rem 1rem;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+.cms-unit-button {
+  width: 100%;
+  text-align: start;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.cms-actions {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0.5rem 0;
+  background: var(--bg);
+}

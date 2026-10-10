@@ -13,13 +13,27 @@ const ADMIN_ITEM: NavItem = {
   group: 'me',
 };
 
+/** Teachers and admins check the course content (story 16.1). */
+const CONTENT_ITEM: NavItem = {
+  to: '/inhalte',
+  label: 'Inhalte prüfen',
+  description: 'Einheiten lesen und als geprüft markieren',
+  icon: 'read',
+  tier: 'secondary',
+  group: 'me',
+};
+
 const GROUPS: readonly MoreGroup[] = ['media', 'help', 'me'];
 
 /** Mobile overflow page: media, help and the learner's own pages, in three groups. */
 export function More() {
-  const isAdmin = useRole() === 'admin';
+  const role = useRole();
   const items = NAV_ITEMS.filter((item) => item.tier === 'secondary');
-  const all = isAdmin ? [...items, ADMIN_ITEM] : items;
+  const all = [
+    ...items,
+    ...(role === 'teacher' || role === 'admin' ? [CONTENT_ITEM] : []),
+    ...(role === 'admin' ? [ADMIN_ITEM] : []),
+  ];
   return (
     <div className="stack" style={{ gap: '1.25rem' }}>
       <h1>Mehr</h1>

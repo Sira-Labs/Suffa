@@ -24,6 +24,7 @@ import { Milestone, UnitPath, UnitStation, Units } from './modules/units';
 import { MadinahLessonPage } from './modules/units/MadinahLesson';
 import { Sources } from './modules/sources';
 import { Admin } from './modules/admin';
+import { ContentReview } from './modules/content';
 import { SignIn } from './modules/account';
 import { Classes, Join } from './modules/classes';
 import { Tutor } from './modules/tutor';
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
       { path: 'settings', element: <Settings /> },
       { path: 'sources', element: <Sources /> },
       { path: 'admin', element: <Admin /> },
+      { path: 'inhalte', element: <ContentReview /> },
       { path: 'classes', element: <Classes /> },
       { path: 'classes/:id', element: <ClassPage /> },
       { path: 'classes/:id/recordings/:mediaId', element: <RecordingPlayer /> },

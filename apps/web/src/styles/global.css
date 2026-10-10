@@ -69,6 +69,17 @@
   box-sizing: border-box;
 }
 
+/* Phones: the floating bottom bar never covers a focused control (WCAG 2.4.11); scrolling to
+   a focus target keeps this much room below it. */
+html {
+  scroll-padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 960px) {
+  html {
+    scroll-padding-bottom: 0;
+  }
+}
+
 html,
 body,
 #root {
@@ -304,6 +315,29 @@ h3 {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
+}
+.paper .eyebrow {
+  color: var(--on-paper-muted);
+}
+
+/* "Zum Inhalt springen": hidden until the keyboard reaches it (WCAG 2.4.1). */
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 100;
+  padding: 0.6rem 1rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--bg);
+  font-weight: 700;
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+.app-main:focus {
+  outline: none;
 }
 
 /* ---------- Controls ---------- */
@@ -1112,8 +1146,10 @@ textarea.input {
   background: var(--bg-elev);
   border: 1px solid var(--accent);
 }
-.path-station-upcoming .path-card {
-  opacity: 0.75;
+/* Upcoming stations look quieter through a muted title, not transparency: their text keeps
+   full contrast (WCAG 1.4.3). */
+.path-station-upcoming .path-card-title {
+  color: var(--text-muted);
 }
 /* Optional stations (page videos): dashed marker, never "done" or "current". */
 .path-station-optional .path-marker {
@@ -1345,7 +1381,11 @@ textarea.input {
   color: var(--warn);
 }
 .unit-tile-locked {
-  opacity: 0.55;
+  background: transparent;
+  border-style: dashed;
+}
+.unit-tile-locked .unit-tile-label {
+  color: var(--text-muted);
 }
 .unit-tile-locked .unit-tile-label svg {
   color: var(--text-muted);
@@ -1471,8 +1511,9 @@ textarea.input {
   font-size: 0.75em;
   color: var(--text-muted);
 }
+/* Locked stages look quieter without transparency, so their text keeps its contrast. */
 .stage-card-locked {
-  opacity: 0.75;
+  border-style: dashed;
 }
 .stage-badge {
   font-size: 0.8rem;
@@ -1597,7 +1638,6 @@ textarea.input {
 .write-step-count {
   margin-inline-start: 0.4rem;
   font-size: 0.8rem;
-  opacity: 0.8;
   font-variant-numeric: tabular-nums;
 }
 
@@ -2610,7 +2650,9 @@ button.quiz-option:disabled {
 }
 
 .quiz-option-dim {
-  opacity: 0.35;
+  /* Wrong answers step back by losing their colour, not their contrast (WCAG 1.4.3). */
+  filter: grayscale(1);
+  text-decoration: line-through;
 }
 
 .quiz-count {

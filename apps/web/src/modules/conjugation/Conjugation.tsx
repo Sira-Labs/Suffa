@@ -50,7 +50,12 @@ export function Conjugation({ scope }: { scope?: UnitPracticeScope } = {}) {
   const verb = verbs.find((v) => v.id === verbId) ?? verbs[0];
 
   if (!verb) {
-    return <p className="muted">{t('noVerbs')}</p>;
+    return (
+      <div className="stack">
+        {!scope && <h1 style={{ margin: 0 }}>{t('title')}</h1>}
+        <p className="muted">{t('noVerbs')}</p>
+      </div>
+    );
   }
 
   return (

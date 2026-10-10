@@ -11,5 +11,6 @@ export const common = {
   signOut: 'Abmelden',
   close: 'Schließen',
   back: 'Zurück',
+  skipToContent: 'Zum Inhalt springen',
   thisDevice: 'dieses Gerät',
 };

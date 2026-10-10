@@ -142,6 +142,26 @@ function Brand() {
   );
 }
 
+/**
+ * "Zum Inhalt springen" (WCAG 2.4.1): the first stop of the keyboard, visible once focused;
+ * moves the focus past the navigation into the page.
+ */
+function SkipLink() {
+  const { t } = useTranslation('common');
+  return (
+    <a
+      className="skip-link"
+      href="#main"
+      onClick={(event) => {
+        event.preventDefault();
+        document.getElementById('main')?.focus();
+      }}
+    >
+      {t('skipToContent')}
+    </a>
+  );
+}
+
 /** Layout: bottom bar on phones, sidebar on wide screens (one nav, restyled by CSS). */
 function Shell() {
   const { t } = useTranslation(['common', 'nav']);
@@ -163,6 +183,7 @@ function Shell() {
   }
   return (
     <div className="app-shell">
+      <SkipLink />
       <nav className="app-nav" aria-label={t('nav:main')}>
         <div className="nav-brand">
           <Brand />
@@ -203,7 +224,7 @@ function Shell() {
           <Brand />
           <SyncBadge />
         </header>
-        <main className="app-main">
+        <main className="app-main" id="main" tabIndex={-1}>
           {/* New pages start at the top; back/forward restores the old position. */}
           <ScrollRestoration />
           <Outlet />

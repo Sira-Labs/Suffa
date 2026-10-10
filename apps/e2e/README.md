@@ -11,6 +11,9 @@ database:
 - a live quiz with the projector and a phone.
 - the learner's main pages in English, with no German interface words outside course
   content (marked `lang="de"`).
+- accessibility (WCAG 2.2 AA): axe on the main pages in both themes and for a teacher, the
+  skip link and visible focus, reflow at 320 px (`a11y.spec.ts`, audit in
+  `docs/accessibility.md`).
 
 Data a learner builds up over weeks (mature cards, finished daily quests) is written to the
 test database directly. Desktop Chrome runs all flows; a phone profile (Pixel 7) runs those

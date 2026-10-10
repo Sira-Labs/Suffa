@@ -63,6 +63,8 @@ export function ReviewSession({
 }: ReviewSessionProps) {
   const { t } = useTranslation('vocab');
   const focus = variant === 'focus';
+  // The full-screen session is a page of its own: its title is the page's main heading.
+  const Heading = focus ? 'h1' : 'h2';
   const userVocab = useContentStore((s) => s.userVocab);
   const showTr = useSettingsStore((s) => s.settings.showTransliteration);
   const review = useSrsStore((s) => s.review);
@@ -108,7 +110,7 @@ export function ReviewSession({
   if (!card || !resolved) {
     return (
       <div className={`review-stage stack${focus ? ' review-stage-focus' : ' card'}`}>
-        <h2 className={focus ? 'visually-hidden' : undefined}>{title}</h2>
+        <Heading className={focus ? 'visually-hidden' : undefined}>{title}</Heading>
         <div className="review-empty">
           <span className="review-empty-icon" aria-hidden>
             <Icon name="check" size={32} strokeWidth={2.5} />
@@ -166,9 +168,9 @@ export function ReviewSession({
   return (
     <div className={`review-stage stack${focus ? ' review-stage-focus' : ''}`}>
       <div className="review-progress-row">
-        <h2 className={focus ? 'visually-hidden' : undefined} style={{ margin: 0 }}>
+        <Heading className={focus ? 'visually-hidden' : undefined} style={{ margin: 0 }}>
           {title}
-        </h2>
+        </Heading>
         <div
           className="review-progress"
           role="progressbar"

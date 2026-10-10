@@ -24,11 +24,8 @@ test('a setting changed on one device arrives on another @mobile', async ({
     .toBe(3);
 
   // … and the second device pulls it after signing in with the same account.
+  // The first sync pushes the laptop's new review cards before it pulls the settings; a
+  // reload would restart it, so the test waits for the pull to land in the open page.
   await signedInOnSettings(laptop, email);
-  await expect
-    .poll(async () => {
-      await laptop.reload();
-      return laptop.getByLabel(/Wochenziel/).inputValue();
-    })
-    .toBe('3');
+  await expect(laptop.getByLabel(/Wochenziel/)).toHaveValue('3', { timeout: 30_000 });
 });

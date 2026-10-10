@@ -8,6 +8,7 @@ import {
   type EngagementSummary,
 } from '@suffa/engagement';
 import { browserTimeZone } from '@/modules/settings/devices';
+import { useActiveCourse } from '@/services/courses';
 import { reconcile } from '@/services/engagement/reconcile';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import {
@@ -44,6 +45,8 @@ export function useLocalEngagement(now?: Date): EngagementSummary {
   const goal = useSettingsStore((s) => s.settings.weeklyGoal);
   const tutor = useEngagementStore((s) => s.tutorAvailable);
   const videos = useEngagementStore((s) => s.videosAvailable);
+  const videoCourses = useEngagementStore((s) => s.videoCourses);
+  const course = useActiveCourse();
   const timeZone = useLearnerTimeZone();
   const minute = now ?? new Date();
   // Recomputed when data changes, and at least once per rendered minute (day change).
@@ -64,7 +67,7 @@ export function useLocalEngagement(now?: Date): EngagementSummary {
           timeZone,
           weeklyGoal: isWeeklyGoal(goal) ? goal : DEFAULT_WEEKLY_GOAL,
           now: new Date(stamp * 60_000),
-          features: { tutor, videos },
+          features: { tutor, videos, course, videoCourses: videoCourses ?? undefined },
         }
       ),
     [
@@ -79,6 +82,8 @@ export function useLocalEngagement(now?: Date): EngagementSummary {
       stamp,
       tutor,
       videos,
+      course,
+      videoCourses,
     ]
   );
 }

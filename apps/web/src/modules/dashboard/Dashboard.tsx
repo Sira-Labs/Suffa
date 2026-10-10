@@ -7,6 +7,7 @@ import { isTtsSupported, speakArabic } from '@/services/speech';
 import { weakCards } from '@/services/stats';
 import { localDay, wordOfTheDay } from '@/services/today';
 import { XP_RULES } from '@/services/engagement/xp';
+import { madinahProgress, useActiveCourse } from '@/services/courses';
 import { ForgettingReminder } from './ForgettingReminder';
 import {
   useCelebrationStore,
@@ -50,6 +51,9 @@ function LearnerHome() {
   const enrollments = useEnrollmentStore((s) => s.enrollments);
   const exams = useEnrollmentStore((s) => s.exams);
   const activeUnit = currentUnit(enrollments, exams);
+  // Quests lead into the learner's course: the next Medina lesson, or the current unit.
+  const course = useActiveCourse();
+  const questUnit = course === 'madinah' ? nextMadinahUnit(exams) : (activeUnit ?? 1);
   const checkIns = useCheckInStore((s) => s.checkIns);
   const checkIn = useCheckInStore((s) => s.checkIn);
   const celebrate = useCelebrationStore((s) => s.show);
@@ -109,7 +113,7 @@ function LearnerHome() {
       <CurrentUnitCard />
 
       <div className="today-grid">
-        <TodayQuests summary={engagement} unit={activeUnit ?? 1} />
+        <TodayQuests summary={engagement} unit={questUnit} />
 
         {word && (
           <section
@@ -178,4 +182,10 @@ function LearnerHome() {
       </Link>
     </div>
   );
+}
+
+/** The Medina lesson to practise: the first not passed yet, else the last one. */
+function nextMadinahUnit(exams: Parameters<typeof madinahProgress>[0]): number {
+  const { next, lessons } = madinahProgress(exams);
+  return (next ?? lessons[lessons.length - 1])?.lesson.unit ?? 101;
 }

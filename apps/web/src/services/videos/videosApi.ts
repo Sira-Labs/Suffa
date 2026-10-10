@@ -12,7 +12,8 @@ export interface VideoLesson {
   durationSec: number | null;
   thumbnailUrl: string | null;
   unit: number | null;
-  channel: { name: string };
+  /** `course`: the course the channel teaches (ADR-0025). */
+  channel: { name: string; course?: CourseId };
   /** The creator allowed transcripts and exercises. */
   interactive: boolean;
 }

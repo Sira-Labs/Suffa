@@ -69,14 +69,17 @@ function readStored(
   course: string,
   book: number
 ): BookSync | null {
-  const raw = storage?.getItem(storageKey(course, book));
-  if (!raw) return null;
   try {
+    const raw = storage?.getItem(storageKey(course, book));
+    if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
     return isBookSync(parsed) ? parsed : null;
   } catch (error) {
-    if (error instanceof SyntaxError) return null;
-    throw error;
+    // Malformed JSON or storage that refuses reading: no kept copy.
+    if (!(error instanceof SyntaxError)) {
+      log.warn('could not read kept book sync', { error: String(error) });
+    }
+    return null;
   }
 }
 

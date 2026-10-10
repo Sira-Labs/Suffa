@@ -81,4 +81,19 @@ describe('book sync', () => {
       await loadBookSync('madinah', 1, { fetchImpl: online, storage: full })
     ).toEqual(answer);
   });
+
+  it('answers without a kept copy when storage refuses reading', async () => {
+    const blocked = {
+      getItem: () => {
+        throw new DOMException('denied', 'SecurityError');
+      },
+      setItem: () => undefined,
+    };
+    const offline = vi.fn(async () => {
+      throw new TypeError('offline');
+    });
+    expect(
+      await loadBookSync('madinah', 1, { fetchImpl: offline, storage: blocked })
+    ).toBeNull();
+  });
 });

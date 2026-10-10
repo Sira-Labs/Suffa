@@ -317,6 +317,11 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     path: '/api/v1/content/units/:course/:unit/translate',
     action: 'content:write',
   },
+  {
+    method: 'PUT',
+    path: '/api/v1/book-sync/:course/:book/:lesson',
+    action: 'content:write',
+  },
 ];
 
 /**
@@ -339,6 +344,8 @@ export const PUBLIC_ROUTES: readonly string[] = [
   // Published course content, as the app itself ships it (story 16.2).
   'GET /api/v1/content/manifest',
   'GET /api/v1/content/bundles/:version',
+  // When the Medina book's pages and lines come in the author's recording (no book text).
+  'GET /api/v1/book-sync/:course/:book',
   // Universal Links / App Links files for the native app (ADR-0019).
   'GET /api/v1/app-links/apple-app-site-association',
   'GET /api/v1/app-links/assetlinks.json',

@@ -2,8 +2,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { registerSW } from 'virtual:pwa-register';
+import { CONTENT_BUNDLE_VERSION } from './content';
 import { installNativeBridge, listenForAppLinks } from './native/install';
 import { router } from './router';
+import { updateContentBundle } from './services/content/bundleUpdater';
 import { initErrorTracking } from './services/errorTracking';
 import { logger } from './services/logger';
 import { ApiSyncProvider } from './services/sync/ApiSyncProvider';
@@ -50,6 +52,11 @@ async function start(): Promise<void> {
 
   // After the first render, so startup never waits for the network.
   void initErrorTracking();
+  // Newer published content is fetched in the background and used from the next start on
+  // (story 16.2), like a new app version; offline, the next connection tries again.
+  const checkContent = () => void updateContentBundle({ inUse: CONTENT_BUNDLE_VERSION });
+  checkContent();
+  window.addEventListener('online', checkContent);
 }
 
 void start();

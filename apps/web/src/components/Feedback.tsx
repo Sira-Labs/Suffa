@@ -12,6 +12,8 @@ interface FeedbackProps {
   diff?: DiffSegment[];
   /** Didactic explanation / hint (immediate, specific feedback). */
   explanation?: string;
+  /** Language of the explanation when it is course content (a German meaning: "de"). */
+  explanationLang?: string;
 }
 
 const VERDICT: Record<
@@ -33,6 +35,7 @@ export function Feedback({
   alsoCorrect = [],
   diff,
   explanation,
+  explanationLang,
 }: FeedbackProps) {
   const { t } = useTranslation('components');
   const v = VERDICT[verdict];
@@ -40,7 +43,8 @@ export function Feedback({
     verdict === 'wrong' || verdict === 'typo' || verdict === 'tashkil-tolerant';
   const expectedStyle = expectedIsArabic
     ? { className: 'arabic-inline', style: { fontSize: '1.4rem' } }
-    : { style: { fontSize: '1.1rem', fontWeight: 600 } };
+    : // A Latin answer is a German meaning: course content until story 16.4.
+      { style: { fontSize: '1.1rem', fontWeight: 600 }, lang: 'de' };
   return (
     <div className="stack" style={{ gap: '0.5rem' }} role="status" aria-live="polite">
       <strong className={v.cls}>{t(`feedback.${v.key}`)}</strong>
@@ -55,7 +59,9 @@ export function Feedback({
       {!showExpected && alsoCorrect.length > 0 && (
         <div>
           <span className="muted">{t('feedback.alsoCorrect')}</span>
-          <span style={{ fontWeight: 600 }}>{alsoCorrect.join(', ')}</span>
+          <span style={{ fontWeight: 600 }} lang="de">
+            {alsoCorrect.join(', ')}
+          </span>
         </div>
       )}
       {diff && verdict === 'wrong' && (
@@ -75,7 +81,7 @@ export function Feedback({
         </div>
       )}
       {explanation && (
-        <p className="muted" style={{ margin: 0 }}>
+        <p className="muted" style={{ margin: 0 }} lang={explanationLang}>
           {explanation}
         </p>
       )}

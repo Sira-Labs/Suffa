@@ -252,8 +252,8 @@ export const units = {
     },
     credit:
       'Bereitgestellt von <1>AbdurRahman.org</1> und archive.org, mit freundlicher Erlaubnis von Dr. V. Abdur Rahim – nur zur persönlichen Nutzung. <2>Alle Quellen & Lizenzen</2>',
-    lessonWords_one: '{{topic}} · {{count}} Wort',
-    lessonWords_other: '{{topic}} · {{count}} Wörter',
+    lessonWords_one: '<1>{{topic}}</1> · {{count}} Wort',
+    lessonWords_other: '<1>{{topic}}</1> · {{count}} Wörter',
     lessonPage: 'Buch S. {{page}} · Aufnahme',
   },
   lessonPage: {

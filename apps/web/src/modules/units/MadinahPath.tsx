@@ -97,12 +97,18 @@ function MadinahBookPath({ book }: { book: MadinahBook }) {
                 <span className="stack" style={{ gap: 0, flex: 1 }}>
                   <strong>{t('lesson', { n: lesson.lesson })}</strong>
                   <span className="muted">
-                    {content
-                      ? t('madinah.lessonWords', {
-                          topic: content.topic,
-                          count: content.words.length,
-                        })
-                      : t('madinah.lessonPage', { page: lesson.page })}
+                    {content ? (
+                      // The topic is course content: German until story 16.4.
+                      <Trans
+                        t={t}
+                        i18nKey="madinah.lessonWords"
+                        values={{ topic: content.topic }}
+                        count={content.words.length}
+                        components={{ 1: <span lang="de" /> }}
+                      />
+                    ) : (
+                      t('madinah.lessonPage', { page: lesson.page })
+                    )}
                   </span>
                 </span>
                 <Icon name="arrowRight" />

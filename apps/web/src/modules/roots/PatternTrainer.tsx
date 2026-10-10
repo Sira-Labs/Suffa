@@ -74,7 +74,7 @@ export function PatternTrainer() {
               <ArabicText size="lg">{question.pattern.wazn}</ArabicText>
             </div>
           </div>
-          <p className="muted" style={{ margin: 0, textAlign: 'center' }}>
+          <p className="muted" style={{ margin: 0, textAlign: 'center' }} lang="de">
             {question.pattern.de}
           </p>
           <div
@@ -119,7 +119,7 @@ export function PatternTrainer() {
                   : t('trainer.wrong')}
               </span>
               <RootWord word={question.answer.ar} root={question.answer.root} size="lg" />
-              <span>{question.answer.de}</span>
+              <span lang="de">{question.answer.de}</span>
               <button type="button" className="btn btn-primary" onClick={next}>
                 {t('trainer.nextWord')}
               </button>

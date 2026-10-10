@@ -45,7 +45,13 @@ function MadinahLessonCard() {
       </span>
       <h2 id="current-unit" style={{ margin: 0 }}>
         {t('units:lesson', { n: lesson.lesson })}
-        {topic && <span className="muted current-unit-name"> · {topic}</span>}
+        {/* Lesson topics and unit titles are course content: German until story 16.4. */}
+        {topic && (
+          <span className="muted current-unit-name">
+            {' · '}
+            <span lang="de">{topic}</span>
+          </span>
+        )}
       </h2>
       <p className="muted" style={{ margin: 0 }}>
         {passed === 0
@@ -84,7 +90,12 @@ function BookUnitCard() {
       </span>
       <h2 id="current-unit" style={{ margin: 0 }}>
         {t('units:unit', { n: unit.unit })}
-        {name && <span className="muted current-unit-name"> · {name}</span>}
+        {name && (
+          <span className="muted current-unit-name">
+            {' · '}
+            <span lang="de">{name}</span>
+          </span>
+        )}
       </h2>
       {started ? (
         <>

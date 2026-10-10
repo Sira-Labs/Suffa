@@ -174,7 +174,7 @@ export function MadinahLessonTest({
                   de: current.hint ?? '',
                 }}
               />
-              <p className="muted" style={{ margin: 0, textAlign: 'center' }}>
+              <p className="muted" style={{ margin: 0, textAlign: 'center' }} lang="de">
                 {current.hint}
               </p>
             </>
@@ -189,7 +189,8 @@ export function MadinahLessonTest({
               <button
                 key={option}
                 type="button"
-                lang={current.kind === 'gap' ? 'ar' : undefined}
+                // Gap answers are Arabic; meanings are German course content.
+                lang={current.kind === 'gap' ? 'ar' : 'de'}
                 dir={current.kind === 'gap' ? 'rtl' : undefined}
                 className={`btn pattern-option ${current.kind === 'gap' ? 'arabic-inline' : ''} ${option === chosen ? 'chosen' : ''}`}
                 aria-pressed={option === chosen}

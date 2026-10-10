@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import type {
   DiscoverCatalog,
   DiscoverCategory,
@@ -10,6 +10,7 @@ import { Icon } from '@/components/Icon';
 import i18n from '@/i18n';
 import { logger } from '@/services/logger';
 import {
+  channelLanguageKey,
   discoverEmbedUrl,
   formatPosition,
   watchedPercent,
@@ -130,8 +131,8 @@ export function Discover() {
             </button>
           </div>
           <ResumablePlayer key={playing.id} entry={playing} />
-          <strong>{playing.title}</strong>
-          <span className="muted" style={{ fontSize: '0.9rem' }}>
+          <strong translate="no">{playing.title}</strong>
+          <span className="muted" style={{ fontSize: '0.9rem' }} translate="no">
             {playing.channel.title}
           </span>
           <ItemActions entry={playing} />
@@ -178,14 +179,17 @@ export function Discover() {
           <span className="eyebrow" style={{ color: 'var(--accent-2)' }}>
             {t('weeklyPick')}
           </span>
-          <h2 id="pick-title" style={{ margin: 0 }}>
+          <h2 id="pick-title" style={{ margin: 0 }} translate="no">
             {pick.title}
           </h2>
           <span className="muted">
-            {pick.channel.title}
+            <span translate="no">{pick.channel.title}</span>
             {pick.minutes ? ` · ${t('minutes', { minutes: pick.minutes })}` : ''}
           </span>
-          <p style={{ margin: 0 }}>{pick.why}</p>
+          {/* Our note on the pick is course content, German until story 16.4. */}
+          <p style={{ margin: 0 }} lang="de">
+            {pick.why}
+          </p>
         </section>
       )}
 
@@ -403,17 +407,31 @@ function DiscoverCard({
           variety: channel.variety,
         })}
       </span>
-      <strong>{entry.title}</strong>
+      <strong translate="no">{entry.title}</strong>
       <span className="muted" style={{ fontSize: '0.9rem' }}>
-        <a href={channel.url} target="_blank" rel="noreferrer">
+        <a href={channel.url} target="_blank" rel="noreferrer" translate="no">
           {channel.title}
         </a>{' '}
-        {t('inLanguage', { language: channel.language })}
+        {t('inLanguage', { language: languageName(channel) })}
       </span>
       <p className="muted" style={{ margin: 0, fontStyle: 'italic' }}>
-        {t('why', { why: entry.why })}
+        {/* Our note on the entry is course content, German until story 16.4. */}
+        <Trans
+          t={t}
+          i18nKey="why"
+          values={{ why: entry.why }}
+          components={{ 1: <span lang="de" /> }}
+        />
       </p>
       <ItemActions entry={entry} />
     </li>
   );
+}
+
+/** A channel's language of instruction in the interface language. */
+function languageName(channel: DiscoverEntry['channel']): string {
+  const key = channelLanguageKey(channel);
+  return key
+    ? i18n.t(`discover:languages.${key}` as 'discover:languages.de')
+    : channel.language;
 }

@@ -102,7 +102,9 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
                   height={180}
                 />
               )}
-              <strong dir="auto">{v.title}</strong>
+              <strong dir="auto" translate="no">
+                {v.title}
+              </strong>
               <span className="muted">
                 {v.unit ? `${unitLabel(v.unit)} · ` : ''}
                 {duration(v.durationSec)}

@@ -41,5 +41,12 @@ export const discover = {
   watched: '{{title}}: {{percent}} % geschaut',
   meta: '{{category}} · Stufe {{level}} · {{variety}}',
   inLanguage: '· auf {{language}}',
-  why: '„{{why}}“',
+  why: '„<1>{{why}}</1>“',
+  /** Languages of instruction, as the catalog names them. */
+  languages: {
+    de: 'Deutsch',
+    en: 'Englisch',
+    ar: 'Arabisch',
+    arPictures: 'Arabisch (mit Bildern)',
+  },
 };

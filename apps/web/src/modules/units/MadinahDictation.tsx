@@ -146,6 +146,7 @@ export function MadinahDictation({
               expected={current.ar}
               diff={diffArabic(value, current.ar)}
               explanation={current.de}
+              explanationLang="de"
             />
           )}
           <p className="muted" style={{ margin: 0 }}>

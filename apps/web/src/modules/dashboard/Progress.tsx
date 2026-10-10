@@ -203,7 +203,9 @@ function WeakWords({ cards }: { cards: SrsCard[] }) {
                 <span lang="ar" dir="rtl" className="arabic-inline">
                   {w.ar}
                 </span>
-                <span className="muted">{w.de}</span>
+                <span className="muted" lang="de">
+                  {w.de}
+                </span>
               </li>
             ))}
           </ul>

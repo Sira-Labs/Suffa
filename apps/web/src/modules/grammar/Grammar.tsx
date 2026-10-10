@@ -92,14 +92,15 @@ function RuleCard({ point }: { point: GrammatikPunkt }) {
   const { t } = useTranslation('grammar');
   return (
     <section className="card stack grammar-rule" aria-labelledby={`${point.id}-title`}>
-      <h2 id={`${point.id}-title`} style={{ margin: 0 }}>
+      {/* The rule is course content: German until story 16.4. */}
+      <h2 id={`${point.id}-title`} style={{ margin: 0 }} lang="de">
         {point.titel}
       </h2>
-      <p className="grammar-rule-line">
+      <p className="grammar-rule-line" lang="de">
         <Mixed text={point.regel} />
       </p>
       {point.erklaerung.map((paragraph) => (
-        <p key={paragraph} style={{ margin: 0 }}>
+        <p key={paragraph} style={{ margin: 0 }} lang="de">
           <Mixed text={paragraph} />
         </p>
       ))}
@@ -113,7 +114,9 @@ function RuleCard({ point }: { point: GrammatikPunkt }) {
               aria-label={t('listen', { example: example.de })}
             >
               <ArabicText>{example.ar}</ArabicText>
-              <span className="muted">{example.de}</span>
+              <span className="muted" lang="de">
+                {example.de}
+              </span>
             </button>
           </li>
         ))}

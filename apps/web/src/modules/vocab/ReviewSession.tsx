@@ -184,7 +184,13 @@ export function ReviewSession({
         {resolved.promptIsArabic ? (
           <ArabicText size={focus ? 'hero' : 'lg'}>{resolved.prompt}</ArabicText>
         ) : (
-          <p className="review-prompt-latin">{resolved.prompt}</p>
+          // A German meaning on its own is course content (German until story 16.4).
+          <p
+            className="review-prompt-latin"
+            lang={resolved.kind === 'vocab_de_ar' ? 'de' : undefined}
+          >
+            {resolved.prompt}
+          </p>
         )}
         {showTr && resolved.transliteration && phase === 'graded' && (
           <em className="muted">[{resolved.transliteration}]</em>
@@ -241,6 +247,7 @@ export function ReviewSession({
                 key={choice}
                 className={`btn btn-lg ${resolved.answerIsArabic ? 'arabic-inline' : ''}`}
                 style={{ fontSize: '1.3rem' }}
+                lang={resolved.answerIsArabic ? 'ar' : 'de'}
                 onClick={() => check(choice)}
               >
                 {choice}

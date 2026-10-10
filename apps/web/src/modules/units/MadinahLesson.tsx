@@ -55,7 +55,12 @@ export function MadinahLessonPage() {
             {lesson.title}
           </span>
         </h1>
-        {content && <p style={{ margin: 0 }}>{content.topic}</p>}
+        {/* Our lesson content (topic, meanings, grammar) is German until story 16.4. */}
+        {content && (
+          <p style={{ margin: 0 }} lang="de">
+            {content.topic}
+          </p>
+        )}
       </header>
 
       {content ? (
@@ -173,7 +178,9 @@ function WordList({ words }: { words: MadinahWord[] }) {
               onClick={() => speakArabic(w.ar)}
             >
               <ArabicText size="lg">{w.ar}</ArabicText>
-              <span className="muted">{w.de}</span>
+              <span className="muted" lang="de">
+                {w.de}
+              </span>
             </button>
           </li>
         ))}
@@ -184,7 +191,7 @@ function WordList({ words }: { words: MadinahWord[] }) {
 
 function GrammarCard({ point }: { point: MadinahGrammar }) {
   return (
-    <article className="card stack" style={{ gap: '0.4rem' }}>
+    <article className="card stack" style={{ gap: '0.4rem' }} lang="de">
       <strong>{point.title}</strong>
       <p style={{ margin: 0 }}>{point.text}</p>
       <ul

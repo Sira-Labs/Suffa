@@ -190,7 +190,8 @@ function UnitTitle({ title, unit }: { title: string | null; unit: number }) {
           {ar}
         </span>
       )}
-      <span>{de}</span>
+      {/* The unit title is course content: German until story 16.4. */}
+      <span lang="de">{de}</span>
     </h1>
   );
 }

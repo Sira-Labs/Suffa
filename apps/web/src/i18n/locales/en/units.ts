@@ -254,8 +254,8 @@ export const units: Messages<typeof de> = {
     },
     credit:
       'Provided by <1>AbdurRahman.org</1> and archive.org, with the kind permission of Dr V. Abdur Rahim – for personal use only. <2>All sources & licences</2>',
-    lessonWords_one: '{{topic}} · {{count}} word',
-    lessonWords_other: '{{topic}} · {{count}} words',
+    lessonWords_one: '<1>{{topic}}</1> · {{count}} word',
+    lessonWords_other: '<1>{{topic}}</1> · {{count}} words',
     lessonPage: 'Book p. {{page}} · recording',
   },
   lessonPage: {

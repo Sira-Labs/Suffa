@@ -39,7 +39,8 @@ export function WordExample({ vocabId }: { vocabId: string }) {
       <ArabicText onClick={isTtsSupported() ? () => speakArabic(example.ar) : undefined}>
         {example.ar}
       </ArabicText>
-      <span>{example.de}</span>
+      {/* The translation is course content: German until story 16.4. */}
+      <span lang="de">{example.de}</span>
       {example.quelle === 'suffa' || !example.tatoeba ? (
         <figcaption className="muted">{t('example.own')}</figcaption>
       ) : (

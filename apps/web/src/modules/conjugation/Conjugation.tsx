@@ -74,7 +74,9 @@ export function Conjugation({ scope }: { scope?: UnitPracticeScope } = {}) {
             <ArabicText size="lg" onClick={() => speakArabic(verb.lemma)}>
               {verb.lemma}
             </ArabicText>
-            <div className="muted">{verb.de}</div>
+            <div className="muted" lang="de">
+              {verb.de}
+            </div>
           </div>
           <span className="badge">
             {t('root')} <span className="arabic-inline">{verb.wurzel}</span> · {verb.wazn}

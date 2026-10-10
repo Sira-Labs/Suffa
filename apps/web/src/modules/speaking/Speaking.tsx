@@ -259,7 +259,9 @@ function Shadowing({
         {targetDone && <span className="feedback-good">{t('shadowing.recorded')}</span>}
       </span>
       <ArabicText size="lg">{target.ar}</ArabicText>
-      <span className="muted">{target.de}</span>
+      <span className="muted" lang="de">
+        {target.de}
+      </span>
 
       <div className="row" style={{ justifyContent: 'center' }}>
         <button

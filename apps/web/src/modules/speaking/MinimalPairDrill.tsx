@@ -34,7 +34,9 @@ export function MinimalPairDrill() {
       <span className="badge">
         {t('pairs.contrast')} <span className="arabic-inline">{pair.kontrast}</span>
       </span>
-      <p className="muted">{pair.de}</p>
+      <p className="muted" lang="de">
+        {pair.de}
+      </p>
       <button
         className="btn btn-primary"
         onClick={playRandom}

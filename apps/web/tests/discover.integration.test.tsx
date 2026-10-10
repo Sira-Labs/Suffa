@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { setUiLanguage } from '@/i18n';
 import type { DiscoverCatalog } from '@/types';
 import { db } from '@/services/storage';
 import { useDiscoverStore, useListenStore } from '@/state';
@@ -245,5 +246,21 @@ describe('Entdecken (integration)', () => {
     expect(within(player).getByTitle('Das Alphabet').getAttribute('src')).not.toMatch(
       /start=/
     );
+  });
+
+  it('names the language in English and keeps our German notes marked as German', async () => {
+    await act(() => setUiLanguage('en'));
+    try {
+      renderDiscover();
+      const list = await screen.findByRole('list', { name: 'Recommendations' });
+      const card = within(list).getByText('Das Alphabet').closest('li')!;
+      expect(within(card).getByText(/· in English/)).toBeInTheDocument();
+      expect(within(card).getByText('Das Alphabet')).toHaveAttribute('translate', 'no');
+      const note = within(card).getByText('Buchstaben');
+      expect(note).toHaveAttribute('lang', 'de');
+      expect(note.parentElement!.textContent).toBe('“Buchstaben”');
+    } finally {
+      await act(() => setUiLanguage('de'));
+    }
   });
 });

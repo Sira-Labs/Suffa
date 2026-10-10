@@ -3,6 +3,7 @@
  * create classes. Each class has its own page (members, progress, class life).
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { ClassesApi, type ClassSummary } from '@/services/classes/classesApi';
@@ -11,6 +12,7 @@ import { OFFERED_COURSES } from '@/services/courses';
 import { DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 
 export function Classes() {
+  const { t } = useTranslation('classes');
   const provider = useSyncStore((s) => s.provider);
   const auth = useSyncStore((s) => s.auth);
   const api = useMemo(() => new ClassesApi(), []);
@@ -30,11 +32,8 @@ export function Classes() {
   if (!(provider instanceof ApiSyncProvider) || auth.status !== 'signed-in') {
     return (
       <div className="stack">
-        <h1>Klassen</h1>
-        <p className="muted">
-          Melde dich unter Einstellungen an, um einer Klasse beizutreten oder eine zu
-          führen.
-        </p>
+        <h1>{t('title')}</h1>
+        <p className="muted">{t('list.signInHint')}</p>
       </div>
     );
   }
@@ -43,14 +42,12 @@ export function Classes() {
 
   return (
     <div className="stack">
-      <h1>Klassen</h1>
+      <h1>{t('title')}</h1>
       {message && <span className="feedback-bad">{message}</span>}
       {canCreate && <CreateClass api={api} onCreated={load} />}
       {classes?.length === 0 && (
         <p className="muted">
-          {canCreate
-            ? 'Noch keine Klasse. Lege oben eine an und teile den Einladungslink.'
-            : 'Du bist noch in keiner Klasse. Öffne den Einladungslink oder scanne den QR-Code deiner Lehrkraft.'}
+          {canCreate ? t('list.emptyTeacher') : t('list.emptyLearner')}
         </p>
       )}
       {classes?.map((c) =>
@@ -64,8 +61,8 @@ export function Classes() {
             <strong>{c.name}</strong>
             <span className="muted">
               {c.classRole === 'teacher'
-                ? `${c.studentCount} Lernende${c.pendingCount > 0 ? ` · ${c.pendingCount} warten` : ''}`
-                : '✓ Mitglied'}
+                ? `${t('learners', { count: c.studentCount })}${c.pendingCount > 0 ? ` · ${t('waiting', { count: c.pendingCount })}` : ''}`
+                : t('list.member')}
             </span>
           </Link>
         ) : (
@@ -75,7 +72,7 @@ export function Classes() {
             style={{ justifyContent: 'space-between' }}
           >
             <strong>{c.name}</strong>
-            <span className="muted">Wartet auf Freigabe</span>
+            <span className="muted">{t('list.awaitingApproval')}</span>
           </div>
         )
       )}
@@ -90,6 +87,7 @@ function CreateClass({
   api: ClassesApi;
   onCreated: () => Promise<void>;
 }) {
+  const { t } = useTranslation('classes');
   const [name, setName] = useState('');
   const [course, setCourse] = useState<CourseId>(DEFAULT_COURSE);
   const [message, setMessage] = useState<string | null>(null);
@@ -105,17 +103,17 @@ function CreateClass({
     <form className="card row" onSubmit={(e) => void submit(e)}>
       <input
         className="input"
-        placeholder="Name der neuen Klasse, z. B. Arabisch 1a"
+        placeholder={t('list.newNamePlaceholder')}
         value={name}
         maxLength={80}
         onChange={(e) => setName(e.target.value)}
-        aria-label="Name der neuen Klasse"
+        aria-label={t('list.newName')}
         style={{ flex: 1 }}
       />
       {OFFERED_COURSES.length > 1 && (
         <select
           className="input"
-          aria-label="Kurs der Klasse"
+          aria-label={t('list.course')}
           value={course}
           onChange={(e) => setCourse(e.target.value as CourseId)}
         >
@@ -127,7 +125,7 @@ function CreateClass({
         </select>
       )}
       <button className="btn btn-primary" type="submit" disabled={!name.trim()}>
-        Anlegen
+        {t('list.create')}
       </button>
       {message && <span className="feedback-bad">{message}</span>}
     </form>

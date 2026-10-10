@@ -4,6 +4,7 @@
  * the learner's cards when it is from the book.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArabicText } from '@/components';
 import { isCorrect, type Checkpoint } from '@/services/media/checkpoints';
 
@@ -14,6 +15,7 @@ export function CheckpointDialog({
   checkpoint: Checkpoint;
   onDone: (correct: boolean) => void;
 }) {
+  const { t } = useTranslation(['recordings', 'common']);
   const data = checkpoint.data;
   const [answer, setAnswer] = useState<string | number | null>(null);
   const [checked, setChecked] = useState(false);
@@ -27,15 +29,15 @@ export function CheckpointDialog({
     >
       <h2 id="checkpoint-title" className="eyebrow">
         {data.kind === 'mcq'
-          ? 'Frage zur Stelle'
+          ? t('checkpoint.mcq')
           : data.kind === 'dictation'
-            ? 'Diktat: schreib, was du gehört hast'
-            : 'Neues Wort'}
+            ? t('checkpoint.dictation')
+            : t('checkpoint.word')}
       </h2>
       {data.kind === 'mcq' && (
         <>
           <strong>{data.question}</strong>
-          <div className="stack" role="radiogroup" aria-label="Antworten">
+          <div className="stack" role="radiogroup" aria-label={t('checkpoint.answers')}>
             {data.options.map((option, i) => (
               <label key={i} className="row">
                 <input
@@ -58,7 +60,7 @@ export function CheckpointDialog({
             className="input"
             lang="ar"
             dir="rtl"
-            aria-label="Deine Antwort"
+            aria-label={t('checkpoint.yourAnswer')}
             disabled={checked}
             value={typeof answer === 'string' ? answer : ''}
             onChange={(e) => setAnswer(e.target.value)}
@@ -74,20 +76,20 @@ export function CheckpointDialog({
       {checked && data.kind !== 'vocab_flash' && (
         <p className={correct ? 'feedback-good' : 'feedback-bad'} style={{ margin: 0 }}>
           {correct
-            ? 'Richtig!'
-            : data.kind === 'mcq'
-              ? `Richtig wäre: ${data.options[data.answer]}`
-              : `Richtig wäre: ${data.answer}`}
+            ? t('checkpoint.correct')
+            : t('checkpoint.shouldBe', {
+                answer: data.kind === 'mcq' ? data.options[data.answer] : data.answer,
+              })}
         </p>
       )}
       <div className="row">
         {data.kind === 'vocab_flash' ? (
           <button className="btn btn-primary" onClick={() => onDone(true)}>
-            Weiter
+            {t('common:continue')}
           </button>
         ) : checked ? (
           <button className="btn btn-primary" onClick={() => onDone(correct)}>
-            Weiter
+            {t('common:continue')}
           </button>
         ) : (
           <button
@@ -95,7 +97,7 @@ export function CheckpointDialog({
             disabled={answer === null || answer === ''}
             onClick={() => setChecked(true)}
           >
-            Prüfen
+            {t('checkpoint.check')}
           </button>
         )}
       </div>

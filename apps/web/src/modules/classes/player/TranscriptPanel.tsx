@@ -5,15 +5,12 @@
  * subtitles on the picture. Both choices are remembered on this device.
  */
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { activeCue, clock, type Cue } from '@/services/media/checkpoints';
 
 export type TranscriptView = 'off' | 'line' | 'full';
 
-const VIEWS: { key: TranscriptView; label: string }[] = [
-  { key: 'off', label: 'Aus' },
-  { key: 'line', label: 'Eine Zeile' },
-  { key: 'full', label: 'Alles' },
-];
+const VIEWS: TranscriptView[] = ['off', 'line', 'full'];
 
 export function TranscriptPanel({
   cues,
@@ -27,6 +24,7 @@ export function TranscriptPanel({
   /** Videos only: the subtitles on the picture and how to switch them. */
   subtitles?: { on: boolean; onChange: (on: boolean) => void };
 }) {
+  const { t } = useTranslation('recordings');
   const current = activeCue(cues, time);
   const list = useRef<HTMLOListElement>(null);
   const [follow, setFollow] = useState(readFollow);
@@ -50,18 +48,18 @@ export function TranscriptPanel({
     <section className="card stack" aria-labelledby="transcript-title">
       <div className="collapsible-head" style={{ flexWrap: 'wrap' }}>
         <h2 id="transcript-title" className="eyebrow">
-          Transkript
+          {t('transcript.title')}
         </h2>
-        <div className="segmented" role="group" aria-label="Transkript anzeigen">
+        <div className="segmented" role="group" aria-label={t('transcript.show')}>
           {VIEWS.map((v) => (
             <button
-              key={v.key}
+              key={v}
               type="button"
-              className={`btn segmented-item${view === v.key ? ' btn-primary' : ''}`}
-              aria-pressed={view === v.key}
-              onClick={() => choose(v.key)}
+              className={`btn segmented-item${view === v ? ' btn-primary' : ''}`}
+              aria-pressed={view === v}
+              onClick={() => choose(v)}
             >
-              {v.label}
+              {t(`transcript.views.${v}`)}
             </button>
           ))}
         </div>
@@ -73,7 +71,7 @@ export function TranscriptPanel({
             checked={subtitles.on}
             onChange={(e) => subtitles.onChange(e.target.checked)}
           />
-          Untertitel im Video
+          {t('transcript.subtitles')}
         </label>
       )}
       {view === 'line' && (
@@ -86,7 +84,7 @@ export function TranscriptPanel({
               </span>
             </>
           ) : (
-            <span className="muted">Startet mit dem Abspielen …</span>
+            <span className="muted">{t('transcript.startsWithPlayback')}</span>
           )}
         </p>
       )}
@@ -101,7 +99,7 @@ export function TranscriptPanel({
                 save(FOLLOW_KEY, e.target.checked ? 'on' : 'off');
               }}
             />
-            Text mitlaufen lassen
+            {t('transcript.follow')}
           </label>
           <ol className="transcript" ref={list}>
             {cues.map((cue, i) => (

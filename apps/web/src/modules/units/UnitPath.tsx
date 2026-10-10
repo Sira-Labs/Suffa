@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { courseOfUnit } from '@suffa/engagement';
 import { madinahLessonPath } from '@/services/courses';
@@ -31,15 +32,16 @@ const STATION_ICONS: Record<StationKind, IconName> = {
   verbs: 'conjugate',
 };
 
-const SKILL_RINGS: Record<SkillProgress['key'], { label: string; icon: IconName }> = {
-  listen: { label: 'Hören', icon: 'listen' },
-  words: { label: 'Wörter', icon: 'cards' },
-  read: { label: 'Lesen', icon: 'read' },
-  grammar: { label: 'Grammatik', icon: 'roots' },
-  cloze: { label: 'Lücken', icon: 'read' },
-  write: { label: 'Schreiben', icon: 'write' },
-  speak: { label: 'Sprechen', icon: 'speak' },
-  verbs: { label: 'Verben', icon: 'conjugate' },
+/** Icon per skill ring; the labels are `units:path.skills.<key>`. */
+const SKILL_ICONS: Record<SkillProgress['key'], IconName> = {
+  listen: 'listen',
+  words: 'cards',
+  read: 'read',
+  grammar: 'roots',
+  cloze: 'read',
+  write: 'write',
+  speak: 'speak',
+  verbs: 'conjugate',
 };
 
 function skillLink(unit: number, key: SkillProgress['key']): string {
@@ -52,6 +54,7 @@ function skillLink(unit: number, key: SkillProgress['key']): string {
  * one is open with its stations, later ones only show that they come next.
  */
 export function UnitPath() {
+  const { t } = useTranslation('units');
   const { unit: param } = useParams();
   const number = Number(param);
   const { index, units } = useBookProgress();
@@ -59,14 +62,14 @@ export function UnitPath() {
   if (courseOfUnit(number)?.id === 'madinah') {
     return <Navigate to={madinahLessonPath(number)} replace />;
   }
-  if (!index) return <p className="muted">Lade Einheit …</p>;
+  if (!index) return <p className="muted">{t('path.loading')}</p>;
   const entry = units.find((u) => u.unit.unit === number);
   if (!entry) {
     return (
       <div className="stack">
-        <h1>Einheit nicht gefunden</h1>
+        <h1>{t('path.notFound')}</h1>
         <Link to="/units" className="btn">
-          Zu allen Einheiten
+          {t('toAllUnits')}
         </Link>
       </div>
     );
@@ -79,7 +82,7 @@ export function UnitPath() {
     <div className="stack" style={{ gap: '1.25rem' }}>
       <Link to="/units" className="back-link">
         <Icon name="arrowLeft" size={18} />
-        Alle Einheiten
+        {t('allUnits')}
       </Link>
 
       <header className="card unit-header">
@@ -87,21 +90,20 @@ export function UnitPath() {
           {arabicNumber(unit.unit)}
         </span>
         <span className="eyebrow" style={{ color: 'var(--accent)' }}>
-          Einheit {unit.unit}
+          {t('unit', { n: unit.unit })}
         </span>
         <UnitTitle title={title} unit={unit.unit} />
         {unlocked && <DeadlineChip unit={unit.unit} status={status} />}
         {draft && (
           <span className="muted" style={{ fontSize: '0.85rem' }}>
-            Inhalte im Entwurf – eigene Texte zum Buchthema, vom Lehrer noch nicht
-            geprüft.
+            {t('path.draft')}
           </span>
         )}
         <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
           <div
             className="review-progress"
             role="progressbar"
-            aria-label={`Fortschritt Einheit ${unit.unit}`}
+            aria-label={t('unitProgress', { n: unit.unit })}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={progress.percent}
@@ -109,26 +111,30 @@ export function UnitPath() {
             <div style={{ width: `${progress.percent}%` }} />
           </div>
           <span className="muted" style={{ whiteSpace: 'nowrap' }}>
-            {progress.doneSections} von {progress.sections} Abschnitten
+            {t('sectionsOf', { done: progress.doneSections, total: progress.sections })}
           </span>
         </div>
         {skills.length > 0 && (
-          <ul className="skill-rings" aria-label="Fertigkeiten in dieser Einheit">
+          <ul className="skill-rings" aria-label={t('path.skillsLabel')}>
             {skills.map((skill) => {
-              const meta = SKILL_RINGS[skill.key];
+              const label = t(`path.skills.${skill.key}`);
               const percent = Math.round((skill.done / skill.total) * 100);
               return (
                 <li key={skill.key}>
                   <Link
                     to={skillLink(unit.unit, skill.key)}
                     className="skill-ring"
-                    aria-label={`${meta.label}: ${skill.done} von ${skill.total}`}
+                    aria-label={t('path.skillProgress', {
+                      skill: label,
+                      done: skill.done,
+                      total: skill.total,
+                    })}
                     style={{ '--p': `${percent}%` } as CSSProperties}
                   >
                     <span className="skill-ring-dial" aria-hidden>
-                      <Icon name={meta.icon} size={16} />
+                      <Icon name={SKILL_ICONS[skill.key]} size={16} />
                     </span>
-                    <span className="skill-ring-label">{meta.label}</span>
+                    <span className="skill-ring-label">{label}</span>
                   </Link>
                 </li>
               );
@@ -144,7 +150,7 @@ export function UnitPath() {
         <SectionCelebration key={unit.unit} unit={unit.unit} sections={sections} />
       )}
       {unlocked && (
-        <ol className="path-sections" aria-label={`Lernpfad Einheit ${unit.unit}`}>
+        <ol className="path-sections" aria-label={t('path.pathLabel', { n: unit.unit })}>
           {sections.map((section) => (
             <PathSectionItem key={section.id} section={section} />
           ))}
@@ -154,18 +160,18 @@ export function UnitPath() {
       <nav
         className="row"
         style={{ justifyContent: 'space-between' }}
-        aria-label="Einheiten"
+        aria-label={t('path.unitsNav')}
       >
         {prev ? (
           <Link to={`/units/${prev.unit.unit}`} className="btn">
-            Einheit {prev.unit.unit}
+            {t('unit', { n: prev.unit.unit })}
           </Link>
         ) : (
           <span />
         )}
         {next && (
           <Link to={`/units/${next.unit.unit}`} className="btn">
-            Einheit {next.unit.unit}
+            {t('unit', { n: next.unit.unit })}
           </Link>
         )}
       </nav>
@@ -174,7 +180,8 @@ export function UnitPath() {
 }
 
 function UnitTitle({ title, unit }: { title: string | null; unit: number }) {
-  if (!title) return <h1>Einheit {unit}</h1>;
+  const { t } = useTranslation('units');
+  if (!title) return <h1>{t('unit', { n: unit })}</h1>;
   const { ar, de } = splitUnitTitle(title);
   return (
     <h1 className="stack" style={{ gap: '0.25rem' }}>
@@ -217,12 +224,13 @@ function StationList({ section }: { section: PathSection }) {
 
 /** A section: done ones fold away (still open to revisit), later ones stay closed. */
 function PathSectionItem({ section }: { section: PathSection }) {
+  const { t } = useTranslation('units');
   if (section.state === 'locked') {
     return (
       <li className="path-section path-section-locked">
         <Icon name="lock" size={16} />
         <span>{section.label}</span>
-        <span className="muted path-section-hint">folgt danach</span>
+        <span className="muted path-section-hint">{t('path.comesNext')}</span>
       </li>
     );
   }
@@ -233,7 +241,7 @@ function PathSectionItem({ section }: { section: PathSection }) {
           <summary>
             <Icon name="check" size={16} strokeWidth={2.6} />
             {sectionHeading(section)}
-            <span className="visually-hidden"> (erledigt)</span>
+            <span className="visually-hidden">{` (${t('path.done')})`}</span>
           </summary>
           <StationList section={section} />
         </details>
@@ -258,11 +266,12 @@ const LISTENING_KINDS = new Set<StationKind>([
 ]);
 
 function PathStation({ station, last }: { station: Station; last: boolean }) {
+  const { t } = useTranslation('units');
   const stateLabel =
     station.state === 'done'
-      ? 'erledigt'
+      ? t('path.done')
       : station.state === 'current'
-        ? 'als Nächstes'
+        ? t('path.upNext')
         : '';
   return (
     <li className={`path-station path-station-${station.state}`}>
@@ -284,16 +293,16 @@ function PathStation({ station, last }: { station: Station; last: boolean }) {
         <span className="muted path-card-detail">{station.detail}</span>
         {station.optional && station.state !== 'done' && (
           <span className="muted path-card-detail">
-            {station.kind === 'video' ? 'Optional · im Buch mitlesen' : 'Optional'}
+            {station.kind === 'video' ? t('path.optionalVideo') : t('path.optional')}
           </span>
         )}
         {station.total > 0 && LISTENING_KINDS.has(station.kind) && (
           <span className="muted path-card-detail">
-            {station.done}/{station.total} gehört
+            {t('path.heard', { done: station.done, total: station.total })}
           </span>
         )}
         {station.state === 'current' && (
-          <span className="path-card-cta">Jetzt starten</span>
+          <span className="path-card-cta">{t('path.startNow')}</span>
         )}
       </Link>
     </li>

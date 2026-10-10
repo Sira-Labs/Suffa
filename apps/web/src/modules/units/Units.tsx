@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { arabicNumber, splitUnitTitle } from '@/services/units';
@@ -10,6 +11,7 @@ import { useActiveCourse } from '@/services/courses';
 import { CourseSwitch } from './CourseSwitch';
 import { MadinahPath } from './MadinahPath';
 import { unitToContinue, useBookProgress, type UnitOverview } from './useBookProgress';
+import { stageBadge, stageName, stageTest } from './labels';
 
 /**
  * The learning path of the learner's course (ADR-0025), with the course switch on top.
@@ -29,20 +31,23 @@ export function Units() {
  * stage test; the unit to continue is highlighted on top.
  */
 function BaynaYadaykPath() {
+  const { t } = useTranslation('units');
   const { units } = useBookProgress();
   const exams = useEnrollmentStore((s) => s.exams);
   const cards = useSrsStore((s) => s.cards);
   const mastery = useMemo(() => unitMastery(cards, content.vokabeln), [cards]);
-  if (units.length === 0) return <p className="muted">Lade Einheiten …</p>;
+  if (units.length === 0) return <p className="muted">{t('levels.loading')}</p>;
   // The unit to continue: the first open one whose test is not passed yet.
   const current = unitToContinue(units)!;
 
   return (
     <div className="stack" style={{ gap: '1.5rem' }}>
       <header className="stack" style={{ gap: '0.25rem' }}>
-        <span className="eyebrow">Al-Arabiyya bayna Yadayk</span>
+        <span className="eyebrow" translate="no">
+          Al-Arabiyya bayna Yadayk
+        </span>
         <h1>
-          Stufe 1 ·{' '}
+          {t('levels.level', { level: 1 })} ·{' '}
           <span lang="ar" dir="rtl" className="arabic-display level-title-ar">
             المستوى الأول
           </span>
@@ -56,16 +61,21 @@ function BaynaYadaykPath() {
         </span>
         <span className="stack" style={{ gap: '0.35rem' }}>
           <span className="eyebrow" style={{ color: 'var(--accent)' }}>
-            Weiter in Einheit {current.unit.unit}
+            {t('levels.continueIn', { n: current.unit.unit })}
           </span>
           {current.title ? (
             <HeroTitle title={current.title} />
           ) : (
-            <strong style={{ fontSize: '1.15rem' }}>Einheit {current.unit.unit}</strong>
+            <strong style={{ fontSize: '1.15rem' }}>
+              {t('unit', { n: current.unit.unit })}
+            </strong>
           )}
           <span className="muted">
-            {current.progress.doneSections} von {current.progress.sections} Abschnitten ·{' '}
-            {current.progress.percent} %
+            {t('sectionsOf', {
+              done: current.progress.doneSections,
+              total: current.progress.sections,
+            })}{' '}
+            · {current.progress.percent} %
           </span>
         </span>
         <Icon name="arrowRight" />
@@ -105,13 +115,14 @@ function HeroTitle({ title }: { title: string }) {
 }
 
 function LevelProgress({ units }: { units: UnitOverview[] }) {
+  const { t } = useTranslation('units');
   const passed = units.filter((u) => u.status.state === 'completed').length;
   return (
     <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
       <div
         className="review-progress"
         role="progressbar"
-        aria-label="Fortschritt Stufe 1"
+        aria-label={t('levels.levelProgress', { level: 1 })}
         aria-valuemin={0}
         aria-valuemax={units.length}
         aria-valuenow={passed}
@@ -119,18 +130,11 @@ function LevelProgress({ units }: { units: UnitOverview[] }) {
         <div style={{ width: `${(passed / Math.max(1, units.length)) * 100}%` }} />
       </div>
       <span className="muted" style={{ whiteSpace: 'nowrap' }}>
-        {passed} von {units.length} Einheiten
+        {t('unitsOf', { done: passed, total: units.length })}
       </span>
     </div>
   );
 }
-
-const STAGE_BADGE: Record<StageState['state'], string> = {
-  locked: 'gesperrt',
-  running: 'läuft',
-  'test-ready': 'Test bereit',
-  done: 'geschafft',
-};
 
 function StageCard({
   stage,
@@ -146,8 +150,10 @@ function StageCard({
   /** Unit → % of its words with a mature card. */
   mastery: ReadonlyMap<number, number>;
 }) {
+  const { t } = useTranslation('units');
   const first = stage.units[0];
   const last = stage.units[stage.units.length - 1];
+  const name = stageName(stage);
   return (
     <section
       className={`card stack stage-card stage-card-${state.state}`}
@@ -155,17 +161,17 @@ function StageCard({
     >
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <h2 id={`stage-${stage.id}`} style={{ margin: 0, fontSize: '1.1rem' }}>
-          {stage.name} · Einheit {first}–{last}
+          {t('levels.stageHeading', { stage: name, first, last })}
         </h2>
-        <span className="stage-badge">{STAGE_BADGE[state.state]}</span>
+        <span className="stage-badge">{t(`levels.state.${state.state}`)}</span>
       </div>
-      <ol className="unit-grid" aria-label={`${stage.name}: Einheiten`}>
+      <ol className="unit-grid" aria-label={t('levels.stageUnits', { stage: name })}>
         {stageUnits.map(({ unit, title, progress, unlocked, status }) => (
           <li key={unit.unit}>
             <Link
               to={`/units/${unit.unit}`}
               className={`unit-tile${unit.unit === currentUnit ? ' unit-tile-current' : ''}${status.state === 'completed' ? ' unit-tile-done' : ''}${unlocked ? '' : ' unit-tile-locked'}`}
-              aria-label={`Einheit ${unit.unit}${title ? `, ${title}` : ''}, ${unlocked ? `${progress.percent} % erledigt, ${mastery.get(unit.unit) ?? 0} % gefestigt` : 'gesperrt'}`}
+              aria-label={`${t('unit', { n: unit.unit })}${title ? `, ${title}` : ''}, ${unlocked ? t('levels.tileProgress', { done: progress.percent, mastered: mastery.get(unit.unit) ?? 0 }) : t('levels.state.locked')}`}
             >
               <span className="unit-tile-top">
                 <span className="unit-tile-number arabic-display" aria-hidden>
@@ -178,7 +184,7 @@ function StageCard({
                   <Icon name="check" size={16} strokeWidth={2.6} />
                 )}
                 {!unlocked && <Icon name="lock" size={14} />}
-                Einheit {unit.unit}
+                {t('unit', { n: unit.unit })}
               </span>
               <span className="unit-tile-bar" aria-hidden>
                 <span style={{ width: `${progress.percent}%` }} />
@@ -193,12 +199,19 @@ function StageCard({
 }
 
 function StageTestRow({ stage, state }: { stage: Stage; state: StageState }) {
+  const { t } = useTranslation('units');
+  const test = stageTest(stage);
   if (state.state === 'done') {
     return (
       <Link to={`/milestone/${stage.id}`} className="stage-test stage-test-done">
         <Icon name="check" size={18} strokeWidth={2.6} />
         <span>
-          <strong>{stage.test}</strong> bestanden · Abzeichen „{stage.badge}“
+          <Trans
+            t={t}
+            i18nKey="levels.testPassed"
+            values={{ test, badge: stageBadge(stage) }}
+            components={{ 1: <strong /> }}
+          />
         </span>
       </Link>
     );
@@ -206,7 +219,7 @@ function StageTestRow({ stage, state }: { stage: Stage; state: StageState }) {
   if (state.state === 'test-ready') {
     return (
       <Link to={`/exam?stage=${stage.id}`} className="btn btn-primary">
-        {stage.test} starten
+        {t('levels.startTest', { test })}
       </Link>
     );
   }
@@ -214,10 +227,13 @@ function StageTestRow({ stage, state }: { stage: Stage; state: StageState }) {
     <p className="stage-test muted">
       <Icon name={state.state === 'locked' ? 'lock' : 'exam'} size={18} />
       <span>
-        <strong style={{ color: 'var(--text)' }}>{stage.test}</strong>{' '}
+        <strong style={{ color: 'var(--text)' }}>{test}</strong>{' '}
         {state.state === 'locked'
-          ? 'nach der vorigen Etappe'
-          : `öffnet nach allen Einheitstests (${state.unitsPassed} von ${stage.units.length})`}
+          ? t('levels.afterPreviousStage')
+          : t('levels.opensAfterUnitTests', {
+              done: state.unitsPassed,
+              total: stage.units.length,
+            })}
       </span>
     </p>
   );
@@ -228,11 +244,12 @@ function StageTestRow({ stage, state }: { stage: Stage; state: StageState }) {
  * (story 5.3), next to the bar of practice done.
  */
 function MasteryRing({ percent }: { percent: number }) {
+  const { t } = useTranslation('units');
   const r = 14;
   const circumference = 2 * Math.PI * r;
   return (
     <svg className="mastery-ring" width={36} height={36} viewBox="0 0 36 36" aria-hidden>
-      <title>{`${percent} % der Wörter gefestigt`}</title>
+      <title>{t('levels.mastery', { percent })}</title>
       <circle
         className="mastery-ring-track"
         cx={18}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { ArabicText } from '@/components';
 import type { FamilyWord, RootFamily } from './family';
 
@@ -21,6 +22,7 @@ export function RootWheel({
   selected: string | null;
   onSelect: (word: FamilyWord) => void;
 }) {
+  const { t } = useTranslation('roots');
   const around = family.words.slice(0, WHEEL_SIZE);
   const spots = around.map((w, i) => {
     // Start at the top and go clockwise.
@@ -31,7 +33,7 @@ export function RootWheel({
     <div
       className="root-wheel"
       role="group"
-      aria-label={`Wurzel ${family.letters.join(' ')}`}
+      aria-label={t('wheel.root', { letters: family.letters.join(' ') })}
     >
       <svg viewBox="0 0 100 100" aria-hidden="true" className="root-wheel-lines">
         <circle cx="50" cy="50" r="36" className="root-wheel-orbit" />
@@ -67,7 +69,10 @@ export function RootWheel({
             .join(' ')}
           style={{ left: `${s.x}%`, top: `${s.y}%` }}
           aria-pressed={s.word.key === selected}
-          aria-label={`${s.word.ar}: ${s.word.de}${s.word.learned ? '' : ' (noch nicht gelernt)'}`}
+          aria-label={t(s.word.learned ? 'wheel.word' : 'wheel.wordUnlearned', {
+            arabic: s.word.ar,
+            meaning: s.word.de,
+          })}
           onClick={() => onSelect(s.word)}
         >
           <ArabicText>{s.word.ar}</ArabicText>

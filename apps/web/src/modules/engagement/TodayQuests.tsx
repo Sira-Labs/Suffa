@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   courseOfUnit,
@@ -8,6 +9,7 @@ import {
 } from '@suffa/engagement';
 import { Icon, type IconName } from '@/components/Icon';
 import { madinahLessonPath } from '@/services/courses';
+import { questTitle } from './labels';
 
 /** Where a quest is done: reviews in the review session, the rest in the current unit. */
 export function questLink(quest: QuestDef, unit: number): string {
@@ -80,6 +82,7 @@ export function TodayQuests({
   summary: EngagementSummary;
   unit: number;
 }) {
+  const { t } = useTranslation('engagement');
   const { quests, bonusAt } = summary.quests;
   const done = quests.filter((q) => q.done).length;
   // The first open quest is today's next step; the button leads straight to it.
@@ -92,10 +95,10 @@ export function TodayQuests({
     <section className="card stack quests-card" aria-labelledby="quests-title">
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <h2 id="quests-title" className="eyebrow">
-          Tagesaufgaben
+          {t('today.title')}
         </h2>
         <span className="muted" style={{ fontSize: '0.9rem' }}>
-          {done} von 3 · Bonus +{QUEST_XP.bonus} XP
+          {t('today.count', { done, xp: QUEST_XP.bonus })}
         </span>
       </div>
       <ul className="quest-list">
@@ -105,42 +108,40 @@ export function TodayQuests({
       </ul>
       {next ? (
         <Link className="btn btn-primary btn-lg" to={questLink(next.quest, unit)}>
-          Weiterlernen
-          <span className="muted-on-primary">· ≈ {minutes} Min.</span>
+          {t('today.keepLearning')}
+          <span className="muted-on-primary">{t('today.minutes', { minutes })}</span>
           <Icon name="arrowRight" size={20} />
         </Link>
       ) : (
         <p className="feedback-good" style={{ margin: 0, fontWeight: 600 }}>
-          {bonusAt
-            ? `Alle drei geschafft – Bonus +${QUEST_XP.bonus} XP. Bārak Allāhu fīk!`
-            : 'Alles erledigt für heute. Masha’Allah!'}
+          {bonusAt ? t('today.allThree', { xp: QUEST_XP.bonus }) : t('today.allDone')}
         </p>
       )}
       <div className="quest-meta">
         <span className="row" style={{ gap: '0.35rem' }}>
           <Icon name="flame" size={16} />
           {streak.current === 0
-            ? 'Serie startet mit der ersten Aufgabe'
-            : `${streak.current} ${streak.current === 1 ? 'Tag' : 'Tage'} in Folge${
-                streak.activeToday ? '' : ' – heute noch offen'
-              }`}
+            ? t('today.streakStarts')
+            : streak.activeToday
+              ? t('today.streak', { count: streak.current })
+              : t('today.streakOpen', { count: streak.current })}
         </span>
-        <span
-          className="row"
-          style={{ gap: '0.35rem' }}
-          title="Für je 7 Tage in Folge gibt es einen Schutz (höchstens 2). Er deckt einen verpassten Tag."
-        >
+        <span className="row" style={{ gap: '0.35rem' }} title={t('today.shieldHint')}>
           <Icon name="shield" size={16} />
           {streak.shields === 0
-            ? 'Kein Pausentag-Schutz'
-            : `${streak.shields} Pausentag-Schutz`}
+            ? t('today.noShield')
+            : t('today.shields', { count: streak.shields })}
         </span>
         <span className="row" style={{ gap: '0.35rem' }}>
           <Icon name="path" size={16} />
           {weekly.met
-            ? `Wochenziel erreicht (${weekly.activeDays}/${weekly.goal})`
-            : `Woche: ${weekly.activeDays}/${weekly.goal} Tage · noch ${weekLeft}`}
-          {weekly.streak > 1 ? ` · ${weekly.streak} Wochen in Folge` : ''}
+            ? t('today.weeklyMet', { days: weekly.activeDays, goal: weekly.goal })
+            : t('today.weekly', {
+                days: weekly.activeDays,
+                goal: weekly.goal,
+                left: weekLeft,
+              })}
+          {weekly.streak > 1 ? t('today.weeksInARow', { weeks: weekly.streak }) : ''}
         </span>
       </div>
     </section>
@@ -148,7 +149,9 @@ export function TodayQuests({
 }
 
 function QuestItem({ status, to }: { status: QuestStatus; to: string }) {
+  const { t } = useTranslation('engagement');
   const { quest, progress, done } = status;
+  const title = questTitle(quest);
   return (
     <li className={`quest${done ? ' quest-done' : ''}`}>
       <Link to={to} className="quest-body">
@@ -161,15 +164,15 @@ function QuestItem({ status, to }: { status: QuestStatus; to: string }) {
             style={{ justifyContent: 'space-between', gap: '0.5rem' }}
           >
             <span className="quest-title">
-              {quest.title}
-              {done && <span className="visually-hidden"> (erledigt)</span>}
+              {title}
+              {done && <span className="visually-hidden">{` (${t('today.done')})`}</span>}
             </span>
-            <span className="muted quest-xp">+{quest.xp} XP</span>
+            <span className="muted quest-xp">{t('today.xp', { xp: quest.xp })}</span>
           </span>
           <span
             className="review-progress"
             role="progressbar"
-            aria-label={quest.title}
+            aria-label={title}
             aria-valuemin={0}
             aria-valuemax={quest.target}
             aria-valuenow={progress}

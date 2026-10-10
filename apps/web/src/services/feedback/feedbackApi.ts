@@ -2,16 +2,31 @@
  * Testers' feedback: sending from any page, and the admins' inbox. Same origin; a signed-in
  * sender's session cookie goes along, so the team can ask back.
  */
+import i18n from '@/i18n';
 import { apiRequest, type Fetch } from '@/services/api/request';
 
 export const FEEDBACK_KINDS = ['bug', 'idea', 'confusing', 'praise'] as const;
 export type FeedbackKind = (typeof FEEDBACK_KINDS)[number];
 
-export const FEEDBACK_KIND_LABEL: Record<FeedbackKind, string> = {
-  bug: 'Fehler',
-  idea: 'Idee',
-  confusing: 'Unklar',
-  praise: 'Gefällt mir',
+/** A kind of feedback in words, in the interface language. */
+export function feedbackKindLabel(kind: FeedbackKind): string {
+  return i18n.t(`admin:feedback.kinds.${kind}`);
+}
+
+/** The kinds in words; each read gives the label in the current interface language. */
+export const FEEDBACK_KIND_LABEL: Readonly<Record<FeedbackKind, string>> = {
+  get bug() {
+    return feedbackKindLabel('bug');
+  },
+  get idea() {
+    return feedbackKindLabel('idea');
+  },
+  get confusing() {
+    return feedbackKindLabel('confusing');
+  },
+  get praise() {
+    return feedbackKindLabel('praise');
+  },
 };
 
 export interface FeedbackItem {
@@ -26,11 +41,12 @@ export interface FeedbackItem {
   sender: { id: string; name: string | null; email: string | null; role: string } | null;
 }
 
-const MESSAGES: Record<string, string> = {
-  rate_limited: 'Gerade kommen sehr viele Rückmeldungen an. Bitte gleich noch einmal.',
-  feedback_disabled: 'Rückmeldungen sind hier ausgeschaltet.',
-  second_factor_required: 'Bitte bestätige zuerst den Code aus deiner Authenticator-App.',
-};
+/** API error codes in the interface language, read at call time (story 16.3). */
+const messages = (): Record<string, string> => ({
+  rate_limited: i18n.t('admin:errors.rateLimited'),
+  feedback_disabled: i18n.t('admin:errors.feedbackDisabled'),
+  second_factor_required: i18n.t('admin:errors.secondFactorRequired'),
+});
 
 export class FeedbackApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
@@ -59,6 +75,6 @@ export class FeedbackApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, messages());
   }
 }

@@ -4,14 +4,21 @@
  * server sends aggregates, never raw records.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { content } from '@/content';
-import {
-  classMasteryByUnit,
-  isInactive,
-  lastActiveLabel,
-  leechWords,
-} from '@/services/classes/dashboard';
+import i18n from '@/i18n';
+import { classMasteryByUnit, isInactive, leechWords } from '@/services/classes/dashboard';
 import type { ClassesApi, ClassProgress } from '@/services/classes/classesApi';
+
+/** "heute", "gestern", "vor 5 Tagen", or "noch nie", in the interface language. */
+function lastActiveLabel(iso: string | null, now: Date = new Date()): string {
+  if (!iso) return i18n.t('classes:progress.never');
+  const day = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  const days = Math.round((day(now) - day(new Date(iso))) / 86_400_000);
+  if (days <= 0) return i18n.t('classes:progress.today');
+  if (days === 1) return i18n.t('classes:progress.yesterday');
+  return i18n.t('classes:progress.daysAgo', { count: days });
+}
 
 export function ClassProgressView({
   api,
@@ -20,6 +27,7 @@ export function ClassProgressView({
   api: ClassesApi;
   classId: string;
 }) {
+  const { t } = useTranslation('classes');
   const [data, setData] = useState<ClassProgress | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -54,35 +62,30 @@ export function ClassProgressView({
   );
 
   if (message) return <p className="feedback-bad">{message}</p>;
-  if (!data) return <p className="muted">Lade Fortschritt …</p>;
+  if (!data) return <p className="muted">{t('progress.loading')}</p>;
   if (data.students.length === 0) {
-    return (
-      <p className="muted">
-        Noch keine freigegebenen Lernenden. Teile den Einladungslink unter „Mitglieder“.
-      </p>
-    );
+    return <p className="muted">{t('progress.empty')}</p>;
   }
   const active = data.students.filter((s) => !isInactive(s.lastActiveAt)).length;
 
   return (
     <div className="stack" style={{ gap: '1rem' }}>
       <p className="muted" style={{ margin: 0 }}>
-        {active} von {data.students.length} Lernenden waren in den letzten 3 Tagen aktiv.
-        Zahlen der letzten 7 Tage, Stand der letzten Synchronisierung.
+        {t('progress.active', { active, total: data.students.length })}
       </p>
       <div className="card table-scroll">
         <table className="data-table">
-          <caption className="visually-hidden">Lernende der Klasse</caption>
+          <caption className="visually-hidden">{t('progress.caption')}</caption>
           <thead>
             <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Zuletzt aktiv</th>
-              <th scope="col">Lerntage</th>
-              <th scope="col">Aufgaben</th>
-              <th scope="col">XP (7 Tage)</th>
-              <th scope="col">Serie</th>
-              <th scope="col">Gefestigte Wörter</th>
-              <th scope="col">Einheit</th>
+              <th scope="col">{t('progress.columns.name')}</th>
+              <th scope="col">{t('progress.columns.lastActive')}</th>
+              <th scope="col">{t('progress.columns.activeDays')}</th>
+              <th scope="col">{t('progress.columns.quests')}</th>
+              <th scope="col">{t('progress.columns.xp')}</th>
+              <th scope="col">{t('progress.columns.streak')}</th>
+              <th scope="col">{t('progress.columns.mature')}</th>
+              <th scope="col">{t('progress.columns.unit')}</th>
             </tr>
           </thead>
           <tbody>
@@ -107,16 +110,16 @@ export function ClassProgressView({
 
       <section className="card stack" aria-labelledby="class-mastery">
         <h2 id="class-mastery" className="eyebrow">
-          Gefestigt pro Einheit (ganze Klasse)
+          {t('progress.masteryTitle')}
         </h2>
         <ul className="mastery-bars">
           {mastery.map(([unit, percent]) => (
             <li key={unit}>
-              <span>Einheit {unit}</span>
+              <span>{t('progress.unit', { unit })}</span>
               <span
                 className="review-progress"
                 role="progressbar"
-                aria-label={`Einheit ${unit}`}
+                aria-label={t('progress.unit', { unit })}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={percent}
@@ -125,7 +128,7 @@ export function ClassProgressView({
                   style={{ display: 'block', height: '100%', width: `${percent}%` }}
                 />
               </span>
-              <span className="muted">{percent} %</span>
+              <span className="muted">{t('percent', { value: percent })}</span>
             </li>
           ))}
         </ul>
@@ -133,11 +136,11 @@ export function ClassProgressView({
 
       <section className="card stack" aria-labelledby="class-leeches">
         <h2 id="class-leeches" className="eyebrow">
-          Schwierige Wörter
+          {t('progress.leechesTitle')}
         </h2>
         {leeches.length === 0 ? (
           <p className="muted" style={{ margin: 0 }}>
-            Gerade keine Wörter, an denen mehrere hängen bleiben.
+            {t('progress.noLeeches')}
           </p>
         ) : (
           <ul className="weak-words-list">
@@ -147,8 +150,11 @@ export function ClassProgressView({
                   {w.ar}
                 </span>
                 <span className="muted">
-                  {w.de} · Einheit {w.einheit} · {w.learners}{' '}
-                  {w.learners === 1 ? 'Lernende:r' : 'Lernende'}
+                  {t('progress.leech', {
+                    meaning: w.de,
+                    unit: w.einheit,
+                    count: w.learners,
+                  })}
                 </span>
               </li>
             ))}

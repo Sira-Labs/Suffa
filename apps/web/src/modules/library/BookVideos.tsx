@@ -1,11 +1,11 @@
 import { useEffect, useState, type MouseEvent } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import type { BookVideo } from '@/types';
 import { Icon } from '@/components/Icon';
 import { logger } from '@/services/logger';
 import {
   embedUrl,
   loadBookVideos,
-  pageLabel,
   thumbnailUrl,
   videosForUnit,
   type BookVideoData,
@@ -19,6 +19,7 @@ const log = logger.child('library:video');
  * thumbnail is shown. Learners follow along in their printed book.
  */
 export function BookVideos({ unit }: { unit: number }) {
+  const { t } = useTranslation('library');
   const [data, setData] = useState<BookVideoData | null>(null);
   const [failed, setFailed] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -45,17 +46,17 @@ export function BookVideos({ unit }: { unit: number }) {
     setPlaying(false);
   }, [unit]);
 
-  if (failed) return <p className="muted">Die Videos konnten nicht geladen werden.</p>;
-  if (!data) return <p className="muted">Lade Videos …</p>;
+  if (failed) return <p className="muted">{t('videos.failed')}</p>;
+  if (!data) return <p className="muted">{t('videos.loading')}</p>;
 
   const unitVideos = videosForUnit(data, unit);
   const playlist = data.index.source.playlist;
   if (!unitVideos || unitVideos.videos.length === 0) {
     return (
       <p className="muted" style={{ margin: 0 }}>
-        Für Einheit {unit} gibt es beim Verlag keine Seitenvideos.{' '}
+        {t('videos.none', { unit })}{' '}
         <a href={playlist} target="_blank" rel="noreferrer">
-          Ganze Playlist auf YouTube
+          {t('videos.playlist')}
         </a>
       </p>
     );
@@ -76,32 +77,43 @@ export function BookVideos({ unit }: { unit: number }) {
   return (
     <div className="stack">
       <p className="muted" style={{ margin: 0 }}>
-        {videos.length} Videos zu Buchseite {unitVideos.from}–{unitVideos.to}
-        {unitVideos.estimated && ' (Seitenbereich geschätzt)'}. Schlag die Seite im Buch
-        auf und lies mit. Nicht jede Seite hat ein Video
-        {unit === 1 && ' (zu Dialog 1 gibt es keins)'} –{' '}
-        <a href="#audio-heading" onClick={toAudio}>
-          die offiziellen Audios
-        </a>{' '}
-        decken alle Dialoge ab.
+        <Trans
+          t={t}
+          i18nKey="videos.intro"
+          values={{
+            pages:
+              t('videos.pages', {
+                count: videos.length,
+                from: unitVideos.from,
+                to: unitVideos.to,
+              }) + (unitVideos.estimated ? t('videos.estimated') : ''),
+            notEveryPage:
+              unit === 1 ? t('videos.notEveryPageUnit1') : t('videos.notEveryPage'),
+          }}
+          components={{ 1: <a href="#audio-heading" onClick={toAudio} /> }}
+        />
       </p>
-      <div className="row page-chips" role="group" aria-label="Buchseite wählen">
+      <div className="row page-chips" role="group" aria-label={t('videos.choosePage')}>
         {videos.map((video) => (
           <button
             key={video.id}
             className={`btn page-chip${video.id === selected.id ? ' btn-accent' : ''}`}
             aria-pressed={video.id === selected.id}
-            aria-label={`Video zu Buchseite ${video.page}${video.approx ? ' (ungefähr)' : ''}`}
+            aria-label={t(video.approx ? 'videos.forPageApprox' : 'videos.forPage', {
+              page: video.page,
+            })}
             onClick={() => choose(video)}
           >
-            {pageLabel(video)}
+            {t(video.approx ? 'videos.pageChipApprox' : 'videos.pageChip', {
+              page: video.page,
+            })}
           </button>
         ))}
       </div>
       <div className="video-frame">
         {playing ? (
           <iframe
-            title={`Video zu Buchseite ${selected.page}`}
+            title={t('videos.forPage', { page: selected.page })}
             src={embedUrl(selected, true)}
             allow="autoplay; encrypted-media; picture-in-picture"
             allowFullScreen
@@ -110,7 +122,7 @@ export function BookVideos({ unit }: { unit: number }) {
           <button
             className="video-poster"
             onClick={() => setPlaying(true)}
-            aria-label={`Video zu Buchseite ${selected.page} abspielen`}
+            aria-label={t('videos.play', { page: selected.page })}
           >
             <img src={thumbnailUrl(selected)} alt="" loading="lazy" />
             <span className="video-play">
@@ -120,8 +132,7 @@ export function BookVideos({ unit }: { unit: number }) {
         )}
       </div>
       <p className="muted" style={{ fontSize: '0.85em', margin: 0 }}>
-        Video: © {data.index.source.publisher}, alle Rechte beim Verlag. Wird von YouTube
-        abgespielt (ohne Cookies bis zum Start) und braucht eine Internetverbindung.
+        {t('videos.credit', { publisher: data.index.source.publisher })}
       </p>
     </div>
   );

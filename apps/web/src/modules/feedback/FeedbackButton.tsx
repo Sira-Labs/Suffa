@@ -5,10 +5,10 @@
  * (`/api/client-config` → feedback).
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { loadClientConfig } from '@/services/clientConfig';
 import {
-  FEEDBACK_KIND_LABEL,
   FEEDBACK_KINDS,
   FeedbackApi,
   type FeedbackKind,
@@ -18,6 +18,7 @@ import {
 const CONFIG_RETRIES = 3;
 
 export function FeedbackButton({ api }: { api?: FeedbackApi }) {
+  const { t } = useTranslation('feedback');
   const client = useMemo(() => api ?? new FeedbackApi(), [api]);
   const [enabled, setEnabled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -64,7 +65,7 @@ export function FeedbackButton({ api }: { api?: FeedbackApi }) {
           onClick={() => setOpen(true)}
           aria-haspopup="dialog"
         >
-          Feedback
+          {t('button')}
         </button>
       )}
       {open && <FeedbackForm api={client} onClose={() => setOpen(false)} />}
@@ -73,6 +74,7 @@ export function FeedbackButton({ api }: { api?: FeedbackApi }) {
 }
 
 function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void }) {
+  const { t } = useTranslation(['feedback', 'common']);
   const { pathname, search } = useLocation();
   const [kind, setKind] = useState<FeedbackKind>('confusing');
   const [message, setMessage] = useState('');
@@ -110,33 +112,34 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
     >
       <div className="collapsible-head">
         <h2 id="feedback-title" className="eyebrow" style={{ margin: 0 }}>
-          Feedback zu dieser Seite
+          {t('title')}
         </h2>
-        <button type="button" className="btn" onClick={onClose} aria-label="Schließen">
+        <button
+          type="button"
+          className="btn"
+          onClick={onClose}
+          aria-label={t('common:close')}
+        >
           ✕
         </button>
       </div>
       {state === 'sent' ? (
         <div className="stack">
           <p className="feedback-good" style={{ margin: 0 }}>
-            Danke! Deine Rückmeldung ist angekommen.
+            {t('thanks')}
           </p>
           <div className="row">
             <button type="button" className="btn" onClick={() => setState('idle')}>
-              Noch etwas melden
+              {t('another')}
             </button>
             <button type="button" className="btn btn-primary" onClick={onClose}>
-              Fertig
+              {t('done')}
             </button>
           </div>
         </div>
       ) : (
-        <form
-          className="stack"
-          onSubmit={(e) => void submit(e)}
-          aria-label="Feedback senden"
-        >
-          <div className="segmented" role="group" aria-label="Art der Rückmeldung">
+        <form className="stack" onSubmit={(e) => void submit(e)} aria-label={t('form')}>
+          <div className="segmented" role="group" aria-label={t('kind')}>
             {FEEDBACK_KINDS.map((k) => (
               <button
                 key={k}
@@ -145,7 +148,7 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
                 aria-pressed={kind === k}
                 onClick={() => setKind(k)}
               >
-                {FEEDBACK_KIND_LABEL[k]}
+                {t(`kinds.${k}`)}
               </button>
             ))}
           </div>
@@ -154,8 +157,8 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
             className="input"
             rows={4}
             maxLength={4000}
-            aria-label="Deine Rückmeldung"
-            placeholder="Was ist dir aufgefallen? Was hast du gesucht?"
+            aria-label={t('message')}
+            placeholder={t('placeholder')}
             value={message}
             onChange={(e) => {
               setMessage(e.target.value);
@@ -163,8 +166,7 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
             }}
           />
           <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-            Gespeichert wird dein Text, diese Seite ({reportedPage(pathname, search)}) und
-            – wenn du angemeldet bist – dein Konto, damit wir nachfragen können.
+            {t('stored', { page: reportedPage(pathname, search) })}
           </p>
           {error && <span className="feedback-bad">{error}</span>}
           <button
@@ -172,7 +174,7 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
             className="btn btn-primary"
             disabled={!message.trim() || state === 'sending'}
           >
-            {state === 'sending' ? 'Wird gesendet …' : 'Senden'}
+            {state === 'sending' ? t('sending') : t('send')}
           </button>
         </form>
       )}

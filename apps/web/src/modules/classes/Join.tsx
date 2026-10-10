@@ -3,12 +3,14 @@
  * link leads back here), see which class it is, join, and wait for the teacher's approval.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { ClassesApi } from '@/services/classes/classesApi';
 import { useSyncStore } from '@/state';
 
 export function Join() {
+  const { t } = useTranslation('classes');
   const { token = '' } = useParams();
   const provider = useSyncStore((s) => s.provider);
   const auth = useSyncStore((s) => s.auth);
@@ -36,42 +38,40 @@ export function Join() {
   };
 
   if (!(provider instanceof ApiSyncProvider)) {
-    return (
-      <p className="muted">
-        Klassen gibt es nur mit Anmeldung – auf diesem Server nicht eingerichtet.
-      </p>
-    );
+    return <p className="muted">{t('join.noServer')}</p>;
   }
 
   return (
     <div className="stack">
-      <h1>Klasse beitreten</h1>
+      <h1>{t('join.title')}</h1>
       {auth.status !== 'signed-in' ? (
         <SignInHere provider={provider} returnTo={`/join/${token}`} />
       ) : result ? (
         <div className="card stack">
           <strong>{result.className}</strong>
           <span className={result.status === 'active' ? 'feedback-good' : undefined}>
-            {result.status === 'active'
-              ? '✓ Du bist schon Mitglied dieser Klasse.'
-              : '✓ Anfrage geschickt. Sobald deine Lehrkraft dich freigibt, bist du dabei.'}
+            {result.status === 'active' ? t('join.alreadyMember') : t('join.requested')}
           </span>
           <Link to="/classes" className="btn" style={{ alignSelf: 'flex-start' }}>
-            Zu meinen Klassen
+            {t('join.toMyClasses')}
           </Link>
         </div>
       ) : preview ? (
         <div className="card stack">
           <span>
-            Du wurdest in die Klasse <strong>{preview.className}</strong>
-            {preview.teacherName && <> von {preview.teacherName}</>} eingeladen.
+            <Trans
+              t={t}
+              i18nKey={preview.teacherName ? 'join.invited' : 'join.invitedNoTeacher'}
+              values={{ name: preview.className, teacher: preview.teacherName }}
+              components={{ 1: <strong /> }}
+            />
           </span>
           <button
             className="btn btn-primary"
             onClick={() => void join()}
             style={{ alignSelf: 'flex-start' }}
           >
-            Beitreten
+            {t('join.join')}
           </button>
         </div>
       ) : null}
@@ -87,33 +87,30 @@ function SignInHere({
   provider: ApiSyncProvider;
   returnTo: string;
 }) {
+  const { t } = useTranslation('classes');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState<string | null>(null);
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const r = await provider.signInWithEmail(email, returnTo);
-    setMessage(
-      r.ok
-        ? '✓ Link gesendet. Öffne die E-Mail auf diesem Gerät – der Link bringt dich hierher zurück.'
-        : `Fehler: ${r.error.message}`
-    );
+    setMessage(r.ok ? t('join.linkSent') : t('join.error', { message: r.error.message }));
   };
   return (
     <form className="card stack" onSubmit={(e) => void submit(e)}>
-      <span>Melde dich zuerst an – ohne Passwort, mit einem Link per E-Mail.</span>
+      <span>{t('join.signInFirst')}</span>
       <div className="row">
         <input
           className="input"
           type="email"
           required
-          placeholder="deine@email.de"
+          placeholder={t('join.emailPlaceholder')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          aria-label="E-Mail-Adresse"
+          aria-label={t('join.email')}
           style={{ flex: 1 }}
         />
         <button className="btn btn-primary" type="submit">
-          Link senden
+          {t('join.sendLink')}
         </button>
       </div>
       {message && <span>{message}</span>}

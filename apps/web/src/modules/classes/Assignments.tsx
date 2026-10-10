@@ -4,6 +4,7 @@
  * and where to go.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   DEFAULT_COURSE,
@@ -11,15 +12,19 @@ import {
   courseOfUnit,
   type CourseId,
 } from '@suffa/engagement';
+import { dateLocale } from '@/i18n/format';
 import { madinahLessonPath, unitLabel } from '@/services/courses';
 import { InteractiveApi, type Assignment } from '@/services/media/interactiveApi';
 import { MediaApi, type MediaItem } from '@/services/media/mediaApi';
 
-const DATE = new Intl.DateTimeFormat('de-DE', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-});
+/** A due date like "Mo., 5. Okt." in the interface language. */
+export function formatDue(iso: string): string {
+  return new Intl.DateTimeFormat(dateLocale(), {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).format(new Date(iso));
+}
 
 /** Where an assignment is done: a Medina lesson has its own page with the lesson test. */
 export function assignmentLink(
@@ -48,6 +53,7 @@ export function Assignments({
   teacher: boolean;
   course?: CourseId;
 }) {
+  const { t } = useTranslation('classes');
   const api = useMemo(() => new InteractiveApi(), []);
   const [items, setItems] = useState<Assignment[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -66,7 +72,7 @@ export function Assignments({
   return (
     <section className="card stack" aria-labelledby="assignments-title">
       <h2 id="assignments-title" className="eyebrow">
-        Klassenaufgaben
+        {t('assignments.title')}
       </h2>
       {teacher && (
         // Keyed: another class or course starts the form fresh, with a unit of that course.
@@ -81,7 +87,7 @@ export function Assignments({
       {message && <span className="feedback-bad">{message}</span>}
       {items?.length === 0 && (
         <p className="muted" style={{ margin: 0 }}>
-          {teacher ? 'Noch keine Aufgaben gestellt.' : 'Gerade keine Aufgaben.'}
+          {teacher ? t('assignments.noneTeacher') : t('assignments.noneLearner')}
         </p>
       )}
       <ul className="feed-list">
@@ -102,8 +108,9 @@ export function Assignments({
                   className={overdue && !a.done ? 'feedback-bad' : 'muted'}
                   style={{ fontSize: '0.85rem' }}
                 >
-                  bis {DATE.format(new Date(a.dueAt))}
-                  {teacher && ` · ${a.doneCount}/${a.learners} erledigt`}
+                  {t('assignments.due', { date: formatDue(a.dueAt) })}
+                  {teacher &&
+                    t('assignments.doneCount', { done: a.doneCount, total: a.learners })}
                 </span>
               </span>
               {teacher && (
@@ -111,7 +118,7 @@ export function Assignments({
                   className="btn btn-small"
                   onClick={() => void api.removeAssignment(classId, a.id).then(load)}
                 >
-                  Löschen
+                  {t('delete')}
                 </button>
               )}
             </li>
@@ -133,6 +140,7 @@ function AssignmentForm({
   course: CourseId;
   onAdded: () => Promise<void>;
 }) {
+  const { t } = useTranslation('classes');
   // Units can only be assigned where a unit test exists (our own exercises, ADR-0025).
   const { units, exercises } = courseById(course);
   const mediaApi = useMemo(() => new MediaApi(), []);
@@ -162,10 +170,15 @@ function AssignmentForm({
     e.preventDefault();
     if (!choice) return;
     const [kind, ref] = choice.split(':') as ['unit' | 'recording', string];
+    // The title is stored with the assignment, in the teacher's interface language.
     const title =
       kind === 'unit'
-        ? `${unitLabel(Number(ref))}: Test bestehen`
-        : `Anhören: ${recordings.find((r) => r.id === ref)?.title ?? 'Aufnahme'}`;
+        ? t('assignments.unitTitle', { unit: unitLabel(Number(ref)) })
+        : t('assignments.recordingTitle', {
+            title:
+              recordings.find((r) => r.id === ref)?.title ??
+              t('assignments.recordingFallback'),
+          });
     const result = await api.addAssignment(classId, {
       kind,
       ref,
@@ -181,18 +194,22 @@ function AssignmentForm({
       className="row"
       style={{ flexWrap: 'wrap' }}
       onSubmit={(e) => void submit(e)}
-      aria-label="Aufgabe stellen"
+      aria-label={t('assignments.form')}
     >
       <select
         className="input"
-        aria-label="Aufgabe"
+        aria-label={t('assignments.choice')}
         value={choice}
         onChange={(e) => setChoice(e.target.value)}
       >
-        {!choice && <option value="">Noch nichts zum Aufgeben</option>}
+        {!choice && <option value="">{t('assignments.nothing')}</option>}
         {exercises && (
           <optgroup
-            label={`${course === 'madinah' ? 'Lektion' : 'Einheit'} (Test bestehen)`}
+            label={
+              course === 'madinah'
+                ? t('assignments.lessonGroup')
+                : t('assignments.unitGroup')
+            }
           >
             {units.map((u) => (
               <option key={u} value={`unit:${u}`}>
@@ -202,7 +219,7 @@ function AssignmentForm({
           </optgroup>
         )}
         {recordings.length > 0 && (
-          <optgroup label="Aufnahme (anhören)">
+          <optgroup label={t('assignments.recordingGroup')}>
             {recordings.map((r) => (
               <option key={r.id} value={`recording:${r.id}`}>
                 {r.title}
@@ -214,17 +231,16 @@ function AssignmentForm({
       <input
         className="input"
         type="date"
-        aria-label="Fällig am"
+        aria-label={t('assignments.dueLabel')}
         value={due}
         onChange={(e) => setDue(e.target.value)}
       />
       <button className="btn btn-primary" type="submit" disabled={!due || !choice}>
-        Aufgabe stellen
+        {t('assignments.submit')}
       </button>
       {!exercises && (
         <span className="muted" style={{ fontSize: '0.85rem' }}>
-          Lektionen mit Test gibt es im {courseById(course).name} noch nicht; Aufnahmen
-          kannst du schon aufgeben.
+          {t('assignments.noTests', { course: courseById(course).name })}
         </span>
       )}
       {message && <span className="feedback-bad">{message}</span>}
@@ -240,12 +256,13 @@ export function OpenAssignments({
   classId: string;
   items: Assignment[];
 }) {
+  const { t } = useTranslation('classes');
   const open = items.filter((a) => !a.done);
   if (open.length === 0) return null;
   return (
     <section className="card stack" aria-labelledby="open-assignments">
       <h2 id="open-assignments" className="eyebrow">
-        Aufgaben deiner Klasse
+        {t('assignments.openTitle')}
       </h2>
       <ul className="feed-list">
         {open.map((a) => (
@@ -256,7 +273,7 @@ export function OpenAssignments({
           >
             <Link to={assignmentLink(classId, a)}>{a.title}</Link>
             <span className="muted" style={{ fontSize: '0.85rem' }}>
-              bis {DATE.format(new Date(a.dueAt))}
+              {t('assignments.due', { date: formatDue(a.dueAt) })}
             </span>
           </li>
         ))}

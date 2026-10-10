@@ -3,15 +3,12 @@
  * medals reached so far, newest first, in their tier's colour, and the two badges closest to
  * their next tier with how far there is to go. The full gallery stays on /badges.
  */
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import type { BadgeProgress, Tier } from '@suffa/engagement';
 import { Icon } from '@/components/Icon';
+import { badgeName, badgeRule, tierLabel } from './labels';
 
-export const TIER_LABEL: Record<Tier, string> = {
-  bronze: 'Bronze',
-  silver: 'Silber',
-  gold: 'Gold',
-};
 const TIERS: readonly Tier[] = ['bronze', 'silver', 'gold'];
 
 /** How many medals and "almost there" rows the card shows. */
@@ -45,25 +42,26 @@ export function homeBadges(badges: BadgeProgress[]): HomeBadgeView {
 }
 
 export function HomeBadges({ badges }: { badges: BadgeProgress[] }) {
+  const { t } = useTranslation('engagement');
   const view = homeBadges(badges);
   return (
     <section className="card stack home-badges" aria-labelledby="home-badges-title">
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <div className="stack" style={{ gap: 2 }}>
           <h2 id="home-badges-title" className="eyebrow" style={{ margin: 0 }}>
-            Deine Abzeichen
+            {t('home.title')}
           </h2>
           <span className="muted" style={{ fontSize: '0.9rem' }}>
-            {view.reached} von {view.possible} Stufen erreicht
+            {t('home.reached', { reached: view.reached, possible: view.possible })}
           </span>
         </div>
         <Link to="/badges" className="btn">
-          Alle ansehen
+          {t('home.seeAll')}
         </Link>
       </div>
 
       {view.earned.length > 0 ? (
-        <ul className="home-medals" aria-label="Erreichte Abzeichen">
+        <ul className="home-medals" aria-label={t('home.earned')}>
           {view.earned.slice(0, SHOWN_MEDALS).map((b) => {
             const top = b.unlocks.at(-1)!;
             return (
@@ -71,39 +69,44 @@ export function HomeBadges({ badges }: { badges: BadgeProgress[] }) {
                 <span className="badge-medal" aria-hidden>
                   <Icon name="award" size={22} />
                 </span>
-                <strong>{b.badge.name}</strong>
-                <span className="muted">{TIER_LABEL[top.tier]}</span>
+                <strong>{badgeName(b.badge)}</strong>
+                <span className="muted">{tierLabel(top.tier)}</span>
               </li>
             );
           })}
         </ul>
       ) : (
         <p className="muted" style={{ margin: 0 }}>
-          Noch kein Abzeichen – das erste ist nah:
+          {t('home.none')}
         </p>
       )}
 
       {view.close.length > 0 && (
-        <ul className="home-close" aria-label="Fast geschafft">
+        <ul className="home-close" aria-label={t('home.close')}>
           {view.close.slice(0, SHOWN_CLOSE).map((b) => {
             const next = b.next!;
             const done = Math.min(b.count, next);
             const tier = TIERS[b.unlocks.length] ?? 'gold';
+            const name = badgeName(b.badge);
             return (
               <li key={b.badge.id} className="stack" style={{ gap: '0.3rem' }}>
                 <span className="row" style={{ justifyContent: 'space-between' }}>
                   <strong>
-                    {b.badge.name} · {TIER_LABEL[tier]}
+                    {name} · {tierLabel(tier)}
                   </strong>
-                  <span className="muted">noch {next - done}</span>
+                  <span className="muted">{t('home.toGo', { count: next - done })}</span>
                 </span>
                 <span className="muted" style={{ fontSize: '0.85rem' }}>
-                  {b.badge.rule.replace('{n}', String(next))} – {done} von {next}
+                  {t('gallery.progress', {
+                    rule: badgeRule(b.badge, next),
+                    done,
+                    total: next,
+                  })}
                 </span>
                 <div
                   className="review-progress"
                   role="progressbar"
-                  aria-label={`${b.badge.name}: Weg zu ${TIER_LABEL[tier]}`}
+                  aria-label={t('home.toTier', { badge: name, tier: tierLabel(tier) })}
                   aria-valuemin={0}
                   aria-valuemax={next}
                   aria-valuenow={done}

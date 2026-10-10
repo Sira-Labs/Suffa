@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import type { ExampleCatalog, UnitPracticeScope, Vokabel } from '@/types';
 import { TaskQueue } from '@/components/TaskQueue';
@@ -16,6 +17,7 @@ const log = logger.child('cloze');
  * reports every sentence completed on the first correct pick.
  */
 export function Cloze({ scope }: { scope: UnitPracticeScope }) {
+  const { t } = useTranslation('cloze');
   const [catalog, setCatalog] = useState<ExampleCatalog | null>(null);
   const [failed, setFailed] = useState(false);
   const [solved, setSolved] = useState<ReadonlySet<string>>(() => new Set());
@@ -51,11 +53,10 @@ export function Cloze({ scope }: { scope: UnitPracticeScope }) {
     );
   }, [catalog, words]);
 
-  if (failed)
-    return <p className="muted">Die Beispielsätze konnten nicht geladen werden.</p>;
-  if (!catalog) return <p className="muted">Lade Sätze …</p>;
+  if (failed) return <p className="muted">{t('loadFailed')}</p>;
+  if (!catalog) return <p className="muted">{t('loading')}</p>;
   if (tasks.size === 0) {
-    return <p className="muted">Zu diesen Wörtern gibt es noch keine Lückentexte.</p>;
+    return <p className="muted">{t('none')}</p>;
   }
 
   const isDone = (id: string) => solved.has(id) || Boolean(scope.isPractised?.(id));
@@ -72,9 +73,9 @@ export function Cloze({ scope }: { scope: UnitPracticeScope }) {
       isDone={isDone}
       complete={
         <div className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
-          <strong className="feedback-good">✓ Alle Lücken gefüllt</strong>
+          <strong className="feedback-good">{t('allDone')}</strong>
           <Link to={`/units/${scope.unit}`} className="btn btn-primary">
-            Zurück zur Einheit
+            {t('backToUnit')}
           </Link>
         </div>
       }
@@ -109,6 +110,7 @@ function ClozeCard({
   onCorrect(): void;
   onNext(): void;
 }) {
+  const { t } = useTranslation(['cloze', 'common']);
   const choices = useMemo(() => clozeChoices(word, pool), [word, pool]);
   const [wrong, setWrong] = useState<ReadonlySet<string>>(() => new Set());
   const [correct, setCorrect] = useState(false);
@@ -128,21 +130,21 @@ function ClozeCard({
   return (
     <div className="card stack cloze-card">
       <p className="muted" style={{ margin: 0 }}>
-        Welches Wort fehlt? · {position}
+        {t('prompt', { position })}
       </p>
       <p lang="ar" dir="rtl" className="arabic cloze-sentence">
         {task.before}
         {correct ? (
           <mark className="cloze-filled">{task.gap}</mark>
         ) : (
-          <span className="cloze-gap" aria-label="Lücke">
+          <span className="cloze-gap" aria-label={t('gap')}>
             ＿＿＿
           </span>
         )}
         {task.after}
       </p>
-      <p style={{ margin: 0 }}>„{task.de}“</p>
-      <div className="cloze-choices" role="group" aria-label="Auswahl">
+      <p style={{ margin: 0 }}>{t('quote', { text: task.de })}</p>
+      <div className="cloze-choices" role="group" aria-label={t('choices')}>
         {choices.map((choice) => (
           <button
             key={choice.id}
@@ -161,19 +163,17 @@ function ClozeCard({
       {correct ? (
         <>
           <span className="feedback-good">
-            ✓ Richtig – {word.ar} · {word.de}
+            {t('correct', { arabic: word.ar, meaning: word.de })}
           </span>
           <button className="btn btn-primary" onClick={onNext}>
-            Weiter
+            {t('common:continue')}
           </button>
         </>
       ) : (
         <>
-          {wrong.size > 0 && (
-            <span className="feedback-bad">Nicht ganz – versuch ein anderes Wort.</span>
-          )}
+          {wrong.size > 0 && <span className="feedback-bad">{t('wrong')}</span>}
           <button className="btn" style={{ alignSelf: 'start' }} onClick={onNext}>
-            Überspringen
+            {t('skip')}
           </button>
         </>
       )}

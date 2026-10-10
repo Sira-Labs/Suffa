@@ -4,6 +4,7 @@
  * `madinah_lesson`, units = [the lesson's unit]); 80 % passes (`PASS_RATIO`).
  */
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { PASS_RATIO } from '@suffa/engagement';
 import { ArabicText } from '@/components';
 import type { MadinahLessonContent } from '@/services/courses';
@@ -60,6 +61,7 @@ export function MadinahLessonTest({
   unit: number;
   content: MadinahLessonContent;
 }) {
+  const { t } = useTranslation('units');
   const exams = useEnrollmentStore((s) => s.exams);
   const best = useMemo(() => {
     const mine = exams.filter(
@@ -127,13 +129,14 @@ export function MadinahLessonTest({
   const passed = questions !== null && score / questions.length >= PASS_RATIO;
 
   return (
-    <section className="card stack" aria-label="Lektionstest">
+    <section className="card stack" aria-label={t('lessonTest.title')}>
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
-        <strong>Lektionstest</strong>
+        <strong>{t('lessonTest.title')}</strong>
         {best && (
           <span className="muted">
-            Bestes Ergebnis: {best.score} von {best.total}
-            {best.score / best.total >= PASS_RATIO ? ' · bestanden' : ''}
+            {best.score / best.total >= PASS_RATIO
+              ? t('lessonTest.bestPassed', { score: best.score, total: best.total })
+              : t('lessonTest.best', { score: best.score, total: best.total })}
           </span>
         )}
       </div>
@@ -141,11 +144,10 @@ export function MadinahLessonTest({
       {!questions && (
         <>
           <p className="muted" style={{ margin: 0 }}>
-            Bedeutungen und Lückensätze der Lektion, jede Frage einmal. Ab{' '}
-            {Math.round(PASS_RATIO * 100)} % ist die Lektion bestanden.
+            {t('lessonTest.intro', { percent: Math.round(PASS_RATIO * 100) })}
           </p>
           <button type="button" className="btn btn-primary" onClick={start}>
-            {best ? 'Test wiederholen' : 'Test starten'}
+            {best ? t('lessonTest.retake') : t('lessonTest.start')}
           </button>
         </>
       )}
@@ -153,7 +155,10 @@ export function MadinahLessonTest({
       {current && (
         <div className="stack" style={{ gap: '0.75rem' }}>
           <span className="muted" style={{ textAlign: 'center' }}>
-            Frage {answers.length + 1} von {questions!.length}
+            {t('lessonTest.questionOf', {
+              index: answers.length + 1,
+              total: questions!.length,
+            })}
           </span>
           {current.kind === 'meaning' ? (
             <div style={{ textAlign: 'center' }}>
@@ -177,7 +182,7 @@ export function MadinahLessonTest({
           <div
             className="grid"
             role="group"
-            aria-label="Antwort wählen"
+            aria-label={t('lessonTest.choose')}
             style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
           >
             {current.options.map((option) => (
@@ -200,7 +205,9 @@ export function MadinahLessonTest({
             disabled={chosen === null}
             onClick={next}
           >
-            {answers.length + 1 === questions!.length ? 'Test abgeben' : 'Weiter'}
+            {answers.length + 1 === questions!.length
+              ? t('lessonTest.submit')
+              : t('next')}
           </button>
         </div>
       )}
@@ -208,8 +215,8 @@ export function MadinahLessonTest({
       {finished && (
         <div className="stack" role="status" style={{ gap: '0.5rem' }}>
           <strong className={passed ? 'feedback-good' : 'feedback-bad'}>
-            {passed ? '✓ Bestanden!' : 'Noch nicht bestanden'} – {score} von{' '}
-            {questions!.length} richtig
+            {passed ? t('lessonTest.passed') : t('lessonTest.notPassed')}{' '}
+            {t('lessonTest.result', { score, total: questions!.length })}
           </strong>
           {answers.some((a) => !a.correct) && (
             <ul
@@ -223,13 +230,14 @@ export function MadinahLessonTest({
                     <span lang="ar" dir="rtl" className="arabic-inline">
                       {a.prompt.replace(GAP, '…')}
                     </span>{' '}
-                    → richtig: <span className="arabic-inline">{a.expected}</span>
+                    {t('lessonTest.rightAnswer')}{' '}
+                    <span className="arabic-inline">{a.expected}</span>
                   </li>
                 ))}
             </ul>
           )}
           <button type="button" className="btn" onClick={() => setQuestions(null)}>
-            Fertig
+            {t('finished')}
           </button>
         </div>
       )}

@@ -4,9 +4,10 @@
  * exported as eval cases (without names) to keep the grading prompt honest (story 11.3).
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { ArabicText } from '@/components';
+import { dateLocale } from '@/i18n/format';
 import { ReviewApi, type ReviewItem } from '@/services/tutor/reviewApi';
-import { MISTAKE_LABELS } from '@/services/tutor/tutorApi';
 
 export function ClassGrades({
   classId,
@@ -15,6 +16,7 @@ export function ClassGrades({
   classId: string;
   api?: ReviewApi;
 }) {
+  const { t } = useTranslation('classes');
   const api = useMemo(() => injected ?? new ReviewApi(), [injected]);
   const [status, setStatus] = useState<'open' | 'reviewed'>('open');
   const [items, setItems] = useState<ReviewItem[] | null>(null);
@@ -47,8 +49,7 @@ export function ClassGrades({
   return (
     <div className="stack">
       <p className="muted" style={{ margin: 0 }}>
-        Texte, die al-Muʿallim bewertet hat. Bestätige oder passe die Bewertung an – deine
-        Urteile machen die KI-Bewertung besser.
+        {t('grades.intro')}
       </p>
       <div className="row" style={{ gap: '0.5rem', flexWrap: 'wrap' }}>
         {(['open', 'reviewed'] as const).map((s) => (
@@ -59,19 +60,19 @@ export function ClassGrades({
             aria-pressed={status === s}
             onClick={() => setStatus(s)}
           >
-            {s === 'open' ? 'Offen' : 'Geprüft'}
+            {t(`grades.${s}`)}
           </button>
         ))}
         {status === 'reviewed' && items && items.length > 0 && (
           <button type="button" className="btn" onClick={() => void download()}>
-            Als Eval-Fälle exportieren
+            {t('grades.export')}
           </button>
         )}
       </div>
       {message && <span className="feedback-bad">{message}</span>}
       {items?.length === 0 && (
         <p className="muted">
-          {status === 'open' ? 'Nichts zu prüfen.' : 'Noch keine geprüften Bewertungen.'}
+          {status === 'open' ? t('grades.nothingOpen') : t('grades.noneReviewed')}
         </p>
       )}
       {items?.map((g) => (
@@ -100,37 +101,53 @@ function GradeReview({
       | { decision: 'override'; score: number; comment: string; corrected: string | null }
   ) => Promise<void>;
 }) {
+  const { t } = useTranslation(['classes', 'common']);
   const [editing, setEditing] = useState(false);
   const [score, setScore] = useState(String(item.override?.score ?? item.score));
   const [comment, setComment] = useState(item.override?.comment ?? '');
 
   return (
-    <article className="card stack" aria-label={`Bewertung von ${item.learner}`}>
+    <article
+      className="card stack"
+      aria-label={t('grades.gradeOf', { name: item.learner })}
+    >
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <strong>{item.learner}</strong>
         <span className="muted">
-          {item.kind === 'speech' ? 'Gesprochen' : 'Geschrieben'} ·{' '}
-          {new Date(item.createdAt).toLocaleDateString('de-DE')}
+          {item.kind === 'speech' ? t('grades.speech') : t('grades.written')} ·{' '}
+          {new Date(item.createdAt).toLocaleDateString(dateLocale())}
         </span>
       </div>
-      {item.task && <span className="muted">Aufgabe: {item.task}</span>}
+      {item.task && (
+        <span className="muted">{t('grades.task', { task: item.task })}</span>
+      )}
       <ArabicText size="lg">{item.answer}</ArabicText>
       <span>
-        KI: <strong>{item.score}</strong>/100
+        <Trans
+          t={t}
+          i18nKey="grades.ai"
+          values={{ score: item.score }}
+          components={{ 1: <strong /> }}
+        />
         {item.override && (
           <>
             {' '}
-            · Deine Bewertung: <strong>{item.override.score}</strong>/100
+            <Trans
+              t={t}
+              i18nKey="grades.yours"
+              values={{ score: item.override.score }}
+              components={{ 1: <strong /> }}
+            />
             {item.override.comment ? ` – ${item.override.comment}` : ''}
           </>
         )}
-        {item.status === 'confirmed' && ' · bestätigt'}
+        {item.status === 'confirmed' && ` · ${t('grades.confirmed')}`}
       </span>
       {item.mistakes.length > 0 && (
         <ul className="grade-mistakes">
           {item.mistakes.map((m, i) => (
             <li key={i}>
-              <span className="badge">{MISTAKE_LABELS[m.category]}</span>{' '}
+              <span className="badge">{t(`grades.mistakes.${m.category}`)}</span>{' '}
               <ArabicText>{m.original}</ArabicText> →{' '}
               <ArabicText>{m.correction}</ArabicText>
             </li>
@@ -151,31 +168,31 @@ function GradeReview({
           }}
         >
           <label className="row" style={{ gap: '0.5rem' }}>
-            Punkte
+            {t('grades.points')}
             <input
               className="input"
               inputMode="numeric"
               value={score}
               onChange={(e) => setScore(e.target.value)}
               style={{ width: 80 }}
-              aria-label="Deine Punkte (0–100)"
+              aria-label={t('grades.pointsLabel')}
             />
           </label>
           <textarea
             className="input"
             rows={2}
             maxLength={1000}
-            placeholder="Was sollte die KI anders sehen?"
-            aria-label="Dein Kommentar"
+            placeholder={t('grades.commentPlaceholder')}
+            aria-label={t('grades.comment')}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
           />
           <div className="row" style={{ gap: '0.5rem' }}>
             <button className="btn btn-primary" type="submit">
-              Speichern
+              {t('common:save')}
             </button>
             <button className="btn" type="button" onClick={() => setEditing(false)}>
-              Abbrechen
+              {t('common:cancel')}
             </button>
           </div>
         </form>
@@ -187,11 +204,11 @@ function GradeReview({
               type="button"
               onClick={() => void onVerdict({ decision: 'confirm' })}
             >
-              Passt
+              {t('grades.confirm')}
             </button>
           )}
           <button className="btn" type="button" onClick={() => setEditing(true)}>
-            Anpassen
+            {t('grades.adjust')}
           </button>
         </div>
       )}

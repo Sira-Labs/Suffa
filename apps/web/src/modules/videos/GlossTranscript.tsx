@@ -3,6 +3,7 @@
  * and tapping an Arabic word shows its course meaning.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArabicText } from '@/components';
 import { activeCue, clock, type Cue } from '@/services/media/checkpoints';
 import { glossFor } from '@/services/videos/gloss';
@@ -16,6 +17,7 @@ export function GlossTranscript({
   time: number;
   onSeek: (sec: number) => void;
 }) {
+  const { t } = useTranslation('videos');
   const [picked, setPicked] = useState<{ word: string; gloss: string | null } | null>(
     null
   );
@@ -23,13 +25,15 @@ export function GlossTranscript({
   // activeCue gives the index of the line being spoken (or -1).
   if (cues.length === 0) return null;
   return (
-    <section className="card stack" aria-label="Transkript">
-      <strong>Transkript</strong>
-      <span className="muted">Tippe ein Wort für seine Bedeutung.</span>
+    <section className="card stack" aria-label={t('transcript.title')}>
+      <strong>{t('transcript.title')}</strong>
+      <span className="muted">{t('transcript.hint')}</span>
       {picked && (
         <div className="badge" role="status" style={{ alignSelf: 'flex-start' }}>
           <ArabicText>{picked.word}</ArabicText>
-          {picked.gloss ? ` – ${picked.gloss}` : ' – nicht im Kurswortschatz'}
+          {picked.gloss
+            ? t('transcript.meaning', { gloss: picked.gloss })
+            : t('transcript.notInCourse')}
         </div>
       )}
       <ol className="gloss-transcript">

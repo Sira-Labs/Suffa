@@ -5,38 +5,46 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Trans, useTranslation } from 'react-i18next';
+import { dateLocale } from '@/i18n/format';
 import type { Certificate } from '@/services/classes/classesApi';
 
-const DATE = new Intl.DateTimeFormat('de-DE', { dateStyle: 'long' });
-
 export function CertificateSheet({ certificate }: { certificate: Certificate }) {
+  const { t } = useTranslation('classes');
+  const date = new Intl.DateTimeFormat(dateLocale(), { dateStyle: 'long' });
   return (
     <article
       className="certificate"
-      aria-label={`Zertifikat Einheit ${certificate.unit}`}
+      aria-label={t('certificate.label', { unit: certificate.unit })}
     >
-      <p className="certificate-brand">
+      <p className="certificate-brand" translate="no">
         Suffa <span lang="ar">الصُّفَّة</span>
       </p>
-      <h1 className="certificate-title">Urkunde</h1>
-      <p className="certificate-lead">Hiermit wird bestätigt, dass</p>
+      <h1 className="certificate-title">{t('certificate.title')}</h1>
+      <p className="certificate-lead">{t('certificate.lead')}</p>
       <p className="certificate-name">
-        {certificate.learnerName || 'die Lernende Person'}
+        {certificate.learnerName || t('certificate.noName')}
       </p>
       <p className="certificate-lead">
-        die <strong>Einheit {certificate.unit}</strong> – {certificate.unitTitle} –
-        abgeschlossen hat.
+        <Trans
+          t={t}
+          i18nKey="certificate.completed"
+          values={{ unit: certificate.unit, title: certificate.unitTitle }}
+          components={{ 1: <strong /> }}
+        />
       </p>
       <p className="certificate-detail">
-        {certificate.mastery} % der Wörter dieser Einheit sind sicher im Gedächtnis.
+        {t('certificate.detail', { mastery: certificate.mastery })}
       </p>
       <footer className="certificate-footer">
         <span>
           {certificate.className}
           {certificate.teacherName ? ` · ${certificate.teacherName}` : ''}
         </span>
-        <span>{DATE.format(new Date(certificate.awardedAt))}</span>
-        <span className="certificate-id">Nr. {certificate.id.slice(0, 8)}</span>
+        <span>{date.format(new Date(certificate.awardedAt))}</span>
+        <span className="certificate-id">
+          {t('certificate.number', { id: certificate.id.slice(0, 8) })}
+        </span>
       </footer>
     </article>
   );

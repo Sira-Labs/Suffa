@@ -3,6 +3,7 @@
  * EU model for one, reads it and publishes or hides it for the class.
  */
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArabicText, CollapsibleCard, InlineMarkdown } from '@/components';
 import type {
   InteractiveApi,
@@ -14,6 +15,7 @@ import type {
 const POLL_MS = 5000;
 
 export function SummaryContent({ content }: { content: LessonSummary }) {
+  const { t } = useTranslation('recordings');
   return (
     <div className="stack summary-body" style={{ gap: '0.6rem' }}>
       <p style={{ margin: 0 }}>
@@ -30,7 +32,7 @@ export function SummaryContent({ content }: { content: LessonSummary }) {
       )}
       {content.vocabulary.length > 0 && (
         <div className="stack" style={{ gap: '0.3rem' }}>
-          <strong style={{ fontSize: '0.95rem' }}>Neue Wörter</strong>
+          <strong style={{ fontSize: '0.95rem' }}>{t('summary.newWords')}</strong>
           <ul
             className="stack"
             style={{ listStyle: 'none', padding: 0, margin: 0, gap: '0.2rem' }}
@@ -52,7 +54,7 @@ export function SummaryContent({ content }: { content: LessonSummary }) {
       )}
       {content.grammar.length > 0 && (
         <div className="stack" style={{ gap: '0.3rem' }}>
-          <strong style={{ fontSize: '0.95rem' }}>Grammatik</strong>
+          <strong style={{ fontSize: '0.95rem' }}>{t('summary.grammar')}</strong>
           <ul style={{ margin: 0, paddingInlineStart: '1.2rem' }}>
             {content.grammar.map((g) => (
               <li key={g}>
@@ -85,6 +87,7 @@ export function SummaryPanel({
   hasTranscript: boolean;
   onChange: () => void;
 }) {
+  const { t } = useTranslation('recordings');
   const [message, setMessage] = useState<string | null>(null);
   const running = summary?.status === 'queued' || summary?.status === 'running';
 
@@ -103,7 +106,7 @@ export function SummaryPanel({
   if (!teacher) {
     if (!summary?.content) return null;
     return (
-      <CollapsibleCard id="summary" title="Zusammenfassung">
+      <CollapsibleCard id="summary" title={t('summary.title')}>
         <SummaryContent content={summary.content} />
       </CollapsibleCard>
     );
@@ -122,19 +125,19 @@ export function SummaryPanel({
   };
 
   return (
-    <CollapsibleCard id="summary" title="Zusammenfassung (KI)">
-      {running && <span className="muted">Die Zusammenfassung wird erstellt …</span>}
+    <CollapsibleCard id="summary" title={t('summary.titleAi')}>
+      {running && <span className="muted">{t('summary.running')}</span>}
       {summary?.status === 'failed' && (
         <span className="feedback-bad">
-          Das hat nicht geklappt{summary.error ? `: ${summary.error}` : '.'}
+          {summary.error
+            ? t('summary.failedWith', { error: summary.error })
+            : t('summary.failed')}
         </span>
       )}
       {summary?.content && summary.status === 'ready' && (
         <>
           <span className="muted" style={{ fontSize: '0.9rem' }}>
-            {summary.publishedAt
-              ? '✓ Für die Klasse sichtbar.'
-              : 'Entwurf – nur du siehst ihn. Lies ihn, bevor du ihn freigibst.'}
+            {summary.publishedAt ? t('summary.visible') : t('summary.draft')}
           </span>
           <SummaryContent content={summary.content} />
         </>
@@ -142,7 +145,7 @@ export function SummaryPanel({
       <div className="row">
         {canSummarize && hasTranscript && !running && (
           <button className="btn" onClick={() => void request()}>
-            {summary?.content ? 'Neu erstellen' : 'Zusammenfassung erstellen'}
+            {summary?.content ? t('summary.regenerate') : t('summary.create')}
           </button>
         )}
         {summary?.content && summary.status === 'ready' && (
@@ -150,15 +153,13 @@ export function SummaryPanel({
             className={summary.publishedAt ? 'btn' : 'btn btn-primary'}
             onClick={() => void publish(!summary.publishedAt)}
           >
-            {summary.publishedAt
-              ? 'Für die Klasse verbergen'
-              : 'Für die Klasse freigeben'}
+            {summary.publishedAt ? t('summary.hide') : t('summary.publish')}
           </button>
         )}
       </div>
       {canSummarize && !hasTranscript && (
         <span className="muted" style={{ fontSize: '0.9rem' }}>
-          Für eine Zusammenfassung braucht die Aufnahme zuerst ein Transkript.
+          {t('summary.needsTranscript')}
         </span>
       )}
       {message && <span className="feedback-bad">{message}</span>}

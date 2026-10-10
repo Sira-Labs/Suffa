@@ -4,9 +4,10 @@
  * and visibility. Checkpoints and the transcript are edited on the lesson page itself.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { dateLocale } from '@/i18n/format';
 import {
-  PERMISSION_LABELS,
   VideosApi,
   type AdminVideo,
   type PermissionStatus,
@@ -15,7 +16,10 @@ import {
 import { COURSES, DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 import { unitLabel } from '@/services/courses';
 
+const PERMISSIONS: PermissionStatus[] = ['unknown', 'requested', 'granted', 'declined'];
+
 export function VideoAdmin({ api: injected }: { api?: VideosApi }) {
+  const { t } = useTranslation('admin');
   const api = useMemo(() => injected ?? new VideosApi(), [injected]);
   const [data, setData] = useState<{
     channels: VideoChannel[];
@@ -38,7 +42,7 @@ export function VideoAdmin({ api: injected }: { api?: VideosApi }) {
     return message ? (
       <span className="feedback-bad">{message}</span>
     ) : (
-      <p className="muted">Lade …</p>
+      <p className="muted">{t('loading')}</p>
     );
 
   return (
@@ -75,6 +79,7 @@ function ChannelCard({
   onChange: () => Promise<void>;
   onMessage: (m: string | null) => void;
 }) {
+  const { t } = useTranslation(['admin', 'common']);
   const [course, setCourse] = useState<CourseId>(channel.course ?? DEFAULT_COURSE);
   const [status, setStatus] = useState<PermissionStatus>(channel.permissionStatus);
   const [notes, setNotes] = useState(channel.permissionNotes);
@@ -102,11 +107,7 @@ function ChannelCard({
 
   const runImport = async () => {
     const result = await api.importChannel(channel.id);
-    onMessage(
-      result.ok
-        ? 'Import gestartet – die Liste füllt sich in einer Minute.'
-        : result.message
-    );
+    onMessage(result.ok ? t('videos.importStarted') : result.message);
   };
 
   const update = async (
@@ -119,38 +120,48 @@ function ChannelCard({
   };
 
   return (
-    <section className="card stack" aria-label={`Kanal ${channel.name}`}>
+    <section
+      className="card stack"
+      aria-label={t('videos.channel', { name: channel.name })}
+    >
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <strong>{channel.name}</strong>
         <span className="muted">
-          {channel.videoCount} Videos
+          {t('videos.videoCount', { count: channel.videoCount })}
           {channel.lastImportAt
-            ? ` · Import ${new Date(channel.lastImportAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}`
+            ? t('videos.lastImportAt', {
+                date: new Date(channel.lastImportAt).toLocaleString(dateLocale(), {
+                  dateStyle: 'short',
+                  timeStyle: 'short',
+                }),
+              })
             : ''}
         </span>
       </div>
       {channel.lastImportError && (
-        <span className="feedback-bad">Letzter Import: {channel.lastImportError}</span>
+        <span className="feedback-bad">
+          {t('videos.lastImportError', { error: channel.lastImportError })}
+        </span>
       )}
       <form className="stack" onSubmit={(e) => void save(e)}>
         <div className="row" style={{ gap: '0.75rem', flexWrap: 'wrap' }}>
           <CourseSelect value={course} onChange={setCourse} />
           <label className="stack" style={{ gap: 2 }}>
-            <span className="muted">Erlaubnis der Autoren</span>
+            <span className="muted">{t('videos.permission')}</span>
             <select
               className="input"
               value={status}
               onChange={(e) => setStatus(e.target.value as PermissionStatus)}
             >
-              {(Object.keys(PERMISSION_LABELS) as PermissionStatus[]).map((s) => (
+              {PERMISSIONS.map((s) => (
                 <option key={s} value={s}>
-                  {PERMISSION_LABELS[s]}
+                  {t(`videos.permissions.${s}`)}
                 </option>
               ))}
             </select>
           </label>
           <label className="stack" style={{ gap: 2 }}>
-            <span className="muted">Kontaktiert am</span>
+            <span className="muted">{t('videos.contacted')}</span>
             <input
               className="input"
               type="date"
@@ -160,7 +171,7 @@ function ChannelCard({
           </label>
         </div>
         <label className="stack" style={{ gap: 2 }}>
-          <span className="muted">Notizen zur Anfrage</span>
+          <span className="muted">{t('videos.notes')}</span>
           <textarea
             className="input"
             rows={2}
@@ -170,7 +181,7 @@ function ChannelCard({
           />
         </label>
         <label className="stack" style={{ gap: 2 }}>
-          <span className="muted">Playlists (IDs, eine pro Zeile)</span>
+          <span className="muted">{t('videos.playlists')}</span>
           <textarea
             className="input"
             rows={2}
@@ -180,23 +191,23 @@ function ChannelCard({
         </label>
         <div className="row" style={{ gap: '0.5rem', flexWrap: 'wrap' }}>
           <button className="btn btn-primary" type="submit">
-            Speichern
+            {t('common:save')}
           </button>
           <button
             className="btn"
             type="button"
             disabled={!importEnabled}
-            title={importEnabled ? undefined : 'SUFFA_YOUTUBE_API_KEY fehlt'}
+            title={importEnabled ? undefined : t('videos.importKeyMissing')}
             onClick={() => void runImport()}
           >
-            Von YouTube importieren
+            {t('videos.import')}
           </button>
-          {saved && <span className="muted">Gespeichert.</span>}
+          {saved && <span className="muted">{t('common:saved')}</span>}
         </div>
       </form>
       {videos.length > 0 && (
         <details>
-          <summary>Videos ({videos.length})</summary>
+          <summary>{t('videos.list', { n: videos.length })}</summary>
           <table style={{ width: '100%' }}>
             <tbody>
               {videos.map((v) => (
@@ -207,7 +218,7 @@ function ChannelCard({
                   <td>
                     <select
                       className="input"
-                      aria-label={`Einheit von ${v.title}`}
+                      aria-label={t('videos.unitOf', { title: v.title })}
                       value={v.unit ?? ''}
                       onChange={(e) =>
                         void update(v, {
@@ -234,7 +245,7 @@ function ChannelCard({
                         checked={!v.hidden}
                         onChange={(e) => void update(v, { hidden: !e.target.checked })}
                       />{' '}
-                      sichtbar
+                      {t('videos.visible')}
                     </label>
                   </td>
                 </tr>
@@ -254,6 +265,7 @@ function NewChannel({
   api: VideosApi;
   onCreated: () => Promise<void>;
 }) {
+  const { t } = useTranslation('admin');
   const [name, setName] = useState('');
   const [course, setCourse] = useState<CourseId>(DEFAULT_COURSE);
   const [playlist, setPlaylist] = useState('');
@@ -273,25 +285,25 @@ function NewChannel({
   };
   return (
     <form className="card stack" onSubmit={(e) => void submit(e)}>
-      <strong>Neuer Kanal</strong>
+      <strong>{t('videos.newChannel')}</strong>
       <input
         className="input"
-        placeholder="Name, z. B. Muhammad al-Andalusi"
-        aria-label="Name des Kanals"
+        placeholder={t('videos.namePlaceholder')}
+        aria-label={t('videos.name')}
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
       <CourseSelect value={course} onChange={setCourse} />
       <input
         className="input"
-        placeholder="Playlist-ID (PL…)"
-        aria-label="Playlist-ID"
+        placeholder={t('videos.playlistPlaceholder')}
+        aria-label={t('videos.playlist')}
         value={playlist}
         onChange={(e) => setPlaylist(e.target.value)}
       />
       <div className="row">
         <button className="btn btn-primary" type="submit" disabled={!name.trim()}>
-          Anlegen
+          {t('videos.create')}
         </button>
         {message && <span className="feedback-bad">{message}</span>}
       </div>
@@ -307,9 +319,10 @@ function CourseSelect({
   value: CourseId;
   onChange: (course: CourseId) => void;
 }) {
+  const { t } = useTranslation('admin');
   return (
     <label className="stack" style={{ gap: 2 }}>
-      <span className="muted">Kurs des Kanals</span>
+      <span className="muted">{t('videos.course')}</span>
       <select
         className="input"
         value={value}

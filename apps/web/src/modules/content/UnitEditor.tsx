@@ -4,6 +4,7 @@
  * Existing IDs are shown but not editable: SRS cards point at them (ADR-0003).
  */
 import { useEffect, useId, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Dialog, GrammatikFrage, GrammatikPunkt, Vokabel } from '@/types';
 import type { UnitContent } from '@/services/content/contentApi';
 
@@ -16,19 +17,20 @@ interface Props {
 }
 
 export function UnitEditor({ unit, content, savedIds, onChange }: Props) {
+  const { t } = useTranslation('content');
   const set = <K extends keyof UnitContent>(key: K, value: UnitContent[K]) =>
     onChange({ ...content, [key]: value });
 
   return (
     <div className="stack">
-      <section className="card stack" aria-label="Allgemein">
+      <section className="card stack" aria-label={t('editor.general')}>
         <TextField
-          label="Titel"
+          label={t('editor.title')}
           value={content.titel}
           onChange={(titel) => set('titel', titel)}
         />
         <TextArea
-          label="Kulturnotiz"
+          label={t('view.cultureNote')}
           value={content.kulturnotiz ?? ''}
           onChange={(text) => set('kulturnotiz', text.trim() ? text : undefined)}
         />
@@ -82,49 +84,50 @@ function VocabSection({
   savedIds: ReadonlySet<string>;
   onChange: (items: Vokabel[]) => void;
 }) {
+  const { t } = useTranslation('content');
   const update = (index: number, patch: Partial<Vokabel>) =>
     onChange(replaceAt(items, index, { ...items[index]!, ...patch }));
   const optional = (value: string) => (value.trim() ? value : undefined);
   return (
-    <section className="card stack" aria-label="Wörter">
-      <h2 style={{ margin: 0 }}>Wörter ({items.length})</h2>
+    <section className="card stack" aria-label={t('view.words')}>
+      <h2 style={{ margin: 0 }}>{t('view.wordsCount', { n: items.length })}</h2>
       {items.map((word, index) => (
         <fieldset key={index} className="cms-item">
           <legend className="muted">
-            {savedIds.has(word.id) ? word.id : 'Neues Wort'}
+            {savedIds.has(word.id) ? word.id : t('editor.newWord')}
           </legend>
           {!savedIds.has(word.id) && (
             <TextField
-              label="Kennung (fest nach dem Speichern)"
+              label={t('editor.id')}
               value={word.id}
               onChange={(id) => update(index, { id: id.trim() })}
             />
           )}
           <div className="cms-grid">
             <TextField
-              label="Arabisch"
+              label={t('view.arabic')}
               arabic
               value={word.ar}
               onChange={(ar) => update(index, { ar })}
             />
             <TextField
-              label="Umschrift"
+              label={t('view.transliteration')}
               value={word.tr}
               onChange={(tr) => update(index, { tr })}
             />
             <TextField
-              label="Deutsch"
+              label={t('view.german')}
               value={word.de}
               onChange={(de) => update(index, { de })}
             />
             <TextField
-              label="Wurzel"
+              label={t('view.root')}
               arabic
               value={word.wurzel}
               onChange={(wurzel) => update(index, { wurzel })}
             />
             <TextField
-              label="Plural"
+              label={t('view.plural')}
               arabic
               value={word.plural ?? ''}
               onChange={(plural) =>
@@ -132,19 +135,19 @@ function VocabSection({
               }
             />
             <TextField
-              label="Wazn"
+              label={t('editor.wazn')}
               arabic
               value={word.wazn ?? ''}
               onChange={(wazn) => update(index, { wazn: optional(wazn) })}
             />
           </div>
           <TextField
-            label="Hinweis"
+            label={t('editor.note')}
             value={word.hinweis ?? ''}
             onChange={(hinweis) => update(index, { hinweis: optional(hinweis) })}
           />
           <RemoveButton
-            label={`Wort ${word.id || index + 1} entfernen`}
+            label={t('editor.removeWord', { id: word.id || index + 1 })}
             onClick={() => onChange(removeAt(items, index))}
           />
         </fieldset>
@@ -159,7 +162,7 @@ function VocabSection({
           ])
         }
       >
-        Wort hinzufügen
+        {t('editor.addWord')}
       </button>
     </section>
   );
@@ -174,18 +177,19 @@ function DialogSection({
   items: Dialog[];
   onChange: (items: Dialog[]) => void;
 }) {
+  const { t } = useTranslation('content');
   const update = (index: number, patch: Partial<Dialog>) =>
     onChange(replaceAt(items, index, { ...items[index]!, ...patch }));
   return (
-    <section className="card stack" aria-label="Dialoge">
-      <h2 style={{ margin: 0 }}>Dialoge ({items.length})</h2>
+    <section className="card stack" aria-label={t('view.dialogues')}>
+      <h2 style={{ margin: 0 }}>{t('view.dialoguesCount', { n: items.length })}</h2>
       {items.map((dialog, index) => (
         <fieldset key={dialog.id} className="cms-item">
           <legend className="muted">
-            {dialog.id} · Abschnitt {dialog.dialog}
+            {t('editor.dialogLegend', { id: dialog.id, section: dialog.dialog })}
           </legend>
           <TextField
-            label="Titel"
+            label={t('editor.title')}
             arabic
             value={dialog.titel}
             onChange={(titel) => update(index, { titel })}
@@ -193,7 +197,7 @@ function DialogSection({
           {dialog.zeilen.map((line, lineIndex) => (
             <div key={lineIndex} className="cms-grid cms-line">
               <TextField
-                label={`Zeile ${lineIndex + 1}: Person`}
+                label={t('editor.linePerson', { n: lineIndex + 1 })}
                 arabic
                 value={line.sp}
                 onChange={(sp) =>
@@ -203,7 +207,7 @@ function DialogSection({
                 }
               />
               <TextField
-                label="Arabisch"
+                label={t('view.arabic')}
                 arabic
                 value={line.ar}
                 onChange={(ar) =>
@@ -213,7 +217,7 @@ function DialogSection({
                 }
               />
               <TextField
-                label="Deutsch"
+                label={t('view.german')}
                 value={line.de}
                 onChange={(de) =>
                   update(index, {
@@ -222,7 +226,7 @@ function DialogSection({
                 }
               />
               <RemoveButton
-                label={`Zeile ${lineIndex + 1} entfernen`}
+                label={t('editor.removeLine', { n: lineIndex + 1 })}
                 onClick={() =>
                   update(index, { zeilen: removeAt(dialog.zeilen, lineIndex) })
                 }
@@ -237,10 +241,10 @@ function DialogSection({
                 update(index, { zeilen: [...dialog.zeilen, { sp: '', ar: '', de: '' }] })
               }
             >
-              Zeile hinzufügen
+              {t('editor.addLine')}
             </button>
             <RemoveButton
-              label={`Dialog ${dialog.id} entfernen`}
+              label={t('editor.removeDialog', { id: dialog.id })}
               onClick={() => onChange(removeAt(items, index))}
             />
           </div>
@@ -267,7 +271,7 @@ function DialogSection({
           ]);
         }}
       >
-        Dialog hinzufügen
+        {t('editor.addDialog')}
       </button>
     </section>
   );
@@ -284,22 +288,23 @@ function GrammarSection({
   sections: number;
   onChange: (items: GrammatikPunkt[]) => void;
 }) {
+  const { t } = useTranslation('content');
   const update = (index: number, patch: Partial<GrammatikPunkt>) =>
     onChange(replaceAt(items, index, { ...items[index]!, ...patch }));
   return (
-    <section className="card stack" aria-label="Grammatik">
-      <h2 style={{ margin: 0 }}>Grammatik ({items.length})</h2>
+    <section className="card stack" aria-label={t('view.grammar')}>
+      <h2 style={{ margin: 0 }}>{t('view.grammarCount', { n: items.length })}</h2>
       {items.map((point, index) => (
         <fieldset key={point.id} className="cms-item">
           <legend className="muted">{point.id}</legend>
           <div className="cms-grid">
             <TextField
-              label="Titel"
+              label={t('editor.title')}
               value={point.titel}
               onChange={(titel) => update(index, { titel })}
             />
             <label className="stack cms-field">
-              <span className="muted">Abschnitt</span>
+              <span className="muted">{t('editor.section')}</span>
               <select
                 className="input"
                 value={point.abschnitt}
@@ -314,18 +319,18 @@ function GrammarSection({
             </label>
           </div>
           <TextField
-            label="Regel"
+            label={t('editor.rule')}
             value={point.regel}
             onChange={(regel) => update(index, { regel })}
           />
           <TextArea
-            label="Erklärung (ein Absatz pro Zeile)"
+            label={t('editor.explanation')}
             commitOnBlur
             value={point.erklaerung.join('\n')}
             onChange={(text) => update(index, { erklaerung: lines(text) })}
           />
           <TextArea
-            label="Beispiele (pro Zeile: Arabisch | Deutsch)"
+            label={t('editor.examples')}
             commitOnBlur
             value={point.beispiele.map((b) => `${b.ar} | ${b.de}`).join('\n')}
             onChange={(text) =>
@@ -339,7 +344,7 @@ function GrammarSection({
           />
           <QuestionList point={point} onChange={(fragen) => update(index, { fragen })} />
           <RemoveButton
-            label={`Grammatikpunkt ${point.id} entfernen`}
+            label={t('editor.removePoint', { id: point.id })}
             onClick={() => onChange(removeAt(items, index))}
           />
         </fieldset>
@@ -367,7 +372,7 @@ function GrammarSection({
           ]);
         }}
       >
-        Grammatikpunkt hinzufügen
+        {t('editor.addPoint')}
       </button>
     </section>
   );
@@ -380,32 +385,33 @@ function QuestionList({
   point: GrammatikPunkt;
   onChange: (questions: GrammatikFrage[]) => void;
 }) {
+  const { t } = useTranslation('content');
   const update = (index: number, patch: Partial<GrammatikFrage>) =>
     onChange(replaceAt(point.fragen, index, { ...point.fragen[index]!, ...patch }));
   return (
     <div className="stack" style={{ gap: '0.5rem' }}>
-      <strong>Quizfragen ({point.fragen.length})</strong>
+      <strong>{t('editor.questions', { n: point.fragen.length })}</strong>
       {point.fragen.map((question, index) => (
         <div key={question.id} className="cms-grid cms-line">
           <TextField
-            label={`Frage ${index + 1}`}
+            label={t('editor.question', { n: index + 1 })}
             value={question.frage}
             onChange={(frage) => update(index, { frage })}
           />
           <TextField
-            label="Arabischer Kontext (… für die Lücke)"
+            label={t('editor.context')}
             arabic
             value={question.ar ?? ''}
             onChange={(ar) => update(index, { ar: ar.trim() ? ar : null })}
           />
           <TextField
-            label="Antwort"
+            label={t('editor.answer')}
             arabic
             value={question.antwort}
             onChange={(antwort) => update(index, { antwort })}
           />
           <TextField
-            label="Ablenker (mit Komma getrennt)"
+            label={t('editor.distractors')}
             arabic
             commitOnBlur
             value={question.ablenker.join(', ')}
@@ -419,7 +425,7 @@ function QuestionList({
             }
           />
           <RemoveButton
-            label={`Frage ${index + 1} entfernen`}
+            label={t('editor.removeQuestion', { n: index + 1 })}
             onClick={() => onChange(removeAt(point.fragen, index))}
           />
         </div>
@@ -448,7 +454,7 @@ function QuestionList({
           ])
         }
       >
-        Frage hinzufügen
+        {t('editor.addQuestion')}
       </button>
     </div>
   );
@@ -536,6 +542,7 @@ function TextArea(props: FieldProps) {
 }
 
 function RemoveButton({ label, onClick }: { label: string; onClick: () => void }) {
+  const { t } = useTranslation('common');
   return (
     <button
       type="button"
@@ -544,7 +551,7 @@ function RemoveButton({ label, onClick }: { label: string; onClick: () => void }
       aria-label={label}
       onClick={onClick}
     >
-      Entfernen
+      {t('remove')}
     </button>
   );
 }

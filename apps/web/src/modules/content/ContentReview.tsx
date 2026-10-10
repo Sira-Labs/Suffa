@@ -4,6 +4,7 @@
  * admin area. `?unit=bayna-yadayk/3` opens a unit directly.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { useRole } from '@/modules/account/useRole';
 import {
@@ -15,12 +16,13 @@ import {
 import { UnitReviewView, UnitStatus } from './UnitReviewView';
 
 export function ContentReview({ api }: { api?: ContentApi }) {
+  const { t } = useTranslation('content');
   const role = useRole();
   if (role !== 'teacher' && role !== 'admin') {
     return (
       <div className="stack">
-        <h1>Inhalte prüfen</h1>
-        <p className="muted">Diese Seite ist für Lehrkräfte.</p>
+        <h1>{t('review.title')}</h1>
+        <p className="muted">{t('review.teachersOnly')}</p>
       </div>
     );
   }
@@ -28,6 +30,7 @@ export function ContentReview({ api }: { api?: ContentApi }) {
 }
 
 function Review({ api }: { api?: ContentApi }) {
+  const { t } = useTranslation('content');
   const client = useMemo(() => api ?? new ContentApi(), [api]);
   const [params, setParams] = useSearchParams();
   const selected = params.get('unit');
@@ -50,10 +53,9 @@ function Review({ api }: { api?: ContentApi }) {
 
   return (
     <div className="stack">
-      <h1>Inhalte prüfen</h1>
+      <h1>{t('review.title')}</h1>
       <p className="muted" style={{ margin: 0 }}>
-        Einheiten, die zur Prüfung gegeben wurden, stehen oben. Markiere sie als geprüft
-        oder gib sie mit einer Notiz zurück.
+        {t('review.intro')}
       </p>
       {message && <span className="feedback-bad">{message}</span>}
       {selected ? (
@@ -67,15 +69,15 @@ function Review({ api }: { api?: ContentApi }) {
         units && (
           <>
             <UnitList
-              label="Zur Prüfung"
+              label={t('review.waiting')}
               units={inReview}
-              empty="Gerade wartet keine Einheit auf deine Prüfung."
+              empty={t('review.waitingEmpty')}
               onSelect={select}
             />
             <UnitList
-              label="Alle Einheiten"
+              label={t('review.all')}
               units={units.filter((u) => u.state !== 'review')}
-              empty="Keine weiteren Einheiten."
+              empty={t('review.allEmpty')}
               onSelect={select}
             />
           </>
@@ -96,6 +98,7 @@ function UnitList({
   empty: string;
   onSelect: (id: string) => void;
 }) {
+  const { t } = useTranslation('content');
   return (
     <section className="stack" aria-label={label}>
       <h2 className="eyebrow">{label}</h2>
@@ -108,9 +111,7 @@ function UnitList({
               className="card stack cms-unit-button"
               onClick={() => onSelect(unit.id)}
             >
-              <strong>
-                Einheit {unit.unit}: {unit.title}
-              </strong>
+              <strong>{t('unitTitle', { unit: unit.unit, title: unit.title })}</strong>
               <UnitStatus unit={unit} />
             </button>
           </li>
@@ -131,6 +132,7 @@ function UnitPanel({
   onBack: () => void;
   onChanged: () => Promise<void>;
 }) {
+  const { t } = useTranslation('content');
   const [unit, setUnit] = useState<UnitDetail | null>(null);
   const [message, setMessage] = useState<{ text: string; good?: boolean } | null>(null);
   const [note, setNote] = useState('');
@@ -166,7 +168,7 @@ function UnitPanel({
         style={{ alignSelf: 'flex-start' }}
         onClick={onBack}
       >
-        ← Alle Einheiten
+        {t('review.back')}
       </button>
       {message && (
         <span className={message.good ? 'feedback-good' : 'feedback-bad'} role="status">
@@ -176,17 +178,17 @@ function UnitPanel({
       {unit && (
         <>
           <h2 style={{ margin: 0 }}>
-            Einheit {unit.unit}: {unit.title}
+            {t('unitTitle', { unit: unit.unit, title: unit.title })}
           </h2>
           <UnitStatus unit={unit} />
           {unit.reviewNote && (
             <p className="feedback-warn" style={{ margin: 0 }}>
-              Notiz zur Prüfung: {unit.reviewNote}
+              {t('review.note', { note: unit.reviewNote })}
             </p>
           )}
           {unit.state === 'review' && (
-            <section className="card stack" aria-label="Prüfung">
-              <h2 style={{ margin: 0 }}>Prüfung</h2>
+            <section className="card stack" aria-label={t('review.section')}>
+              <h2 style={{ margin: 0 }}>{t('review.section')}</h2>
               <div className="row" style={{ flexWrap: 'wrap' }}>
                 <button
                   type="button"
@@ -195,17 +197,15 @@ function UnitPanel({
                   onClick={() =>
                     void act(
                       () => api.step(unit.id, 'check', unit.revision),
-                      'Als geprüft markiert.'
+                      t('review.markedChecked')
                     )
                   }
                 >
-                  {unit.checked ? 'Geprüft' : 'Als geprüft markieren'}
+                  {unit.checked ? t('status.checked') : t('review.markChecked')}
                 </button>
               </div>
               <label className="stack" style={{ gap: '0.25rem' }}>
-                <span className="muted">
-                  Oder zurückgeben, mit einer Notiz für die Redaktion:
-                </span>
+                <span className="muted">{t('review.returnHint')}</span>
                 <textarea
                   className="input cms-textarea"
                   rows={3}
@@ -222,11 +222,11 @@ function UnitPanel({
                 onClick={() =>
                   void act(
                     () => api.returnToDraft(unit.id, unit.revision, note.trim()),
-                    'Zurückgegeben.'
+                    t('review.returned')
                   )
                 }
               >
-                Zurückgeben
+                {t('review.return')}
               </button>
             </section>
           )}

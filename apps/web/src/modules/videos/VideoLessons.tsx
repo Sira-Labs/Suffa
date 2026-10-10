@@ -4,27 +4,36 @@
  * learner's course is shown: its units, and the videos not tied to a unit.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { VideosApi, type VideoLesson } from '@/services/videos/videosApi';
 import { useListenStore } from '@/state';
-import { courseOfUnit } from '@suffa/engagement';
-import { unitLabel, useActiveCourse } from '@/services/courses';
+import { courseOfUnit, unitLabelNumber } from '@suffa/engagement';
+import i18n from '@/i18n';
+import { useActiveCourse } from '@/services/courses';
+
+/** "Einheit 3" or, in the Medina course, "Lektion 3", in the interface language. */
+const unitLabel = (unit: number) =>
+  i18n.t(courseOfUnit(unit)?.id === 'madinah' ? 'videos:lesson' : 'videos:unit', {
+    unit: unitLabelNumber(unit),
+  });
 
 const duration = (sec: number | null) =>
   sec ? `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}` : '';
 
 export function VideoLessons({ api: injected }: { api?: VideosApi }) {
+  const { t } = useTranslation('videos');
   const api = useMemo(() => injected ?? new VideosApi(), [injected]);
   const [params, setParams] = useSearchParams();
   const unit = Number(params.get('unit')) || null;
   const [videos, setVideos] = useState<VideoLesson[] | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [unavailable, setUnavailable] = useState(false);
   const progress = useListenStore((s) => s.progress);
 
   useEffect(() => {
     void api.list().then((result) => {
       if (result.ok) setVideos(result.value.videos);
-      else setMessage('Die Videolektionen sind gerade nicht erreichbar (offline?).');
+      else setUnavailable(true);
     });
   }, [api]);
 
@@ -39,17 +48,16 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
 
   return (
     <div className="stack">
-      <h1>Videolektionen</h1>
+      <h1>{t('title')}</h1>
       <p className="muted" style={{ margin: 0 }}>
-        Lektionen zum Buch auf YouTube – mit Fragen zwischendurch, wo die Autoren es
-        erlauben.
+        {t('intro')}
       </p>
-      {message && <span className="feedback-bad">{message}</span>}
+      {unavailable && <span className="feedback-bad">{t('unavailable')}</span>}
       {units.length > 0 && (
         <div
           className="row"
           role="group"
-          aria-label={course === 'madinah' ? 'Lektion wählen' : 'Einheit wählen'}
+          aria-label={course === 'madinah' ? t('chooseLesson') : t('chooseUnit')}
           style={{ flexWrap: 'wrap', gap: '0.4rem' }}
         >
           <button
@@ -58,7 +66,7 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
             aria-pressed={unit === null}
             onClick={() => setParams({})}
           >
-            Alle
+            {t('all')}
           </button>
           {units.map((u) => (
             <button
@@ -76,8 +84,8 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
       {videos && shown.length === 0 && (
         <p className="muted">
           {ofCourse.length === 0
-            ? 'Noch keine Videolektionen zu deinem Kurs.'
-            : `Noch keine Videolektionen zu ${unitLabel(unit!)}.`}
+            ? t('noneForCourse')
+            : t('noneForUnit', { unit: unitLabel(unit!) })}
         </p>
       )}
       <div className="video-grid">
@@ -98,8 +106,8 @@ export function VideoLessons({ api: injected }: { api?: VideosApi }) {
               <span className="muted">
                 {v.unit ? `${unitLabel(v.unit)} · ` : ''}
                 {duration(v.durationSec)}
-                {v.interactive ? ' · mit Fragen' : ''}
-                {heard?.completedAt ? ' · ✓ angesehen' : ''}
+                {v.interactive ? t('withQuestions') : ''}
+                {heard?.completedAt ? t('watched') : ''}
               </span>
             </Link>
           );

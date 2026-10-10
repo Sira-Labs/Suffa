@@ -2,6 +2,8 @@
  * Plain-language help texts for when recording or pronunciation scoring fails –
  * on iPhone with the specific settings that are usually the cause.
  */
+import i18n from '@/i18n';
+import type { speaking } from '@/i18n/locales/de/speaking';
 import type { RecorderFailure } from '@/services/audio';
 import type { RecognitionFailure } from '@/services/speech';
 
@@ -15,59 +17,55 @@ export function recorderHelp(
   reason: RecorderFailure | 'empty',
   ctx: HelpContext
 ): string {
+  const t = (key: keyof typeof speaking.recorderHelp) =>
+    i18n.t(`speaking:recorderHelp.${key}`);
   switch (reason) {
     case 'denied':
-      return ctx.ios
-        ? 'Kein Zugriff aufs Mikrofon. iPhone: Einstellungen → Apps → Safari → Mikrofon auf „Fragen“ oder „Erlauben“ stellen, dann die Seite neu laden und beim Nachfragen „Erlauben“ tippen.'
-        : 'Kein Zugriff aufs Mikrofon. Erlaube das Mikrofon für diese Seite (Schloss-Symbol in der Adressleiste) und lade die Seite neu.';
+      return ctx.ios ? t('deniedIos') : t('denied');
     case 'no-device':
-      return 'Kein Mikrofon gefunden. Schließe ein Mikrofon/Headset an oder prüfe, ob es vom System erkannt wird.';
+      return t('noDevice');
     case 'busy':
-      return 'Das Mikrofon wird gerade von einer anderen App benutzt (z. B. Anruf, Sprachnachricht). Beende sie und versuche es erneut.';
+      return t('busy');
     case 'insecure':
-      return 'Aufnahmen sind nur über eine sichere Verbindung (https) möglich.';
+      return t('insecure');
     case 'unsupported':
-      return ctx.ios
-        ? 'Dieser Browser kann nicht aufnehmen. Öffne Suffa in Safari (ab iOS 14.3).'
-        : 'Dieser Browser kann nicht aufnehmen. Nutze einen aktuellen Chrome, Edge, Firefox oder Safari.';
+      return ctx.ios ? t('unsupportedIos') : t('unsupported');
     case 'empty':
-      return 'Die Aufnahme ist leer. Tippe auf „Aufnehmen“, sprich die Zeile und tippe erst danach auf „Stoppen“.';
+      return t('empty');
     case 'error':
-      return 'Die Aufnahme ist fehlgeschlagen. Bitte versuche es noch einmal.';
+      return t('error');
   }
 }
 
 export function recognitionHelp(reason: RecognitionFailure, ctx: HelpContext): string {
-  const iosSetup =
-    'iPhone: Einstellungen → Allgemein → Tastatur → „Diktierfunktion“ einschalten und unter „Tastaturen“ Arabisch hinzufügen.';
+  const t = (
+    key: keyof typeof speaking.recognitionHelp,
+    values?: { setup: string; standalone?: string }
+  ) => i18n.t(`speaking:recognitionHelp.${key}`, values ?? {});
+  const setup = t('iosSetup');
   switch (reason) {
     case 'no-speech':
-      return 'Es wurde nichts erkannt. Sprich direkt nach dem Tippen, deutlich und etwas lauter, und halte das Telefon näher.';
+      return t('noSpeech');
     case 'timeout':
       return ctx.ios
-        ? `Die Spracherkennung hat nicht geantwortet. ${iosSetup}${ctx.standalone ? ' Öffne Suffa zum Bewerten außerdem in Safari statt als Home-Bildschirm-App.' : ''}`
-        : 'Die Spracherkennung hat nicht geantwortet. Bitte versuche es noch einmal.';
+        ? t('timeoutIos', {
+            setup,
+            standalone: ctx.standalone ? t('timeoutStandalone') : '',
+          })
+        : t('timeout');
     case 'not-allowed':
-      return ctx.ios
-        ? 'Kein Zugriff aufs Mikrofon für die Spracherkennung. iPhone: Einstellungen → Apps → Safari → Mikrofon erlauben, dann neu laden.'
-        : 'Kein Zugriff aufs Mikrofon für die Spracherkennung. Erlaube das Mikrofon für diese Seite und lade neu.';
+      return ctx.ios ? t('notAllowedIos') : t('notAllowed');
     case 'service-not-allowed':
-      return ctx.ios
-        ? `Die Spracherkennung von iOS ist ausgeschaltet oder in der Home-Bildschirm-App nicht erlaubt. ${iosSetup} Öffne Suffa dann in Safari.`
-        : 'Die Spracherkennung ist in diesem Browser nicht erlaubt. Nutze Chrome oder Edge.';
+      return ctx.ios ? t('serviceNotAllowedIos', { setup }) : t('serviceNotAllowed');
     case 'language-not-supported':
-      return ctx.ios
-        ? `Arabisch ist für die Spracherkennung dieses Geräts nicht eingerichtet. ${iosSetup}`
-        : 'Arabisch wird von der Spracherkennung dieses Browsers nicht unterstützt. Nutze Chrome oder Edge.';
+      return ctx.ios ? t('languageIos', { setup }) : t('language');
     case 'audio-capture':
-      return 'Das Mikrofon liefert kein Signal. Prüfe das Mikrofon und ob eine andere App es gerade benutzt.';
+      return t('audioCapture');
     case 'network':
-      return 'Für die Spracherkennung braucht der Browser eine Internetverbindung. Bitte prüfe die Verbindung.';
+      return t('network');
     case 'unsupported':
-      return ctx.ios
-        ? 'Automatisches Bewerten geht in diesem Browser nicht. Nutze „Aufnehmen“ und vergleiche mit „Vormachen“.'
-        : 'Automatisches Bewerten geht in diesem Browser nicht (z. B. Firefox). Nutze Chrome oder Edge oder vergleiche deine Aufnahme mit „Vormachen“.';
+      return ctx.ios ? t('unsupportedIos') : t('unsupported');
     case 'error':
-      return 'Die Bewertung ist fehlgeschlagen. Bitte versuche es noch einmal.';
+      return t('error');
   }
 }

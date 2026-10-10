@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import type { DialogZeile, UnitPracticeScope, Vokabel } from '@/types';
 import { ArabicText, Feedback, RecallInput } from '@/components';
@@ -18,14 +19,6 @@ import {
 import { diffArabic, gradeAnswer, type AnswerVerdict } from '@/services/srs';
 import { speakArabic, isTtsSupported } from '@/services/speech';
 
-const EXERCISE_LABELS: Record<WriteExercise, string> = {
-  abschreiben: 'Abschreiben',
-  diktat: 'Diktat',
-  umschrift: 'Umschrift → Schrift',
-  satzbau: 'Satzbau',
-  uebersetzung: 'Übersetzen',
-};
-
 /**
  * Writing practice as a guided sequence: copying, dictation, transliteration → script,
  * sentence building, translation. Each exercise is its own step with its own progress; it
@@ -34,6 +27,7 @@ const EXERCISE_LABELS: Record<WriteExercise, string> = {
  * lines and reports every solved task, so all steps count toward the unit.
  */
 export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
+  const { t } = useTranslation('writing');
   const { keep } = useReachedUnits();
   // Outside a unit: the words and dialogues of every unit reached so far.
   const words = useMemo(
@@ -82,16 +76,14 @@ export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
   );
 
   if (words.length === 0) {
-    return (
-      <p className="muted">Für diese Einheit gibt es noch keine Wörter zum Schreiben.</p>
-    );
+    return <p className="muted">{t('noWords')}</p>;
   }
   const nextStep = steps[steps.indexOf(step) + 1];
 
   return (
     <div className="stack">
-      {!scope && <h1 style={{ margin: 0 }}>Schreiben</h1>}
-      <ol className="row write-steps" aria-label="Schreibübungen">
+      {!scope && <h1 style={{ margin: 0 }}>{t('title')}</h1>}
+      <ol className="row write-steps" aria-label={t('steps')}>
         {steps.map((ex) => {
           const total = tasks[ex].length;
           const done = total - openCount(ex);
@@ -103,7 +95,7 @@ export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
                 onClick={() => setStep(ex)}
               >
                 {done === total && <Icon name="check" size={14} strokeWidth={2.6} />}
-                {EXERCISE_LABELS[ex]}
+                {t(`exercises.${ex}`)}
                 {scope && (
                   <span className="write-step-count">
                     {done}/{total}
@@ -123,15 +115,17 @@ export function Writing({ scope }: { scope?: UnitPracticeScope } = {}) {
             className="card stack"
             style={{ alignItems: 'center', textAlign: 'center' }}
           >
-            <strong className="feedback-good">✓ {EXERCISE_LABELS[step]} geschafft</strong>
+            <strong className="feedback-good">
+              {t('done', { exercise: t(`exercises.${step}`) })}
+            </strong>
             {nextStep ? (
               <button className="btn btn-primary" onClick={() => setStep(nextStep)}>
-                Weiter: {EXERCISE_LABELS[nextStep]}
+                {t('next', { exercise: t(`exercises.${nextStep}`) })}
               </button>
             ) : (
               scope && (
                 <Link to={`/units/${scope.unit}`} className="btn btn-primary">
-                  Zurück zur Einheit
+                  {t('backToUnit')}
                 </Link>
               )
             )}
@@ -181,19 +175,20 @@ function TaskButtons({
   onCheck(): void;
   onNext(): void;
 }) {
+  const { t } = useTranslation(['writing', 'common']);
   return (
     <div className="row">
       {correct ? (
         <button className="btn btn-primary" onClick={onNext}>
-          Weiter
+          {t('common:continue')}
         </button>
       ) : (
         <>
           <button className="btn btn-primary" onClick={onCheck}>
-            Prüfen
+            {t('check')}
           </button>
           <button className="btn" onClick={onNext}>
-            Überspringen
+            {t('skip')}
           </button>
         </>
       )}
@@ -212,12 +207,9 @@ function WordTask({
   onCorrect,
   onNext,
 }: TaskProps & { mode: 'abschreiben' | 'diktat' | 'umschrift'; word: Vokabel }) {
+  const { t } = useTranslation('writing');
   const { value, setValue, verdict, correct, check } = useCheck(word.ar, onCorrect);
-  const prompt = {
-    abschreiben: 'Schreib das Wort ab. Vokalzeichen sind freiwillig.',
-    diktat: 'Hör das Wort und schreib es.',
-    umschrift: 'Schreib das Wort in arabischer Schrift.',
-  }[mode];
+  const prompt = t(`prompts.${mode}`);
 
   return (
     <div className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
@@ -241,11 +233,11 @@ function WordTask({
             onClick={() => speakArabic(word.ar)}
             disabled={!isTtsSupported()}
           >
-            <Icon name="listen" size={18} /> Vorlesen
+            <Icon name="listen" size={18} /> {t('readAloud')}
           </button>
           {!isTtsSupported() && (
             <span className="muted">
-              (Keine Sprachausgabe – Wort: <ArabicText>{word.ar}</ArabicText>)
+              ({t('noTts')} <ArabicText>{word.ar}</ArabicText>)
             </span>
           )}
         </>
@@ -261,7 +253,7 @@ function WordTask({
           value={value}
           onChange={setValue}
           onSubmit={correct ? onNext : check}
-          placeholder="Hier schreiben…"
+          placeholder={t('writeHere')}
           disabled={correct}
         />
       </div>
@@ -291,6 +283,7 @@ function SentenceBuilder({
   onCorrect,
   onNext,
 }: TaskProps & { line: DialogZeile }) {
+  const { t } = useTranslation('writing');
   const correctWords = useMemo(() => line.ar.split(/\s+/), [line]);
   const [pool, setPool] = useState<string[]>(() => shuffle(correctWords));
   const [built, setBuilt] = useState<string[]>([]);
@@ -310,7 +303,7 @@ function SentenceBuilder({
   return (
     <div className="card stack">
       <p className="muted" style={{ margin: 0 }}>
-        Bring die Wörter in die richtige Reihenfolge: „{line.de}“ · {position}
+        {t('order', { sentence: line.de, position })}
       </p>
       <div
         className="card arabic"
@@ -352,21 +345,19 @@ function SentenceBuilder({
       ) : (
         <div className="row">
           <button className="btn btn-primary" disabled={pool.length > 0} onClick={check}>
-            Prüfen
+            {t('check')}
           </button>
           <button className="btn" onClick={reset}>
-            Zurücksetzen
+            {t('reset')}
           </button>
           <button className="btn" onClick={onNext}>
-            Überspringen
+            {t('skip')}
           </button>
         </div>
       )}
       {checked && (
         <span className={isCorrect ? 'feedback-good' : 'feedback-bad'}>
-          {isCorrect
-            ? '✓ Richtig zusammengesetzt!'
-            : '✗ Noch nicht – tipp Wörter an, um sie zurückzulegen.'}
+          {isCorrect ? t('orderCorrect') : t('orderWrong')}
         </span>
       )}
     </div>
@@ -380,6 +371,7 @@ function Translation({
   onCorrect,
   onNext,
 }: TaskProps & { line: DialogZeile }) {
+  const { t } = useTranslation('writing');
   const { value, setValue, verdict, correct, check } = useCheck(
     line.ar,
     onCorrect,
@@ -388,7 +380,7 @@ function Translation({
   return (
     <div className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
       <p className="muted" style={{ margin: 0 }}>
-        Übersetze ins Arabische · {position}
+        {t('translate', { position })}
       </p>
       <strong style={{ fontSize: '1.2rem' }}>{line.de}</strong>
       <div style={{ width: '100%' }}>
@@ -405,11 +397,7 @@ function Translation({
           verdict={verdict}
           expected={line.ar}
           diff={diffArabic(value, line.ar)}
-          explanation={
-            correct
-              ? undefined
-              : 'Es zählt die Formulierung aus dem Dialog – vergleiche und versuch es noch einmal.'
-          }
+          explanation={correct ? undefined : t('translateHint')}
         />
       )}
     </div>

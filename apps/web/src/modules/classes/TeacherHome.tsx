@@ -4,6 +4,7 @@
  * recording; a hint when someone waits for approval; the teacher's own learning below.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { ClassesApi, type ClassSummary } from '@/services/classes/classesApi';
@@ -14,6 +15,7 @@ import { useMyClasses } from './useMyClasses';
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function TeacherHome({ api }: { api?: ClassesApi }) {
+  const { t } = useTranslation('classes');
   const client = useMemo(() => api ?? new ClassesApi(), [api]);
   const { online, classes } = useMyClasses(client);
   const mine = (classes ?? []).filter(
@@ -25,31 +27,26 @@ export function TeacherHome({ api }: { api?: ClassesApi }) {
   return (
     <div className="stack" style={{ gap: '1rem' }}>
       <header className="row" style={{ justifyContent: 'space-between' }}>
-        <h1 style={{ margin: 0 }}>Deine Klassen</h1>
+        <h1 style={{ margin: 0 }}>{t('teacherHome.title')}</h1>
         <Link to="/classes" className="btn">
-          + Neue Klasse
+          {t('teacherHome.newClass')}
         </Link>
       </header>
 
       {!online && (
         <p className="muted" style={{ margin: 0 }}>
-          Ohne Verbindung zum Server sind die Klassen gerade nicht zu sehen.
+          {t('teacherHome.offline')}
         </p>
       )}
       {waitingCount > 0 && (
         <Link to={`/classes/${waiting[0]!.id}?tab=members`} className="home-waiting">
-          <strong>
-            {waitingCount === 1
-              ? '1 Person wartet auf Freigabe'
-              : `${waitingCount} Personen warten auf Freigabe`}
-          </strong>
-          <span>Ansehen</span>
+          <strong>{t('teacherHome.waiting', { count: waitingCount })}</strong>
+          <span>{t('teacherHome.view')}</span>
         </Link>
       )}
       {classes && mine.length === 0 && (
         <p className="muted" style={{ margin: 0 }}>
-          Noch keine Klasse. Lege eine an und teile den Einladungslink mit deinen
-          Lernenden.
+          {t('teacherHome.empty')}
         </p>
       )}
       {mine.map((c) => (
@@ -58,8 +55,8 @@ export function TeacherHome({ api }: { api?: ClassesApi }) {
 
       <Link to="/units" className="card row home-link-row">
         <span className="stack" style={{ gap: 0 }}>
-          <strong>Selbst lernen</strong>
-          <span className="muted stat-tile-hint">Deine Einheit fortsetzen und üben</span>
+          <strong>{t('teacherHome.selfStudy')}</strong>
+          <span className="muted stat-tile-hint">{t('teacherHome.selfStudyHint')}</span>
         </span>
         <Icon name="chevron" />
       </Link>
@@ -74,6 +71,7 @@ interface Stats {
 }
 
 function TeacherClassCard({ api, summary }: { api: ClassesApi; summary: ClassSummary }) {
+  const { t } = useTranslation('classes');
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
@@ -114,18 +112,22 @@ function TeacherClassCard({ api, summary }: { api: ClassesApi; summary: ClassSum
             </Link>
           </h2>
           <span className="muted" style={{ fontSize: '0.9rem' }}>
-            {learners === 1 ? '1 Lernende·r' : `${learners} Lernende`}
-            {summary.pendingCount > 0 && ` · ${summary.pendingCount} warten`}
+            {t('teacherHome.learners', { count: learners })}
+            {summary.pendingCount > 0 &&
+              ` · ${t('waiting', { count: summary.pendingCount })}`}
           </span>
         </div>
         <Icon name="people" />
       </div>
-      <ul className="home-class-tiles" aria-label={`Diese Woche in ${summary.name}`}>
+      <ul
+        className="home-class-tiles"
+        aria-label={t('teacherHome.thisWeek', { name: summary.name })}
+      >
         <li>
           <strong className="home-tile-value tone-good">
             {stats?.activeWeek == null ? '–' : `${stats.activeWeek}/${learners}`}
           </strong>
-          <span>aktiv diese Woche</span>
+          <span>{t('teacherHome.activeWeek')}</span>
         </li>
         <li>
           <strong className="home-tile-value tone-accent">
@@ -133,13 +135,17 @@ function TeacherClassCard({ api, summary }: { api: ClassesApi; summary: ClassSum
               ? '–'
               : `${assignment.doneCount}/${assignment.learners ?? learners}`}
           </strong>
-          <span>{assignment ? 'Aufgabe erledigt' : 'keine Aufgabe offen'}</span>
+          <span>
+            {assignment ? t('teacherHome.assignmentDone') : t('teacherHome.noAssignment')}
+          </span>
         </li>
         <li>
           <strong className="home-tile-value tone-info">
             {recording ? `${recording.finished}/${recording.learners}` : '–'}
           </strong>
-          <span>{recording ? 'letzte Aufnahme gehört' : 'noch keine Aufnahme'}</span>
+          <span>
+            {recording ? t('teacherHome.recordingHeard') : t('teacherHome.noRecording')}
+          </span>
         </li>
       </ul>
       {recording && recording.learners > 0 && (
@@ -148,7 +154,7 @@ function TeacherClassCard({ api, summary }: { api: ClassesApi; summary: ClassSum
           <div
             className="review-progress"
             role="progressbar"
-            aria-label={`${recording.title}: gehört`}
+            aria-label={t('teacherHome.heardLabel', { title: recording.title })}
             aria-valuemin={0}
             aria-valuemax={recording.learners}
             aria-valuenow={recording.finished}
@@ -158,17 +164,20 @@ function TeacherClassCard({ api, summary }: { api: ClassesApi; summary: ClassSum
             />
           </div>
           <span className="muted" style={{ fontSize: '0.85rem' }}>
-            {recording.finished} von {recording.learners} gehört · {recording.started}{' '}
-            angefangen
+            {t('teacherHome.heardStats', {
+              finished: recording.finished,
+              learners: recording.learners,
+              started: recording.started,
+            })}
           </span>
         </div>
       )}
       <div className="row" style={{ flexWrap: 'wrap' }}>
         <Link to={`/classes/${summary.id}?tab=recordings`} className="btn">
-          Aufnahme hochladen
+          {t('teacherHome.upload')}
         </Link>
         <Link to={`/classes/${summary.id}/quiz`} className="btn">
-          Live-Quiz starten
+          {t('teacherHome.quiz')}
         </Link>
       </div>
     </section>

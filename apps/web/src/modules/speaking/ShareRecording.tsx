@@ -4,6 +4,7 @@
  * class; classes of minors need the parents' consent first.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Recording } from '@/services/audio';
 import type { ShareTarget, SharingApi } from '@/services/sharing/sharingApi';
 
@@ -21,7 +22,8 @@ export function ShareRecording({
   /** The pronunciation score, when the learner had this recording rated. */
   score: number | null;
 }) {
-  const allowed = targets.filter((t) => t.allowed);
+  const { t } = useTranslation('speaking');
+  const allowed = targets.filter((target) => target.allowed);
   const [classId, setClassId] = useState(allowed[0]?.classId ?? '');
   const [state, setState] = useState<
     | { kind: 'idle' }
@@ -34,21 +36,19 @@ export function ShareRecording({
   if (allowed.length === 0) {
     return (
       <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-        Aufnahmen mit der Lehrkraft teilen geht in deiner Klasse, sobald das
-        Einverständnis deiner Eltern eingetragen ist.
+        {t('share.needsConsent')}
       </p>
     );
   }
   if (state.kind === 'done') {
     return (
       <p className="feedback-good" role="status" style={{ margin: 0 }}>
-        ✓ Mit der Lehrkraft von {state.name} geteilt. Unter Klasse kannst du sie jederzeit
-        zurückziehen.
+        {t('share.shared', { name: state.name })}
       </p>
     );
   }
 
-  const target = allowed.find((t) => t.classId === classId) ?? allowed[0]!;
+  const target = allowed.find((a) => a.classId === classId) ?? allowed[0]!;
   const share = async () => {
     setState({ kind: 'busy' });
     const result = await api.share({ classId: target.classId, text, recording, score });
@@ -64,11 +64,11 @@ export function ShareRecording({
       <div className="row" style={{ justifyContent: 'center' }}>
         {allowed.length > 1 && (
           <label className="row muted" style={{ gap: '0.35rem' }}>
-            Klasse
+            {t('share.class')}
             <select value={target.classId} onChange={(e) => setClassId(e.target.value)}>
-              {allowed.map((t) => (
-                <option key={t.classId} value={t.classId}>
-                  {t.name}
+              {allowed.map((a) => (
+                <option key={a.classId} value={a.classId}>
+                  {a.name}
                 </option>
               ))}
             </select>
@@ -80,14 +80,14 @@ export function ShareRecording({
           onClick={() => void share()}
         >
           {state.kind === 'busy'
-            ? 'Teile …'
+            ? t('share.busy')
             : allowed.length > 1
-              ? '📤 Mit Lehrkraft teilen'
-              : `📤 Mit Lehrkraft von ${target.name} teilen`}
+              ? t('share.share')
+              : t('share.shareWith', { name: target.name })}
         </button>
       </div>
       <span className="muted" style={{ fontSize: '0.8rem' }}>
-        Nur die Lehrkraft der Klasse hört sie; du kannst sie jederzeit zurückziehen.
+        {t('share.privacy')}
       </span>
       {state.kind === 'error' && (
         <p className="feedback-warn" role="alert" style={{ margin: 0 }}>

@@ -1,0 +1,50 @@
+import type { Messages } from '../../types';
+import type { vocab as de } from '../de/vocab';
+
+export const vocab: Messages<typeof de> = {
+  trainer: {
+    title: 'Vocabulary trainer',
+    add: '+ Add content',
+    mode: 'Mode: {{label}}',
+  },
+  modes: {
+    ar_de: 'AR → DE',
+    de_ar: 'DE → AR',
+    plural: 'Plural drill',
+    root: 'Root → word',
+    nisba: 'Nisba',
+    all: 'All mixed',
+  },
+  session: {
+    empty: 'No cards due.',
+    emptyDone_one: 'No cards due – {{count}} done.',
+    emptyDone_other: 'No cards due – {{count}} done.',
+    emptyHint: 'Suffa plans your next review automatically. How about a dialogue?',
+    listenDialogue: 'Listen to a dialogue',
+    toToday: 'To Today',
+    progress: 'Session progress',
+    dailyGoal: ' · Daily goal {{goal}}',
+    leech: 'Tricky word',
+    listen: 'Listen to the pronunciation',
+    answerArabic: 'Answer in Arabic…',
+    answer: 'Answer…',
+    check: 'Check',
+    aidTitle: 'Training wheels',
+    aid: 'Multiple choice (training wheels)',
+    aidBadge: 'Training wheels: recognising instead of producing',
+  },
+  add: {
+    title: 'Add your own word',
+    arabic: 'Arabic (vowelled) *',
+    transliteration: 'Transliteration',
+    german: 'German *',
+    root: 'Root * (e.g. س-ك-ن)',
+    wazn: 'Wazn',
+    plural: 'Plural',
+    unit: 'Unit',
+    hint: 'Hint / mnemonic',
+    required: 'Arabic, German and root are required.',
+    unitInvalid: 'The unit must be a positive number.',
+    submit: 'Save & create cards',
+  },
+};

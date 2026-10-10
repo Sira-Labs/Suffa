@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import type { ExamResult, UnitEnrollment } from '@/types';
@@ -18,19 +19,20 @@ export function CurrentUnitCard() {
 
 /** The Medina course: the first lesson whose test is not passed yet. */
 function MadinahLessonCard() {
+  const { t } = useTranslation(['dashboard', 'units']);
   const exams = useEnrollmentStore((s) => s.exams);
   const { next, passed } = madinahProgress(exams);
   if (!next) {
     return (
       <section className="card stack current-unit-card" aria-labelledby="current-unit">
         <span className="eyebrow" style={{ color: 'var(--accent)' }}>
-          Medina-Kurs
+          {t('currentUnit.madinahCourse')}
         </span>
         <h2 id="current-unit" style={{ margin: 0 }}>
-          Buch 1 geschafft
+          {t('currentUnit.bookDone')}
         </h2>
         <p className="muted" style={{ margin: 0 }}>
-          Alle {passed} Lektionstests bestanden. Wiederhole die Wörter im Training.
+          {t('currentUnit.allPassed', { count: passed })}
         </p>
       </section>
     );
@@ -39,19 +41,19 @@ function MadinahLessonCard() {
   return (
     <section className="card stack current-unit-card" aria-labelledby="current-unit">
       <span className="eyebrow" style={{ color: 'var(--accent)' }}>
-        Deine Lektion
+        {t('currentUnit.yourLesson')}
       </span>
       <h2 id="current-unit" style={{ margin: 0 }}>
-        Lektion {lesson.lesson}
+        {t('units:lesson', { n: lesson.lesson })}
         {topic && <span className="muted current-unit-name"> · {topic}</span>}
       </h2>
       <p className="muted" style={{ margin: 0 }}>
         {passed === 0
-          ? 'Lies die Lektion im Buch, übe die Wörter und mach den Lektionstest.'
-          : `${passed} Lektionen bestanden. Weiter mit Wörtern, Diktat, Lückentext und dem Lektionstest.`}
+          ? t('currentUnit.firstLesson')
+          : t('currentUnit.lessonsPassed', { count: passed })}
       </p>
       <Link to={`/units/madinah/${lesson.lesson}`} className="btn btn-primary btn-lg">
-        Lektion {lesson.lesson} öffnen
+        {t('currentUnit.openLesson', { n: lesson.lesson })}
         <Icon name="arrowRight" size={20} />
       </Link>
     </section>
@@ -60,6 +62,7 @@ function MadinahLessonCard() {
 
 /** Al-Arabiyya bayna Yadayk: the started unit, or the next one to start. */
 function BookUnitCard() {
+  const { t } = useTranslation(['dashboard', 'units']);
   const enrollments = useEnrollmentStore((s) => s.enrollments);
   const exams = useEnrollmentStore((s) => s.exams);
   const { units } = useBookProgress();
@@ -77,10 +80,10 @@ function BookUnitCard() {
   return (
     <section className="card stack current-unit-card" aria-labelledby="current-unit">
       <span className="eyebrow" style={{ color: 'var(--accent)' }}>
-        Deine Einheit
+        {t('currentUnit.yourUnit')}
       </span>
       <h2 id="current-unit" style={{ margin: 0 }}>
-        Einheit {unit.unit}
+        {t('units:unit', { n: unit.unit })}
         {name && <span className="muted current-unit-name"> · {name}</span>}
       </h2>
       {started ? (
@@ -88,14 +91,16 @@ function BookUnitCard() {
           {section && station && (
             <p style={{ margin: 0 }}>
               <strong>{section.label}</strong>
-              <span className="muted"> · als Nächstes: {station.label}</span>
+              <span className="muted">
+                {t('currentUnit.upNext', { station: station.label })}
+              </span>
             </p>
           )}
           <div className="row" style={{ gap: '0.75rem', flexWrap: 'nowrap' }}>
             <div
               className="review-progress"
               role="progressbar"
-              aria-label={`Fortschritt Einheit ${unit.unit}`}
+              aria-label={t('units:unitProgress', { n: unit.unit })}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={progress.percent}
@@ -117,18 +122,23 @@ function BookUnitCard() {
               <Icon name="clock" size={15} />
               {status.state === 'running'
                 ? daysLeftLabel(status.daysLeft)
-                : 'Frist vorbei'}
+                : t('currentUnit.deadlinePassed')}
             </span>
           )}
         </>
       ) : (
         <p className="muted" style={{ margin: 0 }}>
-          Wähle dein Tempo und leg mit Dialog 1 los. Noch nie Arabisch gelesen?{' '}
-          <Link to="/alphabet">Erst das Alphabet lernen</Link>
+          <Trans
+            t={t}
+            i18nKey="currentUnit.notStarted"
+            components={{ 1: <Link to="/alphabet" /> }}
+          />
         </p>
       )}
       <Link to={to} className="btn btn-primary btn-lg">
-        {started ? 'Fortsetzen' : `Einheit ${unit.unit} beginnen`}
+        {started
+          ? t('currentUnit.continue')
+          : t('currentUnit.startUnit', { n: unit.unit })}
         <Icon name="arrowRight" size={20} />
       </Link>
     </section>

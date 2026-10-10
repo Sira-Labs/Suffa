@@ -5,6 +5,7 @@
  * the player.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   MediaApi,
@@ -17,14 +18,7 @@ import { DriveImport } from './DriveImport';
 import { isRecordingFile } from '@/services/media/recordingFile';
 import { InteractiveApi } from '@/services/media/interactiveApi';
 
-const STATUS: Record<MediaItem['status'], string> = {
-  uploading: 'Upload läuft',
-  importing: 'Import läuft',
-  processing: 'Wird verarbeitet',
-  ready: 'Bereit',
-  failed: 'Fehlgeschlagen',
-};
-
+/** "1 h 5 min" or "12 min" (the same in German and English). */
 export function formatDuration(seconds: number | null): string {
   if (!seconds) return '';
   const s = Math.round(seconds);
@@ -40,6 +34,7 @@ export function ClassRecordings({
   classId: string;
   teacher: boolean;
 }) {
+  const { t } = useTranslation(['recordings', 'classes']);
   const api = useMemo(() => new MediaApi(), []);
   const [items, setItems] = useState<MediaItem[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -112,7 +107,7 @@ export function ClassRecordings({
     return result.ok;
   };
 
-  if (!items) return <p className="muted">{message ?? 'Lade Aufnahmen …'}</p>;
+  if (!items) return <p className="muted">{message ?? t('loading')}</p>;
 
   return (
     <div className="stack" style={{ gap: '1rem' }}>
@@ -122,18 +117,14 @@ export function ClassRecordings({
       {message && <p className="feedback-bad">{message}</p>}
       {teacher && listeningError && (
         <p className="feedback-bad row" style={{ flexWrap: 'wrap' }}>
-          <span>Wer zugehört hat, lässt sich gerade nicht laden: {listeningError}</span>
+          <span>{t('listeningError', { message: listeningError })}</span>
           <button type="button" className="btn" onClick={() => void load()}>
-            Erneut laden
+            {t('reload')}
           </button>
         </p>
       )}
       {items.length === 0 ? (
-        <p className="muted">
-          {teacher
-            ? 'Noch keine Aufnahmen. Lade die Aufnahme einer Unterrichtsstunde hoch.'
-            : 'Noch keine Aufnahmen veröffentlicht.'}
-        </p>
+        <p className="muted">{teacher ? t('emptyTeacher') : t('emptyLearner')}</p>
       ) : (
         <ul className="feed-list">
           {items.map((item) => {
@@ -149,18 +140,18 @@ export function ClassRecordings({
                     <strong>{item.title}</strong>
                   )}
                   <span className="muted" style={{ fontSize: '0.85rem' }}>
-                    {item.hasVideo ? 'Video' : 'Audio'} {formatDuration(item.durationSec)}
-                    {heard?.completedAt ? ' · ✓ gehört' : ''}
+                    {item.hasVideo ? t('video') : t('audio')}{' '}
+                    {formatDuration(item.durationSec)}
+                    {heard?.completedAt ? ` · ${t('heard')}` : ''}
                   </span>
                 </div>
                 {teacher && (
                   <span className="muted" style={{ fontSize: '0.85rem' }}>
-                    {STATUS[item.status]}
-                    {item.status === 'processing' && ` · ${item.progress} %`}
+                    {t(`status.${item.status}`)}
+                    {item.status === 'processing' &&
+                      ` · ${t('classes:percent', { value: item.progress })}`}
                     {item.status === 'ready' &&
-                      (item.publishedAt
-                        ? ' · veröffentlicht'
-                        : ' · nur für dich sichtbar')}
+                      ` · ${item.publishedAt ? t('published') : t('onlyYou')}`}
                     {item.error && ` · ${item.error}`}
                   </span>
                 )}
@@ -174,7 +165,7 @@ export function ClassRecordings({
                   <span
                     className="review-progress"
                     role="progressbar"
-                    aria-label={`${item.title} wird verarbeitet`}
+                    aria-label={t('processingLabel', { title: item.title })}
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={item.progress}
@@ -202,12 +193,12 @@ export function ClassRecordings({
                     <button
                       className="btn btn-small"
                       onClick={() => {
-                        if (window.confirm(`„${item.title}“ endgültig löschen?`)) {
+                        if (window.confirm(t('deleteConfirm', { title: item.title }))) {
                           void act(() => api.remove(classId, item.id));
                         }
                       }}
                     >
-                      Löschen
+                      {t('delete')}
                     </button>
                   </div>
                 )}
@@ -228,6 +219,7 @@ function RenameButton({
   title: string;
   onRename: (title: string) => Promise<boolean>;
 }) {
+  const { t } = useTranslation(['recordings', 'common']);
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState(title);
   const [saving, setSaving] = useState(false);
@@ -240,7 +232,7 @@ function RenameButton({
           setEditing(true);
         }}
       >
-        Umbenennen
+        {t('rename')}
       </button>
     );
   }
@@ -264,7 +256,7 @@ function RenameButton({
     >
       <input
         className="input"
-        aria-label="Neuer Titel"
+        aria-label={t('newTitle')}
         maxLength={120}
         value={value}
         autoFocus
@@ -275,16 +267,17 @@ function RenameButton({
         type="submit"
         disabled={!trimmed || saving}
       >
-        Speichern
+        {t('common:save')}
       </button>
       <button className="btn btn-small" type="button" onClick={() => setEditing(false)}>
-        Abbrechen
+        {t('common:cancel')}
       </button>
     </form>
   );
 }
 
 function PublishButton({ onPublish }: { onPublish: () => Promise<boolean> }) {
+  const { t } = useTranslation('recordings');
   const [consent, setConsent] = useState(false);
   return (
     <span className="row" style={{ flexWrap: 'wrap' }}>
@@ -294,14 +287,14 @@ function PublishButton({ onPublish }: { onPublish: () => Promise<boolean> }) {
           checked={consent}
           onChange={(e) => setConsent(e.target.checked)}
         />
-        Alle, die zu sehen oder zu hören sind, sind einverstanden
+        {t('publishConsent')}
       </label>
       <button
         className="btn btn-small btn-primary"
         disabled={!consent}
         onClick={() => void onPublish()}
       >
-        Für die Klasse veröffentlichen
+        {t('publish')}
       </button>
     </span>
   );
@@ -316,6 +309,7 @@ function UploadForm({
   classId: string;
   onDone: () => Promise<void>;
 }) {
+  const { t } = useTranslation('recordings');
   const [title, setTitle] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [sent, setSent] = useState<{ sent: number; total: number } | null>(null);
@@ -345,7 +339,7 @@ function UploadForm({
     if (!result.ok) return setMessage(result.message);
     setTitle('');
     setFile(null);
-    setMessage('Hochgeladen – die Aufnahme wird jetzt verarbeitet.');
+    setMessage(t('upload.done'));
     await onDone();
   };
 
@@ -353,14 +347,14 @@ function UploadForm({
   return (
     <form
       className="card stack"
-      aria-label="Aufnahme hochladen"
+      aria-label={t('upload.title')}
       onSubmit={(e) => void submit(e)}
     >
-      <strong>Aufnahme hochladen</strong>
+      <strong>{t('upload.title')}</strong>
       <input
         className="input"
-        aria-label="Titel"
-        placeholder="Titel, z. B. Stunde 3 – Einheit 2"
+        aria-label={t('upload.titleLabel')}
+        placeholder={t('upload.titlePlaceholder')}
         maxLength={120}
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -368,14 +362,14 @@ function UploadForm({
       />
       <input
         type="file"
-        aria-label="Datei"
+        aria-label={t('upload.file')}
         disabled={uploading}
         onChange={(e) => {
           const picked = e.target.files?.[0] ?? null;
           if (picked && !isRecordingFile(picked)) {
             setFile(null);
             e.target.value = '';
-            setMessage('Bitte eine Audio- oder Videodatei wählen (z. B. MP4, M4A, MP3).');
+            setMessage(t('upload.wrongFile'));
             return;
           }
           setMessage(null);
@@ -386,7 +380,7 @@ function UploadForm({
         <span
           className="review-progress"
           role="progressbar"
-          aria-label="Upload"
+          aria-label={t('upload.progress')}
           aria-valuemin={0}
           aria-valuemax={sent.total}
           aria-valuenow={sent.sent}
@@ -403,16 +397,15 @@ function UploadForm({
       <div className="row">
         {uploading ? (
           <button className="btn" type="button" onClick={() => abort.current?.abort()}>
-            Anhalten
+            {t('upload.pause')}
           </button>
         ) : (
           <button className="btn btn-primary" type="submit" disabled={!file}>
-            Hochladen
+            {t('upload.submit')}
           </button>
         )}
         <span className="muted" style={{ fontSize: '0.85rem' }}>
-          Audio oder Video bis 10 GB. Bricht die Verbindung ab, wähle dieselbe Datei
-          erneut – der Upload geht dort weiter.
+          {t('upload.hint')}
         </span>
       </div>
       {message && <span className="muted">{message}</span>}
@@ -422,6 +415,7 @@ function UploadForm({
 
 /** Per-class AI switch (ADR-0018): off = recordings are never sent for transcription. */
 function AiSwitch({ classId }: { classId: string }) {
+  const { t } = useTranslation('recordings');
   const api = useMemo(() => new InteractiveApi(), []);
   const [enabled, setEnabled] = useState<boolean | null>(null);
   useEffect(() => {
@@ -431,9 +425,9 @@ function AiSwitch({ classId }: { classId: string }) {
   return (
     <label className="card row" style={{ justifyContent: 'space-between' }}>
       <span className="stack" style={{ gap: 0 }}>
-        <strong>KI für Transkripte</strong>
+        <strong>{t('ai.title')}</strong>
         <span className="muted" style={{ fontSize: '0.85rem' }}>
-          Aus: Aufnahmen dieser Klasse werden nie an einen Transkriptionsdienst geschickt.
+          {t('ai.hint')}
         </span>
       </span>
       <input
@@ -456,24 +450,27 @@ function ListeningSummary({
   title: string;
   listening: RecordingListening;
 }) {
+  const { t } = useTranslation(['recordings', 'classes']);
   if (listening.learners === 0) {
     return (
       <span className="muted" style={{ fontSize: '0.85rem' }}>
-        Noch keine Lernenden in der Klasse.
+        {t('listening.noLearners')}
       </span>
     );
   }
   return (
     <details className="listening">
       <summary>
-        <strong>
-          {listening.finished} von {listening.learners}
-        </strong>{' '}
-        gehört
+        <Trans
+          t={t}
+          i18nKey="listening.summary"
+          values={{ finished: listening.finished, learners: listening.learners }}
+          components={{ 1: <strong /> }}
+        />
         {listening.started > listening.finished &&
-          ` · ${listening.started - listening.finished} angefangen`}
+          t('listening.started', { count: listening.started - listening.finished })}
       </summary>
-      <ul className="listening-list" aria-label={`Wer „${title}“ gehört hat`}>
+      <ul className="listening-list" aria-label={t('listening.who', { title })}>
         {listening.people.map((p) => (
           <li key={p.userId} className="row" style={{ justifyContent: 'space-between' }}>
             <span>{p.name}</span>
@@ -481,7 +478,7 @@ function ListeningSummary({
               <span
                 className="review-progress listening-bar"
                 role="progressbar"
-                aria-label={`${p.name}: ${p.percent} % gehört`}
+                aria-label={t('listening.person', { name: p.name, percent: p.percent })}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-valuenow={p.percent}
@@ -492,10 +489,10 @@ function ListeningSummary({
               </span>
               <span className="muted" style={{ fontSize: '0.85rem', minWidth: '4.5rem' }}>
                 {p.completedAt
-                  ? '✓ gehört'
+                  ? t('heard')
                   : p.percent > 0
-                    ? `${p.percent} %`
-                    : 'noch nicht'}
+                    ? t('classes:percent', { value: p.percent })
+                    : t('listening.notYet')}
               </span>
             </span>
           </li>

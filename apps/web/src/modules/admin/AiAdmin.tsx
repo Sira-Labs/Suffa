@@ -3,11 +3,14 @@
  * task (order = fallback order), a test call, and the last 30 days by task and model.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '@/i18n/format';
 import {
+  AI_TASKS,
   AiAdminApi,
   formatUsd,
   PROVIDER_LABELS,
-  TASK_LABELS,
+  taskLabel,
   type AiOverview,
   type AiRoute,
   type Capability,
@@ -17,18 +20,7 @@ import {
   type TryResult,
 } from '@/services/admin/aiAdminApi';
 
-const MODE_LABELS = {
-  normal: 'Normal',
-  economy: 'Sparmodus (nur günstige Modelle)',
-  exhausted: 'Pausiert (Budget aufgebraucht)',
-} as const;
-
-const CAPABILITY_LABELS: Record<Capability, string> = {
-  streaming: 'Streaming',
-  structuredOutput: 'JSON',
-  tools: 'Werkzeuge',
-  vision: 'Bilder',
-};
+const CAPABILITIES: Capability[] = ['streaming', 'structuredOutput', 'tools', 'vision'];
 
 const EFFORTS: Effort[] = ['low', 'medium', 'high', 'xhigh', 'max'];
 const PROVIDERS: ProviderId[] = ['anthropic', 'openrouter', 'huggingface', 'mistral'];
@@ -37,6 +29,7 @@ const toDraft = ({ task: _task, position: _position, ...rest }: AiRoute): RouteD
   rest;
 
 export function AiAdmin({ api: injected }: { api?: AiAdminApi }) {
+  const { t } = useTranslation('adminAi');
   const api = useMemo(() => injected ?? new AiAdminApi(), [injected]);
   const [data, setData] = useState<AiOverview | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -54,19 +47,16 @@ export function AiAdmin({ api: injected }: { api?: AiAdminApi }) {
   }, [load]);
 
   if (error) return <span className="feedback-bad">{error}</span>;
-  if (!data) return <p className="muted">Lade …</p>;
+  if (!data) return <p className="muted">{t('loading')}</p>;
 
-  const tasks = [
-    ...new Set([...Object.keys(TASK_LABELS), ...data.routes.map((r) => r.task)]),
-  ];
+  const tasks = [...new Set<string>([...AI_TASKS, ...data.routes.map((r) => r.task)])];
   return (
     <div className="stack">
       <Budget data={data} />
       <Quotas api={api} data={data} onSaved={load} />
-      <h2 style={{ margin: '0.5rem 0 0' }}>Modelle je Aufgabe</h2>
+      <h2 style={{ margin: '0.5rem 0 0' }}>{t('routesTitle')}</h2>
       <p className="muted" style={{ margin: 0 }}>
-        Das erste aktive Modell antwortet; die weiteren springen bei Ausfall ein.
-        Änderungen gelten spätestens nach einer Minute.
+        {t('routesIntro')}
       </p>
       {tasks.map((task) => (
         <TaskRoutes
@@ -85,6 +75,7 @@ export function AiAdmin({ api: injected }: { api?: AiAdminApi }) {
 }
 
 function Budget({ data }: { data: AiOverview }) {
+  const { t } = useTranslation('adminAi');
   const { budget, providers } = data;
   const percent =
     budget.budgetMicro > 0
@@ -92,14 +83,18 @@ function Budget({ data }: { data: AiOverview }) {
       : 100;
   return (
     <div className="card stack">
-      <strong>Budget diesen Monat</strong>
+      <strong>{t('budget.title')}</strong>
       <span>
-        {formatUsd(budget.spentMicro)} von {formatUsd(budget.budgetMicro)} (
-        {percent.toFixed(0)} %) · {MODE_LABELS[budget.mode]}
+        {t('budget.spent', {
+          spent: formatUsd(budget.spentMicro),
+          budget: formatUsd(budget.budgetMicro),
+          percent: percent.toFixed(0),
+          mode: t(`modes.${budget.mode}`),
+        })}
       </span>
       <div
         role="progressbar"
-        aria-label="Verbrauchtes KI-Budget"
+        aria-label={t('budget.progress')}
         aria-valuenow={Math.round(percent)}
         aria-valuemin={0}
         aria-valuemax={100}
@@ -120,11 +115,12 @@ function Budget({ data }: { data: AiOverview }) {
         />
       </div>
       <span className="muted">
-        Anbieter:{' '}
-        {PROVIDERS.map(
-          (p) =>
-            `${PROVIDER_LABELS[p]} ${providers.includes(p) ? '✓' : '– (kein Schlüssel)'}`
-        ).join(' · ')}
+        {t('budget.providers', {
+          list: PROVIDERS.map(
+            (p) =>
+              `${PROVIDER_LABELS[p]} ${providers.includes(p) ? '✓' : t('budget.noKey')}`
+          ).join(' · '),
+        })}
       </span>
     </div>
   );
@@ -139,6 +135,7 @@ function Quotas({
   data: AiOverview;
   onSaved: () => Promise<void>;
 }) {
+  const { t } = useTranslation(['adminAi', 'common']);
   const { settings } = data;
   const [budgetUsd, setBudgetUsd] = useState(
     String(settings.monthlyBudgetMicro / 1_000_000)
@@ -163,7 +160,7 @@ function Quotas({
         admin: limit(turns.admin),
       },
     });
-    setMessage(result.ok ? 'Gespeichert.' : result.message);
+    setMessage(result.ok ? t('common:saved') : result.message);
     if (result.ok) await onSaved();
   };
 
@@ -173,7 +170,7 @@ function Quotas({
       <input
         className="input"
         inputMode="numeric"
-        placeholder="unbegrenzt"
+        placeholder={t('quotas.unlimited')}
         value={turns[key]}
         onChange={(e) => setTurns({ ...turns, [key]: e.target.value })}
       />
@@ -182,10 +179,10 @@ function Quotas({
 
   return (
     <form className="card stack" onSubmit={(e) => void save(e)}>
-      <strong>Budget und Kontingente</strong>
+      <strong>{t('quotas.title')}</strong>
       <div className="row" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
         <label className="stack" style={{ gap: 2 }}>
-          <span className="muted">Monatsbudget (USD)</span>
+          <span className="muted">{t('quotas.monthly')}</span>
           <input
             className="input"
             inputMode="decimal"
@@ -194,7 +191,7 @@ function Quotas({
           />
         </label>
         <label className="stack" style={{ gap: 2 }}>
-          <span className="muted">Sparmodus ab (%)</span>
+          <span className="muted">{t('quotas.economyFrom')}</span>
           <input
             className="input"
             inputMode="numeric"
@@ -203,15 +200,15 @@ function Quotas({
           />
         </label>
       </div>
-      <span>Gespräche pro Tag</span>
+      <span>{t('quotas.turns')}</span>
       <div className="row" style={{ flexWrap: 'wrap', gap: '0.75rem' }}>
-        {turnField('student', 'Lernende')}
-        {turnField('teacher', 'Lehrkräfte')}
-        {turnField('admin', 'Admins')}
+        {turnField('student', t('quotas.student'))}
+        {turnField('teacher', t('quotas.teacher'))}
+        {turnField('admin', t('quotas.admin'))}
       </div>
       <div className="row">
         <button className="btn btn-primary" type="submit">
-          Speichern
+          {t('common:save')}
         </button>
         {message && <span className="muted">{message}</span>}
       </div>
@@ -232,6 +229,7 @@ function TaskRoutes({
   configured: ProviderId[];
   onSaved: () => Promise<void>;
 }) {
+  const { t } = useTranslation(['adminAi', 'common']);
   const [drafts, setDrafts] = useState<RouteDraft[]>(() => routes.map(toDraft));
   const [message, setMessage] = useState<string | null>(null);
   useEffect(() => setDrafts(routes.map(toDraft)), [routes]);
@@ -261,19 +259,17 @@ function TaskRoutes({
 
   const save = async () => {
     const result = await api.saveRoutes(task, drafts);
-    setMessage(result.ok ? 'Gespeichert.' : result.message);
+    setMessage(result.ok ? t('common:saved') : result.message);
     if (result.ok) await onSaved();
   };
 
   return (
-    <section className="card stack" aria-label={TASK_LABELS[task] ?? task}>
+    <section className="card stack" aria-label={taskLabel(task)}>
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <strong>{TASK_LABELS[task] ?? task}</strong>
+        <strong>{taskLabel(task)}</strong>
         <code className="muted">{task}</code>
       </div>
-      {drafts.length === 0 && (
-        <span className="muted">Kein Modell – Aufgabe ist aus.</span>
-      )}
+      {drafts.length === 0 && <span className="muted">{t('route.off')}</span>}
       {drafts.map((d, i) => (
         <div
           key={i}
@@ -281,10 +277,12 @@ function TaskRoutes({
           style={{ borderTop: '1px solid var(--border, #ddd)', paddingTop: 8 }}
         >
           <div className="row" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-            <span className="muted">{i === 0 ? 'Zuerst' : `Ersatz ${i}`}</span>
+            <span className="muted">
+              {i === 0 ? t('route.first') : t('route.fallback', { n: i })}
+            </span>
             <select
               className="input"
-              aria-label="Anbieter"
+              aria-label={t('route.provider')}
               value={d.provider}
               onChange={(e) => update(i, { provider: e.target.value as ProviderId })}
             >
@@ -296,20 +294,20 @@ function TaskRoutes({
             </select>
             <input
               className="input"
-              aria-label="Modell"
+              aria-label={t('route.model')}
               value={d.model}
               onChange={(e) => update(i, { model: e.target.value })}
               style={{ flex: 1, minWidth: 180 }}
             />
             <select
               className="input"
-              aria-label="Denktiefe"
+              aria-label={t('route.effort')}
               value={d.effort ?? ''}
               onChange={(e) =>
                 update(i, { effort: (e.target.value || null) as Effort | null })
               }
             >
-              <option value="">Denktiefe: Standard</option>
+              <option value="">{t('route.effortDefault')}</option>
               {EFFORTS.map((effort) => (
                 <option key={effort} value={effort}>
                   {effort}
@@ -318,7 +316,7 @@ function TaskRoutes({
             </select>
             <input
               className="input"
-              aria-label="Max. Tokens"
+              aria-label={t('route.maxTokens')}
               inputMode="numeric"
               value={d.maxTokens}
               onChange={(e) => update(i, { maxTokens: Number(e.target.value) || 1 })}
@@ -332,17 +330,17 @@ function TaskRoutes({
                 checked={d.enabled}
                 onChange={(e) => update(i, { enabled: e.target.checked })}
               />{' '}
-              aktiv
+              {t('route.active')}
             </label>
-            <label title="Wird im Sparmodus übersprungen">
+            <label title={t('route.premiumHint')}>
               <input
                 type="checkbox"
                 checked={d.premium}
                 onChange={(e) => update(i, { premium: e.target.checked })}
               />{' '}
-              Premium
+              {t('route.premium')}
             </label>
-            {(Object.keys(CAPABILITY_LABELS) as Capability[]).map((c) => (
+            {CAPABILITIES.map((c) => (
               <label key={c}>
                 <input
                   type="checkbox"
@@ -355,16 +353,16 @@ function TaskRoutes({
                     })
                   }
                 />{' '}
-                {CAPABILITY_LABELS[c]}
+                {t(`capabilities.${c}`)}
               </label>
             ))}
           </div>
           {d.provider !== 'anthropic' && (
             <div className="row" style={{ gap: '0.5rem' }}>
-              <span className="muted">Preis pro Mio. Tokens (USD) Ein/Aus:</span>
+              <span className="muted">{t('route.price')}</span>
               <input
                 className="input"
-                aria-label="Preis Eingabe"
+                aria-label={t('route.priceIn')}
                 inputMode="decimal"
                 value={d.price?.input ?? ''}
                 onChange={(e) =>
@@ -379,7 +377,7 @@ function TaskRoutes({
               />
               <input
                 className="input"
-                aria-label="Preis Ausgabe"
+                aria-label={t('route.priceOut')}
                 inputMode="decimal"
                 value={d.price?.output ?? ''}
                 onChange={(e) =>
@@ -393,8 +391,7 @@ function TaskRoutes({
           )}
           {!configured.includes(d.provider) && (
             <span className="muted">
-              ⚠ Für {PROVIDER_LABELS[d.provider]} ist kein Schlüssel gesetzt – wird
-              übersprungen.
+              {t('route.noKey', { provider: PROVIDER_LABELS[d.provider] })}
             </span>
           )}
           <div className="row" style={{ gap: '0.5rem' }}>
@@ -419,7 +416,7 @@ function TaskRoutes({
               type="button"
               onClick={() => setDrafts(drafts.filter((_, j) => j !== i))}
             >
-              Entfernen
+              {t('common:remove')}
             </button>
           </div>
         </div>
@@ -431,10 +428,10 @@ function TaskRoutes({
           onClick={add}
           disabled={drafts.length >= 10}
         >
-          Modell hinzufügen
+          {t('route.add')}
         </button>
         <button className="btn btn-primary" type="button" onClick={() => void save()}>
-          Speichern
+          {t('common:save')}
         </button>
         {message && <span className="muted">{message}</span>}
       </div>
@@ -451,10 +448,9 @@ function TryRoute({
   tasks: string[];
   onDone: () => Promise<void>;
 }) {
+  const { t } = useTranslation('adminAi');
   const [task, setTask] = useState(tasks[0] ?? 'tutor.converse');
-  const [prompt, setPrompt] = useState(
-    'Erkläre kurz den Unterschied zwischen هذا und هذه.'
-  );
+  const [prompt, setPrompt] = useState(() => t('try.defaultPrompt'));
   const [result, setResult] = useState<TryResult | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -475,23 +471,23 @@ function TryRoute({
 
   return (
     <form className="card stack" onSubmit={(e) => void run(e)}>
-      <strong>Ausprobieren</strong>
-      <span className="muted">Kostet echtes Geld und zählt zum Budget.</span>
+      <strong>{t('try.title')}</strong>
+      <span className="muted">{t('try.cost')}</span>
       <select
         className="input"
-        aria-label="Aufgabe zum Ausprobieren"
+        aria-label={t('try.task')}
         value={task}
         onChange={(e) => setTask(e.target.value)}
       >
-        {tasks.map((t) => (
-          <option key={t} value={t}>
-            {TASK_LABELS[t] ?? t}
+        {tasks.map((id) => (
+          <option key={id} value={id}>
+            {taskLabel(id)}
           </option>
         ))}
       </select>
       <textarea
         className="input"
-        aria-label="Frage"
+        aria-label={t('try.prompt')}
         rows={3}
         maxLength={2000}
         value={prompt}
@@ -503,7 +499,7 @@ function TryRoute({
           type="submit"
           disabled={busy || !prompt.trim()}
         >
-          {busy ? 'Frage …' : 'Senden'}
+          {busy ? t('try.asking') : t('try.send')}
         </button>
         {message && <span className="feedback-bad">{message}</span>}
       </div>
@@ -513,18 +509,24 @@ function TryRoute({
             {result.text}
           </p>
           <span className="muted">
-            {PROVIDER_LABELS[result.provider]} · {result.model} · {result.latencyMs} ms ·{' '}
-            {result.usage.inputTokens + result.usage.cacheReadTokens} Tokens ein (
-            {result.usage.cacheReadTokens} aus dem Cache), {result.usage.outputTokens} aus
-            ·{' '}
-            {result.costMicroUsd === null
-              ? 'Preis unbekannt'
-              : formatUsd(result.costMicroUsd)}
+            {t('try.result', {
+              provider: PROVIDER_LABELS[result.provider],
+              model: result.model,
+              ms: result.latencyMs,
+              tokensIn: result.usage.inputTokens + result.usage.cacheReadTokens,
+              cached: result.usage.cacheReadTokens,
+              tokensOut: result.usage.outputTokens,
+              cost:
+                result.costMicroUsd === null
+                  ? t('try.priceUnknown')
+                  : formatUsd(result.costMicroUsd),
+            })}
           </span>
           {result.attempts.length > 1 && (
             <span className="muted">
-              Versuche:{' '}
-              {result.attempts.map((a) => `${a.model} (${a.outcome})`).join(' → ')}
+              {t('try.attempts', {
+                list: result.attempts.map((a) => `${a.model} (${a.outcome})`).join(' → '),
+              })}
             </span>
           )}
         </div>
@@ -534,36 +536,37 @@ function TryRoute({
 }
 
 function Usage({ data }: { data: AiOverview }) {
+  const { t } = useTranslation('adminAi');
+  const number = (n: number) => n.toLocaleString(dateLocale());
   if (data.usage.length === 0) {
-    return <p className="muted">In den letzten 30 Tagen gab es keine KI-Aufrufe.</p>;
+    return <p className="muted">{t('usage.none')}</p>;
   }
   return (
     <div className="card stack" style={{ overflowX: 'auto' }}>
-      <strong>Letzte 30 Tage</strong>
+      <strong>{t('usage.title')}</strong>
       <table>
         <thead>
           <tr>
-            <th align="left">Aufgabe</th>
-            <th align="left">Modell</th>
-            <th align="right">Aufrufe</th>
-            <th align="right">Fehler</th>
-            <th align="right">Tokens ein/aus</th>
-            <th align="right">aus Cache</th>
-            <th align="right">Kosten</th>
+            <th align="left">{t('usage.task')}</th>
+            <th align="left">{t('usage.model')}</th>
+            <th align="right">{t('usage.calls')}</th>
+            <th align="right">{t('usage.failed')}</th>
+            <th align="right">{t('usage.tokens')}</th>
+            <th align="right">{t('usage.cached')}</th>
+            <th align="right">{t('usage.cost')}</th>
           </tr>
         </thead>
         <tbody>
           {data.usage.map((u) => (
             <tr key={`${u.task}/${u.model}`}>
-              <td>{TASK_LABELS[u.task] ?? u.task}</td>
+              <td>{taskLabel(u.task)}</td>
               <td>{u.model ?? '–'}</td>
               <td align="right">{u.calls}</td>
               <td align="right">{u.failed}</td>
               <td align="right">
-                {u.inputTokens.toLocaleString('de-DE')} /{' '}
-                {u.outputTokens.toLocaleString('de-DE')}
+                {number(u.inputTokens)} / {number(u.outputTokens)}
               </td>
-              <td align="right">{u.cacheReadTokens.toLocaleString('de-DE')}</td>
+              <td align="right">{number(u.cacheReadTokens)}</td>
               <td align="right">{formatUsd(u.costMicro)}</td>
             </tr>
           ))}

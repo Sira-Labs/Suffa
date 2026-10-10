@@ -2,6 +2,7 @@
  * The content CMS (story 16.1): course units with a draft, a review and a published state.
  * Teachers read units and check them; admins edit drafts, submit them and publish.
  */
+import i18n from '@/i18n';
 import { apiRequest, type ApiResult, type Fetch } from '@/services/api/request';
 import type { Dialog, GrammatikPunkt, Vokabel } from '@/types';
 
@@ -47,20 +48,19 @@ export interface UnitDetail extends UnitSummary {
   changes: ItemChanges;
 }
 
-export const STATE_LABEL: Record<UnitState, string> = {
-  draft: 'Entwurf',
-  review: 'In Prüfung',
-  published: 'Veröffentlicht',
-};
+/** A unit's state in words, in the interface language. */
+export function stateLabel(state: UnitState): string {
+  return i18n.t(`content:state.${state}`);
+}
 
-const MESSAGES: Record<string, string> = {
-  stale_revision:
-    'Die Einheit wurde inzwischen geändert. Lade sie neu und übernimm deine Änderung dann.',
-  wrong_state: 'Dieser Schritt passt nicht zum Stand der Einheit. Lade sie neu.',
-  invalid_content: 'Der Inhalt ist so nicht gültig:',
-  id_taken: 'Eine Kennung gehört schon zu einer anderen Einheit:',
-  payload_too_large: 'Die Einheit ist zu groß.',
-};
+/** API error codes in the interface language, read at call time (story 16.3). */
+const messages = (): Record<string, string> => ({
+  stale_revision: i18n.t('content:errors.staleRevision'),
+  wrong_state: i18n.t('content:errors.wrongState'),
+  invalid_content: i18n.t('content:errors.invalidContent'),
+  id_taken: i18n.t('content:errors.idTaken'),
+  payload_too_large: i18n.t('content:errors.payloadTooLarge'),
+});
 
 export type UnitStep = 'submit' | 'check' | 'publish';
 
@@ -68,11 +68,11 @@ export class ContentApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
   list(): Promise<ApiResult<{ units: UnitSummary[] }>> {
-    return apiRequest(this.fetchImpl, '/api/v1/content/units', {}, MESSAGES);
+    return apiRequest(this.fetchImpl, '/api/v1/content/units', {}, messages());
   }
 
   get(id: string): Promise<ApiResult<UnitDetail>> {
-    return apiRequest(this.fetchImpl, unitPath(id), {}, MESSAGES);
+    return apiRequest(this.fetchImpl, unitPath(id), {}, messages());
   }
 
   saveDraft(
@@ -84,7 +84,7 @@ export class ContentApi {
       this.fetchImpl,
       `${unitPath(id)}/draft`,
       { method: 'PUT', body: JSON.stringify({ revision, content }) },
-      MESSAGES
+      messages()
     );
   }
 
@@ -97,7 +97,7 @@ export class ContentApi {
       this.fetchImpl,
       `${unitPath(id)}/${step}`,
       { method: 'POST', body: JSON.stringify({ revision }) },
-      MESSAGES
+      messages()
     );
   }
 
@@ -111,7 +111,7 @@ export class ContentApi {
       this.fetchImpl,
       `${unitPath(id)}/return`,
       { method: 'POST', body: JSON.stringify({ revision, note }) },
-      MESSAGES
+      messages()
     );
   }
 }

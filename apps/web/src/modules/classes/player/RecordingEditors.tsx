@@ -4,6 +4,7 @@
  * correct it line by line.
  */
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { CollapsibleCard } from '@/components';
 import { useCelebrationStore } from '@/state';
 import {
@@ -31,6 +32,7 @@ export function CheckpointEditor({
   currentTime: () => number;
   onChange: () => void;
 }) {
+  const { t } = useTranslation(['recordings', 'common']);
   const [kind, setKind] = useState<Kind>('mcq');
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState('');
@@ -60,21 +62,27 @@ export function CheckpointEditor({
 
   const add = async () => {
     const data = build();
-    if (!data) return setMessage('Bitte alle Felder ausfüllen.');
+    if (!data) return setMessage(t('checkpointEditor.fillAll'));
     const at = Math.round(currentTime() * 10) / 10;
     const result = await api.addCheckpoint(classId, mediaId, at, data);
     if (!result.ok) return setMessage(result.message);
     setQuestion('');
     setOptions('');
     setAnswer('');
-    setMessage(`Checkpoint bei ${clock(at)} angelegt.`);
+    setMessage(t('checkpointEditor.added', { time: clock(at) }));
     onChange();
   };
+  const questionLabel =
+    kind === 'vocab_flash'
+      ? t('checkpointEditor.arabicWord')
+      : kind === 'mcq'
+        ? t('checkpointEditor.question')
+        : t('checkpointEditor.hint');
 
   return (
     <CollapsibleCard
       id="checkpoint-editor"
-      title={`Checkpoints bearbeiten (${checkpoints.length})`}
+      title={t('checkpointEditor.title', { count: checkpoints.length })}
       defaultOpen={false}
     >
       <ul className="feed-list">
@@ -89,8 +97,8 @@ export function CheckpointEditor({
               {c.data.kind === 'mcq'
                 ? c.data.question
                 : c.data.kind === 'dictation'
-                  ? `Diktat: ${c.data.answer}`
-                  : `Wort: ${c.data.ar} – ${c.data.de}`}
+                  ? t('checkpointEditor.dictationItem', { answer: c.data.answer })
+                  : t('checkpointEditor.wordItem', { ar: c.data.ar, de: c.data.de })}
             </span>
             <button
               className="btn btn-small"
@@ -98,7 +106,7 @@ export function CheckpointEditor({
                 void api.removeCheckpoint(classId, mediaId, c.id).then(() => onChange())
               }
             >
-              Entfernen
+              {t('common:remove')}
             </button>
           </li>
         ))}
@@ -106,30 +114,18 @@ export function CheckpointEditor({
       <div className="stack">
         <select
           className="input"
-          aria-label="Art des Checkpoints"
+          aria-label={t('checkpointEditor.kind')}
           value={kind}
           onChange={(e) => setKind(e.target.value as Kind)}
         >
-          <option value="mcq">Frage mit Antworten</option>
-          <option value="dictation">Diktat</option>
-          <option value="vocab_flash">Wortkarte</option>
+          <option value="mcq">{t('checkpointEditor.kinds.mcq')}</option>
+          <option value="dictation">{t('checkpointEditor.kinds.dictation')}</option>
+          <option value="vocab_flash">{t('checkpointEditor.kinds.vocab_flash')}</option>
         </select>
         <input
           className="input"
-          aria-label={
-            kind === 'vocab_flash'
-              ? 'Arabisches Wort'
-              : kind === 'mcq'
-                ? 'Frage'
-                : 'Hinweis (optional)'
-          }
-          placeholder={
-            kind === 'vocab_flash'
-              ? 'Arabisches Wort'
-              : kind === 'mcq'
-                ? 'Frage'
-                : 'Hinweis (optional)'
-          }
+          aria-label={questionLabel}
+          placeholder={questionLabel}
           dir="auto"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -137,8 +133,8 @@ export function CheckpointEditor({
         {kind === 'mcq' && (
           <textarea
             className="input"
-            aria-label="Antworten, eine pro Zeile"
-            placeholder="Antworten, eine pro Zeile"
+            aria-label={t('checkpointEditor.options')}
+            placeholder={t('checkpointEditor.options')}
             rows={3}
             dir="auto"
             value={options}
@@ -149,24 +145,24 @@ export function CheckpointEditor({
           className="input"
           aria-label={
             kind === 'mcq'
-              ? 'Nummer der richtigen Antwort'
+              ? t('checkpointEditor.answerNumber')
               : kind === 'dictation'
-                ? 'Richtige Antwort'
-                : 'Bedeutung'
+                ? t('checkpointEditor.rightAnswer')
+                : t('checkpointEditor.meaning')
           }
           placeholder={
             kind === 'mcq'
-              ? 'Nummer der richtigen Antwort (1, 2, …)'
+              ? t('checkpointEditor.answerNumberPlaceholder')
               : kind === 'dictation'
-                ? 'Richtige Antwort (Arabisch)'
-                : 'Bedeutung (Deutsch)'
+                ? t('checkpointEditor.rightAnswerPlaceholder')
+                : t('checkpointEditor.meaningPlaceholder')
           }
           dir="auto"
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
         />
         <button className="btn" onClick={() => void add()}>
-          An der aktuellen Stelle einfügen
+          {t('checkpointEditor.insert')}
         </button>
         {message && <span className="muted">{message}</span>}
       </div>
@@ -180,20 +176,23 @@ const STALE_TRANSCRIPT_MS = 10 * 60 * 1000;
 
 /** Where an automatic transcript stands: waiting, or how far it has come. */
 function TranscriptProgress({ transcript }: { transcript: Transcript }) {
+  const { t } = useTranslation('recordings');
   if (transcript.status === 'queued' || transcript.progress == null) {
     return (
       <span className="muted" role="status">
-        Wartet auf den Start … (es läuft immer nur ein Auftrag gleichzeitig)
+        {t('transcriptEditor.queued')}
       </span>
     );
   }
   return (
     <div className="stack" role="status" style={{ gap: '0.25rem' }}>
-      <span className="muted">Transkript wird erstellt … {transcript.progress} %</span>
+      <span className="muted">
+        {t('transcriptEditor.progress', { progress: transcript.progress })}
+      </span>
       <progress
         max={100}
         value={transcript.progress}
-        aria-label="Fortschritt des Transkripts"
+        aria-label={t('transcriptEditor.progressLabel')}
         style={{ width: '100%' }}
       />
     </div>
@@ -217,6 +216,7 @@ export function TranscriptEditor({
   currentTime: () => number;
   onChange: () => void;
 }) {
+  const { t } = useTranslation(['recordings', 'common']);
   const [cues, setCues] = useState<Cue[]>(transcript?.cues ?? []);
   const [message, setMessage] = useState<string | null>(null);
   const busy = transcript?.status === 'queued' || transcript?.status === 'processing';
@@ -247,38 +247,32 @@ export function TranscriptEditor({
     }
     setMessage(null);
     setFold((n) => n + 1);
-    celebrate({ title: 'Transkript gespeichert', xp: 0, big: false });
+    celebrate({ title: t('transcriptEditor.saved'), xp: 0, big: false });
     onChange();
   };
   const generate = async () => {
     const result = await api.generateTranscript(classId, mediaId);
-    setMessage(result.ok ? 'Transkript wird erstellt …' : result.message);
+    setMessage(result.ok ? t('transcriptEditor.creating') : result.message);
     if (result.ok) onChange();
   };
 
   return (
     <CollapsibleCard
       id="transcript-editor"
-      title="Transkript bearbeiten"
+      title={t('transcriptEditor.title')}
       foldSignal={fold}
       // Many text fields: folded unless the teacher opens it (or there is nothing yet).
       defaultOpen={!transcript?.cues.length}
       lead={
         <>
           {busy && !stuck && <TranscriptProgress transcript={transcript} />}
-          {stuck && (
-            <span className="feedback-bad">
-              Seit einer Weile tut sich nichts – der Auftrag ist wohl hängen geblieben.
-              Starte ihn neu.
-            </span>
-          )}
+          {stuck && <span className="feedback-bad">{t('transcriptEditor.stuck')}</span>}
           {transcript?.status === 'failed' && transcript.error && (
             <span className="feedback-bad">{transcript.error}</span>
           )}
           {!canGenerate && !transcript?.cues.length && (
             <span className="muted" style={{ fontSize: '0.9rem' }}>
-              Automatische Transkripte sind auf diesem Server noch nicht eingerichtet. Du
-              kannst den Text unten selbst eintragen; er erscheint dann beim Abspielen.
+              {t('transcriptEditor.notSetUp')}
             </span>
           )}
           {canGenerate && (!busy || stuck) && (
@@ -288,8 +282,8 @@ export function TranscriptEditor({
               style={{ alignSelf: 'flex-start' }}
             >
               {transcript?.cues.length
-                ? 'Neu erstellen (KI)'
-                : 'Automatisch erstellen (KI)'}
+                ? t('transcriptEditor.regenerate')
+                : t('transcriptEditor.generate')}
             </button>
           )}
         </>
@@ -304,7 +298,7 @@ export function TranscriptEditor({
               lang="ar"
               dir="rtl"
               rows={2}
-              aria-label={`Zeile bei ${clock(cue.start)}`}
+              aria-label={t('transcriptEditor.line', { time: clock(cue.start) })}
               value={cue.text}
               onChange={(e) =>
                 setCues(
@@ -328,11 +322,11 @@ export function TranscriptEditor({
             );
           }}
         >
-          Zeile an der aktuellen Stelle
+          {t('transcriptEditor.addLine')}
         </button>
         {cues.length > 0 && (
           <button className="btn btn-primary" onClick={() => void save()}>
-            Speichern
+            {t('common:save')}
           </button>
         )}
         {message && <span className="muted">{message}</span>}

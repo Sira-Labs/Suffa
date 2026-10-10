@@ -1,0 +1,73 @@
+/** Exam mode: configuration, questions, results and the Medina lesson tests (story 16.3). */
+export const exam = {
+  formats: {
+    vocab_ar_de: 'Vokabel AR→DE',
+    vocab_de_ar: 'Vokabel DE→AR',
+    plural: 'Plural-Test',
+    root: 'Wurzel-Test',
+    conjugation: 'Konjugationstest',
+    listening: 'Hörtest',
+    reading: 'Leseverständnis',
+    writing: 'Schreib-/Diktattest',
+    speaking: 'Sprechtest',
+    minimalpair: 'Minimalpaar-Hörtest',
+    mixed_chapter: 'Gemischte Kapitelprüfung',
+    speed: 'Speed-Round',
+    adaptive: 'Adaptiver Modus',
+    stage_test: 'Etappentest',
+    madinah_lesson: 'Medina-Lektionstest',
+  },
+  config: {
+    title: 'Prüfungsmodus',
+    intro:
+      'Wähle Formate und Einheiten. Die Fragen werden interleaved gestellt (verschiedene Formate gemischt) – wie in der echten Klassenprüfung.',
+    formats: 'Formate',
+    units: 'Einheiten (gemischte Kapitelprüfung)',
+    unit: 'E{{unit}}',
+    example: 'Beispiel echte Prüfung: „Kapitel 1 → Kapitel 3 Dialog 1“ – wähle E1–E3.',
+    scope: 'Umfang',
+    count: 'Anzahl Fragen:',
+    start: 'Prüfung starten',
+    speed: '⏱ Speed-Round (8 s/Frage)',
+    adaptive: '🎲 Adaptiv / alles gemischt',
+  },
+  runner: {
+    question: 'Frage {{current}} / {{total}}',
+    seconds: '⏱ {{seconds}}s',
+    listen: '🔊 Anhören',
+    answer: 'Antworten',
+  },
+  result: {
+    title: 'Auswertung',
+    flagged_one:
+      '{{count}} schwieriges Item wurde automatisch zur Wiederholung (SRS) markiert.',
+    flagged_other:
+      '{{count}} schwierige Items wurden automatisch zur Wiederholung (SRS) markiert.',
+    byFormat: 'Fehleranalyse nach Format',
+    wrong: 'Falsch beantwortet',
+    restart: 'Neue Prüfung',
+    export: '📤 Ergebnis exportieren (für Lehrer)',
+    passedNext: 'Einheit {{unit}} bestanden · Einheit {{next}} ist offen',
+    passed: 'Einheit {{unit}} bestanden',
+  },
+  questions: {
+    root: 'Wurzel {{root}}',
+    plural: 'Plural von „{{word}}“ ({{meaning}})',
+    rootOf: 'Wurzel von „{{word}}“ ({{meaning}})?',
+    listening: 'Anhören und Bedeutung wählen',
+    writing: 'Schreibe „{{transliteration}}“ ({{meaning}}) auf Arabisch',
+    speaking: 'Laut aussprechen (Selbstkontrolle)',
+    minimalPair: 'Welches Wort bedeutet „{{meaning}}“?',
+    contrast: 'Kontrast {{contrast}}',
+  },
+  madinah: {
+    title: 'Prüfung',
+    intro:
+      'Im Medina-Kurs hat jede Lektion ihren eigenen Test: Bedeutungen und Lückensätze, ab 80 % bestanden. {{passed}} von {{total}} Lektionen bestanden.',
+    toTest: 'Zum Test von Lektion {{lesson}}',
+    tests: 'Lektionstests',
+    lesson: 'Lektion {{lesson}}',
+    passed: '✓ bestanden',
+    open: 'offen',
+  },
+};

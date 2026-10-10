@@ -5,6 +5,7 @@
  * become due cards right away, so the quiz feeds the spaced repetition.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { ClassesApi } from '@/services/classes/classesApi';
 import { QuizApi, type QuizView } from '@/services/classes/quizApi';
@@ -13,6 +14,7 @@ import { useSrsStore, useSyncStore } from '@/state';
 const SHAPES = ['▲', '◆', '●', '■'];
 
 export function LiveQuiz() {
+  const { t } = useTranslation(['quiz', 'classes']);
   const { id = '' } = useParams();
   const signedIn = useSyncStore((s) => s.auth.status === 'signed-in');
   const classes = useMemo(() => new ClassesApi(), []);
@@ -30,20 +32,19 @@ export function LiveQuiz() {
     });
   }, [classes, id, signedIn]);
 
-  if (!signedIn) return <p className="muted">Bitte melde dich unter Einstellungen an.</p>;
-  if (role === undefined) return <p className="muted">Lade Quiz …</p>;
+  if (!signedIn) return <p className="muted">{t('classes:signInFirst')}</p>;
+  if (role === undefined) return <p className="muted">{t('loading')}</p>;
   if (role === null) {
     return (
       <p className="muted">
-        Diese Klasse gibt es nicht oder du bist (noch) nicht freigegeben.{' '}
-        <Link to="/classes">Zu deinen Klassen</Link>
+        {t('classes:notFound')} <Link to="/classes">{t('classes:toYourClasses')}</Link>
       </p>
     );
   }
   return (
     <div className="stack quiz-page" style={{ gap: '1rem' }}>
       <Link to={`/classes/${id}`} className="muted">
-        ← Zur Klasse
+        {t('classes:backToClass')}
       </Link>
       {role === 'teacher' ? (
         <TeacherQuiz api={api} classId={id} quiz={quiz} />
@@ -111,20 +112,21 @@ function TeacherQuiz({
   classId: string;
   quiz: QuizView | null | undefined;
 }) {
+  const { t } = useTranslation('quiz');
   const { busy, message, run } = useAction();
   const seconds = useCountdown(quiz);
   const running = quiz && quiz.status !== 'finished';
 
   return (
-    <section className="card stack quiz-stage" aria-label="Live-Quiz (Beamer)">
+    <section className="card stack quiz-stage" aria-label={t('stage')}>
       <header className="row" style={{ justifyContent: 'space-between' }}>
-        <h1 style={{ margin: 0 }}>Live-Quiz</h1>
+        <h1 style={{ margin: 0 }}>{t('title')}</h1>
         {quiz && running && (
           <span className="muted">
             {quiz.current >= 0
-              ? `Frage ${quiz.current + 1} von ${quiz.questionCount} · `
+              ? `${t('questionOf', { number: quiz.current + 1, total: quiz.questionCount })} · `
               : ''}
-            {quiz.players} dabei
+            {t('players', { count: quiz.players })}
           </span>
         )}
       </header>
@@ -132,9 +134,7 @@ function TeacherQuiz({
       {!running && (
         <div className="stack">
           <p className="muted" style={{ margin: 0 }}>
-            Fragen aus den Problemwörtern der Klasse, ergänzt aus den erreichten
-            Einheiten. Die Lernenden öffnen die Klasse auf dem Handy und tippen auf
-            „Mitmachen“.
+            {t('intro')}
           </p>
           {quiz?.status === 'finished' && <Leaderboard entries={quiz.leaderboard} />}
           <button
@@ -142,20 +142,20 @@ function TeacherQuiz({
             disabled={busy}
             onClick={() => void run(() => api.create(classId))}
           >
-            {quiz?.status === 'finished' ? 'Neues Quiz starten' : 'Quiz starten'}
+            {quiz?.status === 'finished' ? t('startNew') : t('start')}
           </button>
         </div>
       )}
 
       {quiz?.status === 'lobby' && (
         <div className="stack">
-          <p className="quiz-big">{quiz.players} Lernende sind dabei.</p>
+          <p className="quiz-big">{t('lobby', { count: quiz.players })}</p>
           <button
             className="btn btn-primary"
             disabled={busy}
             onClick={() => void run(() => api.next(classId))}
           >
-            Erste Frage zeigen
+            {t('firstQuestion')}
           </button>
         </div>
       )}
@@ -168,8 +168,8 @@ function TeacherQuiz({
           <Options quiz={quiz} />
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <span className="muted">
-              {quiz.answered} von {quiz.players} geantwortet
-              {seconds !== null && ` · noch ${seconds} s`}
+              {t('answered', { answered: quiz.answered, players: quiz.players })}
+              {seconds !== null && ` · ${t('secondsLeft', { seconds })}`}
             </span>
             {quiz.status === 'question' ? (
               <button
@@ -177,7 +177,7 @@ function TeacherQuiz({
                 disabled={busy}
                 onClick={() => void run(() => api.reveal(classId))}
               >
-                Auflösen
+                {t('reveal')}
               </button>
             ) : (
               <button
@@ -185,9 +185,7 @@ function TeacherQuiz({
                 disabled={busy}
                 onClick={() => void run(() => api.next(classId))}
               >
-                {quiz.current + 1 < quiz.questionCount
-                  ? 'Nächste Frage'
-                  : 'Ergebnis zeigen'}
+                {quiz.current + 1 < quiz.questionCount ? t('next') : t('results')}
               </button>
             )}
           </div>
@@ -202,7 +200,7 @@ function TeacherQuiz({
           onClick={() => void run(() => api.finish(classId))}
           style={{ alignSelf: 'flex-start' }}
         >
-          Quiz beenden
+          {t('finish')}
         </button>
       )}
       {message && <p className="feedback-bad">{message}</p>}
@@ -219,6 +217,7 @@ function LearnerQuiz({
   classId: string;
   quiz: QuizView | null | undefined;
 }) {
+  const { t } = useTranslation('quiz');
   const { busy, message, run } = useAction();
   const seconds = useCountdown(quiz);
   const prioritise = useSrsStore((s) => s.prioritise);
@@ -233,23 +232,23 @@ function LearnerQuiz({
     if (quiz.you.answer?.correct !== true) void prioritise([quiz.question.wordId]);
   }, [quiz, prioritise]);
 
-  if (quiz === undefined) return <p className="muted">Lade Quiz …</p>;
+  if (quiz === undefined) return <p className="muted">{t('loading')}</p>;
   if (quiz === null) {
-    return <p className="muted">Gerade läuft kein Quiz. Deine Lehrkraft startet es.</p>;
+    return <p className="muted">{t('noQuiz')}</p>;
   }
   if (!quiz.you?.joined && quiz.status !== 'finished') {
     return (
-      <section className="card stack" aria-label="Live-Quiz">
-        <h1 style={{ margin: 0 }}>Live-Quiz</h1>
+      <section className="card stack" aria-label={t('title')}>
+        <h1 style={{ margin: 0 }}>{t('title')}</h1>
         <p className="muted" style={{ margin: 0 }}>
-          {quiz.players} sind schon dabei.
+          {t('alreadyIn', { count: quiz.players })}
         </p>
         <button
           className="btn btn-primary"
           disabled={busy}
           onClick={() => void run(() => api.join(classId))}
         >
-          Mitmachen
+          {t('join')}
         </button>
         {message && <p className="feedback-bad">{message}</p>}
       </section>
@@ -258,19 +257,17 @@ function LearnerQuiz({
 
   const answer = quiz.you?.answer ?? null;
   return (
-    <section className="card stack" aria-label="Live-Quiz">
+    <section className="card stack" aria-label={t('title')}>
       <header className="row" style={{ justifyContent: 'space-between' }}>
         <strong>
           {quiz.current >= 0 && quiz.status !== 'finished'
-            ? `Frage ${quiz.current + 1} von ${quiz.questionCount}`
-            : 'Live-Quiz'}
+            ? t('questionOf', { number: quiz.current + 1, total: quiz.questionCount })
+            : t('title')}
         </strong>
-        <span>{quiz.you?.points ?? 0} Punkte</span>
+        <span>{t('points', { count: quiz.you?.points ?? 0 })}</span>
       </header>
 
-      {quiz.status === 'lobby' && (
-        <p className="quiz-big">Du bist dabei. Gleich geht es los …</p>
-      )}
+      {quiz.status === 'lobby' && <p className="quiz-big">{t('inLobby')}</p>}
 
       {quiz.question && quiz.status === 'question' && (
         <div className="stack">
@@ -278,9 +275,9 @@ function LearnerQuiz({
             {quiz.question.prompt}
           </p>
           {answer ? (
-            <p className="quiz-big">Antwort gespeichert – warte auf die Auflösung.</p>
+            <p className="quiz-big">{t('saved')}</p>
           ) : (
-            <div className="quiz-options" role="group" aria-label="Antworten">
+            <div className="quiz-options" role="group" aria-label={t('answers')}>
               {quiz.question.options.map((option, i) => (
                 <button
                   key={option}
@@ -295,7 +292,9 @@ function LearnerQuiz({
               ))}
             </div>
           )}
-          {seconds !== null && <span className="muted">noch {seconds} s</span>}
+          {seconds !== null && (
+            <span className="muted">{t('secondsLeft', { seconds })}</span>
+          )}
         </div>
       )}
 
@@ -306,11 +305,7 @@ function LearnerQuiz({
               answer?.correct ? 'feedback-good quiz-big' : 'feedback-bad quiz-big'
             }
           >
-            {answer?.correct
-              ? 'Richtig!'
-              : answer
-                ? 'Leider falsch – das Wort kommt heute noch einmal dran.'
-                : 'Keine Antwort – das Wort kommt heute noch einmal dran.'}
+            {answer?.correct ? t('correct') : answer ? t('wrong') : t('noAnswer')}
           </p>
           <p style={{ margin: 0 }}>
             <span lang="ar" dir="rtl" className="arabic-inline">
@@ -324,7 +319,7 @@ function LearnerQuiz({
 
       {quiz.status === 'finished' && (
         <div className="stack">
-          <p className="quiz-big">Geschafft! Du hast {quiz.you?.points ?? 0} Punkte.</p>
+          <p className="quiz-big">{t('finished', { count: quiz.you?.points ?? 0 })}</p>
           <Leaderboard entries={quiz.leaderboard} />
         </div>
       )}
@@ -334,10 +329,11 @@ function LearnerQuiz({
 }
 
 function Options({ quiz }: { quiz: QuizView }) {
+  const { t } = useTranslation('quiz');
   const q = quiz.question!;
   const revealed = quiz.status === 'reveal';
   return (
-    <ol className="quiz-options" aria-label="Antworten">
+    <ol className="quiz-options" aria-label={t('answers')}>
       {q.options.map((option, i) => (
         <li
           key={option}
@@ -354,9 +350,10 @@ function Options({ quiz }: { quiz: QuizView }) {
 }
 
 function Leaderboard({ entries }: { entries: QuizView['leaderboard'] }) {
+  const { t } = useTranslation('quiz');
   if (entries.length === 0) return null;
   return (
-    <ol className="feed-list" aria-label="Bestenliste">
+    <ol className="feed-list" aria-label={t('leaderboard')}>
       {entries.map((e, i) => (
         <li
           key={`${i}-${e.name}`}
@@ -364,7 +361,7 @@ function Leaderboard({ entries }: { entries: QuizView['leaderboard'] }) {
           style={{ justifyContent: 'space-between' }}
         >
           <span>
-            {i + 1}. {e.you ? 'Du' : e.name}
+            {i + 1}. {e.you ? t('you') : e.name}
           </span>
           <span>{e.points}</span>
         </li>

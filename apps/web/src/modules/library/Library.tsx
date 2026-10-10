@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { BookVideos } from './BookVideos';
@@ -18,6 +19,7 @@ export function Library() {
 }
 
 function BookLibrary() {
+  const { t } = useTranslation('library');
   const [params] = useSearchParams();
   const initialUnit = Number(params.get('unit')) || 1;
   const lesson = Number(params.get('lesson')) || undefined;
@@ -32,10 +34,9 @@ function BookLibrary() {
 
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Hören & Sehen</h1>
+      <h1 style={{ margin: 0 }}>{t('title')}</h1>
       <p className="muted" style={{ margin: 0 }}>
-        Die Videos und Audios des Verlags zu Buch 1. Du liest im gedruckten Buch mit.
-        Streams brauchen Internet; alle anderen Lernfunktionen gehen auch offline.
+        {t('intro')}
       </p>
 
       <section
@@ -49,12 +50,14 @@ function BookLibrary() {
           style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}
         >
           <h2 id="videos-heading" style={{ margin: 0 }}>
-            Buchseiten-Videos · {unit <= UNITS ? `Einheit ${unit}` : 'Tests'}
+            {t('videosHeading', {
+              part: unit <= UNITS ? t('unit', { unit }) : t('tests'),
+            })}
           </h2>
           <div className="row" style={{ gap: '0.4rem', flexShrink: 0 }}>
             <button
               className="btn icon-btn"
-              aria-label="Vorherige Einheit"
+              aria-label={t('previousUnit')}
               disabled={unit <= 1}
               hidden={unit > UNITS}
               onClick={() => setUnit(unit - 1)}
@@ -63,7 +66,7 @@ function BookLibrary() {
             </button>
             <button
               className="btn icon-btn"
-              aria-label="Nächste Einheit"
+              aria-label={t('nextUnit')}
               disabled={unit >= UNITS}
               hidden={unit > UNITS}
               onClick={() => setUnit(unit + 1)}
@@ -76,14 +79,14 @@ function BookLibrary() {
           <BookVideos unit={unit} />
         ) : (
           <p className="muted" style={{ margin: 0 }}>
-            Zu den Tests gibt es keine Seitenvideos.
+            {t('noTestVideos')}
           </p>
         )}
       </section>
 
       <section className="card stack" aria-labelledby="audio-heading">
         <h2 id="audio-heading" style={{ margin: 0 }}>
-          Offizielle Audios
+          {t('audioHeading')}
         </h2>
         <PublisherAudio
           key={lesson ?? ''}

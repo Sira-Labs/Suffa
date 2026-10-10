@@ -3,10 +3,12 @@
  * view; learners see a banner while a quiz is running.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { QuizApi } from '@/services/classes/quizApi';
 
 export function QuizEntry({ classId, teacher }: { classId: string; teacher: boolean }) {
+  const { t } = useTranslation('quiz');
   const api = useMemo(() => new QuizApi(), []);
   const [running, setRunning] = useState(false);
 
@@ -27,13 +29,13 @@ export function QuizEntry({ classId, teacher }: { classId: string; teacher: bool
     return (
       <section className="card row" style={{ justifyContent: 'space-between' }}>
         <span className="stack" style={{ gap: 0 }}>
-          <strong>Live-Quiz</strong>
+          <strong>{t('title')}</strong>
           <span className="muted" style={{ fontSize: '0.85rem' }}>
-            Für den Beamer: Problemwörter der Klasse, Antworten per Handy
+            {t('entry.hint')}
           </span>
         </span>
         <Link className="btn btn-primary" to={`/classes/${classId}/quiz`}>
-          Öffnen
+          {t('entry.open')}
         </Link>
       </section>
     );
@@ -41,8 +43,8 @@ export function QuizEntry({ classId, teacher }: { classId: string; teacher: bool
   if (!running) return null;
   return (
     <Link className="card row quiz-banner" to={`/classes/${classId}/quiz`}>
-      <strong>Live-Quiz läuft</strong>
-      <span>Mitmachen →</span>
+      <strong>{t('entry.running')}</strong>
+      <span>{t('entry.join')}</span>
     </Link>
   );
 }

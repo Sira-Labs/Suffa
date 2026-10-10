@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import type { Dialog, UnitPracticeScope } from '@/types';
 import { TashkilToggle } from '@/components';
 import { applyTashkilLevel } from '@/components/ArabicText';
@@ -20,6 +21,7 @@ for (const v of content.vokabeln) {
  * a dialogue counts as read once its comprehension question is answered correctly.
  */
 export function Reading({ scope }: { scope?: UnitPracticeScope } = {}) {
+  const { t } = useTranslation('reading');
   const { keep } = useReachedUnits();
   // Outside a unit: the dialogues of every unit reached so far.
   const dialoge = useMemo(
@@ -31,16 +33,13 @@ export function Reading({ scope }: { scope?: UnitPracticeScope } = {}) {
   const [showTranslation, setShowTranslation] = useState(true);
 
   if (dialoge.length === 0) {
-    return <p className="muted">Für diese Einheit gibt es noch keinen Lesetext.</p>;
+    return <p className="muted">{t('noText')}</p>;
   }
 
   return (
     <div className="stack">
-      {!scope && <h1 style={{ margin: 0 }}>Lesen</h1>}
-      <p className="muted">
-        Vokalisierte Texte mit Tap-a-Word-Glosse. Tippe ein Wort an, um Bedeutung und
-        Wurzel zu sehen (Comprehensible Input, i+1).
-      </p>
+      {!scope && <h1 style={{ margin: 0 }}>{t('title')}</h1>}
+      <p className="muted">{t('intro')}</p>
 
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <div className="row">
@@ -50,12 +49,12 @@ export function Reading({ scope }: { scope?: UnitPracticeScope } = {}) {
               className={`btn ${d.id === selected?.id ? 'btn-accent' : ''}`}
               onClick={() => setSelected(d)}
             >
-              E{d.einheit}·D{d.dialog}
+              {t('dialogue', { unit: d.einheit, dialogue: d.dialog })}
             </button>
           ))}
         </div>
         <button className="btn" onClick={() => setShowTranslation((v) => !v)}>
-          Übersetzung {showTranslation ? 'aus' : 'ein'}
+          {showTranslation ? t('translationOff') : t('translationOn')}
         </button>
       </div>
 
@@ -100,6 +99,7 @@ function GlossLine({
   german: string;
   showTranslation: boolean;
 }) {
+  const { t } = useTranslation('reading');
   const level = useSettingsStore((s) => s.settings.tashkilLevel);
   const [gloss, setGloss] = useState<{ word: string; de: string; wurzel: string } | null>(
     null
@@ -113,7 +113,7 @@ function GlossLine({
         <button
           className="btn"
           onClick={() => speakArabic(arabic)}
-          aria-label="Zeile anhören"
+          aria-label={t('listenLine')}
         >
           🔊
         </button>
@@ -142,7 +142,7 @@ function GlossLine({
       </p>
       {gloss && (
         <p className="muted" style={{ margin: 0 }}>
-          <span className="arabic-inline">{gloss.word}</span> → {gloss.de} (Wurzel{' '}
+          <span className="arabic-inline">{gloss.word}</span> → {gloss.de} ({t('root')}{' '}
           <span className="arabic-inline">{gloss.wurzel}</span>)
         </p>
       )}
@@ -157,6 +157,7 @@ function GlossLine({
 
 /** Simple reading comprehension after the text. */
 function Comprehension({ dialog, onCorrect }: { dialog: Dialog; onCorrect(): void }) {
+  const { t } = useTranslation('reading');
   const firstLine = dialog.zeilen[0];
   const correct = firstLine?.de ?? '';
   const [answer, setAnswer] = useState<string | null>(null);
@@ -172,10 +173,14 @@ function Comprehension({ dialog, onCorrect }: { dialog: Dialog; onCorrect(): voi
 
   return (
     <div className="card stack">
-      <strong>Leseverständnis</strong>
+      <strong>{t('comprehension')}</strong>
       <p>
-        Was bedeutet die erste Zeile (
-        <span className="arabic-inline">{firstLine.ar}</span>)?
+        <Trans
+          t={t}
+          i18nKey="question"
+          values={{ line: firstLine.ar }}
+          components={{ 1: <span className="arabic-inline" /> }}
+        />
       </p>
       {options.map((opt) => (
         <button
@@ -191,7 +196,7 @@ function Comprehension({ dialog, onCorrect }: { dialog: Dialog; onCorrect(): voi
       ))}
       {answer && (
         <span className={answer === correct ? 'feedback-good' : 'feedback-bad'}>
-          {answer === correct ? '✓ Richtig!' : `✗ Richtig wäre: ${correct}`}
+          {answer === correct ? t('correct') : t('wrong', { answer: correct })}
         </span>
       )}
     </div>

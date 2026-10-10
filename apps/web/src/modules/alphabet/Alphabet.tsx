@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { TaskQueue } from '@/components/TaskQueue';
@@ -30,17 +31,16 @@ function useLessonProgress(lesson: AlphabetLesson): { done: number; total: numbe
 
 /** The alphabet course: eight short lessons, from the first letters to the vowel signs. */
 export function Alphabet() {
+  const { t } = useTranslation('alphabet');
   return (
     <div className="stack" style={{ gap: '1.25rem' }}>
       <header className="stack" style={{ gap: '0.35rem' }}>
-        <h1 style={{ margin: 0 }}>Alphabet</h1>
+        <h1 style={{ margin: 0 }}>{t('title')}</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Die 28 Buchstaben in acht kurzen Lektionen. Arabisch schreibt man von rechts
-          nach links, die meisten Buchstaben verbinden sich und ändern dabei leicht ihre
-          Form.
+          {t('intro')}
         </p>
       </header>
-      <ol className="alphabet-lessons" aria-label="Lektionen">
+      <ol className="alphabet-lessons" aria-label={t('lessons')}>
         {ALPHABET_LESSONS.map((lesson) => (
           <LessonTile key={lesson.no} lesson={lesson} />
         ))}
@@ -50,6 +50,7 @@ export function Alphabet() {
 }
 
 function LessonTile({ lesson }: { lesson: AlphabetLesson }) {
+  const { t } = useTranslation('alphabet');
   const { done, total } = useLessonProgress(lesson);
   const finished = done === total;
   return (
@@ -68,10 +69,10 @@ function LessonTile({ lesson }: { lesson: AlphabetLesson }) {
           <span className="muted" style={{ fontSize: '0.9rem' }}>
             {finished ? (
               <>
-                <Icon name="check" size={14} strokeWidth={2.6} /> geschafft
+                <Icon name="check" size={14} strokeWidth={2.6} /> {t('done')}
               </>
             ) : (
-              `${done} von ${total} Aufgaben`
+              t('tasks', { done, total })
             )}
           </span>
         </span>
@@ -82,6 +83,7 @@ function LessonTile({ lesson }: { lesson: AlphabetLesson }) {
 
 /** One lesson: learn the letters (forms, sound, example), then recognise and find them. */
 export function AlphabetLessonPage() {
+  const { t } = useTranslation(['alphabet', 'common']);
   const { lesson: param } = useParams();
   const lesson = ALPHABET_LESSONS.find((l) => l.no === Number(param));
   const records = usePracticeStore((s) => s.records);
@@ -94,9 +96,9 @@ export function AlphabetLessonPage() {
   if (!lesson || !selected) {
     return (
       <div className="stack">
-        <h1>Lektion nicht gefunden</h1>
+        <h1>{t('notFound')}</h1>
         <Link to="/alphabet" className="btn">
-          Zum Alphabet
+          {t('toAlphabet')}
         </Link>
       </div>
     );
@@ -110,9 +112,13 @@ export function AlphabetLessonPage() {
     setSolved((prev) => new Set(prev).add(item));
     void practise(ALPHABET_UNIT, 'letters', item, items).then((outcome) => {
       if (outcome.stationComplete) {
-        celebrate({ title: `Lektion ${lesson.no} geschafft`, xp: outcome.xp, big: true });
+        celebrate({
+          title: t('lessonDone', { lesson: lesson.no }),
+          xp: outcome.xp,
+          big: true,
+        });
       } else if (outcome.first) {
-        celebrate({ title: 'Richtig', xp: outcome.xp, big: false });
+        celebrate({ title: t('correct'), xp: outcome.xp, big: false });
       }
     });
   };
@@ -121,11 +127,11 @@ export function AlphabetLessonPage() {
     <div className="stack" style={{ gap: '1.25rem' }}>
       <Link to="/alphabet" className="back-link">
         <Icon name="arrowLeft" size={18} />
-        Alphabet
+        {t('title')}
       </Link>
       <header className="stack" style={{ gap: '0.35rem' }}>
         <span className="eyebrow" style={{ color: 'var(--accent)' }}>
-          Lektion {lesson.no}
+          {t('lesson', { lesson: lesson.no })}
         </span>
         <h1 lang="ar" dir="rtl" className="arabic-display alphabet-title">
           {lesson.letters.map((l) => l.char).join(' ')}
@@ -138,7 +144,7 @@ export function AlphabetLessonPage() {
           <div
             className="review-progress"
             role="progressbar"
-            aria-label={`Fortschritt Lektion ${lesson.no}`}
+            aria-label={t('progress', { lesson: lesson.no })}
             aria-valuemin={0}
             aria-valuemax={progress.total}
             aria-valuenow={progress.done}
@@ -146,12 +152,12 @@ export function AlphabetLessonPage() {
             <div style={{ width: `${(progress.done / progress.total) * 100}%` }} />
           </div>
           <span className="muted" style={{ whiteSpace: 'nowrap' }}>
-            {progress.done} von {progress.total}
+            {t('progressCount', { done: progress.done, total: progress.total })}
           </span>
         </div>
       </header>
 
-      <div className="alphabet-letters" role="group" aria-label="Buchstaben">
+      <div className="alphabet-letters" role="group" aria-label={t('letters')}>
         {lesson.letters.map((letter) => (
           <button
             key={letter.id}
@@ -172,7 +178,7 @@ export function AlphabetLessonPage() {
       <LetterCard letter={selected} />
 
       <h2 className="eyebrow" style={{ margin: 0 }}>
-        Üben
+        {t('practise')}
       </h2>
       <TaskQueue
         ids={items}
@@ -182,12 +188,14 @@ export function AlphabetLessonPage() {
             className="card stack"
             style={{ alignItems: 'center', textAlign: 'center' }}
           >
-            <strong className="feedback-good">✓ Lektion {lesson.no} geschafft</strong>
+            <strong className="feedback-good">
+              {t('lessonComplete', { lesson: lesson.no })}
+            </strong>
             <Link
               to={next ? `/alphabet/${next.no}` : '/units/1'}
               className="btn btn-primary"
             >
-              {next ? `Weiter: Lektion ${next.no}` : 'Weiter zu Einheit 1'}
+              {next ? t('nextLesson', { lesson: next.no }) : t('toUnit1')}
             </Link>
           </div>
         }
@@ -208,18 +216,19 @@ export function AlphabetLessonPage() {
 }
 
 function LetterCard({ letter }: { letter: Letter }) {
+  const { t } = useTranslation('alphabet');
   return (
-    <section className="card stack" aria-label={`Buchstabe ${letter.name}`}>
+    <section className="card stack" aria-label={t('letter', { name: letter.name })}>
       <div
         className="row"
         style={{ justifyContent: 'space-between', flexWrap: 'nowrap' }}
       >
         <span className="stack" style={{ gap: '0.15rem' }}>
           <strong style={{ fontSize: '1.2rem' }}>{letter.name}</strong>
-          <span className="muted">Laut: {letter.sound}</span>
+          <span className="muted">{t('sound', { sound: letter.sound })}</span>
           {!letter.connects && letter.forms && (
             <span className="muted" style={{ fontSize: '0.9rem' }}>
-              Verbindet sich nicht mit dem nächsten Buchstaben.
+              {t('noConnect')}
             </span>
           )}
         </span>
@@ -227,18 +236,18 @@ function LetterCard({ letter }: { letter: Letter }) {
           type="button"
           className="icon-button"
           onClick={() => speakArabic(letter.nameAr)}
-          aria-label={`${letter.name} anhören`}
+          aria-label={t('listenTo', { name: letter.name })}
         >
           <Icon name="volume" size={20} />
         </button>
       </div>
-      <ul className="alphabet-forms" aria-label="Formen">
+      <ul className="alphabet-forms" aria-label={t('forms.title')}>
         {letterForms(letter).map(({ form, text }) => (
           <li key={form}>
             <span lang="ar" dir="rtl" className="arabic-inline alphabet-form">
               {text}
             </span>
-            <span className="muted">{form}</span>
+            <span className="muted">{t(`forms.${form}`)}</span>
           </li>
         ))}
       </ul>
@@ -246,7 +255,7 @@ function LetterCard({ letter }: { letter: Letter }) {
         type="button"
         className="grammar-example"
         onClick={() => speakArabic(letter.example.ar)}
-        aria-label={`Beispiel ${letter.example.de} anhören`}
+        aria-label={t('example', { example: letter.example.de })}
       >
         <span
           lang="ar"
@@ -288,6 +297,7 @@ function LetterQuestion({
   onCorrect(): void;
   onNext(): void;
 }) {
+  const { t } = useTranslation(['alphabet', 'common']);
   const parsed = parseItem(item)!;
   const { kind, letter } = parsed;
   const choices = useMemo(() => choicesFor(letter, lesson), [letter, lesson]);
@@ -313,8 +323,7 @@ function LetterQuestion({
   return (
     <div className="card stack">
       <p className="muted" style={{ margin: 0 }}>
-        {kind === 'see' ? 'Welcher Buchstabe ist das?' : 'Wo ist dieser Buchstabe?'} ·{' '}
-        {position}
+        {kind === 'see' ? t('see', { position }) : t('find', { position })}
       </p>
       {kind === 'see' ? (
         <p lang="ar" dir="rtl" className="arabic alphabet-prompt">
@@ -329,7 +338,7 @@ function LetterQuestion({
       <div
         className={kind === 'see' ? 'grammar-options' : 'cloze-choices'}
         role="group"
-        aria-label="Auswahl"
+        aria-label={t('choices')}
       >
         {choices.map((choice) => (
           <button
@@ -349,21 +358,17 @@ function LetterQuestion({
       {correct ? (
         <>
           <span className="feedback-good">
-            ✓ Richtig – {letter.name} ({letter.sound})
+            {t('answerCorrect', { name: letter.name, sound: letter.sound })}
           </span>
           <button className="btn btn-primary" onClick={onNext}>
-            Weiter
+            {t('common:continue')}
           </button>
         </>
       ) : (
         <>
-          {wrong.size > 0 && (
-            <span className="feedback-bad">
-              Nicht ganz – schau dir die Punkte genau an.
-            </span>
-          )}
+          {wrong.size > 0 && <span className="feedback-bad">{t('wrong')}</span>}
           <button className="btn" style={{ alignSelf: 'start' }} onClick={onNext}>
-            Überspringen
+            {t('skip')}
           </button>
         </>
       )}

@@ -4,6 +4,7 @@
  * the lesson's page. Book text is shown only at its source, never copied (ADR-0023).
  */
 import { useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import { ArabicText } from '@/components';
 import {
@@ -25,14 +26,15 @@ import { MadinahWordPractice } from './MadinahWordPractice';
 const external = { target: '_blank', rel: 'noopener noreferrer' } as const;
 
 export function MadinahLessonPage() {
+  const { t } = useTranslation('units');
   const params = useParams();
   const lessonNo = Number(params.lesson);
   const found = Number.isInteger(lessonNo) ? madinahLesson(1, lessonNo) : null;
   if (!found) {
     return (
       <div className="stack">
-        <p className="muted">Diese Lektion gibt es nicht.</p>
-        <Link to="/units">Zum Lernpfad</Link>
+        <p className="muted">{t('lessonPage.notFound')}</p>
+        <Link to="/units">{t('toPath')}</Link>
       </div>
     );
   }
@@ -45,10 +47,10 @@ export function MadinahLessonPage() {
     <div className="stack" style={{ gap: '1.25rem' }}>
       <header className="stack" style={{ gap: '0.25rem' }}>
         <Link to="/units" className="muted">
-          ← Medina-Kurs, Buch {book.book}
+          {t('lessonPage.back', { book: book.book })}
         </Link>
         <h1>
-          Lektion {lesson.lesson}{' '}
+          {t('lesson', { n: lesson.lesson })}{' '}
           <span lang="ar" dir="rtl" className="arabic-display">
             {lesson.title}
           </span>
@@ -74,8 +76,8 @@ export function MadinahLessonPage() {
             unit={lesson.unit}
             gaps={content.gaps}
           />
-          <section className="stack" aria-label="Grammatik">
-            <h2 style={{ margin: 0 }}>Grammatik</h2>
+          <section className="stack" aria-label={t('lessonPage.grammar')}>
+            <h2 style={{ margin: 0 }}>{t('lessonPage.grammar')}</h2>
             {content.grammar.map((g) => (
               <GrammarCard key={g.title} point={g} />
             ))}
@@ -87,25 +89,23 @@ export function MadinahLessonPage() {
           />
           {content.status === 'draft' && (
             <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-              Entwurf: Wortbedeutungen und Erklärungen sind von Suffa geschrieben und noch
-              nicht von einer Lehrkraft geprüft.
+              {t('lessonPage.draft')}
             </p>
           )}
         </>
       ) : (
         <p className="card muted" style={{ margin: 0 }}>
-          Wörter und Grammatik zu dieser Lektion folgen. Bis dahin: Buch und Aufnahme
-          unten.
+          {t('lessonPage.comingSoon')}
         </p>
       )}
 
-      <section className="card stack" aria-label="Aufnahme">
-        <strong>Aufnahme von Dr. V. Abdur Rahim</strong>
+      <section className="card stack" aria-label={t('lessonPage.recording')}>
+        <strong>{t('lessonPage.recordingBy')}</strong>
         <audio
           controls
           preload="none"
           src={lesson.audio}
-          aria-label={`Aufnahme Lektion ${lesson.lesson}`}
+          aria-label={t('lessonPage.recordingLabel', { n: lesson.lesson })}
           style={{ width: '100%' }}
         />
       </section>
@@ -124,18 +124,18 @@ export function MadinahLessonPage() {
       <nav
         className="row"
         style={{ justifyContent: 'space-between' }}
-        aria-label="Lektionen"
+        aria-label={t('lessonPage.lessonsNav')}
       >
         {previous ? (
           <Link className="btn" to={`/units/madinah/${previous.lesson}`}>
-            ← Lektion {previous.lesson}
+            {t('lessonPage.previous', { n: previous.lesson })}
           </Link>
         ) : (
           <span />
         )}
         {next && (
           <Link className="btn" to={`/units/madinah/${next.lesson}`}>
-            Lektion {next.lesson} →
+            {t('lessonPage.next', { n: next.lesson })}
           </Link>
         )}
       </nav>
@@ -144,9 +144,10 @@ export function MadinahLessonPage() {
 }
 
 function WordList({ words }: { words: MadinahWord[] }) {
+  const { t } = useTranslation('units');
   return (
-    <section className="card stack" aria-label="Neue Wörter">
-      <strong>Neue Wörter ({words.length})</strong>
+    <section className="card stack" aria-label={t('lessonPage.newWords')}>
+      <strong>{t('lessonPage.newWordsCount', { count: words.length })}</strong>
       <ul
         style={{
           listStyle: 'none',
@@ -168,7 +169,7 @@ function WordList({ words }: { words: MadinahWord[] }) {
                 padding: '0.6rem',
                 textAlign: 'center',
               }}
-              aria-label={`${w.de} anhören`}
+              aria-label={t('listenTo', { word: w.de })}
               onClick={() => speakArabic(w.ar)}
             >
               <ArabicText size="lg">{w.ar}</ArabicText>
@@ -225,16 +226,17 @@ function BookPages({
   printed: { book: number; page: number };
   printedUrl: string;
 }) {
+  const { t } = useTranslation('units');
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   // The page whose image archive.org could not deliver (the next page tries again).
   const [failed, setFailed] = useState<number | null>(null);
   const page = pages[index]!;
   return (
-    <section className="card stack" aria-label="Im Buch">
+    <section className="card stack" aria-label={t('lessonPage.inBook')}>
       <div className="row" style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <strong>
-          Im Buch (S. {pages[0]}–{pages[pages.length - 1]})
+          {t('lessonPage.inBookPages', { from: pages[0], to: pages[pages.length - 1] })}
         </strong>
         <button
           type="button"
@@ -242,7 +244,7 @@ function BookPages({
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
         >
-          {open ? 'Buch schließen' : 'Buch anzeigen'}
+          {open ? t('lessonPage.closeBook') : t('lessonPage.showBook')}
         </button>
       </div>
       {open && (
@@ -252,15 +254,14 @@ function BookPages({
         >
           {failed === page ? (
             <p role="alert" className="card muted" style={{ margin: 0 }}>
-              Seite {page} lässt sich gerade nicht laden. Öffne sie als PDF über die Links
-              unten.
+              {t('lessonPage.pageFailed', { page })}
             </p>
           ) : (
-            <a href={image(page, false)} {...external} title="Seite groß öffnen">
+            <a href={image(page, false)} {...external} title={t('lessonPage.openPage')}>
               <img
                 key={page}
                 src={image(page, true)}
-                alt={`Buchseite ${page}`}
+                alt={t('lessonPage.pageAlt', { page })}
                 onError={() => setFailed(page)}
                 style={{
                   width: '100%',
@@ -279,10 +280,10 @@ function BookPages({
               disabled={index === 0}
               onClick={() => setIndex((i) => i - 1)}
             >
-              ← Seite
+              {t('lessonPage.previousPage')}
             </button>
             <span className="muted">
-              S. {page} ({index + 1} von {pages.length})
+              {t('lessonPage.pageOf', { page, index: index + 1, total: pages.length })}
             </span>
             <button
               type="button"
@@ -290,27 +291,28 @@ function BookPages({
               disabled={index === pages.length - 1}
               onClick={() => setIndex((i) => i + 1)}
             >
-              Seite →
+              {t('lessonPage.nextPage')}
             </button>
           </figcaption>
         </figure>
       )}
       <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-        Als PDF:{' '}
-        <a href={pdfUrl(page)} {...external}>
+        {t('lessonPage.asPdf')}{' '}
+        <a href={pdfUrl(page)} {...external} translate="no">
           archive.org
         </a>{' '}
         ·{' '}
-        <a href={mirrorUrl(page)} {...external}>
+        <a href={mirrorUrl(page)} {...external} translate="no">
           AbdurRahman.org
         </a>
       </p>
       <p className="muted" style={{ margin: 0, fontSize: '0.85rem' }}>
-        Gedruckt als „Madinah Arabic Reader“ (
-        <a href={printedUrl} {...external}>
-          Goodword
-        </a>
-        ): Buch {printed.book}, S. {printed.page}
+        <Trans
+          t={t}
+          i18nKey="lessonPage.printed"
+          values={{ book: printed.book, page: printed.page }}
+          components={{ 1: <a href={printedUrl} {...external} /> }}
+        />
       </p>
     </section>
   );

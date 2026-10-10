@@ -1,20 +1,26 @@
 import { useEffect, useRef } from 'react';
-import { BADGES, isCourseId, QUEST_XP, type CourseId } from '@suffa/engagement';
+import {
+  BADGES,
+  isCourseId,
+  QUEST_XP,
+  type CourseId,
+  type Tier,
+} from '@suffa/engagement';
 import {
   useCelebrationStore,
   useEngagementStore,
   useSrsStore,
   useSyncStore,
 } from '@/state';
+import i18n from '@/i18n';
 import { nativeBridge } from '@/native/install';
 import { logger } from '@/services/logger';
 import { TutorApi } from '@/services/tutor/tutorApi';
 import { VideosApi } from '@/services/videos/videosApi';
 import { useLocalEngagement } from './useEngagement';
+import { badgeName, questTitle, tierLabel } from './labels';
 
 const log = logger.child('engagement:watcher');
-
-const TIER_LABEL = { bronze: 'Bronze', silver: 'Silber', gold: 'Gold' } as const;
 
 /**
  * Keeps the engagement inputs fresh and celebrates what was just reached: a daily quest, all
@@ -98,21 +104,29 @@ export function EngagementWatcher() {
     if (kind === 'quest') {
       const quest = quests.find((q) => q.quest.id === b);
       celebrate({
-        title: `Tagesaufgabe: ${quest?.quest.title ?? ''}`,
+        title: i18n.t('engagement:celebrate.quest', {
+          quest: quest ? questTitle(quest.quest) : '',
+        }),
         xp: quest?.quest.xp ?? 0,
         big: false,
       });
     } else if (kind === 'bonus') {
       celebrate({
-        title: 'Alle drei Tagesaufgaben geschafft',
+        title: i18n.t('engagement:celebrate.allThree'),
         xp: QUEST_XP.bonus,
         big: true,
       });
     } else {
       const badge = BADGES.find((x) => x.id === a);
       const tiered = (badge?.thresholds.length ?? 1) > 1;
+      const name = badge ? badgeName(badge) : a;
       celebrate({
-        title: `Abzeichen: ${badge?.name ?? a}${tiered ? ` (${TIER_LABEL[b as keyof typeof TIER_LABEL]})` : ''}`,
+        title: tiered
+          ? i18n.t('engagement:celebrate.badgeTier', {
+              badge: name,
+              tier: tierLabel(b as Tier),
+            })
+          : i18n.t('engagement:celebrate.badge', { badge: name }),
         xp: 0,
         big: true,
       });

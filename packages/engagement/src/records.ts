@@ -26,7 +26,20 @@ export interface TrackEntry {
   deleted?: boolean;
 }
 
-/** First success with one unit practice item (`practice_progress`). */
+/**
+ * Practice repeated after the first success: a dialogue read again (`reread`, item
+ * `<dialogue id>@<day>`) or a track heard to the end again (`relisten`, item
+ * `<track id>@<day>`). Stored at most once per item and day; it counts for the daily quests
+ * but earns no XP of its own (the first success already did).
+ */
+export const REPEAT_SKILLS = ['reread', 'relisten'] as const;
+export type RepeatSkill = (typeof REPEAT_SKILLS)[number];
+
+export function isRepeatSkill(skill: string): skill is RepeatSkill {
+  return (REPEAT_SKILLS as readonly string[]).includes(skill);
+}
+
+/** First success with one unit practice item, or a repeat (`practice_progress`). */
 export interface PracticeEntry {
   id: string;
   unit: number;

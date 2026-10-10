@@ -14,6 +14,7 @@ import type {
   TrackEntry,
 } from './records.js';
 import { ALL_STAGES, enrollmentStatus, stageCompleted } from './units.js';
+import { isRepeatSkill } from './records.js';
 
 /** Bump when a weight changes: the server then recomputes every ledger. */
 export const RULES_VERSION = 1;
@@ -130,14 +131,16 @@ export function listeningXpEvents(
   return events;
 }
 
-/** XP events from unit practice: one per item first practised successfully. */
+/** XP events from unit practice: one per item first practised successfully (no repeats). */
 export function practiceXpEvents(records: readonly PracticeEntry[]): XpEvent[] {
-  return live(records).map((r) => ({
-    at: r.practisedAt,
-    points: XP_RULES.itemPractised,
-    kind: 'practice' as const,
-    ref: r.id,
-  }));
+  return live(records)
+    .filter((r) => !isRepeatSkill(r.skill))
+    .map((r) => ({
+      at: r.practisedAt,
+      points: XP_RULES.itemPractised,
+      kind: 'practice' as const,
+      ref: r.id,
+    }));
 }
 
 /** On-time bonus per started unit whose test was passed by its target date. */

@@ -3,6 +3,7 @@ import {
   COURSE_QUESTS_SINCE,
   dailyQuests,
   evaluateDay,
+  practiceXpEvents,
   QUEST_POOL,
   questStatus,
   TUTOR_QUESTS_SINCE,
@@ -149,6 +150,37 @@ describe('daily quests', () => {
     expect(dailyQuests('2026-10-05', { ...onlyBayna, course: 'madinah' })).toEqual(
       dailyQuests('2026-10-05', { videos: true })
     );
+  });
+
+  it('counts a dialogue read or heard again for the dialogue quests', () => {
+    const read = QUEST_POOL.produce.find((q) => q.id === 'read-1')!;
+    const listen = QUEST_POOL.learn.find((q) => q.id === 'listen-1')!;
+    const video = QUEST_POOL.learn.find((q) => q.id === 'video-1')!;
+    const at = '2026-10-12T09:00:00.000Z';
+    const repeat = (id: string, skill: string) => ({
+      id,
+      unit: 0,
+      skill,
+      practisedAt: at,
+    });
+    const ticks = ticksByDay(
+      {
+        reviews: [],
+        tracks: [],
+        practice: [
+          repeat('3:reread:d-3-1@2026-10-12', 'reread'),
+          repeat('0:relisten:b1/u3/t1@2026-10-12', 'relisten'),
+          repeat('0:relisten:yt/abc@2026-10-12', 'relisten'),
+        ],
+      },
+      TZ
+    ).get('2026-10-12')!;
+    expect(questStatus(read, ticks).done).toBe(true);
+    expect(questStatus(listen, ticks).progress).toBe(1);
+    expect(questStatus(video, ticks).done).toBe(true);
+    // Repeats earn no XP of their own.
+    expect(practiceXpEvents([repeat('3:reread:d-3-1@2026-10-12', 'reread')])).toEqual([]);
+    expect(practiceXpEvents([repeat('3:read:d-3-1', 'read')])).toHaveLength(1);
   });
 
   it('counts Medina word practice for the word quest', () => {

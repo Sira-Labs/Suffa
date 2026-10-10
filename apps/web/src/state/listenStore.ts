@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { MediaProgress } from '@/types';
 import { mediaProgressRepo } from '@/services/storage';
 import { HEARD_THRESHOLD, XP_RULES } from '@/services/engagement/xp';
+import { usePracticeStore } from './practiceStore';
 
 export interface TrackRef {
   id: string;
@@ -36,6 +37,12 @@ interface ListenState {
 
 const NOTHING: ListenOutcome = { trackHeard: false, lessonComplete: false, xp: 0 };
 
+/**
+ * Seconds played per track since the app started. A track heard before (its `listenedSec` is
+ * full) counts as heard again for the daily quests once this run crosses the threshold.
+ */
+const playedThisRun = new Map<string, number>();
+
 export const useListenStore = create<ListenState>((set, get) => ({
   progress: {},
   loaded: false,
@@ -69,6 +76,16 @@ export const useListenStore = create<ListenState>((set, get) => ({
       return NOTHING;
     const existing = get().progress[track.id];
     const duration = Math.max(durationSec, existing?.durationSec ?? 0);
+    if (existing?.completedAt) {
+      const played = (playedThisRun.get(track.id) ?? 0) + playedSec;
+      if (played / duration >= HEARD_THRESHOLD) {
+        playedThisRun.delete(track.id);
+        // Once per track and day; unit 0 like other course-wide practice.
+        await usePracticeStore.getState().practiseAgain(0, 'relisten', track.id);
+      } else {
+        playedThisRun.set(track.id, played);
+      }
+    }
     const listened = Math.min(duration, (existing?.listenedSec ?? 0) + playedSec);
     const justHeard = !existing?.completedAt && listened / duration >= HEARD_THRESHOLD;
     const next: MediaProgress = {

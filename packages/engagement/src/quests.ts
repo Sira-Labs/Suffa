@@ -175,7 +175,8 @@ export const QUEST_POOL: Record<QuestSlot, readonly QuestDef[]> = {
       title: 'Lies einen Dialog',
       target: 1,
       xp: QUEST_XP.produce,
-      metric: { kind: 'practice', skills: ['read'] },
+      // A dialogue read before counts again (once per day): a unit has only a few.
+      metric: { kind: 'practice', skills: ['read', 'reread'] },
       courses: ['bayna-yadayk'],
     },
     {
@@ -282,7 +283,18 @@ export function ticksByDay(
     }
   }
   for (const p of input.practice) {
-    if (!p.deleted) ticks.push({ at: p.practisedAt, kind: 'practice', skill: p.skill });
+    if (p.deleted) continue;
+    if (p.skill === 'relisten') {
+      // A track heard to the end again counts like a track heard (record id
+      // `<unit>:relisten:<track id>@<day>`).
+      ticks.push({
+        at: p.practisedAt,
+        kind: 'track',
+        video: p.id.includes(':relisten:yt/'),
+      });
+    } else {
+      ticks.push({ at: p.practisedAt, kind: 'practice', skill: p.skill });
+    }
   }
   ticks.sort((a, b) => a.at.localeCompare(b.at));
   const byDay = new Map<string, Tick[]>();

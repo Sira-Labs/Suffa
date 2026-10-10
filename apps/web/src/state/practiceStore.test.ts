@@ -31,6 +31,22 @@ describe('practice store', () => {
     });
   });
 
+  it('records a dialogue read again once a day, without XP', async () => {
+    const { practise } = usePracticeStore.getState();
+    await practise(3, 'read', 'd-3-1', ['d-3-1']);
+    expect(await practise(3, 'read', 'd-3-1', ['d-3-1'])).toMatchObject({ xp: 0 });
+    await practise(3, 'read', 'd-3-1', ['d-3-1']);
+    const repeats = Object.values(usePracticeStore.getState().records).filter(
+      (r) => r.skill === 'reread'
+    );
+    expect(repeats).toHaveLength(1);
+    expect(repeats[0]!.itemId).toMatch(/^d-3-1@\d{4}-\d{2}-\d{2}$/);
+    // Other skills keep counting first successes only.
+    await practise(3, 'write', 'w1', ['w1']);
+    await practise(3, 'write', 'w1', ['w1']);
+    expect(Object.keys(usePracticeStore.getState().records)).toHaveLength(3);
+  });
+
   it('persists records across reloads', async () => {
     await usePracticeStore.getState().practise(2, 'read', 'd1', ['d1']);
     usePracticeStore.setState({ records: {}, loaded: false });

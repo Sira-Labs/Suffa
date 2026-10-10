@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useContentStore, useSrsStore } from '@/state';
 
 interface AddVocabFormProps {
@@ -32,6 +33,7 @@ const EMPTY: FormState = {
  * and automatically creates the SRS cards after saving.
  */
 export function AddVocabForm({ onDone }: AddVocabFormProps) {
+  const { t } = useTranslation(['vocab', 'common']);
   const add = useContentStore((s) => s.add);
   const ensureSeedCards = useSrsStore((s) => s.ensureSeedCards);
   const loadSrs = useSrsStore((s) => s.load);
@@ -46,11 +48,11 @@ export function AddVocabForm({ onDone }: AddVocabFormProps) {
     setError(null);
     const einheit = Number.parseInt(form.einheit, 10);
     if (!form.ar.trim() || !form.de.trim() || !form.wurzel.trim()) {
-      setError('Arabisch, Deutsch und Wurzel sind Pflichtfelder.');
+      setError(t('add.required'));
       return;
     }
     if (Number.isNaN(einheit) || einheit < 1) {
-      setError('Einheit muss eine positive Zahl sein.');
+      setError(t('add.unitInvalid'));
       return;
     }
     await add({
@@ -71,13 +73,13 @@ export function AddVocabForm({ onDone }: AddVocabFormProps) {
 
   return (
     <form className="card stack" onSubmit={submit}>
-      <h3 style={{ margin: 0 }}>Eigene Vokabel hinzufügen</h3>
+      <h3 style={{ margin: 0 }}>{t('add.title')}</h3>
       <div
         className="grid"
         style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}
       >
         <label className="stack" style={{ gap: '0.25rem' }}>
-          <span className="muted">Arabisch (vokalisiert) *</span>
+          <span className="muted">{t('add.arabic')}</span>
           <input
             className="input arabic-inline"
             dir="rtl"
@@ -86,15 +88,15 @@ export function AddVocabForm({ onDone }: AddVocabFormProps) {
           />
         </label>
         <label className="stack" style={{ gap: '0.25rem' }}>
-          <span className="muted">Umschrift</span>
+          <span className="muted">{t('add.transliteration')}</span>
           <input className="input" value={form.tr} onChange={set('tr')} />
         </label>
         <label className="stack" style={{ gap: '0.25rem' }}>
-          <span className="muted">Deutsch *</span>
+          <span className="muted">{t('add.german')}</span>
           <input className="input" value={form.de} onChange={set('de')} />
         </label>
         <label className="stack" style={{ gap: '0.25rem' }}>
-          <span className="muted">Wurzel * (z. B. س-ك-ن)</span>
+          <span className="muted">{t('add.root')}</span>
           <input
             className="input arabic-inline"
             dir="rtl"
@@ -103,7 +105,7 @@ export function AddVocabForm({ onDone }: AddVocabFormProps) {
           />
         </label>
         <label className="stack" style={{ gap: '0.25rem' }}>
-          <span className="muted">Wazn</span>
+          <span className="muted">{t('add.wazn')}</span>
           <input
             className="input arabic-inline"
             dir="rtl"
@@ -112,7 +114,7 @@ export function AddVocabForm({ onDone }: AddVocabFormProps) {
           />
         </label>
         <label className="stack" style={{ gap: '0.25rem' }}>
-          <span className="muted">Plural</span>
+          <span className="muted">{t('add.plural')}</span>
           <input
             className="input arabic-inline"
             dir="rtl"
@@ -121,7 +123,7 @@ export function AddVocabForm({ onDone }: AddVocabFormProps) {
           />
         </label>
         <label className="stack" style={{ gap: '0.25rem' }}>
-          <span className="muted">Einheit</span>
+          <span className="muted">{t('add.unit')}</span>
           <input
             className="input"
             type="number"
@@ -131,7 +133,7 @@ export function AddVocabForm({ onDone }: AddVocabFormProps) {
           />
         </label>
         <label className="stack" style={{ gap: '0.25rem' }}>
-          <span className="muted">Hinweis / Mnemonik</span>
+          <span className="muted">{t('add.hint')}</span>
           <input className="input" value={form.hinweis} onChange={set('hinweis')} />
         </label>
       </div>
@@ -142,10 +144,10 @@ export function AddVocabForm({ onDone }: AddVocabFormProps) {
       )}
       <div className="row">
         <button type="submit" className="btn btn-primary">
-          Speichern & Karten anlegen
+          {t('add.submit')}
         </button>
         <button type="button" className="btn" onClick={onDone}>
-          Abbrechen
+          {t('common:cancel')}
         </button>
       </div>
     </form>

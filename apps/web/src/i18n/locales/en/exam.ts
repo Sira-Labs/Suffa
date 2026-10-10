@@ -1,0 +1,73 @@
+import type { Messages } from '../../types';
+import type { exam as de } from '../de/exam';
+
+export const exam: Messages<typeof de> = {
+  formats: {
+    vocab_ar_de: 'Vocabulary AR→DE',
+    vocab_de_ar: 'Vocabulary DE→AR',
+    plural: 'Plural test',
+    root: 'Root test',
+    conjugation: 'Conjugation test',
+    listening: 'Listening test',
+    reading: 'Reading comprehension',
+    writing: 'Writing/dictation test',
+    speaking: 'Speaking test',
+    minimalpair: 'Minimal pair listening test',
+    mixed_chapter: 'Mixed chapter test',
+    speed: 'Speed round',
+    adaptive: 'Adaptive mode',
+    stage_test: 'Stage test',
+    madinah_lesson: 'Medina lesson test',
+  },
+  config: {
+    title: 'Test mode',
+    intro:
+      'Choose formats and units. The questions are interleaved (different formats mixed) – just like in the real class test.',
+    formats: 'Formats',
+    units: 'Units (mixed chapter test)',
+    unit: 'U{{unit}}',
+    example: 'Example of a real test: “Chapter 1 → Chapter 3 Dialogue 1” – choose U1–U3.',
+    scope: 'Length',
+    count: 'Number of questions:',
+    start: 'Start test',
+    speed: '⏱ Speed round (8 s/question)',
+    adaptive: '🎲 Adaptive / all mixed',
+  },
+  runner: {
+    question: 'Question {{current}} / {{total}}',
+    seconds: '⏱ {{seconds}}s',
+    listen: '🔊 Listen',
+    answer: 'Answer',
+  },
+  result: {
+    title: 'Results',
+    flagged_one: '{{count}} tricky item was automatically marked for review (SRS).',
+    flagged_other: '{{count}} tricky items were automatically marked for review (SRS).',
+    byFormat: 'Mistakes by format',
+    wrong: 'Answered incorrectly',
+    restart: 'New test',
+    export: '📤 Export result (for teachers)',
+    passedNext: 'Unit {{unit}} passed · unit {{next}} is open',
+    passed: 'Unit {{unit}} passed',
+  },
+  questions: {
+    root: 'Root {{root}}',
+    plural: 'Plural of “{{word}}” ({{meaning}})',
+    rootOf: 'Root of “{{word}}” ({{meaning}})?',
+    listening: 'Listen and choose the meaning',
+    writing: 'Write “{{transliteration}}” ({{meaning}}) in Arabic',
+    speaking: 'Say it out loud (check yourself)',
+    minimalPair: 'Which word means “{{meaning}}”?',
+    contrast: 'Contrast {{contrast}}',
+  },
+  madinah: {
+    title: 'Test',
+    intro:
+      'In the Medina course every lesson has its own test: meanings and gap sentences, passed from 80 %. {{passed}} of {{total}} lessons passed.',
+    toTest: 'To the test of lesson {{lesson}}',
+    tests: 'Lesson tests',
+    lesson: 'Lesson {{lesson}}',
+    passed: '✓ passed',
+    open: 'open',
+  },
+};

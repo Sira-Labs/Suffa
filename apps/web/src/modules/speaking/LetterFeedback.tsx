@@ -3,13 +3,8 @@
  * marked, the letters to work on, and up to three tips. Feedback, not a verdict: "check"
  * means the recogniser was unsure, so it is shown softer than a typical confusion.
  */
-import type { Assessment, LetterStatus } from '@/services/speech';
-
-const STATUS_LABEL: Record<LetterStatus, string> = {
-  good: 'gut',
-  check: 'prüfen',
-  wrong: 'verwechselt',
-};
+import { useTranslation } from 'react-i18next';
+import type { Assessment } from '@/services/speech';
 
 /** Vowel marks, shadda, sukūn, tanwīn and the dagger alif belong to the letter before. */
 const isMark = (ch: string) => {
@@ -35,6 +30,7 @@ export function LetterFeedback({
   text: string;
   assessment: Assessment;
 }) {
+  const { t } = useTranslation('speaking');
   const status = new Map(assessment.letters.map((l) => [l.index, l.status]));
   const toWork = assessment.letters.filter((l) => l.status !== 'good');
   const percent = Math.round(assessment.score * 100);
@@ -44,7 +40,7 @@ export function LetterFeedback({
         {letterSegments(text).map((segment) => {
           const s = status.get(segment.start);
           return s ? (
-            <span key={segment.start} className={`letter-${s}`} title={STATUS_LABEL[s]}>
+            <span key={segment.start} className={`letter-${s}`} title={t(`letters.${s}`)}>
               {segment.text}
             </span>
           ) : (
@@ -53,26 +49,26 @@ export function LetterFeedback({
         })}
       </p>
       <strong className={percent >= 80 ? 'feedback-good' : 'feedback-warn'}>
-        {percent} % der Laute erkannt
+        {t('letters.recognised', { percent })}
       </strong>
       {toWork.length > 0 ? (
-        <ul className="row letter-list" aria-label="Laute zum Üben">
+        <ul className="row letter-list" aria-label={t('letters.toPractise')}>
           {toWork.map((l) => (
             <li key={l.index} className={`letter-chip letter-chip-${l.status}`}>
               <span className="arabic-inline">{l.letter}</span>{' '}
               {l.heard ? (
                 <>
-                  gehört als <span className="arabic-inline">{l.heard}</span>
+                  {t('letters.heardAs')} <span className="arabic-inline">{l.heard}</span>
                 </>
               ) : (
-                'nicht gehört'
+                t('letters.notHeard')
               )}
             </li>
           ))}
         </ul>
       ) : (
         <p className="feedback-good" style={{ margin: 0 }}>
-          Alle Laute klar erkannt – sehr gut!
+          {t('letters.allClear')}
         </p>
       )}
       {assessment.tips.length > 0 && (
@@ -83,7 +79,8 @@ export function LetterFeedback({
         </ul>
       )}
       <span className="muted" style={{ fontSize: '0.85rem' }}>
-        Gehört: <span className="arabic-inline">{assessment.transcript || '—'}</span>
+        {t('letters.heard')}{' '}
+        <span className="arabic-inline">{assessment.transcript || '—'}</span>
       </span>
     </div>
   );

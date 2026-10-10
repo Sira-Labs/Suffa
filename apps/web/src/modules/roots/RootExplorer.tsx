@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import type { Vokabel } from '@/types';
 import { ArabicText } from '@/components';
@@ -19,6 +20,7 @@ const CHIPS = 12;
  * course's; further derivations and all explanations are our own (ADR-0023).
  */
 export function RootExplorer() {
+  const { t } = useTranslation('roots');
   const families = useRootFamilies();
   const [query, setQuery] = useState('');
   const [rootId, setRootId] = useState<string | null>(null);
@@ -50,25 +52,24 @@ export function RootExplorer() {
   return (
     <div className="stack">
       <header className="stack" style={{ gap: '0.25rem' }}>
-        <span className="eyebrow">Wurzelfamilie</span>
-        <h1 style={{ margin: 0 }}>Wurzeln & Muster (الجذر والوزن)</h1>
+        <span className="eyebrow">{t('explorer.eyebrow')}</span>
+        <h1 style={{ margin: 0 }}>{t('explorer.title')}</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Aus drei Buchstaben entstehen viele Wörter. Die Wurzel trägt die Bedeutung, das
-          Muster sagt, was für ein Wort es ist.
+          {t('explorer.intro')}
         </p>
       </header>
 
       <label className="stack" style={{ gap: '0.3rem' }}>
-        <span className="muted">Wurzel oder Bedeutung suchen</span>
+        <span className="muted">{t('explorer.search')}</span>
         <input
           className="input"
           type="search"
           value={query}
-          placeholder="z. B. كتب oder schreiben"
+          placeholder={t('explorer.searchPlaceholder')}
           onChange={(e) => setQuery(e.target.value)}
         />
       </label>
-      <div className="row" role="list" aria-label="Wurzeln">
+      <div className="row" role="list" aria-label={t('explorer.roots')}>
         {chips.map((f) => (
           <span role="listitem" key={f.root}>
             <button
@@ -81,7 +82,7 @@ export function RootExplorer() {
             </button>
           </span>
         ))}
-        {chips.length === 0 && <span className="muted">Keine Wurzel gefunden.</span>}
+        {chips.length === 0 && <span className="muted">{t('explorer.noRoot')}</span>}
       </div>
 
       {family && selected && (
@@ -93,10 +94,10 @@ export function RootExplorer() {
             onSelect={(w) => setSelectedKey(w.key)}
           />
           <p className="muted root-legend" style={{ margin: 0 }}>
-            Durchgezogen: schon gelernt · gestrichelt: noch nicht gelernt
+            {t('explorer.legend')}
           </p>
           {family.words.length > WHEEL_SIZE && (
-            <div className="row" aria-label="Weitere Wörter der Familie">
+            <div className="row" aria-label={t('explorer.moreWords')}>
               {family.words.slice(WHEEL_SIZE).map((w) => (
                 <button
                   key={w.key}
@@ -122,7 +123,7 @@ export function RootExplorer() {
       )}
 
       <Link className="btn btn-primary btn-lg" to="/roots/muster">
-        Muster-Trainer: Wörter selbst bilden
+        {t('explorer.toTrainer')}
       </Link>
 
       <SameRootDrill words={drillWords} />
@@ -146,6 +147,7 @@ function WordCard({
   root: string;
   samePattern: (FamilyWord & { root: string })[];
 }) {
+  const { t } = useTranslation('roots');
   const pattern = word.wazn ? PATTERNS.get(word.wazn) : undefined;
   // Learned examples first, at most three.
   const examples = [...samePattern]
@@ -154,7 +156,7 @@ function WordCard({
   return (
     <section
       className="paper stack"
-      aria-label="Gewähltes Wort"
+      aria-label={t('word.selected')}
       style={{ gap: '0.6rem' }}
     >
       <div
@@ -164,31 +166,31 @@ function WordCard({
         <button
           type="button"
           className="btn btn-small"
-          aria-label={`${word.ar} anhören`}
+          aria-label={t('word.listenTo', { word: word.ar })}
           onClick={() => speakArabic(word.ar)}
         >
-          Anhören
+          {t('word.listen')}
         </button>
         <RootWord word={word.ar} root={root} size="lg" />
       </div>
       <strong>{word.de}</strong>
       <span className="muted">
         {word.source === 'extra'
-          ? 'Nicht im Buch – ein weiteres Wort dieser Wurzel.'
+          ? t('word.extra')
           : word.learned
-            ? `Gelernt in Einheit ${word.unit}.`
-            : `Kommt in Einheit ${word.unit}.`}
+            ? t('word.learned', { unit: word.unit })
+            : t('word.upcoming', { unit: word.unit })}
       </span>
       {pattern ? (
         <div className="stack" style={{ gap: '0.3rem' }}>
           <div className="row" style={{ justifyContent: 'space-between' }}>
-            <span className="eyebrow">Muster</span>
+            <span className="eyebrow">{t('word.pattern')}</span>
             <ArabicText size="lg">{pattern.wazn}</ArabicText>
           </div>
           <p style={{ margin: 0 }}>{pattern.de}</p>
           {examples.length > 0 && (
             <p style={{ margin: 0 }}>
-              Genauso:{' '}
+              {t('word.sameWay')}{' '}
               {examples.map((e, i) => (
                 <span key={e.key}>
                   {i > 0 && ' · '}
@@ -200,7 +202,7 @@ function WordCard({
         </div>
       ) : (
         <p className="muted" style={{ margin: 0 }}>
-          Für dieses Wort ist noch kein Muster erklärt.
+          {t('word.noPattern')}
         </p>
       )}
     </section>
@@ -218,21 +220,18 @@ function useLearnedRootWords(): Vokabel[] {
 
 /** "Gleiche Wurzel?" exercise – two words, same root or not. */
 function SameRootDrill({ words: allVocab }: { words: Vokabel[] }) {
+  const { t } = useTranslation('roots');
   const [pair, setPair] = useState(() => makePair(allVocab));
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<'correct' | 'wrong' | null>(null);
 
   const answer = (saysSame: boolean) => {
     const correct = pair.a.wurzel === pair.b.wurzel;
-    setResult(
-      saysSame === correct
-        ? '✓ Richtig!'
-        : `✗ Falsch. ${pair.a.ar} (${pair.a.wurzel}) vs. ${pair.b.ar} (${pair.b.wurzel})`
-    );
+    setResult(saysSame === correct ? 'correct' : 'wrong');
   };
 
   return (
     <div className="card stack">
-      <strong>Übung: Gleiche Wurzel?</strong>
+      <strong>{t('drill.title')}</strong>
       <div className="row" style={{ justifyContent: 'center', gap: '2rem' }}>
         <ArabicText size="lg">{pair.a.ar}</ArabicText>
         <span style={{ fontSize: '1.5rem' }}>↔</span>
@@ -240,16 +239,23 @@ function SameRootDrill({ words: allVocab }: { words: Vokabel[] }) {
       </div>
       <div className="row" style={{ justifyContent: 'center' }}>
         <button className="btn btn-primary" onClick={() => answer(true)}>
-          Gleiche Wurzel
+          {t('drill.same')}
         </button>
         <button className="btn" onClick={() => answer(false)}>
-          Andere Wurzel
+          {t('drill.different')}
         </button>
       </div>
       {result && (
         <div className="stack" style={{ alignItems: 'center' }}>
-          <span className={result.startsWith('✓') ? 'feedback-good' : 'feedback-bad'}>
-            {result}
+          <span className={result === 'correct' ? 'feedback-good' : 'feedback-bad'}>
+            {result === 'correct'
+              ? t('drill.correct')
+              : t('drill.wrong', {
+                  a: pair.a.ar,
+                  rootA: pair.a.wurzel,
+                  b: pair.b.ar,
+                  rootB: pair.b.wurzel,
+                })}
           </span>
           <button
             className="btn"
@@ -258,7 +264,7 @@ function SameRootDrill({ words: allVocab }: { words: Vokabel[] }) {
               setResult(null);
             }}
           >
-            Nächstes Paar
+            {t('drill.nextPair')}
           </button>
         </div>
       )}

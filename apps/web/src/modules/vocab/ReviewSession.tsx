@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import type { CardKind, ReviewRating, SrsCard } from '@/types';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   ArabicText,
@@ -58,6 +59,7 @@ export function ReviewSession({
   cards,
   emptyActions,
 }: ReviewSessionProps) {
+  const { t } = useTranslation('vocab');
   const focus = variant === 'focus';
   const userVocab = useContentStore((s) => s.userVocab);
   const showTr = useSettingsStore((s) => s.settings.showTransliteration);
@@ -106,20 +108,19 @@ export function ReviewSession({
             <Icon name="check" size={32} strokeWidth={2.5} />
           </span>
           <p style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>
-            Keine fälligen Karten{done > 0 ? ` – ${done} bearbeitet` : ''}.
+            {done > 0 ? t('session.emptyDone', { count: done }) : t('session.empty')}
           </p>
           {emptyActions ?? (
             <>
               <p className="muted" style={{ margin: 0 }}>
-                Die nächste Wiederholung plant Suffa automatisch. Wie wäre es mit einem
-                Dialog?
+                {t('session.emptyHint')}
               </p>
               <div className="row" style={{ justifyContent: 'center' }}>
                 <Link className="btn btn-primary" to="/units">
-                  Dialog hören
+                  {t('session.listenDialogue')}
                 </Link>
                 <Link className="btn" to="/">
-                  Zu Heute
+                  {t('session.toToday')}
                 </Link>
               </div>
             </>
@@ -163,7 +164,7 @@ export function ReviewSession({
         <div
           className="review-progress"
           role="progressbar"
-          aria-label="Fortschritt der Sitzung"
+          aria-label={t('session.progress')}
           aria-valuemin={0}
           aria-valuemax={total}
           aria-valuenow={done}
@@ -172,12 +173,14 @@ export function ReviewSession({
         </div>
         <span className="muted review-count">
           {done}/{total}
-          <span className="visually-hidden"> · Tagesziel {dailyGoal}</span>
+          <span className="visually-hidden">
+            {t('session.dailyGoal', { goal: dailyGoal })}
+          </span>
         </span>
       </div>
 
       <div className={`review-card${focus ? '' : ' card'}`}>
-        {card.leech && <span className="badge feedback-warn">Schwieriges Wort</span>}
+        {card.leech && <span className="badge feedback-warn">{t('session.leech')}</span>}
         {resolved.promptIsArabic ? (
           <ArabicText size={focus ? 'hero' : 'lg'}>{resolved.prompt}</ArabicText>
         ) : (
@@ -195,7 +198,7 @@ export function ReviewSession({
             type="button"
             className="icon-button"
             onClick={() => speakArabic(resolved.speakable!)}
-            aria-label="Aussprache anhören"
+            aria-label={t('session.listen')}
           >
             <Icon name="volume" />
           </button>
@@ -210,15 +213,21 @@ export function ReviewSession({
               onChange={setAnswer}
               onSubmit={() => check(answer)}
               arabic={resolved.answerIsArabic}
-              placeholder={resolved.answerIsArabic ? 'Antwort auf Arabisch…' : 'Antwort…'}
+              placeholder={
+                resolved.answerIsArabic ? t('session.answerArabic') : t('session.answer')
+              }
               autoFocus
             />
             <button className="btn btn-primary btn-lg" onClick={() => check(answer)}>
-              Prüfen
+              {t('session.check')}
             </button>
             {allowRecognitionAid && (
-              <button className="btn" onClick={() => setUseAid(true)} title="Stützrad">
-                Multiple-Choice (Stützrad)
+              <button
+                className="btn"
+                onClick={() => setUseAid(true)}
+                title={t('session.aidTitle')}
+              >
+                {t('session.aid')}
               </button>
             )}
           </div>
@@ -226,9 +235,7 @@ export function ReviewSession({
 
         {phase === 'prompt' && useAid && (
           <div className="stack" style={{ gap: '0.5rem' }}>
-            <span className="badge feedback-warn">
-              Stützrad: Wiedererkennen statt Produzieren
-            </span>
+            <span className="badge feedback-warn">{t('session.aidBadge')}</span>
             {choices.map((choice) => (
               <button
                 key={choice}

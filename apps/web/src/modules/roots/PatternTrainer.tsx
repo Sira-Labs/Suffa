@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ArabicText } from '@/components';
 import { speakArabic } from '@/services/speech';
@@ -11,6 +12,7 @@ import { useRootFamilies } from './useRootFamilies';
  * root into a pattern (ك ت ب + مَفْعَل = مَكْتَب); choosing the right form trains exactly that.
  */
 export function PatternTrainer() {
+  const { t } = useTranslation('roots');
   const families = useRootFamilies();
   const pool = useMemo(() => patternWords(families), [families]);
   const [question, setQuestion] = useState<PatternQuestion | null>(() =>
@@ -39,24 +41,27 @@ export function PatternTrainer() {
     <div className="stack">
       <header className="stack" style={{ gap: '0.25rem' }}>
         <Link to="/roots" className="muted">
-          ← Wurzeln & Muster
+          {t('trainer.back')}
         </Link>
-        <h1 style={{ margin: 0 }}>Muster-Trainer</h1>
+        <h1 style={{ margin: 0 }}>{t('trainer.title')}</h1>
         <p className="muted" style={{ margin: 0 }}>
-          Gieß die Wurzel in das Muster: Welches Wort entsteht?
+          {t('trainer.intro')}
         </p>
       </header>
 
       {!question ? (
         <p className="card muted" style={{ margin: 0 }}>
-          Noch zu wenige Wörter mit Muster. Lerne ein paar Einheiten weiter, dann geht es
-          hier los.
+          {t('trainer.tooFew')}
         </p>
       ) : (
-        <section className="card stack" aria-label="Aufgabe" style={{ gap: '0.9rem' }}>
-          <div className="pattern-sum" aria-label="Wurzel und Muster">
+        <section
+          className="card stack"
+          aria-label={t('trainer.task')}
+          style={{ gap: '0.9rem' }}
+        >
+          <div className="pattern-sum" aria-label={t('trainer.sum')}>
             <div className="stack" style={{ gap: '0.1rem', alignItems: 'center' }}>
-              <span className="eyebrow">Wurzel</span>
+              <span className="eyebrow">{t('trainer.root')}</span>
               <span lang="ar" dir="rtl" className="arabic arabic-lg root-letter">
                 {question.answer.root.split('-').join(' ')}
               </span>
@@ -65,14 +70,18 @@ export function PatternTrainer() {
               +
             </span>
             <div className="stack" style={{ gap: '0.1rem', alignItems: 'center' }}>
-              <span className="eyebrow">Muster</span>
+              <span className="eyebrow">{t('trainer.pattern')}</span>
               <ArabicText size="lg">{question.pattern.wazn}</ArabicText>
             </div>
           </div>
           <p className="muted" style={{ margin: 0, textAlign: 'center' }}>
             {question.pattern.de}
           </p>
-          <div className="grid pattern-options" role="group" aria-label="Antworten">
+          <div
+            className="grid pattern-options"
+            role="group"
+            aria-label={t('trainer.answers')}
+          >
             {question.options.map((o) => {
               const state = !chosen
                 ? ''
@@ -105,17 +114,19 @@ export function PatternTrainer() {
                   chosen === question.answer.ar ? 'feedback-good' : 'feedback-bad'
                 }
               >
-                {chosen === question.answer.ar ? '✓ Richtig!' : '✗ Nicht ganz.'}
+                {chosen === question.answer.ar
+                  ? t('trainer.correct')
+                  : t('trainer.wrong')}
               </span>
               <RootWord word={question.answer.ar} root={question.answer.root} size="lg" />
               <span>{question.answer.de}</span>
               <button type="button" className="btn btn-primary" onClick={next}>
-                Nächstes Wort
+                {t('trainer.nextWord')}
               </button>
             </div>
           )}
           <p className="muted" style={{ margin: 0, textAlign: 'center' }}>
-            {score.right} von {score.total} richtig
+            {t('trainer.score', { right: score.right, total: score.total })}
           </p>
         </section>
       )}

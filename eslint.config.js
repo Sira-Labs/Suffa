@@ -28,6 +28,16 @@ const TRANSLATED = [
   'apps/web/src/modules/tutor/**/*.tsx',
   'apps/web/src/modules/sources/**/*.tsx',
   'apps/web/src/modules/units/**/*.tsx',
+  'apps/web/src/modules/vocab/**/*.tsx',
+  'apps/web/src/modules/writing/**/*.tsx',
+  'apps/web/src/modules/speaking/**/*.tsx',
+  'apps/web/src/modules/reading/**/*.tsx',
+  'apps/web/src/modules/cloze/**/*.tsx',
+  'apps/web/src/modules/grammar/**/*.tsx',
+  'apps/web/src/modules/conjugation/**/*.tsx',
+  'apps/web/src/modules/roots/**/*.tsx',
+  'apps/web/src/modules/exam/**/*.tsx',
+  'apps/web/src/modules/alphabet/**/*.tsx',
 ];
 
 export default tseslint.config(

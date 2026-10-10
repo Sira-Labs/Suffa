@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { UnitPracticeScope } from '@/types';
 import { lineId, scopedDialogues } from '@/services/practice';
 import { ArabicText } from '@/components';
@@ -40,6 +41,7 @@ export function Speaking({
   speechApi,
   sharingApi,
 }: { scope?: UnitPracticeScope; speechApi?: SpeechApi; sharingApi?: SharingApi } = {}) {
+  const { t } = useTranslation('speaking');
   const api = useMemo(() => speechApi ?? new SpeechApi(), [speechApi]);
   const sharing = useMemo(() => sharingApi ?? new SharingApi(), [sharingApi]);
   const [tab, setTab] = useState<Tab>('shadowing');
@@ -55,19 +57,19 @@ export function Speaking({
   );
   return (
     <div className="stack">
-      {!scope && <h1 style={{ margin: 0 }}>Sprechen (Pushed Output)</h1>}
+      {!scope && <h1 style={{ margin: 0 }}>{t('title')}</h1>}
       <div className="row">
         <button
           className={`btn ${tab === 'shadowing' ? 'btn-accent' : ''}`}
           onClick={() => setTab('shadowing')}
         >
-          Shadowing & Aussprache
+          {t('tabs.shadowing')}
         </button>
         <button
           className={`btn ${tab === 'phonologie' ? 'btn-accent' : ''}`}
           onClick={() => setTab('phonologie')}
         >
-          Phonologie-Drills
+          {t('tabs.phonology')}
         </button>
       </div>
       {tab === 'shadowing' ? (
@@ -80,9 +82,7 @@ export function Speaking({
             onPractised={(id) => scope?.onPractised(id)}
           />
         ) : (
-          <p className="muted">
-            Für diese Einheit gibt es noch keine Sätze zum Nachsprechen.
-          </p>
+          <p className="muted">{t('noLines')}</p>
         )
       ) : (
         <MinimalPairDrill />
@@ -140,6 +140,7 @@ function Shadowing({
   isPractised(lineId: string): boolean;
   onPractised(lineId: string): void;
 }) {
+  const { t } = useTranslation('speaking');
   // Continue with the first sentence not done yet (or the first one when all are done).
   const [i, setI] = useState(() =>
     Math.max(
@@ -227,7 +228,7 @@ function Shadowing({
     } else if (outcome.failure.source === 'server') {
       setScoreHint(outcome.failure.message);
     } else {
-      setScoreHint('Dieser Satz lässt sich nicht Buchstabe für Buchstabe bewerten.');
+      setScoreHint(t('shadowing.notScorable'));
     }
   };
   const run = async (
@@ -254,8 +255,8 @@ function Shadowing({
   return (
     <div className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
       <span className="muted" aria-live="polite">
-        Satz {index + 1} von {lines.length}
-        {targetDone && <span className="feedback-good"> · ✓ aufgenommen</span>}
+        {t('shadowing.position', { current: index + 1, total: lines.length })}
+        {targetDone && <span className="feedback-good">{t('shadowing.recorded')}</span>}
       </span>
       <ArabicText size="lg">{target.ar}</ArabicText>
       <span className="muted">{target.de}</span>
@@ -266,10 +267,10 @@ function Shadowing({
           onClick={() => speakArabic(target.ar, { rate })}
           disabled={!isTtsSupported()}
         >
-          🔊 Vormachen
+          {t('shadowing.model')}
         </button>
         <label className="row muted" style={{ gap: '0.4rem' }}>
-          Tempo
+          {t('shadowing.tempo')}
           <input
             type="range"
             min={0.5}
@@ -285,11 +286,11 @@ function Shadowing({
         {isRecordingSupported() ? (
           recording ? (
             <button className="btn btn-accent" onClick={() => void stopRecording()}>
-              ⏹ Aufnahme stoppen
+              {t('shadowing.stop')}
             </button>
           ) : (
             <button className="btn" onClick={() => void startRecording()}>
-              ⏺ Aufnehmen
+              {t('shadowing.record')}
             </button>
           )
         ) : (
@@ -303,7 +304,7 @@ function Shadowing({
           onClick={() => void scoreRecording(recordedHere)}
           disabled={scoring}
         >
-          {scoring ? 'Bewerte…' : '✨ Aufnahme bewerten'}
+          {scoring ? t('shadowing.scoring') : t('shadowing.scoreRecording')}
         </button>
       )}
       {recordedHere && (
@@ -331,7 +332,7 @@ function Shadowing({
             onClick={() => void scoreLive()}
             disabled={scoring}
           >
-            {scoring ? 'Höre zu…' : '🎤 Aussprache bewerten'}
+            {scoring ? t('shadowing.listening') : t('shadowing.scoreLive')}
           </button>
         ) : (
           // With the server, a recording can be rated instead.
@@ -354,14 +355,14 @@ function Shadowing({
           onClick={() => go(-1)}
           disabled={lines.length < 2 || recording !== null}
         >
-          ← Vorheriger Satz
+          {t('shadowing.previous')}
         </button>
         <button
           className="btn"
           onClick={() => go(1)}
           disabled={lines.length < 2 || recording !== null}
         >
-          Nächster Satz →
+          {t('shadowing.next')}
         </button>
       </div>
     </div>

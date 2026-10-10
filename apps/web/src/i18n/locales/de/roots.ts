@@ -1,0 +1,56 @@
+/** Root families, the pattern trainer and the "same root?" drill (story 16.3). */
+export const roots = {
+  explorer: {
+    eyebrow: 'Wurzelfamilie',
+    title: 'Wurzeln & Muster (الجذر والوزن)',
+    intro:
+      'Aus drei Buchstaben entstehen viele Wörter. Die Wurzel trägt die Bedeutung, das Muster sagt, was für ein Wort es ist.',
+    search: 'Wurzel oder Bedeutung suchen',
+    searchPlaceholder: 'z. B. كتب oder schreiben',
+    roots: 'Wurzeln',
+    noRoot: 'Keine Wurzel gefunden.',
+    legend: 'Durchgezogen: schon gelernt · gestrichelt: noch nicht gelernt',
+    moreWords: 'Weitere Wörter der Familie',
+    toTrainer: 'Muster-Trainer: Wörter selbst bilden',
+  },
+  wheel: {
+    root: 'Wurzel {{letters}}',
+    word: '{{arabic}}: {{meaning}}',
+    wordUnlearned: '{{arabic}}: {{meaning}} (noch nicht gelernt)',
+  },
+  word: {
+    selected: 'Gewähltes Wort',
+    listenTo: '{{word}} anhören',
+    listen: 'Anhören',
+    extra: 'Nicht im Buch – ein weiteres Wort dieser Wurzel.',
+    learned: 'Gelernt in Einheit {{unit}}.',
+    upcoming: 'Kommt in Einheit {{unit}}.',
+    pattern: 'Muster',
+    sameWay: 'Genauso:',
+    noPattern: 'Für dieses Wort ist noch kein Muster erklärt.',
+  },
+  drill: {
+    title: 'Übung: Gleiche Wurzel?',
+    same: 'Gleiche Wurzel',
+    different: 'Andere Wurzel',
+    correct: '✓ Richtig!',
+    wrong: '✗ Falsch. {{a}} ({{rootA}}) vs. {{b}} ({{rootB}})',
+    nextPair: 'Nächstes Paar',
+  },
+  trainer: {
+    back: '← Wurzeln & Muster',
+    title: 'Muster-Trainer',
+    intro: 'Gieß die Wurzel in das Muster: Welches Wort entsteht?',
+    tooFew:
+      'Noch zu wenige Wörter mit Muster. Lerne ein paar Einheiten weiter, dann geht es hier los.',
+    task: 'Aufgabe',
+    sum: 'Wurzel und Muster',
+    root: 'Wurzel',
+    pattern: 'Muster',
+    answers: 'Antworten',
+    correct: '✓ Richtig!',
+    wrong: '✗ Nicht ganz.',
+    nextWord: 'Nächstes Wort',
+    score: '{{right}} von {{total}} richtig',
+  },
+};

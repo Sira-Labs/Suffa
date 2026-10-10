@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ConjugationTable, MadiPerson, UnitPracticeScope, Verb } from '@/types';
 import { PERSON_LABELS, AMR_LABELS } from '@/types';
 import { ArabicText, Feedback, RecallInput } from '@/components';
@@ -8,12 +9,6 @@ import { diffArabic, gradeAnswer, type AnswerVerdict } from '@/services/srs';
 import { speakArabic } from '@/services/speech';
 
 type Tense = 'madi' | 'mudari' | 'amr';
-
-const TENSE_LABEL: Record<Tense, string> = {
-  madi: 'الماضي (Vergangenheit)',
-  mudari: 'المضارع (Gegenwart)',
-  amr: 'الأمر (Imperativ)',
-};
 
 const PERSON_ORDER: MadiPerson[] = [
   'ana',
@@ -39,6 +34,7 @@ export const FORMS_PER_VERB = 5;
  * introduces; a verb counts once FORMS_PER_VERB forms were written correctly.
  */
 export function Conjugation({ scope }: { scope?: UnitPracticeScope } = {}) {
+  const { t } = useTranslation('conjugation');
   const { keep } = useReachedUnits();
   // Outside a unit: the verbs of every unit reached so far.
   const verbs = useMemo(
@@ -54,12 +50,12 @@ export function Conjugation({ scope }: { scope?: UnitPracticeScope } = {}) {
   const verb = verbs.find((v) => v.id === verbId) ?? verbs[0];
 
   if (!verb) {
-    return <p className="muted">Diese Einheit führt noch keine Verben ein.</p>;
+    return <p className="muted">{t('noVerbs')}</p>;
   }
 
   return (
     <div className="stack">
-      {!scope && <h1 style={{ margin: 0 }}>Konjugationstrainer</h1>}
+      {!scope && <h1 style={{ margin: 0 }}>{t('title')}</h1>}
       <div className="row">
         {verbs.map((v) => (
           <button
@@ -81,20 +77,20 @@ export function Conjugation({ scope }: { scope?: UnitPracticeScope } = {}) {
             <div className="muted">{verb.de}</div>
           </div>
           <span className="badge">
-            Wurzel <span className="arabic-inline">{verb.wurzel}</span> · {verb.wazn}
+            {t('root')} <span className="arabic-inline">{verb.wurzel}</span> · {verb.wazn}
           </span>
         </div>
         {verb.hinweis && <p className="muted">{verb.hinweis}</p>}
       </div>
 
       <div className="row">
-        {(['madi', 'mudari', 'amr'] as Tense[]).map((t) => (
+        {(['madi', 'mudari', 'amr'] as Tense[]).map((option) => (
           <button
-            key={t}
-            className={`btn ${t === tense ? 'btn-accent' : ''}`}
-            onClick={() => setTense(t)}
+            key={option}
+            className={`btn ${option === tense ? 'btn-accent' : ''}`}
+            onClick={() => setTense(option)}
           >
-            {TENSE_LABEL[t]}
+            {t(`tenses.${option}`)}
           </button>
         ))}
       </div>
@@ -103,13 +99,13 @@ export function Conjugation({ scope }: { scope?: UnitPracticeScope } = {}) {
           className={`btn ${mode === 'table' ? 'btn-primary' : ''}`}
           onClick={() => setMode('table')}
         >
-          Tabelle
+          {t('table')}
         </button>
         <button
           className={`btn ${mode === 'drill' ? 'btn-primary' : ''}`}
           onClick={() => setMode('drill')}
         >
-          Lückentraining
+          {t('drill')}
         </button>
       </div>
 
@@ -175,6 +171,7 @@ function ConjugationDrill({
   tense: Tense;
   onVerbPractised(): void;
 }) {
+  const { t } = useTranslation('conjugation');
   const persons = useMemo(
     () =>
       tense === 'amr'
@@ -216,7 +213,7 @@ function ConjugationDrill({
   return (
     <div className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
       <p className="muted">
-        Konjugiere <ArabicText>{verb.lemma}</ArabicText> · {TENSE_LABEL[tense]} ·{' '}
+        {t('conjugate')} <ArabicText>{verb.lemma}</ArabicText> · {t(`tenses.${tense}`)} ·{' '}
         <strong>
           {label.de} <span className="arabic-inline">{label.ar}</span>
         </strong>
@@ -226,10 +223,10 @@ function ConjugationDrill({
       </div>
       <div className="row">
         <button className="btn btn-primary" onClick={check}>
-          Prüfen
+          {t('check')}
         </button>
         <button className="btn" onClick={next}>
-          Nächste Form
+          {t('nextForm')}
         </button>
       </div>
       {verdict && (

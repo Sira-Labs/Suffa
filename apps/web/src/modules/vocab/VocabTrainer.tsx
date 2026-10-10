@@ -1,30 +1,30 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CardKind } from '@/types';
 import { TashkilToggle } from '@/components';
 import { ReviewSession } from './ReviewSession';
 import { AddVocabForm } from './AddVocabForm';
 
 type Mode = {
-  id: string;
-  label: string;
+  id: 'ar_de' | 'de_ar' | 'plural' | 'root' | 'nisba' | 'all';
   kinds: CardKind[];
   aid?: boolean;
 };
 
 const MODES: Mode[] = [
-  { id: 'ar_de', label: 'AR → DE', kinds: ['vocab_ar_de'], aid: true },
-  { id: 'de_ar', label: 'DE → AR', kinds: ['vocab_de_ar'] },
-  { id: 'plural', label: 'Plural-Drill', kinds: ['plural'] },
-  { id: 'root', label: 'Wurzel → Wort', kinds: ['root_to_word'] },
-  { id: 'nisba', label: 'Nisba', kinds: ['nisba'] },
+  { id: 'ar_de', kinds: ['vocab_ar_de'], aid: true },
+  { id: 'de_ar', kinds: ['vocab_de_ar'] },
+  { id: 'plural', kinds: ['plural'] },
+  { id: 'root', kinds: ['root_to_word'] },
+  { id: 'nisba', kinds: ['nisba'] },
   {
     id: 'all',
-    label: 'Alles gemischt',
     kinds: ['vocab_ar_de', 'vocab_de_ar', 'plural', 'root_to_word', 'nisba'],
   },
 ];
 
 export function VocabTrainer() {
+  const { t } = useTranslation(['vocab', 'common']);
   const [mode, setMode] = useState<Mode>(MODES[0]!);
   const [showAdd, setShowAdd] = useState(false);
   // key forces a remount of the session on mode change (fresh queue).
@@ -38,9 +38,9 @@ export function VocabTrainer() {
   return (
     <div className="stack">
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h1 style={{ margin: 0 }}>Vokabeltrainer</h1>
+        <h1 style={{ margin: 0 }}>{t('trainer.title')}</h1>
         <button className="btn" onClick={() => setShowAdd((v) => !v)}>
-          {showAdd ? 'Schließen' : '+ Inhalt hinzufügen'}
+          {showAdd ? t('common:close') : t('trainer.add')}
         </button>
       </div>
 
@@ -53,7 +53,7 @@ export function VocabTrainer() {
             className={`btn ${m.id === mode.id ? 'btn-accent' : ''}`}
             onClick={() => pick(m)}
           >
-            {m.label}
+            {t(`modes.${m.id}`)}
           </button>
         ))}
       </div>
@@ -63,7 +63,7 @@ export function VocabTrainer() {
       <ReviewSession
         key={sessionKey}
         kinds={mode.kinds}
-        title={`Modus: ${mode.label}`}
+        title={t('trainer.mode', { label: t(`modes.${mode.id}`) })}
         allowRecognitionAid={mode.aid}
       />
     </div>

@@ -6,6 +6,7 @@
  * speed round (time pressure) and adaptive mode (difficult items more often).
  */
 import type { ExamFormat } from '@/types';
+import i18n from '@/i18n';
 import { content } from '@/content';
 
 export interface ExamQuestion {
@@ -75,7 +76,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         expected: v.de,
         expectedIsArabic: false,
         options: distractors(v.de, allDe),
-        hint: v.wurzel ? `Wurzel ${v.wurzel}` : undefined,
+        hint: v.wurzel ? i18n.t('exam:questions.root', { root: v.wurzel }) : undefined,
       };
     },
     vocab_de_ar: () => {
@@ -99,7 +100,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         id: qid(),
         format: 'plural',
         contentRef: v.id,
-        prompt: `Plural von „${v.ar}“ (${v.de})`,
+        prompt: i18n.t('exam:questions.plural', { word: v.ar, meaning: v.de }),
         promptIsArabic: false,
         expected: v.plural,
         expectedIsArabic: true,
@@ -115,7 +116,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         id: qid(),
         format: 'root',
         contentRef: v.id,
-        prompt: `Wurzel von „${v.ar}“ (${v.de})?`,
+        prompt: i18n.t('exam:questions.rootOf', { word: v.ar, meaning: v.de }),
         promptIsArabic: false,
         expected: v.wurzel,
         expectedIsArabic: true,
@@ -148,7 +149,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         expected: v.de,
         expectedIsArabic: false,
         options: distractors(v.de, allDe),
-        hint: 'Anhören und Bedeutung wählen',
+        hint: i18n.t('exam:questions.listening'),
       };
     },
     reading: () => {
@@ -176,7 +177,10 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         id: qid(),
         format: 'writing',
         contentRef: v.id,
-        prompt: `Schreibe „${v.tr}“ (${v.de}) auf Arabisch`,
+        prompt: i18n.t('exam:questions.writing', {
+          transliteration: v.tr,
+          meaning: v.de,
+        }),
         promptIsArabic: false,
         expected: v.ar,
         expectedIsArabic: true,
@@ -193,7 +197,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         promptIsArabic: true,
         expected: v.ar,
         expectedIsArabic: true,
-        hint: 'Laut aussprechen (Selbstkontrolle)',
+        hint: i18n.t('exam:questions.speaking'),
       };
     },
     minimalpair: () => {
@@ -206,12 +210,14 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         id: qid(),
         format: 'minimalpair',
         contentRef: mp.id,
-        prompt: `Welches Wort bedeutet „${mp.de.split(' / ')[0]}“?`,
+        prompt: i18n.t('exam:questions.minimalPair', {
+          meaning: mp.de.split(' / ')[0] ?? mp.de,
+        }),
         promptIsArabic: false,
         expected: mp.a,
         expectedIsArabic: true,
         options: shuffle([mp.a, mp.b]),
-        hint: `Kontrast ${mp.kontrast}`,
+        hint: i18n.t('exam:questions.contrast', { contrast: mp.kontrast }),
       };
     },
     mixed_chapter: () => null, // realised via the other formats

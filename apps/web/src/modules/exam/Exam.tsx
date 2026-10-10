@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import i18n from '@/i18n';
 import type { ExamFormat, ExamItemResult } from '@/types';
 import { ArabicText, RecallInput } from '@/components';
 import { gradeRecall, isCorrect } from '@/services/srs';
@@ -24,24 +26,6 @@ import { XP_RULES } from '@/services/engagement/xp';
 import { generateExam, type ExamQuestion } from './examEngine';
 import { MadinahExams } from './MadinahExams';
 import { useActiveCourse } from '@/services/courses';
-
-const FORMAT_LABELS: Record<ExamFormat, string> = {
-  vocab_ar_de: 'Vokabel AR→DE',
-  vocab_de_ar: 'Vokabel DE→AR',
-  plural: 'Plural-Test',
-  root: 'Wurzel-Test',
-  conjugation: 'Konjugationstest',
-  listening: 'Hörtest',
-  reading: 'Leseverständnis',
-  writing: 'Schreib-/Diktattest',
-  speaking: 'Sprechtest',
-  minimalpair: 'Minimalpaar-Hörtest',
-  mixed_chapter: 'Gemischte Kapitelprüfung',
-  speed: 'Speed-Round',
-  adaptive: 'Adaptiver Modus',
-  stage_test: 'Etappentest',
-  madinah_lesson: 'Medina-Lektionstest',
-};
 
 type Stage = 'config' | 'running' | 'result';
 
@@ -157,6 +141,7 @@ function ExamConfig(props: {
   setCount: (n: number) => void;
   onStart: (f: ExamFormat[], u: number[], n: number, speed: boolean) => void;
 }) {
+  const { t } = useTranslation('exam');
   const toggleFormat = (f: ExamFormat) =>
     props.setSelectedFormats(
       props.selectedFormats.includes(f)
@@ -172,14 +157,11 @@ function ExamConfig(props: {
 
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>{props.stageTitle ?? 'Prüfungsmodus'}</h1>
-      <p className="muted">
-        Wähle Formate und Einheiten. Die Fragen werden interleaved gestellt (verschiedene
-        Formate gemischt) – wie in der echten Klassenprüfung.
-      </p>
+      <h1 style={{ margin: 0 }}>{props.stageTitle ?? t('config.title')}</h1>
+      <p className="muted">{t('config.intro')}</p>
 
       <div className="card stack">
-        <strong>Formate</strong>
+        <strong>{t('config.formats')}</strong>
         <div className="row">
           {PRESET_FORMATS.map((f) => (
             <button
@@ -187,7 +169,7 @@ function ExamConfig(props: {
               className={`btn ${props.selectedFormats.includes(f) ? 'btn-accent' : ''}`}
               onClick={() => toggleFormat(f)}
             >
-              {FORMAT_LABELS[f]}
+              {t(`formats.${f}`)}
             </button>
           ))}
         </div>
@@ -195,7 +177,7 @@ function ExamConfig(props: {
 
       {!props.stageTitle && (
         <div className="card stack">
-          <strong>Einheiten (gemischte Kapitelprüfung)</strong>
+          <strong>{t('config.units')}</strong>
           <div className="row">
             {unitInfos
               .filter((u) => props.reachedUnits.includes(u.einheit))
@@ -205,20 +187,20 @@ function ExamConfig(props: {
                   className={`btn ${props.selectedUnits.includes(u.einheit) ? 'btn-accent' : ''}`}
                   onClick={() => toggleUnit(u.einheit)}
                 >
-                  E{u.einheit}
+                  {t('config.unit', { unit: u.einheit })}
                 </button>
               ))}
           </div>
           <p className="muted" style={{ margin: 0 }}>
-            Beispiel echte Prüfung: „Kapitel 1 → Kapitel 3 Dialog 1“ – wähle E1–E3.
+            {t('config.example')}
           </p>
         </div>
       )}
 
       <div className="card stack">
-        <strong>Umfang</strong>
+        <strong>{t('config.scope')}</strong>
         <label className="row">
-          Anzahl Fragen:
+          {t('config.count')}
           <input
             className="input"
             type="number"
@@ -239,7 +221,7 @@ function ExamConfig(props: {
             props.onStart(props.selectedFormats, props.selectedUnits, props.count, false)
           }
         >
-          Prüfung starten
+          {t('config.start')}
         </button>
         <button
           className="btn"
@@ -248,7 +230,7 @@ function ExamConfig(props: {
             props.onStart(props.selectedFormats, props.selectedUnits, props.count, true)
           }
         >
-          ⏱ Speed-Round (8 s/Frage)
+          {t('config.speed')}
         </button>
         <button
           className="btn"
@@ -256,7 +238,7 @@ function ExamConfig(props: {
             props.onStart(PRESET_FORMATS, props.selectedUnits, props.count, false)
           }
         >
-          🎲 Adaptiv / alles gemischt
+          {t('config.adaptive')}
         </button>
       </div>
     </div>
@@ -272,6 +254,7 @@ function ExamRunner({
   speed: boolean;
   onFinish: (items: ExamItemResult[]) => void;
 }) {
+  const { t } = useTranslation('exam');
   const [idx, setIdx] = useState(0);
   const [value, setValue] = useState('');
   const [results, setResults] = useState<ExamItemResult[]>([]);
@@ -327,16 +310,20 @@ function ExamRunner({
     <div className="stack">
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <span className="badge">
-          Frage {idx + 1} / {questions.length}
+          {t('runner.question', { current: idx + 1, total: questions.length })}
         </span>
-        <span className="badge">{FORMAT_LABELS[q.format]}</span>
-        {speed && <span className="badge feedback-warn">⏱ {secondsLeft}s</span>}
+        <span className="badge">{t(`formats.${q.format}`)}</span>
+        {speed && (
+          <span className="badge feedback-warn">
+            {t('runner.seconds', { seconds: secondsLeft })}
+          </span>
+        )}
       </div>
 
       <div className="card stack" style={{ alignItems: 'center', textAlign: 'center' }}>
         {q.format === 'listening' || q.format === 'minimalpair' ? (
           <button className="btn btn-primary" onClick={() => speakArabic(q.prompt)}>
-            🔊 Anhören
+            {t('runner.listen')}
           </button>
         ) : q.promptIsArabic ? (
           <ArabicText size="lg" onClick={() => speakArabic(q.prompt)}>
@@ -374,7 +361,7 @@ function ExamRunner({
               style={{ marginTop: '0.75rem' }}
               onClick={() => submit(value)}
             >
-              Antworten
+              {t('runner.answer')}
             </button>
           </div>
         )}
@@ -397,6 +384,7 @@ function ExamResultView({
   stageId: number | null;
   onRestart: () => void;
 }) {
+  const { t } = useTranslation('exam');
   const navigate = useNavigate();
   const reloadSrs = useSrsStore((s) => s.load);
   const refreshPending = useSyncStore((s) => s.refreshPending);
@@ -451,8 +439,8 @@ function ExamResultView({
       useCelebrationStore.getState().show({
         title:
           unit < 16
-            ? `Einheit ${unit} bestanden · Einheit ${unit + 1} ist offen`
-            : `Einheit ${unit} bestanden`,
+            ? i18n.t('exam:result.passedNext', { unit, next: unit + 1 })
+            : i18n.t('exam:result.passed', { unit }),
         xp: onTime ? XP_RULES.unitOnTime : 0,
         big: true,
       });
@@ -515,7 +503,7 @@ function ExamResultView({
 
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Auswertung</h1>
+      <h1 style={{ margin: 0 }}>{t('result.title')}</h1>
       <div className="card" style={{ textAlign: 'center' }}>
         <div
           style={{
@@ -526,17 +514,14 @@ function ExamResultView({
         >
           {score} / {items.length} ({pct} %)
         </div>
-        <p className="muted">
-          {wrong.length} schwierige Items wurden automatisch zur Wiederholung (SRS)
-          markiert.
-        </p>
+        <p className="muted">{t('result.flagged', { count: wrong.length })}</p>
       </div>
 
       <div className="card stack">
-        <strong>Fehleranalyse nach Format</strong>
+        <strong>{t('result.byFormat')}</strong>
         {byFormat.map(([fmt, e]) => (
           <div key={fmt} className="row" style={{ justifyContent: 'space-between' }}>
-            <span>{FORMAT_LABELS[fmt]}</span>
+            <span>{t(`formats.${fmt}`)}</span>
             <span className={e.correct === e.total ? 'feedback-good' : 'feedback-warn'}>
               {e.correct} / {e.total}
             </span>
@@ -546,7 +531,7 @@ function ExamResultView({
 
       {wrong.length > 0 && (
         <div className="card stack">
-          <strong>Falsch beantwortet</strong>
+          <strong>{t('result.wrong')}</strong>
           {wrong.map((item, i) => (
             <div key={i} className="row" style={{ justifyContent: 'space-between' }}>
               <span className="muted">{item.prompt}</span>
@@ -562,10 +547,10 @@ function ExamResultView({
 
       <div className="row">
         <button className="btn btn-primary" onClick={onRestart}>
-          Neue Prüfung
+          {t('result.restart')}
         </button>
         <button className="btn" onClick={exportResult}>
-          📤 Ergebnis exportieren (für Lehrer)
+          {t('result.export')}
         </button>
       </div>
     </div>

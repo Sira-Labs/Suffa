@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import type { GrammatikFrage, GrammatikPunkt, UnitPracticeScope } from '@/types';
 import { ArabicText } from '@/components';
@@ -21,6 +22,7 @@ export function Grammar({
   /** One section, or the sections that are open on the unit path. */
   section?: number | readonly number[];
 }) {
+  const { t } = useTranslation('grammar');
   const points = useMemo(
     () =>
       content.grammatik.filter(
@@ -40,7 +42,7 @@ export function Grammar({
   const [solved, setSolved] = useState<ReadonlySet<string>>(() => new Set());
 
   if (points.length === 0) {
-    return <p className="muted">Zu diesem Abschnitt gibt es noch keine Grammatik.</p>;
+    return <p className="muted">{t('none')}</p>;
   }
   const isDone = (id: string) => solved.has(id) || Boolean(scope.isPractised?.(id));
   const markDone = (id: string) => {
@@ -55,7 +57,7 @@ export function Grammar({
         <RuleCard key={point.id} point={point} />
       ))}
       <h2 className="eyebrow" style={{ margin: 0 }}>
-        Kurz geprüft
+        {t('quickCheck')}
       </h2>
       <TaskQueue
         ids={[...questions.keys()]}
@@ -65,9 +67,9 @@ export function Grammar({
             className="card stack"
             style={{ alignItems: 'center', textAlign: 'center' }}
           >
-            <strong className="feedback-good">✓ Alle Fragen richtig</strong>
+            <strong className="feedback-good">{t('allDone')}</strong>
             <Link to={`/units/${scope.unit}`} className="btn btn-primary">
-              Zurück zur Einheit
+              {t('backToUnit')}
             </Link>
           </div>
         }
@@ -87,6 +89,7 @@ export function Grammar({
 }
 
 function RuleCard({ point }: { point: GrammatikPunkt }) {
+  const { t } = useTranslation('grammar');
   return (
     <section className="card stack grammar-rule" aria-labelledby={`${point.id}-title`}>
       <h2 id={`${point.id}-title`} style={{ margin: 0 }}>
@@ -100,14 +103,14 @@ function RuleCard({ point }: { point: GrammatikPunkt }) {
           <Mixed text={paragraph} />
         </p>
       ))}
-      <ul className="grammar-examples" aria-label="Beispiele">
+      <ul className="grammar-examples" aria-label={t('examples')}>
         {point.beispiele.map((example) => (
           <li key={example.ar}>
             <button
               type="button"
               className="grammar-example"
               onClick={() => speakArabic(example.ar)}
-              aria-label={`${example.de} – anhören`}
+              aria-label={t('listen', { example: example.de })}
             >
               <ArabicText>{example.ar}</ArabicText>
               <span className="muted">{example.de}</span>
@@ -148,6 +151,7 @@ function QuestionCard({
   onCorrect(): void;
   onNext(): void;
 }) {
+  const { t } = useTranslation(['grammar', 'common']);
   const options = useMemo(
     () => stableShuffle([question.antwort, ...question.ablenker], question.id, (o) => o),
     [question]
@@ -178,7 +182,7 @@ function QuestionCard({
           {question.ar}
         </p>
       )}
-      <div className="grammar-options" role="group" aria-label="Antworten">
+      <div className="grammar-options" role="group" aria-label={t('answers')}>
         {options.map((option) => {
           const arabic = ARABIC.test(option) && !/[a-zäöü]/i.test(option);
           return (
@@ -199,20 +203,16 @@ function QuestionCard({
       </div>
       {correct ? (
         <>
-          <span className="feedback-good">✓ Richtig</span>
+          <span className="feedback-good">{t('correct')}</span>
           <button className="btn btn-primary" onClick={onNext}>
-            Weiter
+            {t('common:continue')}
           </button>
         </>
       ) : (
         <>
-          {wrong.size > 0 && (
-            <span className="feedback-bad">
-              Nicht ganz – schau noch einmal in die Regel oben.
-            </span>
-          )}
+          {wrong.size > 0 && <span className="feedback-bad">{t('wrong')}</span>}
           <button className="btn" style={{ alignSelf: 'start' }} onClick={onNext}>
-            Überspringen
+            {t('skip')}
           </button>
         </>
       )}

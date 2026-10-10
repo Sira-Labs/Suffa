@@ -1,0 +1,41 @@
+import type { Messages } from '../../types';
+import type { alphabet as de } from '../de/alphabet';
+
+export const alphabet: Messages<typeof de> = {
+  title: 'Alphabet',
+  intro:
+    'The 28 letters in eight short lessons. Arabic is written from right to left; most letters join up and change their shape slightly as they do.',
+  lessons: 'Lessons',
+  done: 'done',
+  tasks: '{{done}} of {{total}} tasks',
+  notFound: 'Lesson not found',
+  toAlphabet: 'To the alphabet',
+  lessonDone: 'Lesson {{lesson}} done',
+  correct: 'Correct',
+  lesson: 'Lesson {{lesson}}',
+  progress: 'Progress of lesson {{lesson}}',
+  progressCount: '{{done}} of {{total}}',
+  letters: 'Letters',
+  practise: 'Practise',
+  lessonComplete: '✓ Lesson {{lesson}} done',
+  nextLesson: 'Next: lesson {{lesson}}',
+  toUnit1: 'On to unit 1',
+  letter: 'Letter {{name}}',
+  sound: 'Sound: {{sound}}',
+  noConnect: 'Does not join the next letter.',
+  listenTo: 'Listen to {{name}}',
+  forms: {
+    title: 'Forms',
+    isoliert: 'isolated',
+    Anfang: 'initial',
+    Mitte: 'medial',
+    Ende: 'final',
+  },
+  example: 'Listen to the example {{example}}',
+  see: 'Which letter is this? · {{position}}',
+  find: 'Where is this letter? · {{position}}',
+  choices: 'Choices',
+  answerCorrect: '✓ Correct – {{name}} ({{sound}})',
+  wrong: 'Not quite – look closely at the dots.',
+  skip: 'Skip',
+};

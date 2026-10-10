@@ -60,6 +60,7 @@ import { PgSyncRepository } from './sync/repository.js';
 import { PgListeningRepository } from './media/listening.js';
 import { PgFeedbackRepository } from './feedback/repository.js';
 import { PgBookSyncRepository } from './booksync/repository.js';
+import { DEFAULT_SYNC_SEED, seedBookSync } from './booksync/seed.js';
 import { PgContentRepository } from './content/repository.js';
 import { DEFAULT_SEED_DIR, seedContent } from './content/seed.js';
 import { PgSpeechRepository } from './speech/repository.js';
@@ -359,6 +360,9 @@ async function main(): Promise<void> {
   // Units missing from the CMS come from the bundled unit files (story 16.1).
   const content = new PgContentRepository(pool);
   await seedContent(content, config.contentSeedDir ?? DEFAULT_SEED_DIR, log);
+  // Lessons of the Medina book without page turns and lines get the suggested ones.
+  const bookSync = new PgBookSyncRepository(pool);
+  await seedBookSync(bookSync, DEFAULT_SYNC_SEED, log);
   // The api only installs the queue schema and sends jobs; the worker processes them.
   const boss = await startBoss({
     databaseUrl: config.databaseUrl,
@@ -557,7 +561,7 @@ async function main(): Promise<void> {
       enabled: config.feedbackEnabled,
     },
     content: { repo: content, auth, log, gateway: ai.gateway },
-    bookSync: { repo: new PgBookSyncRepository(pool), auth, log },
+    bookSync: { repo: bookSync, auth, log },
     speech: {
       auth,
       log,

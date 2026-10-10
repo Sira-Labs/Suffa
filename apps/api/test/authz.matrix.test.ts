@@ -339,6 +339,7 @@ function buildApp() {
       repo: {
         list: async () => [],
         save: async () => ({ ok: true, revision: 1 }),
+        seed: async () => false,
       },
       auth: resolver,
       log: quiet,

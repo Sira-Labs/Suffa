@@ -4,12 +4,15 @@
  * editors apart and every save is audit-logged.
  * Run with SUFFA_TEST_DATABASE_URL=postgres://… ; skipped otherwise. The database is wiped.
  */
+import { mkdtemp, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 import type { AuthResolver } from '../src/auth/resolver.js';
 import { PgBookSyncRepository, type LessonSync } from '../src/booksync/repository.js';
+import { seedBookSync } from '../src/booksync/seed.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
 
 const url = process.env.SUFFA_TEST_DATABASE_URL;
@@ -20,6 +23,7 @@ const BOOK = '/api/v1/book-sync/madinah/1';
 
 describe.skipIf(!url)('Book sync (Postgres)', () => {
   let pool: pg.Pool;
+  let repo: PgBookSyncRepository;
   let app: ReturnType<typeof createApp>;
 
   beforeAll(async () => {
@@ -36,6 +40,7 @@ describe.skipIf(!url)('Book sync (Postgres)', () => {
          ($2, 'lehrerin@example.org', 'Lehrerin', 'teacher')`,
       [ADMIN, TEACHER]
     );
+    repo = new PgBookSyncRepository(pool);
     const auth: AuthResolver = {
       actor: async (h) => {
         const who = h.get('x-test-user');
@@ -52,7 +57,7 @@ describe.skipIf(!url)('Book sync (Postgres)', () => {
         schemaRevision: async () => null,
         queueDepth: async () => ({ waiting: 0, active: 0, failed: 0, deadLetter: 0 }),
       },
-      bookSync: { repo: new PgBookSyncRepository(pool), auth, log: quiet },
+      bookSync: { repo, auth, log: quiet },
     });
   });
 
@@ -160,5 +165,50 @@ describe.skipIf(!url)('Book sync (Postgres)', () => {
       (await call('PUT', `${BOOK}/100`, 'admin', { revision: 0, pages })).status
     ).toBe(404);
     expect((await call('GET', '/api/v1/book-sync/Medina/1')).status).toBe(404);
+  });
+
+  it('seeds the suggestion for lessons without a sync and never overwrites a saved one', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'book-sync-seed-'));
+    const file = join(dir, 'book1-sync.json');
+    const suggested = (lesson: number) => ({
+      lesson,
+      pages: [{ page: 2, at: 0 }],
+      lines: [{ page: 2, box: [0.1, 0.1, 0.8, 0.05], start: 1, end: 4 }],
+    });
+    await writeFile(
+      file,
+      JSON.stringify({
+        course: 'madinah',
+        book: 1,
+        lessons: [
+          suggested(1), // saved by an admin above: stays as it is
+          suggested(3),
+          {
+            lesson: 4,
+            pages: [
+              { page: 2, at: 5 },
+              { page: 3, at: 1 },
+            ],
+            lines: [],
+          },
+        ],
+      })
+    );
+    expect(await seedBookSync(repo, file, quiet)).toBe(1);
+    expect(await seedBookSync(repo, file, quiet)).toBe(0);
+    const all = await lessons();
+    expect(all.find((l) => l.lesson === 1)).toMatchObject({ revision: 2 });
+    expect(all.find((l) => l.lesson === 3)).toMatchObject({
+      revision: 1,
+      lines: suggested(3).lines,
+    });
+    // An invalid lesson in the file is skipped, not inserted.
+    expect(all.find((l) => l.lesson === 4)).toBeUndefined();
+    const { rows } = await pool.query<{ actor_id: string | null; target_id: string }>(
+      `select actor_id, target_id from audit_log where action = 'content.book_sync_seeded'`
+    );
+    expect(rows).toEqual([{ actor_id: null, target_id: 'madinah/1/3' }]);
+    // A missing file is no reason to fail the start.
+    expect(await seedBookSync(repo, join(dir, 'missing.json'), quiet)).toBe(0);
   });
 });

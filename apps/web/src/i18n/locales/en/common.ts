@@ -13,5 +13,6 @@ export const common: Messages<typeof de> = {
   signOut: 'Sign out',
   close: 'Close',
   back: 'Back',
+  skipToContent: 'Skip to content',
   thisDevice: 'this device',
 };

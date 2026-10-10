@@ -3,7 +3,7 @@
  * playback continues. A right answer counts as practice (XP, synced); a word can be added to
  * the learner's cards when it is from the book.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArabicText } from '@/components';
 import { isCorrect, type Checkpoint } from '@/services/media/checkpoints';
@@ -20,9 +20,15 @@ export function CheckpointDialog({
   const [answer, setAnswer] = useState<string | number | null>(null);
   const [checked, setChecked] = useState(false);
   const correct = answer !== null && isCorrect(data, answer);
+  // The question appears while the media pauses: keyboard and screen-reader users land in it
+  // (WCAG 2.4.3), instead of staying on the player controls.
+  const card = useRef<HTMLDivElement>(null);
+  useEffect(() => card.current?.focus(), [checkpoint.id]);
 
   return (
     <div
+      ref={card}
+      tabIndex={-1}
       className="card stack checkpoint-card"
       role="dialog"
       aria-labelledby="checkpoint-title"

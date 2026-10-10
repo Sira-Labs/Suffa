@@ -172,6 +172,15 @@ and our own exercises, and no copied book texts or pictures in the repo.
     whose test is not passed, because Madinah lessons have no enrolments. Trouble words
     resolve in both courses.
   - The recording prompts (suggestions, proofreading, summary) name the class's course.
+- **Stage 4, follow-up (done): daily quests per course.** From `COURSE_QUESTS_SINCE`
+  (2026-10-11) a quest can name its courses and a title per course. The dialogue quests
+  ("Höre einen Dialog", "Lies einen Dialog") are _bayna yadayk_ only, since Medina lessons have
+  no dialogues; Medina learners get "Übe 5 Wörter deiner Lektion" (skill `words`) and the
+  wording "Lektion". The video quest needs videos of the learner's course: the public video
+  list names each channel's course, and the server asks `coursesWithVideos()`. App and server
+  both read the course from the learner's settings, so they pick the same quests. Earlier days
+  keep their quests, so no quest done and no XP earned changes. On "Heute" the quests of a
+  Medina learner lead to their next lesson's page.
 - **Stage 5 and later:**
   - more Madinah exercises, lesson by lesson;
   - the word tools of the tutor (`lookup_vocab`, `get_root_family`) for Madinah words, which

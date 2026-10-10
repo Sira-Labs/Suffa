@@ -458,6 +458,10 @@ area; the e2e check for untranslated text comes with the last of them.
   learner's own days.
 - **2026-09-26 — releases:** `main` deploys to staging by digest; production is promoted
   after approval, without a rebuild (ADR-0024).
+- **2026-10-10 — daily quests per course:** from 2026-10-11 the quests follow the learner's
+  course (ADR-0025). Medina learners get no dialogue quests, a word quest instead, "Lektion"
+  instead of "Einheit", and their quests open the lesson page; the video quest needs videos
+  of the learner's course. Earlier days keep their quests and XP.
 
 ## Backlog (unscheduled)
 

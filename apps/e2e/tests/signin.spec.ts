@@ -30,7 +30,8 @@ test('shows the sign-in page first, and lets a learner go on without an account 
   page,
 }) => {
   await page.goto('/vocab');
-  await expect(page).toHaveURL(/\/login\?next=%2Fvocab$/);
+  // The page opens first and moves to the sign-in once the session check has answered.
+  await expect(page).toHaveURL(/\/login\?next=%2Fvocab$/, { timeout: 15_000 });
   await expect(page.getByRole('heading', { name: 'Bei Suffa anmelden' })).toBeVisible();
 
   await page.getByRole('button', { name: /Ohne Konto weiter/ }).click();

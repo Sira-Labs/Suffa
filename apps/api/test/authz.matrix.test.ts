@@ -320,7 +320,10 @@ function buildApp() {
     },
     content: {
       repo: {
-        seed: async () => 0,
+        seed: async () => ({ inserted: 0, refreshed: 0 }),
+        ensureBundle: async () => null,
+        latestBundle: async () => null,
+        bundle: async () => null,
         list: async () => [],
         get: async () => null,
         saveDraft: async () => ({ ok: false, reason: 'not_found' }),

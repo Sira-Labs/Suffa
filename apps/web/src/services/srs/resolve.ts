@@ -11,7 +11,7 @@ import type {
   Verb,
   Vokabel,
 } from '@/types';
-import { content, madinahVokabeln } from '@/content';
+import { content, madinahVokabeln, retiredVokabeln } from '@/content';
 
 export interface ResolvedCard {
   contentRef: string;
@@ -31,6 +31,8 @@ export interface ResolvedCard {
 
 function vokabelLookup(userVocab: UserVocab[]): Map<string, Vokabel | UserVocab> {
   const map = new Map<string, Vokabel | UserVocab>();
+  // Removed words first: a card made before the removal still resolves (story 16.2).
+  for (const v of retiredVokabeln) map.set(v.id, v);
   for (const v of content.vokabeln) map.set(v.id, v);
   for (const v of madinahVokabeln) map.set(v.id, v);
   for (const v of userVocab) map.set(v.id, v);

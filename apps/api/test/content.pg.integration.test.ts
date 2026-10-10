@@ -1,14 +1,19 @@
 /**
- * The content CMS against a real Postgres (story 16.1): seeding from the bundled unit files,
- * who may read, edit, check and publish, revisions, stable IDs and the audit trail.
+ * The content CMS against a real Postgres (stories 16.1, 16.2): seeding from the bundled unit
+ * files, who may read, edit, check and publish, revisions, stable IDs, the audit trail, and the
+ * immutable bundles learners download (manifest, checksum, caching, tombstones).
  * Run with SUFFA_TEST_DATABASE_URL=postgres://… ; skipped otherwise. The database is wiped.
  */
+import { createHash } from 'node:crypto';
+import { cp, mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 import type { AuthResolver } from '../src/auth/resolver.js';
 import { PgContentRepository, type UnitDetail } from '../src/content/repository.js';
+import type { ContentBundle } from '../src/content/bundles.js';
 import type { UnitContent } from '../src/content/schema.js';
 import { DEFAULT_SEED_DIR, seedContent } from '../src/content/seed.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
@@ -85,7 +90,22 @@ describe.skipIf(!url)('Content CMS (Postgres)', () => {
       )
     ).rows;
 
+  const manifest = async () =>
+    (await (await call('GET', '/api/v1/content/manifest')).json()) as {
+      version: number;
+      checksum: string;
+      size: number;
+      url: string;
+    };
+  const bundle = async (version: number) => {
+    const res = await call('GET', `/api/v1/content/bundles/${version}`);
+    const text = await res.text();
+    return { res, text, json: JSON.parse(text) as ContentBundle };
+  };
+
   it('seeds every bundled unit once, published as learners see it', async () => {
+    // Before any content there is no bundle to fetch.
+    expect((await call('GET', '/api/v1/content/manifest')).status).toBe(404);
     expect(await seedContent(repo, DEFAULT_SEED_DIR, quiet)).toBe(16);
     expect(await seedContent(repo, DEFAULT_SEED_DIR, quiet)).toBe(0);
 
@@ -315,5 +335,129 @@ describe.skipIf(!url)('Content CMS (Postgres)', () => {
   it('never overwrites edited units when seeding again', async () => {
     expect(await seedContent(repo, DEFAULT_SEED_DIR, quiet)).toBe(0);
     expect((await detail()).draft.kulturnotiz).toBe('Neue Kulturnotiz.');
+  });
+
+  it('serves the published units as an immutable, checksummed bundle (16.2)', async () => {
+    // Seeding froze bundle 1; the publish in the review test froze bundle 2.
+    const latest = await manifest();
+    expect(latest).toMatchObject({ version: 2, url: '/api/v1/content/bundles/2' });
+
+    const first = await bundle(1);
+    expect(first.res.status).toBe(200);
+    expect(first.res.headers.get('cache-control')).toBe(
+      'public, max-age=31536000, immutable'
+    );
+    expect(first.json).toMatchObject({ format: 1, version: 1, course: 'bayna-yadayk' });
+    expect(first.json.units).toHaveLength(16);
+    expect(first.json.tombstones).toEqual([]);
+
+    const second = await bundle(2);
+    // The checksum covers the bytes exactly as served.
+    expect(createHash('sha256').update(second.text).digest('hex')).toBe(latest.checksum);
+    expect(Buffer.byteLength(second.text)).toBe(latest.size);
+    expect(second.json.units[0]).toMatchObject({ einheit: 1, status: 'geprueft' });
+    expect(second.json.units[0]!.vokabeln.some((v) => v.id === 'v-cms-test')).toBe(true);
+
+    const etag = second.res.headers.get('etag')!;
+    expect(etag).toBe(`"${latest.checksum}"`);
+    const cached = await app.request('/api/v1/content/bundles/2', {
+      headers: { 'if-none-match': etag },
+    });
+    expect(cached.status).toBe(304);
+    expect((await call('GET', '/api/v1/content/bundles/99')).status).toBe(404);
+    expect((await call('GET', '/api/v1/content/bundles/abc')).status).toBe(404);
+
+    // Bundles never change, not even by accident in SQL.
+    await expect(
+      pool.query(`update content_bundles set body = '{}' where version = 1`)
+    ).rejects.toThrow(/immutable/);
+    await expect(
+      pool.query(`delete from content_bundles where version = 1`)
+    ).rejects.toThrow(/immutable/);
+  });
+
+  it('tombstones removed items and keeps them for SRS cards until they come back', async () => {
+    const publishWith = async (edit: (draft: UnitContent) => void) => {
+      const unit = await detail();
+      const draft = structuredClone(unit.draft);
+      edit(draft);
+      await call('PUT', `${UNIT}/draft`, 'admin', {
+        revision: unit.revision,
+        content: draft,
+      });
+      const saved = await detail();
+      await call('POST', `${UNIT}/submit`, 'admin', { revision: saved.revision });
+      const res = await call('POST', `${UNIT}/publish`, 'admin', {
+        revision: saved.revision,
+      });
+      expect(res.status).toBe(200);
+    };
+
+    const removed = (await detail()).draft.vokabeln.find((v) => v.id === 'v-cms-test')!;
+    await publishWith((draft) => {
+      draft.vokabeln = draft.vokabeln.filter((v) => v.id !== 'v-cms-test');
+    });
+    const without = await bundle((await manifest()).version);
+    expect(without.json.units[0]!.vokabeln.some((v) => v.id === 'v-cms-test')).toBe(
+      false
+    );
+    expect(without.json.tombstones).toEqual([
+      { id: 'v-cms-test', kind: 'vocab', unit: 1, item: removed },
+    ]);
+    const [published] = await audit('content.unit_published').then((rows) =>
+      rows.slice(-1)
+    );
+    expect(published!.details).toMatchObject({ bundle: without.json.version });
+
+    // Another publish keeps the tombstone …
+    await publishWith((draft) => {
+      draft.kulturnotiz = 'Noch eine Kulturnotiz.';
+    });
+    const later = await bundle((await manifest()).version);
+    expect(later.json.tombstones.map((t) => t.id)).toEqual(['v-cms-test']);
+
+    // … until the item comes back.
+    await publishWith((draft) => {
+      draft.vokabeln.push(removed);
+    });
+    const back = await bundle((await manifest()).version);
+    expect(back.json.tombstones).toEqual([]);
+  });
+
+  it('follows changed seed files only for units nobody edited, in a new bundle', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'suffa-seed-'));
+    await cp(DEFAULT_SEED_DIR, dir, { recursive: true });
+    const edit = async (
+      name: string,
+      change: (file: { vokabeln: { de: string }[] }) => void
+    ) => {
+      const path = join(dir, name);
+      const file = JSON.parse(await readFile(path, 'utf8'));
+      change(file);
+      await writeFile(path, JSON.stringify(file));
+    };
+    await edit('einheit-01.json', (f) => {
+      f.vokabeln[0]!.de = 'aus der Datei';
+    });
+    await edit('einheit-02.json', (f) => {
+      f.vokabeln[0]!.de = 'korrigiert in der Datei';
+    });
+    const before = (await manifest()).version;
+
+    expect(await seedContent(repo, dir, quiet)).toBe(1);
+    // Unit 2 was never touched in the CMS: it follows the file. Unit 1 belongs to the CMS.
+    const two = await repo.get('bayna-yadayk/2');
+    expect(two!.draft.vokabeln[0]!.de).toBe('korrigiert in der Datei');
+    expect(two!.published!.vokabeln[0]!.de).toBe('korrigiert in der Datei');
+    expect((await detail()).draft.vokabeln[0]!.de).not.toBe('aus der Datei');
+    expect(await audit('content.units_reseeded')).toHaveLength(1);
+
+    const next = await bundle((await manifest()).version);
+    expect(next.json.version).toBe(before + 1);
+    expect(next.json.units[1]!.vokabeln[0]!.de).toBe('korrigiert in der Datei');
+
+    // Nothing changed since: no new bundle.
+    expect(await seedContent(repo, dir, quiet)).toBe(0);
+    expect((await manifest()).version).toBe(before + 1);
   });
 });

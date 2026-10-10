@@ -1,8 +1,9 @@
 /**
- * The seed of the CMS (story 16.1): the unit files the web app bundles today
- * (`apps/web/src/content/units/einheit-NN.json`). They are read at start-up and every unit
- * that is not in the database yet is inserted as published, so a fresh database starts with
- * exactly what learners see. Units already in the database are never touched again.
+ * The seed of the CMS (story 16.1): the unit files the web app bundles
+ * (`apps/web/src/content/units/einheit-NN.json`). They are read at start-up: every unit that is
+ * not in the database yet is inserted as published, so a fresh database starts with exactly
+ * what learners see. A unit nobody edited in the CMS follows its seed file; once edited, the
+ * CMS owns it and the file no longer touches it.
  *
  * The API image copies the files to the same relative path (infra/docker/api.Dockerfile);
  * SUFFA_CONTENT_SEED_DIR points elsewhere if needed.
@@ -55,27 +56,33 @@ export interface SeedLog {
 }
 
 /**
- * Seeds missing units at start-up. A broken or missing seed is logged, not fatal: the API
- * keeps serving everything else, and the CMS shows what is in the database.
+ * Seeds missing units at start-up and makes sure a content bundle holds what is published
+ * (story 16.2); returns how many units were inserted or refreshed. A broken or missing seed is
+ * logged, not fatal: the API keeps serving everything else, and the CMS shows what is in the
+ * database.
  */
 export async function seedContent(
   repo: ContentRepository,
   dir: string,
   log: SeedLog
 ): Promise<number> {
-  let units: SeedUnit[];
+  let units: SeedUnit[] | null = null;
   try {
     units = await loadSeedUnits(dir);
   } catch (error) {
-    if (error instanceof SeedError || isMissingDir(error)) {
-      log.error({ dir, error: String(error) }, 'content.seed_unreadable');
-      return 0;
-    }
-    throw error;
+    if (!(error instanceof SeedError || isMissingDir(error))) throw error;
+    log.error({ dir, error: String(error) }, 'content.seed_unreadable');
   }
-  const inserted = await repo.seed(units);
-  if (inserted > 0) log.info({ inserted, files: units.length }, 'content.seeded');
-  return inserted;
+  let changed = 0;
+  if (units) {
+    const { inserted, refreshed } = await repo.seed(units);
+    changed = inserted + refreshed;
+    if (changed > 0)
+      log.info({ inserted, refreshed, files: units.length }, 'content.seeded');
+  }
+  const bundle = await repo.ensureBundle();
+  if (bundle !== null) log.info({ version: bundle }, 'content.bundle_created');
+  return changed;
 }
 
 function isMissingDir(error: unknown): boolean {

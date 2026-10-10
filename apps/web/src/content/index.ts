@@ -4,6 +4,9 @@
  * New units are added simply by dropping in another `units/einheit-NN.json` –
  * `import.meta.glob` registers them automatically, without code changes.
  * (See ADR-0003.)
+ *
+ * The bundled unit files are the offline baseline: a published content bundle kept on the
+ * device (story 16.2, `./bundle.ts`) replaces them unit by unit at start-up.
  */
 import type {
   ContentBundle,
@@ -16,6 +19,7 @@ import type {
   Verb,
   Vokabel,
 } from '@/types';
+import { mergeUnits, readStoredBundle, retiredVocabulary } from './bundle';
 import metaRaw from './meta.json';
 import madinahBook1Lessons from './courses/madinah/book1-lessons.json';
 
@@ -53,9 +57,21 @@ const unitModules = import.meta.glob<UnitFile>('./units/*.json', {
   import: 'default',
 });
 
-const units: UnitFile[] = Object.values(unitModules).sort(
+const builtInUnits: UnitFile[] = Object.values(unitModules).sort(
   (a, b) => a.einheit - b.einheit
 );
+
+const storedBundle = readStoredBundle();
+const units: UnitFile[] = mergeUnits(builtInUnits, storedBundle);
+
+/** Version of the published bundle in use; 0 means the units this app was built with. */
+export const CONTENT_BUNDLE_VERSION = storedBundle?.version ?? 0;
+
+/**
+ * Words removed from the course after being published (tombstones). Never offered as new
+ * cards, but SRS cards created earlier still show them.
+ */
+export const retiredVokabeln: Vokabel[] = retiredVocabulary(storedBundle);
 
 const vokabeln: Vokabel[] = units.flatMap((u) => u.vokabeln);
 const dialoge: Dialog[] = units.flatMap((u) => u.dialoge);

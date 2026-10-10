@@ -13,6 +13,7 @@
 import type pg from 'pg';
 import { writeAudit } from '../audit/log.js';
 import { inTransaction } from '../db/transaction.js';
+import { createBundleIfChanged, type BundleInfo } from './bundles.js';
 import {
   contentIds,
   contentOfFile,
@@ -69,9 +70,19 @@ export type SaveResult =
   | TransitionResult
   | { ok: false; reason: 'id_taken'; issues: string[] };
 
+export interface SeedResult {
+  /** Units that were not in the database yet. */
+  inserted: number;
+  /** Units nobody edited in the CMS whose seed file changed since (taken over as is). */
+  refreshed: number;
+}
+
 export interface ContentRepository {
-  /** Inserts units that are not there yet; returns how many. */
-  seed(units: SeedUnit[]): Promise<number>;
+  /**
+   * Inserts units that are not there yet and refreshes units nobody touched in the CMS from
+   * their (changed) seed file; units edited in the CMS are never overwritten.
+   */
+  seed(units: SeedUnit[]): Promise<SeedResult>;
   list(): Promise<UnitSummary[]>;
   get(id: string): Promise<UnitDetail | null>;
   saveDraft(
@@ -89,7 +100,13 @@ export interface ContentRepository {
     revision: number,
     note: string
   ): Promise<TransitionResult>;
+  /** Publishes the revision under review and freezes a new content bundle (story 16.2). */
   publish(id: string, actor: ContentActor, revision: number): Promise<TransitionResult>;
+  /** Creates a bundle when the published units differ from the newest one (start-up). */
+  ensureBundle(): Promise<number | null>;
+  latestBundle(): Promise<BundleInfo | null>;
+  /** The bundle exactly as stored, or null. */
+  bundle(version: number): Promise<{ body: string; checksum: string } | null>;
 }
 
 export const unitId = (course: string, unit: number) => `${course}/${unit}`;
@@ -151,9 +168,10 @@ const AUDIT_ID_LIMIT = 50;
 export class PgContentRepository implements ContentRepository {
   constructor(private readonly pool: pg.Pool) {}
 
-  async seed(units: SeedUnit[]): Promise<number> {
+  async seed(units: SeedUnit[]): Promise<SeedResult> {
     return inTransaction(this.pool, async (client) => {
       const inserted: string[] = [];
+      const refreshed: string[] = [];
       for (const { course, file } of units) {
         const id = unitId(course, file.einheit);
         const content = contentOfFile(file);
@@ -175,9 +193,42 @@ export class PgContentRepository implements ContentRepository {
             JSON.stringify(file),
           ]
         );
-        if (!rowCount) continue;
-        inserted.push(id);
-        await registerIds(client, id, content);
+        if (rowCount) {
+          inserted.push(id);
+          await registerIds(client, id, content);
+          continue;
+        }
+        // Still exactly as seeded (never saved, checked or published in the CMS): a changed
+        // seed file replaces it, so fixes in the repository keep reaching learners.
+        const refresh = await client.query(
+          `update content_units
+              set draft = $2::jsonb, title = $3, published = $4::jsonb,
+                  checked_revision = $5, checked_at = $6, updated_at = now()
+            where id = $1 and state = 'published' and revision = 1
+              and published_revision = 1 and updated_by is null and published_by is null
+              and checked_by is null and published is distinct from $4::jsonb`,
+          [
+            id,
+            JSON.stringify(content),
+            content.titel,
+            JSON.stringify(file),
+            checked ? 1 : null,
+            checked ? new Date() : null,
+          ]
+        );
+        if (refresh.rowCount) {
+          refreshed.push(id);
+          await registerIds(client, id, content);
+        }
+      }
+      if (refreshed.length > 0) {
+        await writeAudit(client, {
+          actorId: null,
+          action: 'content.units_reseeded',
+          targetType: 'content_unit',
+          targetId: refreshed.length === 1 ? refreshed[0]! : `${refreshed.length} units`,
+          details: { units: refreshed },
+        });
       }
       if (inserted.length > 0) {
         await writeAudit(client, {
@@ -188,7 +239,7 @@ export class PgContentRepository implements ContentRepository {
           details: { units: inserted },
         });
       }
-      return inserted.length;
+      return { inserted: inserted.length, refreshed: refreshed.length };
     });
   }
 
@@ -314,7 +365,56 @@ export class PgContentRepository implements ContentRepository {
                  'status', case when checked_revision = revision then 'geprueft' else 'entwurf' end),
                published_revision = revision, published_by = $2, published_at = now()`,
       params: [actor.id],
+      // In the same transaction: learners get the unit with the next bundle, or not at all.
+      after: async (client) => ({
+        bundle: await createBundleIfChanged(client, actor.id),
+      }),
     });
+  }
+
+  ensureBundle(): Promise<number | null> {
+    return inTransaction(this.pool, async (client) => {
+      const version = await createBundleIfChanged(client, null);
+      if (version !== null) {
+        await writeAudit(client, {
+          actorId: null,
+          action: 'content.bundle_created',
+          targetType: 'content_bundle',
+          targetId: String(version),
+          details: { version },
+        });
+      }
+      return version;
+    });
+  }
+
+  async latestBundle(): Promise<BundleInfo | null> {
+    const { rows } = await this.pool.query<{
+      version: number;
+      checksum: string;
+      size_bytes: number;
+      created_at: Date;
+    }>(
+      `select version, checksum, size_bytes, created_at
+         from content_bundles order by version desc limit 1`
+    );
+    const row = rows[0];
+    return row
+      ? {
+          version: row.version,
+          checksum: row.checksum,
+          size: row.size_bytes,
+          createdAt: row.created_at.toISOString(),
+        }
+      : null;
+  }
+
+  async bundle(version: number): Promise<{ body: string; checksum: string } | null> {
+    const { rows } = await this.pool.query<{ body: string; checksum: string }>(
+      `select body, checksum from content_bundles where version = $1`,
+      [version]
+    );
+    return rows[0] ?? null;
   }
 
   /**
@@ -331,6 +431,8 @@ export class PgContentRepository implements ContentRepository {
       update: string;
       params?: unknown[];
       details?: Record<string, unknown>;
+      /** Runs after the update in the same transaction; its result joins the audit details. */
+      after?: (client: pg.PoolClient) => Promise<Record<string, unknown>>;
     }
   ): Promise<TransitionResult> {
     return inTransaction(this.pool, async (client) => {
@@ -342,13 +444,14 @@ export class PgContentRepository implements ContentRepository {
         id,
         ...(step.params ?? []),
       ]);
+      const extra = step.after ? await step.after(client) : {};
       await writeAudit(client, {
         actorId: actor.id,
         action: step.action,
         targetType: 'content_unit',
         targetId: id,
         ipAddress: actor.ipAddress,
-        details: { revision, from: current.state, ...step.details },
+        details: { revision, from: current.state, ...step.details, ...extra },
       });
       return { ok: true, revision };
     });

@@ -12,6 +12,11 @@
  * Teachers read and check, admins (with the second factor) edit and publish. Every change
  * carries the revision it was made on: 409 `stale_revision` when someone else was faster,
  * 409 `wrong_state` when the unit is not in a state that allows the step.
+ *
+ * Published content is public, as in the app itself (story 16.2):
+ *
+ *   GET  /content/manifest          → { version, checksum, size, createdAt, url } (no-cache)
+ *   GET  /content/bundles/:version  → the bundle, byte for byte (immutable, cached for a year)
  */
 import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
@@ -89,6 +94,33 @@ export function createContentRoutes(deps: ContentRouteDeps): Hono<ActorEnv> {
     ipAddress: c.req.header('x-real-ip') ?? null,
   });
   const params = (c: Context) => UnitParams.safeParse(c.req.param());
+
+  app.get('/content/manifest', async (c) => {
+    const latest = await deps.repo.latestBundle();
+    // Clients ask on every start; the answer may change with the next publish.
+    c.header('Cache-Control', 'no-cache');
+    if (!latest) return c.json({ error: 'no_bundle' }, 404);
+    return c.json({ ...latest, url: `/api/v1/content/bundles/${latest.version}` });
+  });
+
+  app.get('/content/bundles/:version', async (c) => {
+    const version = z.coerce
+      .number()
+      .int()
+      .positive()
+      .max(1e9)
+      .safeParse(c.req.param('version'));
+    if (!version.success) return c.json({ error: 'not_found' }, 404);
+    const bundle = await deps.repo.bundle(version.data);
+    if (!bundle) return c.json({ error: 'not_found' }, 404);
+    const etag = `"${bundle.checksum}"`;
+    c.header('ETag', etag);
+    // A version never changes, so caches may keep it for good.
+    c.header('Cache-Control', 'public, max-age=31536000, immutable');
+    if (c.req.header('if-none-match') === etag) return c.body(null, 304);
+    c.header('Content-Type', 'application/json; charset=utf-8');
+    return c.body(bundle.body);
+  });
 
   app.get('/content/units', guard('content:review'), async (c) => {
     c.header('Cache-Control', 'no-store');

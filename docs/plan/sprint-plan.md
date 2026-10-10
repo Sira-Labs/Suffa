@@ -405,8 +405,17 @@ edits. Admins (with the second factor) edit drafts in the admin area ("Inhalte")
 the revision they loaded, submit and publish; teachers read every unit on "Inhalte prüfen", mark
 the one under review as checked or send it back with a note. Publishing writes `status:
 geprueft` only for a checked revision. Content IDs are registered in `content_ids` and never move
-to another unit. Every step is audit-logged with the IDs it added, changed or removed. Learners
-keep the bundled content until 16.2 serves published bundles.
+to another unit. Every step is audit-logged with the IDs it added, changed or removed.
+16.2 ✅: every publish freezes all published units into an immutable bundle (migration 0039;
+version, sha256, refused by a trigger to change) in the same transaction; the API also creates
+one at start-up when the published units differ from the newest bundle.
+`GET /api/v1/content/manifest` names the newest version, `GET /api/v1/content/bundles/:version`
+serves it byte for byte (public, cached for a year, ETag). The PWA keeps shipping the unit files
+as its offline baseline; on start and when coming online it downloads a newer bundle, checks the
+checksum and keeps it in localStorage for the next start, where its units replace the built-in
+ones. Removed items are tombstoned with their last content, carried from bundle to bundle until
+they come back, so SRS cards that point at them still resolve. Units nobody edited in the CMS
+follow their seed file, so fixes in the repository keep reaching learners.
 
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------- |

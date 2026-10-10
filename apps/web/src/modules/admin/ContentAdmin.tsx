@@ -1,8 +1,8 @@
 /**
  * The admins' content editor (story 16.1): pick a unit, edit its draft, save it against the
  * revision it was loaded with, give it to the teachers for review and publish it once it came
- * back. Learners keep the content bundled with the app until published bundles reach them
- * (story 16.2).
+ * back. Publishing freezes a new content bundle; the app downloads it in the background and
+ * uses it from the next start (story 16.2).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -41,8 +41,8 @@ export function ContentAdmin({ api }: { api?: ContentApi }) {
   return (
     <section className="stack" aria-label="Inhalte">
       <p className="muted" style={{ margin: 0 }}>
-        Entwürfe bearbeiten, zur Prüfung geben und veröffentlichen. Lernende sehen bis zu
-        den Inhaltspaketen (nächster Schritt) weiter den Stand der App.
+        Entwürfe bearbeiten, zur Prüfung geben und veröffentlichen. Veröffentlichte
+        Einheiten lädt die App im Hintergrund; Lernende sehen sie ab dem nächsten Öffnen.
       </p>
       {message && <span className="feedback-bad">{message}</span>}
       <label className="stack" style={{ gap: '0.25rem' }}>

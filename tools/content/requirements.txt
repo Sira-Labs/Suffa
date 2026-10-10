@@ -1,0 +1,2 @@
+# For tools/content/speech_words.py (local speech recognition for madinah-book-sync.mjs).
+faster-whisper==1.2.1

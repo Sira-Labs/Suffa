@@ -1,8 +1,9 @@
 /**
  * Suggested page turns and line marks for the Medina book (tools/content/madinah-book-sync.mjs):
  * at start-up every lesson without a sync gets the suggestion, so the book follows the
- * recording right away. A lesson an admin has saved is never touched again; the suggestion is
- * only a start for their corrections. Only boxes and seconds (ADR-0023).
+ * recording right away, and a lesson still holding an older suggestion gets the new one. A
+ * lesson an admin has saved is never touched again; the suggestion is only a start for their
+ * corrections. Only boxes and seconds (ADR-0023).
  *
  * The API image copies the file to the same relative path (infra/docker/api.Dockerfile).
  */
@@ -34,7 +35,7 @@ export interface SeedLog {
   warn(obj: object, msg: string): void;
 }
 
-/** Inserts the suggestion for every lesson that has no sync yet; returns how many. */
+/** Stores the suggestion for every lesson without an admin's sync; returns how many changed. */
 export async function seedBookSync(
   repo: Pick<BookSyncRepository, 'seed'>,
   file: string,

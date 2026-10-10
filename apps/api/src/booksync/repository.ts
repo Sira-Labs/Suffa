@@ -33,7 +33,10 @@ export interface BookSyncRepository {
     revision: number,
     data: BookSyncData
   ): Promise<SyncSaveResult>;
-  /** The suggestion for a lesson without a sync; false when it has one (never overwritten). */
+  /**
+   * The suggestion for a lesson without a sync, or in place of an older suggestion no admin
+   * has saved (a new revision); false when nothing changed. A saved sync is never replaced.
+   */
   seed(
     course: string,
     book: number,
@@ -72,19 +75,23 @@ export class PgBookSyncRepository implements BookSyncRepository {
     data: BookSyncData
   ): Promise<boolean> {
     return inTransaction(this.pool, async (client) => {
-      const inserted = await client.query(
-        `insert into book_sync (course, book, lesson, data, revision, updated_by)
-         values ($1, $2, $3, $4::jsonb, 1, null)
-         on conflict (course, book, lesson) do nothing`,
+      const { rows } = await client.query<{ revision: number }>(
+        `insert into book_sync (course, book, lesson, data, revision, updated_by, suggested)
+         values ($1, $2, $3, $4::jsonb, 1, null, true)
+         on conflict (course, book, lesson) do update
+           set data = excluded.data, revision = book_sync.revision + 1, updated_at = now()
+           where book_sync.suggested and book_sync.data <> excluded.data
+         returning revision`,
         [course, book, lesson, JSON.stringify(data)]
       );
-      if (inserted.rowCount === 0) return false;
+      const revision = rows[0]?.revision;
+      if (revision === undefined) return false;
       await writeAudit(client, {
         actorId: null,
         action: 'content.book_sync_seeded',
         targetType: 'book_sync',
         targetId: `${course}/${book}/${lesson}`,
-        details: { revision: 1, pages: data.pages.length, lines: data.lines.length },
+        details: { revision, pages: data.pages.length, lines: data.lines.length },
       });
       return true;
     });
@@ -119,7 +126,7 @@ export class PgBookSyncRepository implements BookSyncRepository {
       } else {
         await client.query(
           `update book_sync set data = $4::jsonb, revision = $5, updated_by = $6,
-                  updated_at = now()
+                  updated_at = now(), suggested = false
             where course = $1 and book = $2 and lesson = $3`,
           [course, book, lesson, JSON.stringify(data), next, actor.id]
         );

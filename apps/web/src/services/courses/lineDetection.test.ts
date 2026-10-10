@@ -74,6 +74,32 @@ describe('line detection', () => {
     expect(boxes.every(([, , , h]) => h < 0.1)).toBe(true);
   });
 
+  it('leaves out a picture that reaches into the rows and columns of the text', () => {
+    const grey = page(300, 400, [
+      { top: 50, bottom: 150, left: 20, right: 140 }, // a horse's body
+      { top: 150, bottom: 200, left: 20, right: 200 }, // its legs, under the text
+      { top: 60, bottom: 72, left: 160, right: 280 },
+      { top: 100, bottom: 112, left: 160, right: 280 },
+      { top: 230, bottom: 242, left: 20, right: 280 },
+    ]);
+    const boxes = detectLines(grey, 300, 400);
+    expect(boxes).toHaveLength(3);
+    expect(boxes.slice(0, 2).every(([x]) => x > 0.5)).toBe(true);
+    expect(boxes.every(([, , , h]) => h < 0.1)).toBe(true);
+  });
+
+  it('cuts captions side by side into lines of their own, right to left', () => {
+    const grey = page(400, 300, [
+      { top: 100, bottom: 112, left: 20, right: 100 },
+      { top: 100, bottom: 112, left: 160, right: 240 },
+      { top: 100, bottom: 112, left: 300, right: 380 },
+    ]);
+    const boxes = detectLines(grey, 400, 300);
+    expect(boxes).toHaveLength(3);
+    expect(boxes.map(([x]) => x > 0.7)).toEqual([true, false, false]);
+    expect(boxes[2]![0]).toBeLessThan(0.1);
+  });
+
   it('finds nothing on a blank page', () => {
     expect(detectLines(new Uint8ClampedArray(100 * 100).fill(250), 100, 100)).toEqual([]);
   });

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { matchesEtag } from '../src/booksync/routes.js';
 import { validateBookSync } from '../src/booksync/schema.js';
 
 const line = (start: number, end: number, page = 2) => ({
@@ -68,5 +69,16 @@ describe('book sync validation', () => {
     ]) {
       expect(validateBookSync(input).ok, JSON.stringify(input)).toBe(false);
     }
+  });
+
+  it('compares If-None-Match as a list, weakly', () => {
+    const etag = '"abc"';
+    expect(matchesEtag('"abc"', etag)).toBe(true);
+    expect(matchesEtag('W/"abc"', etag)).toBe(true);
+    expect(matchesEtag('"old", "abc"', etag)).toBe(true);
+    expect(matchesEtag('*', etag)).toBe(true);
+    expect(matchesEtag('"abc*"', etag)).toBe(false);
+    expect(matchesEtag('"other"', etag)).toBe(false);
+    expect(matchesEtag(undefined, etag)).toBe(false);
   });
 });

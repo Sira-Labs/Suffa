@@ -50,6 +50,18 @@ async function jsonBody(c: Context): Promise<unknown> {
   }
 }
 
+/**
+ * If-None-Match holds a list of entity tags (or `*`) and compares weakly: `W/"x"` matches
+ * `"x"`. Only complete tags count.
+ */
+export function matchesEtag(header: string | undefined, etag: string): boolean {
+  if (!header) return false;
+  return header.split(',').some((raw) => {
+    const tag = raw.trim();
+    return tag === '*' || tag === etag || tag === `W/${etag}`;
+  });
+}
+
 export function createBookSyncRoutes(deps: BookSyncRouteDeps): Hono<ActorEnv> {
   const app = new Hono<ActorEnv>();
 
@@ -62,7 +74,7 @@ export function createBookSyncRoutes(deps: BookSyncRouteDeps): Hono<ActorEnv> {
     c.header('ETag', etag);
     // Admins may change it any time: caches keep it but ask again before using it.
     c.header('Cache-Control', 'public, no-cache');
-    if (c.req.header('if-none-match') === etag) return c.body(null, 304);
+    if (matchesEtag(c.req.header('if-none-match'), etag)) return c.body(null, 304);
     c.header('Content-Type', 'application/json; charset=utf-8');
     return c.body(body);
   });

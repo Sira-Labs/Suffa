@@ -22,7 +22,11 @@ export const settings: Messages<typeof de> = {
   display: {
     title: 'Display',
     language: 'Interface language',
-    languageHint: 'Word meanings stay in German for now.',
+    languageHint: 'Menus, buttons and hints.',
+    meaningLanguage: 'Language of meanings',
+    meaningLanguageHint:
+      'Word meanings and translations, including your answers in reviews. What is not translated yet stays in German.',
+    meaningFollowsUi: 'Same as the interface',
     design: 'Theme',
     dark: '🌙 Dark',
     light: '☀️ Light',

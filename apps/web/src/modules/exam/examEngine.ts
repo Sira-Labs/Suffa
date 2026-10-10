@@ -8,6 +8,13 @@
 import type { ExamFormat } from '@/types';
 import i18n from '@/i18n';
 import { content } from '@/content';
+import {
+  consistentMeanings,
+  currentMeaningLanguage,
+  meaningOf,
+  type Glossed,
+  type MeaningLanguage,
+} from '@/services/meanings';
 
 export interface ExamQuestion {
   id: string;
@@ -21,6 +28,10 @@ export interface ExamQuestion {
   /** For choice formats: options (including the correct answer). */
   options?: string[];
   hint?: string;
+  /** Language of a meaning in the prompt or the expected answer (story 16.4). */
+  meaningLang?: MeaningLanguage;
+  /** The meaning language had no gloss: the German one stands in ("not yet translated"). */
+  meaningMissing?: boolean;
 }
 
 export interface ExamConfig {
@@ -53,12 +64,36 @@ function qid(): string {
 
 type Generator = () => ExamQuestion | null;
 
-export function generateExam(config: ExamConfig): ExamQuestion[] {
+/**
+ * A choice question about meanings: the correct item and three others with different
+ * meanings, all in one language (the chosen one if every item has it, else German).
+ */
+function meaningChoice(
+  correct: Glossed,
+  pool: readonly Glossed[],
+  language: MeaningLanguage
+): Pick<ExamQuestion, 'expected' | 'options' | 'meaningLang' | 'meaningMissing'> {
+  const others = shuffle(pool.filter((x) => x.de !== correct.de))
+    .filter((x, i, all) => all.findIndex((y) => y.de === x.de) === i)
+    .slice(0, 3);
+  const { texts, lang, missing } = consistentMeanings([correct, ...others], language);
+  return {
+    expected: texts[0]!,
+    options: shuffle(texts),
+    meaningLang: lang,
+    meaningMissing: missing,
+  };
+}
+
+export function generateExam(
+  config: ExamConfig,
+  language: MeaningLanguage = currentMeaningLanguage()
+): ExamQuestion[] {
   const unitSet = new Set(config.units);
   const vocab = content.vokabeln.filter(
     (v) => config.units.length === 0 || unitSet.has(v.einheit)
   );
-  const allDe = content.vokabeln.map((v) => v.de);
+  const meaning = (item: Glossed) => meaningOf(item, language);
   const allPlurals = content.vokabeln
     .map((v) => v.plural)
     .filter((p): p is string => !!p);
@@ -73,9 +108,8 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         contentRef: v.id,
         prompt: v.ar,
         promptIsArabic: true,
-        expected: v.de,
+        ...meaningChoice(v, content.vokabeln, language),
         expectedIsArabic: false,
-        options: distractors(v.de, allDe),
         hint: v.wurzel ? i18n.t('exam:questions.root', { root: v.wurzel }) : undefined,
       };
     },
@@ -86,7 +120,9 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         id: qid(),
         format: 'vocab_de_ar',
         contentRef: v.id,
-        prompt: v.de,
+        prompt: meaning(v).text,
+        meaningLang: meaning(v).lang,
+        meaningMissing: meaning(v).missing,
         promptIsArabic: false,
         expected: v.ar,
         expectedIsArabic: true,
@@ -100,7 +136,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         id: qid(),
         format: 'plural',
         contentRef: v.id,
-        prompt: i18n.t('exam:questions.plural', { word: v.ar, meaning: v.de }),
+        prompt: i18n.t('exam:questions.plural', { word: v.ar, meaning: meaning(v).text }),
         promptIsArabic: false,
         expected: v.plural,
         expectedIsArabic: true,
@@ -116,7 +152,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         id: qid(),
         format: 'root',
         contentRef: v.id,
-        prompt: i18n.t('exam:questions.rootOf', { word: v.ar, meaning: v.de }),
+        prompt: i18n.t('exam:questions.rootOf', { word: v.ar, meaning: meaning(v).text }),
         promptIsArabic: false,
         expected: v.wurzel,
         expectedIsArabic: true,
@@ -146,9 +182,8 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         contentRef: v.id,
         prompt: v.ar,
         promptIsArabic: true,
-        expected: v.de,
+        ...meaningChoice(v, content.vokabeln, language),
         expectedIsArabic: false,
-        options: distractors(v.de, allDe),
         hint: i18n.t('exam:questions.listening'),
       };
     },
@@ -162,12 +197,8 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         contentRef: z.ar,
         prompt: z.ar,
         promptIsArabic: true,
-        expected: z.de,
+        ...meaningChoice(z, lines, language),
         expectedIsArabic: false,
-        options: distractors(
-          z.de,
-          lines.map((l) => l.de)
-        ),
       };
     },
     writing: () => {
@@ -179,7 +210,7 @@ export function generateExam(config: ExamConfig): ExamQuestion[] {
         contentRef: v.id,
         prompt: i18n.t('exam:questions.writing', {
           transliteration: v.tr,
-          meaning: v.de,
+          meaning: meaning(v).text,
         }),
         promptIsArabic: false,
         expected: v.ar,

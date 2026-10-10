@@ -25,6 +25,11 @@ export const components: Messages<typeof de> = {
     months_one: '~{{count}} month',
     months_other: '~{{count}} months',
   },
+  meaning: {
+    notTranslated: 'not yet translated',
+    notTranslatedHint:
+      'This meaning has no reviewed English version yet; the German one stands in for it.',
+  },
   feedback: {
     correct: '✓ Correct',
     typo: '✓ Correct – small typo',

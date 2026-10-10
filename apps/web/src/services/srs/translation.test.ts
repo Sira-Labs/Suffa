@@ -112,4 +112,24 @@ describe('gradeTranslation', () => {
     );
     expect(gradeTranslation('Gut', 'Gut, Gott sei Dank.').verdict).toBe('wrong');
   });
+
+  it('grades English glosses with English rules (story 16.4)', () => {
+    // Articles and the infinitive marker are ignored, alternatives split as in German.
+    expect(gradeTranslation('a country', 'country, place', 'en').verdict).toBe(
+      'accepted'
+    );
+    expect(gradeTranslation('write', 'to write', 'en').verdict).toBe('exact');
+    // British and American spellings are the same answer.
+    expect(gradeTranslation('color', 'colour', 'en').verdict).toBe('exact');
+    expect(gradeTranslation('center', 'centre', 'en').verdict).toBe('exact');
+    expect(gradeTranslation('to organize', 'to organise', 'en').verdict).toBe('exact');
+    expect(gradeTranslation('traveling', 'travelling', 'en').verdict).toBe('exact');
+    expect(gradeTranslation('gray', 'grey', 'en').verdict).toBe('exact');
+    // Typos are forgiven the same way; wrong words are wrong.
+    expect(gradeTranslation('neighbuor', 'neighbour', 'en').verdict).toBe('typo');
+    expect(gradeTranslation('city', 'country, place', 'en').verdict).toBe('wrong');
+    // German articles are no English articles: "die" stays a word.
+    expect(gradeTranslation('die', 'to die', 'en').verdict).toBe('exact');
+    expect(gradeTranslation('die house', 'house', 'en').verdict).toBe('wrong');
+  });
 });

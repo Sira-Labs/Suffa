@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { TashkilToggle } from '@/components';
 import i18n, { setUiLanguage, type UiLanguage } from '@/i18n';
 import { dateLocale } from '@/i18n/format';
+import { isMeaningLanguage } from '@/services/meanings';
 import { ApiSyncProvider, SIGN_IN_RETURN_PATH } from '@/services/sync/ApiSyncProvider';
 import { PasskeySignIn } from '@/modules/account/PasskeySignIn';
 import { SignInForm } from '@/modules/account/SignInForm';
@@ -30,6 +31,7 @@ export function Settings() {
       <div className="card stack">
         <strong>{t('display.title')}</strong>
         <LanguageSetting />
+        <MeaningLanguageSetting />
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <span>{t('display.design')}</span>
           <button className="btn" onClick={() => void toggleTheme()}>
@@ -156,6 +158,41 @@ function LanguageSetting() {
         style={{ width: 160, flexShrink: 0 }}
       >
         {/* Each language names itself, so it can be found from either side. */}
+        <option value="de" lang="de">
+          Deutsch
+        </option>
+        <option value="en" lang="en">
+          English
+        </option>
+      </select>
+    </label>
+  );
+}
+
+/** Meaning language (story 16.4): glosses and translation answers; by default as the UI. */
+function MeaningLanguageSetting() {
+  const { t } = useTranslation(['settings', 'common']);
+  const choice = useSettingsStore((s) => s.settings.meaningLanguage ?? null);
+  const update = useSettingsStore((s) => s.update);
+  return (
+    <label className="row" style={{ justifyContent: 'space-between' }}>
+      <span className="stack" style={{ gap: 0 }}>
+        <span>{t('display.meaningLanguage')}</span>
+        <span className="muted" style={{ fontSize: '0.85rem' }}>
+          {t('display.meaningLanguageHint')}
+        </span>
+      </span>
+      <select
+        className="input"
+        value={choice ?? ''}
+        onChange={(e) =>
+          void update({
+            meaningLanguage: isMeaningLanguage(e.target.value) ? e.target.value : null,
+          })
+        }
+        style={{ width: 160, flexShrink: 0 }}
+      >
+        <option value="">{t('display.meaningFollowsUi')}</option>
         <option value="de" lang="de">
           Deutsch
         </option>

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import type { DialogZeile, UnitPracticeScope, Vokabel } from '@/types';
-import { ArabicText, Feedback, RecallInput } from '@/components';
+import { ArabicText, Feedback, MeaningText, RecallInput } from '@/components';
 import { Icon } from '@/components/Icon';
 import { TaskQueue } from '@/components/TaskQueue';
 import { content } from '@/content';
@@ -18,6 +18,7 @@ import {
 } from '@/services/practice';
 import { diffArabic, gradeAnswer, type AnswerVerdict } from '@/services/srs';
 import { speakArabic, isTtsSupported } from '@/services/speech';
+import { meaningOf, useMeaningLanguage } from '@/services/meanings';
 
 /**
  * Writing practice as a guided sequence: copying, dictation, transliteration → script,
@@ -208,6 +209,7 @@ function WordTask({
   onNext,
 }: TaskProps & { mode: 'abschreiben' | 'diktat' | 'umschrift'; word: Vokabel }) {
   const { t } = useTranslation('writing');
+  const language = useMeaningLanguage();
   const { value, setValue, verdict, correct, check } = useCheck(word.ar, onCorrect);
   const prompt = t(`prompts.${mode}`);
 
@@ -224,7 +226,7 @@ function WordTask({
           <span>
             <strong>{word.tr}</strong>{' '}
             <span className="muted">
-              · <span lang="de">{word.de}</span>
+              · <MeaningText meaning={meaningOf(word, language)} />
             </span>
           </span>
         </>
@@ -249,7 +251,7 @@ function WordTask({
         <>
           <strong style={{ fontSize: '1.6rem' }}>{word.tr}</strong>
           <span className="muted">
-            (<span lang="de">{word.de}</span>)
+            (<MeaningText meaning={meaningOf(word, language)} />)
           </span>
         </>
       )}
@@ -268,8 +270,10 @@ function WordTask({
           verdict={verdict}
           expected={word.ar}
           diff={diffArabic(value, word.ar)}
-          explanation={mode === 'abschreiben' ? undefined : word.de}
-          explanationLang="de"
+          explanation={
+            mode === 'abschreiben' ? undefined : meaningOf(word, language).text
+          }
+          explanationLang={meaningOf(word, language).lang}
         />
       )}
     </div>
@@ -290,6 +294,7 @@ function SentenceBuilder({
   onNext,
 }: TaskProps & { line: DialogZeile }) {
   const { t } = useTranslation('writing');
+  const language = useMeaningLanguage();
   const correctWords = useMemo(() => line.ar.split(/\s+/), [line]);
   const [pool, setPool] = useState<string[]>(() => shuffle(correctWords));
   const [built, setBuilt] = useState<string[]>([]);
@@ -309,7 +314,7 @@ function SentenceBuilder({
   return (
     <div className="card stack">
       <p className="muted" style={{ margin: 0 }}>
-        {t('order', { sentence: line.de, position })}
+        {t('order', { sentence: meaningOf(line, language).text, position })}
       </p>
       <div
         className="card arabic"
@@ -378,6 +383,7 @@ function Translation({
   onNext,
 }: TaskProps & { line: DialogZeile }) {
   const { t } = useTranslation('writing');
+  const language = useMeaningLanguage();
   const { value, setValue, verdict, correct, check } = useCheck(
     line.ar,
     onCorrect,
@@ -388,8 +394,8 @@ function Translation({
       <p className="muted" style={{ margin: 0 }}>
         {t('translate', { position })}
       </p>
-      <strong style={{ fontSize: '1.2rem' }} lang="de">
-        {line.de}
+      <strong style={{ fontSize: '1.2rem' }}>
+        <MeaningText meaning={meaningOf(line, language)} />
       </strong>
       <div style={{ width: '100%' }}>
         <RecallInput

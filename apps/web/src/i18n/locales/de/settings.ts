@@ -20,7 +20,11 @@ export const settings = {
   display: {
     title: 'Darstellung',
     language: 'Sprache der Oberfläche',
-    languageHint: 'Bedeutungen der Wörter bleiben vorerst auf Deutsch.',
+    languageHint: 'Menüs, Knöpfe und Hinweise.',
+    meaningLanguage: 'Sprache der Bedeutungen',
+    meaningLanguageHint:
+      'Wortbedeutungen und Übersetzungen, auch deine Antworten in der Wiederholung. Was noch nicht übersetzt ist, steht auf Deutsch.',
+    meaningFollowsUi: 'Wie die Oberfläche',
     design: 'Design',
     dark: '🌙 Dunkel',
     light: '☀️ Hell',

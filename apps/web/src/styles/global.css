@@ -887,6 +887,13 @@ textarea.input {
 
 /* ---------- Listening progress ---------- */
 
+.badge-untranslated {
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 .badge-done {
   background: color-mix(in srgb, var(--accent-2) 18%, var(--bg-elev));
   border-color: var(--accent-2);

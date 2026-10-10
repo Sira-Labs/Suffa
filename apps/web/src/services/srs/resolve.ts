@@ -2,9 +2,15 @@
  * Resolves an SRS card to its static (or user-created) content.
  * Returns a uniform prompt/answer pair per CardKind, the basis for all
  * recall modules and exam formats. Prompts and hints come in the interface language at call
- * time (story 16.3); the German meanings inside them are course content and stay German.
+ * time (story 16.3); meanings come in the learner's meaning language, German where English is
+ * missing (story 16.4).
  */
 import i18n from '@/i18n';
+import {
+  currentMeaningLanguage,
+  meaningOf,
+  type MeaningLanguage,
+} from '@/services/meanings';
 import type {
   CardKind,
   Minimalpaar,
@@ -29,6 +35,10 @@ export interface ResolvedCard {
   transliteration?: string;
   /** Full Arabic text to read aloud (TTS), if available. */
   speakable?: string;
+  /** Language of the meaning in the prompt or answer (story 16.4). */
+  meaningLang?: MeaningLanguage;
+  /** The meaning language had no gloss: the German one is shown ("not yet translated"). */
+  meaningMissing?: boolean;
 }
 
 function vokabelLookup(userVocab: UserVocab[]): Map<string, Vokabel | UserVocab> {
@@ -50,20 +60,30 @@ const mpById = new Map<string, Minimalpaar>(
 export function resolveCard(
   kind: CardKind,
   contentRef: string,
-  userVocab: UserVocab[] = []
+  userVocab: UserVocab[] = [],
+  language: MeaningLanguage = currentMeaningLanguage()
 ): ResolvedCard | null {
   const vocab = vokabelLookup(userVocab);
+  const own = new Set(userVocab.map((v) => v.id));
+  // A learner's own word keeps the meaning they typed, whatever its language.
+  const gloss = (v: Vokabel | UserVocab) =>
+    own.has(v.id)
+      ? { text: v.de, lang: language, missing: false }
+      : meaningOf(v, language);
 
   switch (kind) {
     case 'vocab_ar_de': {
       const v = vocab.get(contentRef);
       if (!v) return null;
+      const meaning = gloss(v);
       return {
         contentRef,
         kind,
         prompt: v.ar,
         promptIsArabic: true,
-        answer: v.de,
+        answer: meaning.text,
+        meaningLang: meaning.lang,
+        meaningMissing: meaning.missing,
         answerIsArabic: false,
         transliteration: v.tr || undefined,
         hint: v.wurzel
@@ -77,10 +97,13 @@ export function resolveCard(
     case 'vocab_de_ar': {
       const v = vocab.get(contentRef);
       if (!v) return null;
+      const meaning = gloss(v);
       return {
         contentRef,
         kind,
-        prompt: v.de,
+        prompt: meaning.text,
+        meaningLang: meaning.lang,
+        meaningMissing: meaning.missing,
         promptIsArabic: false,
         answer: v.ar,
         answerIsArabic: true,
@@ -95,7 +118,7 @@ export function resolveCard(
       return {
         contentRef,
         kind,
-        prompt: i18n.t('vocab:cards.pluralOf', { ar: v.ar, de: v.de }),
+        prompt: i18n.t('vocab:cards.pluralOf', { ar: v.ar, de: gloss(v).text }),
         promptIsArabic: false,
         answer: v.plural,
         answerIsArabic: true,
@@ -111,7 +134,7 @@ export function resolveCard(
       return {
         contentRef,
         kind,
-        prompt: i18n.t('vocab:cards.rootToWord', { root: v.wurzel, de: v.de }),
+        prompt: i18n.t('vocab:cards.rootToWord', { root: v.wurzel, de: gloss(v).text }),
         promptIsArabic: false,
         answer: v.ar,
         answerIsArabic: true,

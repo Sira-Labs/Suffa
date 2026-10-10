@@ -23,6 +23,11 @@ export const components = {
     months_one: '~{{count}} Monat',
     months_other: '~{{count}} Monate',
   },
+  meaning: {
+    notTranslated: 'noch nicht übersetzt',
+    notTranslatedHint:
+      'Für diese Bedeutung gibt es noch keine geprüfte englische Fassung; die deutsche steht an ihrer Stelle.',
+  },
   feedback: {
     correct: '✓ Richtig',
     typo: '✓ Richtig – kleiner Tippfehler',

@@ -416,6 +416,11 @@ checksum and keeps it in localStorage for the next start, where its units replac
 ones. Removed items are tombstoned with their last content, carried from bundle to bundle until
 they come back, so SRS cards that point at them still resolve. Units nobody edited in the CMS
 follow their seed file, so fixes in the repository keep reaching learners.
+16.3 (in progress): i18next with typed German/English catalogues, the synced setting
+`uiLanguage` (migration 0040, also kept on the device for the next start) and a lint rule
+against new hard-coded text in translated areas (`docs/i18n.md`). Translated so far: the app
+shell and navigation, shared components, settings and sign-in. The other modules follow area by
+area; the e2e check for untranslated text comes with the last of them.
 
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------- |

@@ -3,6 +3,19 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import prettier from 'eslint-config-prettier';
+import suffa from './tools/eslint/no-hardcoded-ui-text.js';
+
+/**
+ * Areas whose interface text already comes from the i18n catalogues (story 16.3). New
+ * hard-coded text there fails the lint; the list grows module by module.
+ */
+const TRANSLATED = [
+  'apps/web/src/App.tsx',
+  'apps/web/src/components/**/*.tsx',
+  'apps/web/src/modules/account/**/*.tsx',
+  'apps/web/src/modules/more/**/*.tsx',
+  'apps/web/src/modules/settings/**/*.tsx',
+];
 
 export default tseslint.config(
   {
@@ -38,6 +51,12 @@ export default tseslint.config(
     // Node scripts for maintainers (content tooling).
     files: ['tools/**/*.mjs', 'apps/e2e/**/*.mjs'],
     languageOptions: { ecmaVersion: 2023, globals: globals.node },
+  },
+  {
+    files: TRANSLATED,
+    ignores: ['**/*.test.tsx'],
+    plugins: { suffa },
+    rules: { 'suffa/no-hardcoded-ui-text': 'error' },
   },
   {
     files: ['**/*.test.{ts,tsx}', '**/tests/**/*.{ts,tsx}', '**/vitest.setup.ts'],

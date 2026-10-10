@@ -4,16 +4,19 @@
  * WebAuthn.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
+import { dateLocale } from '@/i18n/format';
 import type { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { PasskeyClient, passkeysSupported, type Passkey } from '@/services/passkeys';
 
 const date = (iso: string) =>
-  new Date(iso).toLocaleDateString('de-DE', { dateStyle: 'medium' });
+  new Date(iso).toLocaleDateString(dateLocale(), { dateStyle: 'medium' });
 
 /** "iCloud-Schlüsselbund · synchronisiert" or "Passkey". */
 export function describePasskey(passkey: Passkey): string {
   const name = passkey.name || passkey.provider || 'Passkey';
-  return passkey.synced ? `${name} · auf deinen Geräten synchronisiert` : name;
+  return passkey.synced ? i18n.t('settings:passkeys.synced', { name }) : name;
 }
 
 export function AccountPasskeys({
@@ -23,6 +26,7 @@ export function AccountPasskeys({
   provider: ApiSyncProvider;
   client?: PasskeyClient;
 }) {
+  const { t } = useTranslation(['settings', 'common']);
   const passkeys = useMemo(() => client ?? new PasskeyClient(), [client]);
   const [list, setList] = useState<Passkey[] | null>(null);
   const [message, setMessage] = useState<{ good: boolean; text: string } | null>(null);
@@ -48,7 +52,7 @@ export function AccountPasskeys({
     if (result.ok) {
       setMessage({
         good: true,
-        text: '✓ Passkey hinzugefügt. Ab jetzt reicht „Mit Passkey anmelden“.',
+        text: t('passkeys.addedMessage'),
       });
       void load();
     } else if (result.message) {
@@ -60,7 +64,7 @@ export function AccountPasskeys({
     const result = await provider.deletePasskey(id);
     setMessage(
       result.ok
-        ? { good: true, text: '✓ Passkey entfernt.' }
+        ? { good: true, text: t('passkeys.removed') }
         : { good: false, text: result.error.message }
     );
     void load();
@@ -68,10 +72,9 @@ export function AccountPasskeys({
 
   return (
     <div className="stack" style={{ gap: '0.4rem' }}>
-      <strong style={{ fontSize: '0.95rem' }}>Passkeys</strong>
+      <strong style={{ fontSize: '0.95rem' }}>{t('passkeys.title')}</strong>
       <span className="muted" style={{ fontSize: '0.9rem' }}>
-        Melde dich mit Gesicht, Fingerabdruck oder der PIN deines Geräts an – ohne auf
-        eine E-Mail zu warten. Link und Code funktionieren weiterhin.
+        {t('passkeys.intro')}
       </span>
       {list?.map((p) => (
         <div key={p.id} className="row" style={{ justifyContent: 'space-between' }}>
@@ -79,11 +82,11 @@ export function AccountPasskeys({
             🔑 {describePasskey(p)}
             <br />
             <span className="muted" style={{ fontSize: '0.85rem' }}>
-              hinzugefügt am {date(p.createdAt)}
+              {t('passkeys.added', { date: date(p.createdAt) })}
             </span>
           </span>
           <button className="btn" onClick={() => void remove(p.id)}>
-            Entfernen
+            {t('common:remove')}
           </button>
         </div>
       ))}
@@ -93,7 +96,7 @@ export function AccountPasskeys({
         disabled={busy}
         onClick={() => void add()}
       >
-        Passkey hinzufügen
+        {t('passkeys.add')}
       </button>
       {message && (
         <span className={message.good ? 'feedback-good' : 'feedback-bad'} role="status">

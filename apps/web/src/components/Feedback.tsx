@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { DiffSegment } from '@/services/srs/tashkil';
 import type { RecallVerdict } from '@/services/srs/recall';
 
@@ -13,15 +14,15 @@ interface FeedbackProps {
   explanation?: string;
 }
 
-const VERDICT_TEXT: Record<RecallVerdict, { label: string; cls: string }> = {
-  exact: { label: '✓ Richtig', cls: 'feedback-good' },
-  accepted: { label: '✓ Richtig', cls: 'feedback-good' },
-  typo: { label: '✓ Richtig – kleiner Tippfehler', cls: 'feedback-warn' },
-  'tashkil-tolerant': {
-    label: '✓ Richtig – Tashkīl unvollständig, aber akzeptiert',
-    cls: 'feedback-warn',
-  },
-  wrong: { label: '✗ Noch nicht richtig', cls: 'feedback-bad' },
+const VERDICT: Record<
+  RecallVerdict,
+  { key: 'correct' | 'typo' | 'tashkilTolerant' | 'wrong'; cls: string }
+> = {
+  exact: { key: 'correct', cls: 'feedback-good' },
+  accepted: { key: 'correct', cls: 'feedback-good' },
+  typo: { key: 'typo', cls: 'feedback-warn' },
+  'tashkil-tolerant': { key: 'tashkilTolerant', cls: 'feedback-warn' },
+  wrong: { key: 'wrong', cls: 'feedback-bad' },
 };
 
 /** Immediate, specific feedback with optional character diff and explanation. */
@@ -33,7 +34,8 @@ export function Feedback({
   diff,
   explanation,
 }: FeedbackProps) {
-  const v = VERDICT_TEXT[verdict];
+  const { t } = useTranslation('components');
+  const v = VERDICT[verdict];
   const showExpected =
     verdict === 'wrong' || verdict === 'typo' || verdict === 'tashkil-tolerant';
   const expectedStyle = expectedIsArabic
@@ -41,18 +43,18 @@ export function Feedback({
     : { style: { fontSize: '1.1rem', fontWeight: 600 } };
   return (
     <div className="stack" style={{ gap: '0.5rem' }} role="status" aria-live="polite">
-      <strong className={v.cls}>{v.label}</strong>
+      <strong className={v.cls}>{t(`feedback.${v.key}`)}</strong>
       {showExpected && (
         <div>
           <span className="muted">
-            {verdict === 'wrong' ? 'Erwartet: ' : 'Richtig: '}
+            {verdict === 'wrong' ? t('feedback.expected') : t('feedback.right')}
           </span>
           <span {...expectedStyle}>{expected}</span>
         </div>
       )}
       {!showExpected && alsoCorrect.length > 0 && (
         <div>
-          <span className="muted">Auch richtig: </span>
+          <span className="muted">{t('feedback.alsoCorrect')}</span>
           <span style={{ fontWeight: 600 }}>{alsoCorrect.join(', ')}</span>
         </div>
       )}

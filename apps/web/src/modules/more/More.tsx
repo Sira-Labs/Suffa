@@ -1,13 +1,13 @@
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
-import { MORE_GROUP_LABEL, NAV_ITEMS, type MoreGroup, type NavItem } from '@/navigation';
+import { NAV_ITEMS, navText, type MoreGroup, type NavItem } from '@/navigation';
 import { useRole } from '@/modules/account/useRole';
 
 /** Admins also see the admin area (story 4.2). */
 const ADMIN_ITEM: NavItem = {
   to: '/admin',
-  label: 'Verwaltung',
-  description: 'Nutzer, Rollen und Protokoll',
+  id: 'admin',
   icon: 'lock',
   tier: 'secondary',
   group: 'me',
@@ -16,8 +16,7 @@ const ADMIN_ITEM: NavItem = {
 /** Teachers and admins check the course content (story 16.1). */
 const CONTENT_ITEM: NavItem = {
   to: '/inhalte',
-  label: 'Inhalte prüfen',
-  description: 'Einheiten lesen und als geprüft markieren',
+  id: 'content',
   icon: 'read',
   tier: 'secondary',
   group: 'me',
@@ -27,6 +26,7 @@ const GROUPS: readonly MoreGroup[] = ['media', 'help', 'me'];
 
 /** Mobile overflow page: media, help and the learner's own pages, in three groups. */
 export function More() {
+  const { t } = useTranslation('nav');
   const role = useRole();
   const items = NAV_ITEMS.filter((item) => item.tier === 'secondary');
   const all = [
@@ -36,14 +36,14 @@ export function More() {
   ];
   return (
     <div className="stack" style={{ gap: '1.25rem' }}>
-      <h1>Mehr</h1>
+      <h1>{t('more')}</h1>
       {GROUPS.map((group) => (
         <section key={group} className="stack" aria-labelledby={`more-${group}`}>
           <h2 id={`more-${group}`} className="eyebrow">
-            {MORE_GROUP_LABEL[group]}
+            {t(`groups.${group}`)}
           </h2>
           <TileList
-            label={MORE_GROUP_LABEL[group]}
+            label={t(`groups.${group}`)}
             items={all.filter((item) => item.group === group)}
           />
         </section>
@@ -54,15 +54,15 @@ export function More() {
 
 /** "Üben": practice across the units reached so far (the unit room covers one at a time). */
 export function Training() {
+  const { t } = useTranslation('nav');
   return (
     <div className="stack">
-      <h1>Üben</h1>
+      <h1>{t('training')}</h1>
       <p className="muted" style={{ margin: 0 }}>
-        Üben mit allem aus den Einheiten, die du schon erreicht hast – neue Einheiten
-        kommen mit jedem bestandenen Test dazu.
+        {t('trainingIntro')}
       </p>
       <TileList
-        label="Trainingsbereiche"
+        label={t('trainingAreas')}
         items={NAV_ITEMS.filter((item) => item.tier === 'training')}
       />
     </div>
@@ -70,6 +70,8 @@ export function Training() {
 }
 
 function TileList({ label, items }: { label: string; items: readonly NavItem[] }) {
+  // Re-renders when the language changes.
+  useTranslation('nav');
   return (
     <ul className="more-grid" aria-label={label}>
       {items.map((item) => (
@@ -79,9 +81,9 @@ function TileList({ label, items }: { label: string; items: readonly NavItem[] }
               <Icon name={item.icon} size={24} />
             </span>
             <span className="stack" style={{ gap: 2 }}>
-              <strong>{item.label}</strong>
+              <strong>{navText(item).label}</strong>
               <span className="muted" style={{ fontSize: '0.9rem' }}>
-                {item.description}
+                {navText(item).description}
               </span>
             </span>
           </Link>

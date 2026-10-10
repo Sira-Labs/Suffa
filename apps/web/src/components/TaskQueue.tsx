@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Works through the open tasks in order. A solved task never comes back; skipping moves on to
@@ -15,6 +16,7 @@ export function TaskQueue({
   complete: ReactNode;
   children(id: string, position: string, next: () => void): ReactNode;
 }) {
+  const { t } = useTranslation('components');
   const [current, setCurrent] = useState<string | null>(
     () => ids.find((id) => !isDone(id)) ?? null
   );
@@ -32,5 +34,5 @@ export function TaskQueue({
     }
     setCurrent(isDone(current) ? null : current);
   };
-  return <>{children(current, `noch ${open.length} offen`, next)}</>;
+  return <>{children(current, t('queue.open', { count: open.length }), next)}</>;
 }

@@ -1,6 +1,9 @@
 import { WEEKLY_GOALS } from '@suffa/engagement';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { TashkilToggle } from '@/components';
+import i18n, { setUiLanguage, type UiLanguage } from '@/i18n';
+import { dateLocale } from '@/i18n/format';
 import { ApiSyncProvider, SIGN_IN_RETURN_PATH } from '@/services/sync/ApiSyncProvider';
 import { PasskeySignIn } from '@/modules/account/PasskeySignIn';
 import { SignInForm } from '@/modules/account/SignInForm';
@@ -10,30 +13,36 @@ import { RemindersCard } from './RemindersCard';
 import { PrivacyCard } from './PrivacyCard';
 
 export function Settings() {
+  const { t } = useTranslation(['settings', 'common']);
   const settings = useSettingsStore((s) => s.settings);
   const update = useSettingsStore((s) => s.update);
   const toggleTheme = useSettingsStore((s) => s.toggleTheme);
 
   return (
     <div className="stack">
-      <h1 style={{ margin: 0 }}>Einstellungen</h1>
+      <h1 style={{ margin: 0 }}>{t('title')}</h1>
 
       <div className="card stack">
-        <strong>Konto & Synchronisation</strong>
+        <strong>{t('account.title')}</strong>
         <AccountPanel />
       </div>
 
       <div className="card stack">
-        <strong>Darstellung</strong>
+        <strong>{t('display.title')}</strong>
+        <LanguageSetting />
         <div className="row" style={{ justifyContent: 'space-between' }}>
-          <span>Design</span>
+          <span>{t('display.design')}</span>
           <button className="btn" onClick={() => void toggleTheme()}>
-            {settings.theme === 'dark' ? '🌙 Dunkel' : '☀️ Hell'} – umschalten
+            {t('display.toggle', {
+              current: settings.theme === 'dark' ? t('display.dark') : t('display.light'),
+            })}
           </button>
         </div>
         <TashkilToggle />
         <label className="stack" style={{ gap: '0.3rem' }}>
-          <span>Arabische Schriftgröße: {settings.arabicFontScale.toFixed(1)}×</span>
+          <span>
+            {t('display.fontScale', { scale: settings.arabicFontScale.toFixed(1) })}
+          </span>
           <input
             type="range"
             min={0.8}
@@ -44,7 +53,7 @@ export function Settings() {
           />
         </label>
         <label className="row" style={{ justifyContent: 'space-between' }}>
-          <span>Umschrift anzeigen</span>
+          <span>{t('display.transliteration')}</span>
           <input
             type="checkbox"
             checked={settings.showTransliteration}
@@ -52,7 +61,7 @@ export function Settings() {
           />
         </label>
         <label className="row" style={{ justifyContent: 'space-between' }}>
-          <span>Golf-Dialekt-Randnotizen (nicht prüfungsrelevant)</span>
+          <span>{t('display.dialectNotes')}</span>
           <input
             type="checkbox"
             checked={settings.dialectNotes}
@@ -62,9 +71,9 @@ export function Settings() {
       </div>
 
       <div className="card stack">
-        <strong>Lernen</strong>
+        <strong>{t('learning.title')}</strong>
         <label className="row" style={{ justifyContent: 'space-between' }}>
-          <span>Tagesziel (Karten)</span>
+          <span>{t('learning.dailyGoal')}</span>
           <input
             className="input"
             type="number"
@@ -77,9 +86,9 @@ export function Settings() {
         </label>
         <label className="row" style={{ justifyContent: 'space-between' }}>
           <span className="stack" style={{ gap: 0 }}>
-            <span>Wochenziel</span>
+            <span>{t('learning.weeklyGoal')}</span>
             <span className="muted" style={{ fontSize: '0.85rem' }}>
-              Lerntage pro Woche – ein freier Tag bricht das Ziel nicht
+              {t('learning.weeklyGoalHint')}
             </span>
           </span>
           <select
@@ -90,17 +99,16 @@ export function Settings() {
           >
             {WEEKLY_GOALS.map((goal) => (
               <option key={goal} value={goal}>
-                {goal} Tage
+                {t('learning.weeklyGoalDays', { count: goal })}
               </option>
             ))}
           </select>
         </label>
         <label className="row" style={{ justifyContent: 'space-between' }}>
           <span className="stack" style={{ gap: 0 }}>
-            <span>Wiederholungsplan</span>
+            <span>{t('learning.schedule')}</span>
             <span className="muted" style={{ fontSize: '0.85rem' }}>
-              FSRS plant jede Karte nach deinem Gedächtnis (Pilot). Heute fällige Karten
-              bleiben fällig; zurückwechseln geht jederzeit ohne Verlust.
+              {t('learning.scheduleHint')}
             </span>
           </span>
           <select
@@ -111,8 +119,8 @@ export function Settings() {
             }
             style={{ width: 160, flexShrink: 0 }}
           >
-            <option value="sm2">Klassisch</option>
-            <option value="fsrs">FSRS (Pilot)</option>
+            <option value="sm2">{t('learning.classic')}</option>
+            <option value="fsrs">{t('learning.fsrs')}</option>
           </select>
         </label>
       </div>
@@ -124,7 +132,43 @@ export function Settings() {
   );
 }
 
+/** Interface language (story 16.3): synced, and kept on the device for the next start. */
+function LanguageSetting() {
+  const { t } = useTranslation(['settings', 'common']);
+  const update = useSettingsStore((s) => s.update);
+  const current: UiLanguage = i18n.language === 'en' ? 'en' : 'de';
+  const choose = async (language: UiLanguage) => {
+    await setUiLanguage(language);
+    await update({ uiLanguage: language });
+  };
+  return (
+    <label className="row" style={{ justifyContent: 'space-between' }}>
+      <span className="stack" style={{ gap: 0 }}>
+        <span>{t('display.language')}</span>
+        <span className="muted" style={{ fontSize: '0.85rem' }}>
+          {t('display.languageHint')}
+        </span>
+      </span>
+      <select
+        className="input"
+        value={current}
+        onChange={(e) => void choose(e.target.value === 'en' ? 'en' : 'de')}
+        style={{ width: 160, flexShrink: 0 }}
+      >
+        {/* Each language names itself, so it can be found from either side. */}
+        <option value="de" lang="de">
+          Deutsch
+        </option>
+        <option value="en" lang="en">
+          English
+        </option>
+      </select>
+    </label>
+  );
+}
+
 function AccountPanel() {
+  const { t } = useTranslation(['settings', 'common']);
   const provider = useSyncStore((s) => s.provider);
   const auth = useSyncStore((s) => s.auth);
   const signOut = useSyncStore((s) => s.signOut);
@@ -139,51 +183,49 @@ function AccountPanel() {
   if (provider instanceof ApiSyncProvider && provider.isServerDown()) {
     return (
       <p className="muted" role="status">
-        Der Server ist gerade nicht erreichbar. Dein Lernstand bleibt auf diesem Gerät und
-        wird abgeglichen, sobald er wieder da ist – du bleibst angemeldet.
+        {t('account.serverDown')}
       </p>
     );
   }
 
   if (!provider.isConfigured()) {
-    return (
-      <p className="muted">
-        Offline-Modus: Alle Daten liegen lokal auf diesem Gerät. Die Anmeldung für den
-        Abgleich zwischen Geräten ist auf diesem Server noch nicht eingerichtet.
-      </p>
-    );
+    return <p className="muted">{t('account.offline')}</p>;
   }
 
   if (auth.status === 'signed-in') {
     return (
       <div className="stack">
         {justSignedIn && (
-          <span className="feedback-good">
-            ✓ Du bist angemeldet. Dein Lernstand wird abgeglichen.
-          </span>
+          <span className="feedback-good">{t('account.justSignedIn')}</span>
         )}
         <span>
-          Angemeldet als <strong>{auth.user.email ?? auth.user.id}</strong>
+          <Trans
+            t={t}
+            i18nKey="account.signedInAs"
+            values={{ who: auth.user.email ?? auth.user.id }}
+            components={{ 1: <strong /> }}
+          />
         </span>
         <span className="muted">
-          Dein Lernstand wird automatisch abgeglichen: beim Öffnen der App, alle paar
-          Minuten und kurz nach jeder Übung.
+          {t('account.autoSync')}
           {lastSyncAt &&
-            ` Zuletzt: ${new Date(lastSyncAt).toLocaleString('de-DE', {
-              dateStyle: 'short',
-              timeStyle: 'short',
-            })}.`}
+            t('account.lastSync', {
+              when: new Date(lastSyncAt).toLocaleString(dateLocale(), {
+                dateStyle: 'short',
+                timeStyle: 'short',
+              }),
+            })}
         </span>
         <div className="row">
           <button
             className="btn"
             onClick={() => void syncNow()}
-            title="Nur nötig, wenn du sofort auf ein anderes Gerät wechselst"
+            title={t('account.syncNowHint')}
           >
-            Sofort abgleichen
+            {t('account.syncNow')}
           </button>
           <button className="btn" onClick={() => void signOut()}>
-            Abmelden
+            {t('common:signOut')}
           </button>
         </div>
         <AccountDevices />
@@ -196,8 +238,7 @@ function AccountPanel() {
     <div className="stack">
       {linkError && <span className="feedback-bad">{linkError}</span>}
       <p className="muted" style={{ margin: 0 }}>
-        Anmelden ohne Passwort: Du bekommst einen Link per E-Mail. Mit demselben Konto auf
-        Handy und Computer wird dein Lernstand automatisch abgeglichen.
+        {t('account.signInIntro')}
       </p>
       <SignInForm returnTo={SIGN_IN_RETURN_PATH} />
       <PasskeySignIn />
@@ -207,23 +248,23 @@ function AccountPanel() {
 
 /** Sources and licences of the content the app shows (the full list is its own page). */
 function SourcesCard() {
+  const { t } = useTranslation(['settings', 'common']);
   return (
     <section className="card stack" aria-labelledby="sources-title">
-      <strong id="sources-title">Quellen & Lizenzen</strong>
+      <strong id="sources-title">{t('sources.title')}</strong>
       <p className="muted" style={{ margin: 0 }}>
-        Woher Bücher, Aufnahmen, Videos und Beispielsätze kommen und unter welchen
-        Bedingungen wir sie zeigen.
+        {t('sources.intro')}
       </p>
-      <Link to="/sources">Alle Quellen & Lizenzen</Link>
+      <Link to="/sources">{t('sources.link')}</Link>
     </section>
   );
 }
 
-/** German explanation for the error code Better Auth appends to a failed magic link. */
+/** Explanation for the error code Better Auth appends to a failed magic link. */
 export function signInLinkError(code: string | null): string | null {
   if (!code) return null;
   if (code === 'INVALID_TOKEN' || code === 'EXPIRED_TOKEN') {
-    return 'Dieser Anmeldelink ist abgelaufen oder wurde schon benutzt. Fordere einen neuen an.';
+    return i18n.t('account:linkExpired');
   }
-  return 'Die Anmeldung hat nicht geklappt. Fordere einen neuen Link an.';
+  return i18n.t('account:linkFailed');
 }

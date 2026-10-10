@@ -1,14 +1,39 @@
 import type { IconName } from './components/Icon';
+import i18n from './i18n';
 
 /** Sections of the "Mehr" page. */
 export type MoreGroup = 'media' | 'help' | 'me';
 
+/** Key of a destination in the `nav` catalogue (label and short description). */
+export type NavId =
+  | 'today'
+  | 'units'
+  | 'classes'
+  | 'classesTeacher'
+  | 'training'
+  | 'alphabet'
+  | 'review'
+  | 'vocab'
+  | 'reading'
+  | 'writing'
+  | 'speaking'
+  | 'roots'
+  | 'conjugation'
+  | 'exam'
+  | 'discover'
+  | 'videos'
+  | 'library'
+  | 'tutor'
+  | 'progress'
+  | 'settings'
+  | 'content'
+  | 'admin';
+
 export interface NavItem {
   to: string;
-  label: string;
+  /** Label and description come from the `nav` catalogue (story 16.3). */
+  id: NavId;
   icon: IconName;
-  /** Short explanation, shown on the hub pages ("Üben", "Mehr"). */
-  description: string;
   /**
    * primary: bottom bar on phones. training: listed on the "Üben" hub (practice across
    * all units). secondary: listed under "Mehr", in its group. The desktop sidebar shows
@@ -22,14 +47,20 @@ export interface NavItem {
 export const TRAINING_PATH = '/training';
 export const CLASSES_PATH = '/classes';
 
-export const MORE_GROUP_LABEL: Record<MoreGroup, string> = {
-  media: 'Medien',
-  help: 'Hilfe',
-  me: 'Ich',
-};
+/** Label and short description (shown on the "Üben" and "Mehr" hubs) in the UI language. */
+export function navText(item: Pick<NavItem, 'id'>): {
+  label: string;
+  description: string;
+} {
+  return {
+    label: i18n.t(`nav:items.${item.id}.label`),
+    description: i18n.t(`nav:items.${item.id}.description`),
+  };
+}
 
 /**
- * Every destination of the app, in sidebar order. Labels are learner-facing (German).
+ * Every destination of the app, in sidebar order. Labels and descriptions live in the `nav`
+ * catalogue.
  * Redesign v3 (tester feedback R6): the class gets its own tab, so learners and teachers
  * find it at once; practice of every kind sits under "Üben"; "Mehr" keeps only media,
  * help and the learner's own pages.
@@ -37,141 +68,122 @@ export const MORE_GROUP_LABEL: Record<MoreGroup, string> = {
 export const NAV_ITEMS: readonly NavItem[] = [
   {
     to: '/',
-    label: 'Heute',
+    id: 'today',
     icon: 'home',
-    description: 'Dein Weg für heute',
     tier: 'primary',
     end: true,
   },
   {
     to: '/units',
-    label: 'Einheit',
+    id: 'units',
     icon: 'path',
-    description: 'Stufen, Etappen und deine Einheit',
     tier: 'primary',
   },
   {
     to: CLASSES_PATH,
-    label: 'Klasse',
+    id: 'classes',
     icon: 'people',
-    description: 'Deine Klasse: Aufgaben, Aufnahmen, Challenge',
     tier: 'primary',
   },
   {
     to: TRAINING_PATH,
-    label: 'Üben',
+    id: 'training',
     icon: 'dumbbell',
-    description: 'Üben über alle Einheiten',
     tier: 'primary',
   },
   {
     to: '/alphabet',
-    label: 'Alphabet',
+    id: 'alphabet',
     icon: 'write',
-    description: 'Die 28 Buchstaben – für den Einstieg',
     tier: 'training',
   },
   {
     to: '/review',
-    label: 'Wiederholen',
+    id: 'review',
     icon: 'cards',
-    description: 'Fällige Karten im Fokusmodus',
     tier: 'training',
   },
   {
     to: '/vocab',
-    label: 'Vokabeln',
+    id: 'vocab',
     icon: 'cards',
-    description: 'Vokabeltrainer mit allen Übungsarten',
     tier: 'training',
   },
   {
     to: '/reading',
-    label: 'Lesen',
+    id: 'reading',
     icon: 'read',
-    description: 'Dialoge mit Worterklärungen',
     tier: 'training',
   },
   {
     to: '/writing',
-    label: 'Schreiben',
+    id: 'writing',
     icon: 'write',
-    description: 'Abschreiben, Diktat und Übersetzung',
     tier: 'training',
   },
   {
     to: '/speaking',
-    label: 'Sprechen',
+    id: 'speaking',
     icon: 'speak',
-    description: 'Nachsprechen, Aufnahme, Minimalpaare',
     tier: 'training',
   },
   {
     to: '/roots',
-    label: 'Wurzeln',
+    id: 'roots',
     icon: 'roots',
-    description: 'Wurzeln, Muster und Wortfamilien',
     tier: 'training',
   },
   {
     to: '/conjugation',
-    label: 'Konjugation',
+    id: 'conjugation',
     icon: 'conjugate',
-    description: 'Verbtabellen für alle Personen',
     tier: 'training',
   },
   {
     to: '/exam',
-    label: 'Prüfung',
+    id: 'exam',
     icon: 'exam',
-    description: 'Gemischte Tests über mehrere Einheiten',
     tier: 'training',
   },
   {
     to: '/discover',
-    label: 'Entdecken',
+    id: 'discover',
     icon: 'compass',
-    description: 'Ausgewählte Videos und Podcasts',
     tier: 'secondary',
     group: 'media',
   },
   {
     to: '/videos',
-    label: 'Videolektionen',
+    id: 'videos',
     icon: 'play',
-    description: 'Lektionen zum Buch auf YouTube, mit Fragen zwischendurch',
     tier: 'secondary',
     group: 'media',
   },
   {
     to: '/library',
-    label: 'Buch-Medien',
+    id: 'library',
     icon: 'listen',
-    description: 'Alle Verlagsvideos und -audios zu Buch 1',
     tier: 'secondary',
     group: 'media',
   },
   {
     to: '/tutor',
-    label: 'al-Muʿallim',
+    id: 'tutor',
     icon: 'chat',
-    description: 'Dein KI-Lehrer: fragen, üben, erklären lassen',
     tier: 'secondary',
     group: 'help',
   },
   {
     to: '/progress',
-    label: 'Fortschritt',
+    id: 'progress',
     icon: 'chart',
-    description: 'Stufe, Statistik, wackelige Wörter und Abzeichen',
     tier: 'secondary',
     group: 'me',
   },
   {
     to: '/settings',
-    label: 'Einstellungen',
+    id: 'settings',
     icon: 'settings',
-    description: 'Konto, Darstellung, Erinnerungen',
     tier: 'secondary',
     group: 'me',
   },
@@ -185,11 +197,7 @@ export function navItemsFor(role: string | null | undefined): NavItem[] {
   if (role !== 'teacher' && role !== 'admin') return [...NAV_ITEMS];
   const classes = NAV_ITEMS.find((i) => i.to === CLASSES_PATH)!;
   const rest = NAV_ITEMS.filter((i) => i !== classes);
-  return [
-    rest[0]!,
-    { ...classes, label: 'Klassen', description: 'Deine Klassen führen' },
-    ...rest.slice(1),
-  ];
+  return [rest[0]!, { ...classes, id: 'classesTeacher' }, ...rest.slice(1)];
 }
 
 export const MORE_PATH = '/more';

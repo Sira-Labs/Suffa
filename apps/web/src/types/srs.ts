@@ -125,6 +125,8 @@ export interface SettingsRecord extends Syncable {
   course?: CourseId | null;
   /** Review scheduling (story 15.6); none or null means SM-2. */
   srsAlgorithm?: SrsAlgorithm | null;
+  /** Interface language (story 16.3); none or null means German. */
+  uiLanguage?: 'de' | 'en' | null;
 }
 
 export type TashkilLevel = 'full' | 'partial' | 'none';

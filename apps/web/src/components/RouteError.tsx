@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom';
 import { reportError } from '@/services/errorTracking';
 
@@ -7,6 +8,7 @@ import { reportError } from '@/services/errorTracking';
  * error tracking and offers a restart instead of the default English page.
  */
 export function RouteError() {
+  const { t } = useTranslation('components');
   const error = useRouteError();
   const notFound = isRouteErrorResponse(error) && error.status === 404;
 
@@ -16,17 +18,13 @@ export function RouteError() {
 
   return (
     <main role="alert" style={{ padding: '2rem', maxWidth: 560, margin: '0 auto' }}>
-      <h1>{notFound ? 'Seite nicht gefunden' : 'Da ist etwas schiefgelaufen'}</h1>
-      <p>
-        {notFound
-          ? 'Diese Seite gibt es nicht.'
-          : 'Der Fehler wurde gemeldet. Deine Lernfortschritte sind lokal gespeichert und bleiben erhalten.'}
-      </p>
+      <h1>{notFound ? t('routeError.notFound') : t('routeError.failed')}</h1>
+      <p>{notFound ? t('routeError.notFoundText') : t('routeError.failedText')}</p>
       <p style={{ display: 'flex', gap: '0.5rem' }}>
-        <a href="/">Zur Übersicht</a>
+        <a href="/">{t('routeError.home')}</a>
         {!notFound && (
           <button type="button" onClick={() => window.location.reload()}>
-            Neu laden
+            {t('routeError.reload')}
           </button>
         )}
       </p>

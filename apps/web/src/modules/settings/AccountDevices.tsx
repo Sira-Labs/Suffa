@@ -3,23 +3,26 @@
  * API (not in offline mode).
  */
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ApiSyncProvider, type DeviceSession } from '@/services/sync/ApiSyncProvider';
+import { dateLocale } from '@/i18n/format';
 import { useSyncStore } from '@/state';
 import { AccountPasskeys } from './AccountPasskeys';
 import { browserTimeZone, describeDevice, timeZoneOptions } from './devices';
 
 const dateTime = (iso: string) =>
-  new Date(iso).toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
+  new Date(iso).toLocaleString(dateLocale(), { dateStyle: 'medium', timeStyle: 'short' });
 
 export function AccountDevices() {
+  const { t } = useTranslation(['settings', 'common']);
   const provider = useSyncStore((s) => s.provider);
   if (!(provider instanceof ApiSyncProvider)) return null;
   return (
     <>
       {provider.currentUser()?.role === 'admin' && (
         <Link to="/admin" className="btn" style={{ alignSelf: 'flex-start' }}>
-          Verwaltung öffnen
+          {t('devices.openAdmin')}
         </Link>
       )}
       <TimeZoneSetting provider={provider} />
@@ -30,6 +33,7 @@ export function AccountDevices() {
 }
 
 function TimeZoneSetting({ provider }: { provider: ApiSyncProvider }) {
+  const { t } = useTranslation(['settings', 'common']);
   const [zone, setZone] = useState(provider.currentUser()?.timeZone ?? null);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,7 +54,7 @@ function TimeZoneSetting({ provider }: { provider: ApiSyncProvider }) {
 
   return (
     <label className="row" style={{ justifyContent: 'space-between' }}>
-      <span>Zeitzone (für Tagesziel und Serie)</span>
+      <span>{t('devices.timeZone')}</span>
       <select
         className="input"
         style={{ maxWidth: 220 }}
@@ -69,6 +73,7 @@ function TimeZoneSetting({ provider }: { provider: ApiSyncProvider }) {
 }
 
 function DeviceList({ provider }: { provider: ApiSyncProvider }) {
+  const { t } = useTranslation(['settings', 'common']);
   const [sessions, setSessions] = useState<DeviceSession[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -84,7 +89,7 @@ function DeviceList({ provider }: { provider: ApiSyncProvider }) {
 
   const revoke = async (id: string) => {
     const result = await provider.revokeSession(id);
-    setMessage(result.ok ? '✓ Gerät abgemeldet.' : result.error.message);
+    setMessage(result.ok ? t('devices.signedOut') : result.error.message);
     void load();
   };
 
@@ -92,7 +97,7 @@ function DeviceList({ provider }: { provider: ApiSyncProvider }) {
     const result = await provider.revokeOtherSessions();
     setMessage(
       result.ok
-        ? `✓ ${result.value === 1 ? 'Ein Gerät' : `${result.value} Geräte`} abgemeldet.`
+        ? t('devices.othersSignedOut', { count: result.value })
         : result.error.message
     );
     void load();
@@ -103,27 +108,27 @@ function DeviceList({ provider }: { provider: ApiSyncProvider }) {
 
   return (
     <div className="stack" style={{ gap: '0.4rem' }}>
-      <strong style={{ fontSize: '0.95rem' }}>Angemeldete Geräte</strong>
+      <strong style={{ fontSize: '0.95rem' }}>{t('devices.title')}</strong>
       {sessions.map((s) => (
         <div key={s.id} className="row" style={{ justifyContent: 'space-between' }}>
           <span>
             {describeDevice(s.userAgent)}
-            {s.current && <span className="muted"> · dieses Gerät</span>}
+            {s.current && <span className="muted"> · {t('common:thisDevice')}</span>}
             <br />
             <span className="muted" style={{ fontSize: '0.85rem' }}>
-              zuletzt aktiv {dateTime(s.lastActiveAt)}
+              {t('devices.lastActive', { when: dateTime(s.lastActiveAt) })}
             </span>
           </span>
           {!s.current && (
             <button className="btn" onClick={() => void revoke(s.id)}>
-              Abmelden
+              {t('common:signOut')}
             </button>
           )}
         </div>
       ))}
       {others.length > 0 && (
         <button className="btn" onClick={() => void revokeOthers()}>
-          Auf allen anderen Geräten abmelden
+          {t('devices.signOutOthers')}
         </button>
       )}
       {message && <span className="muted">{message}</span>}

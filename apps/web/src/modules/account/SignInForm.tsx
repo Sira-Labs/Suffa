@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSyncStore } from '@/state';
 
 /**
@@ -14,6 +15,7 @@ export function SignInForm({
   /** Called after signing in with the code (the link brings the learner back by itself). */
   onSignedIn?: () => void;
 }) {
+  const { t } = useTranslation('account');
   const signIn = useSyncStore((s) => s.signIn);
   const signInWithCode = useSyncStore((s) => s.signInWithCode);
   const [code, setCode] = useState('');
@@ -28,7 +30,7 @@ export function SignInForm({
     const result = await signIn(email, returnTo);
     setBusy(false);
     if (result.ok) setSentTo(email.trim());
-    else setError(result.message ?? 'Der Anmeldelink konnte nicht gesendet werden.');
+    else setError(result.message ?? t('sendFailed'));
   };
 
   const confirm = async () => {
@@ -38,19 +40,16 @@ export function SignInForm({
     const result = await signInWithCode(sentTo, code);
     setBusy(false);
     if (result.ok) onSignedIn?.();
-    else setError(result.message ?? 'Die Anmeldung hat nicht geklappt.');
+    else setError(result.message ?? t('signInFailed'));
   };
 
   if (sentTo) {
     return (
       <div className="stack">
         <span className="feedback-good" role="status">
-          ✓ Link gesendet an {sentTo}
+          {t('sentTo', { email: sentTo })}
         </span>
-        <span className="muted">
-          Öffne die E-Mail auf diesem Gerät und tippe auf „Bei Suffa anmelden“. Link und
-          Code gelten 15 Minuten. Nichts angekommen? Schau auch im Spam-Ordner nach.
-        </span>
+        <span className="muted">{t('sentHint')}</span>
         <form
           className="stack sign-in-code"
           onSubmit={(e) => {
@@ -59,10 +58,7 @@ export function SignInForm({
           }}
         >
           <label className="stack" style={{ gap: '0.3rem' }}>
-            <span>
-              Öffnet deine Mail-App den Link in ihrem eigenen Browser? Dann gib hier den
-              6-stelligen Code aus der Mail ein:
-            </span>
+            <span>{t('codePrompt')}</span>
             <div className="row">
               <input
                 className="input sign-in-code-input"
@@ -71,13 +67,13 @@ export function SignInForm({
                 pattern="[0-9 ]*"
                 maxLength={7}
                 placeholder="123456"
-                aria-label="Anmeldecode"
+                aria-label={t('code')}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 required
               />
               <button className="btn btn-primary" type="submit" disabled={busy}>
-                Anmelden
+                {t('signIn')}
               </button>
             </div>
           </label>
@@ -89,10 +85,10 @@ export function SignInForm({
             disabled={busy}
             onClick={() => void send()}
           >
-            Nochmal senden
+            {t('sendAgain')}
           </button>
           <button className="btn" type="button" onClick={() => setSentTo(null)}>
-            Andere E-Mail-Adresse
+            {t('otherEmail')}
           </button>
         </div>
         {error && <span className="feedback-bad">{error}</span>}
@@ -114,15 +110,15 @@ export function SignInForm({
           type="email"
           autoComplete="email"
           inputMode="email"
-          placeholder="du@example.com"
-          aria-label="E-Mail-Adresse"
+          placeholder={t('emailPlaceholder')}
+          aria-label={t('email')}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
           style={{ flex: 1, minWidth: 0 }}
         />
         <button className="btn btn-primary" type="submit" disabled={busy}>
-          Link senden
+          {t('sendLink')}
         </button>
       </div>
       {error && <span className="feedback-bad">{error}</span>}

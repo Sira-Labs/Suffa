@@ -81,6 +81,8 @@ export const SYNC_SCHEMAS = {
     course: z.enum(COURSE_IDS as [CourseId, ...CourseId[]]).nullish(),
     // Review scheduling (story 15.6); none means SM-2.
     srsAlgorithm: z.enum(['sm2', 'fsrs']).nullish(),
+    // Interface language (story 16.3); kept when an older app does not send it.
+    uiLanguage: z.enum(['de', 'en']).nullish(),
   }),
   user_vocab: z.object({
     ...base,
@@ -168,7 +170,7 @@ export const JSON_COLUMNS: ReadonlySet<string> = new Set(['units', 'items']);
  */
 export const PRESERVED_WHEN_MISSING: Partial<Record<SyncTableName, ReadonlySet<string>>> =
   {
-    settings: new Set(['course', 'srsAlgorithm']),
+    settings: new Set(['course', 'srsAlgorithm', 'uiLanguage']),
     srs_cards: new Set(['stability', 'difficulty']),
   };
 

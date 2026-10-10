@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { RouterProvider } from 'react-router-dom';
 import { registerSW } from 'virtual:pwa-register';
 import { CONTENT_BUNDLE_VERSION } from './content';
+import { initUiLanguage } from './i18n';
 import { installNativeBridge, listenForAppLinks } from './native/install';
 import { router } from './router';
 import { updateContentBundle } from './services/content/bundleUpdater';
@@ -43,6 +44,9 @@ async function start(): Promise<void> {
       },
     });
   }
+
+  // The language this device used last time, before the first render (no German flash).
+  await initUiLanguage();
 
   createRoot(rootEl).render(
     <StrictMode>

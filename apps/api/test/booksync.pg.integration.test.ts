@@ -211,4 +211,47 @@ describe.skipIf(!url)('Book sync (Postgres)', () => {
     // A missing file is no reason to fail the start.
     expect(await seedBookSync(repo, join(dir, 'missing.json'), quiet)).toBe(0);
   });
+
+  it('replaces a suggestion nobody saved with a better one, never a saved sync', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'book-sync-reseed-'));
+    const file = join(dir, 'book1-sync.json');
+    const better = (lesson: number) => ({
+      lesson,
+      pages: [{ page: 2, at: 0 }],
+      lines: [{ page: 2, box: [0.1, 0.3, 0.8, 0.05], start: 2.5, end: 6 }],
+    });
+    await writeFile(
+      file,
+      JSON.stringify({ course: 'madinah', book: 1, lessons: [better(1), better(3)] })
+    );
+    expect(await seedBookSync(repo, file, quiet)).toBe(1);
+    const all = await lessons();
+    expect(all.find((l) => l.lesson === 1)).toMatchObject({ revision: 2 });
+    expect(all.find((l) => l.lesson === 3)).toMatchObject({
+      revision: 2,
+      lines: better(3).lines,
+    });
+
+    // Once an admin saves the lesson, it is theirs.
+    const saved = await call('PUT', `${BOOK}/3`, 'admin', { revision: 2, pages });
+    expect(await saved.json()).toEqual({ revision: 3 });
+    await writeFile(
+      file,
+      JSON.stringify({
+        course: 'madinah',
+        book: 1,
+        lessons: [{ ...better(3), pages: [{ page: 3, at: 0 }] }],
+      })
+    );
+    expect(await seedBookSync(repo, file, quiet)).toBe(0);
+    expect((await lessons()).find((l) => l.lesson === 3)).toMatchObject({
+      revision: 3,
+      pages,
+    });
+    const { rows } = await pool.query<{ details: { revision: number } }>(
+      `select details from audit_log where action = 'content.book_sync_seeded'
+        and target_id = 'madinah/1/3' order by id`
+    );
+    expect(rows.map((r) => r.details.revision)).toEqual([1, 2]);
+  });
 });

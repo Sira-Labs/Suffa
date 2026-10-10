@@ -212,6 +212,7 @@ async function main(): Promise<void> {
             errors,
             async () => ({
               videos: await new PgVideoRepository(pool).hasVisibleVideos(),
+              videoCourses: await new PgVideoRepository(pool).coursesWithVideos(),
               tutor:
                 (await tutorRouter.plan(TUTOR_TASK, { requires: ['streaming', 'tools'] }))
                   .length > 0,

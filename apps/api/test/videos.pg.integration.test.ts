@@ -137,7 +137,11 @@ describe.skipIf(!url)('Video catalog (Postgres)', () => {
       cues: [{ start: 0, end: 4, text: 'السَّلامُ عَلَيْكُمْ' }],
     });
     const listed = (await (await app.request('/api/v1/videos?unit=1')).json()) as {
-      videos: { title: string; interactive: boolean; channel: { name: string } }[];
+      videos: {
+        title: string;
+        interactive: boolean;
+        channel: { name: string; course: string };
+      }[];
     };
     expect(listed.videos.map((v) => v.title)).toEqual([
       'الدرس ١ – التحية (جديد)',
@@ -145,7 +149,7 @@ describe.skipIf(!url)('Video catalog (Postgres)', () => {
     ]);
     expect(listed.videos[0]).toMatchObject({
       interactive: false,
-      channel: { name: 'Muhammad al-Andalusi' },
+      channel: { name: 'Muhammad al-Andalusi', course: 'bayna-yadayk' },
     });
     const gated = (await (await app.request(`/api/v1/videos/${lesson1.id}`)).json()) as {
       checkpoints: unknown[];
@@ -183,6 +187,7 @@ describe.skipIf(!url)('Video catalog (Postgres)', () => {
     });
 
     expect(await repo.hasVisibleVideos()).toBe(true);
+    expect(await repo.coursesWithVideos()).toEqual(['bayna-yadayk']);
     // Hidden videos disappear for learners.
     await call('PATCH', `/admin/videos/${intro.id}`, { hidden: true });
     const after = (await (await app.request('/api/v1/videos')).json()) as {

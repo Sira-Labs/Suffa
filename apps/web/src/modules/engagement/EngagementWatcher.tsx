@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { BADGES, QUEST_XP } from '@suffa/engagement';
+import { BADGES, isCourseId, QUEST_XP, type CourseId } from '@suffa/engagement';
 import {
   useCelebrationStore,
   useEngagementStore,
@@ -52,7 +52,14 @@ export function EngagementWatcher() {
   useEffect(() => {
     let cancelled = false;
     void new VideosApi().list().then((result) => {
-      if (!cancelled && result.ok) setVideosAvailable(result.value.videos.length > 0);
+      if (!cancelled && result.ok) {
+        const { videos } = result.value;
+        // Older APIs send no channel course: then the quest only needs any lesson.
+        const courses = videos.every((v) => isCourseId(v.channel.course))
+          ? videos.map((v) => v.channel.course as CourseId)
+          : undefined;
+        setVideosAvailable(videos.length > 0, courses);
+      }
     });
     return () => {
       cancelled = true;

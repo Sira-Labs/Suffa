@@ -4,7 +4,12 @@
  */
 import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
-import { courseOfUnit, DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
+import {
+  courseOfUnit,
+  DEFAULT_COURSE,
+  isCourseId,
+  type CourseId,
+} from '@suffa/engagement';
 import { writeAudit } from '../audit/log.js';
 import { inTransaction } from '../db/transaction.js';
 import type { CheckpointData, Cue } from '../media/interactive.js';
@@ -40,7 +45,7 @@ export interface Video {
 }
 
 export interface PublicVideo extends Omit<Video, 'hidden' | 'channelId' | 'position'> {
-  channel: { name: string };
+  channel: { name: string; course: CourseId };
   /** The creator allowed transcripts and exercises. */
   interactive: boolean;
 }
@@ -286,10 +291,20 @@ export class PgVideoRepository {
     return rows[0]?.any === true;
   }
 
+  /** Courses with visible lessons: the video quest comes up for their learners only. */
+  async coursesWithVideos(): Promise<CourseId[]> {
+    const { rows } = await this.pool.query<{ course: string }>(
+      `select distinct c.course
+         from videos v join video_channels c on c.id = v.channel_id
+        where not v.hidden`
+    );
+    return rows.map((r) => r.course).filter(isCourseId);
+  }
+
   /** Visible lessons for learners, optionally of one unit, in course order. */
   async publicVideos(unit: number | null): Promise<PublicVideo[]> {
     const { rows } = await this.pool.query(
-      `select v.*, c.name as channel_name, c.permission_status
+      `select v.*, c.name as channel_name, c.course as channel_course, c.permission_status
          from videos v join video_channels c on c.id = v.channel_id
         where not v.hidden and ($1::int is null or v.unit = $1)
         order by v.unit nulls last, v.playlist_id, v.position, v.title
@@ -300,7 +315,10 @@ export class PgVideoRepository {
       const { hidden: _h, channelId: _c, position: _p, ...video } = videoOf(r);
       return {
         ...video,
-        channel: { name: r.channel_name as string },
+        channel: {
+          name: r.channel_name as string,
+          course: (r.channel_course as CourseId | undefined) ?? DEFAULT_COURSE,
+        },
         interactive: r.permission_status === 'granted',
       };
     });
@@ -308,7 +326,7 @@ export class PgVideoRepository {
 
   async publicVideo(id: string): Promise<PublicVideo | null> {
     const { rows } = await this.pool.query(
-      `select v.*, c.name as channel_name, c.permission_status
+      `select v.*, c.name as channel_name, c.course as channel_course, c.permission_status
          from videos v join video_channels c on c.id = v.channel_id
         where v.id = $1 and not v.hidden`,
       [id]
@@ -318,7 +336,10 @@ export class PgVideoRepository {
     const { hidden: _h, channelId: _c, position: _p, ...video } = videoOf(r);
     return {
       ...video,
-      channel: { name: r.channel_name as string },
+      channel: {
+        name: r.channel_name as string,
+        course: (r.channel_course as CourseId | undefined) ?? DEFAULT_COURSE,
+      },
       interactive: r.permission_status === 'granted',
     };
   }

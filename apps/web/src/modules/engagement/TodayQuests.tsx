@@ -1,21 +1,27 @@
 import { Link } from 'react-router-dom';
 import {
+  courseOfUnit,
   QUEST_XP,
   type EngagementSummary,
   type QuestDef,
   type QuestStatus,
 } from '@suffa/engagement';
 import { Icon, type IconName } from '@/components/Icon';
+import { madinahLessonPath } from '@/services/courses';
 
 /** Where a quest is done: reviews in the review session, the rest in the current unit. */
 export function questLink(quest: QuestDef, unit: number): string {
   const metric = quest.metric;
-  if (metric.kind === 'tracks') return `/units/${unit}/listen`;
+  // A Medina lesson has all its exercises on one page, no stations.
+  const lessonPage =
+    courseOfUnit(unit)?.id === 'madinah' ? madinahLessonPath(unit) : null;
+  if (metric.kind === 'tracks') return lessonPage ?? `/units/${unit}/listen`;
   if (metric.kind === 'videos') return '/videos';
   if (metric.kind === 'practice') {
     const skill = metric.skills?.[0];
     // A conversation with al-Muʿallim happens on the tutor page, not in a unit station.
     if (skill === 'tutor') return '/tutor';
+    if (lessonPage) return lessonPage;
     return skill ? `/units/${unit}/${skill}` : `/units/${unit}`;
   }
   return '/review';
@@ -51,6 +57,15 @@ const SLOT_ICON: Record<QuestDef['slot'], IconName> = {
   learn: 'listen',
   produce: 'write',
 };
+
+/** The icon of a quest: what it is about where that differs from its slot. */
+export function questIcon(quest: QuestDef): IconName {
+  const metric = quest.metric;
+  if (metric.kind === 'videos') return 'play';
+  if (metric.kind === 'new-cards') return 'cards';
+  if (metric.kind === 'practice' && metric.skills?.[0] === 'words') return 'cards';
+  return SLOT_ICON[quest.slot];
+}
 
 /**
  * "Tagesaufgaben" (story 5.2): the day's three quests with progress, the bonus for all
@@ -138,7 +153,7 @@ function QuestItem({ status, to }: { status: QuestStatus; to: string }) {
     <li className={`quest${done ? ' quest-done' : ''}`}>
       <Link to={to} className="quest-body">
         <span className="quest-icon" aria-hidden>
-          <Icon name={done ? 'check' : SLOT_ICON[quest.slot]} size={18} />
+          <Icon name={done ? 'check' : questIcon(quest)} size={18} />
         </span>
         <span className="stack" style={{ gap: '0.3rem', flex: 1 }}>
           <span

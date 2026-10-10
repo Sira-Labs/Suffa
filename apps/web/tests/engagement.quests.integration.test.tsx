@@ -1,11 +1,11 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { dailyQuests, dayKey } from '@suffa/engagement';
+import { COURSE_QUESTS_SINCE, dailyQuests, dayKey } from '@suffa/engagement';
 import type { ReviewLog } from '@/types';
 import { Dashboard } from '@/modules/dashboard';
 import { EngagementWatcher } from '@/modules/engagement/EngagementWatcher';
-import { questLink, questMinutes } from '@/modules/engagement/TodayQuests';
+import { questIcon, questLink, questMinutes } from '@/modules/engagement/TodayQuests';
 import { browserTimeZone } from '@/modules/settings/devices';
 import { db } from '@/services/storage';
 import {
@@ -127,6 +127,46 @@ describe('Daily quests (integration)', () => {
     expect(
       questLink({ ...produce!, metric: { kind: 'practice', skills: ['tutor'] } }, 3)
     ).toBe('/tutor');
+  });
+
+  it('leads Medina quests to the lesson page and words them for lessons', async () => {
+    const [, learn, produce] = dailyQuests('2026-10-12', { course: 'madinah' });
+    expect(
+      questLink({ ...learn!, metric: { kind: 'practice', skills: ['words'] } }, 105)
+    ).toBe('/units/madinah/5');
+    expect(questLink({ ...produce!, metric: { kind: 'practice' } }, 105)).toBe(
+      '/units/madinah/5'
+    );
+    expect(
+      questLink({ ...produce!, metric: { kind: 'practice', skills: ['tutor'] } }, 105)
+    ).toBe('/tutor');
+
+    // Word quests show cards, not the headphones of listening.
+    expect(
+      questIcon({ ...learn!, metric: { kind: 'practice', skills: ['words'] } })
+    ).toBe('cards');
+    expect(questIcon({ ...learn!, metric: { kind: 'tracks' } })).toBe('listen');
+
+    await act(() => useSettingsStore.getState().update({ course: 'madinah' }));
+    // A day on which quests follow the course (only the clock is faked, timers stay real).
+    vi.useFakeTimers({ toFake: ['Date'], shouldAdvanceTime: true });
+    vi.setSystemTime(new Date(`${COURSE_QUESTS_SINCE}T10:00:00`));
+    try {
+      renderHome();
+      const card = await screen.findByRole('region', { name: 'Tagesaufgaben' });
+      const today = dayKey(new Date(), browserTimeZone());
+      const quests = dailyQuests(today, { course: 'madinah' });
+      for (const quest of quests) {
+        expect(within(card).getByText(quest.title)).toBeTruthy();
+      }
+      expect(within(card).queryByText(/Dialog/)).toBeNull();
+      // No lesson passed yet: every quest outside reviews leads into lesson 1.
+      const next = within(card).getByRole('link', { name: /Weiterlernen/ });
+      expect(next.getAttribute('href')).toBe(questLink(quests[0]!, 101));
+    } finally {
+      vi.useRealTimers();
+      await act(() => useSettingsStore.getState().update({ course: 'bayna-yadayk' }));
+    }
   });
 
   it('estimates the minutes the open quests still take', () => {

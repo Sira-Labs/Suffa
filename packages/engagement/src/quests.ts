@@ -4,6 +4,7 @@
  * device and the server show the same ones, offline too. Progress is derived from the day's
  * learning records, so a quest done on the phone is done on the laptop after a sync.
  */
+import { DEFAULT_COURSE, type CourseId } from './courses.js';
 import { dayKey } from './day.js';
 import type { EngagementInput } from './records.js';
 import type { XpEvent } from './xp.js';
@@ -25,11 +26,21 @@ export type QuestMetric =
   /** Unit practice items; only these skills, or any skill without a list. */
   | { kind: 'practice'; skills?: readonly string[] };
 
-/** Features a quest may need; without them it is never picked (e.g. no AI tutor). */
+/**
+ * What the learner has: features a quest may need (without them it is never picked, e.g. no
+ * AI tutor) and the course they follow.
+ */
 export interface QuestFeatures {
   tutor?: boolean;
   /** The video lesson catalog has lessons (Sprint 12). */
   videos?: boolean;
+  /**
+   * Courses whose video lessons are in the catalog. From COURSE_QUESTS_SINCE on the video
+   * quest needs the learner's course among them (`videos` alone is not enough).
+   */
+  videoCourses?: readonly CourseId[];
+  /** The learner's course (ADR-0025); none means the default course. */
+  course?: CourseId | null;
 }
 
 export interface QuestDef {
@@ -42,9 +53,16 @@ export interface QuestDef {
    */
   since?: string;
   /** Only picked when this feature is on for the learner. */
-  requires?: keyof QuestFeatures;
+  requires?: 'tutor' | 'videos';
+  /**
+   * Only for learners of these courses, from COURSE_QUESTS_SINCE on: e.g. dialogue quests
+   * fit "Al-Arabiyya bayna Yadayk", whose units are built around dialogues.
+   */
+  courses?: readonly CourseId[];
   /** Learner-facing (German). */
   title: string;
+  /** The title for learners of another course, where the wording differs (unit vs lesson). */
+  titles?: Partial<Record<CourseId, string>>;
   target: number;
   xp: number;
   metric: QuestMetric;
@@ -54,6 +72,11 @@ export interface QuestDef {
 export const TUTOR_QUESTS_SINCE = '2026-09-26';
 /** The day the video lesson quest joins the pool (Sprint 12). */
 export const VIDEO_QUESTS_SINCE = '2026-09-27';
+/**
+ * The day quests follow the learner's course (Medina course, ADR-0025). Earlier days keep the
+ * quests they had, so no quest done and no XP earned changes.
+ */
+export const COURSE_QUESTS_SINCE = '2026-10-11';
 
 export const QUEST_XP: Record<QuestSlot, number> & { bonus: number } = {
   review: 30,
@@ -114,6 +137,7 @@ export const QUEST_POOL: Record<QuestSlot, readonly QuestDef[]> = {
       target: 1,
       xp: QUEST_XP.learn,
       metric: { kind: 'tracks' },
+      courses: ['bayna-yadayk'],
     },
     {
       id: 'video-1',
@@ -124,6 +148,16 @@ export const QUEST_POOL: Record<QuestSlot, readonly QuestDef[]> = {
       metric: { kind: 'videos' },
       since: VIDEO_QUESTS_SINCE,
       requires: 'videos',
+    },
+    {
+      id: 'words-5',
+      slot: 'learn',
+      title: 'Übe 5 Wörter deiner Lektion',
+      target: 5,
+      xp: QUEST_XP.learn,
+      metric: { kind: 'practice', skills: ['words'] },
+      since: COURSE_QUESTS_SINCE,
+      courses: ['madinah'],
     },
   ],
   produce: [
@@ -142,6 +176,7 @@ export const QUEST_POOL: Record<QuestSlot, readonly QuestDef[]> = {
       target: 1,
       xp: QUEST_XP.produce,
       metric: { kind: 'practice', skills: ['read'] },
+      courses: ['bayna-yadayk'],
     },
     {
       id: 'cloze-3',
@@ -155,6 +190,7 @@ export const QUEST_POOL: Record<QuestSlot, readonly QuestDef[]> = {
       id: 'practice-5',
       slot: 'produce',
       title: '5 Übungen in deiner Einheit',
+      titles: { madinah: '5 Übungen in deiner Lektion' },
       target: 5,
       xp: QUEST_XP.produce,
       metric: { kind: 'practice' },
@@ -184,14 +220,31 @@ function hash(text: string): number {
   return h >>> 0;
 }
 
-/** The three quests of `day` (`YYYY-MM-DD`) for a learner with these features. */
+/** Whether `quest` can come up on `day` for this learner. */
+function eligible(quest: QuestDef, day: string, features: QuestFeatures): boolean {
+  if (quest.since && quest.since > day) return false;
+  if (quest.requires && features[quest.requires] !== true) return false;
+  if (day < COURSE_QUESTS_SINCE) return true;
+  const course = features.course ?? DEFAULT_COURSE;
+  if (quest.courses && !quest.courses.includes(course)) return false;
+  // A video quest only where the learner's course has video lessons.
+  if (quest.requires === 'videos' && features.videoCourses) {
+    return features.videoCourses.includes(course);
+  }
+  return true;
+}
+
+/**
+ * The three quests of `day` (`YYYY-MM-DD`) for a learner with these features, titled for
+ * their course.
+ */
 export function dailyQuests(day: string, features: QuestFeatures = {}): QuestDef[] {
+  const course = features.course ?? DEFAULT_COURSE;
   return SLOTS.map((slot) => {
-    const pool = QUEST_POOL[slot].filter(
-      (q) =>
-        (!q.since || q.since <= day) && (!q.requires || features[q.requires] === true)
-    );
-    return pool[hash(`${day}:${slot}`) % pool.length] as QuestDef;
+    const pool = QUEST_POOL[slot].filter((q) => eligible(q, day, features));
+    const quest = pool[hash(`${day}:${slot}`) % pool.length] as QuestDef;
+    const title = day >= COURSE_QUESTS_SINCE ? quest.titles?.[course] : undefined;
+    return title ? { ...quest, title } : quest;
   });
 }
 

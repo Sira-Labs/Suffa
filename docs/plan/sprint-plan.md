@@ -398,6 +398,16 @@ moves, so the same cards are due on the day of the switch; switching back loses 
 
 ### Sprint 16 — _"Open up"_ (plan: May 3 – May 16; now: week of Sep 28)
 
+Status: 16.1 ✅: `content_units` (migration 0038) hold each unit's draft, review state and the
+last published unit file; at start-up the API inserts every bundled unit that is missing
+(`apps/web/src/content/units`, published as is), so the JSON is the seed and never overwrites
+edits. Admins (with the second factor) edit drafts in the admin area ("Inhalte"), save against
+the revision they loaded, submit and publish; teachers read every unit on "Inhalte prüfen", mark
+the one under review as checked or send it back with a note. Publishing writes `status:
+geprueft` only for a checked revision. Content IDs are registered in `content_ids` and never move
+to another unit. Every step is audit-logged with the IDs it added, changed or removed. Learners
+keep the bundled content until 16.2 serves published bundles.
+
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                              |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------------------------------------------------- |
 | 16.1 | Content CMS (ADR-0014): `content_units` in Postgres with draft / review / published, admin editor, the teacher marks a unit as checked                                    | 5   | Existing JSON is the seed; stable IDs; every change audit-logged.                       |

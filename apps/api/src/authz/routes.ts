@@ -281,6 +281,37 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   { method: 'POST', path: '/api/v1/account/2fa/confirm', action: 'profile:write' },
   { method: 'GET', path: '/api/v1/admin/feedback', action: 'admin:feedback' },
   { method: 'PATCH', path: '/api/v1/admin/feedback/:id', action: 'admin:feedback' },
+  { method: 'GET', path: '/api/v1/content/units', action: 'content:review' },
+  {
+    method: 'GET',
+    path: '/api/v1/content/units/:course/:unit',
+    action: 'content:review',
+  },
+  {
+    method: 'PUT',
+    path: '/api/v1/content/units/:course/:unit/draft',
+    action: 'content:write',
+  },
+  {
+    method: 'POST',
+    path: '/api/v1/content/units/:course/:unit/submit',
+    action: 'content:write',
+  },
+  {
+    method: 'POST',
+    path: '/api/v1/content/units/:course/:unit/check',
+    action: 'content:review',
+  },
+  {
+    method: 'POST',
+    path: '/api/v1/content/units/:course/:unit/return',
+    action: 'content:review',
+  },
+  {
+    method: 'POST',
+    path: '/api/v1/content/units/:course/:unit/publish',
+    action: 'content:write',
+  },
 ];
 
 /**

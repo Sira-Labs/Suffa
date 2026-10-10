@@ -16,6 +16,7 @@ import {
 } from '@/services/admin/adminApi';
 import { useSyncStore } from '@/state';
 import { AiAdmin } from './AiAdmin';
+import { ContentAdmin } from './ContentAdmin';
 import { FeedbackAdmin } from './FeedbackAdmin';
 import { VideoAdmin } from './VideoAdmin';
 
@@ -147,9 +148,9 @@ function SecondFactor({
 }
 
 function AdminTabs({ api }: { api: AdminApi }) {
-  const [tab, setTab] = useState<'users' | 'audit' | 'ai' | 'videos' | 'feedback'>(
-    'users'
-  );
+  const [tab, setTab] = useState<
+    'users' | 'audit' | 'ai' | 'videos' | 'content' | 'feedback'
+  >('users');
   return (
     <>
       <div className="row" role="tablist">
@@ -187,6 +188,14 @@ function AdminTabs({ api }: { api: AdminApi }) {
         </button>
         <button
           role="tab"
+          aria-selected={tab === 'content'}
+          className={`btn ${tab === 'content' ? 'btn-primary' : ''}`}
+          onClick={() => setTab('content')}
+        >
+          Inhalte
+        </button>
+        <button
+          role="tab"
           aria-selected={tab === 'feedback'}
           className={`btn ${tab === 'feedback' ? 'btn-primary' : ''}`}
           onClick={() => setTab('feedback')}
@@ -198,6 +207,7 @@ function AdminTabs({ api }: { api: AdminApi }) {
       {tab === 'audit' && <Audit api={api} />}
       {tab === 'ai' && <AiAdmin />}
       {tab === 'videos' && <VideoAdmin />}
+      {tab === 'content' && <ContentAdmin />}
       {tab === 'feedback' && <FeedbackAdmin />}
     </>
   );

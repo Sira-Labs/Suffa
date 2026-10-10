@@ -59,6 +59,8 @@ import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/res
 import { PgSyncRepository } from './sync/repository.js';
 import { PgListeningRepository } from './media/listening.js';
 import { PgFeedbackRepository } from './feedback/repository.js';
+import { PgContentRepository } from './content/repository.js';
+import { DEFAULT_SEED_DIR, seedContent } from './content/seed.js';
 import { PgSpeechRepository } from './speech/repository.js';
 import { PgSharingRepository, purgeDeletedFiles } from './sharing/repository.js';
 import type { SharingRouteDeps } from './sharing/routes.js';
@@ -352,6 +354,9 @@ async function main(): Promise<void> {
   }
 
   await migrate(pool, migrations, log);
+  // Units missing from the CMS come from the bundled unit files (story 16.1).
+  const content = new PgContentRepository(pool);
+  await seedContent(content, config.contentSeedDir ?? DEFAULT_SEED_DIR, log);
   // The api only installs the queue schema and sends jobs; the worker processes them.
   const boss = await startBoss({
     databaseUrl: config.databaseUrl,
@@ -549,6 +554,7 @@ async function main(): Promise<void> {
       log,
       enabled: config.feedbackEnabled,
     },
+    content: { repo: content, auth, log },
     speech: {
       auth,
       log,

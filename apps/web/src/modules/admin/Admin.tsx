@@ -4,7 +4,9 @@
  * asks for a code once per session (valid 12 hours).
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import QRCode from 'qrcode';
+import { dateLocale } from '@/i18n/format';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import {
   AdminApi,
@@ -21,9 +23,10 @@ import { FeedbackAdmin } from './FeedbackAdmin';
 import { VideoAdmin } from './VideoAdmin';
 
 const dateTime = (iso: string) =>
-  new Date(iso).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' });
+  new Date(iso).toLocaleString(dateLocale(), { dateStyle: 'short', timeStyle: 'short' });
 
 export function Admin() {
+  const { t } = useTranslation('admin');
   const provider = useSyncStore((s) => s.provider);
   const api = useMemo(() => new AdminApi(), []);
   const [status, setStatus] = useState<{ enabled: boolean; confirmed: boolean } | null>(
@@ -46,15 +49,15 @@ export function Admin() {
   if (!isAdmin) {
     return (
       <div className="stack">
-        <h1>Verwaltung</h1>
-        <p className="muted">Dieser Bereich ist nur für Admins.</p>
+        <h1>{t('title')}</h1>
+        <p className="muted">{t('adminsOnly')}</p>
       </div>
     );
   }
 
   return (
     <div className="stack">
-      <h1>Verwaltung</h1>
+      <h1>{t('title')}</h1>
       {error && <span className="feedback-bad">{error}</span>}
       {status && !status.confirmed && (
         <SecondFactor api={api} enabled={status.enabled} onConfirmed={refresh} />
@@ -73,6 +76,7 @@ function SecondFactor({
   enabled: boolean;
   onConfirmed: () => Promise<void>;
 }) {
+  const { t } = useTranslation('admin');
   const [setup, setSetup] = useState<{ secret: string; qr: string } | null>(null);
   const [code, setCode] = useState('');
   const [message, setMessage] = useState<string | null>(null);
@@ -95,32 +99,30 @@ function SecondFactor({
 
   return (
     <div className="card stack">
-      <strong>Zwei-Faktor-Anmeldung</strong>
+      <strong>{t('secondFactor.title')}</strong>
       {!enabled && !setup && (
         <>
           <p className="muted" style={{ margin: 0 }}>
-            Für die Verwaltung brauchst du zusätzlich einen Code aus einer
-            Authenticator-App (z. B. Google Authenticator, Aegis oder 1Password). Einmal
-            einrichten, dann alle 12 Stunden einen Code eingeben.
+            {t('secondFactor.intro')}
           </p>
           <button className="btn btn-primary" onClick={() => void start()}>
-            Einrichten
+            {t('secondFactor.setUp')}
           </button>
         </>
       )}
       {setup && (
         <div className="stack" style={{ alignItems: 'flex-start' }}>
-          <span>1. Scanne den QR-Code mit deiner Authenticator-App:</span>
-          <img
-            src={setup.qr}
-            alt="QR-Code für die Authenticator-App"
-            width={220}
-            height={220}
-          />
+          <span>{t('secondFactor.scan')}</span>
+          <img src={setup.qr} alt={t('secondFactor.qrAlt')} width={220} height={220} />
           <span className="muted" style={{ fontSize: '0.85rem', wordBreak: 'break-all' }}>
-            Oder gib den Schlüssel von Hand ein: <code>{setup.secret}</code>
+            <Trans
+              t={t}
+              i18nKey="secondFactor.manual"
+              values={{ secret: setup.secret }}
+              components={{ 1: <code /> }}
+            />
           </span>
-          <span>2. Gib den Code ein, den die App anzeigt:</span>
+          <span>{t('secondFactor.enterCode')}</span>
         </div>
       )}
       {(enabled || setup) && (
@@ -135,10 +137,10 @@ function SecondFactor({
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
             style={{ width: 120 }}
-            aria-label="Code aus der Authenticator-App"
+            aria-label={t('secondFactor.code')}
           />
           <button className="btn btn-primary" type="submit" disabled={code.length !== 6}>
-            Bestätigen
+            {t('secondFactor.confirm')}
           </button>
         </form>
       )}
@@ -147,61 +149,25 @@ function SecondFactor({
   );
 }
 
+const TABS = ['users', 'audit', 'ai', 'videos', 'content', 'feedback'] as const;
+
 function AdminTabs({ api }: { api: AdminApi }) {
-  const [tab, setTab] = useState<
-    'users' | 'audit' | 'ai' | 'videos' | 'content' | 'feedback'
-  >('users');
+  const { t } = useTranslation('admin');
+  const [tab, setTab] = useState<(typeof TABS)[number]>('users');
   return (
     <>
       <div className="row" role="tablist">
-        <button
-          role="tab"
-          aria-selected={tab === 'users'}
-          className={`btn ${tab === 'users' ? 'btn-primary' : ''}`}
-          onClick={() => setTab('users')}
-        >
-          Nutzer
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === 'audit'}
-          className={`btn ${tab === 'audit' ? 'btn-primary' : ''}`}
-          onClick={() => setTab('audit')}
-        >
-          Protokoll
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === 'ai'}
-          className={`btn ${tab === 'ai' ? 'btn-primary' : ''}`}
-          onClick={() => setTab('ai')}
-        >
-          KI
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === 'videos'}
-          className={`btn ${tab === 'videos' ? 'btn-primary' : ''}`}
-          onClick={() => setTab('videos')}
-        >
-          Videos
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === 'content'}
-          className={`btn ${tab === 'content' ? 'btn-primary' : ''}`}
-          onClick={() => setTab('content')}
-        >
-          Inhalte
-        </button>
-        <button
-          role="tab"
-          aria-selected={tab === 'feedback'}
-          className={`btn ${tab === 'feedback' ? 'btn-primary' : ''}`}
-          onClick={() => setTab('feedback')}
-        >
-          Feedback
-        </button>
+        {TABS.map((id) => (
+          <button
+            key={id}
+            role="tab"
+            aria-selected={tab === id}
+            className={`btn ${tab === id ? 'btn-primary' : ''}`}
+            onClick={() => setTab(id)}
+          >
+            {t(`tabs.${id}`)}
+          </button>
+        ))}
       </div>
       {tab === 'users' && <Users api={api} />}
       {tab === 'audit' && <Audit api={api} />}
@@ -214,6 +180,7 @@ function AdminTabs({ api }: { api: AdminApi }) {
 }
 
 function Users({ api }: { api: AdminApi }) {
+  const { t } = useTranslation('admin');
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [next, setNext] = useState<string | null>(null);
@@ -237,7 +204,11 @@ function Users({ api }: { api: AdminApi }) {
   }, [load]);
 
   const change = async (user: AdminUser, update: { role?: Role; disabled?: boolean }) => {
-    if (update.disabled && !window.confirm(`${user.email ?? user.id} sperren?`)) return;
+    if (
+      update.disabled &&
+      !window.confirm(t('users.confirmDisable', { who: user.email ?? user.id }))
+    )
+      return;
     const result = await api.updateUser(user.id, update);
     if (!result.ok) return setMessage(result.message);
     setMessage(null);
@@ -249,10 +220,10 @@ function Users({ api }: { api: AdminApi }) {
       <input
         className="input"
         type="search"
-        placeholder="Suchen nach E-Mail oder Name"
+        placeholder={t('users.search')}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        aria-label="Nutzer suchen"
+        aria-label={t('users.searchLabel')}
       />
       {message && <span className="feedback-bad">{message}</span>}
       {users.map((user) => (
@@ -263,10 +234,10 @@ function Users({ api }: { api: AdminApi }) {
         >
           <span style={{ opacity: user.disabled ? 0.6 : 1 }}>
             <strong>{user.email ?? '–'}</strong>
-            {user.disabled && <span className="feedback-bad"> · gesperrt</span>}
+            {user.disabled && <span className="feedback-bad">{t('users.disabled')}</span>}
             <br />
             <span className="muted" style={{ fontSize: '0.85rem' }}>
-              seit {dateTime(user.createdAt)}
+              {t('users.since', { date: dateTime(user.createdAt) })}
             </span>
           </span>
           <span className="row">
@@ -274,7 +245,7 @@ function Users({ api }: { api: AdminApi }) {
               className="input"
               value={user.role}
               onChange={(e) => void change(user, { role: e.target.value as Role })}
-              aria-label={`Rolle von ${user.email ?? user.id}`}
+              aria-label={t('users.roleOf', { who: user.email ?? user.id })}
             >
               {(['student', 'teacher', 'admin'] as const).map((r) => (
                 <option key={r} value={r}>
@@ -286,15 +257,15 @@ function Users({ api }: { api: AdminApi }) {
               className="btn"
               onClick={() => void change(user, { disabled: !user.disabled })}
             >
-              {user.disabled ? 'Entsperren' : 'Sperren'}
+              {user.disabled ? t('users.enable') : t('users.disable')}
             </button>
           </span>
         </div>
       ))}
-      {users.length === 0 && <span className="muted">Keine Nutzer gefunden.</span>}
+      {users.length === 0 && <span className="muted">{t('users.none')}</span>}
       {next && (
         <button className="btn" onClick={() => void load(next)}>
-          Mehr laden
+          {t('users.more')}
         </button>
       )}
     </div>
@@ -302,6 +273,7 @@ function Users({ api }: { api: AdminApi }) {
 }
 
 function Audit({ api }: { api: AdminApi }) {
+  const { t } = useTranslation('admin');
   const [entries, setEntries] = useState<AuditEntry[]>([]);
   const [next, setNext] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -330,14 +302,17 @@ function Audit({ api }: { api: AdminApi }) {
           <strong>{describeAudit(entry)}</strong>
           <br />
           <span className="muted" style={{ fontSize: '0.85rem' }}>
-            {dateTime(entry.createdAt)} · von {entry.actorEmail ?? 'unbekannt'}
+            {t('audit.meta', {
+              date: dateTime(entry.createdAt),
+              who: entry.actorEmail ?? t('audit.unknownActor'),
+            })}
           </span>
         </div>
       ))}
-      {entries.length === 0 && <span className="muted">Noch keine Einträge.</span>}
+      {entries.length === 0 && <span className="muted">{t('audit.none')}</span>}
       {next && (
         <button className="btn" onClick={() => void load(next)}>
-          Ältere laden
+          {t('audit.older')}
         </button>
       )}
     </div>

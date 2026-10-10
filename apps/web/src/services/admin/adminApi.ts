@@ -1,7 +1,8 @@
 /**
  * Client for the admin area and the second factor (story 4.2). Same origin, session cookie;
- * errors come back as German messages the page can show as they are.
+ * errors come back as messages in the interface language the page can show as they are.
  */
+import i18n from '@/i18n';
 import { apiRequest, type Fetch } from '@/services/api/request';
 
 export type Role = 'student' | 'teacher' | 'admin';
@@ -27,14 +28,15 @@ export interface AuditEntry {
   createdAt: string;
 }
 
-const MESSAGES: Record<string, string> = {
-  second_factor_required: 'Bitte bestätige zuerst den Code aus deiner Authenticator-App.',
-  invalid_code: 'Der Code stimmt nicht. Nimm den aktuellen Code aus der App.',
-  locked: 'Zu viele falsche Codes – bitte in 15 Minuten noch einmal.',
-  not_set_up: 'Die Zwei-Faktor-Anmeldung ist noch nicht eingerichtet.',
-  already_enabled: 'Die Zwei-Faktor-Anmeldung ist schon eingerichtet.',
-  cannot_change_self: 'Das eigene Konto kann hier nicht geändert werden.',
-};
+/** API error codes in the interface language, read at call time (story 16.3). */
+const messages = (): Record<string, string> => ({
+  second_factor_required: i18n.t('admin:errors.secondFactorRequired'),
+  invalid_code: i18n.t('admin:errors.invalidCode'),
+  locked: i18n.t('admin:errors.locked'),
+  not_set_up: i18n.t('admin:errors.notSetUp'),
+  already_enabled: i18n.t('admin:errors.alreadyEnabled'),
+  cannot_change_self: i18n.t('admin:errors.cannotChangeSelf'),
+});
 
 export class AdminApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
@@ -79,61 +81,85 @@ export class AdminApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, messages());
   }
 }
 
-/** Audit actions in words. */
+/** Audit actions in words, in the interface language. Values from the details stay as sent. */
 export function describeAudit(entry: AuditEntry): string {
   const d = entry.details;
   switch (entry.action) {
     case 'user.role_changed':
-      return `Rolle geändert: ${roleLabel(d.from)} → ${roleLabel(d.to)}`;
+      return i18n.t('admin:audit.roleChanged', {
+        from: roleLabel(d.from),
+        to: roleLabel(d.to),
+      });
     case 'user.disabled':
-      return `Konto gesperrt${typeof d.endedSessions === 'number' ? ` (${d.endedSessions} Sitzung(en) beendet)` : ''}`;
+      return typeof d.endedSessions === 'number'
+        ? i18n.t('admin:audit.disabledSessions', { count: d.endedSessions })
+        : i18n.t('admin:audit.disabled');
     case 'user.enabled':
-      return 'Konto entsperrt';
+      return i18n.t('admin:audit.enabled');
     case 'account.2fa_enabled':
-      return 'Zwei-Faktor-Anmeldung eingerichtet';
+      return i18n.t('admin:audit.twoFactorEnabled');
     case 'ai.routes.replace':
-      return `KI-Modelle für ${entry.targetId} geändert`;
+      return i18n.t('admin:audit.aiRoutes', { task: entry.targetId });
     case 'ai.settings.update':
-      return 'KI-Budget und Kontingente geändert';
+      return i18n.t('admin:audit.aiSettings');
     case 'video.channel_created':
-      return `Videokanal angelegt: ${String(d.name ?? '')}`;
+      return i18n.t('admin:audit.channelCreated', { name: String(d.name ?? '') });
     case 'video.permission_changed':
-      return `Erlaubnis des Videokanals: ${String(d.from ?? '')} → ${String(d.permissionStatus ?? '')}`;
+      return i18n.t('admin:audit.permissionChanged', {
+        from: String(d.from ?? ''),
+        to: String(d.permissionStatus ?? ''),
+      });
     case 'video.channel_updated':
-      return 'Videokanal geändert';
+      return i18n.t('admin:audit.channelUpdated');
     case 'certificate.awarded':
-      return `Zertifikat Einheit ${String(d.unit ?? '')} vergeben (${String(d.mastery ?? '')} %)`;
+      return i18n.t('admin:audit.certificateAwarded', {
+        unit: String(d.unit ?? ''),
+        mastery: String(d.mastery ?? ''),
+      });
     case 'certificate.revoked':
-      return `Zertifikat Einheit ${String(d.unit ?? '')} zurückgenommen`;
+      return i18n.t('admin:audit.certificateRevoked', { unit: String(d.unit ?? '') });
     case 'content.units_seeded':
-      return `Inhalte übernommen: ${Array.isArray(d.units) ? d.units.length : ''} Einheit(en)`;
+      return i18n.t('admin:audit.unitsSeeded', {
+        count: Array.isArray(d.units) ? d.units.length : 0,
+      });
     case 'content.unit_saved': {
       const c = (d.counts ?? {}) as {
         added?: number;
         removed?: number;
         changed?: number;
       };
-      return `Entwurf gespeichert (+${c.added ?? 0} neu, ${c.changed ?? 0} geändert, −${c.removed ?? 0} entfernt)`;
+      return i18n.t('admin:audit.unitSaved', {
+        added: c.added ?? 0,
+        changed: c.changed ?? 0,
+        removed: c.removed ?? 0,
+      });
     }
     case 'content.unit_submitted':
-      return 'Einheit zur Prüfung gegeben';
+      return i18n.t('admin:audit.unitSubmitted');
     case 'content.unit_checked':
-      return 'Einheit als geprüft markiert';
+      return i18n.t('admin:audit.unitChecked');
     case 'content.unit_returned':
-      return `Einheit zurückgegeben: ${String(d.note ?? '')}`;
+      return i18n.t('admin:audit.unitReturned', { note: String(d.note ?? '') });
     case 'content.unit_published':
-      return 'Einheit veröffentlicht';
+      return i18n.t('admin:audit.unitPublished');
     case 'class.league.settings':
-      return `Wochenliga ${d.enabled ? 'eingeschaltet' : 'ausgeschaltet'}${d.minors ? ' (Klasse mit Minderjährigen)' : ''}`;
+      return (
+        i18n.t(d.enabled ? 'admin:audit.leagueOn' : 'admin:audit.leagueOff') +
+        (d.minors ? i18n.t('admin:audit.leagueMinors') : '')
+      );
     default:
       return entry.action;
   }
 }
 
 export function roleLabel(role: unknown): string {
-  return role === 'admin' ? 'Admin' : role === 'teacher' ? 'Lehrkraft' : 'Lernende:r';
+  return role === 'admin'
+    ? i18n.t('admin:roles.admin')
+    : role === 'teacher'
+      ? i18n.t('admin:roles.teacher')
+      : i18n.t('admin:roles.student');
 }

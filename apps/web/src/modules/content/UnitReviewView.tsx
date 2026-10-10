@@ -2,42 +2,45 @@
  * Read-only view of a unit draft for review (story 16.1): what changed against the published
  * unit first, then the words, dialogues and grammar points with "neu" / "geändert" marks.
  */
+import { useTranslation } from 'react-i18next';
+import { dateLocale } from '@/i18n/format';
 import type {
   ItemChanges,
   UnitContent,
   UnitSummary,
 } from '@/services/content/contentApi';
-import { STATE_LABEL } from '@/services/content/contentApi';
-
-const WHEN = new Intl.DateTimeFormat('de-DE', {
-  dateStyle: 'medium',
-  timeStyle: 'short',
-});
+import { stateLabel } from '@/services/content/contentApi';
 
 export function UnitStatus({ unit }: { unit: UnitSummary }) {
+  const { t } = useTranslation('content');
+  const when = new Date(unit.updatedAt).toLocaleString(dateLocale(), {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
   return (
     <div className="row" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-      <span className="badge">{STATE_LABEL[unit.state]}</span>
+      <span className="badge">{stateLabel(unit.state)}</span>
       <span className={`badge${unit.checked ? ' badge-done' : ''}`}>
-        {unit.checked ? 'Geprüft' : 'Nicht geprüft'}
+        {unit.checked ? t('status.checked') : t('status.unchecked')}
       </span>
       <span className="muted" style={{ fontSize: '0.85rem' }}>
-        Stand {unit.revision}
+        {t('status.revision', { revision: unit.revision })}
         {unit.publishedRevision !== null &&
-          ` · veröffentlicht: Stand ${unit.publishedRevision}`}
-        {` · zuletzt ${WHEN.format(new Date(unit.updatedAt))}`}
-        {unit.updatedBy && ` von ${unit.updatedBy}`}
+          t('status.published', { revision: unit.publishedRevision })}
+        {t('status.updated', { when })}
+        {unit.updatedBy && t('status.by', { who: unit.updatedBy })}
       </span>
     </div>
   );
 }
 
 export function ChangesSummary({ changes }: { changes: ItemChanges }) {
+  const { t } = useTranslation('content');
   const { added, removed, changed, textChanged } = changes;
   if (!added.length && !removed.length && !changed.length && !textChanged) {
     return (
       <p className="muted" style={{ margin: 0 }}>
-        Keine Änderungen gegenüber der veröffentlichten Fassung.
+        {t('changes.none')}
       </p>
     );
   }
@@ -46,17 +49,22 @@ export function ChangesSummary({ changes }: { changes: ItemChanges }) {
       className="stack"
       style={{ margin: 0, paddingInlineStart: '1.2rem', gap: '0.25rem' }}
     >
-      {added.length > 0 && <li>Neu: {added.join(', ')}</li>}
-      {changed.length > 0 && <li>Geändert: {changed.join(', ')}</li>}
-      {removed.length > 0 && <li>Entfernt: {removed.join(', ')}</li>}
-      {textChanged && <li>Titel oder Kulturnotiz geändert</li>}
+      {added.length > 0 && <li>{t('changes.added', { ids: added.join(', ') })}</li>}
+      {changed.length > 0 && <li>{t('changes.changed', { ids: changed.join(', ') })}</li>}
+      {removed.length > 0 && <li>{t('changes.removed', { ids: removed.join(', ') })}</li>}
+      {textChanged && <li>{t('changes.text')}</li>}
     </ul>
   );
 }
 
 function Mark({ id, changes }: { id: string; changes: ItemChanges }) {
-  if (changes.added.includes(id)) return <span className="badge badge-done">neu</span>;
-  if (changes.changed.includes(id)) return <span className="badge">geändert</span>;
+  const { t } = useTranslation('content');
+  if (changes.added.includes(id)) {
+    return <span className="badge badge-done">{t('changes.markNew')}</span>;
+  }
+  if (changes.changed.includes(id)) {
+    return <span className="badge">{t('changes.markChanged')}</span>;
+  }
   return null;
 }
 
@@ -67,29 +75,32 @@ export function UnitReviewView({
   content: UnitContent;
   changes: ItemChanges;
 }) {
+  const { t } = useTranslation('content');
   return (
     <div className="stack">
-      <section className="card stack" aria-label="Änderungen">
-        <h2 style={{ margin: 0 }}>Änderungen</h2>
+      <section className="card stack" aria-label={t('changes.title')}>
+        <h2 style={{ margin: 0 }}>{t('changes.title')}</h2>
         <ChangesSummary changes={changes} />
       </section>
       {content.kulturnotiz && (
-        <section className="card stack" aria-label="Kulturnotiz">
-          <h2 style={{ margin: 0 }}>Kulturnotiz</h2>
+        <section className="card stack" aria-label={t('view.cultureNote')}>
+          <h2 style={{ margin: 0 }}>{t('view.cultureNote')}</h2>
           <p style={{ margin: 0 }}>{content.kulturnotiz}</p>
         </section>
       )}
-      <section className="card stack" aria-label="Wörter">
-        <h2 style={{ margin: 0 }}>Wörter ({content.vokabeln.length})</h2>
+      <section className="card stack" aria-label={t('view.words')}>
+        <h2 style={{ margin: 0 }}>
+          {t('view.wordsCount', { n: content.vokabeln.length })}
+        </h2>
         <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Arabisch</th>
-                <th>Umschrift</th>
-                <th>Deutsch</th>
-                <th>Wurzel</th>
-                <th>Plural</th>
+                <th>{t('view.arabic')}</th>
+                <th>{t('view.transliteration')}</th>
+                <th>{t('view.german')}</th>
+                <th>{t('view.root')}</th>
+                <th>{t('view.plural')}</th>
                 <th />
               </tr>
             </thead>
@@ -119,8 +130,10 @@ export function UnitReviewView({
           </table>
         </div>
       </section>
-      <section className="card stack" aria-label="Dialoge">
-        <h2 style={{ margin: 0 }}>Dialoge ({content.dialoge.length})</h2>
+      <section className="card stack" aria-label={t('view.dialogues')}>
+        <h2 style={{ margin: 0 }}>
+          {t('view.dialoguesCount', { n: content.dialoge.length })}
+        </h2>
         {content.dialoge.map((dialog) => (
           <article key={dialog.id} className="stack" style={{ gap: '0.35rem' }}>
             <h3 style={{ margin: 0 }}>
@@ -141,8 +154,10 @@ export function UnitReviewView({
           </article>
         ))}
       </section>
-      <section className="card stack" aria-label="Grammatik">
-        <h2 style={{ margin: 0 }}>Grammatik ({content.grammatik.length})</h2>
+      <section className="card stack" aria-label={t('view.grammar')}>
+        <h2 style={{ margin: 0 }}>
+          {t('view.grammarCount', { n: content.grammatik.length })}
+        </h2>
         {content.grammatik.map((point) => (
           <article key={point.id} className="stack" style={{ gap: '0.35rem' }}>
             <h3 style={{ margin: 0 }}>
@@ -166,7 +181,7 @@ export function UnitReviewView({
             ))}
             {point.fragen.length > 0 && (
               <p className="muted" style={{ margin: 0 }}>
-                {point.fragen.length} Quizfrage(n)
+                {t('view.questions', { count: point.fragen.length })}
               </p>
             )}
           </article>

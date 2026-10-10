@@ -2,6 +2,7 @@
  * Client for the admin AI page (story 9.5): routes per task, budget and quotas, spend, and a
  * test call. Amounts come from the server in micro-dollars.
  */
+import i18n from '@/i18n';
 import { apiRequest, type Fetch } from '@/services/api/request';
 
 export type ProviderId = 'anthropic' | 'openrouter' | 'huggingface' | 'mistral';
@@ -70,27 +71,37 @@ export interface TryResult {
   attempts: Array<{ provider: ProviderId; model: string; outcome: string }>;
 }
 
-const MESSAGES: Record<string, string> = {
-  second_factor_required: 'Bitte bestätige zuerst den Code aus deiner Authenticator-App.',
-  invalid_body: 'Bitte prüfe die Eingaben.',
-  ai_paused: 'Das KI-Budget dieses Monats ist aufgebraucht – KI macht Pause.',
-  ai_unavailable: 'Kein Modell hat geantwortet. Sind die Schlüssel gesetzt?',
-  ai_quota: 'Das Tageskontingent ist aufgebraucht.',
-  ai_bad_request: 'Das Modell hat die Anfrage abgelehnt (ungültige Anfrage).',
-};
+/** API error codes in the interface language, read at call time (story 16.3). */
+const messages = (): Record<string, string> => ({
+  second_factor_required: i18n.t('admin:errors.secondFactorRequired'),
+  invalid_body: i18n.t('adminAi:errors.invalidBody'),
+  ai_paused: i18n.t('adminAi:errors.paused'),
+  ai_unavailable: i18n.t('adminAi:errors.unavailable'),
+  ai_quota: i18n.t('adminAi:errors.quota'),
+  ai_bad_request: i18n.t('adminAi:errors.badRequest'),
+});
 
-export const TASK_LABELS: Record<string, string> = {
-  'tutor.converse': 'Gespräch mit al-Muʿallim',
-  'tutor.explain': 'Erklärungen',
-  'grade.writing': 'Schreiben bewerten',
-  'grade.speech': 'Aussprache bewerten',
-  'exercise.generate': 'Übungen erzeugen',
-  'tutor.coach': 'Wochenplan',
-  'content.author-assist': 'Autorenhilfe',
-  'recording.suggest': 'Vorschläge für Aufnahmen',
-  'recording.summarize': 'Zusammenfassung von Aufnahmen',
-  'recording.proofread': 'Transkript-Korrekturen von Aufnahmen',
-};
+/** The AI tasks the server knows; each has a label in the `adminAi` catalogue. */
+export const AI_TASKS = [
+  'tutor.converse',
+  'tutor.explain',
+  'grade.writing',
+  'grade.speech',
+  'exercise.generate',
+  'tutor.coach',
+  'content.author-assist',
+  'recording.suggest',
+  'recording.summarize',
+  'recording.proofread',
+] as const;
+export type AiTask = (typeof AI_TASKS)[number];
+
+/** A task in words in the interface language; unknown tasks keep their ID. */
+export function taskLabel(task: string): string {
+  return (AI_TASKS as readonly string[]).includes(task)
+    ? i18n.t(`adminAi:tasks.${task as AiTask}`)
+    : task;
+}
 
 export const PROVIDER_LABELS: Record<ProviderId, string> = {
   anthropic: 'Anthropic',
@@ -138,6 +149,6 @@ export class AiAdminApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, messages());
   }
 }

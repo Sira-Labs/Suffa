@@ -1,7 +1,10 @@
 /** English catalogues, loaded on demand when a learner picks English (story 16.3). */
 import { account } from './account';
+import { admin } from './admin';
+import { adminAi } from './adminAi';
 import { common } from './common';
 import { components } from './components';
+import { content } from './content';
 import { discover } from './discover';
 import { library } from './library';
 import { nav } from './nav';
@@ -16,9 +19,12 @@ export const en = {
   nav,
   settings,
   account,
-  library,
-  videos,
+  admin,
+  adminAi,
+  content,
   discover,
-  tutor,
+  library,
   sources,
+  tutor,
+  videos,
 };

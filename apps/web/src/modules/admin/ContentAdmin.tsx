@@ -5,11 +5,12 @@
  * uses it from the next start (story 16.2).
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   ContentApi,
   errorText,
-  STATE_LABEL,
+  stateLabel,
   type UnitContent,
   type UnitDetail,
   type UnitSummary,
@@ -18,6 +19,7 @@ import { UnitEditor } from '@/modules/content/UnitEditor';
 import { ChangesSummary, UnitStatus } from '@/modules/content/UnitReviewView';
 
 export function ContentAdmin({ api }: { api?: ContentApi }) {
+  const { t } = useTranslation('content');
   const client = useMemo(() => api ?? new ContentApi(), [api]);
   const [units, setUnits] = useState<UnitSummary[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -39,33 +41,32 @@ export function ContentAdmin({ api }: { api?: ContentApi }) {
   }, [loadList]);
 
   return (
-    <section className="stack" aria-label="Inhalte">
+    <section className="stack" aria-label={t('workbench.region')}>
       <p className="muted" style={{ margin: 0 }}>
-        Entwürfe bearbeiten, zur Prüfung geben und veröffentlichen. Veröffentlichte
-        Einheiten lädt die App im Hintergrund; Lernende sehen sie ab dem nächsten Öffnen.
+        {t('workbench.intro')}
       </p>
       {message && <span className="feedback-bad">{message}</span>}
       <label className="stack" style={{ gap: '0.25rem' }}>
-        <span className="muted">Einheit</span>
+        <span className="muted">{t('workbench.unit')}</span>
         <select
           className="input"
           value={selected ?? ''}
           onChange={(e) => {
-            if (
-              dirty.current &&
-              !window.confirm('Ungespeicherte Änderungen verwerfen und Einheit wechseln?')
-            ) {
+            if (dirty.current && !window.confirm(t('workbench.confirmSwitch'))) {
               return;
             }
             dirty.current = false;
             setSelected(e.target.value || null);
           }}
         >
-          <option value="">Einheit wählen …</option>
+          <option value="">{t('workbench.choose')}</option>
           {units.map((u) => (
             <option key={u.id} value={u.id}>
-              Einheit {u.unit}: {u.title} ({STATE_LABEL[u.state]}
-              {u.checked ? ', geprüft' : ''})
+              {t(u.checked ? 'workbench.optionChecked' : 'workbench.option', {
+                unit: u.unit,
+                title: u.title,
+                state: stateLabel(u.state),
+              })}
             </option>
           ))}
         </select>
@@ -94,6 +95,7 @@ function UnitWorkbench({
   onChanged: () => Promise<void>;
   onDirty: (dirty: boolean) => void;
 }) {
+  const { t } = useTranslation(['content', 'common']);
   const [unit, setUnit] = useState<UnitDetail | null>(null);
   const [draft, setDraft] = useState<UnitContent | null>(null);
   const [message, setMessage] = useState<{ text: string; good?: boolean } | null>(null);
@@ -140,15 +142,10 @@ function UnitWorkbench({
   };
 
   const publish = () => {
-    if (
-      !unit.checked &&
-      !window.confirm(
-        'Diese Fassung ist noch nicht von einer Lehrkraft geprüft. Trotzdem veröffentlichen?'
-      )
-    ) {
+    if (!unit.checked && !window.confirm(t('workbench.confirmPublish'))) {
       return;
     }
-    void run(() => api.step(unit.id, 'publish', unit.revision), 'Veröffentlicht.');
+    void run(() => api.step(unit.id, 'publish', unit.revision), t('workbench.published'));
   };
 
   return (
@@ -156,14 +153,14 @@ function UnitWorkbench({
       <UnitStatus unit={unit} />
       {unit.reviewNote && (
         <p className="feedback-warn" style={{ margin: 0 }}>
-          Zurückgegeben mit der Notiz: {unit.reviewNote}
+          {t('workbench.returnedNote', { note: unit.reviewNote })}
         </p>
       )}
       <div className="card stack">
-        <strong>Gegenüber der veröffentlichten Fassung</strong>
+        <strong>{t('workbench.againstPublished')}</strong>
         <ChangesSummary changes={unit.changes} />
         <Link to={`/inhalte?unit=${encodeURIComponent(unit.id)}`}>
-          Prüfansicht öffnen
+          {t('workbench.openReview')}
         </Link>
       </div>
       <div className="row cms-actions" style={{ flexWrap: 'wrap' }}>
@@ -174,11 +171,11 @@ function UnitWorkbench({
           onClick={() =>
             void run(
               () => api.saveDraft(unit.id, unit.revision, draft),
-              'Entwurf gespeichert.'
+              t('workbench.saved')
             )
           }
         >
-          Speichern
+          {t('common:save')}
         </button>
         <button
           type="button"
@@ -187,7 +184,7 @@ function UnitWorkbench({
           onClick={() => setDraft(unit.draft)}
           hidden={!dirty}
         >
-          Änderungen verwerfen
+          {t('workbench.discard')}
         </button>
         <button
           type="button"
@@ -196,11 +193,11 @@ function UnitWorkbench({
           onClick={() =>
             void run(
               () => api.step(unit.id, 'submit', unit.revision),
-              'Zur Prüfung gegeben.'
+              t('workbench.submitted')
             )
           }
         >
-          Zur Prüfung geben
+          {t('workbench.submit')}
         </button>
         <button
           type="button"
@@ -208,7 +205,7 @@ function UnitWorkbench({
           disabled={busy || dirty || unit.state !== 'review'}
           onClick={publish}
         >
-          Veröffentlichen
+          {t('workbench.publish')}
         </button>
       </div>
       {message && (

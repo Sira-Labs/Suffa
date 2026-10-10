@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArabicKeyboard } from './ArabicKeyboard';
 
 interface RecallInputProps {
@@ -25,6 +26,7 @@ export function RecallInput({
   arabic = true,
   autoFocus,
 }: RecallInputProps) {
+  const { t } = useTranslation('components');
   const [showKeyboard, setShowKeyboard] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -59,7 +61,7 @@ export function RecallInput({
             }
           }}
           style={{ fontSize: '1.4rem' }}
-          aria-label="Antwort eingeben"
+          aria-label={t('recall.answer')}
         />
         {arabic && (
           <button
@@ -67,7 +69,7 @@ export function RecallInput({
             className="btn"
             aria-pressed={showKeyboard}
             onClick={() => setShowKeyboard((v) => !v)}
-            title="Arabische Tastatur"
+            title={t('keyboard.title')}
           >
             ⌨
           </button>

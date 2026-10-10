@@ -4,6 +4,7 @@
  * live on the server so every device follows the same plan.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   NotificationsApi,
   type NotificationConfig,
@@ -17,6 +18,7 @@ import {
 } from '@/services/notifications/channel';
 
 export function RemindersCard() {
+  const { t } = useTranslation(['settings', 'common']);
   const api = useMemo(() => new NotificationsApi(), []);
   const channel = useMemo<ReminderChannel>(() => {
     const bridge = nativeBridge();
@@ -62,7 +64,7 @@ export function RemindersCard() {
       setPrefs(next);
       const fresh = await api.config();
       if (fresh.ok) setConfig(fresh.value);
-      setMessage({ text: 'Gespeichert.', good: true });
+      setMessage({ text: t('common:saved'), good: true });
     } finally {
       setBusy(false);
     }
@@ -71,10 +73,8 @@ export function RemindersCard() {
   if (!channel.available(config)) {
     return (
       <div className="card stack">
-        <strong>Erinnerungen</strong>
-        <span className="muted">
-          Erinnerungen sind auf diesem Server noch nicht eingerichtet.
-        </span>
+        <strong>{t('reminders.title')}</strong>
+        <span className="muted">{t('reminders.unavailable')}</span>
       </div>
     );
   }
@@ -88,13 +88,13 @@ export function RemindersCard() {
         void save(prefs);
       }}
     >
-      <strong id="reminders-title">Erinnerungen</strong>
+      <strong id="reminders-title">{t('reminders.title')}</strong>
       {channel.hint() && <span className="muted">{channel.hint()}</span>}
       <label className="row" style={{ justifyContent: 'space-between' }}>
         <span className="stack" style={{ gap: 0 }}>
-          <span>Tägliche Erinnerung</span>
+          <span>{t('reminders.daily')}</span>
           <span className="muted" style={{ fontSize: '0.85rem' }}>
-            Höchstens eine am Tag – und keine, wenn du schon gelernt hast
+            {t('reminders.dailyHint')}
           </span>
         </span>
         <input
@@ -104,7 +104,7 @@ export function RemindersCard() {
         />
       </label>
       <label className="row" style={{ justifyContent: 'space-between' }}>
-        <span>Uhrzeit</span>
+        <span>{t('reminders.time')}</span>
         <input
           className="input"
           type="time"
@@ -115,21 +115,21 @@ export function RemindersCard() {
         />
       </label>
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <span>Ruhezeit</span>
+        <span>{t('reminders.quiet')}</span>
         <span className="row">
           <input
             className="input"
             type="time"
-            aria-label="Ruhezeit von"
+            aria-label={t('reminders.quietFrom')}
             value={prefs.quietStart}
             onChange={(e) => setPrefs({ ...prefs, quietStart: e.target.value })}
             style={{ width: 120 }}
           />
-          <span>bis</span>
+          <span>{t('reminders.until')}</span>
           <input
             className="input"
             type="time"
-            aria-label="Ruhezeit bis"
+            aria-label={t('reminders.quietTo')}
             value={prefs.quietEnd}
             onChange={(e) => setPrefs({ ...prefs, quietEnd: e.target.value })}
             style={{ width: 120 }}
@@ -138,9 +138,9 @@ export function RemindersCard() {
       </div>
       <label className="row" style={{ justifyContent: 'space-between' }}>
         <span className="stack" style={{ gap: 0 }}>
-          <span>Wochenrückblick</span>
+          <span>{t('reminders.recap')}</span>
           <span className="muted" style={{ fontSize: '0.85rem' }}>
-            Sonntagabend: deine Woche in Zahlen
+            {t('reminders.recapHint')}
           </span>
         </span>
         <input
@@ -151,7 +151,7 @@ export function RemindersCard() {
       </label>
       <div className="row">
         <button className="btn btn-primary" type="submit" disabled={busy}>
-          Speichern
+          {t('common:save')}
         </button>
         <span className="muted" style={{ fontSize: '0.85rem' }}>
           {channel.status(config)}

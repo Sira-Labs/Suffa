@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface ArabicKeyboardProps {
   onInsert(char: string): void;
@@ -31,10 +32,11 @@ const HAMZA: string[] = ['أ', 'إ', 'آ', 'ؤ', 'ئ', 'ء'];
  * Fully operable via keyboard/screen reader (each key is a <button>).
  */
 export function ArabicKeyboard({ onInsert, onBackspace, onSpace }: ArabicKeyboardProps) {
+  const { t } = useTranslation('components');
   const [showHarakat, setShowHarakat] = useState(true);
 
   return (
-    <div className="card" style={{ padding: '0.6rem' }} aria-label="Arabische Tastatur">
+    <div className="card" style={{ padding: '0.6rem' }} aria-label={t('keyboard.title')}>
       <div className="stack" style={{ gap: '0.4rem' }}>
         {LETTER_ROWS.map((row, i) => (
           <div
@@ -49,7 +51,7 @@ export function ArabicKeyboard({ onInsert, onBackspace, onSpace }: ArabicKeyboar
                 className="btn arabic-inline"
                 style={{ minWidth: '2.2rem', fontSize: '1.3rem', padding: '0.35rem' }}
                 onClick={() => onInsert(ch)}
-                aria-label={`Buchstabe ${ch}`}
+                aria-label={t('keyboard.letter', { char: ch })}
               >
                 {ch}
               </button>
@@ -65,7 +67,7 @@ export function ArabicKeyboard({ onInsert, onBackspace, onSpace }: ArabicKeyboar
               className="btn arabic-inline"
               style={{ minWidth: '2.2rem', fontSize: '1.3rem', padding: '0.35rem' }}
               onClick={() => onInsert(ch)}
-              aria-label={`Hamza-Variante ${ch}`}
+              aria-label={t('keyboard.hamza', { char: ch })}
             >
               {ch}
             </button>
@@ -94,13 +96,13 @@ export function ArabicKeyboard({ onInsert, onBackspace, onSpace }: ArabicKeyboar
 
         <div className="row" style={{ justifyContent: 'center', gap: '0.4rem' }}>
           <button type="button" className="btn" onClick={onSpace} style={{ flex: 1 }}>
-            Leerzeichen
+            {t('keyboard.space')}
           </button>
           <button
             type="button"
             className="btn"
             onClick={onBackspace}
-            aria-label="Löschen"
+            aria-label={t('keyboard.delete')}
           >
             ⌫
           </button>
@@ -110,7 +112,7 @@ export function ArabicKeyboard({ onInsert, onBackspace, onSpace }: ArabicKeyboar
             aria-pressed={showHarakat}
             onClick={() => setShowHarakat((v) => !v)}
           >
-            Harakāt {showHarakat ? 'aus' : 'ein'}
+            {showHarakat ? t('keyboard.harakatOff') : t('keyboard.harakatOn')}
           </button>
         </div>
       </div>

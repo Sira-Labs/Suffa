@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSyncStore } from '@/state';
 import { signInLinkError } from '@/modules/settings/Settings';
@@ -7,6 +8,7 @@ import { safeNext, setSignInSkipped, signInReturnPath } from '@/services/signInG
 
 /** The sign-in page (/login): shown first to learners who are not signed in. */
 export function SignIn() {
+  const { t } = useTranslation(['account', 'common']);
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const auth = useSyncStore((s) => s.auth);
@@ -27,26 +29,24 @@ export function SignIn() {
             الصُّفَّة
           </span>
         </div>
-        <h1 style={{ margin: 0 }}>Bei Suffa anmelden</h1>
+        <h1 style={{ margin: 0 }}>{t('title')}</h1>
         {auth.status === 'signed-in' ? (
           <>
             <span className="feedback-good">
-              ✓ Du bist angemeldet als {auth.user.email ?? auth.user.id}.
+              {t('signedInAs', { who: auth.user.email ?? auth.user.id })}
             </span>
             <button
               className="btn btn-primary"
               type="button"
               onClick={() => navigate(next, { replace: true })}
             >
-              Weiter
+              {t('common:continue')}
             </button>
           </>
         ) : (
           <>
             <p className="muted" style={{ margin: 0 }}>
-              Ohne Passwort: Gib deine E-Mail-Adresse ein, und wir schicken dir einen
-              Anmeldelink. Mit demselben Konto lernst du auf Handy und Computer weiter,
-              und deine Klasse sieht deinen Fortschritt.
+              {t('intro')}
             </p>
             {linkError && <span className="feedback-bad">{linkError}</span>}
             <SignInForm
@@ -55,7 +55,7 @@ export function SignIn() {
             />
             <PasskeySignIn onSignedIn={() => navigate(next, { replace: true })} />
             <button className="btn sign-in-skip" type="button" onClick={continueLocally}>
-              Ohne Konto weiter – dein Lernstand bleibt nur auf diesem Gerät
+              {t('skip')}
             </button>
           </>
         )}

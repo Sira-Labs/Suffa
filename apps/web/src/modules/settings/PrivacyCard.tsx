@@ -3,12 +3,14 @@
  * account for good – with the own email address as confirmation.
  */
 import { useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import { PrivacyApi } from '@/services/privacy/privacyApi';
 import { db } from '@/services/storage';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { useSyncStore } from '@/state';
 
 export function PrivacyCard() {
+  const { t } = useTranslation(['settings', 'common']);
   const provider = useSyncStore((s) => s.provider);
   const auth = useSyncStore((s) => s.auth);
   const api = useMemo(() => new PrivacyApi(), []);
@@ -41,28 +43,24 @@ export function PrivacyCard() {
 
   return (
     <div className="card stack">
-      <strong>Meine Daten</strong>
+      <strong>{t('privacy.title')}</strong>
       <p className="muted" style={{ margin: 0 }}>
-        Du kannst jederzeit alles herunterladen, was Suffa über dich speichert, oder dein
-        Konto mit allen Daten löschen.
+        {t('privacy.intro')}
       </p>
       <div className="row">
         <button className="btn" onClick={() => void download()}>
-          Daten herunterladen
+          {t('privacy.download')}
         </button>
         {!confirming && (
           <button className="btn" onClick={() => setConfirming(true)}>
-            Konto löschen …
+            {t('privacy.delete')}
           </button>
         )}
       </div>
       {confirming && (
         <form className="stack" onSubmit={(e) => void remove(e)}>
           <span>
-            Das löscht dein Konto, deinen Lernstand auf dem Server und deine
-            Klassenmitgliedschaften.{' '}
-            <strong>Das lässt sich nicht rückgängig machen.</strong> Gib zur Bestätigung
-            deine E-Mail-Adresse ein:
+            <Trans t={t} i18nKey="privacy.confirm" components={{ 1: <strong /> }} />
           </span>
           <input
             className="input"
@@ -70,7 +68,7 @@ export function PrivacyCard() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={auth.user.email ?? ''}
-            aria-label="E-Mail-Adresse zur Bestätigung"
+            aria-label={t('privacy.confirmEmail')}
           />
           <label className="row">
             <input
@@ -78,7 +76,7 @@ export function PrivacyCard() {
               checked={alsoLocal}
               onChange={(e) => setAlsoLocal(e.target.checked)}
             />
-            <span>Auch die Daten auf diesem Gerät löschen</span>
+            <span>{t('privacy.alsoLocal')}</span>
           </label>
           <div className="row">
             <button
@@ -87,10 +85,10 @@ export function PrivacyCard() {
               disabled={!email.trim()}
               style={{ color: 'var(--bad)' }}
             >
-              Endgültig löschen
+              {t('privacy.deleteForGood')}
             </button>
             <button className="btn" type="button" onClick={() => setConfirming(false)}>
-              Abbrechen
+              {t('common:cancel')}
             </button>
           </div>
         </form>

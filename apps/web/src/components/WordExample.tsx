@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ExampleCatalog } from '@/types';
 import { loadExamples, tatoebaUrl } from '@/services/examples';
 import { logger } from '@/services/logger';
@@ -12,6 +13,7 @@ const log = logger.child('examples');
  * when the word has no example or the sentences cannot be loaded.
  */
 export function WordExample({ vocabId }: { vocabId: string }) {
+  const { t } = useTranslation('components');
   const [catalog, setCatalog] = useState<ExampleCatalog | null>(null);
 
   useEffect(() => {
@@ -33,24 +35,24 @@ export function WordExample({ vocabId }: { vocabId: string }) {
   const { source } = catalog;
 
   return (
-    <figure className="word-example" aria-label="Beispielsatz">
+    <figure className="word-example" aria-label={t('example.label')}>
       <ArabicText onClick={isTtsSupported() ? () => speakArabic(example.ar) : undefined}>
         {example.ar}
       </ArabicText>
       <span>{example.de}</span>
       {example.quelle === 'suffa' || !example.tatoeba ? (
-        <figcaption className="muted">Eigener Beispielsatz (Suffa)</figcaption>
+        <figcaption className="muted">{t('example.own')}</figcaption>
       ) : (
         <figcaption className="muted">
-          Beispiel:{' '}
+          {t('example.source')}{' '}
           <a href={tatoebaUrl(example.tatoeba)} target="_blank" rel="noreferrer">
             {source.name} #{example.tatoeba}
           </a>
-          {example.autor ? ` von ${example.autor}` : ''} ·{' '}
+          {example.autor ? t('example.by', { author: example.autor }) : ''} ·{' '}
           <a href={source.licenseUrl} target="_blank" rel="noreferrer">
             {source.license}
           </a>
-          {example.deVon === 'suffa' ? ' · Übersetzung: Suffa' : ''}
+          {example.deVon === 'suffa' ? t('example.translatedBySuffa') : ''}
         </figcaption>
       )}
     </figure>

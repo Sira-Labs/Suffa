@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, type CSSProperties } from 'react';
 import { useCelebrationStore } from '@/state';
 import { Icon } from './Icon';
@@ -15,6 +16,7 @@ const PARTICLES = Array.from({ length: 14 }, (_, i) => ({
  * decorative and disabled under prefers-reduced-motion (global rule).
  */
 export function CelebrationToast() {
+  const { t } = useTranslation('components');
   const current = useCelebrationStore((s) => s.current);
   const dismiss = useCelebrationStore((s) => s.dismiss);
 
@@ -51,7 +53,9 @@ export function CelebrationToast() {
           </span>
           <span className="celebration-text">
             {current.xp > 0 && (
-              <strong className="celebration-xp">+{current.xp} XP</strong>
+              <strong className="celebration-xp">
+                {t('celebration.xp', { count: current.xp })}
+              </strong>
             )}
             <span>{current.title}</span>
           </span>

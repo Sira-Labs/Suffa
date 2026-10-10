@@ -9,7 +9,9 @@ import {
   isUnderTraining,
   NAV_ITEMS,
   navItemsFor,
+  navText,
 } from '@/navigation';
+import { setUiLanguage } from '@/i18n';
 
 function renderPage(element: React.ReactElement) {
   const router = createMemoryRouter([{ path: '/', element }]);
@@ -18,15 +20,30 @@ function renderPage(element: React.ReactElement) {
 
 describe('navigation', () => {
   it('puts Heute · Einheit · Klasse · Üben into the phone bar (plus "Mehr")', () => {
-    const primary = NAV_ITEMS.filter((i) => i.tier === 'primary').map((i) => i.label);
+    const primary = NAV_ITEMS.filter((i) => i.tier === 'primary').map(
+      (i) => navText(i).label
+    );
     expect(primary).toEqual(['Heute', 'Einheit', 'Klasse', 'Üben']);
+  });
+
+  it('names every destination in English too (story 16.3)', async () => {
+    await setUiLanguage('en');
+    try {
+      const primary = NAV_ITEMS.filter((i) => i.tier === 'primary').map(
+        (i) => navText(i).label
+      );
+      expect(primary).toEqual(['Today', 'Unit', 'Class', 'Practise']);
+      expect(navText({ id: 'classesTeacher' }).label).toBe('Classes');
+    } finally {
+      await setUiLanguage('de');
+    }
   });
 
   it('gives teachers "Klassen" right after "Heute"', () => {
     const primary = (role: string | null) =>
       navItemsFor(role)
         .filter((i) => i.tier === 'primary')
-        .map((i) => i.label);
+        .map((i) => navText(i).label);
     expect(primary('teacher')).toEqual(['Heute', 'Klassen', 'Einheit', 'Üben']);
     expect(primary('learner')).toEqual(['Heute', 'Einheit', 'Klasse', 'Üben']);
     expect(primary(null)).toEqual(['Heute', 'Einheit', 'Klasse', 'Üben']);

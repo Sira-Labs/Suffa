@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Link,
   Navigate,
@@ -17,8 +18,10 @@ import {
   isUnderTraining,
   MORE_PATH,
   navItemsFor,
+  navText,
   TRAINING_PATH,
 } from './navigation';
+import { setUiLanguage } from './i18n';
 import { useRole } from './modules/account/useRole';
 import { logger } from './services/logger';
 import { useTrainingScope } from './modules/units/useReachedUnits';
@@ -43,7 +46,13 @@ import { FeedbackButton } from '@/modules/feedback/FeedbackButton';
  * The UI is rendered only after loading.
  */
 export function App() {
+  const { t } = useTranslation();
   const [ready, setReady] = useState(false);
+  // The synced interface language (story 16.3): set here, on another device or by sync.
+  const uiLanguage = useSettingsStore((s) => s.settings.uiLanguage);
+  useEffect(() => {
+    if (uiLanguage) void setUiLanguage(uiLanguage);
+  }, [uiLanguage]);
   const loadSettings = useSettingsStore((s) => s.load);
   const loadContent = useContentStore((s) => s.load);
   const loadSrs = useSrsStore((s) => s.load);
@@ -99,7 +108,7 @@ export function App() {
         <p className="arabic-inline" style={{ fontSize: '2rem', margin: '0.5rem 0 0' }}>
           الصُّفَّة
         </p>
-        <p className="muted">Lade Lernstand…</p>
+        <p className="muted">{t('loadingProgress')}</p>
       </div>
     );
   }
@@ -113,8 +122,9 @@ export function App() {
 }
 
 function Brand() {
+  const { t } = useTranslation();
   return (
-    <Link to="/" className="brand" aria-label="Suffa – zur Übersicht">
+    <Link to="/" className="brand" aria-label={t('toOverview')}>
       <img
         className="brand-mark"
         src="/brand/suffa-mark.svg"
@@ -122,7 +132,9 @@ function Brand() {
         width={32}
         height={32}
       />
-      <span className="brand-latin">Suffa</span>
+      <span className="brand-latin" translate="no">
+        Suffa
+      </span>
       <span className="brand-arabic" lang="ar">
         الصُّفَّة
       </span>
@@ -132,6 +144,7 @@ function Brand() {
 
 /** Layout: bottom bar on phones, sidebar on wide screens (one nav, restyled by CSS). */
 function Shell() {
+  const { t } = useTranslation(['common', 'nav']);
   const { pathname } = useLocation();
   const moreActive = isUnderMore(pathname);
   const items = navItemsFor(useRole());
@@ -150,7 +163,7 @@ function Shell() {
   }
   return (
     <div className="app-shell">
-      <nav className="app-nav" aria-label="Hauptnavigation">
+      <nav className="app-nav" aria-label={t('nav:main')}>
         <div className="nav-brand">
           <Brand />
         </div>
@@ -169,7 +182,7 @@ function Shell() {
             }}
           >
             <Icon name={item.icon} />
-            <span className="nav-label">{item.label}</span>
+            <span className="nav-label">{navText(item).label}</span>
           </NavLink>
         ))}
         <Link
@@ -178,7 +191,7 @@ function Shell() {
           aria-current={moreActive ? 'page' : undefined}
         >
           <Icon name="more" />
-          <span className="nav-label">Mehr</span>
+          <span className="nav-label">{t('nav:more')}</span>
         </Link>
         <div className="nav-footer">
           <SyncBadge />

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { passkeysSupported } from '@/services/passkeys';
 import { useSyncStore } from '@/state';
 
@@ -7,6 +8,7 @@ import { useSyncStore } from '@/state';
  * added a passkey in the settings. Hidden in browsers without WebAuthn.
  */
 export function PasskeySignIn({ onSignedIn }: { onSignedIn?: () => void }) {
+  const { t } = useTranslation('account');
   const signInWithPasskey = useSyncStore((s) => s.signInWithPasskey);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export function PasskeySignIn({ onSignedIn }: { onSignedIn?: () => void }) {
         disabled={busy}
         onClick={() => void signIn()}
       >
-        🔑 Mit Passkey anmelden
+        {t('passkey')}
       </button>
       {error && <span className="feedback-bad">{error}</span>}
     </div>

@@ -4,6 +4,7 @@
  * remembered per card on this device.
  */
 import { useEffect, useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function CollapsibleCard({
   id,
@@ -25,6 +26,7 @@ export function CollapsibleCard({
   foldSignal?: number;
   children: ReactNode;
 }) {
+  const { t } = useTranslation('components');
   const [open, setOpen] = useState(() => readOpen(id, defaultOpen));
   const titleId = `${id}-title`;
   const bodyId = `${id}-body`;
@@ -51,7 +53,7 @@ export function CollapsibleCard({
           aria-controls={bodyId}
           onClick={toggle}
         >
-          {open ? 'Zuklappen ▴' : 'Aufklappen ▾'}
+          {open ? t('collapsible.collapse') : t('collapsible.expand')}
         </button>
       </div>
       {lead}

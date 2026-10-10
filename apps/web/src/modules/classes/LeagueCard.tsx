@@ -5,6 +5,7 @@
  * is ever shown as last.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ClassesApi, LeagueView } from '@/services/classes/classesApi';
 
 const MEDAL = ['🥇', '🥈', '🥉'];
@@ -18,6 +19,7 @@ export function LeagueCard({
   classId: string;
   teacher: boolean;
 }) {
+  const { t } = useTranslation('classes');
   const [view, setView] = useState<LeagueView | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -50,16 +52,15 @@ export function LeagueCard({
   return (
     <section className="card stack" aria-labelledby="league-title">
       <h2 id="league-title" className="eyebrow">
-        Wochenliga
+        {t('league.title')}
       </h2>
       {teacher && (
         <div className="stack" style={{ gap: '0.5rem' }}>
           <label className="row" style={{ justifyContent: 'space-between' }}>
             <span className="stack" style={{ gap: 0 }}>
-              <span>Liga einschalten</span>
+              <span>{t('league.enable')}</span>
               <span className="muted" style={{ fontSize: '0.85rem' }}>
-                Wertung nach Anteil am eigenen Wochenziel; nur wer mitmachen will, wird
-                gezeigt.
+                {t('league.enableHint')}
               </span>
             </span>
             <input
@@ -78,9 +79,9 @@ export function LeagueCard({
           </label>
           <label className="row" style={{ justifyContent: 'space-between' }}>
             <span className="stack" style={{ gap: 0 }}>
-              <span>Klasse mit Minderjährigen</span>
+              <span>{t('league.minors')}</span>
               <span className="muted" style={{ fontSize: '0.85rem' }}>
-                Nur Vornamen; beim Markieren wird die Liga ausgeschaltet.
+                {t('league.minorsHint')}
               </span>
             </span>
             <input
@@ -104,7 +105,7 @@ export function LeagueCard({
 
       {view.enabled && view.optedIn !== null && (
         <label className="row" style={{ justifyContent: 'space-between' }}>
-          <span>Ich mache mit</span>
+          <span>{t('league.optIn')}</span>
           <input
             type="checkbox"
             checked={view.optedIn}
@@ -119,12 +120,10 @@ export function LeagueCard({
       {view.enabled &&
         (view.podium.length === 0 ? (
           <p className="muted" style={{ margin: 0 }}>
-            {view.participants === 0
-              ? 'Noch niemand macht mit.'
-              : 'Diese Woche ist noch offen – der erste Lerntag bringt aufs Podest.'}
+            {view.participants === 0 ? t('league.nobody') : t('league.open')}
           </p>
         ) : (
-          <ol className="feed-list" aria-label="Podest dieser Woche">
+          <ol className="feed-list" aria-label={t('league.podium')}>
             {view.podium.map((p) => (
               <li
                 key={`${p.place}-${p.name}`}
@@ -132,10 +131,10 @@ export function LeagueCard({
                 style={{ justifyContent: 'space-between' }}
               >
                 <span>
-                  {MEDAL[p.place - 1]} <strong>{p.you ? 'Du' : p.name}</strong>{' '}
+                  {MEDAL[p.place - 1]} <strong>{p.you ? t('league.you') : p.name}</strong>{' '}
                   <span className="muted">· {p.title}</span>
                 </span>
-                <span>{p.percent} %</span>
+                <span>{t('percent', { value: p.percent })}</span>
               </li>
             ))}
           </ol>
@@ -143,8 +142,11 @@ export function LeagueCard({
 
       {view.you && !view.you.onPodium && (
         <p className="muted" style={{ margin: 0 }}>
-          Deine Woche: {view.you.activeDays} von {view.you.goal} Tagen ({view.you.percent}{' '}
-          %). Jeder Lerntag zählt – die Liga beginnt jeden Montag neu.
+          {t('league.yourWeek', {
+            days: view.you.activeDays,
+            goal: view.you.goal,
+            percent: view.you.percent,
+          })}
         </p>
       )}
       {message && <p className="feedback-bad">{message}</p>}

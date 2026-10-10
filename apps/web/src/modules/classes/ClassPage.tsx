@@ -3,6 +3,7 @@
  * Learners: the class feed with the weekly challenge, shout-outs and badges.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { ClassesApi, type ClassSummary } from '@/services/classes/classesApi';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
@@ -29,17 +30,18 @@ type Tab =
   | 'grades'
   | 'certificates'
   | 'members';
-const TABS: { id: Tab; label: string }[] = [
-  { id: 'progress', label: 'Fortschritt' },
-  { id: 'life', label: 'Klassenleben' },
-  { id: 'recordings', label: 'Aufnahmen' },
-  { id: 'shared', label: 'Hörliste' },
-  { id: 'grades', label: 'Bewertungen' },
-  { id: 'certificates', label: 'Zertifikate' },
-  { id: 'members', label: 'Mitglieder' },
+const TABS: Tab[] = [
+  'progress',
+  'life',
+  'recordings',
+  'shared',
+  'grades',
+  'certificates',
+  'members',
 ];
 
 export function ClassPage() {
+  const { t } = useTranslation('classes');
   const { id = '' } = useParams();
   const provider = useSyncStore((s) => s.provider);
   const auth = useSyncStore((s) => s.auth);
@@ -50,7 +52,7 @@ export function ClassPage() {
   // Links from "Heute" open a tab directly (?tab=recordings).
   const [params] = useSearchParams();
   const asked = params.get('tab');
-  const [tab, setTab] = useState<Tab>(TABS.find((t) => t.id === asked)?.id ?? 'progress');
+  const [tab, setTab] = useState<Tab>(TABS.find((x) => x === asked) ?? 'progress');
 
   const load = useCallback(async () => {
     const result = await api.list();
@@ -64,16 +66,14 @@ export function ClassPage() {
   }, [auth.status, load]);
 
   if (!(provider instanceof ApiSyncProvider) || auth.status !== 'signed-in') {
-    return <p className="muted">Bitte melde dich unter Einstellungen an.</p>;
+    return <p className="muted">{t('signInFirst')}</p>;
   }
-  if (summary === undefined) return <p className="muted">Lade Klasse …</p>;
+  if (summary === undefined) return <p className="muted">{t('page.loading')}</p>;
   if (summary === null || summary.status !== 'active') {
     return (
       <div className="stack">
-        <p className="muted">
-          Diese Klasse gibt es nicht oder du bist (noch) nicht freigegeben.
-        </p>
-        <Link to="/classes">Zu deinen Klassen</Link>
+        <p className="muted">{t('notFound')}</p>
+        <Link to="/classes">{t('toYourClasses')}</Link>
       </div>
     );
   }
@@ -83,25 +83,25 @@ export function ClassPage() {
     <div className="stack" style={{ gap: '1.25rem' }}>
       <header className="stack" style={{ gap: '0.25rem' }}>
         <Link to="/classes" className="muted">
-          ← Klassen
+          {t('page.back')}
         </Link>
         <h1>{summary.name}</h1>
         {!teacher && <ClassCourseHint course={summary.course} />}
       </header>
       {teacher ? (
         <>
-          <div className="tab-list" role="tablist" aria-label="Bereiche der Klasse">
-            {TABS.map((t) => (
+          <div className="tab-list" role="tablist" aria-label={t('page.areas')}>
+            {TABS.map((id) => (
               <button
-                key={t.id}
+                key={id}
                 role="tab"
-                id={`tab-${t.id}`}
-                aria-selected={tab === t.id}
-                aria-controls={`panel-${t.id}`}
+                id={`tab-${id}`}
+                aria-selected={tab === id}
+                aria-controls={`panel-${id}`}
                 className="tab"
-                onClick={() => setTab(t.id)}
+                onClick={() => setTab(id)}
               >
-                {t.label}
+                {t(`page.tabs.${id}`)}
               </button>
             ))}
           </div>
@@ -141,7 +141,7 @@ export function ClassPage() {
           />
           <section className="stack" aria-labelledby="recordings-title">
             <h2 id="recordings-title" className="eyebrow">
-              Aufnahmen
+              {t('page.recordings')}
             </h2>
             <ClassRecordings classId={summary.id} teacher={false} />
           </section>
@@ -154,17 +154,18 @@ export function ClassPage() {
 
 /** A learner whose own course differs from the class's is offered to follow the class. */
 function ClassCourseHint({ course }: { course?: CourseId }) {
+  const { t } = useTranslation('classes');
   const active = useActiveCourse();
   const setCourse = useSetCourse();
   if (!course || course === active) return null;
   return (
     <p className="card row" style={{ flexWrap: 'wrap', gap: '0.5rem', margin: 0 }}>
-      <span>Diese Klasse lernt mit dem {courseById(course).name}.</span>
+      <span>{t('page.courseHint', { course: courseById(course).name })}</span>
       <button
         className="btn btn-small btn-primary"
         onClick={() => void setCourse(course)}
       >
-        Zum {courseById(course).name} wechseln
+        {t('page.switchCourse', { course: courseById(course).name })}
       </button>
     </p>
   );

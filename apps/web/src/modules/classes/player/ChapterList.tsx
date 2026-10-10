@@ -1,4 +1,5 @@
 /** Parts of a recorded lesson (story 11.4): tap to jump; teachers can remove a chapter. */
+import { useTranslation } from 'react-i18next';
 import { CollapsibleCard } from '@/components';
 import { clock } from '@/services/media/checkpoints';
 import type { Chapter } from '@/services/media/interactiveApi';
@@ -14,11 +15,12 @@ export function ChapterList({
   onSeek: (sec: number) => void;
   onRemove?: (chapter: Chapter) => void;
 }) {
+  const { t } = useTranslation('recordings');
   if (chapters.length === 0) return null;
   const current = [...chapters].reverse().find((c) => c.atSec <= time)?.id;
   return (
-    <CollapsibleCard id="chapters" title="Kapitel">
-      <nav className="stack" aria-label="Kapitel" style={{ gap: '0.35rem' }}>
+    <CollapsibleCard id="chapters" title={t('chapters.title')}>
+      <nav className="stack" aria-label={t('chapters.title')} style={{ gap: '0.35rem' }}>
         {chapters.map((c) => (
           <div key={c.id} className="row" style={{ gap: '0.5rem' }}>
             <button
@@ -34,7 +36,7 @@ export function ChapterList({
               <button
                 type="button"
                 className="btn"
-                aria-label={`Kapitel „${c.title}“ entfernen`}
+                aria-label={t('chapters.remove', { title: c.title })}
                 onClick={() => onRemove(c)}
               >
                 ✕

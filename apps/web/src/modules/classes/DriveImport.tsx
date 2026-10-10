@@ -3,6 +3,7 @@
  * Suffa copies them and processes them like uploads. Hidden when the server has no Drive.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import {
   DriveApi,
@@ -11,11 +12,18 @@ import {
   type DriveStatus,
 } from '@/services/media/drive';
 
-const RETURN_MESSAGES: Record<string, string> = {
-  connected: 'Google Drive ist verbunden.',
-  cancelled: 'Verbindung abgebrochen.',
-  failed: 'Google Drive konnte nicht verbunden werden.',
-};
+/** The `?drive=…` result after connecting, as a catalogue key. */
+const RETURN_MESSAGES = {
+  connected: 'drive.connected',
+  cancelled: 'drive.cancelled',
+  failed: 'drive.failed',
+} as const;
+
+function returnMessage(value: string | null) {
+  return value && Object.prototype.hasOwnProperty.call(RETURN_MESSAGES, value)
+    ? RETURN_MESSAGES[value as keyof typeof RETURN_MESSAGES]
+    : null;
+}
 
 export function DriveImport({
   classId,
@@ -24,12 +32,14 @@ export function DriveImport({
   classId: string;
   onImported: () => void;
 }) {
+  const { t } = useTranslation('recordings');
   const api = useMemo(() => new DriveApi(), []);
   const { search, pathname } = useLocation();
   const [status, setStatus] = useState<DriveStatus | null>(null);
-  const [message, setMessage] = useState<string | null>(
-    RETURN_MESSAGES[new URLSearchParams(search).get('drive') ?? ''] ?? null
+  const [returned] = useState(() =>
+    returnMessage(new URLSearchParams(search).get('drive'))
   );
+  const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
     void api.status().then((result) => result.ok && setStatus(result.value));
@@ -45,23 +55,22 @@ export function DriveImport({
       if (ids.length === 0) return;
       const result = await api.import(classId, ids);
       if (!result.ok) return setMessage(result.message);
-      setMessage(
-        `${ids.length === 1 ? 'Eine Aufnahme wird' : `${ids.length} Aufnahmen werden`} importiert.`
-      );
+      setMessage(t('drive.importing', { count: ids.length }));
       onImported();
     } catch (error) {
       if (!(error instanceof Error)) throw error;
-      setMessage('Die Google-Auswahl konnte nicht geladen werden.');
+      setMessage(t('drive.pickerFailed'));
     }
   };
 
+  const shown = message ?? (returned ? t(returned) : null);
   return (
     <div className="card stack">
-      <strong>Aus Google Drive</strong>
+      <strong>{t('drive.title')}</strong>
       {status.connected ? (
         <div className="row">
           <button className="btn" onClick={() => void pick()}>
-            Aufnahmen auswählen
+            {t('drive.pick')}
           </button>
           <button
             className="btn btn-small"
@@ -69,20 +78,20 @@ export function DriveImport({
               void api.disconnect().then(() => setStatus({ ...status, connected: false }))
             }
           >
-            Trennen
+            {t('drive.disconnect')}
           </button>
         </div>
       ) : (
         <div className="row">
           <a className="btn" href={driveConnectUrl(pathname)}>
-            Google Drive verbinden
+            {t('drive.connect')}
           </a>
           <span className="muted" style={{ fontSize: '0.85rem' }}>
-            Suffa sieht nur die Dateien, die du selbst auswählst.
+            {t('drive.privacy')}
           </span>
         </div>
       )}
-      {message && <span className="muted">{message}</span>}
+      {shown && <span className="muted">{shown}</span>}
     </div>
   );
 }

@@ -4,6 +4,7 @@
  * without the teacher's click.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArabicText, CollapsibleCard } from '@/components';
 import { clock } from '@/services/media/checkpoints';
 import type {
@@ -14,12 +15,19 @@ import type {
 
 const POLL_MS = 3000;
 
-function describe(s: Suggestion) {
-  if (s.kind === 'chapter') return <span>Kapitel: {s.data.title}</span>;
+function Describe({ s }: { s: Suggestion }) {
+  const { t } = useTranslation('recordings');
+  if (s.kind === 'chapter') {
+    return (
+      <span>
+        {t('suggestions.chapter')} {s.data.title}
+      </span>
+    );
+  }
   if (s.kind === 'fix') {
     return (
       <span>
-        Transkript: <del className="muted">{s.data.before}</del> →{' '}
+        {t('suggestions.fix')} <del className="muted">{s.data.before}</del> →{' '}
         <ArabicText>{s.data.after}</ArabicText>
       </span>
     );
@@ -29,20 +37,23 @@ function describe(s: Suggestion) {
     case 'mcq':
       return (
         <span>
-          Frage: {d.question} <span className="muted">({d.options[d.answer]})</span>
+          {t('suggestions.mcq')} {d.question}{' '}
+          <span className="muted">({d.options[d.answer]})</span>
         </span>
       );
     case 'dictation':
       return (
         <span>
-          Diktat: <ArabicText>{d.answer}</ArabicText>
+          {t('suggestions.dictation')} <ArabicText>{d.answer}</ArabicText>
         </span>
       );
     case 'vocab_flash':
       return (
         <span>
-          Wortkarte: <ArabicText>{d.ar}</ArabicText> – {d.de}
-          {d.contentRef ? <span className="muted"> (Kurswort)</span> : null}
+          {t('suggestions.word')} <ArabicText>{d.ar}</ArabicText> – {d.de}
+          {d.contentRef ? (
+            <span className="muted"> {t('suggestions.courseWord')}</span>
+          ) : null}
         </span>
       );
   }
@@ -61,6 +72,7 @@ export function SuggestionsEditor({
   onChange: () => void;
   pollMs?: number;
 }) {
+  const { t } = useTranslation('recordings');
   const [state, setState] = useState<SuggestionState | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   // One decision (or batch) at a time: repeated clicks must not send the same one twice.
@@ -139,17 +151,12 @@ export function SuggestionsEditor({
       id="suggestions"
       title={
         state?.suggestions.length
-          ? `KI-Vorschläge (${state.suggestions.length} offen)`
-          : 'KI-Vorschläge'
+          ? t('suggestions.titleOpen', { count: state.suggestions.length })
+          : t('suggestions.title')
       }
     >
       <p className="muted" style={{ margin: 0 }}>
-        Kapitel, Wortkarten, Fragen und Diktate aus dem Transkript. Lernende sehen nur,
-        was du übernimmst: Kapitel erscheinen als Liste unter dem Video (antippen springt
-        dorthin), Fragen, Diktate und Wortkarten als Checkpoints – das Video hält an der
-        Stelle an und zeigt die Aufgabe. Transkript-Korrekturen ersetzen Arabisch in
-        Lautschrift (z. B. „Ma hada“) durch arabische Schrift; übernommen ändern sie die
-        Zeile im Transkript, richtige Zeilen bleiben, wie sie sind.
+        {t('suggestions.intro')}
       </p>
       <div className="row" style={{ gap: '0.5rem', flexWrap: 'wrap' }}>
         <button
@@ -159,13 +166,13 @@ export function SuggestionsEditor({
           onClick={() => void request()}
         >
           {working
-            ? 'Vorschläge werden erstellt …'
+            ? t('suggestions.working')
             : state?.suggestions.length
-              ? 'Neu vorschlagen lassen'
-              : 'Vorschläge holen'}
+              ? t('suggestions.again')
+              : t('suggestions.fetch')}
         </button>
         {status === 'failed' && (
-          <span className="feedback-bad">Das hat nicht geklappt. Bitte noch einmal.</span>
+          <span className="feedback-bad">{t('suggestions.failed')}</span>
         )}
         {message && <span className="feedback-bad">{message}</span>}
       </div>
@@ -177,7 +184,7 @@ export function SuggestionsEditor({
             disabled={busy}
             onClick={() => void decideAll('accept')}
           >
-            Alle übernehmen
+            {t('suggestions.acceptAll')}
           </button>
           <button
             className="btn"
@@ -185,7 +192,7 @@ export function SuggestionsEditor({
             disabled={busy}
             onClick={() => void decideAll('dismiss')}
           >
-            Alle verwerfen
+            {t('suggestions.dismissAll')}
           </button>
         </div>
       )}
@@ -196,26 +203,26 @@ export function SuggestionsEditor({
           style={{ gap: '0.5rem', justifyContent: 'space-between', flexWrap: 'wrap' }}
         >
           <span>
-            <span className="muted">{clock(s.atSec)}</span> {describe(s)}
+            <span className="muted">{clock(s.atSec)}</span> <Describe s={s} />
           </span>
           <span className="row" style={{ gap: '0.4rem' }}>
             <button
               className="btn btn-primary"
               type="button"
               disabled={busy}
-              aria-label={`Übernehmen (${clock(s.atSec)})`}
+              aria-label={t('suggestions.acceptAt', { time: clock(s.atSec) })}
               onClick={() => void decide(s, 'accept')}
             >
-              Übernehmen
+              {t('suggestions.accept')}
             </button>
             <button
               className="btn"
               type="button"
               disabled={busy}
-              aria-label={`Verwerfen (${clock(s.atSec)})`}
+              aria-label={t('suggestions.dismissAt', { time: clock(s.atSec) })}
               onClick={() => void decide(s, 'dismiss')}
             >
-              Verwerfen
+              {t('suggestions.dismiss')}
             </button>
           </span>
         </div>

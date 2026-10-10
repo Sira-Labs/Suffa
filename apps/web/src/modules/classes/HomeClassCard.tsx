@@ -5,6 +5,7 @@
  * join one. Offline or without an account it shows nothing.
  */
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import {
@@ -16,15 +17,9 @@ import {
 import { InteractiveApi, type Assignment } from '@/services/media/interactiveApi';
 import { MediaApi, type MediaItem } from '@/services/media/mediaApi';
 import { useListenStore, useSyncStore } from '@/state';
-import { assignmentLink } from './Assignments';
+import { assignmentLink, formatDue } from './Assignments';
 import { formatDuration } from './ClassRecordings';
 import { useMyClasses } from './useMyClasses';
-
-const DUE = new Intl.DateTimeFormat('de-DE', {
-  weekday: 'short',
-  day: 'numeric',
-  month: 'short',
-});
 
 export function HomeClassCard({ api }: { api?: ClassesApi }) {
   const client = useMemo(() => api ?? new ClassesApi(), [api]);
@@ -45,6 +40,7 @@ interface ClassNews {
 }
 
 function LearnerClass({ api, summary }: { api: ClassesApi; summary: ClassSummary }) {
+  const { t } = useTranslation('classes');
   const lastSyncAt = useSyncStore((s) => s.lastSyncAt);
   const heard = useListenStore((s) => s.progress);
   const [news, setNews] = useState<ClassNews | null>(null);
@@ -87,55 +83,57 @@ function LearnerClass({ api, summary }: { api: ClassesApi; summary: ClassSummary
     <section className="card stack home-class" aria-labelledby="home-class-title">
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <div className="stack" style={{ gap: 2 }}>
-          <span className="eyebrow home-class-eyebrow">Deine Klasse</span>
+          <span className="eyebrow home-class-eyebrow">{t('home.eyebrow')}</span>
           <h2 id="home-class-title" style={{ margin: 0 }}>
             {summary.name}
           </h2>
           {summary.teacherName && (
             <span className="muted" style={{ fontSize: '0.9rem' }}>
-              bei {summary.teacherName}
+              {t('home.teacher', { teacher: summary.teacherName })}
             </span>
           )}
         </div>
         <Link
           to={`/classes/${summary.id}`}
           className="icon-button"
-          aria-label={`Zur Klasse ${summary.name}`}
+          aria-label={t('home.toClass', { name: summary.name })}
         >
           <Icon name="chevron" />
         </Link>
       </div>
 
-      <ul className="home-class-tiles" aria-label="Neues aus der Klasse">
+      <ul className="home-class-tiles" aria-label={t('home.news')}>
         <li>
           <strong className="home-tile-value tone-accent">
             {news ? open.length : '…'}
           </strong>
-          <span>{open.length === 1 ? 'Aufgabe offen' : 'Aufgaben offen'}</span>
+          <span>{t('home.openTasks', { count: open.length })}</span>
         </li>
         <li>
           <strong className="home-tile-value tone-info">
             {news ? unheard.length : '…'}
           </strong>
-          <span>{unheard.length === 1 ? 'neue Aufnahme' : 'neue Aufnahmen'}</span>
+          <span>{t('home.newRecordings', { count: unheard.length })}</span>
         </li>
         <li>
           <strong className="home-tile-value tone-good">
-            {share === null ? '–' : `${share} %`}
+            {share === null ? '–' : t('percent', { value: share })}
           </strong>
-          <span>Wochen-Challenge</span>
+          <span>{t('home.challenge')}</span>
         </li>
       </ul>
 
       {(open.length > 0 || unheard.length > 0) && (
-        <ul className="home-class-list" aria-label="Als Nächstes in der Klasse">
+        <ul className="home-class-list" aria-label={t('home.next')}>
           {open.slice(0, 3).map((a) => (
             <li key={a.id}>
               <Link to={assignmentLink(summary.id, a)} className="home-class-item">
                 <Icon name="check" size={18} />
                 <span className="stack" style={{ gap: 0 }}>
                   <strong>{a.title}</strong>
-                  <span className="muted">bis {DUE.format(new Date(a.dueAt))}</span>
+                  <span className="muted">
+                    {t('assignments.due', { date: formatDue(a.dueAt) })}
+                  </span>
                 </span>
               </Link>
             </li>
@@ -150,7 +148,7 @@ function LearnerClass({ api, summary }: { api: ClassesApi; summary: ClassSummary
                 <span className="stack" style={{ gap: 0 }}>
                   <strong>{r.title}</strong>
                   <span className="muted">
-                    {[formatDuration(r.durationSec), 'noch nicht gehört']
+                    {[formatDuration(r.durationSec), t('home.notHeard')]
                       .filter(Boolean)
                       .join(' · ')}
                   </span>
@@ -162,13 +160,13 @@ function LearnerClass({ api, summary }: { api: ClassesApi; summary: ClassSummary
       )}
       {news && open.length === 0 && unheard.length === 0 && (
         <p className="muted" style={{ margin: 0 }}>
-          Alles erledigt – nichts offen in deiner Klasse.
+          {t('home.allDone')}
         </p>
       )}
       {shout && (
         <p className="feed-item feed-item-you" style={{ margin: 0 }}>
           <span className="muted" style={{ fontSize: '0.85rem' }}>
-            {shout.author ?? 'Deine Lehrkraft'} an dich:{' '}
+            {t('home.shoutFrom', { author: shout.author ?? t('home.yourTeacher') })}
           </span>
           {shout.message}
         </p>
@@ -178,16 +176,17 @@ function LearnerClass({ api, summary }: { api: ClassesApi; summary: ClassSummary
 }
 
 function WaitingClass({ summary }: { summary: ClassSummary }) {
+  const { t } = useTranslation('classes');
   return (
     <section className="card stack home-class" aria-labelledby="home-class-title">
-      <span className="eyebrow home-class-eyebrow">Deine Klasse</span>
+      <span className="eyebrow home-class-eyebrow">{t('home.eyebrow')}</span>
       <h2 id="home-class-title" style={{ margin: 0 }}>
         {summary.name}
       </h2>
       <p className="muted" style={{ margin: 0 }}>
-        Wartet auf Freigabe
-        {summary.teacherName ? ` durch ${summary.teacherName}` : ' durch deine Lehrkraft'}
-        . Danach siehst du hier Aufgaben und Aufnahmen.
+        {summary.teacherName
+          ? t('home.waiting', { teacher: summary.teacherName })
+          : t('home.waitingNoTeacher')}
       </p>
     </section>
   );
@@ -195,9 +194,10 @@ function WaitingClass({ summary }: { summary: ClassSummary }) {
 
 /** No class yet: paste the invite link (or its code) the teacher shared. */
 function JoinClass() {
+  const { t } = useTranslation('classes');
   const navigate = useNavigate();
   const [value, setValue] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -205,7 +205,7 @@ function JoinClass() {
     const token =
       inviteToken(text) ?? (/^[A-Za-z0-9_-]{20,64}$/.test(text) ? text : null);
     if (!token) {
-      setError('Das ist kein Einladungslink. Kopiere ihn ganz aus der Nachricht.');
+      setError(true);
       return;
     }
     navigate(`/join/${token}`);
@@ -216,16 +216,15 @@ function JoinClass() {
       className="card stack home-class home-class-join"
       aria-labelledby="home-class-title"
     >
-      <span className="eyebrow home-class-eyebrow">Deine Klasse</span>
+      <span className="eyebrow home-class-eyebrow">{t('home.eyebrow')}</span>
       <h2 id="home-class-title" style={{ margin: 0 }}>
-        Lernst du mit einer Lehrkraft?
+        {t('home.joinQuestion')}
       </h2>
       <p className="muted" style={{ margin: 0 }}>
-        Füge den Einladungslink deiner Klasse ein oder scanne ihren QR-Code mit der
-        Kamera. Dann siehst du hier Aufgaben und Aufnahmen.
+        {t('home.joinIntro')}
       </p>
       <form className="stack" style={{ gap: '0.4rem' }} onSubmit={submit}>
-        <label htmlFor="home-invite">Einladungslink</label>
+        <label htmlFor="home-invite">{t('home.inviteLink')}</label>
         <div className="row" style={{ flexWrap: 'nowrap' }}>
           <input
             id="home-invite"
@@ -234,16 +233,16 @@ function JoinClass() {
             value={value}
             onChange={(e) => {
               setValue(e.target.value);
-              setError(null);
+              setError(false);
             }}
-            placeholder="https://…/join/…"
+            placeholder={t('home.invitePlaceholder')}
             autoComplete="off"
           />
           <button type="submit" className="btn btn-primary" disabled={!value.trim()}>
-            Beitreten
+            {t('home.join')}
           </button>
         </div>
-        {error && <span className="feedback-bad">{error}</span>}
+        {error && <span className="feedback-bad">{t('home.notALink')}</span>}
       </form>
     </section>
   );

@@ -15,6 +15,7 @@ const TRANSLATED = [
   'apps/web/src/modules/account/**/*.tsx',
   'apps/web/src/modules/admin/**/*.tsx',
   'apps/web/src/modules/content/**/*.tsx',
+  'apps/web/src/modules/classes/**/*.tsx',
   'apps/web/src/modules/more/**/*.tsx',
   'apps/web/src/modules/settings/**/*.tsx',
   'apps/web/src/modules/library/**/*.tsx',

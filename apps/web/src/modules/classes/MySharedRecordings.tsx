@@ -3,10 +3,12 @@
  * teacher's comment, withdraw it (the file is deleted).
  */
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ArabicText } from '@/components';
+import { dateLocale } from '@/i18n/format';
 import type { SharedRecording, SharingApi } from '@/services/sharing/sharingApi';
 
-const day = (iso: string) => new Date(iso).toLocaleDateString('de-DE');
+const day = (iso: string) => new Date(iso).toLocaleDateString(dateLocale());
 
 export function MySharedRecordings({
   api,
@@ -15,6 +17,7 @@ export function MySharedRecordings({
   api: SharingApi;
   classId: string;
 }) {
+  const { t } = useTranslation('recordings');
   const [items, setItems] = useState<SharedRecording[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -29,7 +32,7 @@ export function MySharedRecordings({
   }, [load]);
 
   const withdraw = async (item: SharedRecording) => {
-    if (!window.confirm('Aufnahme zurückziehen? Sie wird gelöscht.')) return;
+    if (!window.confirm(t('mine.withdrawConfirm'))) return;
     const result = await api.withdraw(item.id);
     setMessage(result.ok ? null : result.message);
     await load();
@@ -40,30 +43,27 @@ export function MySharedRecordings({
   return (
     <section className="stack" aria-labelledby="my-shared-title">
       <h2 id="my-shared-title" className="eyebrow">
-        Mit der Lehrkraft geteilt
+        {t('mine.title')}
       </h2>
       {items.length === 0 ? (
-        <p className="muted">
-          Beim Sprechen (Shadowing) kannst du eine Aufnahme mit deiner Lehrkraft teilen.
-          Nur sie hört sie, und du kannst sie jederzeit zurückziehen.
-        </p>
+        <p className="muted">{t('mine.empty')}</p>
       ) : (
         items.map((item) => (
-          <article key={item.id} className="card stack" aria-label="Geteilte Aufnahme">
+          <article key={item.id} className="card stack" aria-label={t('mine.item')}>
             <div className="row" style={{ justifyContent: 'space-between' }}>
               <span className="muted" style={{ fontSize: '0.85rem' }}>
                 {day(item.createdAt)}
-                {item.heardAt ? ' · von der Lehrkraft gehört' : ' · noch nicht gehört'}
+                {` · ${item.heardAt ? t('mine.heardByTeacher') : t('mine.notHeard')}`}
               </span>
               <button className="btn" onClick={() => void withdraw(item)}>
-                Zurückziehen
+                {t('mine.withdraw')}
               </button>
             </div>
             <ArabicText>{item.text}</ArabicText>
             <audio controls preload="none" src={item.url} />
             {item.comment && (
               <p className="shared-comment" style={{ margin: 0 }}>
-                <strong>Deine Lehrkraft:</strong> {item.comment}
+                <strong>{t('mine.teacherComment')}</strong> {item.comment}
               </p>
             )}
           </article>

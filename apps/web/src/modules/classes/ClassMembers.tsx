@@ -3,12 +3,14 @@
  * learners, and deleting the class. Teachers only.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import QRCode from 'qrcode';
 import { useNavigate } from 'react-router-dom';
+import { dateLocale } from '@/i18n/format';
 import type { ClassesApi, ClassSummary, Member } from '@/services/classes/classesApi';
 import type { SharingApi } from '@/services/sharing/sharingApi';
 
-const date = (iso: string) => new Date(iso).toLocaleDateString('de-DE');
+const date = (iso: string) => new Date(iso).toLocaleDateString(dateLocale());
 
 export function ClassMembers({
   api,
@@ -22,6 +24,7 @@ export function ClassMembers({
   summary: ClassSummary;
   onChange: () => Promise<void>;
 }) {
+  const { t } = useTranslation(['classes', 'common']);
   const [invite, setInvite] = useState<{
     url: string;
     expiresAt: string;
@@ -60,10 +63,11 @@ export function ClassMembers({
   return (
     <div className="card stack">
       <div className="row" style={{ justifyContent: 'space-between' }}>
-        <strong>Mitglieder</strong>
+        <strong>{t('members.title')}</strong>
         <span className="muted">
-          {summary.studentCount} Lernende
-          {summary.pendingCount > 0 && ` · ${summary.pendingCount} warten`}
+          {t('learners', { count: summary.studentCount })}
+          {summary.pendingCount > 0 &&
+            ` · ${t('waiting', { count: summary.pendingCount })}`}
         </span>
       </div>
       {!invite ? (
@@ -72,13 +76,13 @@ export function ClassMembers({
           onClick={() => void createInvite()}
           style={{ alignSelf: 'flex-start' }}
         >
-          Einladungslink &amp; QR-Code
+          {t('members.invite')}
         </button>
       ) : (
         <div className="stack" style={{ alignItems: 'flex-start' }}>
           <img
             src={invite.qr}
-            alt={`QR-Code zum Beitritt in ${summary.name}`}
+            alt={t('members.qrAlt', { name: summary.name })}
             width={240}
             height={240}
           />
@@ -90,16 +94,16 @@ export function ClassMembers({
               className="btn"
               onClick={() => void navigator.clipboard?.writeText(invite.url)}
             >
-              Link kopieren
+              {t('members.copy')}
             </button>
             <span className="muted" style={{ fontSize: '0.85rem' }}>
-              gültig bis {date(invite.expiresAt)} · ein neuer Link ersetzt diesen
+              {t('members.validUntil', { date: date(invite.expiresAt) })}
             </span>
           </span>
         </div>
       )}
       {pending.length > 0 && (
-        <strong style={{ fontSize: '0.95rem' }}>Warten auf Freigabe</strong>
+        <strong style={{ fontSize: '0.95rem' }}>{t('members.pending')}</strong>
       )}
       {pending.map((m) => (
         <div key={m.userId} className="row" style={{ justifyContent: 'space-between' }}>
@@ -109,22 +113,23 @@ export function ClassMembers({
               className="btn btn-primary"
               onClick={() => void act(() => api.approve(summary.id, m.userId))}
             >
-              Freigeben
+              {t('members.approve')}
             </button>
             <button
               className="btn"
               onClick={() => void act(() => api.remove(summary.id, m.userId))}
             >
-              Ablehnen
+              {t('members.reject')}
             </button>
           </span>
         </div>
       ))}
-      {students.length > 0 && <strong style={{ fontSize: '0.95rem' }}>Lernende</strong>}
+      {students.length > 0 && (
+        <strong style={{ fontSize: '0.95rem' }}>{t('members.learners')}</strong>
+      )}
       {students.length > 0 && summary.minors && sharing && (
         <span className="muted" style={{ fontSize: '0.85rem' }}>
-          Klasse mit Minderjährigen: Aufnahmen mit dir teilen kann nur, wessen Eltern
-          zugestimmt haben. Hake das Einverständnis ab, sobald es dir vorliegt.
+          {t('members.minorsHint')}
         </span>
       )}
       {students.map((m) => (
@@ -133,7 +138,7 @@ export function ClassMembers({
             {m.name ?? m.email}
             <span className="muted" style={{ fontSize: '0.85rem' }}>
               {' '}
-              · seit {date(m.joinedAt)}
+              {t('members.since', { date: date(m.joinedAt) })}
             </span>
           </span>
           <span className="row">
@@ -147,29 +152,26 @@ export function ClassMembers({
                   checked={m.parentalConsent ?? false}
                   onChange={(e) => {
                     const consent = e.target.checked;
-                    if (
-                      !consent &&
-                      !window.confirm(
-                        'Einverständnis entfernen? Was dieses Kind geteilt hat, wird gelöscht.'
-                      )
-                    ) {
+                    if (!consent && !window.confirm(t('members.removeConsentConfirm'))) {
                       return;
                     }
                     void act(() => sharing.setConsent(summary.id, m.userId, consent));
                   }}
                 />
-                Einverständnis der Eltern
+                {t('members.consent')}
               </label>
             )}
             <button
               className="btn"
               onClick={() => {
-                if (window.confirm(`${m.name ?? m.email} aus der Klasse entfernen?`)) {
+                if (
+                  window.confirm(t('members.removeConfirm', { name: m.name ?? m.email }))
+                ) {
                   void act(() => api.remove(summary.id, m.userId));
                 }
               }}
             >
-              Entfernen
+              {t('common:remove')}
             </button>
           </span>
         </div>
@@ -185,6 +187,7 @@ export function ClassMembers({
  * learners lose access at once, the data stays with the admins for a while.
  */
 function DeleteClass({ api, summary }: { api: ClassesApi; summary: ClassSummary }) {
+  const { t } = useTranslation(['classes', 'common']);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState('');
@@ -207,22 +210,21 @@ function DeleteClass({ api, summary }: { api: ClassesApi; summary: ClassSummary 
       style={{ marginTop: '1.5rem' }}
     >
       <h3 id="delete-class-title" style={{ margin: 0 }}>
-        Klasse löschen
+        {t('deleteClass.title')}
       </h3>
       {!open ? (
         <div className="row" style={{ flexWrap: 'wrap' }}>
           <span className="muted" style={{ fontSize: '0.9rem' }}>
-            Die Klasse verschwindet für alle Mitglieder, offene Einladungen werden
-            ungültig.
+            {t('deleteClass.intro')}
           </span>
           <button type="button" className="btn btn-danger" onClick={() => setOpen(true)}>
-            Klasse löschen …
+            {t('deleteClass.open')}
           </button>
         </div>
       ) : (
         <form
           className="stack"
-          aria-label="Klasse löschen bestätigen"
+          aria-label={t('deleteClass.confirmForm')}
           onSubmit={(e) => {
             e.preventDefault();
             if (typed.trim() === summary.name && !busy) void remove();
@@ -230,8 +232,7 @@ function DeleteClass({ api, summary }: { api: ClassesApi; summary: ClassSummary 
         >
           <label className="stack" style={{ gap: '0.3rem' }}>
             <span>
-              Zum Bestätigen den Namen der Klasse eingeben:{' '}
-              <strong>{summary.name}</strong>
+              {t('deleteClass.typeName')} <strong>{summary.name}</strong>
             </span>
             <input
               className="input"
@@ -246,7 +247,7 @@ function DeleteClass({ api, summary }: { api: ClassesApi; summary: ClassSummary 
               className="btn btn-danger"
               disabled={busy || typed.trim() !== summary.name}
             >
-              {busy ? 'Wird gelöscht …' : 'Endgültig löschen'}
+              {busy ? t('deleteClass.deleting') : t('deleteClass.forGood')}
             </button>
             <button
               type="button"
@@ -256,7 +257,7 @@ function DeleteClass({ api, summary }: { api: ClassesApi; summary: ClassSummary 
                 setTyped('');
               }}
             >
-              Abbrechen
+              {t('common:cancel')}
             </button>
           </div>
           {error && <span className="feedback-bad">{error}</span>}

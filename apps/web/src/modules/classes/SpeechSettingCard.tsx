@@ -4,9 +4,11 @@
  * recogniser only for the rating and are not stored.
  */
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { SpeechApi } from '@/services/speech';
 
 export function SpeechSettingCard({ api, classId }: { api: SpeechApi; classId: string }) {
+  const { t } = useTranslation('classes');
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -39,16 +41,14 @@ export function SpeechSettingCard({ api, classId }: { api: SpeechApi; classId: s
   return (
     <section className="card stack" aria-labelledby="speech-setting-title">
       <h2 id="speech-setting-title" className="eyebrow">
-        Aussprache-Bewertung
+        {t('speech.title')}
       </h2>
       {enabled !== null && (
         <label className="row" style={{ justifyContent: 'space-between' }}>
           <span className="stack" style={{ gap: 0 }}>
-            <span>Aufnahmen auf dem Server bewerten</span>
+            <span>{t('speech.label')}</span>
             <span className="muted" style={{ fontSize: '0.85rem' }}>
-              Die Aufnahme geht nur für die Bewertung an eine Spracherkennung in der EU
-              und wird nicht gespeichert. Aus: Bewertung nur im Browser (falls er es
-              kann).
+              {t('speech.hint')}
             </span>
           </span>
           <input

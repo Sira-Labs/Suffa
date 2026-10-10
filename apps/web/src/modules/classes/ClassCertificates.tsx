@@ -4,13 +4,13 @@
  * be printed (or saved as PDF) and withdrawn if given by mistake.
  */
 import { useCallback, useEffect, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
+import { dateLocale } from '@/i18n/format';
 import type {
   ClassCertificates as Overview,
   ClassesApi,
 } from '@/services/classes/classesApi';
 import { useCertificatePrint } from './CertificateSheet';
-
-const DATE = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium' });
 
 export function ClassCertificates({
   api,
@@ -19,6 +19,7 @@ export function ClassCertificates({
   api: ClassesApi;
   classId: string;
 }) {
+  const { t } = useTranslation('classes');
   const [overview, setOverview] = useState<Overview | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -45,7 +46,10 @@ export function ClassCertificates({
     }
   };
 
-  if (!overview) return <p className="muted">{message ?? 'Lade Zertifikate …'}</p>;
+  if (!overview) {
+    return <p className="muted">{message ?? t('certificates.loading')}</p>;
+  }
+  const date = new Intl.DateTimeFormat(dateLocale(), { dateStyle: 'medium' });
 
   return (
     <div className="stack" style={{ gap: '1rem' }}>
@@ -53,15 +57,14 @@ export function ClassCertificates({
       {message && <p className="feedback-bad">{message}</p>}
       <section className="card stack" aria-labelledby="eligible-title">
         <h2 id="eligible-title" className="eyebrow">
-          Bereit für ein Zertifikat
+          {t('certificates.eligibleTitle')}
         </h2>
         <p className="muted" style={{ margin: 0 }}>
-          Ab {overview.threshold} % Meisterschaft einer Einheit – also so viele ihrer
-          Wörter sicher im Gedächtnis.
+          {t('certificates.threshold', { threshold: overview.threshold })}
         </p>
         {overview.eligible.length === 0 ? (
           <p className="muted" style={{ margin: 0 }}>
-            Gerade ist niemand so weit. Das Klassen-Dashboard zeigt, wer nah dran ist.
+            {t('certificates.noneEligible')}
           </p>
         ) : (
           <ul className="feed-list">
@@ -72,8 +75,17 @@ export function ClassCertificates({
                 style={{ justifyContent: 'space-between' }}
               >
                 <span>
-                  <strong>{e.name || 'Ohne Namen'}</strong> · Einheit {e.unit} (
-                  {e.unitTitle}) · {e.mastery} %
+                  <Trans
+                    t={t}
+                    i18nKey="certificates.eligible"
+                    values={{
+                      name: e.name || t('certificates.noName'),
+                      unit: e.unit,
+                      title: e.unitTitle,
+                      mastery: e.mastery,
+                    }}
+                    components={{ 1: <strong /> }}
+                  />
                 </span>
                 <button
                   className="btn btn-primary btn-small"
@@ -82,7 +94,7 @@ export function ClassCertificates({
                     void act(() => api.awardCertificate(classId, e.userId, e.unit))
                   }
                 >
-                  Vergeben
+                  {t('certificates.award')}
                 </button>
               </li>
             ))}
@@ -92,11 +104,11 @@ export function ClassCertificates({
 
       <section className="card stack" aria-labelledby="awarded-title">
         <h2 id="awarded-title" className="eyebrow">
-          Vergebene Zertifikate
+          {t('certificates.awardedTitle')}
         </h2>
         {overview.awarded.length === 0 ? (
           <p className="muted" style={{ margin: 0 }}>
-            Noch keine.
+            {t('certificates.noneAwarded')}
           </p>
         ) : (
           <ul className="feed-list">
@@ -107,23 +119,31 @@ export function ClassCertificates({
                 style={{ justifyContent: 'space-between', flexWrap: 'wrap' }}
               >
                 <span>
-                  <strong>{c.learnerName || 'Ohne Namen'}</strong> · Einheit {c.unit} ·{' '}
-                  {DATE.format(new Date(c.awardedAt))}
+                  <Trans
+                    t={t}
+                    i18nKey="certificates.awarded"
+                    values={{
+                      name: c.learnerName || t('certificates.noName'),
+                      unit: c.unit,
+                      date: date.format(new Date(c.awardedAt)),
+                    }}
+                    components={{ 1: <strong /> }}
+                  />
                 </span>
                 <span className="row">
                   <button className="btn btn-small" onClick={() => print(c)}>
-                    Drucken
+                    {t('certificates.print')}
                   </button>
                   <button
                     className="btn btn-small"
                     disabled={busy}
                     onClick={() => {
-                      if (window.confirm('Dieses Zertifikat wirklich zurücknehmen?')) {
+                      if (window.confirm(t('certificates.revokeConfirm'))) {
                         void act(() => api.revokeCertificate(classId, c.id));
                       }
                     }}
                   >
-                    Zurücknehmen
+                    {t('certificates.revoke')}
                   </button>
                 </span>
               </li>

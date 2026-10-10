@@ -5,7 +5,9 @@
  * (XP, synced). Teachers also edit checkpoints and the transcript here.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
+import i18n from '@/i18n';
 import { playableUrl } from '@/native/install';
 import {
   cuesToVtt,
@@ -57,6 +59,7 @@ interface Loaded {
 }
 
 export function RecordingPlayer() {
+  const { t } = useTranslation(['recordings', 'classes']);
   const { id = '', mediaId = '' } = useParams();
   const mediaApi = useMemo(() => new MediaApi(), []);
   const api = useMemo(() => new InteractiveApi(), []);
@@ -149,7 +152,11 @@ export function RecordingPlayer() {
       (before === 'queued' || before === 'processing') &&
       transcriptStatus === 'ready'
     ) {
-      celebrate({ title: 'Transkript ist fertig', xp: 0, big: false });
+      celebrate({
+        title: i18n.t('recordings:player.transcriptReady'),
+        xp: 0,
+        big: false,
+      });
     }
   }, [transcriptStatus, celebrate]);
 
@@ -175,7 +182,7 @@ export function RecordingPlayer() {
   }, [cueList]);
 
   if (message) return <p className="feedback-bad">{message}</p>;
-  if (!media) return <p className="muted">Lade Aufnahme …</p>;
+  if (!media) return <p className="muted">{t('player.loading')}</p>;
 
   const flush = async (el: HTMLMediaElement) => {
     const played = pending.current;
@@ -193,7 +200,11 @@ export function RecordingPlayer() {
       el.duration || media.durationSec || 0
     );
     if (outcome.trackHeard) {
-      celebrate({ title: `Aufnahme gehört: ${media.title}`, xp: outcome.xp, big: false });
+      celebrate({
+        title: t('player.heardToast', { title: media.title }),
+        xp: outcome.xp,
+        big: false,
+      });
     }
   };
 
@@ -203,7 +214,7 @@ export function RecordingPlayer() {
     if (correct) {
       const outcome = await practise(0, 'checkpoint', `${mediaId}/${cp.id}`, []);
       if (outcome.first)
-        celebrate({ title: 'Checkpoint geschafft', xp: outcome.xp, big: false });
+        celebrate({ title: t('player.checkpointDone'), xp: outcome.xp, big: false });
     }
     void element.current?.play();
   };
@@ -284,19 +295,23 @@ export function RecordingPlayer() {
       media.audio
     );
     setSaved(ok);
-    if (!ok) setMessage('Offline speichern hat nicht geklappt.');
+    if (!ok) setMessage(t('player.offlineFailed'));
   };
 
   return (
     <div className="stack" style={{ gap: '1rem' }}>
       <Link to={`/classes/${id}`} className="muted">
-        ← Zur Klasse
+        {t('classes:backToClass')}
       </Link>
       <h1>{media.title}</h1>
       <span className="muted">
         {formatDuration(media.durationSec)}
-        {heard?.completedAt ? ' · ✓ gehört' : percent > 0 ? ` · ${percent} % gehört` : ''}
-        {media.offline && ' · offline gespeichert'}
+        {heard?.completedAt
+          ? ` · ${t('heard')}`
+          : percent > 0
+            ? ` · ${t('player.heardPercent', { percent })}`
+            : ''}
+        {media.offline && ` · ${t('player.savedOffline')}`}
       </span>
       {media.video ? (
         <video
@@ -313,7 +328,7 @@ export function RecordingPlayer() {
               kind="subtitles"
               src={subtitles}
               srcLang="ar"
-              label="Transkript"
+              label={t('player.subtitles')}
               default={subtitlesOn}
             />
           )}
@@ -353,7 +368,7 @@ export function RecordingPlayer() {
           className="btn"
           style={{ alignSelf: 'flex-start' }}
         >
-          Frag al-Muʿallim zu dieser Minute ({formatClock(time)})
+          {t('player.askTutor', { time: formatClock(time) })}
         </Link>
       )}
       {offlineSupported() && !media.offline && (
@@ -362,12 +377,15 @@ export function RecordingPlayer() {
           onClick={() => void toggleOffline()}
           style={{ alignSelf: 'flex-start' }}
         >
-          {saved ? 'Offline-Kopie löschen' : 'Audio offline speichern'}
+          {saved ? t('player.removeOffline') : t('player.saveOffline')}
         </button>
       )}
       {media.checkpoints.length > 0 && (
         <span className="muted" style={{ fontSize: '0.9rem' }}>
-          {media.checkpoints.length} Checkpoints · {doneCheckpoints().size} erledigt
+          {t('player.checkpoints', {
+            count: media.checkpoints.length,
+            done: doneCheckpoints().size,
+          })}
         </span>
       )}
       <ChapterList

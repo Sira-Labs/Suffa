@@ -21,25 +21,66 @@ export const engagement = {
     'words-5': 'Übe 5 Wörter deiner Lektion',
     'tutor-ar-1': 'Schreib al-Muʿallim etwas auf Arabisch',
   },
-  /** Badge meanings and rules by badge id (German as in @suffa/engagement). */
+  /**
+   * Badge meanings and rules by badge id (German as in @suffa/engagement). A rule with a
+   * count has a singular and a plural form; `rule_other` is the text of the data.
+   */
   badges: {
-    mudawim: { meaning: 'der Beständige', rule: '{{n}} Tage in Folge gelernt' },
-    talib: { meaning: 'der Wissenssuchende', rule: '{{n}} Wochenziele erreicht' },
+    mudawim: {
+      meaning: 'der Beständige',
+      rule_one: '{{count}} Tag in Folge gelernt',
+      rule_other: '{{count}} Tage in Folge gelernt',
+    },
+    talib: {
+      meaning: 'der Wissenssuchende',
+      rule_one: '{{count}} Wochenziel erreicht',
+      rule_other: '{{count}} Wochenziele erreicht',
+    },
     mujtahid: {
       meaning: 'der Fleißige',
-      rule: 'An {{n}} Tagen alle drei Tagesaufgaben geschafft',
+      rule_one: 'An {{count}} Tag alle drei Tagesaufgaben geschafft',
+      rule_other: 'An {{count}} Tagen alle drei Tagesaufgaben geschafft',
     },
-    bukur: { meaning: 'Frühaufsteher', rule: 'An {{n}} Tagen vor 8 Uhr gelernt' },
+    bukur: {
+      meaning: 'Frühaufsteher',
+      rule_one: 'An {{count}} Tag vor 8 Uhr gelernt',
+      rule_other: 'An {{count}} Tagen vor 8 Uhr gelernt',
+    },
     hafiz: {
       meaning: 'Bewahrer der Wörter',
-      rule: '{{n}} Karten gefestigt (Abstand ≥ 21 Tage)',
+      rule_one: '{{count}} Karte gefestigt (Abstand ≥ 21 Tage)',
+      rule_other: '{{count}} Karten gefestigt (Abstand ≥ 21 Tage)',
     },
-    mustami: { meaning: 'der Zuhörer', rule: '{{n}} Lektionen ganz gehört' },
-    khattat: { meaning: 'der Schreiber', rule: '{{n}} Wörter richtig geschrieben' },
-    mutakallim: { meaning: 'der Sprechende', rule: '{{n}} Sätze gesprochen' },
-    mutasarrif: { meaning: 'der Konjugierende', rule: '{{n}} Verben geübt' },
-    najm: { meaning: 'Stern der Prüfung', rule: '{{n}}× volle Punktzahl in einem Test' },
-    ruh: { meaning: 'Klassengeist', rule: '{{n}} Klassen-Challenges mitgeschafft' },
+    mustami: {
+      meaning: 'der Zuhörer',
+      rule_one: '{{count}} Lektion ganz gehört',
+      rule_other: '{{count}} Lektionen ganz gehört',
+    },
+    khattat: {
+      meaning: 'der Schreiber',
+      rule_one: '{{count}} Wort richtig geschrieben',
+      rule_other: '{{count}} Wörter richtig geschrieben',
+    },
+    mutakallim: {
+      meaning: 'der Sprechende',
+      rule_one: '{{count}} Satz gesprochen',
+      rule_other: '{{count}} Sätze gesprochen',
+    },
+    mutasarrif: {
+      meaning: 'der Konjugierende',
+      rule_one: '{{count}} Verb geübt',
+      rule_other: '{{count}} Verben geübt',
+    },
+    najm: {
+      meaning: 'Stern der Prüfung',
+      rule_one: '{{count}}× volle Punktzahl in einem Test',
+      rule_other: '{{count}}× volle Punktzahl in einem Test',
+    },
+    ruh: {
+      meaning: 'Klassengeist',
+      rule_one: '{{count}} Klassen-Challenge mitgeschafft',
+      rule_other: '{{count}} Klassen-Challenges mitgeschafft',
+    },
     'stage-1': { meaning: 'Etappe 1 geschafft', rule: 'Zwischentest bestanden' },
     'stage-2': { meaning: 'Etappe 2 geschafft', rule: 'Abschlusstest bestanden' },
     'madinah-stage-1': {

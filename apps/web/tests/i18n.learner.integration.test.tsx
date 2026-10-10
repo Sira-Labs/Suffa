@@ -19,7 +19,7 @@ import { de } from '@/i18n/locales/de';
 import { en } from '@/i18n/locales/en';
 import { Dashboard } from '@/modules/dashboard';
 import { Badges } from '@/modules/engagement/Badges';
-import { questTitle } from '@/modules/engagement/labels';
+import { badgeRule, questTitle } from '@/modules/engagement/labels';
 import { UnitPath, Units } from '@/modules/units';
 import { db } from '@/services/storage';
 import {
@@ -216,9 +216,21 @@ describe('catalogue entries for shared course data', () => {
       BADGES.map((b) => b.id).sort()
     );
     for (const badge of BADGES) {
-      const entry = de.engagement.badges[badge.id as keyof typeof de.engagement.badges];
+      const entry: {
+        meaning: string;
+        rule?: string;
+        rule_one?: string;
+        rule_other?: string;
+      } = de.engagement.badges[badge.id as keyof typeof de.engagement.badges];
       expect(entry.meaning).toBe(badge.meaning);
-      expect(entry.rule).toBe(badge.rule.replace('{n}', '{{n}}'));
+      if (badge.rule.includes('{n}')) {
+        // A rule with a count: the plural form is the text of the data, plus a singular.
+        expect(entry.rule_other).toBe(badge.rule.replace('{n}', '{{count}}'));
+        expect(entry.rule_one).toContain('{{count}}');
+        expect(entry.rule).toBeUndefined();
+      } else {
+        expect(entry.rule).toBe(badge.rule);
+      }
     }
     for (const stage of ALL_STAGES) {
       const ref = stage.ref as keyof typeof de.units.stageBadges;
@@ -229,6 +241,25 @@ describe('catalogue entries for shared course data', () => {
           stage.test
         );
       }
+    }
+  });
+
+  it('says a badge rule in the singular for one and the plural for more', async () => {
+    const ruh = BADGES.find((b) => b.id === 'ruh')!;
+    const mudawim = BADGES.find((b) => b.id === 'mudawim')!;
+    expect(badgeRule(ruh, 1)).toBe('1 Klassen-Challenge mitgeschafft');
+    expect(badgeRule(ruh, 5)).toBe('5 Klassen-Challenges mitgeschafft');
+    await act(() => setUiLanguage('en'));
+    try {
+      expect(badgeRule(ruh, 1)).toBe('Helped complete 1 class challenge');
+      expect(badgeRule(ruh, 10)).toBe('Helped complete 10 class challenges');
+      expect(badgeRule(mudawim, 7)).toBe('Learned 7 days in a row');
+      // A stage badge has no count.
+      expect(badgeRule(BADGES.find((b) => b.id === 'stage-1')!, 1)).toBe(
+        'Passed the mid-level test'
+      );
+    } finally {
+      await act(() => setUiLanguage('de'));
     }
   });
 

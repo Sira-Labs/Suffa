@@ -10,9 +10,16 @@ import i18n from '@/i18n';
 /** Keys built from data ids are not known to the typed `t`. */
 const untyped = i18n as unknown as { t(key: string, options?: object): string };
 
-/** The text under `key` in the interface language, or `fallback` for unknown data. */
-export function dataText(key: string, fallback: string, options?: object): string {
-  return i18n.exists(key) ? untyped.t(key, options) : fallback;
+/**
+ * The text under `key` in the interface language, or `fallback` for unknown data. With a
+ * `count` in `options`, a key with only `_one`/`_other` forms counts as known.
+ */
+export function dataText(
+  key: string,
+  fallback: string,
+  options?: Record<string, unknown>
+): string {
+  return i18n.exists(key, options) ? untyped.t(key, options) : fallback;
 }
 
 export function stageName(stage: Stage): string {

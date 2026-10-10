@@ -33,10 +33,10 @@ export function badgeMeaning(badge: Pick<BadgeDef, 'id' | 'meaning'>): string {
   return dataText(`engagement:badges.${badge.id}.meaning`, badge.meaning);
 }
 
-/** What to do for a tier, with its threshold `n`. */
+/** What to do for a tier, with its threshold `n` (singular or plural by `n`). */
 export function badgeRule(badge: Pick<BadgeDef, 'id' | 'rule'>, n: number): string {
   const fallback = badge.rule.replace('{n}', String(n));
-  return dataText(`engagement:badges.${badge.id}.rule`, fallback, { n });
+  return dataText(`engagement:badges.${badge.id}.rule`, fallback, { count: n });
 }
 
 export function tierLabel(tier: Tier): string {

@@ -284,6 +284,38 @@ export const units = {
     nextPage: 'Seite →',
     pageOf: 'S. {{page}} ({{index}} von {{total}})',
     followBook: 'Buch folgt der Aufnahme',
+    lines: {
+      group: 'Zeilen dieser Seite',
+      play: 'Zeile {{n}} von {{total}} abspielen',
+      edit: 'Zeilen bearbeiten (Admin)',
+      editGroup: 'Zeilen dieser Seite bearbeiten',
+      intro:
+        'Erkenne die Zeilen der Seite und die Pausen der Aufnahme, lass dir Zeiten vorschlagen und korrigiere sie: Beim Mittippen setzt ein Tipp auf eine Zeile ihren Beginn auf die laufende Stelle. Gespeichert werden nur Kästen und Sekunden.',
+      find: 'Zeilen erkennen',
+      finding: 'Suche Zeilen …',
+      found: '{{count}} Zeilen gefunden.',
+      findFailed:
+        'Die Seite ließ sich nicht auswerten. Lade sie neu oder zeichne die Zeilen selbst.',
+      findPauses: 'Pausen suchen',
+      listening: 'Höre die Aufnahme durch …',
+      pauses: '{{count}} Sprechabschnitte gefunden.',
+      pausesFailed:
+        'Die Aufnahme ließ sich nicht auswerten. Tippe die Zeilen dann beim Abspielen mit.',
+      suggest: 'Zeiten vorschlagen',
+      suggested: 'Zeiten vorgeschlagen. Spiel ab und prüf sie.',
+      modes: 'Bearbeitungsart',
+      select: 'Auswählen',
+      tap: 'Mittippen',
+      draw: 'Zeile zeichnen',
+      remove: 'Zeile entfernen',
+      clearPage: 'Seite leeren',
+      count: '{{count}} Zeilen auf dieser Seite.',
+      untimedCount: '{{count}} Zeilen ohne Zeit werden nicht gespeichert.',
+      untimed: 'Zeile {{n}}, noch ohne Zeit',
+      timed: 'Zeile {{n}}, ab {{at}} s',
+      tapHint: 'Tippe auf die Zeile, die gerade beginnt (jetzt bei {{at}} s).',
+      save: 'Zeilen speichern',
+    },
     sync: {
       title: 'Seitenwechsel festlegen (Admin)',
       intro:

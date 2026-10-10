@@ -1,6 +1,6 @@
 # ADR-0021: Learner languages — UI, tutoring and meaning language (German, English, later Arabic UI)
 
-- Status: accepted (tutoring language implemented in Sprint 10; UI language implemented in story 16.3, see `docs/i18n.md`; meaning language planned for 16.4)
+- Status: accepted (tutoring language implemented in Sprint 10; UI language implemented in story 16.3, see `docs/i18n.md`; meaning language in story 16.4: learner side implemented, CMS translations in progress)
 - Date: 2026-09-23
 - Related: ADR-0011 (al-Muʿallim), ADR-0014 (content CMS)
 
@@ -77,3 +77,27 @@ queue gets a "translations" view.
 - German course content (meanings, unit titles, lesson topics) is marked `lang="de"`, so screen
   readers pronounce it as German and the e2e check skips it until meanings follow the meaning
   language (16.4).
+
+## Implementation notes (story 16.4, learner side)
+
+- Setting `settings.meaningLanguage` (migration 0041, synced, kept by the sync when an older
+  app does not send it); null follows the interface language. Settings → "Sprache der
+  Bedeutungen".
+- Content gets optional English next to German instead of a nested `bedeutung` object, so
+  existing ids, cards and the `de` field stay untouched: `Vokabel.en`, `DialogZeile.en`,
+  grammar `beispiele[].en`. English arrives only through the CMS (reviewed, published, in the
+  content bundle); the files in the repository stay German.
+- `meaningOf(item, language)` returns the gloss and whether it is a German fallback; screens
+  show the fallback with a "not yet translated" badge (`MeaningText`, `NotTranslated`).
+  Multiple-choice questions take all options from one language (`consistentMeanings`): German
+  for all if any option lacks English, so no option stands out.
+- Review cards (`vocab_ar_de`, `vocab_de_ar`, plural and root prompts), exams, reading glosses,
+  line translations and the comprehension question, writing prompts and the word of the day
+  follow the meaning language. A learner's own words keep what they typed.
+- Grading: `gradeTranslation(input, gloss, locale)` has a rule table per locale. German keeps
+  its rules (umlaut folding, German and English articles); English ignores `the/a/an/to` and
+  folds British and American spellings (colour/color, centre/center, -ise/-ize, travelling,
+  grey).
+- Not yet: Medina lesson meanings are static files without English (badge shown), nisba,
+  verb and minimal-pair meanings, examples and the server side (tutor curriculum pack, live
+  quiz options) stay German.

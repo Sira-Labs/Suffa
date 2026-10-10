@@ -129,6 +129,7 @@ describe.skipIf(!url)('Content CMS (Postgres)', () => {
       removed: [],
       changed: [],
       textChanged: false,
+      english: [],
     });
     expect(await audit('content.units_seeded')).toHaveLength(1);
     const { rows } = await pool.query(`select count(*)::int as n from content_ids`);
@@ -187,6 +188,7 @@ describe.skipIf(!url)('Content CMS (Postgres)', () => {
       removed: [removed.id],
       changed: [first.id],
       textChanged: false,
+      english: [],
     });
     // Learners still get the published unit.
     expect(saved.published!.vokabeln[0]!.de).toBe(unit.draft.vokabeln[0]!.de);
@@ -459,5 +461,114 @@ describe.skipIf(!url)('Content CMS (Postgres)', () => {
     // Nothing changed since: no new bundle.
     expect(await seedContent(repo, dir, quiet)).toBe(0);
     expect((await manifest()).version).toBe(before + 1);
+  });
+
+  it('drafts missing English with the LLM and publishes it only after a check (16.4)', async () => {
+    const UNIT2 = '/api/v1/content/units/bayna-yadayk/2';
+    const asked: string[] = [];
+    const gateway = {
+      complete: async (
+        _actor: unknown,
+        task: string,
+        input: { messages: { content: string }[] }
+      ) => {
+        expect(task).toBe('content.translate');
+        const { items } = JSON.parse(input.messages[0]!.content) as {
+          items: { place: string; de: string }[];
+        };
+        asked.push(...items.map((i) => i.place));
+        return {
+          text: JSON.stringify({
+            translations: [
+              ...items.map((i) => ({ place: i.place, en: `EN ${i.de}` })),
+              // A place it was not asked for is ignored.
+              { place: 'v-unknown', en: 'nope' },
+            ],
+          }),
+          model: 'fake-model',
+        };
+      },
+    };
+    const ai = createApp({
+      version: 'test',
+      expectedRevision: null,
+      health: {
+        schemaRevision: async () => null,
+        queueDepth: async () => ({ waiting: 0, active: 0, failed: 0, deadLetter: 0 }),
+      },
+      content: {
+        repo,
+        auth: { actor: async () => ({ id: ADMIN, role: 'admin', secondFactor: true }) },
+        log: quiet,
+        gateway: gateway as never,
+      },
+    });
+    const get = async () =>
+      (await (await call('GET', UNIT2, 'teacher')).json()) as UnitDetail;
+    const post = (path: string, user: string, body: unknown) =>
+      call('POST', `${UNIT2}/${path}`, user, body);
+
+    // An English gloss someone wrote by hand stays as it is.
+    let unit = await get();
+    const draft = structuredClone(unit.draft);
+    const kept = draft.vokabeln[0]!;
+    kept.en = 'written by hand';
+    expect(
+      (
+        await call('PUT', `${UNIT2}/draft`, 'admin', {
+          revision: unit.revision,
+          content: draft,
+        })
+      ).status
+    ).toBe(200);
+    unit = await get();
+
+    // Teachers may not start drafts; admins may.
+    expect((await post('translate', 'teacher', { revision: unit.revision })).status).toBe(
+      403
+    );
+    const res = await ai.request(`${UNIT2}/translate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ revision: unit.revision }),
+    });
+    expect(res.status).toBe(200);
+    const drafted = (await res.json()) as { filled: number; remaining: number };
+    expect(drafted.remaining).toBe(0);
+    expect(asked).not.toContain(kept.id);
+    unit = await get();
+    expect(unit.draft.vokabeln[0]!.en).toBe('written by hand');
+    expect(unit.draft.vokabeln[1]!.en).toBe(`EN ${unit.draft.vokabeln[1]!.de}`);
+    expect(unit.draft.dialoge[0]!.zeilen[0]!.en).toMatch(/^EN /);
+    expect(unit.changes.english.length).toBe(drafted.filled + 1);
+    expect(JSON.stringify(unit.draft)).not.toContain('nope');
+
+    // Nothing left: a second draft has nothing to do.
+    const again = await ai.request(`${UNIT2}/translate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ revision: unit.revision }),
+    });
+    expect(again.status).toBe(409);
+
+    // Unchecked English never reaches learners: publishing waits for a teacher's check.
+    expect((await post('submit', 'admin', { revision: unit.revision })).status).toBe(200);
+    const refused = await post('publish', 'admin', { revision: unit.revision });
+    expect(refused.status).toBe(409);
+    expect(await refused.json()).toEqual({ error: 'translation_unreviewed' });
+    expect((await post('check', 'teacher', { revision: unit.revision })).status).toBe(
+      200
+    );
+    expect((await post('publish', 'admin', { revision: unit.revision })).status).toBe(
+      200
+    );
+    unit = await get();
+    expect(unit.published!.vokabeln[1]!.en).toMatch(/^EN /);
+    expect(unit.changes.english).toEqual([]);
+    const bundle = (await (
+      await app.request(`/api/v1/content/bundles/${(await manifest()).version}`)
+    ).json()) as ContentBundle;
+    const published = bundle.units.find((u) => u.einheit === 2)!;
+    expect(published.vokabeln[0]!.en).toBe('written by hand');
   });
 });

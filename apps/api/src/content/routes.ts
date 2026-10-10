@@ -31,11 +31,14 @@ import {
   type SaveResult,
 } from './repository.js';
 import { validateUnitContent } from './schema.js';
+import { draftEnglish, type TranslateDeps } from './translate.js';
 
 export interface ContentRouteDeps {
   repo: ContentRepository;
   auth: AuthResolver;
   log: AuthorizeLog;
+  /** English drafts by the LLM (story 16.4); without it the draft route answers 503. */
+  gateway?: TranslateDeps['gateway'];
 }
 
 /** A unit with 300 words, 20 dialogues and 40 grammar points stays well below this. */
@@ -80,6 +83,7 @@ function answer(c: Context, result: SaveResult) {
       return c.json({ error: 'not_found' }, 404);
     case 'stale_revision':
     case 'wrong_state':
+    case 'translation_unreviewed':
       return c.json({ error: result.reason }, 409);
     case 'id_taken':
       return c.json({ error: 'id_taken', issues: result.issues }, 422);
@@ -187,6 +191,47 @@ export function createContentRoutes(deps: ContentRouteDeps): Hono<ActorEnv> {
       }
     );
   }
+
+  // English drafts for what the draft lacks (admins; reviewed before publishing, story 16.4).
+  app.post(
+    '/content/units/:course/:unit/translate',
+    limit(MAX_STEP_BYTES),
+    guard('content:write'),
+    async (c) => {
+      const p = params(c);
+      if (!p.success) return c.json({ error: 'not_found' }, 404);
+      const body = StepBody.safeParse(await jsonBody(c));
+      if (!body.success) return c.json({ error: 'invalid_body' }, 400);
+      if (!deps.gateway) return c.json({ error: 'ai_unavailable' }, 503);
+      const result = await draftEnglish(
+        { repo: deps.repo, gateway: deps.gateway },
+        actorOf(c),
+        unitId(p.data.course, p.data.unit),
+        body.data.revision
+      );
+      if (result.ok) {
+        return c.json({
+          revision: result.revision,
+          filled: result.filled,
+          remaining: result.remaining,
+        });
+      }
+      switch (result.reason) {
+        case 'nothing_to_translate':
+          return c.json({ error: result.reason }, 409);
+        case 'ai_unavailable':
+          return c.json({ error: result.reason }, 503);
+        case 'ai_quota':
+          return c.json({ error: result.reason }, 429);
+        case 'ai_failed':
+          return c.json({ error: result.reason }, 502);
+        case 'invalid_content':
+          return c.json({ error: result.reason, issues: result.issues }, 422);
+        default:
+          return answer(c, result);
+      }
+    }
+  );
 
   app.post(
     '/content/units/:course/:unit/return',

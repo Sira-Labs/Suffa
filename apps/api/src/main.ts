@@ -555,7 +555,7 @@ async function main(): Promise<void> {
       log,
       enabled: config.feedbackEnabled,
     },
-    content: { repo: content, auth, log },
+    content: { repo: content, auth, log, gateway: ai.gateway },
     speech: {
       auth,
       log,

@@ -45,6 +45,12 @@ export const errors: Messages<typeof de> = {
     ai_quota: "Today's AI quota is used up.",
     ai_failed: 'The AI returned no usable translation. Please try again.',
   },
+  bookSync: {
+    stale_revision:
+      'Someone changed the timings in the meantime. Reload the page and tap along again.',
+    invalid_sync: 'The timings are not valid:',
+    payload_too_large: 'Too many lines for one lesson.',
+  },
   videos: {
     import_unavailable: 'The import needs the YouTube key (SUFFA_YOUTUBE_API_KEY).',
     invalid_body: 'Please check your input (playlist IDs start with PL…).',

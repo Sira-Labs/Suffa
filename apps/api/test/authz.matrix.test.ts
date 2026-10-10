@@ -335,6 +335,14 @@ function buildApp() {
       auth: resolver,
       log: quiet,
     },
+    bookSync: {
+      repo: {
+        list: async () => [],
+        save: async () => ({ ok: true, revision: 1 }),
+      },
+      auth: resolver,
+      log: quiet,
+    },
     speech: {
       auth: resolver,
       log: quiet,

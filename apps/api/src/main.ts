@@ -59,6 +59,7 @@ import { DenyAllResolver, DevTokenResolver, type AuthResolver } from './auth/res
 import { PgSyncRepository } from './sync/repository.js';
 import { PgListeningRepository } from './media/listening.js';
 import { PgFeedbackRepository } from './feedback/repository.js';
+import { PgBookSyncRepository } from './booksync/repository.js';
 import { PgContentRepository } from './content/repository.js';
 import { DEFAULT_SEED_DIR, seedContent } from './content/seed.js';
 import { PgSpeechRepository } from './speech/repository.js';
@@ -556,6 +557,7 @@ async function main(): Promise<void> {
       enabled: config.feedbackEnabled,
     },
     content: { repo: content, auth, log, gateway: ai.gateway },
+    bookSync: { repo: new PgBookSyncRepository(pool), auth, log },
     speech: {
       auth,
       log,

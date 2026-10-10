@@ -93,6 +93,20 @@ and our own exercises, and no copied book texts or pictures in the repo.
     PDF ourselves is not possible either. CSP `img-src` allows `archive.org` and
     `*.archive.org`; links to the PDF at the page remain.
   - If archive.org cannot deliver a page image, the page says so and points to the PDF links.
+  - **The book follows the recording (2026-10-10).** The author's recordings read the book
+    aloud, in its order. Playing a lesson's recording opens the book at the lesson; where an
+    admin has set the page turns, the book turns its pages with the recording. Flipping by hand
+    while it plays stops following until "Buch folgt der Aufnahme" is pressed again. Admins
+    tap the page turns along on the lesson page ("Jetzt" while it plays) and save them
+    (`PUT /api/v1/book-sync/madinah/1/:lesson`, content:write with second factor, revision
+    checked, audit-logged); everyone reads them (`GET /api/v1/book-sync/madinah/1`, public,
+    ETag), and the app keeps the last answer for offline use. Only seconds and page
+    coordinates are stored (table `book_sync`, migration 0043), no book text. The same record
+    has room for line marks (a box on the page image and the seconds it is read), which the
+    next step fills: lines found on the page image in the browser (archive.org's images and
+    recordings send CORS headers, checked 2026-10-10; its OCR of the Arabic is unusable),
+    pauses found in the recording, matched by an admin, and the line being read highlighted
+    on the page.
   - The same course is sold in print as "Madinah Arabic Reader" by Goodword Books, split into
     8 books (our book 1 = their books 1 and 2). Each lesson names its book and start page in
     that edition, so learners with the printed book find it. We show none of its pages: its

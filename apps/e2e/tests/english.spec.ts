@@ -117,13 +117,11 @@ test('shows the learner pages in English, without German interface text', async 
   page,
 }) => {
   test.setTimeout(180_000);
-  await page.goto('/');
-  await page.waitForLoadState('networkidle');
-  // Without an account: learning stays on this device.
-  if (new URL(page.url()).pathname === '/login') {
-    await page.getByRole('button', { name: /Ohne Konto weiter/ }).click();
-  }
+  // The sign-in page comes first; without an account learning stays on this device.
   await page.goto('/settings');
+  await expect(page).toHaveURL(/\/login\?next=%2Fsettings$/);
+  await page.getByRole('button', { name: /Ohne Konto weiter/ }).click();
+  await expect(page).toHaveURL(/\/settings$/);
   await page.getByLabel(/Sprache der Oberfläche/).selectOption('en');
   await expect(page.getByRole('heading', { name: 'Settings', level: 1 })).toBeVisible();
 

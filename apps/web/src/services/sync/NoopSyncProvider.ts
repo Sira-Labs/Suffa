@@ -5,6 +5,7 @@
  * This keeps the app fully usable without a sync backend; a later
  * "sign in & upload" is possible by setting a real provider.
  */
+import i18n from '@/i18n';
 import type { SyncTable } from '@/types';
 import type {
   PullResult,
@@ -36,7 +37,7 @@ export class NoopSyncProvider implements SyncProvider {
       ok: false,
       error: {
         code: 'sync-disabled',
-        message: 'Synchronisation ist nicht konfiguriert (reiner Offline-Modus).',
+        message: i18n.t('errors:signIn.syncDisabled'),
       },
     };
   }

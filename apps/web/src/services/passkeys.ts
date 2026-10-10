@@ -13,6 +13,7 @@ import type {
   PublicKeyCredentialRequestOptionsJSON,
   RegistrationResponseJSON,
 } from '@simplewebauthn/browser';
+import i18n from '@/i18n';
 import { logger } from '@/services/logger';
 
 const log = logger.child('passkeys');
@@ -43,20 +44,10 @@ export type PasskeyResult =
   | { ok: true }
   | { ok: false; reason: PasskeyFailure; message?: string };
 
-/** What the learner reads for each failure; `cancelled` stays silent. */
-export const PASSKEY_MESSAGES: Record<PasskeyFailure, string | undefined> = {
-  cancelled: undefined,
-  'already-added': 'Auf diesem Gerät ist schon ein Passkey für Suffa eingerichtet.',
-  'stale-session':
-    'Zur Sicherheit: Melde dich kurz neu an (Link oder Code), dann kannst du einen Passkey hinzufügen.',
-  'unknown-passkey':
-    'Dieser Passkey ist bei Suffa nicht (mehr) hinterlegt. Melde dich mit Link oder Code an.',
-  'not-verified':
-    'Bitte bestätige mit Gesicht, Fingerabdruck oder der PIN deines Geräts.',
-  'rate-limited': 'Zu viele Versuche – bitte in ein paar Minuten noch einmal.',
-  offline: 'Keine Verbindung – versuch es gleich noch einmal.',
-  failed: 'Das hat nicht geklappt. Versuch es noch einmal oder nimm Link oder Code.',
-};
+/** What the learner reads for a failure, in the interface language; `cancelled` stays silent. */
+export function passkeyMessage(reason: PasskeyFailure): string | undefined {
+  return reason === 'cancelled' ? undefined : i18n.t(`errors:passkeys.${reason}`);
+}
 
 export interface WebAuthnCeremonies {
   startRegistration(options: {
@@ -100,7 +91,7 @@ export async function serverFailure(response: Response): Promise<PasskeyFailure>
 const failure = (reason: PasskeyFailure): PasskeyResult => ({
   ok: false,
   reason,
-  message: PASSKEY_MESSAGES[reason],
+  message: passkeyMessage(reason),
 });
 
 type Fetch = typeof fetch;

@@ -50,13 +50,6 @@ export const PERMISSION_LABELS: Record<PermissionStatus, string> = {
   declined: 'Abgelehnt',
 };
 
-const MESSAGES: Record<string, string> = {
-  import_unavailable:
-    'Für den Import fehlt der YouTube-Schlüssel (SUFFA_YOUTUBE_API_KEY).',
-  invalid_body: 'Bitte prüfe die Eingaben (Playlist-IDs beginnen mit PL…).',
-  second_factor_required: 'Bitte bestätige zuerst den Code aus deiner Authenticator-App.',
-};
-
 export class VideosApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
@@ -147,6 +140,6 @@ export class VideosApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, 'videos');
   }
 }

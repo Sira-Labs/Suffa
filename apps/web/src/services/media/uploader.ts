@@ -4,6 +4,7 @@
  * connection is back); a page reload resumes when the same file is picked again, because the
  * server knows which parts are already stored.
  */
+import i18n from '@/i18n';
 import type { MediaApi, UploadPlan } from './mediaApi';
 
 /** Part URLs fetched per request. */
@@ -152,8 +153,7 @@ export async function uploadRecording(
         if (tries >= MAX_TRIES) {
           return {
             ok: false,
-            message:
-              'Die Verbindung ist abgebrochen. Wähle die Datei erneut, um fortzusetzen.',
+            message: i18n.t('errors:media.upload_interrupted'),
             mediaId: plan.mediaId,
           };
         }

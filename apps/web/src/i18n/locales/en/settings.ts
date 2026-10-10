@@ -82,6 +82,14 @@ export const settings: Messages<typeof de> = {
     until: 'to',
     recap: 'Weekly recap',
     recapHint: 'Sunday evening: your week in numbers',
+    noDevice: 'No device registered yet',
+    devices_one: '{{count}} device gets notifications',
+    devices_other: '{{count}} devices get notifications',
+    selfPlanned: 'This device schedules the reminder itself',
+    localTitle: 'Time for Arabic',
+    localBody: 'A few minutes today keep your streak alive.',
+    unsupported:
+      'This device cannot receive notifications. On iPhone/iPad: add Suffa to the home screen and open it from there.',
   },
   privacy: {
     title: 'My data',

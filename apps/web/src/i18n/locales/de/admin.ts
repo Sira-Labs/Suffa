@@ -73,16 +73,6 @@ export const admin = {
     leagueOff: 'Wochenliga ausgeschaltet',
     leagueMinors: ' (Klasse mit Minderjährigen)',
   },
-  errors: {
-    secondFactorRequired: 'Bitte bestätige zuerst den Code aus deiner Authenticator-App.',
-    invalidCode: 'Der Code stimmt nicht. Nimm den aktuellen Code aus der App.',
-    locked: 'Zu viele falsche Codes – bitte in 15 Minuten noch einmal.',
-    notSetUp: 'Die Zwei-Faktor-Anmeldung ist noch nicht eingerichtet.',
-    alreadyEnabled: 'Die Zwei-Faktor-Anmeldung ist schon eingerichtet.',
-    cannotChangeSelf: 'Das eigene Konto kann hier nicht geändert werden.',
-    rateLimited: 'Gerade kommen sehr viele Rückmeldungen an. Bitte gleich noch einmal.',
-    feedbackDisabled: 'Rückmeldungen sind hier ausgeschaltet.',
-  },
   videos: {
     importStarted: 'Import gestartet – die Liste füllt sich in einer Minute.',
     channel: 'Kanal {{name}}',

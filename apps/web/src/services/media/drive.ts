@@ -10,19 +10,11 @@ export interface DriveStatus {
   appId: string;
 }
 
-const MESSAGES: Record<string, string> = {
-  not_connected: 'Google Drive ist nicht (mehr) verbunden. Bitte neu verbinden.',
-  unsupported_type: 'Bitte nur Audio- oder Videodateien auswählen.',
-  too_large: 'Eine Datei ist zu groß (höchstens 10 GB).',
-  quota_exceeded: 'Der Speicher dieser Klasse ist voll (50 GB).',
-  not_accessible: 'Auf eine Datei gibt es keinen Zugriff.',
-};
-
 export class DriveApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
   status() {
-    return apiRequest<DriveStatus>(this.fetchImpl, '/api/v1/drive', {}, MESSAGES);
+    return apiRequest<DriveStatus>(this.fetchImpl, '/api/v1/drive', {}, 'drive');
   }
 
   token() {
@@ -30,7 +22,7 @@ export class DriveApi {
       this.fetchImpl,
       '/api/v1/drive/token',
       { method: 'POST' },
-      MESSAGES
+      'drive'
     );
   }
 
@@ -39,7 +31,7 @@ export class DriveApi {
       this.fetchImpl,
       '/api/v1/drive',
       { method: 'DELETE' },
-      MESSAGES
+      'drive'
     );
   }
 
@@ -48,7 +40,7 @@ export class DriveApi {
       this.fetchImpl,
       `/api/v1/classes/${encodeURIComponent(classId)}/media/drive`,
       { method: 'POST', body: JSON.stringify({ fileIds }) },
-      MESSAGES
+      'drive'
     );
   }
 }

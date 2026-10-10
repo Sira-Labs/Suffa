@@ -4,6 +4,7 @@
  * so reminders keep coming when the app is not opened; each start and each finished day
  * re-plans it, skipping today once today's learning is done. Quiet hours are respected.
  */
+import i18n from '@/i18n';
 import { logger } from '@/services/logger';
 import type { NotificationPrefs } from '@/services/notifications/notificationsApi';
 import { plugin, type LocalNotificationsPlugin } from './capacitor';
@@ -102,8 +103,8 @@ export function createLocalReminders(
       await notifications.schedule({
         notifications: times.map((at, i) => ({
           id: FIRST_ID + i,
-          title: 'Zeit für Arabisch',
-          body: 'Ein paar Minuten heute halten deine Serie am Leben.',
+          title: i18n.t('settings:reminders.localTitle'),
+          body: i18n.t('settings:reminders.localBody'),
           schedule: { at, allowWhileIdle: true },
         })),
       });

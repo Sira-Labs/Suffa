@@ -44,24 +44,13 @@ export function rateTranscript(text: string, transcript: string): AssessOutcome 
   }
 }
 
-const MESSAGES: Record<string, string> = {
-  speech_unavailable:
-    'Die Bewertung auf dem Server ist gerade nicht erreichbar. Versuch es über den Browser.',
-  speech_off_for_class: 'Deine Klasse hat die Bewertung auf dem Server ausgeschaltet.',
-  rate_limited: 'Sehr viele Bewertungen in kurzer Zeit – bitte einen Moment warten.',
-  unsupported_audio: 'Dieses Aufnahmeformat kann der Server nicht lesen.',
-  audio_too_short: 'Die Aufnahme ist zu kurz. Sprich den ganzen Satz.',
-  payload_too_large: 'Die Aufnahme ist zu lang. Sprich nur diesen Satz.',
-  invalid_text: 'Dieser Satz lässt sich nicht Buchstabe für Buchstabe bewerten.',
-};
-
 /** Suffa's speech endpoints. */
 export class SpeechApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
   /** Whether this learner's recordings may be rated on the server. */
   settings(): Promise<ApiResult<{ server: boolean }>> {
-    return apiRequest(this.fetchImpl, '/api/v1/speech/settings', {}, MESSAGES);
+    return apiRequest(this.fetchImpl, '/api/v1/speech/settings', {}, 'speech');
   }
 
   assess(text: string, recording: Recording): Promise<ApiResult<Assessment>> {
@@ -72,7 +61,7 @@ export class SpeechApi {
       this.fetchImpl,
       '/api/v1/speech/assess',
       { method: 'POST', body: form },
-      MESSAGES
+      'speech'
     );
   }
 
@@ -82,7 +71,7 @@ export class SpeechApi {
       this.fetchImpl,
       `/api/v1/classes/${encodeURIComponent(classId)}/speech`,
       {},
-      MESSAGES
+      'speech'
     );
   }
 
@@ -91,7 +80,7 @@ export class SpeechApi {
       this.fetchImpl,
       `/api/v1/classes/${encodeURIComponent(classId)}/speech`,
       { method: 'PUT', body: JSON.stringify({ serverSpeech }) },
-      MESSAGES
+      'speech'
     );
   }
 }

@@ -92,11 +92,4 @@ export const adminAi = {
     cached: 'aus Cache',
     cost: 'Kosten',
   },
-  errors: {
-    invalidBody: 'Bitte prüfe die Eingaben.',
-    paused: 'Das KI-Budget dieses Monats ist aufgebraucht – KI macht Pause.',
-    unavailable: 'Kein Modell hat geantwortet. Sind die Schlüssel gesetzt?',
-    quota: 'Das Tageskontingent ist aufgebraucht.',
-    badRequest: 'Das Modell hat die Anfrage abgelehnt (ungültige Anfrage).',
-  },
 };

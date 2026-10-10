@@ -3,6 +3,7 @@
  * the server can send to it, else reminders the device plans itself. The settings card talks
  * to this interface only.
  */
+import i18n from '@/i18n';
 import { enableAppPush, disableAppPush } from '@/native/appPush';
 import type { NativeBridge } from '@/native/install';
 import type {
@@ -27,16 +28,13 @@ export interface ReminderChannel {
 }
 
 function devicesLine(config: NotificationConfig): string {
-  if (config.devices === 0) return 'Noch kein Gerät angemeldet';
-  return `${config.devices} ${config.devices === 1 ? 'Gerät bekommt' : 'Geräte bekommen'} Mitteilungen`;
+  if (config.devices === 0) return i18n.t('settings:reminders.noDevice');
+  return i18n.t('settings:reminders.devices', { count: config.devices });
 }
 
 export const webPushChannel: ReminderChannel = {
   available: (config) => config.publicKey !== null,
-  hint: () =>
-    pushSupported()
-      ? null
-      : 'Dieses Gerät kann keine Mitteilungen empfangen. Auf iPhone/iPad: Suffa zum Home-Bildschirm hinzufügen und von dort öffnen.',
+  hint: () => (pushSupported() ? null : i18n.t('settings:reminders.unsupported')),
   enable: (api, config) => enablePush(api, config.publicKey ?? ''),
   disable: (api) => disablePush(api),
   saved: async () => undefined,
@@ -55,8 +53,7 @@ export function appChannel(bridge: NativeBridge): ReminderChannel {
       return {
         ok: false,
         reason: 'denied',
-        message:
-          'Mitteilungen sind blockiert. Erlaube sie in den Einstellungen des Geräts.',
+        message: i18n.t('errors:push.deniedApp'),
       };
     },
     async disable(api, config) {
@@ -70,8 +67,6 @@ export function appChannel(bridge: NativeBridge): ReminderChannel {
       );
     },
     status: (config) =>
-      serverPush(config)
-        ? devicesLine(config)
-        : 'Dieses Gerät plant die Erinnerung selbst',
+      serverPush(config) ? devicesLine(config) : i18n.t('settings:reminders.selfPlanned'),
   };
 }

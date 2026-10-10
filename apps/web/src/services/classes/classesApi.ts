@@ -113,16 +113,6 @@ export const CHALLENGE_LABELS: Record<
   'active-days': { title: 'Lerntage sammeln', unit: 'Lerntage', suggested: 60 },
 };
 
-const MESSAGES: Record<string, string> = {
-  invalid_invite:
-    'Dieser Einladungslink ist abgelaufen oder ungültig. Bitte frag nach einem neuen.',
-  forbidden: 'Das darf nur die Lehrkraft dieser Klasse.',
-  not_a_learner: 'Das geht nur für Lernende der Klasse.',
-  not_eligible: 'Die Meisterschaft der Einheit liegt noch unter 90 %.',
-  exists: 'Für diese Einheit gibt es schon ein Zertifikat.',
-  unknown_unit: 'Diese Einheit gibt es nicht.',
-};
-
 /** The token of an invite URL `…/join/<token>`, or null. */
 export function inviteToken(url: string): string | null {
   return /\/join\/([A-Za-z0-9_-]{20,64})$/.exec(url)?.[1] ?? null;
@@ -332,6 +322,6 @@ export class ClassesApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, 'classes');
   }
 }

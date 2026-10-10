@@ -2,7 +2,8 @@
  * Client for al-Muʿallim (Sprint 10). A turn streams server-sent events over a POST request
  * (EventSource only does GET), parsed here from the response body.
  */
-import { apiRequest, type Fetch } from '@/services/api/request';
+import i18n from '@/i18n';
+import { apiRequest, errorMessage, type Fetch } from '@/services/api/request';
 
 export type TutorLanguage = 'de' | 'en';
 
@@ -34,15 +35,6 @@ export type TutorEvent =
   | { type: 'replace'; text: string }
   | { type: 'done'; messageId: string; flags: string[] }
   | { type: 'error'; error: string; message: string };
-
-const MESSAGES: Record<string, string> = {
-  invalid_body: 'Die Nachricht ist leer oder zu lang (höchstens 2000 Zeichen).',
-  ai_quota:
-    'Für heute hast du alle Gespräche mit al-Muʿallim genutzt. Morgen geht es weiter.',
-  ai_paused: 'Die KI-Funktionen machen diesen Monat Pause.',
-  ai_unavailable:
-    'al-Muʿallim ist gerade nicht erreichbar. Versuche es gleich noch einmal.',
-};
 
 /** Splits an SSE byte stream into the JSON payloads of its `data:` lines. */
 export async function* readEvents<T = TutorEvent>(
@@ -136,20 +128,21 @@ export class TutorApi {
       });
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
-      yield { type: 'error', error: 'offline', message: 'Keine Verbindung.' };
+      yield { type: 'error', error: 'offline', message: i18n.t('errors:common.offline') };
       return;
     }
     if (!response.ok || !response.body) {
       const body = (await response.json().catch(() => null)) as { error?: string } | null;
       const code = body?.error ?? 'server_error';
+      const known = i18n.exists(`errors:tutor.${code}`);
       yield {
         type: 'error',
         error: code,
-        message:
-          MESSAGES[code] ??
-          (response.status === 401
-            ? 'Bitte melde dich an.'
-            : `al-Muʿallim antwortet gerade nicht (${response.status}).`),
+        message: known
+          ? errorMessage(code, response.status, 'tutor')
+          : response.status === 401
+            ? i18n.t('errors:common.unauthorized')
+            : i18n.t('errors:tutor.no_answer', { status: response.status }),
       };
       return;
     }
@@ -157,7 +150,7 @@ export class TutorApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, 'tutor');
   }
 }
 
@@ -191,15 +184,6 @@ export interface Grade {
   override: { score: number; comment: string; corrected: string | null } | null;
   createdAt: string;
 }
-
-export const MISTAKE_LABELS: Record<GradeMistake['category'], string> = {
-  spelling: 'Rechtschreibung',
-  grammar: 'Grammatik',
-  vocabulary: 'Wortschatz',
-  word_order: 'Satzstellung',
-  vocalisation: 'Vokalisierung',
-  other: 'Sonstiges',
-};
 
 /** Arabic letters in a text, for the "write Arabic to the tutor" quest. */
 export function countArabicLetters(text: string): number {

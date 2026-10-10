@@ -80,6 +80,14 @@ export const settings = {
     until: 'bis',
     recap: 'Wochenrückblick',
     recapHint: 'Sonntagabend: deine Woche in Zahlen',
+    noDevice: 'Noch kein Gerät angemeldet',
+    devices_one: '{{count}} Gerät bekommt Mitteilungen',
+    devices_other: '{{count}} Geräte bekommen Mitteilungen',
+    selfPlanned: 'Dieses Gerät plant die Erinnerung selbst',
+    localTitle: 'Zeit für Arabisch',
+    localBody: 'Ein paar Minuten heute halten deine Serie am Leben.',
+    unsupported:
+      'Dieses Gerät kann keine Mitteilungen empfangen. Auf iPhone/iPad: Suffa zum Home-Bildschirm hinzufügen und von dort öffnen.',
   },
   privacy: {
     title: 'Meine Daten',

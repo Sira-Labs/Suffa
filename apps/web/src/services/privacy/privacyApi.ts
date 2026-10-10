@@ -1,10 +1,6 @@
 /** GDPR self-service (story 4.4): download everything stored about you; delete the account. */
 import { apiRequest, type Fetch } from '@/services/api/request';
 
-const MESSAGES: Record<string, string> = {
-  confirmation_mismatch: 'Die E-Mail-Adresse stimmt nicht mit deinem Konto überein.',
-};
-
 export class PrivacyApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
@@ -27,7 +23,7 @@ export class PrivacyApi {
       this.fetchImpl,
       '/api/v1/account',
       { method: 'DELETE', body: JSON.stringify({ confirm: confirmEmail }) },
-      MESSAGES
+      'privacy'
     );
   }
 }

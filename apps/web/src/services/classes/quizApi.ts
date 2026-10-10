@@ -32,16 +32,6 @@ export interface QuizView {
   leaderboard: { name: string; points: number; you: boolean }[];
 }
 
-const MESSAGES: Record<string, string> = {
-  running: 'In dieser Klasse läuft schon ein Quiz.',
-  no_words: 'Für ein Quiz fehlen noch Wörter.',
-  no_quiz: 'Gerade läuft kein Quiz.',
-  wrong_state: 'Diese Frage ist schon vorbei.',
-  too_late: 'Die Zeit für diese Frage ist um.',
-  not_joined: 'Tritt zuerst dem Quiz bei.',
-  teacher: 'Als Lehrkraft steuerst du das Quiz.',
-};
-
 export class QuizApi {
   constructor(private readonly fetchImpl: Fetch = (...args) => fetch(...args)) {}
 
@@ -112,6 +102,6 @@ export class QuizApi {
   }
 
   private call<T>(path: string, init: RequestInit = {}) {
-    return apiRequest<T>(this.fetchImpl, path, init, MESSAGES);
+    return apiRequest<T>(this.fetchImpl, path, init, 'quiz');
   }
 }

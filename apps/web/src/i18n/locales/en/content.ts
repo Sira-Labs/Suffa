@@ -8,14 +8,6 @@ export const content: Messages<typeof de> = {
     review: 'In review',
     published: 'Published',
   },
-  errors: {
-    staleRevision:
-      'The unit has been changed in the meantime. Reload it and then make your change again.',
-    wrongState: 'This step does not fit the unit’s current state. Reload it.',
-    invalidContent: 'The content is not valid like this:',
-    idTaken: 'An ID already belongs to another unit:',
-    payloadTooLarge: 'The unit is too large.',
-  },
   review: {
     title: 'Review content',
     teachersOnly: 'This page is for teachers.',

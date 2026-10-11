@@ -9,8 +9,8 @@
  * For each lesson it loads the page images and the recording from archive.org into a temporary
  * folder and
  * - finds the text lines on each page with the app's own line detection (pictures left out),
- * - reads each line with Tesseract (Arabic; SUFFA_TESSDATA may name a folder with the more
- *   accurate tessdata_best model),
+ * - reads each line with Tesseract in four ways (Arabic; SUFFA_TESSDATA may name a folder
+ *   with the more accurate tessdata_best model) and keeps the reading most like the speech,
  * - recognises the recording's words with their seconds, locally (speech_words.py, Whisper),
  * - and matches the two letter by letter (textAlign.mjs): a line starts when its letters are
  *   first said. The reader repeats lines and announces exercises; that speech matches nothing
@@ -28,13 +28,11 @@ import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { detectLines } from '../../apps/web/src/services/courses/lineDetection.ts';
-import { letters, lineTimes } from './textAlign.mjs';
+import { letters, lineTimes, pickReading } from './textAlign.mjs';
 
 const WIDTH = 600;
 const PAUSE_MS = 1500;
-/** A line stays marked until the next one starts, unless the next is this far off. */
-const HOLD_SECONDS = 8;
-/** How long a line stays marked after its last letter when the next one is far off. */
+/** How long the last line stays marked after its last letter. */
 const TAIL_SECONDS = 1.5;
 /** Padding around a line's box when it is cut out for OCR, as a fraction of the page. */
 const CROP_PAD = 0.008;
@@ -61,24 +59,18 @@ export function readable([x, y, w, h]) {
 /**
  * Page turns and line marks from the lines in reading order (`ordered`: page and box) and
  * the seconds each was found at (`times`, null when it was not heard). Each page turns when
- * its first heard line starts; a line ends where the next begins, unless that is far off.
+ * its first heard line starts. A line stays marked until the next one starts: the reader
+ * repeats a line, pauses and explains, and the mark should only move on with the reading.
  */
 export function timedSync(ordered, times) {
-  const heard = [];
-  ordered.forEach((line, i) => {
-    const t = times[i];
-    if (!t) return;
-    // A line found before the one above it is a misreading of a repeated phrase.
-    if (heard.length > 0 && t.start <= heard[heard.length - 1].start) return;
-    heard.push({ ...line, ...t });
-  });
+  // In the order they are said: a page may be read column by column.
+  const heard = ordered
+    .map((line, i) => (times[i] ? { ...line, ...times[i] } : null))
+    .filter(Boolean)
+    .sort((a, b) => a.start - b.start);
   const lines = heard.map((line, i) => {
     const next = heard[i + 1];
-    let end =
-      next && next.start - line.end <= HOLD_SECONDS
-        ? next.start
-        : line.end + TAIL_SECONDS;
-    if (next) end = Math.min(end, next.start);
+    const end = next ? next.start : line.end + TAIL_SECONDS;
     return {
       page: line.page,
       box: line.box.map((v) => round(v, 4)),
@@ -162,13 +154,21 @@ function tesseract(file, psm) {
       '--psm',
       psm,
     ],
-    { stdio: ['ignore', 'pipe', 'ignore'] }
+    // One thread: a line is small, and Tesseract's threads otherwise spin against Whisper's.
+    {
+      stdio: ['ignore', 'pipe', 'ignore'],
+      env: { ...process.env, OMP_THREAD_LIMIT: '1' },
+    }
   )
     .toString()
     .trim();
 }
 
-/** The text of each box on a page image, read as a single line (else as a block). */
+/**
+ * Readings of each box on a page image: as one line and as a block, at its size and twice
+ * its size. OCR of vowelled print varies; the reading most like the recording is picked
+ * later (pickReading).
+ */
 function readBoxes(file, boxes, work) {
   const [w, h] = imageSize(file);
   const crop = join(work, 'line.png');
@@ -177,18 +177,21 @@ function readBoxes(file, boxes, work) {
     const top = Math.max(0, Math.round((y - CROP_PAD) * h));
     const cw = Math.min(w - left, Math.round((bw + 2 * CROP_PAD) * w));
     const ch = Math.min(h - top, Math.round((bh + 2 * CROP_PAD) * h));
-    execFileSync('ffmpeg', [
-      '-v',
-      'error',
-      '-y',
-      '-i',
-      file,
-      '-vf',
-      `crop=${cw}:${ch}:${left}:${top},format=gray`,
-      crop,
-    ]);
-    const text = tesseract(crop, '7');
-    return letters(text).length >= 2 ? text : tesseract(crop, '6');
+    const readings = [];
+    for (const scale of [1, 2]) {
+      execFileSync('ffmpeg', [
+        '-v',
+        'error',
+        '-y',
+        '-i',
+        file,
+        '-vf',
+        `crop=${cw}:${ch}:${left}:${top},scale=iw*${scale}:-1,format=gray`,
+        crop,
+      ]);
+      readings.push(tesseract(crop, '7'), tesseract(crop, '6'));
+    }
+    return readings;
   });
 }
 
@@ -228,20 +231,6 @@ async function main() {
   try {
     for (const lesson of book.lessons) {
       if (only !== null && lesson.lesson !== only) continue;
-      const ordered = [];
-      const texts = [];
-      for (const page of lessonPages(book, lesson)) {
-        const file = join(work, `p${page}.jpg`);
-        await download(pageImageUrl(book, page), file);
-        const { grey, width, height } = greyPage(file);
-        const boxes = detectLines(grey, width, height)
-          .filter(readable)
-          .sort((a, b) => a[1] - b[1] || b[0] - a[0]);
-        texts.push(...readBoxes(file, boxes, work));
-        ordered.push(...boxes.map((box) => ({ page, box })));
-        rmSync(file);
-        await sleep(PAUSE_MS);
-      }
       const cached = cache && join(cache, `words-b${bookNo}-l${lesson.lesson}.json`);
       let words;
       if (cached && existsSync(cached)) {
@@ -253,7 +242,25 @@ async function main() {
         rmSync(audio);
         if (cached) writeFileSync(cached, JSON.stringify(words));
       }
-      const { pages, lines } = timedSync(ordered, lineTimes(texts, words));
+      const said = words.map((word) => letters(word.w)).join('');
+      const ordered = [];
+      const texts = [];
+      for (const page of lessonPages(book, lesson)) {
+        const file = join(work, `p${page}.jpg`);
+        await download(pageImageUrl(book, page), file);
+        const { grey, width, height } = greyPage(file);
+        const boxes = detectLines(grey, width, height)
+          .filter(readable)
+          .sort((a, b) => a[1] - b[1] || b[0] - a[0]);
+        texts.push(...readBoxes(file, boxes, work).map((r) => pickReading(r, said)));
+        ordered.push(...boxes.map((box) => ({ page, box })));
+        rmSync(file);
+        await sleep(PAUSE_MS);
+      }
+      const { pages, lines } = timedSync(
+        ordered,
+        lineTimes(texts, words, { pages: ordered.map((l) => l.page) })
+      );
       process.stderr.write(
         `lesson ${lesson.lesson}: ${ordered.length} boxes, ${lines.length} heard, ${pages.length} page turns, ${words.length} words\n`
       );

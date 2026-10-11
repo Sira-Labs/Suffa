@@ -135,6 +135,13 @@ and our own exercises, and no copied book texts or pictures in the repo.
       (`textAlign.mjs`); a line starts when its letters are first said, repeated or announced
       speech matches nothing and is passed over, and boxes never heard (pictures, page numbers)
       are dropped. The OCR text and the recognised words are deleted after the run.
+    - Tuned after listening (2026-10-11): a line stays marked until the next one starts
+      (the reader repeats each line several times); a line starts at its first reading, also
+      when the repeat was recognised a little differently; each line's OCR is read four ways
+      and the reading most like the speech is kept; a match must resemble the line (not only
+      its "هذا"); lines not found are looked for between their neighbours or anywhere in their
+      page's stretch, since some pages are read column by column; marks follow the order
+      lines are said in, not the order they are printed in.
     - Rows the seed wrote are marked `suggested` (migration 0044). A new suggestion replaces
       them at start-up as a new revision; a lesson an admin has saved is never replaced.
   - The same course is sold in print as "Madinah Arabic Reader" by Goodword Books, split into

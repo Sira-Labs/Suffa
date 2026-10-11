@@ -27,29 +27,33 @@ test('specks and the centred page number are not read', () => {
 
 const box = (y) => [0.1, y, 0.8, 0.04];
 
-test('heard lines are kept in order; each holds until the next unless that is far off', () => {
+test('heard lines are marked in the order they are said, each until the next one starts', () => {
   const { pages, lines } = timedSync(
     [
       { page: 2, box: box(0.1) },
       { page: 2, box: box(0.2) }, // a picture: never heard
       { page: 2, box: box(0.3) },
-      { page: 3, box: box(0.1) },
-      { page: 3, box: box(0.2) }, // found before the line above it: a misreading
+      { page: 3, box: box(0.1) }, // the right column, read first
+      { page: 3, box: box(0.2) }, // the left column, read after it
+      { page: 3, box: box(0.3) }, // the right column again
     ],
     [
       { start: 1, end: 3 },
       null,
       { start: 4, end: 6 },
       { start: 20, end: 21 },
-      { start: 10, end: 11 },
+      { start: 30, end: 31 },
+      { start: 25, end: 26 },
     ]
   );
   assert.deepEqual(
     lines.map((l) => [l.page, l.box[1], l.start, l.end]),
     [
       [2, 0.1, 1, 4],
-      [2, 0.3, 4, 7.5],
-      [3, 0.1, 20, 22.5],
+      [2, 0.3, 4, 20],
+      [3, 0.1, 20, 25],
+      [3, 0.3, 25, 30],
+      [3, 0.2, 30, 32.5],
     ]
   );
   assert.deepEqual(pages, [

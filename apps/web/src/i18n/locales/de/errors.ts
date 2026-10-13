@@ -127,7 +127,8 @@ export const errors = {
   live: {
     live_unavailable: 'Live-Unterricht ist auf diesem Server noch nicht eingerichtet.',
     not_live: 'Dieser Live-Unterricht läuft gerade nicht.',
-    already_live: 'In dieser Klasse läuft schon ein Live-Unterricht.',
+    already_live: 'Für diese Gruppe läuft schon ein Live-Unterricht.',
+    wrong_audience: 'Dieser Live-Unterricht ist für eine andere Gruppe der Klasse.',
     wrong_state: 'Das geht in diesem Zustand des Live-Unterrichts nicht.',
     invalid_start: 'Der Beginn muss zwischen heute und in einem Jahr liegen.',
     not_in_room: 'Diese Person ist nicht mehr im Raum.',

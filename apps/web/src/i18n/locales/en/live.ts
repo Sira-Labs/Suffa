@@ -12,7 +12,16 @@ export const live: Messages<typeof de> = {
     titlePlaceholder: 'e.g. Lesson 5',
     startsAt: 'Starts',
     duration: 'Length (minutes)',
+    audience: 'For',
+    audienceHint:
+      'Put learners with the sisters or the brothers under “Members”. Learners without a section only see lessons for everyone.',
+    camerasOff: 'Learners’ cameras stay off (microphone only with the floor)',
     submit: 'Plan',
+  },
+  audience: {
+    all: 'Everyone',
+    sisters: 'Sisters',
+    brothers: 'Brothers',
   },
   session: {
     when: '{{date}}, {{minutes}} minutes',
@@ -22,6 +31,7 @@ export const live: Messages<typeof de> = {
     cancel: 'Cancel',
     confirmCancel: 'Cancel “{{title}}”?',
     join: 'Join',
+    camerasOff: 'Learners’ cameras off',
   },
   banner: {
     live: 'Live lesson in progress: {{title}}',

@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { LiveApi, type LiveRole, type LiveSession } from '@/services/live/liveApi';
+import { SessionTags } from './LiveSessions';
 import {
   connectLive,
   MAX_MESSAGE_LENGTH,
@@ -272,6 +273,7 @@ function Room({
             {t('room.back')}
           </Link>
           <h1>{session.title}</h1>
+          <SessionTags session={session} />
         </span>
         {state.status === 'reconnecting' && (
           <p className="live-tag" role="status">
@@ -312,13 +314,15 @@ function Room({
             >
               {me.micOn ? t('room.micOff') : t('room.micOn')}
             </button>
-            <button
-              className="btn"
-              aria-pressed={me.cameraOn}
-              onClick={() => void device(() => connection.setCamera(!me.cameraOn))}
-            >
-              {me.cameraOn ? t('room.cameraOff') : t('room.cameraOn')}
-            </button>
+            {(teacherView || session.learnerCameras) && (
+              <button
+                className="btn"
+                aria-pressed={me.cameraOn}
+                onClick={() => void device(() => connection.setCamera(!me.cameraOn))}
+              >
+                {me.cameraOn ? t('room.cameraOff') : t('room.cameraOn')}
+              </button>
+            )}
           </>
         )}
         {teacherView && me && (

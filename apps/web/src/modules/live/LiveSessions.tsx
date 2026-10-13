@@ -5,7 +5,12 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { LiveApi, type LiveSession, type LiveSessions } from '@/services/live/liveApi';
+import {
+  LiveApi,
+  type LiveAudience,
+  type LiveSession,
+  type LiveSessions,
+} from '@/services/live/liveApi';
 
 export const DEFAULT_MINUTES = 60;
 
@@ -47,6 +52,27 @@ function useSessions(api: LiveApi, classId: string) {
 const roomPath = (classId: string, sessionId: string) =>
   `/classes/${classId}/live/${sessionId}`;
 
+const AUDIENCES: LiveAudience[] = ['all', 'sisters', 'brothers'];
+
+/** Who a session is for and whether learners' cameras stay off; nothing for a plain one. */
+export function SessionTags({ session }: { session: LiveSession }) {
+  const { t } = useTranslation('live');
+  const tags = [
+    session.audience !== 'all' && t(`audience.${session.audience}`),
+    !session.learnerCameras && t('session.camerasOff'),
+  ].filter(Boolean);
+  if (tags.length === 0) return null;
+  return (
+    <span className="row" style={{ gap: '0.35rem', flexWrap: 'wrap' }}>
+      {tags.map((tag) => (
+        <span key={String(tag)} className="badge">
+          {tag}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 /** The teacher's tab: plan and run the class's live lessons. */
 export function LiveSessionsTeacher({
   classId,
@@ -63,6 +89,8 @@ export function LiveSessionsTeacher({
   const [title, setTitle] = useState('');
   const [startsAt, setStartsAt] = useState(() => nextHourLocal());
   const [minutes, setMinutes] = useState(DEFAULT_MINUTES);
+  const [audience, setAudience] = useState<LiveAudience>('all');
+  const [camerasOff, setCamerasOff] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -83,6 +111,8 @@ export function LiveSessionsTeacher({
         title: title.trim(),
         startsAt: new Date(startsAt).toISOString(),
         durationMinutes: minutes,
+        audience,
+        learnerCameras: !camerasOff,
       })
     );
     if (ok) setTitle('');
@@ -112,6 +142,7 @@ export function LiveSessionsTeacher({
                   <span className="muted" style={{ fontSize: '0.85rem' }}>
                     {s.status === 'live' ? t('session.live') : when(s)}
                   </span>
+                  <SessionTags session={s} />
                 </span>
                 <span className="row" style={{ gap: '0.5rem' }}>
                   {s.status === 'live' ? (
@@ -201,7 +232,31 @@ export function LiveSessionsTeacher({
               onChange={(e) => setMinutes(Number(e.target.value))}
             />
           </label>
+          <label className="stack" style={{ gap: '0.25rem' }}>
+            <span>{t('plan.audience')}</span>
+            <select
+              value={audience}
+              onChange={(e) => setAudience(e.target.value as LiveAudience)}
+            >
+              {AUDIENCES.map((a) => (
+                <option key={a} value={a}>
+                  {t(`audience.${a}`)}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
+        <label className="row" style={{ gap: '0.5rem' }}>
+          <input
+            type="checkbox"
+            checked={camerasOff}
+            onChange={(e) => setCamerasOff(e.target.checked)}
+          />
+          <span>{t('plan.camerasOff')}</span>
+        </label>
+        <p className="muted" style={{ fontSize: '0.85rem', margin: 0 }}>
+          {t('plan.audienceHint')}
+        </p>
         {error && (
           <p className="feedback-warn" role="alert">
             {error}
@@ -230,6 +285,7 @@ export function LiveBanner({ classId, api: given }: { classId: string; api?: Liv
     return (
       <Link className="card row quiz-banner live-banner" to={roomPath(classId, live.id)}>
         <strong>{t('banner.live', { title: live.title })}</strong>
+        <SessionTags session={live} />
         <span>{t('banner.join')}</span>
       </Link>
     );

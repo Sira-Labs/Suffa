@@ -6,6 +6,8 @@ import { apiRequest, type Fetch } from '@/services/api/request';
 
 export type LiveStatus = 'scheduled' | 'live' | 'ended';
 export type LiveRole = 'teacher' | 'learner';
+/** Who a session is for: the whole class, or the sisters or the brothers only. */
+export type LiveAudience = 'all' | 'sisters' | 'brothers';
 
 export interface LiveSession {
   id: string;
@@ -16,6 +18,9 @@ export interface LiveSession {
   status: LiveStatus;
   startedAt: string | null;
   endedAt: string | null;
+  audience: LiveAudience;
+  /** Learners given the floor may turn on their camera; false: their voice only. */
+  learnerCameras: boolean;
 }
 
 export interface LiveSessions {
@@ -35,6 +40,8 @@ export interface NewLiveSession {
   title: string;
   startsAt: string;
   durationMinutes: number;
+  audience: LiveAudience;
+  learnerCameras: boolean;
 }
 
 export class LiveApi {
@@ -76,7 +83,10 @@ export class LiveApi {
     });
   }
 
-  /** Gives a learner in the room the floor (microphone and camera) or takes it back. */
+  /**
+   * Gives a learner in the room the floor (microphone, and the camera unless the session
+   * keeps learner cameras off) or takes it back.
+   */
   floor(classId: string, sessionId: string, identity: string, allowed: boolean) {
     return this.call<void>(`${this.base(classId)}/${sessionId}/floor`, {
       method: 'POST',

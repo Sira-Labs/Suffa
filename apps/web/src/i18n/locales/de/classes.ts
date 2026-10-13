@@ -80,6 +80,10 @@ export const classes = {
     removeConsentConfirm:
       'Einverständnis entfernen? Was dieses Kind geteilt hat, wird gelöscht.',
     removeConfirm: '{{name}} aus der Klasse entfernen?',
+    section: 'Bereich von {{name}}',
+    sectionNone: 'Kein Bereich',
+    sisters: 'Schwestern',
+    brothers: 'Brüder',
   },
   deleteClass: {
     title: 'Klasse löschen',

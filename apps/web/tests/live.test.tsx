@@ -33,6 +33,8 @@ const session = (over: Partial<LiveSession> = {}): LiveSession => ({
   status: 'scheduled',
   startedAt: null,
   endedAt: null,
+  audience: 'all',
+  learnerCameras: true,
   ...over,
 });
 
@@ -66,7 +68,10 @@ function server(
           url: 'wss://live.example.org',
           token: 'jwt',
           role,
-          session: session({ status: 'live' }),
+          session: {
+            ...(state.sessions.find((s) => s.id === SESSION_ID) ?? session()),
+            status: 'live',
+          },
         });
       }
       if (path === `${base}/${SESSION_ID}/floor`)
@@ -184,11 +189,39 @@ describe('planning live lessons', () => {
     await userEvent.type(screen.getByLabelText('Thema'), 'Lektion 5');
     await userEvent.click(screen.getByRole('button', { name: 'Planen' }));
     const create = requests.find((r) => r.method === 'POST');
-    expect(create?.body).toMatchObject({ title: 'Lektion 5', durationMinutes: 60 });
+    expect(create?.body).toMatchObject({
+      title: 'Lektion 5',
+      durationMinutes: 60,
+      audience: 'all',
+      learnerCameras: true,
+    });
     expect(new Date((create!.body as { startsAt: string }).startsAt).getMinutes()).toBe(
       0
     );
     expect(await screen.findByText('Lektion 5')).toBeTruthy();
+  });
+
+  it('plans a sisters’ lesson with the learners’ cameras off', async () => {
+    const { requests } = server({ enabled: true, sessions: [] });
+    renderAt(
+      <LiveSessionsTeacher classId={CLASS_ID} />,
+      `/classes/${CLASS_ID}/tab`,
+      '/classes/:id/tab'
+    );
+    await userEvent.type(await screen.findByLabelText('Thema'), 'Tajwid');
+    await userEvent.selectOptions(screen.getByLabelText('Für'), 'Schwestern');
+    await userEvent.click(screen.getByLabelText(/Kameras der Lernenden bleiben aus/));
+    await userEvent.click(screen.getByRole('button', { name: 'Planen' }));
+    expect(requests.find((r) => r.method === 'POST')?.body).toMatchObject({
+      title: 'Tajwid',
+      audience: 'sisters',
+      learnerCameras: false,
+    });
+    const item = (await screen.findByText('Tajwid')).closest('li')!;
+    expect(within(item as HTMLElement).getByText('Schwestern')).toBeTruthy();
+    expect(
+      within(item as HTMLElement).getByText('Kameras der Lernenden aus')
+    ).toBeTruthy();
   });
 
   it('shows the teacher that live lessons are not set up', async () => {
@@ -330,6 +363,23 @@ describe('the live room', () => {
     expect(await screen.findByText('Du hast das Wort.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Mikrofon aus' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Melden/ })).toBeNull();
+  });
+
+  it('gives a learner only the microphone when the cameras stay off', async () => {
+    server(
+      {
+        enabled: true,
+        sessions: [session({ audience: 'sisters', learnerCameras: false })],
+      },
+      'learner'
+    );
+    const me = person({ identity: 'a', name: 'Amina', local: true, floor: true });
+    await join(
+      new FakeConnection({ people: [me, { ...teacher, local: false }], canPublish: true })
+    );
+    expect(screen.getByText('Schwestern')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Mikrofon an' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Kamera an' })).toBeNull();
   });
 
   it('shows that the teacher ended the lesson', async () => {

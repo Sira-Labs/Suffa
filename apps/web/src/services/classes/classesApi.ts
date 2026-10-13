@@ -30,7 +30,12 @@ export interface Member {
   joinedAt: string;
   /** The teacher recorded the parents' consent (classes of minors); older servers send none. */
   parentalConsent?: boolean;
+  /** Sisters or brothers for live lessons (ADR-0026); null or missing when not assigned. */
+  section?: ClassSection | null;
 }
+
+/** The group of a class a learner belongs to for sisters' and brothers' live lessons. */
+export type ClassSection = 'sisters' | 'brothers';
 
 /** Class dashboard (story 6.1): aggregates of the active learners, last 7 days. */
 export interface StudentProgress {
@@ -184,6 +189,14 @@ export class ClassesApi {
     return this.call<void>(
       `/api/v1/classes/${encodeURIComponent(classId)}/members/${encodeURIComponent(userId)}/approve`,
       { method: 'POST' }
+    );
+  }
+
+  /** Puts a learner with the sisters or the brothers, or neither (null). */
+  setSection(classId: string, userId: string, section: ClassSection | null) {
+    return this.call<void>(
+      `/api/v1/classes/${encodeURIComponent(classId)}/members/${encodeURIComponent(userId)}/section`,
+      { method: 'PUT', body: JSON.stringify({ section }) }
     );
   }
 

@@ -1,13 +1,19 @@
 /**
  * Members of a class (story 4.3): invite link and QR code, approving who joins, removing
- * learners, and deleting the class. Teachers only.
+ * learners, putting them with the sisters or the brothers for live lessons (ADR-0026), and
+ * deleting the class. Teachers only.
  */
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'qrcode';
 import { useNavigate } from 'react-router-dom';
 import { dateLocale } from '@/i18n/format';
-import type { ClassesApi, ClassSummary, Member } from '@/services/classes/classesApi';
+import type {
+  ClassesApi,
+  ClassSection,
+  ClassSummary,
+  Member,
+} from '@/services/classes/classesApi';
 import type { SharingApi } from '@/services/sharing/sharingApi';
 
 const date = (iso: string) => new Date(iso).toLocaleDateString(dateLocale());
@@ -142,6 +148,18 @@ export function ClassMembers({
             </span>
           </span>
           <span className="row">
+            <select
+              aria-label={t('members.section', { name: m.name ?? m.email })}
+              value={m.section ?? ''}
+              onChange={(e) => {
+                const section = (e.target.value || null) as ClassSection | null;
+                void act(() => api.setSection(summary.id, m.userId, section));
+              }}
+            >
+              <option value="">{t('members.sectionNone')}</option>
+              <option value="sisters">{t('members.sisters')}</option>
+              <option value="brothers">{t('members.brothers')}</option>
+            </select>
             {summary.minors && sharing && (
               <label
                 className="row muted"

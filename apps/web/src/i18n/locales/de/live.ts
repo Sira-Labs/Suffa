@@ -10,7 +10,16 @@ export const live = {
     titlePlaceholder: 'z. B. Lektion 5',
     startsAt: 'Beginn',
     duration: 'Dauer (Minuten)',
+    audience: 'Für',
+    audienceHint:
+      'Lernende ordnest du unter „Mitglieder“ den Schwestern oder den Brüdern zu. Wer keinem Bereich zugeordnet ist, sieht nur Unterricht für alle.',
+    camerasOff: 'Kameras der Lernenden bleiben aus (nur Mikrofon mit dem Wort)',
     submit: 'Planen',
+  },
+  audience: {
+    all: 'Alle',
+    sisters: 'Schwestern',
+    brothers: 'Brüder',
   },
   session: {
     when: '{{date}}, {{minutes}} Minuten',
@@ -20,6 +29,7 @@ export const live = {
     cancel: 'Absagen',
     confirmCancel: '„{{title}}“ absagen?',
     join: 'Beitreten',
+    camerasOff: 'Kameras der Lernenden aus',
   },
   banner: {
     live: 'Live-Unterricht läuft: {{title}}',

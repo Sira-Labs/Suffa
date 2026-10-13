@@ -33,6 +33,7 @@ export const classes: Messages<typeof de> = {
     courseHint: 'This class uses {{course}}.',
     switchCourse: 'Switch to {{course}}',
     tabs: {
+      live: 'Live',
       progress: 'Progress',
       life: 'Class life',
       recordings: 'Recordings',

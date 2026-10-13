@@ -42,8 +42,10 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,json}'],
         // Error tracking is only loaded online and only with a DSN set: do not precache.
         // Font subsets for scripts the app does not use; browsers fetch them only on demand.
+        // Live lessons need the network anyway: their LiveKit client loads when someone joins.
         globIgnores: [
           '**/sentry-*.js',
+          '**/livekit-client*.js',
           '**/*-{cyrillic,cyrillic-ext,greek,vietnamese}-*.woff2',
         ],
         navigateFallback: 'index.html',

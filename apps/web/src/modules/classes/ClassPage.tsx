@@ -10,6 +10,7 @@ import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { useSyncStore } from '@/state';
 import { ClassCertificates } from './ClassCertificates';
 import { ClassLife } from './ClassLife';
+import { LiveBanner, LiveSessionsTeacher } from '@/modules/live/LiveSessions';
 import { ClassMembers } from './ClassMembers';
 import { ClassGrades } from './ClassGrades';
 import { ClassRecordings } from './ClassRecordings';
@@ -25,6 +26,7 @@ import { useActiveCourse, useSetCourse } from '@/services/courses';
 type Tab =
   | 'progress'
   | 'life'
+  | 'live'
   | 'recordings'
   | 'shared'
   | 'grades'
@@ -33,6 +35,7 @@ type Tab =
 const TABS: Tab[] = [
   'progress',
   'life',
+  'live',
   'recordings',
   'shared',
   'grades',
@@ -110,6 +113,7 @@ export function ClassPage() {
             {tab === 'life' && (
               <ClassLife api={api} classId={summary.id} teacher course={summary.course} />
             )}
+            {tab === 'live' && <LiveSessionsTeacher classId={summary.id} />}
             {tab === 'recordings' && <ClassRecordings classId={summary.id} teacher />}
             {tab === 'shared' && (
               <SharedRecordingsList api={sharingApi} classId={summary.id} />
@@ -133,6 +137,7 @@ export function ClassPage() {
         </>
       ) : (
         <>
+          <LiveBanner classId={summary.id} />
           <ClassLife
             api={api}
             classId={summary.id}

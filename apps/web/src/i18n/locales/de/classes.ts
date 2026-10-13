@@ -35,6 +35,7 @@ export const classes = {
     courseHint: 'Diese Klasse lernt mit dem {{course}}.',
     switchCourse: 'Zum {{course}} wechseln',
     tabs: {
+      live: 'Live',
       progress: 'Fortschritt',
       life: 'Klassenleben',
       recordings: 'Aufnahmen',

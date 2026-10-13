@@ -18,6 +18,7 @@ import { feedback } from './feedback';
 import { grammar } from './grammar';
 import { library } from './library';
 import { nav } from './nav';
+import { live } from './live';
 import { quiz } from './quiz';
 import { reading } from './reading';
 import { recordings } from './recordings';
@@ -53,6 +54,7 @@ export const en = {
   feedback,
   grammar,
   library,
+  live,
   quiz,
   reading,
   recordings,

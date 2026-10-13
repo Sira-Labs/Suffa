@@ -102,6 +102,7 @@ const classRepo: ClassRepository = {
   members: async () => [],
   approve: async () => false,
   remove: async () => false,
+  setSection: async () => false,
   archive: async () => false,
   preview: async () => null,
   join: async () => ({ ok: false, reason: 'invalid_invite' }),
@@ -273,6 +274,7 @@ function buildApp() {
         end: async () => ({ ok: false, reason: 'not_found' }),
         cancel: async () => ({ ok: false, reason: 'not_found' }),
         displayName: async () => 'Test',
+        section: async () => null,
       },
       rooms: {
         url: 'wss://live.example.org',

@@ -230,6 +230,53 @@ describe.skipIf(!url)('Classes (Postgres)', () => {
     expect(audit.rows.map((r) => r.action)).toEqual(['class.member_rejected']);
   });
 
+  it('the teacher puts learners with the sisters or the brothers', async () => {
+    const { id, token } = await newClassWithInvite();
+    await call('amina', 'POST', `/invites/${token}/join`);
+    await call('teacher', 'POST', `/classes/${id}/members/${users.amina!.id}/approve`);
+    const section = (who: string, userId: string, body: unknown) =>
+      call(who, 'PUT', `/classes/${id}/members/${userId}/section`, body);
+    const sectionOf = async (userId: string) => {
+      const { members } = (await (
+        await call('teacher', 'GET', `/classes/${id}/members`)
+      ).json()) as { members: { userId: string; section: string | null }[] };
+      return members.find((m) => m.userId === userId)?.section;
+    };
+
+    expect(await sectionOf(users.amina!.id)).toBeNull();
+    expect(
+      (await section('teacher', users.amina!.id, { section: 'sisters' })).status
+    ).toBe(204);
+    expect(await sectionOf(users.amina!.id)).toBe('sisters');
+    expect((await section('teacher', users.amina!.id, { section: null })).status).toBe(
+      204
+    );
+    expect(await sectionOf(users.amina!.id)).toBeNull();
+
+    // Only the teacher, only valid sections, only learners of the class.
+    expect((await section('amina', users.amina!.id, { section: 'sisters' })).status).toBe(
+      403
+    );
+    expect((await section('teacher', users.amina!.id, { section: 'aunts' })).status).toBe(
+      400
+    );
+    expect((await section('teacher', users.amina!.id, {})).status).toBe(400);
+    expect(
+      (await section('teacher', users.teacher!.id, { section: 'brothers' })).status
+    ).toBe(404);
+    expect((await section('teacher', 'nobody', { section: 'brothers' })).status).toBe(
+      404
+    );
+
+    const audit = await pool.query(
+      "select details from audit_log where action = 'class.member_section_set' order by id"
+    );
+    expect(audit.rows.map((r) => r.details)).toEqual([
+      { userId: users.amina!.id, section: 'sisters' },
+      { userId: users.amina!.id, section: null },
+    ]);
+  });
+
   it('the teacher deletes a class: hidden and closed for everyone, data kept', async () => {
     const { id, token } = await newClassWithInvite();
     await call('amina', 'POST', `/invites/${token}/join`);

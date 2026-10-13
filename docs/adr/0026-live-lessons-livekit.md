@@ -37,9 +37,10 @@ Constraints that already hold in Suffa:
     them the floor (microphone, camera) through the API, which updates their permission on
     the LiveKit server, and takes it back the same way.
 - **Live sessions are planned in the class** (`live_sessions`): title, start, length; the
-  teacher starts and ends them. At most one session of a class is live at a time. Every
-  change is audit-logged.
-- **Nothing of the room is stored in Etappe 1:** no chat history, no recording. Chat messages
+  teacher starts and ends them. At most one session per audience of a class is live at a time
+  (everyone, the sisters, the brothers; stage 2), so the two groups can meet in parallel.
+  Every change is audit-logged.
+- **Nothing of the room is stored in stage 1:** no chat history, no recording. Chat messages
   travel only through the room. Recording comes later, into the class's recordings, only when
   the teacher turns it on for a session and with the same EU-only rule.
 - **The feature is off until configured.** Without `SUFFA_LIVEKIT_URL`, `SUFFA_LIVEKIT_API_KEY`

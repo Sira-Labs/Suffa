@@ -15,6 +15,7 @@ alter table live_sessions
 
 -- One live session per audience (not per class), so the sisters and the brothers can meet
 -- at the same time.
-drop index if exists live_sessions_live_idx;
+-- The new index first, so the limit holds throughout (the table is small: no concurrent build).
 create unique index if not exists live_sessions_live_audience_idx
   on live_sessions (class_id, audience) where status = 'live';
+drop index if exists live_sessions_live_idx;

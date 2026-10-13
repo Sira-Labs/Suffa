@@ -639,10 +639,30 @@ join tokens; browsers connect to `suffa-live` directly.
 
 3. **HTTP settings:** container HTTP port `7880`, **WebSocket support on**, connect the domain
    `live.suffa.<domain>`, **Enable HTTPS**, **Force HTTPS**.
-4. **Port mapping** (App Configs → Port Mapping): host `7881` → container `7881` (TCP) and host
-   `7882` → container `7882` (UDP). Open both in the server's firewall (Hetzner Cloud firewall:
-   TCP 7881, UDP 7882). Without UDP, media falls back to TCP 7881; without either, nobody hears
-   anything.
+4. **Media ports, published on the host.** CapRover's _Port Mapping_ goes through Docker Swarm's
+   routing mesh, which breaks WebRTC over UDP (browsers then fail with "could not establish pc
+   connection"). Leave _Port Mapping_ empty and put this under App Configs → **Service Update
+   Override**:
+
+   ```yaml
+   EndpointSpec:
+     Ports:
+       - Protocol: tcp
+         TargetPort: 7881
+         PublishedPort: 7881
+         PublishMode: host
+       - Protocol: udp
+         TargetPort: 7882
+         PublishedPort: 7882
+         PublishMode: host
+   ```
+
+   Open both in the Hetzner Cloud firewall (inbound TCP 7881, UDP 7882, any source); `ufw` does
+   not matter here, as Docker's own rules bypass it. Without UDP, media falls back to TCP 7881;
+   without either, nobody hears anything. On start the log shows `nodeIP` (the public address)
+   and `using external IPs` mapping it to the container. A warning that the UDP receive buffer
+   is too small is fine for classes; for hundreds of participants raise `net.core.rmem_max`.
+
 5. **`suffa-api`:** `SUFFA_LIVEKIT_URL=wss://live.suffa.<domain>`,
    `SUFFA_LIVEKIT_API_KEY=suffa`, `SUFFA_LIVEKIT_API_SECRET=<secret>`,
    `SUFFA_LIVEKIT_API_URL=http://srv-captain--suffa-live:7880`.

@@ -49,9 +49,12 @@ Constraints that already hold in Suffa:
 
 1. Plan, start and join live sessions; sound and picture, screen sharing, raised hands with
    the teacher giving the floor, chat.
-2. Sisters' and brothers' sessions: each class member belongs to the sisters or the brothers;
-   a session is for everyone, the sisters or the brothers, and the API admits only matching
-   members; an option keeps learners' cameras off.
+2. Sisters' and brothers' sessions: the teacher puts each learner with the sisters or the
+   brothers (members tab, audit-logged); a session is for everyone, the sisters or the
+   brothers. Learners see and join only sessions for everyone and for their own section (a
+   learner without a section: everyone's only); the teacher sees and leads all. One session
+   per audience is live at a time, so the two groups can meet in parallel. An option keeps
+   learners' cameras off: the floor then grants the microphone only, enforced by LiveKit.
 3. Recording into the class's recordings (transcript, chapters, "ask about this minute"), and
    a push reminder before a session starts.
 

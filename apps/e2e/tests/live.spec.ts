@@ -3,7 +3,8 @@
  * the teacher learns that live lessons are not set up. The full room (sound and picture,
  * raised hand, floor, chat, ending) runs when the API was started with a LiveKit server
  * (E2E_LIVEKIT=1 and SUFFA_LIVEKIT_URL/_API_KEY/_API_SECRET); camera and microphone are
- * Chromium's fake devices.
+ * Chromium's fake devices. Sisters' and brothers' sessions (stage 2) reach only their section
+ * and may keep the learners' cameras off.
  */
 import { expect, test, type Page } from '@playwright/test';
 import { classWithLearner } from './helpers';
@@ -16,11 +17,26 @@ test.use({
   },
 });
 
-async function plan(teacher: Page, classId: string, title: string) {
+async function plan(
+  teacher: Page,
+  classId: string,
+  title: string,
+  { audience, camerasOff = false }: { audience?: string; camerasOff?: boolean } = {}
+) {
   await teacher.goto(`/classes/${classId}?tab=live`);
   await teacher.getByLabel('Thema').fill(title);
+  if (audience) await teacher.getByLabel('Für').selectOption({ label: audience });
+  if (camerasOff) await teacher.getByLabel(/Kameras der Lernenden bleiben aus/).check();
   await teacher.getByRole('button', { name: 'Planen' }).click();
   await expect(teacher.getByText(title)).toBeVisible();
+}
+
+/** The teacher puts the class's learner with the sisters or the brothers. */
+async function assignSection(teacher: Page, classId: string, section: string) {
+  await teacher.goto(`/classes/${classId}?tab=members`);
+  const select = teacher.getByRole('combobox', { name: /Bereich von/ });
+  await select.selectOption({ label: section });
+  await expect(select).toHaveValue(section === 'Schwestern' ? 'sisters' : 'brothers');
 }
 
 /** The video on the stage shows moving pictures. */
@@ -48,6 +64,16 @@ test('plans a live lesson that learners see coming', async ({ browser }) => {
     teacher.getByText('Live-Unterricht ist auf diesem Server noch nicht eingerichtet.')
   ).toBeVisible();
   await expect(teacher.getByRole('button', { name: 'Starten' })).toBeDisabled();
+
+  // A sisters' lesson with the learners' cameras off carries both as tags.
+  await assignSection(teacher, classId, 'Schwestern');
+  await plan(teacher, classId, 'Tajwid für Schwestern', {
+    audience: 'Schwestern',
+    camerasOff: true,
+  });
+  const item = teacher.locator('li').filter({ hasText: 'Tajwid für Schwestern' });
+  await expect(item.getByText('Schwestern', { exact: true })).toBeVisible();
+  await expect(item.getByText('Kameras der Lernenden aus')).toBeVisible();
 
   // Without a LiveKit server learners see nothing of it.
   await learner.goto(`/classes/${classId}`);
@@ -97,4 +123,47 @@ test('teaches a live lesson: picture, raised hand, floor, chat, end', async ({
   teacher.once('dialog', (dialog) => void dialog.accept());
   await teacher.getByRole('button', { name: 'Für alle beenden' }).click();
   await expect(learner.getByText('Der Live-Unterricht ist beendet.')).toBeVisible();
+});
+
+test('a sisters’ lesson: only the sisters join, with their voice only', async ({
+  browser,
+}) => {
+  test.skip(!withLiveKit, 'needs a LiveKit server (E2E_LIVEKIT=1)');
+  const media = { permissions: ['camera', 'microphone'] };
+  const teacher = await (await browser.newContext(media)).newPage();
+  const learner = await (await browser.newContext(media)).newPage();
+  const { classId } = await classWithLearner(teacher, learner, 'Live E2E Schwestern');
+  await assignSection(teacher, classId, 'Schwestern');
+
+  await plan(teacher, classId, 'Nur für Brüder', { audience: 'Brüder' });
+  await plan(teacher, classId, 'Schwestern-Runde', {
+    audience: 'Schwestern',
+    camerasOff: true,
+  });
+  await teacher
+    .locator('li')
+    .filter({ hasText: 'Schwestern-Runde' })
+    .getByRole('button', { name: 'Starten' })
+    .click();
+  await teacher.getByRole('button', { name: 'Beitreten' }).click();
+  await expect(teacher.getByRole('heading', { name: 'Schwestern-Runde' })).toBeVisible();
+
+  // The sister sees her lesson, never the brothers' one.
+  await learner.goto(`/classes/${classId}`);
+  await learner
+    .getByRole('link', { name: /Live-Unterricht läuft: Schwestern-Runde/ })
+    .click();
+  await expect(learner.getByText('Nur für Brüder')).toHaveCount(0);
+  await learner.getByRole('button', { name: 'Beitreten' }).click();
+  await expect(learner.getByText('2 im Raum')).toBeVisible();
+
+  // Given the floor, she speaks; her camera stays off.
+  await learner.getByRole('button', { name: /Melden/ }).click();
+  await teacher
+    .getByRole('region', { name: '2 im Raum' })
+    .getByRole('button', { name: 'Wort geben' })
+    .click();
+  await expect(learner.getByText('Du hast das Wort.')).toBeVisible();
+  await expect(learner.getByRole('button', { name: 'Mikrofon aus' })).toBeVisible();
+  await expect(learner.getByRole('button', { name: 'Kamera an' })).toHaveCount(0);
 });

@@ -84,7 +84,9 @@ describe.skipIf(!server)('LiveKit room service (local server)', () => {
   });
 
   it('answers false for a learner who is not in the room', async () => {
-    expect(await rooms.setFloor('live-nobody-here', 'u-1', true)).toBe(false);
+    expect(await rooms.setFloor('live-nobody-here', 'u-1', true, { camera: true })).toBe(
+      false
+    );
   });
 
   it('closes a room that is already gone without an error', async () => {

@@ -2,8 +2,8 @@
  * Live lessons (ADR-0026), mounted at /api/v1:
  *
  *   GET    /classes/:id/live                    → { enabled, sessions }            (class:read)
- *   POST   /classes/:id/live                    { title, startsAt, durationMinutes } → 201
- *                                                                                   (class:manage)
+ *   POST   /classes/:id/live                    { title, startsAt, durationMinutes,
+ *                                                  audience?, learnerCameras? } → 201 (class:manage)
  *   POST   /classes/:id/live/:session/start     → the session, now live            (class:manage)
  *   POST   /classes/:id/live/:session/end       → the session, ended; room closed  (class:manage)
  *   DELETE /classes/:id/live/:session           → 204, a planned session removed   (class:manage)
@@ -16,6 +16,11 @@
  * the floor (`not_in_room` for anyone else, so a teacher's own rights are never replaced).
  * Without a LiveKit server (`rooms` undefined) sessions are listed as disabled and nobody can
  * start or join one.
+ *
+ * Sisters and brothers (stage 2): a session is for everyone or for one section. Learners see
+ * and join only sessions for everyone and for their own section (403 `wrong_audience`
+ * otherwise); the teacher sees and leads all. With `learnerCameras` false the floor is the
+ * learner's microphone only.
  */
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
@@ -25,6 +30,7 @@ import type { Actor as PolicyActor } from '../authz/policies.js';
 import type { ClassRepository } from '../classes/repository.js';
 import {
   OVERRUN_MINUTES,
+  audiencesOf,
   type LiveActionResult,
   type LiveSessionRepository,
 } from './repository.js';
@@ -48,6 +54,8 @@ const CreateBody = z
     title: z.string().trim().min(1).max(120),
     startsAt: z.string().datetime({ offset: true }),
     durationMinutes: z.number().int().min(10).max(240),
+    audience: z.enum(['all', 'sisters', 'brothers']).default('all'),
+    learnerCameras: z.boolean().default(true),
   })
   .strict();
 const FloorBody = z.object({ identity: Uuid, allowed: z.boolean() }).strict();
@@ -86,9 +94,15 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
   const fail = (c: Context, result: Exclude<LiveActionResult, { ok: true }>) =>
     c.json({ error: result.reason }, STATUS[result.reason]);
 
+  /** The audiences the actor may see; undefined for the teacher (all of them). */
+  const audiences = async (c: Context<ActorEnv>) =>
+    (await isTeacher(c))
+      ? undefined
+      : audiencesOf(await deps.sessions.section(c.req.param('id')!, c.get('actor').id));
+
   app.get('/classes/:id/live', read, async (c) => {
     c.header('Cache-Control', 'no-store');
-    const sessions = await deps.sessions.list(c.req.param('id'));
+    const sessions = await deps.sessions.list(c.req.param('id'), await audiences(c));
     return c.json({ enabled: deps.rooms !== undefined, sessions });
   });
 
@@ -105,6 +119,8 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
       title: parsed.data.title,
       startsAt,
       durationMinutes: parsed.data.durationMinutes,
+      audience: parsed.data.audience,
+      learnerCameras: parsed.data.learnerCameras,
     });
     return c.json({ session }, 201);
   });
@@ -146,7 +162,11 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
     if (!session) return c.json({ error: 'not_found' }, 404);
     if (session.status !== 'live') return c.json({ error: 'not_live' }, 409);
     const actor = c.get('actor');
-    const role = (await isTeacher(c)) ? 'teacher' : 'learner';
+    const allowed = await audiences(c);
+    if (allowed && !allowed.includes(session.audience)) {
+      return c.json({ error: 'wrong_audience' }, 403);
+    }
+    const role = allowed ? 'learner' : 'teacher';
     const token = await deps.rooms.token(
       roomName(session.id),
       { identity: actor.id, name: await deps.sessions.displayName(actor.id), role },
@@ -171,7 +191,8 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
     const changed = await deps.rooms.setFloor(
       roomName(session.id),
       parsed.data.identity,
-      parsed.data.allowed
+      parsed.data.allowed,
+      { camera: session.learnerCameras }
     );
     return changed ? c.body(null, 204) : c.json({ error: 'not_in_room' }, 404);
   });

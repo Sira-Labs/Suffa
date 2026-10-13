@@ -2,13 +2,20 @@
  * Live sessions of a class (ADR-0026): planned, started, ended or cancelled by the class
  * teacher. Every change is audit-logged in the same transaction. A session left live ends on
  * its own once it is more than OVERRUN_MINUTES past its planned length.
+ *
+ * A session is for everyone, the sisters or the brothers (stage 2); learners see only the
+ * sessions for everyone and for their own section. One session per audience is live at a
+ * time, so the sisters and the brothers can meet in parallel.
  */
 import { randomUUID } from 'node:crypto';
 import type pg from 'pg';
 import { writeAudit } from '../audit/log.js';
+import type { ClassSection } from '../classes/repository.js';
 import { inTransaction } from '../db/transaction.js';
 
 export type LiveStatus = 'scheduled' | 'live' | 'ended';
+/** Who a session is for. */
+export type LiveAudience = 'all' | ClassSection;
 
 export interface LiveSession {
   id: string;
@@ -19,6 +26,9 @@ export interface LiveSession {
   status: LiveStatus;
   startedAt: string | null;
   endedAt: string | null;
+  audience: LiveAudience;
+  /** Learners given the floor may turn on their camera; false: their voice only. */
+  learnerCameras: boolean;
 }
 
 export interface LiveActor {
@@ -30,6 +40,8 @@ export interface NewLiveSession {
   title: string;
   startsAt: Date;
   durationMinutes: number;
+  audience: LiveAudience;
+  learnerCameras: boolean;
 }
 
 export type LiveActionResult =
@@ -37,8 +49,11 @@ export type LiveActionResult =
   | { ok: false; reason: 'not_found' | 'wrong_state' | 'already_live' };
 
 export interface LiveSessionRepository {
-  /** The class's sessions still to come or running, soonest first. */
-  list(classId: string): Promise<LiveSession[]>;
+  /**
+   * The class's sessions still to come or running, soonest first; only those for
+   * `audiences` when given (a learner), all of them otherwise (the teacher).
+   */
+  list(classId: string, audiences?: LiveAudience[]): Promise<LiveSession[]>;
   get(classId: string, sessionId: string): Promise<LiveSession | null>;
   create(classId: string, actor: LiveActor, input: NewLiveSession): Promise<LiveSession>;
   start(classId: string, sessionId: string, actor: LiveActor): Promise<LiveActionResult>;
@@ -47,7 +62,13 @@ export interface LiveSessionRepository {
   cancel(classId: string, sessionId: string, actor: LiveActor): Promise<LiveActionResult>;
   /** The name shown for a user in the room. */
   displayName(userId: string): Promise<string>;
+  /** The section of a learner in the class; null when not assigned or not a member. */
+  section(classId: string, userId: string): Promise<ClassSection | null>;
 }
+
+/** The audiences a learner of `section` belongs to. */
+export const audiencesOf = (section: ClassSection | null): LiveAudience[] =>
+  section ? ['all', section] : ['all'];
 
 /** How long a session may run past its planned length before it ends on its own. */
 export const OVERRUN_MINUTES = 60;
@@ -63,10 +84,13 @@ interface Row {
   status: LiveStatus;
   started_at: Date | null;
   ended_at: Date | null;
+  audience: LiveAudience;
+  learner_cameras: boolean;
 }
 
 const COLUMNS =
-  'id, class_id, title, starts_at, duration_minutes, status, started_at, ended_at';
+  'id, class_id, title, starts_at, duration_minutes, status, started_at, ended_at, ' +
+  'audience, learner_cameras';
 
 function toSession(row: Row): LiveSession {
   return {
@@ -78,6 +102,8 @@ function toSession(row: Row): LiveSession {
     status: row.status,
     startedAt: row.started_at?.toISOString() ?? null,
     endedAt: row.ended_at?.toISOString() ?? null,
+    audience: row.audience,
+    learnerCameras: row.learner_cameras,
   };
 }
 
@@ -100,17 +126,18 @@ export class PgLiveSessionRepository implements LiveSessionRepository {
     );
   }
 
-  async list(classId: string): Promise<LiveSession[]> {
+  async list(classId: string, audiences?: LiveAudience[]): Promise<LiveSession[]> {
     await this.endOverrun(this.pool, classId);
     const { rows } = await this.pool.query<Row>(
       `select ${COLUMNS} from live_sessions
         where class_id = $1
+          and ($4::text[] is null or audience = any($4))
           and (status = 'live'
                or (status = 'scheduled'
                    and starts_at + make_interval(mins => duration_minutes, hours => $3) > $2))
         order by status = 'live' desc, starts_at
         limit 20`,
-      [classId, this.now(), MISSED_HOURS]
+      [classId, this.now(), MISSED_HOURS, audiences ?? null]
     );
     return rows.map(toSession);
   }
@@ -132,8 +159,9 @@ export class PgLiveSessionRepository implements LiveSessionRepository {
     return inTransaction(this.pool, async (db) => {
       const { rows } = await db.query<Row>(
         `insert into live_sessions
-           (id, class_id, title, starts_at, duration_minutes, created_by, created_at)
-         values ($1, $2, $3, $4, $5, $6, $7)
+           (id, class_id, title, starts_at, duration_minutes, audience, learner_cameras,
+            created_by, created_at)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          returning ${COLUMNS}`,
         [
           randomUUID(),
@@ -141,6 +169,8 @@ export class PgLiveSessionRepository implements LiveSessionRepository {
           input.title,
           input.startsAt,
           input.durationMinutes,
+          input.audience,
+          input.learnerCameras,
           actor.id,
           this.now(),
         ]
@@ -163,7 +193,7 @@ export class PgLiveSessionRepository implements LiveSessionRepository {
         action: 'live.session_started',
       });
     } catch (error) {
-      // The partial unique index: another session of this class is live.
+      // The partial unique index: another session of this class for the audience is live.
       if ((error as { code?: string }).code === '23505') {
         return { ok: false, reason: 'already_live' };
       }
@@ -213,6 +243,15 @@ export class PgLiveSessionRepository implements LiveSessionRepository {
     return row?.name?.trim() || row?.email?.split('@')[0] || '?';
   }
 
+  async section(classId: string, userId: string): Promise<ClassSection | null> {
+    const { rows } = await this.pool.query<{ section: ClassSection | null }>(
+      `select section from class_members
+        where class_id = $1 and user_id = $2 and status = 'active'`,
+      [classId, userId]
+    );
+    return rows[0]?.section ?? null;
+  }
+
   private async transition(
     classId: string,
     sessionId: string,
@@ -256,6 +295,7 @@ export class PgLiveSessionRepository implements LiveSessionRepository {
         classId: session.classId,
         title: session.title,
         startsAt: session.startsAt,
+        audience: session.audience,
       },
     });
   }

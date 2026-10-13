@@ -1,7 +1,8 @@
 /**
  * Live lessons (ADR-0026) against Postgres: the teacher plans, starts and ends sessions; only
  * active members get a join token, only while a session is live; the teacher gives the floor;
- * every change is audit-logged. The LiveKit server is a recording fake here (its own test:
+ * every change is audit-logged; sisters' and brothers' sessions reach only their section. The
+ * LiveKit server is a recording fake here (its own test:
  * livekit.integration.test.ts).
  * Run with SUFFA_TEST_DATABASE_URL=postgres://… ; skipped otherwise. The database is wiped.
  */
@@ -23,16 +24,21 @@ const quiet = { info: () => undefined, warn: () => undefined, error: () => undef
 class FakeRooms implements LiveRooms {
   readonly url = 'wss://live.example.org';
   tokens: { room: string; who: LiveParticipant; ttl: number }[] = [];
-  floor: { room: string; identity: string; allowed: boolean }[] = [];
+  floor: { room: string; identity: string; allowed: boolean; camera: boolean }[] = [];
   closed: string[] = [];
   present = new Set<string>();
   async token(room: string, who: LiveParticipant, ttl: number) {
     this.tokens.push({ room, who, ttl });
     return `token-for-${who.identity}`;
   }
-  async setFloor(room: string, identity: string, allowed: boolean) {
+  async setFloor(
+    room: string,
+    identity: string,
+    allowed: boolean,
+    { camera }: { camera: boolean }
+  ) {
     if (!this.present.has(identity)) return false;
-    this.floor.push({ room, identity, allowed });
+    this.floor.push({ room, identity, allowed, camera });
     return true;
   }
   async close(room: string) {
@@ -84,11 +90,12 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
       body: body === undefined ? undefined : JSON.stringify(body),
     });
 
-  const plan = async (title = 'Lektion 5', startsAt = now) => {
+  const plan = async (title = 'Lektion 5', startsAt = now, extra: object = {}) => {
     const res = await call('teacher', 'POST', '', {
       title,
       startsAt: startsAt.toISOString(),
       durationMinutes: 60,
+      ...extra,
     });
     expect(res.status).toBe(201);
     return ((await res.json()) as { session: LiveSession }).session;
@@ -122,7 +129,8 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
       name: string,
       role: Role,
       classRole: string | null,
-      status = 'active'
+      status = 'active',
+      section: string | null = null
     ) => {
       const id = randomUUID();
       await pool.query(
@@ -132,9 +140,9 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
       users[name] = { id, role };
       if (classRole) {
         await pool.query(
-          `insert into class_members (class_id, user_id, class_role, status)
-           values ($1, $2, $3, $4)`,
-          [classId, id, classRole, status]
+          `insert into class_members (class_id, user_id, class_role, status, section)
+           values ($1, $2, $3, $4, $5)`,
+          [classId, id, classRole, status, section]
         );
       }
     };
@@ -142,6 +150,8 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     await add('learner', 'student', 'student');
     await add('waiting', 'student', 'student', 'pending');
     await add('outsider', 'student', null);
+    await add('sister', 'student', 'student', 'active', 'sisters');
+    await add('brother', 'student', 'student', 'active', 'brothers');
   });
 
   afterAll(async () => {
@@ -230,7 +240,10 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     expect((await floor(true)).status).toBe(204);
     expect((await floor(false)).status).toBe(204);
     expect((await floor(true, 'learner')).status).toBe(403);
-    expect(rooms.floor.map((f) => f.allowed)).toEqual([true, false]);
+    expect(rooms.floor.map((f) => [f.allowed, f.camera])).toEqual([
+      [true, true],
+      [false, true],
+    ]);
 
     // Only learners of the class: the teacher's own rights and outsiders are never touched.
     for (const who of ['teacher', 'outsider', 'waiting']) {
@@ -242,6 +255,71 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
       expect(await res.json(), who).toEqual({ error: 'not_in_room' });
     }
     expect(rooms.floor).toHaveLength(2);
+  });
+
+  it('shows sisters and brothers only their own sessions and those for everyone', async () => {
+    const all = await plan('Alle');
+    const sisters = await plan('Schwestern', now, { audience: 'sisters' });
+    const brothers = await plan('Brüder', now, { audience: 'brothers' });
+    const titles = async (who: string) =>
+      (
+        (await (await call(who, 'GET', '')).json()) as { sessions: LiveSession[] }
+      ).sessions
+        .map((s) => s.title)
+        .sort();
+
+    expect(await titles('teacher')).toEqual(['Alle', 'Brüder', 'Schwestern']);
+    expect(await titles('sister')).toEqual(['Alle', 'Schwestern']);
+    expect(await titles('brother')).toEqual(['Alle', 'Brüder']);
+    // Not assigned yet: only sessions for everyone.
+    expect(await titles('learner')).toEqual(['Alle']);
+
+    // The sisters and the brothers meet at the same time, next to a session for everyone.
+    for (const session of [all, sisters, brothers]) {
+      expect((await call('teacher', 'POST', `/${session.id}/start`)).status).toBe(200);
+    }
+    expect((await call('sister', 'POST', `/${sisters.id}/join`)).status).toBe(200);
+    expect((await call('sister', 'POST', `/${all.id}/join`)).status).toBe(200);
+    const wrong = await call('brother', 'POST', `/${sisters.id}/join`);
+    expect(wrong.status).toBe(403);
+    expect(await wrong.json()).toEqual({ error: 'wrong_audience' });
+    expect((await call('learner', 'POST', `/${brothers.id}/join`)).status).toBe(403);
+    expect(
+      await (await call('teacher', 'POST', `/${brothers.id}/join`)).json()
+    ).toMatchObject({ role: 'teacher' });
+    const another = await plan('Noch einmal', now, { audience: 'sisters' });
+    expect(await (await call('teacher', 'POST', `/${another.id}/start`)).json()).toEqual({
+      error: 'already_live',
+    });
+  });
+
+  it('gives learners only their voice when cameras stay off', async () => {
+    const session = await plan('Ohne Kameras', now, {
+      audience: 'sisters',
+      learnerCameras: false,
+    });
+    expect(session).toMatchObject({ audience: 'sisters', learnerCameras: false });
+    await call('teacher', 'POST', `/${session.id}/start`);
+    rooms.present.add(users.sister!.id);
+    const res = await call('teacher', 'POST', `/${session.id}/floor`, {
+      identity: users.sister!.id,
+      allowed: true,
+    });
+    expect(res.status).toBe(204);
+    expect(rooms.floor).toEqual([
+      {
+        room: `live-${session.id}`,
+        identity: users.sister!.id,
+        allowed: true,
+        camera: false,
+      },
+    ]);
+    const invalid = { title: 'x', startsAt: now.toISOString(), durationMinutes: 60 };
+    for (const extra of [{ audience: 'cousins' }, { learnerCameras: 'no' }]) {
+      expect((await call('teacher', 'POST', '', { ...invalid, ...extra })).status).toBe(
+        400
+      );
+    }
   });
 
   it('keeps one live session per class, ends it and closes its room', async () => {

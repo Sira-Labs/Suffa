@@ -124,6 +124,16 @@ export const errors = {
     exists: 'Für diese Einheit gibt es schon ein Zertifikat.',
     unknown_unit: 'Diese Einheit gibt es nicht.',
   },
+  live: {
+    live_unavailable: 'Live-Unterricht ist auf diesem Server noch nicht eingerichtet.',
+    not_live: 'Dieser Live-Unterricht läuft gerade nicht.',
+    already_live: 'Für diese Gruppe läuft schon ein Live-Unterricht.',
+    wrong_audience: 'Dieser Live-Unterricht ist für eine andere Gruppe der Klasse.',
+    wrong_state: 'Das geht in diesem Zustand des Live-Unterrichts nicht.',
+    invalid_start: 'Der Beginn muss zwischen heute und in einem Jahr liegen.',
+    not_in_room: 'Diese Person ist nicht mehr im Raum.',
+    not_found: 'Diesen Live-Unterricht gibt es nicht mehr.',
+  },
   quiz: {
     running: 'In dieser Klasse läuft schon ein Quiz.',
     no_words: 'Für ein Quiz fehlen noch Wörter.',

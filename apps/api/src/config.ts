@@ -110,6 +110,26 @@ const RawEnvSchema = z.object({
   SUFFA_VAPID_PRIVATE_KEY: z.string().trim().optional(),
   SUFFA_VAPID_SUBJECT: z.string().trim().optional(),
   /**
+   * Live lessons (ADR-0026): the LiveKit server browsers connect to (wss://…), its API key
+   * and secret, and optionally the address the API reaches it at from inside the server
+   * (e.g. http://srv-captain--suffa-live:7880; default: the public address over https).
+   * Live sessions stay off until the first three are set.
+   */
+  SUFFA_LIVEKIT_URL: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => v || undefined)
+    .pipe(z.string().url().optional()),
+  SUFFA_LIVEKIT_API_URL: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => v || undefined)
+    .pipe(z.string().url().optional()),
+  SUFFA_LIVEKIT_API_KEY: z.string().trim().optional(),
+  SUFFA_LIVEKIT_API_SECRET: z.string().trim().optional(),
+  /**
    * Object storage (ADR-0017): the S3 endpoint of the shared RustFS (internal, e.g.
    * http://srv-captain--rustfs:9000) and the `suffa-app` key. Recordings stay off without it.
    */
@@ -269,6 +289,17 @@ export interface Config {
   warnings: string[];
   /** Web Push keys; undefined turns push reminders off. */
   vapid: { publicKey: string; privateKey: string; subject: string } | undefined;
+  /** LiveKit server for live lessons (ADR-0026); undefined turns live sessions off. */
+  live: LiveKitConfig | undefined;
+}
+
+export interface LiveKitConfig {
+  /** Where browsers connect (wss://…). */
+  url: string;
+  /** Where the API calls the server's room service (http(s)://…). */
+  apiUrl: string;
+  apiKey: string;
+  apiSecret: string;
 }
 
 function isPlaceholder(value: string): boolean {
@@ -379,6 +410,27 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
   if (vapidComplete && !/^(mailto:|https:\/\/)/.test(raw.SUFFA_VAPID_SUBJECT!)) {
     warnings.push('SUFFA_VAPID_SUBJECT must start with mailto: or https://');
     vapidComplete = false;
+  }
+  const liveParts = [
+    raw.SUFFA_LIVEKIT_URL,
+    raw.SUFFA_LIVEKIT_API_KEY,
+    raw.SUFFA_LIVEKIT_API_SECRET,
+  ];
+  let liveComplete = liveParts.every(Boolean);
+  if (liveParts.some(Boolean) && !liveComplete) {
+    warnings.push(
+      'SUFFA_LIVEKIT_URL, SUFFA_LIVEKIT_API_KEY and SUFFA_LIVEKIT_API_SECRET go together'
+    );
+  }
+  if (liveComplete && !/^wss?:\/\//.test(raw.SUFFA_LIVEKIT_URL!)) {
+    warnings.push('SUFFA_LIVEKIT_URL must start with wss:// (or ws:// for local tests)');
+    liveComplete = false;
+  }
+  if (liveComplete && raw.SUFFA_LIVEKIT_API_SECRET!.length < 32) {
+    warnings.push(
+      'SUFFA_LIVEKIT_API_SECRET must be at least 32 characters (LiveKit needs it)'
+    );
+    liveComplete = false;
   }
   const extraOrigins = parseOrigins(raw.SUFFA_TRUSTED_ORIGINS);
   issues.push(...extraOrigins.issues);
@@ -512,6 +564,16 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
           publicKey: raw.SUFFA_VAPID_PUBLIC_KEY!,
           privateKey: raw.SUFFA_VAPID_PRIVATE_KEY!,
           subject: raw.SUFFA_VAPID_SUBJECT!,
+        }
+      : undefined,
+    live: liveComplete
+      ? {
+          url: raw.SUFFA_LIVEKIT_URL!,
+          apiUrl:
+            raw.SUFFA_LIVEKIT_API_URL ??
+            raw.SUFFA_LIVEKIT_URL!.replace(/^ws(s?):/, 'http$1:'),
+          apiKey: raw.SUFFA_LIVEKIT_API_KEY!,
+          apiSecret: raw.SUFFA_LIVEKIT_API_SECRET!,
         }
       : undefined,
   };

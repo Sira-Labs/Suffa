@@ -33,6 +33,7 @@ export const classes: Messages<typeof de> = {
     courseHint: 'This class uses {{course}}.',
     switchCourse: 'Switch to {{course}}',
     tabs: {
+      live: 'Live',
       progress: 'Progress',
       life: 'Class life',
       recordings: 'Recordings',
@@ -76,6 +77,10 @@ export const classes: Messages<typeof de> = {
     removeConsentConfirm:
       'Remove the consent? Everything this child has shared will be deleted.',
     removeConfirm: 'Remove {{name}} from the class?',
+    section: 'Section of {{name}}',
+    sectionNone: 'No section',
+    sisters: 'Sisters',
+    brothers: 'Brothers',
   },
   deleteClass: {
     title: 'Delete class',

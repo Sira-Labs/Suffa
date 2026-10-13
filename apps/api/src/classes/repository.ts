@@ -30,6 +30,9 @@ export interface ClassSummary {
   createdAt: string;
 }
 
+/** The group of a class a learner belongs to for sisters' and brothers' live lessons. */
+export type ClassSection = 'sisters' | 'brothers';
+
 export interface Member {
   userId: string;
   email: string | null;
@@ -39,6 +42,8 @@ export interface Member {
   joinedAt: string;
   /** The teacher recorded the parents' consent (classes of minors, story 15.4). */
   parentalConsent: boolean;
+  /** Sisters or brothers (live lessons, ADR-0026); null when not assigned. */
+  section: ClassSection | null;
 }
 
 export interface InvitePreview {
@@ -77,6 +82,13 @@ export interface ClassRepository {
   members(classId: string): Promise<Member[]>;
   approve(actor: Actor, classId: string, userId: string): Promise<boolean>;
   remove(actor: Actor, classId: string, userId: string): Promise<boolean>;
+  /** Puts a learner with the sisters or the brothers (null: neither); false for no learner. */
+  setSection(
+    actor: Actor,
+    classId: string,
+    userId: string,
+    section: ClassSection | null
+  ): Promise<boolean>;
   /**
    * Deletes the class for everyone: it is archived (hidden, no access), its data stays for
    * recovery by an admin. False when it does not exist or is already archived.
@@ -232,9 +244,10 @@ export class PgClassRepository implements ClassRepository {
       status: MemberStatus;
       joined_at: Date;
       parental_consent_at: Date | null;
+      section: ClassSection | null;
     }>(
       `select m.user_id, u.email, u.name, m.class_role, m.status, m.joined_at,
-              m.parental_consent_at
+              m.parental_consent_at, m.section
          from class_members m join users u on u.id = m.user_id
         where m.class_id = $1
         order by m.status desc, m.class_role desc, u.email`,
@@ -248,7 +261,34 @@ export class PgClassRepository implements ClassRepository {
       status: r.status,
       joinedAt: r.joined_at.toISOString(),
       parentalConsent: r.parental_consent_at !== null,
+      section: r.section,
     }));
+  }
+
+  async setSection(
+    actor: Actor,
+    classId: string,
+    userId: string,
+    section: ClassSection | null
+  ): Promise<boolean> {
+    return this.tx(async (client) => {
+      // Only learners belong to a section; the teacher leads every session.
+      const { rowCount } = await client.query(
+        `update class_members set section = $3
+          where class_id = $1 and user_id = $2 and class_role = 'student'`,
+        [classId, userId, section]
+      );
+      if (!rowCount) return false;
+      await writeAudit(client, {
+        actorId: actor.id,
+        action: 'class.member_section_set',
+        targetType: 'class',
+        targetId: classId,
+        details: { userId, section },
+        ipAddress: actor.ip,
+      });
+      return true;
+    });
   }
 
   async approve(actor: Actor, classId: string, userId: string): Promise<boolean> {

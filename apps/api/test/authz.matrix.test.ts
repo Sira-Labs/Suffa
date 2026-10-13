@@ -102,6 +102,7 @@ const classRepo: ClassRepository = {
   members: async () => [],
   approve: async () => false,
   remove: async () => false,
+  setSection: async () => false,
   archive: async () => false,
   preview: async () => null,
   join: async () => ({ ok: false, reason: 'invalid_invite' }),
@@ -257,6 +258,29 @@ function buildApp() {
         answer: async () => ({ ok: false, reason: 'no_quiz' }),
         view: async () => null,
         version: async () => null,
+      },
+      auth: resolver,
+      log: quiet,
+    },
+    live: {
+      classes: classRepo,
+      sessions: {
+        list: async () => [],
+        get: async () => null,
+        create: async () => {
+          throw new Error('not in the matrix');
+        },
+        start: async () => ({ ok: false, reason: 'not_found' }),
+        end: async () => ({ ok: false, reason: 'not_found' }),
+        cancel: async () => ({ ok: false, reason: 'not_found' }),
+        displayName: async () => 'Test',
+        section: async () => null,
+      },
+      rooms: {
+        url: 'wss://live.example.org',
+        token: async () => 'token',
+        setFloor: async () => false,
+        close: async () => undefined,
       },
       auth: resolver,
       log: quiet,

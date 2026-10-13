@@ -110,6 +110,16 @@ export const errors: Messages<typeof de> = {
     exists: 'There already is a certificate for this unit.',
     unknown_unit: 'This unit does not exist.',
   },
+  live: {
+    live_unavailable: 'Live lessons are not set up on this server yet.',
+    not_live: 'This live lesson is not running right now.',
+    already_live: 'A live lesson is already running for this group.',
+    wrong_audience: 'This live lesson is for another group of the class.',
+    wrong_state: 'That is not possible in this state of the live lesson.',
+    invalid_start: 'The start must be between today and a year from now.',
+    not_in_room: 'This person is no longer in the room.',
+    not_found: 'This live lesson no longer exists.',
+  },
   quiz: {
     running: 'A quiz is already running in this class.',
     no_words: 'A quiz still needs words.',

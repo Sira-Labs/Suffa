@@ -350,6 +350,23 @@ describe('the live room', () => {
     expect(await screen.findByText('Du hast den Raum verlassen.')).toBeTruthy();
   });
 
+  it('leaves a room that connects after the page was left', async () => {
+    server({ enabled: true, sessions: [] });
+    const connection = new FakeConnection({ people: [teacher], canPublish: true });
+    let resolve: (c: LiveConnection) => void = () => undefined;
+    const connect = vi.fn(() => new Promise<LiveConnection>((done) => (resolve = done)));
+    const { unmount } = renderAt(
+      <LiveRoom connect={connect} />,
+      `/classes/${CLASS_ID}/live/${SESSION_ID}`,
+      '/classes/:id/live/:session'
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Beitreten' }));
+    await waitFor(() => expect(connect).toHaveBeenCalled());
+    unmount();
+    resolve(connection);
+    await waitFor(() => expect(connection.calls).toEqual(['disconnect']));
+  });
+
   it('says so when the session is not live', async () => {
     vi.stubGlobal(
       'fetch',

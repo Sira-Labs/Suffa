@@ -383,9 +383,16 @@ export function LiveRoom({
     (useLocation().state as { teacher?: boolean } | null)?.teacher
   );
 
-  // Leaving the page leaves the room.
+  // Leaving the page leaves the room, also when it is left while still connecting.
   const connection = phase.kind === 'room' ? phase.connection : null;
   useEffect(() => () => connection?.disconnect(), [connection]);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   const join = async () => {
     setPhase({ kind: 'joining' });
@@ -400,6 +407,10 @@ export function LiveRoom({
         result.value.token,
         audioHost.current!
       );
+      if (!mounted.current) {
+        connection.disconnect();
+        return;
+      }
       setPhase({
         kind: 'room',
         role: result.value.role,

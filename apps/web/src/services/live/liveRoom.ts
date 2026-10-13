@@ -286,7 +286,13 @@ class LiveKitConnection implements LiveConnection {
 export const connectLive: ConnectLive = async (url, token, audioHost) => {
   const lk = await import('livekit-client');
   const room = new lk.Room({ adaptiveStream: true, dynacast: true });
-  await room.connect(url, token);
+  try {
+    await room.connect(url, token);
+  } catch (error) {
+    // Release whatever the failed attempt opened; the caller shows the error.
+    await room.disconnect().catch(() => undefined);
+    throw error;
+  }
   await room.startAudio().catch(() => undefined);
   return new LiveKitConnection(lk, room, audioHost);
 };

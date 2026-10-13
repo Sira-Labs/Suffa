@@ -60,6 +60,8 @@ export const live: Messages<typeof de> = {
     cameraOff: 'Camera off',
     shareScreen: 'Share screen',
     stopShare: 'Stop sharing',
+    noScreenShare:
+      'Screen sharing does not work in the browser on iPhone and iPad, only on a computer.',
     raiseHand: 'Raise hand',
     lowerHand: 'Lower hand',
     leave: 'Leave',

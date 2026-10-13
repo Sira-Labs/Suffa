@@ -76,6 +76,17 @@ export type ConnectLive = (
   audioHost: HTMLElement
 ) => Promise<LiveConnection>;
 
+/**
+ * Whether this browser can share the screen. iOS (any browser on iPhone and iPad) and most
+ * mobile browsers offer no screen capture to web pages.
+ */
+export function canShareScreen(
+  devices: Pick<MediaDevices, 'getDisplayMedia'> | undefined = globalThis.navigator
+    ?.mediaDevices
+): boolean {
+  return typeof devices?.getDisplayMedia === 'function';
+}
+
 export const MAX_MESSAGE_LENGTH = 500;
 const MAX_MESSAGES = 200;
 const CHAT_TOPIC = 'chat';

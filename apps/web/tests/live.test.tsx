@@ -283,10 +283,10 @@ describe('the live room', () => {
   const amina = person({ identity: 'a', name: 'Amina', hand: true });
   const yusuf = person({ identity: 'y', name: 'Yusuf' });
 
-  const join = async (connection: FakeConnection) => {
+  const join = async (connection: FakeConnection, screenShare = true) => {
     const connect = vi.fn(async () => connection);
     renderAt(
-      <LiveRoom connect={connect} />,
+      <LiveRoom connect={connect} screenShare={screenShare} />,
       `/classes/${CLASS_ID}/live/${SESSION_ID}`,
       '/classes/:id/live/:session'
     );
@@ -363,6 +363,16 @@ describe('the live room', () => {
     expect(await screen.findByText('Du hast das Wort.')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Mikrofon aus' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Melden/ })).toBeNull();
+  });
+
+  it('explains on iPhone and iPad that the screen cannot be shared', async () => {
+    server({ enabled: true, sessions: [] });
+    await join(new FakeConnection({ people: [teacher], canPublish: true }), false);
+    expect(screen.queryByRole('button', { name: 'Bildschirm teilen' })).toBeNull();
+    expect(
+      screen.getByText(/Bildschirm teilen geht auf iPhone und iPad nicht/)
+    ).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Kamera aus' })).toBeTruthy();
   });
 
   it('gives a learner only the microphone when the cameras stay off', async () => {

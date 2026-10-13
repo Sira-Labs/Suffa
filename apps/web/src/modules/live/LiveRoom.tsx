@@ -11,6 +11,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { LiveApi, type LiveRole, type LiveSession } from '@/services/live/liveApi';
 import { SessionTags } from './LiveSessions';
 import {
+  canShareScreen,
   connectLive,
   MAX_MESSAGE_LENGTH,
   type ConnectLive,
@@ -209,6 +210,7 @@ function Room({
   session,
   role,
   connection,
+  screenShare,
   onLeave,
 }: {
   api: LiveApi;
@@ -216,6 +218,7 @@ function Room({
   session: LiveSession;
   role: LiveRole;
   connection: LiveConnection;
+  screenShare: boolean;
   onLeave: () => void;
 }) {
   const { t } = useTranslation('live');
@@ -325,7 +328,7 @@ function Room({
             )}
           </>
         )}
-        {teacherView && me && (
+        {teacherView && me && screenShare && (
           <button
             className="btn"
             aria-pressed={me.screenOn}
@@ -333,6 +336,11 @@ function Room({
           >
             {me.screenOn ? t('room.stopShare') : t('room.shareScreen')}
           </button>
+        )}
+        {teacherView && me && !screenShare && (
+          <span className="muted" style={{ fontSize: '0.85rem' }}>
+            {t('room.noScreenShare')}
+          </span>
         )}
         {!teacherView && me && !state.canPublish && (
           <button
@@ -373,9 +381,12 @@ function Room({
 export function LiveRoom({
   api: givenApi,
   connect = connectLive,
+  screenShare = canShareScreen(),
 }: {
   api?: LiveApi;
   connect?: ConnectLive;
+  /** The browser can share the screen (not on iPhone and iPad). */
+  screenShare?: boolean;
 }) {
   const { t } = useTranslation('live');
   const { id: classId = '', session: sessionId = '' } = useParams();
@@ -436,6 +447,7 @@ export function LiveRoom({
           session={phase.session}
           role={phase.role}
           connection={phase.connection}
+          screenShare={screenShare}
           onLeave={() => setPhase({ kind: 'left' })}
         />
       ) : (

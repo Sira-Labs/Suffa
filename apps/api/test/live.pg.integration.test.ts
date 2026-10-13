@@ -231,6 +231,17 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     expect((await floor(false)).status).toBe(204);
     expect((await floor(true, 'learner')).status).toBe(403);
     expect(rooms.floor.map((f) => f.allowed)).toEqual([true, false]);
+
+    // Only learners of the class: the teacher's own rights and outsiders are never touched.
+    for (const who of ['teacher', 'outsider', 'waiting']) {
+      rooms.present.add(users[who]!.id);
+      const res = await call('teacher', 'POST', `/${session.id}/floor`, {
+        identity: users[who]!.id,
+        allowed: true,
+      });
+      expect(await res.json(), who).toEqual({ error: 'not_in_room' });
+    }
+    expect(rooms.floor).toHaveLength(2);
   });
 
   it('keeps one live session per class, ends it and closes its room', async () => {

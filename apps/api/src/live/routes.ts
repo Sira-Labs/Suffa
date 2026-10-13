@@ -12,8 +12,10 @@
  *
  * Only active members of the class get a token, and only while the session is live. The
  * teacher's token may publish and moderate; a learner's may only listen, chat and raise a
- * hand until the teacher gives them the floor. Without a LiveKit server (`rooms` undefined)
- * sessions are listed as disabled and nobody can start or join one.
+ * hand until the teacher gives them the floor; only active learners of the class can be given
+ * the floor (`not_in_room` for anyone else, so a teacher's own rights are never replaced).
+ * Without a LiveKit server (`rooms` undefined) sessions are listed as disabled and nobody can
+ * start or join one.
  */
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
@@ -163,6 +165,9 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
     const session = await deps.sessions.get(c.req.param('id'), id.data);
     if (!session) return c.json({ error: 'not_found' }, 404);
     if (session.status !== 'live') return c.json({ error: 'not_live' }, 409);
+    // The floor replaces all of a participant's rights: never touch a teacher's or an admin's.
+    const target = await deps.classes.scope(c.req.param('id')!, parsed.data.identity);
+    if (target.classRole !== 'student') return c.json({ error: 'not_in_room' }, 404);
     const changed = await deps.rooms.setFloor(
       roomName(session.id),
       parsed.data.identity,

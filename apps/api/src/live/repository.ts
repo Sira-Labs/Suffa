@@ -204,11 +204,13 @@ export class PgLiveSessionRepository implements LiveSessionRepository {
   }
 
   async displayName(userId: string): Promise<string> {
-    const { rows } = await this.pool.query<{ name: string | null }>(
-      'select name from users where id = $1',
+    // As in the class's shout-outs: the profile name, else the address before the @.
+    const { rows } = await this.pool.query<{ name: string | null; email: string | null }>(
+      'select name, email from users where id = $1',
       [userId]
     );
-    return rows[0]?.name?.trim() || 'Suffa';
+    const row = rows[0];
+    return row?.name?.trim() || row?.email?.split('@')[0] || '?';
   }
 
   private async transition(

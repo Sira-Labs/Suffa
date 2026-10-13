@@ -83,13 +83,14 @@ For deploying without GHCR, the root `captain-definition` builds the same image 
 
 ## What to create
 
-| #   | CapRover app          | Image                                          | Persistent data                                   | Public domain                   | Notes                                                                                |
-| --- | --------------------- | ---------------------------------------------- | ------------------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------ |
-| 1   | `suffa-db`            | `pgvector/pgvector:<pinned>-pg17`              | `/var/lib/postgresql/data` (label `suffa-pgdata`) | no                              | Plain app, not a one-click DB (needs pgvector). No host port.                        |
-| 2   | `suffa-api`           | `ghcr.io/sira-labs/suffa-api:<sha>`            | none                                              | optional                        | Runs DB migrations on start; refuses to start on placeholder secrets. Port **8000**. |
-| 3   | `suffa-worker`        | same image as api                              | `/data/tmp` (scratch for transcodes)              | no                              | `SUFFA_ROLE=worker`. Has `ffmpeg`. Exits with code 3 until the api has migrated.     |
-| 4   | `suffa-web`           | `ghcr.io/sira-labs/suffa-web:<sha>`            | none                                              | **yes** (e.g. `suffa.<domain>`) | Caddy + PWA; proxies `/api`, `/healthz`, `/media`. Port **80**.                      |
-| —   | `rustfs` (**exists**) | `rustfs/rustfs:1.0.0` (as pinned for Tabayyun) | existing                                          | no                              | Add buckets + a Suffa-only key (below).                                              |
+| #   | CapRover app          | Image                                          | Persistent data                                   | Public domain                        | Notes                                                                                  |
+| --- | --------------------- | ---------------------------------------------- | ------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------- |
+| 1   | `suffa-db`            | `pgvector/pgvector:<pinned>-pg17`              | `/var/lib/postgresql/data` (label `suffa-pgdata`) | no                                   | Plain app, not a one-click DB (needs pgvector). No host port.                          |
+| 2   | `suffa-api`           | `ghcr.io/sira-labs/suffa-api:<sha>`            | none                                              | optional                             | Runs DB migrations on start; refuses to start on placeholder secrets. Port **8000**.   |
+| 3   | `suffa-worker`        | same image as api                              | `/data/tmp` (scratch for transcodes)              | no                                   | `SUFFA_ROLE=worker`. Has `ffmpeg`. Exits with code 3 until the api has migrated.       |
+| 4   | `suffa-web`           | `ghcr.io/sira-labs/suffa-web:<sha>`            | none                                              | **yes** (e.g. `suffa.<domain>`)      | Caddy + PWA; proxies `/api`, `/healthz`, `/media`. Port **80**.                        |
+| 5   | `suffa-live`          | `livekit/livekit-server:v1.9.1`                | none                                              | **yes** (e.g. `live.suffa.<domain>`) | LiveKit for live lessons (§12). Port **7880**; also TCP 7881 and UDP 7882 on the host. |
+| —   | `rustfs` (**exists**) | `rustfs/rustfs:1.0.0` (as pinned for Tabayyun) | existing                                          | no                                   | Add buckets + a Suffa-only key (below).                                                |
 
 Separate `suffa-db` rather than a second database inside `tabayyun-db`: the two apps then
 upgrade, restart and restore independently.
@@ -148,47 +149,50 @@ In the RustFS console (open port 9001 temporarily or via SSH tunnel, as for Taba
 
 Env (App Configs → Environment variables):
 
-| Name                                                                        | Value                                                                                                               | From sprint |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `SUFFA_ENV`                                                                 | `prod`                                                                                                              | S1          |
-| `SUFFA_PUBLIC_URL`                                                          | `https://suffa.<domain>`                                                                                            | S1          |
-| `SUFFA_DATABASE_URL`                                                        | `postgres://suffa:<password>@srv-captain--suffa-db:5432/suffa`                                                      | S1          |
-| `SUFFA_AUTH_SECRET`                                                         | `openssl rand -base64 48`                                                                                           | S3          |
-| `SUFFA_ERROR_DSN`                                                           | DSN of the GlitchTip project `suffa-api` (§9); unset = no error reporting                                           | S2          |
-| `SUFFA_WEB_ERROR_DSN`                                                       | DSN of the GlitchTip project `suffa-web` (§9), handed to the PWA via `/api/client-config`                           | S2          |
-| `SUFFA_SYNC_DEV_TOKENS`                                                     | **never in prod** (the api refuses to start): `token=userUuid;…` for local/test sync before Better Auth             | dev only    |
-| `SUFFA_SMTP_HOST`, `SUFFA_SMTP_PORT`                                        | `smtp-relay.gmail.com`, `587` – Google Workspace SMTP relay (§ Sign-in mails)                                       | S3          |
-| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD`                                    | optional, only if the relay requires SMTP authentication (Workspace user + app password)                            | S3          |
-| `SUFFA_TRUSTED_ORIGINS`                                                     | optional: further addresses the app is served from (e.g. the old domain), comma-separated                           | S5          |
-| `SUFFA_VAPID_PUBLIC_KEY`, `SUFFA_VAPID_PRIVATE_KEY`                         | `npx web-push generate-vapid-keys` (once; keep them, new keys cancel every device's reminders)                      | S6          |
-| `SUFFA_VAPID_SUBJECT`                                                       | `mailto:<ops address>` – contact for push services; reminders stay off until all three are set                      | S6          |
-| `SUFFA_TRANSCRIBE_URL`                                                      | optional: `https://api.mistral.ai/v1/audio/transcriptions` (Mistral Voxtral, EU, §11)                               | S8          |
-| `SUFFA_TRANSCRIBE_TOKEN`, `SUFFA_TRANSCRIBE_MODEL`                          | model, default `voxtral-mini-latest`; the token falls back to `SUFFA_MISTRAL_API_KEY` for Mistral                   | S8          |
-| `SUFFA_TRANSCRIBE_LANGUAGE`                                                 | optional: `ar` to force Arabic; empty = detect per piece (mixed German/Arabic lessons)                              | S8          |
-| `SUFFA_APP_ORIGINS`                                                         | native app web view origins for bearer-token API access; default `capacitor://localhost,https://localhost`          | S13         |
-| `SUFFA_IOS_APP_IDS`                                                         | optional: `TEAMID.org.siralabs.suffa` for Universal Links (`/.well-known/apple-app-site-association`)               | S13         |
-| `SUFFA_ANDROID_APP_LINKS`                                                   | optional: `org.siralabs.suffa:<SHA-256 of the signing key>` for App Links (`/.well-known/assetlinks.json`)          | S13         |
-| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | optional: Firebase service account JSON, base64; push to the native apps (worker)                                   | S13         |
-| `SUFFA_YOUTUBE_API_KEY`                                                     | optional: YouTube Data API v3 key (restrict it to the server IP) for the video catalog import; worker               | S12         |
-| `SUFFA_ANTHROPIC_API_KEY`                                                   | optional: turns on Anthropic routes (AI gateway, ADR-0010); api and worker                                          | S9          |
-| `SUFFA_OPENROUTER_API_KEY`                                                  | optional: turns on OpenRouter routes (open-weight models)                                                           | S9          |
-| `SUFFA_HF_API_KEY`, `SUFFA_HF_ENDPOINT_URL`                                 | optional: Hugging Face token; endpoint URL for a dedicated Inference Endpoint (router otherwise)                    | S9          |
-| `SUFFA_MISTRAL_API_KEY`                                                     | optional: Mistral (EU); recording summaries/suggestions, and Voxtral transcripts (§11)                              | S15         |
-| GitHub secret `SUFFA_EVAL_ANTHROPIC_API_KEY`                                | optional, CI only: runs the AI evals (`.github/workflows/evals.yml`, ≤ $0.30 per run); use a key with a spend limit | S11         |
-| `SUFFA_GOOGLE_CLIENT_ID`, `SUFFA_GOOGLE_CLIENT_SECRET`                      | OAuth web client (Google Cloud), redirect URI `https://<app>/api/v1/drive/callback`, scope `drive.file`             | S7          |
-| `SUFFA_GOOGLE_API_KEY`, `SUFFA_GOOGLE_APP_ID`                               | browser API key (Picker API, restricted to the app's domain) and the project number                                 | S7          |
-| `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                                          | S7          |
-| `SUFFA_MAIL_FROM`                                                           | `Suffa <noreply@<domain>>` – any address of the Workspace domain                                                    | S3          |
-| `SUFFA_S3_ENDPOINT`                                                         | `http://srv-captain--rustfs:9000`                                                                                   | S7          |
-| `SUFFA_S3_ALLOW_HTTP`                                                       | `true` (internal endpoint only)                                                                                     | S7          |
-| `SUFFA_S3_ACCESS_KEY_ID` / `SUFFA_S3_SECRET_ACCESS_KEY`                     | the `suffa-app` key                                                                                                 | S7          |
-| `SUFFA_S3_BUCKET_MEDIA` / `_UPLOADS` / `_CONTENT`                           | `suffa-media` / `suffa-uploads` / `suffa-content`                                                                   | S7          |
-| `SUFFA_MEDIA_PUBLIC_PREFIX`                                                 | `/media` (presigned URLs are rewritten to this same-origin path)                                                    | S7          |
-| `SUFFA_VAPID_PUBLIC_KEY` / `_PRIVATE_KEY` / `_SUBJECT`                      | `npx web-push generate-vapid-keys`; subject `mailto:you@<domain>`                                                   | S6          |
-| `SUFFA_GOOGLE_CLIENT_ID` / `_CLIENT_SECRET` / `SUFFA_GOOGLE_PICKER_API_KEY` | Google Cloud project (Drive API + Picker)                                                                           | S7          |
-| `SUFFA_YOUTUBE_API_KEY`                                                     | Google Cloud project (YouTube Data API v3)                                                                          | S12         |
-| `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`                       | provider keys                                                                                                       | S9          |
-| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | Firebase service-account JSON (base64)                                                                              | S13         |
+| Name                                                                        | Value                                                                                                                                 | From sprint |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `SUFFA_ENV`                                                                 | `prod`                                                                                                                                | S1          |
+| `SUFFA_PUBLIC_URL`                                                          | `https://suffa.<domain>`                                                                                                              | S1          |
+| `SUFFA_DATABASE_URL`                                                        | `postgres://suffa:<password>@srv-captain--suffa-db:5432/suffa`                                                                        | S1          |
+| `SUFFA_AUTH_SECRET`                                                         | `openssl rand -base64 48`                                                                                                             | S3          |
+| `SUFFA_ERROR_DSN`                                                           | DSN of the GlitchTip project `suffa-api` (§9); unset = no error reporting                                                             | S2          |
+| `SUFFA_WEB_ERROR_DSN`                                                       | DSN of the GlitchTip project `suffa-web` (§9), handed to the PWA via `/api/client-config`                                             | S2          |
+| `SUFFA_SYNC_DEV_TOKENS`                                                     | **never in prod** (the api refuses to start): `token=userUuid;…` for local/test sync before Better Auth                               | dev only    |
+| `SUFFA_SMTP_HOST`, `SUFFA_SMTP_PORT`                                        | `smtp-relay.gmail.com`, `587` – Google Workspace SMTP relay (§ Sign-in mails)                                                         | S3          |
+| `SUFFA_SMTP_USER`, `SUFFA_SMTP_PASSWORD`                                    | optional, only if the relay requires SMTP authentication (Workspace user + app password)                                              | S3          |
+| `SUFFA_TRUSTED_ORIGINS`                                                     | optional: further addresses the app is served from (e.g. the old domain), comma-separated                                             | S5          |
+| `SUFFA_VAPID_PUBLIC_KEY`, `SUFFA_VAPID_PRIVATE_KEY`                         | `npx web-push generate-vapid-keys` (once; keep them, new keys cancel every device's reminders)                                        | S6          |
+| `SUFFA_VAPID_SUBJECT`                                                       | `mailto:<ops address>` – contact for push services; reminders stay off until all three are set                                        | S6          |
+| `SUFFA_TRANSCRIBE_URL`                                                      | optional: `https://api.mistral.ai/v1/audio/transcriptions` (Mistral Voxtral, EU, §11)                                                 | S8          |
+| `SUFFA_TRANSCRIBE_TOKEN`, `SUFFA_TRANSCRIBE_MODEL`                          | model, default `voxtral-mini-latest`; the token falls back to `SUFFA_MISTRAL_API_KEY` for Mistral                                     | S8          |
+| `SUFFA_TRANSCRIBE_LANGUAGE`                                                 | optional: `ar` to force Arabic; empty = detect per piece (mixed German/Arabic lessons)                                                | S8          |
+| `SUFFA_APP_ORIGINS`                                                         | native app web view origins for bearer-token API access; default `capacitor://localhost,https://localhost`                            | S13         |
+| `SUFFA_IOS_APP_IDS`                                                         | optional: `TEAMID.org.siralabs.suffa` for Universal Links (`/.well-known/apple-app-site-association`)                                 | S13         |
+| `SUFFA_ANDROID_APP_LINKS`                                                   | optional: `org.siralabs.suffa:<SHA-256 of the signing key>` for App Links (`/.well-known/assetlinks.json`)                            | S13         |
+| `SUFFA_LIVEKIT_URL`                                                         | optional: `wss://live.suffa.<domain>` – where browsers reach `suffa-live` (§12)                                                       | S17         |
+| `SUFFA_LIVEKIT_API_KEY`, `SUFFA_LIVEKIT_API_SECRET`                         | the key pair under `keys:` in `suffa-live`'s `LIVEKIT_CONFIG` (secret ≥ 32 characters); live lessons stay off until all three are set | S17         |
+| `SUFFA_LIVEKIT_API_URL`                                                     | optional: `http://srv-captain--suffa-live:7880` (inside the server; default: the public address)                                      | S17         |
+| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | optional: Firebase service account JSON, base64; push to the native apps (worker)                                                     | S13         |
+| `SUFFA_YOUTUBE_API_KEY`                                                     | optional: YouTube Data API v3 key (restrict it to the server IP) for the video catalog import; worker                                 | S12         |
+| `SUFFA_ANTHROPIC_API_KEY`                                                   | optional: turns on Anthropic routes (AI gateway, ADR-0010); api and worker                                                            | S9          |
+| `SUFFA_OPENROUTER_API_KEY`                                                  | optional: turns on OpenRouter routes (open-weight models)                                                                             | S9          |
+| `SUFFA_HF_API_KEY`, `SUFFA_HF_ENDPOINT_URL`                                 | optional: Hugging Face token; endpoint URL for a dedicated Inference Endpoint (router otherwise)                                      | S9          |
+| `SUFFA_MISTRAL_API_KEY`                                                     | optional: Mistral (EU); recording summaries/suggestions, and Voxtral transcripts (§11)                                                | S15         |
+| GitHub secret `SUFFA_EVAL_ANTHROPIC_API_KEY`                                | optional, CI only: runs the AI evals (`.github/workflows/evals.yml`, ≤ $0.30 per run); use a key with a spend limit                   | S11         |
+| `SUFFA_GOOGLE_CLIENT_ID`, `SUFFA_GOOGLE_CLIENT_SECRET`                      | OAuth web client (Google Cloud), redirect URI `https://<app>/api/v1/drive/callback`, scope `drive.file`                               | S7          |
+| `SUFFA_GOOGLE_API_KEY`, `SUFFA_GOOGLE_APP_ID`                               | browser API key (Picker API, restricted to the app's domain) and the project number                                                   | S7          |
+| `SUFFA_ENCRYPTION_KEY`                                                      | `openssl rand -base64 32` (encrypts Google refresh tokens)                                                                            | S7          |
+| `SUFFA_MAIL_FROM`                                                           | `Suffa <noreply@<domain>>` – any address of the Workspace domain                                                                      | S3          |
+| `SUFFA_S3_ENDPOINT`                                                         | `http://srv-captain--rustfs:9000`                                                                                                     | S7          |
+| `SUFFA_S3_ALLOW_HTTP`                                                       | `true` (internal endpoint only)                                                                                                       | S7          |
+| `SUFFA_S3_ACCESS_KEY_ID` / `SUFFA_S3_SECRET_ACCESS_KEY`                     | the `suffa-app` key                                                                                                                   | S7          |
+| `SUFFA_S3_BUCKET_MEDIA` / `_UPLOADS` / `_CONTENT`                           | `suffa-media` / `suffa-uploads` / `suffa-content`                                                                                     | S7          |
+| `SUFFA_MEDIA_PUBLIC_PREFIX`                                                 | `/media` (presigned URLs are rewritten to this same-origin path)                                                                      | S7          |
+| `SUFFA_VAPID_PUBLIC_KEY` / `_PRIVATE_KEY` / `_SUBJECT`                      | `npx web-push generate-vapid-keys`; subject `mailto:you@<domain>`                                                                     | S6          |
+| `SUFFA_GOOGLE_CLIENT_ID` / `_CLIENT_SECRET` / `SUFFA_GOOGLE_PICKER_API_KEY` | Google Cloud project (Drive API + Picker)                                                                                             | S7          |
+| `SUFFA_YOUTUBE_API_KEY`                                                     | Google Cloud project (YouTube Data API v3)                                                                                            | S12         |
+| `ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY`, `HF_TOKEN`                       | provider keys                                                                                                                         | S9          |
+| `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | Firebase service-account JSON (base64)                                                                                                | S13         |
 
 - Container HTTP port `8000`. HTTP settings: no public domain needed.
 - Deployment tab → **Enable App Token** → GitHub secret `CAPROVER_APP_TOKEN_API`.
@@ -203,7 +207,8 @@ Env (App Configs → Environment variables):
 ## 5. `suffa-web`
 
 - Env: `SUFFA_API_UPSTREAM=srv-captain--suffa-api:8000`,
-  `SUFFA_MEDIA_UPSTREAM=srv-captain--rustfs:9000`.
+  `SUFFA_MEDIA_UPSTREAM=srv-captain--rustfs:9000`, and with live lessons (§12)
+  `SUFFA_LIVEKIT_HOST=live.suffa.<domain>` (allowed in the page's `connect-src`).
 - Container HTTP port `80`. Connect domain, **Enable HTTPS**, **Force HTTPS**.
 - App token → `CAPROVER_APP_TOKEN_WEB`.
 
@@ -216,7 +221,7 @@ Caddyfile sketch (lives in `infra/caddy/Caddyfile`, mirrors Tabayyun's):
 		Content-Security-Policy "default-src 'self'; script-src 'self' https://www.youtube.com https://apis.google.com; frame-src https://www.youtube-nocookie.com https://docs.google.com; img-src 'self' data: https://i.ytimg.com; media-src 'self' blob:; connect-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "strict-origin-when-cross-origin"
-		Permissions-Policy "camera=(), microphone=(self), geolocation=()"
+		Permissions-Policy "camera=(self), microphone=(self), display-capture=(self), geolocation=()"
 		-Server
 	}
 	@api path /api/* /healthz
@@ -610,6 +615,45 @@ The api speaks the OpenAI-compatible transcription protocol, so another EU servi
 only a new URL, model and `SUFFA_TRANSCRIBE_TOKEN`. Recordings go out over https only
 (plain http is accepted for localhost, in development). `SUFFA_TRANSCRIBE_LANGUAGE` is
 ignored for Voxtral, which returns timestamps only when it detects the language itself.
+
+## 12. Live lessons (`suffa-live`, LiveKit, ADR-0026)
+
+Live lessons run on our own LiveKit server; no audio or video leaves the server. The API signs
+join tokens; browsers connect to `suffa-live` directly.
+
+1. **Create the app** `suffa-live` (no persistent data). _Deployment → Deploy via ImageName_:
+   `livekit/livekit-server:v1.9.1`.
+2. **Env** (one variable holds the whole config; generate the secret with
+   `openssl rand -base64 48`, at least 32 characters):
+
+   ```yaml
+   LIVEKIT_CONFIG=
+   port: 7880
+   rtc:
+     tcp_port: 7881
+     udp_port: 7882
+     use_external_ip: true
+   keys:
+     suffa: <secret>
+   ```
+
+3. **HTTP settings:** container HTTP port `7880`, **WebSocket support on**, connect the domain
+   `live.suffa.<domain>`, **Enable HTTPS**, **Force HTTPS**.
+4. **Port mapping** (App Configs → Port Mapping): host `7881` → container `7881` (TCP) and host
+   `7882` → container `7882` (UDP). Open both in the server's firewall (Hetzner Cloud firewall:
+   TCP 7881, UDP 7882). Without UDP, media falls back to TCP 7881; without either, nobody hears
+   anything.
+5. **`suffa-api`:** `SUFFA_LIVEKIT_URL=wss://live.suffa.<domain>`,
+   `SUFFA_LIVEKIT_API_KEY=suffa`, `SUFFA_LIVEKIT_API_SECRET=<secret>`,
+   `SUFFA_LIVEKIT_API_URL=http://srv-captain--suffa-live:7880`.
+6. **`suffa-web`:** `SUFFA_LIVEKIT_HOST=live.suffa.<domain>`.
+7. **Check:** `https://live.suffa.<domain>` answers `OK`; in a class, _Live → Planen → Starten_
+   opens the room; a second browser (learner) joins, hears the teacher, chats and raises a hand;
+   the teacher gives the floor and hears the learner.
+
+Load (§10): an SFU forwards streams and does not mix them; one class of 30 with the teacher's
+video uses roughly 1 vCPU and 5–10 Mbit/s per watching learner on the way out. Many classes at
+once, or recording (stage 3), want their own media server.
 
 ## Troubleshooting
 

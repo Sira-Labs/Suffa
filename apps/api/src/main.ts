@@ -37,6 +37,8 @@ import { PgNotificationRepository } from './notifications/repository.js';
 import { PgClassProgressRepository } from './classes/progress.js';
 import { PgCertificateRepository } from './classes/certificates.js';
 import { PgLiveQuizRepository } from './classes/quizRepository.js';
+import { PgLiveSessionRepository } from './live/repository.js';
+import { LiveKitRooms } from './live/rooms.js';
 import { PgClassLeagueRepository } from './classes/league.js';
 import { PgClassSpiritRepository } from './classes/spirit.js';
 import { registerEngagement, requestRecompute } from './engagement/jobs.js';
@@ -545,6 +547,13 @@ async function main(): Promise<void> {
       log,
     },
     ...(await classContentDeps(pool, auth, log)),
+    live: {
+      classes: new PgClassRepository(pool),
+      sessions: new PgLiveSessionRepository(pool),
+      rooms: config.live ? new LiveKitRooms(config.live) : undefined,
+      auth,
+      log,
+    },
     classSpirit: {
       classes: new PgClassRepository(pool),
       progress: new PgClassProgressRepository(pool),

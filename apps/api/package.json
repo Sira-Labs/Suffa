@@ -29,6 +29,7 @@
     "@suffa/phonology": "0.1.0",
     "better-auth": "1.7.6",
     "hono": "^4.13.8",
+    "livekit-server-sdk": "2.19.1",
     "nodemailer": "^10.0.10",
     "pg": "^8.23.0",
     "pg-boss": "^12.33.7",

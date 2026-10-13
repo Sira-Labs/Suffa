@@ -214,6 +214,44 @@ describe('Web Push keys', () => {
   });
 });
 
+describe('LiveKit for live lessons', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+  const live = {
+    SUFFA_LIVEKIT_URL: 'wss://live.suffa.example.org',
+    SUFFA_LIVEKIT_API_KEY: 'suffa',
+    SUFFA_LIVEKIT_API_SECRET: 'a-secret-from-env-that-is-long-enough',
+  };
+
+  it('is off without settings and on with all three, the API reaching it over https', () => {
+    expect(loadConfig(base).live).toBeUndefined();
+    expect(loadConfig({ ...base, ...live }).live).toEqual({
+      url: 'wss://live.suffa.example.org',
+      apiUrl: 'https://live.suffa.example.org',
+      apiKey: 'suffa',
+      apiSecret: 'a-secret-from-env-that-is-long-enough',
+    });
+    expect(
+      loadConfig({
+        ...base,
+        ...live,
+        SUFFA_LIVEKIT_API_URL: 'http://srv-captain--suffa-live:7880',
+      }).live?.apiUrl
+    ).toBe('http://srv-captain--suffa-live:7880');
+  });
+
+  it('stays off with a warning when half set, not a websocket address or the secret is short', () => {
+    for (const env of [
+      { SUFFA_LIVEKIT_URL: live.SUFFA_LIVEKIT_URL },
+      { ...live, SUFFA_LIVEKIT_URL: 'https://live.suffa.example.org' },
+      { ...live, SUFFA_LIVEKIT_API_SECRET: 'short' },
+    ]) {
+      const config = loadConfig({ ...base, ...env });
+      expect(config.live, JSON.stringify(env)).toBeUndefined();
+      expect(config.warnings).toHaveLength(1);
+    }
+  });
+});
+
 describe('SUFFA_TRUSTED_ORIGINS', () => {
   const base = {
     SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db',

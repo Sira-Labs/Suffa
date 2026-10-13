@@ -54,6 +54,7 @@ import { createTutorRoutes, type TutorRouteDeps } from './tutor/routes.js';
 import { createReviewRoutes, type ReviewRouteDeps } from './tutor/reviewRoutes.js';
 import { createVideoRoutes, type VideoRouteDeps } from './videos/routes.js';
 import { createQuizRoutes, type QuizRouteDeps } from './classes/quizRoutes.js';
+import { createLiveRoutes, type LiveRouteDeps } from './live/routes.js';
 import {
   createCertificateRoutes,
   type CertificateRouteDeps,
@@ -100,6 +101,8 @@ export interface AppDeps {
   classSpirit?: ClassSpiritRouteDeps;
   certificates?: CertificateRouteDeps;
   quiz?: QuizRouteDeps;
+  /** Live lessons on the LiveKit server (ADR-0026). */
+  live?: LiveRouteDeps;
   /** The server's copy of XP, streak and badges (story 5.4). */
   engagement?: EngagementRouteDeps;
   /** Browser error reporting: /api/client-config and the /api/errors tunnel. */
@@ -241,6 +244,7 @@ export function createApp(deps: AppDeps): Hono {
     app.route('/api/v1', createCertificateRoutes(deps.certificates));
   }
   if (deps.quiz) app.route('/api/v1', createQuizRoutes(deps.quiz));
+  if (deps.live) app.route('/api/v1', createLiveRoutes(deps.live));
   if (deps.media) app.route('/api/v1', createMediaRoutes(deps.media));
   if (deps.drive) app.route('/api/v1', createDriveRoutes(deps.drive));
   if (deps.interactive) app.route('/api/v1', createInteractiveRoutes(deps.interactive));

@@ -261,6 +261,28 @@ function buildApp() {
       auth: resolver,
       log: quiet,
     },
+    live: {
+      classes: classRepo,
+      sessions: {
+        list: async () => [],
+        get: async () => null,
+        create: async () => {
+          throw new Error('not in the matrix');
+        },
+        start: async () => ({ ok: false, reason: 'not_found' }),
+        end: async () => ({ ok: false, reason: 'not_found' }),
+        cancel: async () => ({ ok: false, reason: 'not_found' }),
+        displayName: async () => 'Test',
+      },
+      rooms: {
+        url: 'wss://live.example.org',
+        token: async () => 'token',
+        setFloor: async () => false,
+        close: async () => undefined,
+      },
+      auth: resolver,
+      log: quiet,
+    },
     certificates: {
       classes: classRepo,
       certificates: {

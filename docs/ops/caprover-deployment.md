@@ -623,18 +623,16 @@ join tokens; browsers connect to `suffa-live` directly.
 
 1. **Create the app** `suffa-live` (no persistent data). _Deployment → Deploy via ImageName_:
    `livekit/livekit-server:v1.9.1`.
-2. **Env:** one variable, `LIVEKIT_CONFIG`, holds the whole config; its value is this YAML
-   (generate the secret with `openssl rand -base64 48`, at least 32 characters):
+2. **Env:** one variable, `LIVEKIT_CONFIG`, holds the whole config as one line of YAML
+   (CapRover's environment variables take no line breaks). Generate the secret with
+   `openssl rand -hex 32` (64 characters; hex keeps YAML special characters out):
 
-   ```yaml
-   port: 7880
-   rtc:
-     tcp_port: 7881
-     udp_port: 7882
-     use_external_ip: true
-   keys:
-     suffa: <secret>
+   ```text
+   {port: 7880, rtc: {tcp_port: 7881, udp_port: 7882, use_external_ip: true}, keys: {suffa: <secret>}}
    ```
+
+   Without it LiveKit stops at start-up asking for keys. The same secret goes to `suffa-api`
+   (step 5).
 
 3. **HTTP settings:** container HTTP port `7880`, **WebSocket support on**, connect the domain
    `live.suffa.<domain>`, **Enable HTTPS**, **Force HTTPS**.

@@ -442,6 +442,27 @@ the focus. Audit and open points: `docs/accessibility.md`.
 | 16.5 | WCAG 2.2 AA: axe checks in the e2e run plus a keyboard and screen-reader pass; fixes                                                                                      | 3   | No serious axe finding; audit written down in `docs/`.                                  |
 | 16.6 | Release `v2.2`                                                                                                                                                            | 1   | Promoted to production (once 2b is live).                                               |
 
+### Sprint 17 — _"Live in class"_ (week of Oct 12)
+
+Live lessons in the class on our own LiveKit server (ADR-0026), replacing Zoom or Jitsi links.
+
+Status: 17.1 (done): teachers plan, start, end and cancel live sessions on a "Live" tab of the
+class (migration 0045, audit-logged, one live session per class, a session left live ends an hour
+past its length). Learners see a banner while a lesson is live and the next planned one. The API
+signs short-lived LiveKit tokens only for active members and only while a session is live: the
+teacher publishes camera, microphone and screen and moderates; learners listen, chat (not
+stored) and raise a hand until the teacher gives them the floor. The room is Suffa's own UI;
+`livekit-client` loads only when someone joins. Without the LiveKit settings the tab says live
+lessons are not set up. A browser test runs the whole room against a local LiveKit server
+(teacher's picture at the learner, raised hand, floor, chat, ending); runbook §12 sets up
+`suffa-live`.
+
+| #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                               |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---------------------------------------------------------------------------------------- |
+| 17.1 | Live sessions: plan, start, join; sound and picture, screen sharing, raised hands with the teacher giving the floor, chat                                                 | 8   | Only active members of the class join, only while live; nothing of the room is stored.   |
+| 17.2 | Sisters' and brothers' sessions: each member belongs to the sisters or the brothers; a session is for all, the sisters or the brothers; learners' cameras can be kept off | 5   | The API admits only matching members; the other group does not see the session.          |
+| 17.3 | Recording into the class's recordings (transcript, chapters), and a push reminder before a session                                                                        | 5   | Recording only when the teacher turns it on; EU-only processing as for other recordings. |
+
 ---
 
 ## Shipped outside the plan

@@ -58,6 +58,8 @@ export const live = {
     cameraOff: 'Kamera aus',
     shareScreen: 'Bildschirm teilen',
     stopShare: 'Teilen beenden',
+    noScreenShare:
+      'Bildschirm teilen geht auf iPhone und iPad nicht im Browser, nur am Computer.',
     raiseHand: 'Melden',
     lowerHand: 'Hand runter',
     leave: 'Verlassen',

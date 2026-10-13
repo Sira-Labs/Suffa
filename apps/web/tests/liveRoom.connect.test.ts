@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { connectLive } from '@/services/live/liveRoom';
+import { canShareScreen, connectLive } from '@/services/live/liveRoom';
 
 /** A room whose connection fails (for example an expired token). */
 const rooms: { disconnect: ReturnType<typeof vi.fn> }[] = [];
@@ -22,5 +22,14 @@ describe('connectLive', () => {
     ).rejects.toThrow('could not establish signal connection');
     expect(rooms).toHaveLength(1);
     expect(rooms[0]!.disconnect).toHaveBeenCalledOnce();
+  });
+});
+
+describe('canShareScreen', () => {
+  it('needs getDisplayMedia, which iOS browsers do not offer', () => {
+    expect(canShareScreen({ getDisplayMedia: vi.fn() })).toBe(true);
+    expect(canShareScreen({} as Pick<MediaDevices, 'getDisplayMedia'>)).toBe(false);
+    // No mediaDevices at all (here: the test DOM): no sharing.
+    expect(canShareScreen(undefined)).toBe(false);
   });
 });

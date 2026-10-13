@@ -72,12 +72,13 @@ describe('LiveKit join tokens', () => {
   });
 });
 
-const server = process.env.SUFFA_TEST_LIVEKIT_URL;
+// The suite's body is collected even when it is skipped, so nothing in it may need the server.
+const server = process.env.SUFFA_TEST_LIVEKIT_URL ?? '';
 
 describe.skipIf(!server)('LiveKit room service (local server)', () => {
   const rooms = new LiveKitRooms({
-    url: server!,
-    apiUrl: server!.replace(/^ws/, 'http'),
+    url: server,
+    apiUrl: server.replace(/^ws/, 'http'),
     apiKey: process.env.SUFFA_TEST_LIVEKIT_KEY ?? '',
     apiSecret: process.env.SUFFA_TEST_LIVEKIT_SECRET ?? '',
   });

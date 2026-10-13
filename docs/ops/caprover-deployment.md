@@ -623,11 +623,10 @@ join tokens; browsers connect to `suffa-live` directly.
 
 1. **Create the app** `suffa-live` (no persistent data). _Deployment → Deploy via ImageName_:
    `livekit/livekit-server:v1.9.1`.
-2. **Env** (one variable holds the whole config; generate the secret with
-   `openssl rand -base64 48`, at least 32 characters):
+2. **Env:** one variable, `LIVEKIT_CONFIG`, holds the whole config; its value is this YAML
+   (generate the secret with `openssl rand -base64 48`, at least 32 characters):
 
    ```yaml
-   LIVEKIT_CONFIG=
    port: 7880
    rtc:
      tcp_port: 7881

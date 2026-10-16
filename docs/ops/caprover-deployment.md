@@ -658,7 +658,16 @@ join tokens; browsers connect to `suffa-live` directly.
          TargetPort: 7882
          PublishedPort: 7882
          PublishMode: host
+   UpdateConfig:
+     Order: stop-first
+     FailureAction: pause
    ```
+
+   `UpdateConfig` matters: a host port can be held by one container only, so with Swarm's
+   default for CapRover (start the new container first) every **Save & Update** leaves the new
+   container `Pending` ("host-mode port already in use") and the old one keeps running with the
+   old settings. `stop-first` stops the old one first; live lessons are down for ~10 seconds.
+   If an update hangs anyway: `docker service scale srv-captain--suffa-live=0`, then `=1`.
 
    Open both in the Hetzner Cloud firewall (inbound TCP 7881, UDP 7882, any source); `ufw` does
    not matter here, as Docker's own rules bypass it. Without UDP, media falls back to TCP 7881;
@@ -770,6 +779,7 @@ its own server; it only needs to reach the public LiveKit address, Redis and Rus
 | Transcript stays "Wartet auf den Start" / fails with "Worker ohne SUFFA_TRANSCRIBE_URL" | the transcription settings are on `suffa-api` only                                                            | set the same `SUFFA_TRANSCRIBE_*`/`SUFFA_MISTRAL_API_KEY` on `suffa-worker`; after 10 minutes without progress the teacher can start it again |
 | API refuses to start in prod                                                            | placeholder or short secret                                                                                   | Generate secrets as above, **Save & Update**                                                                                                  |
 | Live recording fails with `Start signal not received`                                   | the egress Chrome could not open `live-record.html` or not reach LiveKit                                      | `ws_url` must be the public `wss://` address; `SUFFA_LIVE_RECORDING_TEMPLATE_URL` must open in a browser; UDP 7882/TCP 7881 open (§12)        |
+| Live recording: `Internal service panic` on `ListEgress`, or the start times out        | `suffa-live` runs without Redis (its log has no `connecting to redis`), so Egress never gets the request      | set `REDIS_HOST` on `suffa-live` (§12a) and make sure the container really restarted (`UpdateConfig`, §12)                                    |
 | Live recording fails with `Local upload failed`                                         | `EGRESS_CONFIG_BODY` has no (or a misspelt) `storage: {s3: …}`                                                | add the `storage` part of §12a, **Save & Update**                                                                                             |
 | Recording stays _Wird im Live-Unterricht aufgenommen_                                   | the worker lacks `SUFFA_LIVE_RECORDING_TEMPLATE_URL` (or LiveKit/S3 settings), so nobody follows it           | set them on `suffa-worker` (§12a step 5)                                                                                                      |
 

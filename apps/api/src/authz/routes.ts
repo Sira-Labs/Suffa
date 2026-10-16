@@ -147,6 +147,7 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     path: '/api/v1/classes/:id/members/:userId/section',
     action: 'class:manage',
   },
+  { method: 'PUT', path: '/api/v1/classes/:id/settings', action: 'class:manage' },
   { method: 'DELETE', path: '/api/v1/classes/:id', action: 'class:manage' },
   { method: 'GET', path: '/api/v1/classes/:id/progress', action: 'class:progress:read' },
   { method: 'GET', path: '/api/v1/classes/:id/feed', action: 'class:read' },

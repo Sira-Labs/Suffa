@@ -4,7 +4,12 @@
  * audit-logged in the same transaction.
  */
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
+import {
+  DEFAULT_COURSE,
+  type AreaUnlocks,
+  type CourseId,
+  type PaletteId,
+} from '@suffa/engagement';
 import type pg from 'pg';
 import { writeAudit } from '../audit/log.js';
 import type { ClassScope } from '../authz/policies.js';
@@ -28,6 +33,18 @@ export interface ClassSummary {
   /** A class of minors: stricter defaults (league off, sharing needs parents' consent). */
   minors: boolean;
   createdAt: string;
+  /** When the user joined (or created) the class; the latest class sets the app's colours. */
+  joinedAt: string;
+  /** Colour scheme the teacher picked (story 18.1). */
+  palette: PaletteId;
+  /** When the practice areas open; missing areas follow the default (story 18.2). */
+  unlocks: AreaUnlocks;
+}
+
+/** What a teacher can change in the class's settings. */
+export interface ClassSettingsPatch {
+  palette?: PaletteId;
+  unlocks?: AreaUnlocks;
 }
 
 /** The group of a class a learner belongs to for sisters' and brothers' live lessons. */
@@ -82,6 +99,12 @@ export interface ClassRepository {
   members(classId: string): Promise<Member[]>;
   approve(actor: Actor, classId: string, userId: string): Promise<boolean>;
   remove(actor: Actor, classId: string, userId: string): Promise<boolean>;
+  /** Changes the class's colours and area unlocks (audit-logged); false for no such class. */
+  updateSettings(
+    actor: Actor,
+    classId: string,
+    patch: ClassSettingsPatch
+  ): Promise<boolean>;
   /** Puts a learner with the sisters or the brothers (null: neither); false for no learner. */
   setSection(
     actor: Actor,
@@ -162,8 +185,12 @@ export class PgClassRepository implements ClassRepository {
       teacher_name: string | null;
       minors: boolean;
       created_at: Date;
+      joined_at: Date;
+      palette: PaletteId;
+      unlocks: AreaUnlocks;
     }>(
       `select c.id, c.name, c.course, m.class_role, m.status, c.created_at, c.minors,
+              m.joined_at, c.palette, c.unlocks,
               (select coalesce(nullif(u.name, ''), split_part(u.email, '@', 1))
                  from users u where u.id = c.created_by) as teacher_name,
               (select count(*) from class_members s
@@ -188,6 +215,9 @@ export class PgClassRepository implements ClassRepository {
       teacherName: r.teacher_name,
       minors: r.minors,
       createdAt: r.created_at.toISOString(),
+      joinedAt: r.joined_at.toISOString(),
+      palette: r.palette,
+      unlocks: r.unlocks,
     }));
   }
 
@@ -263,6 +293,36 @@ export class PgClassRepository implements ClassRepository {
       parentalConsent: r.parental_consent_at !== null,
       section: r.section,
     }));
+  }
+
+  async updateSettings(
+    actor: Actor,
+    classId: string,
+    patch: ClassSettingsPatch
+  ): Promise<boolean> {
+    return this.tx(async (client) => {
+      const { rowCount } = await client.query(
+        `update classes
+            set palette = coalesce($2, palette),
+                unlocks = coalesce($3::jsonb, unlocks)
+          where id = $1 and archived_at is null`,
+        [
+          classId,
+          patch.palette ?? null,
+          patch.unlocks ? JSON.stringify(patch.unlocks) : null,
+        ]
+      );
+      if (!rowCount) return false;
+      await writeAudit(client, {
+        actorId: actor.id,
+        action: 'class.settings_changed',
+        targetType: 'class',
+        targetId: classId,
+        details: { ...patch },
+        ipAddress: actor.ip,
+      });
+      return true;
+    });
   }
 
   async setSection(

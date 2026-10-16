@@ -9,6 +9,8 @@
  *   DELETE /classes/:id/members/:userId          → 204                    (class:manage)
  *   PUT    /classes/:id/members/:userId/section { section } → 204          (class:manage)
  *          a learner with the sisters, the brothers or neither (null), for live lessons
+ *   PUT    /classes/:id/settings { palette?, unlocks? } → 204              (class:manage)
+ *          the class's colour scheme and when its practice areas open (stories 18.1/18.2)
  *   DELETE /classes/:id                          → 204                    (class:manage)
  *          deletes the class for everyone (archived: hidden, data kept for an admin)
  *   GET    /invites/:token                       → { className, teacherName } (class:join)
@@ -17,7 +19,13 @@
  * class:manage is scoped: the actor's class role comes from the database (only the class's
  * teachers, or admins), never from the request.
  */
-import { COURSES, type CourseId } from '@suffa/engagement';
+import {
+  AREA_IDS,
+  COURSES,
+  PALETTE_IDS,
+  type AreaId,
+  type CourseId,
+} from '@suffa/engagement';
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
 import type { AuthResolver } from '../auth/resolver.js';
@@ -34,6 +42,21 @@ export interface ClassRouteDeps {
 }
 
 const Uuid = z.string().uuid();
+// Unit positions are counted within the course; no course has more than 99 units per book.
+const AreaRule = z.discriminatedUnion('mode', [
+  z.object({ mode: z.literal('open') }).strict(),
+  z.object({ mode: z.literal('unit'), unit: z.number().int().min(1).max(99) }).strict(),
+  z.object({ mode: z.literal('closed') }).strict(),
+]);
+const SettingsBody = z
+  .object({
+    palette: z.enum(PALETTE_IDS).optional(),
+    unlocks: z
+      .record(z.enum(AREA_IDS as unknown as [AreaId, ...AreaId[]]), AreaRule)
+      .optional(),
+  })
+  .strict()
+  .refine((b) => b.palette !== undefined || b.unlocks !== undefined);
 const SectionBody = z
   .object({ section: z.enum(['sisters', 'brothers']).nullable() })
   .strict();
@@ -123,6 +146,15 @@ export function createClassRoutes(deps: ClassRouteDeps): Hono<ActorEnv> {
     const actor = { id: c.get('actor').id, ip: clientIp(c) };
     const done = await deps.repo.remove(actor, c.req.param('id'), userId.data);
     return done ? c.body(null, 204) : c.json({ error: 'not_found' }, 404);
+  });
+
+  app.put('/classes/:id/settings', manage, async (c) => {
+    const body = SettingsBody.safeParse(await c.req.json().catch(() => null));
+    if (!body.success) return c.json({ error: 'invalid_body' }, 400);
+    const actor = { id: c.get('actor').id, ip: clientIp(c) };
+    return (await deps.repo.updateSettings(actor, c.req.param('id'), body.data))
+      ? c.body(null, 204)
+      : c.json({ error: 'not_found' }, 404);
   });
 
   app.delete('/classes/:id', manage, async (c) => {

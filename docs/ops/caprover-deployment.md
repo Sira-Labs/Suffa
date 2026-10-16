@@ -731,13 +731,15 @@ LiveKit and Egress find each other through Redis.
    domain, no port mapping. Under _App Configs_ set **Instance Count 1**. Its whole config is one
    variable in YAML flow style on a single line (CapRover keeps it intact):
 
-   | Variable             | Value                                                                                                                                                                                                                                                                                                                                         |
-   | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-   | `EGRESS_CONFIG_BODY` | `{api_key: suffa, api_secret: "<LiveKit secret>", ws_url: "wss://live.suffa.<domain>", redis: {address: "srv-captain--suffa-redis:6379"}, storage: {s3: {access_key: suffa-egress, secret: "<RustFS secret of suffa-egress>", region: us-east-1, endpoint: "http://srv-captain--rustfs:9000", bucket: suffa-media, force_path_style: true}}}` |
+   | Variable             | Value                                                                                                                                                                                                                                                                                                                                                        |
+   | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+   | `EGRESS_CONFIG_BODY` | `{api_key: suffa, api_secret: "<LiveKit secret>", ws_url: "wss://live.suffa.<domain>", redis: {address: "srv-captain--suffa-redis:6379"}, storage: {s3: {access_key: "<Access Key of suffa-egress>", secret: "<Secret Key of suffa-egress>", region: us-east-1, endpoint: "http://srv-captain--rustfs:9000", bucket: suffa-media, force_path_style: true}}}` |
    - `api_key`/`api_secret` are the pair in `suffa-live`'s `LIVEKIT_KEYS`.
    - `ws_url` is the **public** address. Egress hands it to the recording page, and the page's
      Content Security Policy only allows that host.
    - `bucket` is the same as `SUFFA_S3_BUCKET_MEDIA`.
+   - `access_key` is the generated **Access Key** RustFS shows for that key, not its name
+     (otherwise uploads fail with `401 … Your account is not signed up`).
    - The log shows `service ready`.
    - If it shows Chrome failing to start its sandbox, add under **Service Update Override**:
 

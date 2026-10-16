@@ -225,7 +225,7 @@ describe('Class page (integration)', () => {
     const alert = await screen.findByRole('alert');
     expect(alert.textContent).toContain('Die Klasse ließ sich nicht laden.');
     expect(screen.getByRole('heading', { name: 'Arabisch 1a' })).toBeInTheDocument();
-    expect(screen.getByRole('radio', { name: /Meer/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /Meer/ })).toBeChecked();
 
     down = false;
     await userEvent.click(within(alert).getByRole('button', { name: 'Erneut laden' }));

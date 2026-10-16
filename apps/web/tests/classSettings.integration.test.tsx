@@ -5,12 +5,14 @@ import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import { Training } from '@/modules/more';
 import { AreaGate } from '@/modules/classes/areaAccess';
 import { ClassSettings } from '@/modules/classes/ClassSettings';
+import { ClassContextSync } from '@/modules/classes/ClassContextSync';
 import { ClassesApi, type ClassSummary } from '@/services/classes/classesApi';
 import {
   primaryClass,
   readStored,
   useClassContextStore,
   useEnrollmentStore,
+  useSyncStore,
 } from '@/state';
 import { PALETTES } from '@/theme/palettes';
 import { applyDocumentSettings, useSettingsStore } from '@/state/settingsStore';
@@ -224,5 +226,34 @@ describe('class settings (teacher)', () => {
     expect(order).toEqual([]);
     release();
     await waitFor(() => expect(order).toEqual(['meer', 'sand']));
+  });
+});
+
+describe('remembered class', () => {
+  const context = {
+    classId: 'c1',
+    course: 'bayna-yadayk' as const,
+    palette: 'meer' as const,
+    unlocks: { exam: { mode: 'closed' as const } },
+  };
+  const original = useSyncStore.getState().auth;
+  afterEach(() => useSyncStore.setState({ auth: original }));
+
+  it('keeps it while the app starts or stays offline, signed out', () => {
+    useSyncStore.setState({ auth: { status: 'signed-out' } });
+    useClassContextStore.setState({ context });
+    render(<ClassContextSync />);
+    expect(useClassContextStore.getState().context).toEqual(context);
+  });
+
+  it('forgets it when the user signs out', async () => {
+    useSyncStore.setState({
+      auth: { status: 'signed-in', user: { id: 'u1', email: 'a@example.org' } },
+    } as never);
+    useClassContextStore.setState({ context });
+    render(<ClassContextSync />);
+    expect(useClassContextStore.getState().context).toEqual(context);
+    useSyncStore.setState({ auth: { status: 'signed-out' } });
+    await waitFor(() => expect(useClassContextStore.getState().context).toBeNull());
   });
 });

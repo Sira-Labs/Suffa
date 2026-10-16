@@ -65,6 +65,8 @@ export interface LiveState {
   chat: LiveMessage[];
   /** This person may publish (teacher, or a learner with the floor). */
   canPublish: boolean;
+  /** The room is being recorded (ADR-0029); everyone in it sees this. */
+  recording: boolean;
 }
 
 export interface LiveConnection {
@@ -143,6 +145,7 @@ class LiveKitConnection implements LiveConnection {
       E.ActiveSpeakersChanged,
       E.ParticipantAttributesChanged,
       E.ParticipantNameChanged,
+      E.RecordingStatusChanged,
     ] as const) {
       room.on(event, refresh);
     }
@@ -371,6 +374,7 @@ class LiveKitConnection implements LiveConnection {
       ],
       chat: this.chat,
       canPublish: me.permissions?.canPublish ?? false,
+      recording: this.room.isRecording,
     };
   }
 

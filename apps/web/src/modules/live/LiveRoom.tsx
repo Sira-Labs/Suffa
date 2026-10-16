@@ -5,6 +5,9 @@
  * gives and takes the floor; learners raise their hand. Whoever may use the camera can put a
  * background behind it.
  *
+ * Recording (ADR-0029): the teacher starts and stops it; everyone in the room sees
+ * „Aufnahme läuft“ while it runs and is told before joining that the lesson may be recorded.
+ *
  * Joining starts from a click so the browser lets the room's sound play.
  */
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
@@ -293,6 +296,7 @@ function Room({
   connection,
   screenShare,
   backgrounds,
+  recordingEnabled,
   onLeave,
 }: {
   api: LiveApi;
@@ -302,6 +306,8 @@ function Room({
   connection: LiveConnection;
   screenShare: boolean;
   backgrounds: boolean;
+  /** The teacher can record the lesson on the server. */
+  recordingEnabled: boolean;
   onLeave: () => void;
 }) {
   const { t } = useTranslation('live');
@@ -316,14 +322,28 @@ function Room({
     backgrounds ? rememberedBackground() : 'none'
   );
   const [backgroundBusy, setBackgroundBusy] = useState(false);
+  // What the teacher asked the server for; the room reports the egress a moment later.
+  const [recordingWanted, setRecordingWanted] = useState(session.recording);
+  const [recordingBusy, setRecordingBusy] = useState(false);
+  // Shown while the egress runs, and for the teacher from the moment it was asked for.
+  const recording = state.recording || (teacherView && recordingWanted);
 
   const hadFloor = useRef(false);
   useEffect(() => {
     if (!teacherView && state.canPublish && !hadFloor.current) {
-      setNotice(t('room.floorGiven'));
+      setNotice(t(state.recording ? 'room.floorGivenRecording' : 'room.floorGiven'));
     }
     hadFloor.current = state.canPublish;
-  }, [state.canPublish, teacherView, t]);
+  }, [state.canPublish, state.recording, teacherView, t]);
+
+  // Learners are told when the recording starts or stops while they are in the room.
+  const wasRecording = useRef(state.recording);
+  useEffect(() => {
+    if (state.recording !== wasRecording.current && !teacherView) {
+      setNotice(t(state.recording ? 'room.recordingStarted' : 'room.recordingStopped'));
+    }
+    wasRecording.current = state.recording;
+  }, [state.recording, teacherView, t]);
 
   const device = async (action: () => Promise<void>) => {
     try {
@@ -361,6 +381,20 @@ function Room({
     const result = await api.floor(classId, session.id, person.identity, allowed);
     if (!result.ok) setNotice(result.message);
   };
+  const toggleRecording = async () => {
+    if (!recordingWanted && !window.confirm(t('room.confirmRecording'))) return;
+    setRecordingBusy(true);
+    const result = recordingWanted
+      ? await api.stopRecording(classId, session.id)
+      : await api.startRecording(classId, session.id);
+    setRecordingBusy(false);
+    if (!result.ok) {
+      setNotice(result.message);
+      return;
+    }
+    setRecordingWanted(result.value.session.recording);
+    if (!result.value.session.recording) setNotice(t('room.recordingSaved'));
+  };
   const endForAll = async () => {
     if (!window.confirm(t('room.confirmEnd'))) return;
     const result = await api.end(classId, session.id);
@@ -391,6 +425,11 @@ function Room({
           <h1>{session.title}</h1>
           <SessionTags session={session} />
         </span>
+        {recording && (
+          <p className="live-tag live-recording" role="status">
+            {t('room.recordingBadge')}
+          </p>
+        )}
         {state.status === 'reconnecting' && (
           <p className="live-tag" role="status">
             {t('room.reconnecting')}
@@ -473,6 +512,16 @@ function Room({
         >
           {t('room.leave')}
         </button>
+        {teacherView && recordingEnabled && (
+          <button
+            className="btn"
+            aria-pressed={recordingWanted}
+            disabled={recordingBusy}
+            onClick={() => void toggleRecording()}
+          >
+            {recordingWanted ? t('room.stopRecording') : t('room.startRecording')}
+          </button>
+        )}
         {teacherView && (
           <button className="btn btn-danger" onClick={() => void endForAll()}>
             {t('room.endForAll')}
@@ -520,6 +569,25 @@ export function LiveRoom({
   const teacherHint = Boolean(
     (useLocation().state as { teacher?: boolean } | null)?.teacher
   );
+  // Before joining, everyone learns whether the lesson may be recorded (and whether it is).
+  const [recordingInfo, setRecordingInfo] = useState<{
+    enabled: boolean;
+    now: boolean;
+  } | null>(null);
+  useEffect(() => {
+    let active = true;
+    void api.list(classId).then((result) => {
+      if (!active || !result.ok) return;
+      const session = result.value.sessions.find((s) => s.id === sessionId);
+      setRecordingInfo({
+        enabled: result.value.recordingEnabled,
+        now: Boolean(session?.recording),
+      });
+    });
+    return () => {
+      active = false;
+    };
+  }, [api, classId, sessionId]);
 
   // Leaving the page leaves the room, also when it is left while still connecting.
   const connection = phase.kind === 'room' ? phase.connection : null;
@@ -572,6 +640,7 @@ export function LiveRoom({
           connection={phase.connection}
           screenShare={screenShare}
           backgrounds={backgrounds}
+          recordingEnabled={Boolean(recordingInfo?.enabled)}
           onLeave={() => setPhase({ kind: 'left' })}
         />
       ) : (
@@ -581,6 +650,12 @@ export function LiveRoom({
           </Link>
           <h1>{t('title')}</h1>
           <p>{teacherHint ? t('room.preJoinTeacher') : t('room.preJoinLearner')}</p>
+          {recordingInfo?.enabled && (
+            <p className="live-recording-notice">
+              {t('room.recordingNotice')}
+              {recordingInfo.now && <strong> {t('room.recordingNow')}</strong>}
+            </p>
+          )}
           {phase.kind === 'error' && (
             <p className="feedback-warn" role="alert">
               {phase.message}

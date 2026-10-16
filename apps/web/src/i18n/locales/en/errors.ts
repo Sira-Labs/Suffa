@@ -63,6 +63,8 @@ export const errors: Messages<typeof de> = {
       'This file format is not supported (audio or video, e.g. MP3, M4A, MP4).',
     parts_missing: 'Parts of the file are still missing. The upload will continue.',
     consent_required: 'Please confirm that everyone recorded has agreed.',
+    still_recording:
+      'This recording is still running in the live lesson. Stop it there, then you can delete it.',
     upload_interrupted: 'The connection dropped. Choose the file again to continue.',
   },
   interactive: {
@@ -119,6 +121,12 @@ export const errors: Messages<typeof de> = {
     invalid_start: 'The start must be between today and a year from now.',
     not_in_room: 'This person is no longer in the room.',
     not_found: 'This live lesson no longer exists.',
+    recording_unavailable: 'Recording is not set up on this server yet.',
+    already_recording: 'The recording is already running.',
+    not_recording: 'No recording is running.',
+    quota_exceeded:
+      'This class does not have enough storage left for a recording (50 GB). Delete old recordings.',
+    recording_failed: 'The recording could not start. Please try again in a moment.',
   },
   quiz: {
     running: 'A quiz is already running in this class.',

@@ -72,6 +72,8 @@ export const errors = {
       'Dieses Dateiformat wird nicht unterstützt (Audio oder Video, z. B. MP3, M4A, MP4).',
     parts_missing: 'Es fehlen noch Teile der Datei. Der Upload wird fortgesetzt.',
     consent_required: 'Bitte bestätige, dass alle Aufgenommenen einverstanden sind.',
+    still_recording:
+      'Diese Aufnahme läuft noch im Live-Unterricht. Beende sie dort, dann kannst du sie löschen.',
     /** Not an API code: the upload gave up after several tries. */
     upload_interrupted:
       'Die Verbindung ist abgebrochen. Wähle die Datei erneut, um fortzusetzen.',
@@ -133,6 +135,13 @@ export const errors = {
     invalid_start: 'Der Beginn muss zwischen heute und in einem Jahr liegen.',
     not_in_room: 'Diese Person ist nicht mehr im Raum.',
     not_found: 'Diesen Live-Unterricht gibt es nicht mehr.',
+    recording_unavailable: 'Aufnehmen ist auf diesem Server noch nicht eingerichtet.',
+    already_recording: 'Die Aufnahme läuft schon.',
+    not_recording: 'Gerade läuft keine Aufnahme.',
+    quota_exceeded:
+      'Der Speicher dieser Klasse reicht nicht für eine Aufnahme (50 GB). Lösche alte Aufnahmen.',
+    recording_failed:
+      'Die Aufnahme ließ sich nicht starten. Bitte gleich noch einmal versuchen.',
   },
   quiz: {
     running: 'In dieser Klasse läuft schon ein Quiz.',

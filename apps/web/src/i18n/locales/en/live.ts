@@ -31,6 +31,7 @@ export const live: Messages<typeof de> = {
     cancel: 'Cancel',
     confirmCancel: 'Cancel “{{title}}”?',
     join: 'Join',
+    recording: 'Being recorded',
     camerasOff: 'Learners’ cameras off',
   },
   banner: {
@@ -78,6 +79,20 @@ export const live: Messages<typeof de> = {
     endForAll: 'End for everyone',
     confirmEnd: 'End the live lesson for everyone?',
     floorGiven: 'You have the floor.',
+    floorGivenRecording:
+      'You have the floor. The recording is running: your voice is recorded too.',
+    recordingNotice:
+      'The teacher can record this lesson: the teacher’s picture and voice, and the voice of everyone given the floor. Your picture is never recorded. While it records, “Recording” shows at the top.',
+    recordingNow: 'The recording is running right now.',
+    recordingBadge: 'Recording',
+    startRecording: 'Start recording',
+    stopRecording: 'Stop recording',
+    confirmRecording:
+      'Start recording? Everyone in the room sees “Recording”. Your picture and voice are recorded, and the voice of everyone you give the floor. The recording goes unpublished into the class’s recordings.',
+    recordingStarted: 'The teacher started recording.',
+    recordingStopped: 'The recording has stopped.',
+    recordingSaved:
+      'The recording has stopped. It appears in the class’s recordings in a few minutes, still unpublished.',
     deviceError:
       'The microphone or camera could not start. Please check the browser’s permission.',
     people_one: '{{count}} in the room',

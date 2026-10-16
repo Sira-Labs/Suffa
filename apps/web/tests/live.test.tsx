@@ -37,15 +37,20 @@ const session = (over: Partial<LiveSession> = {}): LiveSession => ({
   endedAt: null,
   audience: 'all',
   learnerCameras: true,
+  recording: false,
   ...over,
 });
 
 /** A fake API server: sessions in memory, every request recorded. */
 function server(
-  initial: { enabled: boolean; sessions: LiveSession[] },
+  initial: { enabled: boolean; recordingEnabled?: boolean; sessions: LiveSession[] },
   role: 'teacher' | 'learner' = 'teacher'
 ) {
-  const state = { ...initial, sessions: [...initial.sessions] };
+  const state = {
+    recordingEnabled: false,
+    ...initial,
+    sessions: [...initial.sessions],
+  };
   const requests: { method: string; path: string; body: unknown }[] = [];
   vi.stubGlobal(
     'fetch',
@@ -78,6 +83,14 @@ function server(
       }
       if (path === `${base}/${SESSION_ID}/floor`)
         return new Response(null, { status: 204 });
+      if (path === `${base}/${SESSION_ID}/recording`) {
+        const recording = method === 'POST';
+        state.sessions = state.sessions.map((s) => ({ ...s, recording }));
+        return Response.json(
+          { session: { ...session({ status: 'live' }), recording } },
+          { status: recording ? 201 : 200 }
+        );
+      }
       if (path === `${base}/${SESSION_ID}/end`) {
         return Response.json({ session: session({ status: 'ended' }) });
       }
@@ -116,6 +129,7 @@ class FakeConnection implements LiveConnection {
       people: [],
       chat: [],
       canPublish: false,
+      recording: false,
       ...state,
     };
   }
@@ -523,6 +537,115 @@ describe('the live room', () => {
     expect(requests.some((r) => r.path.endsWith('/end'))).toBe(true);
     expect(connection.calls).toContain('disconnect');
     expect(await screen.findByText('Du hast den Raum verlassen.')).toBeTruthy();
+  });
+
+  it('tells everyone before joining that the lesson may be recorded, and the teacher records it', async () => {
+    const { requests } = server({
+      enabled: true,
+      recordingEnabled: true,
+      sessions: [session({ status: 'live' })],
+    });
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const connection = new FakeConnection({ people: [teacher], canPublish: true });
+    renderAt(
+      <LiveRoom connect={vi.fn(async () => connection)} />,
+      `/classes/${CLASS_ID}/live/${SESSION_ID}`,
+      '/classes/:id/live/:session'
+    );
+    expect(await screen.findByText(/kann diesen Unterricht aufzeichnen/)).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Beitreten' }));
+    await screen.findByRole('heading', { name: 'Lektion 5' });
+    expect(screen.queryByText('Aufnahme läuft')).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Aufnahme starten' }));
+    expect(window.confirm).toHaveBeenCalled();
+    expect(
+      requests.some((r) => r.method === 'POST' && r.path.endsWith('/recording'))
+    ).toBe(true);
+    // Shown to the teacher at once, before the room reports the running egress.
+    expect(await screen.findByText('Aufnahme läuft')).toBeTruthy();
+    connection.update({ recording: true });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Aufnahme beenden' }));
+    expect(
+      requests.some((r) => r.method === 'DELETE' && r.path.endsWith('/recording'))
+    ).toBe(true);
+    expect(await screen.findByText(/erscheint in ein paar Minuten/)).toBeTruthy();
+    // Still shown until the egress has really stopped.
+    expect(screen.getByText('Aufnahme läuft')).toBeTruthy();
+    connection.update({ recording: false });
+    expect(screen.queryByText('Aufnahme läuft')).toBeNull();
+  });
+
+  it('does not record without the teacher confirming', async () => {
+    const { requests } = server({
+      enabled: true,
+      recordingEnabled: true,
+      sessions: [session({ status: 'live' })],
+    });
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    renderAt(
+      <LiveRoom
+        connect={vi.fn(
+          async () => new FakeConnection({ people: [teacher], canPublish: true })
+        )}
+      />,
+      `/classes/${CLASS_ID}/live/${SESSION_ID}`,
+      '/classes/:id/live/:session'
+    );
+    await screen.findByText(/kann diesen Unterricht aufzeichnen/);
+    await userEvent.click(screen.getByRole('button', { name: 'Beitreten' }));
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Aufnahme starten' })
+    );
+    expect(requests.some((r) => r.path.endsWith('/recording'))).toBe(false);
+    expect(screen.queryByText('Aufnahme läuft')).toBeNull();
+  });
+
+  it('shows learners that the lesson is being recorded, also when they get the floor', async () => {
+    server(
+      {
+        enabled: true,
+        recordingEnabled: true,
+        sessions: [session({ status: 'live', recording: true })],
+      },
+      'learner'
+    );
+    const me = person({ identity: 'a', name: 'Amina', local: true });
+    const connection = new FakeConnection({
+      people: [me, { ...teacher, local: false }],
+      recording: false,
+    });
+    renderAt(
+      <LiveRoom connect={vi.fn(async () => connection)} />,
+      `/classes/${CLASS_ID}/live/${SESSION_ID}`,
+      '/classes/:id/live/:session'
+    );
+    expect(await screen.findByText('Die Aufnahme läuft gerade.')).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Beitreten' }));
+    await screen.findByRole('heading', { name: 'Lektion 5' });
+    // A learner cannot start one.
+    expect(screen.queryByRole('button', { name: 'Aufnahme starten' })).toBeNull();
+
+    connection.update({ recording: true });
+    expect(
+      await screen.findByText('Die Lehrkraft hat die Aufnahme gestartet.')
+    ).toBeTruthy();
+    expect(screen.getByText('Aufnahme läuft')).toBeTruthy();
+
+    connection.update({ canPublish: true, people: [{ ...me, floor: true }, teacher] });
+    expect(await screen.findByText(/dein Ton wird mit aufgezeichnet/i)).toBeTruthy();
+
+    connection.update({ recording: false });
+    expect(await screen.findByText('Die Aufnahme ist beendet.')).toBeTruthy();
+    expect(screen.queryByText('Aufnahme läuft')).toBeNull();
+  });
+
+  it('offers no recording where the server cannot record', async () => {
+    server({ enabled: true, sessions: [session({ status: 'live' })] });
+    await join(new FakeConnection({ people: [teacher], canPublish: true }));
+    expect(screen.queryByRole('button', { name: 'Aufnahme starten' })).toBeNull();
+    expect(screen.queryByText(/kann diesen Unterricht aufzeichnen/)).toBeNull();
   });
 
   it('leaves a room that connects after the page was left', async () => {

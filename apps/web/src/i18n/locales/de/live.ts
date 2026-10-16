@@ -29,6 +29,7 @@ export const live = {
     cancel: 'Absagen',
     confirmCancel: '„{{title}}“ absagen?',
     join: 'Beitreten',
+    recording: 'Wird aufgezeichnet',
     camerasOff: 'Kameras der Lernenden aus',
   },
   banner: {
@@ -76,6 +77,20 @@ export const live = {
     endForAll: 'Für alle beenden',
     confirmEnd: 'Den Live-Unterricht für alle beenden?',
     floorGiven: 'Du hast das Wort.',
+    floorGivenRecording:
+      'Du hast das Wort. Die Aufnahme läuft: Dein Ton wird mit aufgezeichnet.',
+    recordingNotice:
+      'Die Lehrkraft kann diesen Unterricht aufzeichnen: Bild und Ton der Lehrkraft und den Ton aller, denen sie das Wort gibt. Dein Bild wird nie aufgenommen. Solange aufgezeichnet wird, steht oben „Aufnahme läuft“.',
+    recordingNow: 'Die Aufnahme läuft gerade.',
+    recordingBadge: 'Aufnahme läuft',
+    startRecording: 'Aufnahme starten',
+    stopRecording: 'Aufnahme beenden',
+    confirmRecording:
+      'Aufnahme starten? Alle im Raum sehen „Aufnahme läuft“. Aufgenommen werden dein Bild und Ton und der Ton aller, denen du das Wort gibst. Die Aufnahme kommt unveröffentlicht in die Aufnahmen der Klasse.',
+    recordingStarted: 'Die Lehrkraft hat die Aufnahme gestartet.',
+    recordingStopped: 'Die Aufnahme ist beendet.',
+    recordingSaved:
+      'Die Aufnahme ist beendet. Sie erscheint in ein paar Minuten in den Aufnahmen der Klasse, noch unveröffentlicht.',
     deviceError:
       'Mikrofon oder Kamera ließ sich nicht starten. Bitte die Freigabe im Browser prüfen.',
     people_one: '{{count}} im Raum',

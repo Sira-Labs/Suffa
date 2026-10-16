@@ -21,11 +21,15 @@ export interface LiveSession {
   audience: LiveAudience;
   /** Learners given the floor may turn on their camera; false: their voice only. */
   learnerCameras: boolean;
+  /** The session is being recorded right now (ADR-0029). */
+  recording: boolean;
 }
 
 export interface LiveSessions {
   /** False while the server has no LiveKit set up. */
   enabled: boolean;
+  /** The teacher can record sessions on the server (ADR-0029). */
+  recordingEnabled: boolean;
   sessions: LiveSession[];
 }
 
@@ -92,6 +96,21 @@ export class LiveApi {
       method: 'POST',
       body: JSON.stringify({ identity, allowed }),
     });
+  }
+
+  /** Starts recording the session into the class's recordings (ADR-0029). */
+  startRecording(classId: string, sessionId: string) {
+    return this.call<{ session: LiveSession }>(
+      `${this.base(classId)}/${sessionId}/recording`,
+      { method: 'POST' }
+    );
+  }
+
+  stopRecording(classId: string, sessionId: string) {
+    return this.call<{ session: LiveSession }>(
+      `${this.base(classId)}/${sessionId}/recording`,
+      { method: 'DELETE' }
+    );
   }
 
   private base(classId: string) {

@@ -6,6 +6,7 @@ export const recordings: Messages<typeof de> = {
   status: {
     uploading: 'Uploading',
     importing: 'Importing',
+    recording: 'Being recorded in the live lesson',
     processing: 'Processing',
     ready: 'Ready',
     failed: 'Failed',

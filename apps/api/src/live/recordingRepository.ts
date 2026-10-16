@@ -31,6 +31,15 @@ export interface LiveRecordingRepository {
   discard(mediaId: string): Promise<void>;
   /** The recording's session is still live (not ended, not left far past its planned end). */
   sessionLive(mediaId: string, now: Date): Promise<boolean>;
+  /** Notes that the worker has just checked on the recording. */
+  touch(mediaId: string): Promise<void>;
+  /** Recordings nobody has checked on since `before`, oldest first. */
+  stale(before: Date, limit?: number): Promise<string[]>;
+  /**
+   * Moves a recording whose file is stored on to `processing`; false when another check already
+   * did, so only one of them queues the transcode.
+   */
+  stored(mediaId: string, bytes: number): Promise<boolean>;
 }
 
 export class PgLiveRecordingRepository implements LiveRecordingRepository {
@@ -126,5 +135,33 @@ export class PgLiveRecordingRepository implements LiveRecordingRepository {
       [mediaId, now, OVERRUN_MINUTES]
     );
     return rows.length > 0;
+  }
+
+  async touch(mediaId: string): Promise<void> {
+    await this.pool.query(
+      `update media_items set updated_at = now() where id = $1 and status = 'recording'`,
+      [mediaId]
+    );
+  }
+
+  async stale(before: Date, limit = 50): Promise<string[]> {
+    const { rows } = await this.pool.query<{ id: string }>(
+      `select id from media_items
+        where status = 'recording' and updated_at < $1
+        order by updated_at limit $2`,
+      [before, limit]
+    );
+    return rows.map((row) => row.id);
+  }
+
+  async stored(mediaId: string, bytes: number): Promise<boolean> {
+    const { rowCount } = await this.pool.query(
+      `update media_items
+          set status = 'processing', original_size = $2, progress = 0, error = null,
+              updated_at = now()
+        where id = $1 and status = 'recording'`,
+      [mediaId, bytes]
+    );
+    return rowCount === 1;
   }
 }

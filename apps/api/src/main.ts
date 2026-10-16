@@ -198,7 +198,8 @@ async function main(): Promise<void> {
             pool,
             log,
             errors,
-            config.storage ? new S3ObjectStorage(config.storage) : undefined
+            config.storage ? new S3ObjectStorage(config.storage) : undefined,
+            liveRecordings(config, pool, boss, log)
           );
           if (config.youtubeApiKey) {
             await registerImports(

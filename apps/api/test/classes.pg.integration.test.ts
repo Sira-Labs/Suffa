@@ -230,6 +230,57 @@ describe.skipIf(!url)('Classes (Postgres)', () => {
     expect(audit.rows.map((r) => r.action)).toEqual(['class.member_rejected']);
   });
 
+  it('the teacher picks the colours and when the practice areas open', async () => {
+    const { id, token } = await newClassWithInvite();
+    await call('amina', 'POST', `/invites/${token}/join`);
+    await call('teacher', 'POST', `/classes/${id}/members/${users.amina!.id}/approve`);
+    const mine = async (who: string) =>
+      (
+        (await (await call(who, 'GET', '/classes')).json()) as {
+          classes: { id: string; palette: string; unlocks: object; joinedAt: string }[];
+        }
+      ).classes.find((c) => c.id === id)!;
+    expect(await mine('amina')).toMatchObject({ palette: 'oase', unlocks: {} });
+
+    const put = (who: string, body: unknown) =>
+      call(who, 'PUT', `/classes/${id}/settings`, body);
+    expect((await put('teacher', { palette: 'meer' })).status).toBe(204);
+    expect(
+      (
+        await put('teacher', {
+          unlocks: { roots: { mode: 'unit', unit: 5 }, exam: { mode: 'closed' } },
+        })
+      ).status
+    ).toBe(204);
+    // The learner's app sees both (it styles itself and opens the areas from this).
+    const seen = await mine('amina');
+    expect(seen).toMatchObject({
+      palette: 'meer',
+      unlocks: { roots: { mode: 'unit', unit: 5 }, exam: { mode: 'closed' } },
+    });
+    expect(Date.parse(seen.joinedAt)).not.toBeNaN();
+
+    for (const body of [
+      {},
+      { palette: 'neon' },
+      { unlocks: { tutor: { mode: 'open' } } },
+      { unlocks: { roots: { mode: 'unit', unit: 0 } } },
+      { unlocks: { roots: { mode: 'unit' } } },
+      { palette: 'meer', extra: true },
+    ]) {
+      expect((await put('teacher', body)).status, JSON.stringify(body)).toBe(400);
+    }
+    expect((await put('amina', { palette: 'sand' })).status).toBe(403);
+
+    const audit = await pool.query(
+      "select details from audit_log where action = 'class.settings_changed' order by id"
+    );
+    expect(audit.rows.map((r) => r.details)).toEqual([
+      { palette: 'meer' },
+      { unlocks: { roots: { mode: 'unit', unit: 5 }, exam: { mode: 'closed' } } },
+    ]);
+  });
+
   it('the teacher puts learners with the sisters or the brothers', async () => {
     const { id, token } = await newClassWithInvite();
     await call('amina', 'POST', `/invites/${token}/join`);

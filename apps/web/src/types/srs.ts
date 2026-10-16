@@ -6,7 +6,7 @@
  *   - updated_at: ISO timestamp (basis for last-write-wins, see ADR-0002)
  *   - deleted:    soft-delete flag (tombstone) so deletions can be synced
  */
-import type { CourseId } from '@suffa/engagement';
+import type { CourseId, PaletteId } from '@suffa/engagement';
 
 export interface Syncable {
   id: string;
@@ -132,6 +132,11 @@ export interface SettingsRecord extends Syncable {
    * interface language.
    */
   meaningLanguage?: 'de' | 'en' | null;
+  /**
+   * Colour scheme (story 18.1): 'class', none or null follows the learner's class, else one of
+   * the palettes.
+   */
+  palette?: PaletteId | 'class' | null;
 }
 
 export type TashkilLevel = 'full' | 'partial' | 'none';

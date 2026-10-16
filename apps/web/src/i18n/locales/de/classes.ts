@@ -29,6 +29,8 @@ export const classes = {
   },
   page: {
     loading: 'Lade Klasse …',
+    loadFailed: 'Die Klasse ließ sich nicht laden.',
+    retry: 'Erneut laden',
     back: '← Klassen',
     areas: 'Bereiche der Klasse',
     recordings: 'Aufnahmen',
@@ -43,7 +45,27 @@ export const classes = {
       grades: 'Bewertungen',
       certificates: 'Zertifikate',
       members: 'Mitglieder',
+      settings: 'Einstellungen',
     },
+  },
+  settings: {
+    palette: 'Farbschema der Klasse',
+    paletteHint:
+      'Alle Lernenden der Klasse sehen die App in diesen Farben, solange sie in ihren Einstellungen „Wie meine Klasse“ gewählt haben.',
+    unlocksTitle: 'Bereiche freischalten',
+    unlocksHint:
+      'Wann sich die Übungsbereiche für die Lernenden öffnen. „Ab Einheit“ zählt im Kurs der Klasse; was du hier nicht änderst, folgt der Voreinstellung.',
+    area: 'Bereich',
+    rule: 'Wann',
+    open: 'Sofort offen',
+    fromUnit: 'Ab Einheit …',
+    closed: 'Geschlossen (ich öffne später)',
+    unit: 'Einheit',
+    unitFor: 'Ab Einheit für {{area}}',
+    ruleFor: 'Wann öffnet sich {{area}}?',
+    saved: 'Gespeichert. Die Lernenden sehen es beim nächsten Abgleich.',
+    save: 'Freischaltung speichern',
+    reset: 'Voreinstellung',
   },
   join: {
     noServer: 'Klassen gibt es nur mit Anmeldung – auf diesem Server nicht eingerichtet.',

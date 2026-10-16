@@ -15,4 +15,11 @@ export const common: Messages<typeof de> = {
   back: 'Back',
   skipToContent: 'Skip to content',
   thisDevice: 'this device',
+  palettes: {
+    oase: { name: 'Oasis', hint: 'Deep green with saffron – the classic Suffa' },
+    meer: { name: 'Sea', hint: 'Fresh turquoise with coral' },
+    minze: { name: 'Mint', hint: 'Light mint green with sunflower yellow' },
+    lavendel: { name: 'Lavender', hint: 'Calm violet with gold' },
+    sand: { name: 'Sand', hint: 'Warm sand with terracotta' },
+  },
 };

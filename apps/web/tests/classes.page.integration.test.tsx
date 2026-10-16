@@ -210,6 +210,28 @@ describe('Class page (integration)', () => {
     ]);
   });
 
+  it('keeps the class on screen when the refresh after a save fails', async () => {
+    await signIn('teacher', 'teacher');
+    renderClass();
+    await userEvent.click(await screen.findByRole('tab', { name: 'Einstellungen' }));
+    // The settings save works, but the class list behind the refresh does not.
+    const working = globalThis.fetch;
+    let down = true;
+    vi.stubGlobal('fetch', (async (input: RequestInfo | URL, init?: RequestInit) =>
+      down && String(input) === '/api/v1/classes'
+        ? Response.json({ error: 'unavailable' }, { status: 503 })
+        : working(input, init)) as typeof fetch);
+    await userEvent.click(await screen.findByRole('radio', { name: /Meer/ }));
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('Die Klasse ließ sich nicht laden.');
+    expect(screen.getByRole('heading', { name: 'Arabisch 1a' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /Meer/ })).toBeChecked();
+
+    down = false;
+    await userEvent.click(within(alert).getByRole('button', { name: 'Erneut laden' }));
+    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
+  });
+
   it('shows a learner the challenge with their share and shout-outs to them', async () => {
     await signIn('student', 'student');
     renderClass();

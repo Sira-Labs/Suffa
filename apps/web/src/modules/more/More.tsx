@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Icon } from '@/components/Icon';
 import { NAV_ITEMS, navText, type MoreGroup, type NavItem } from '@/navigation';
 import { useRole } from '@/modules/account/useRole';
+import { accessOf, useAreaAccessMap, useLockReason } from '@/modules/classes/areaAccess';
 
 /** Admins also see the admin area (story 4.2). */
 const ADMIN_ITEM: NavItem = {
@@ -72,23 +73,45 @@ export function Training() {
 function TileList({ label, items }: { label: string; items: readonly NavItem[] }) {
   // Re-renders when the language changes.
   useTranslation('nav');
+  const access = useAreaAccessMap();
+  const reason = useLockReason();
   return (
     <ul className="more-grid" aria-label={label}>
-      {items.map((item) => (
-        <li key={item.to}>
-          <Link to={item.to} className="more-tile">
-            <span className="more-icon">
-              <Icon name={item.icon} size={24} />
-            </span>
-            <span className="stack" style={{ gap: 2 }}>
-              <strong>{navText(item).label}</strong>
-              <span className="muted" style={{ fontSize: '0.9rem' }}>
-                {navText(item).description}
+      {items.map((item) => {
+        const state = accessOf(access, item.id);
+        if (!state.open) {
+          return (
+            <li key={item.to}>
+              <div className="more-tile more-tile-locked" aria-disabled="true">
+                <span className="more-icon">
+                  <Icon name="lock" size={24} />
+                </span>
+                <span className="stack" style={{ gap: 2 }}>
+                  <strong>{navText(item).label}</strong>
+                  <span className="muted" style={{ fontSize: '0.9rem' }}>
+                    {reason(state)}
+                  </span>
+                </span>
+              </div>
+            </li>
+          );
+        }
+        return (
+          <li key={item.to}>
+            <Link to={item.to} className="more-tile">
+              <span className="more-icon">
+                <Icon name={item.icon} size={24} />
               </span>
-            </span>
-          </Link>
-        </li>
-      ))}
+              <span className="stack" style={{ gap: 2 }}>
+                <strong>{navText(item).label}</strong>
+                <span className="muted" style={{ fontSize: '0.9rem' }}>
+                  {navText(item).description}
+                </span>
+              </span>
+            </Link>
+          </li>
+        );
+      })}
     </ul>
   );
 }

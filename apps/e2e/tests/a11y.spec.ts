@@ -79,7 +79,7 @@ for (const theme of ['dark', 'light'] as const) {
   test(`learner pages have no serious WCAG findings (${theme} theme)`, async ({
     page,
   }) => {
-    test.setTimeout(240_000);
+    test.setTimeout(420_000);
     const findings: Finding[] = [];
     await page.goto('/login');
     findings.push(...(await audit(page, `/login (${theme})`)));
@@ -106,6 +106,15 @@ for (const theme of ['dark', 'light'] as const) {
     for (const path of ['/', '/units', '/units/madinah/1', '/exam']) {
       await page.goto(path);
       findings.push(...(await audit(page, `${path} Medina (${theme})`)));
+    }
+    // Every colour scheme (story 18.1) on a few busy pages.
+    for (const palette of ['Meer', 'Minze', 'Lavendel', 'Sand']) {
+      await page.goto('/settings');
+      await page.getByRole('radio', { name: new RegExp(palette) }).check();
+      for (const path of ['/', '/units/1', '/training', '/settings']) {
+        await page.goto(path);
+        findings.push(...(await audit(page, `${path} ${palette} (${theme})`)));
+      }
     }
     expect(report(findings), 'serious or critical axe findings').toEqual([]);
   });
@@ -136,6 +145,7 @@ test('teacher pages have no serious WCAG findings', async ({ browser }) => {
       'Klassenleben',
       'Aufnahmen',
       'Mitglieder',
+      'Einstellungen',
     ]) {
       await teacher.goto(`/classes/${classId}`);
       const button = teacher.getByRole('tab', { name: tab });

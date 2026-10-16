@@ -5,7 +5,7 @@
  *
  * Mirrors `apps/web/src/types/*.ts` (camelCase columns).
  */
-import { COURSE_IDS, type CourseId } from '@suffa/engagement';
+import { COURSE_IDS, PALETTE_IDS, type CourseId } from '@suffa/engagement';
 import { z } from 'zod';
 
 const isoTimestamp = z.string().datetime({ offset: true });
@@ -84,6 +84,8 @@ export const SYNC_SCHEMAS = {
     // Interface language (story 16.3); kept when an older app does not send it.
     uiLanguage: z.enum(['de', 'en']).nullish(),
     meaningLanguage: z.enum(['de', 'en']).nullish(),
+    // Colour scheme (story 18.1): 'class' or none follows the class, else one of the palettes.
+    palette: z.enum(['class', ...PALETTE_IDS]).nullish(),
   }),
   user_vocab: z.object({
     ...base,
@@ -174,7 +176,13 @@ export const JSON_COLUMNS: ReadonlySet<string> = new Set(['units', 'items']);
  */
 export const PRESERVED_WHEN_MISSING: Partial<Record<SyncTableName, ReadonlySet<string>>> =
   {
-    settings: new Set(['course', 'srsAlgorithm', 'uiLanguage', 'meaningLanguage']),
+    settings: new Set([
+      'course',
+      'srsAlgorithm',
+      'uiLanguage',
+      'meaningLanguage',
+      'palette',
+    ]),
     srs_cards: new Set(['stability', 'difficulty']),
   };
 

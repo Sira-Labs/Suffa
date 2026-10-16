@@ -30,6 +30,12 @@ import { SignIn } from './modules/account';
 import { Classes, Join } from './modules/classes';
 import { Tutor } from './modules/tutor';
 import { VideoLesson, VideoLessons } from './modules/videos';
+import { AreaGate } from './modules/classes/areaAccess';
+import type { AreaId } from '@suffa/engagement';
+import type { ReactNode } from 'react';
+
+/** A practice area's page, shown only while the area is open (story 18.2). */
+const gate = (area: AreaId, page: ReactNode) => <AreaGate area={area}>{page}</AreaGate>;
 
 /**
  * Normal paths (story 2.6, ADR-0013): Caddy answers unknown paths with index.html and the
@@ -45,16 +51,16 @@ export const router = createBrowserRouter([
     errorElement: <RouteError />,
     children: [
       { index: true, element: <Dashboard /> },
-      { path: 'alphabet', element: <Alphabet /> },
-      { path: 'alphabet/:lesson', element: <AlphabetLessonPage /> },
-      { path: 'vocab', element: <VocabTrainer /> },
-      { path: 'roots', element: <RootExplorer /> },
-      { path: 'roots/muster', element: <PatternTrainer /> },
-      { path: 'reading', element: <Reading /> },
-      { path: 'writing', element: <Writing /> },
-      { path: 'speaking', element: <Speaking /> },
-      { path: 'conjugation', element: <Conjugation /> },
-      { path: 'exam', element: <Exam /> },
+      { path: 'alphabet', element: gate('alphabet', <Alphabet />) },
+      { path: 'alphabet/:lesson', element: gate('alphabet', <AlphabetLessonPage />) },
+      { path: 'vocab', element: gate('vocab', <VocabTrainer />) },
+      { path: 'roots', element: gate('roots', <RootExplorer />) },
+      { path: 'roots/muster', element: gate('roots', <PatternTrainer />) },
+      { path: 'reading', element: gate('reading', <Reading />) },
+      { path: 'writing', element: gate('writing', <Writing />) },
+      { path: 'speaking', element: gate('speaking', <Speaking />) },
+      { path: 'conjugation', element: gate('conjugation', <Conjugation />) },
+      { path: 'exam', element: gate('exam', <Exam />) },
       { path: 'library', element: <Library /> },
       { path: 'login', element: <SignIn /> },
       { path: 'settings', element: <Settings /> },

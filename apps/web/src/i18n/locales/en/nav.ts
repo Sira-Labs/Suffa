@@ -8,6 +8,11 @@ export const nav: Messages<typeof de> = {
   trainingIntro:
     'Practise with everything from the units you have reached – new units join with every test you pass.',
   trainingAreas: 'Practice areas',
+  locked: {
+    fromUnit: 'Opens once you reach unit {{unit}}.',
+    byTeacher: 'Your teacher has not opened this area yet.',
+    back: 'Back to practice',
+  },
   groups: { media: 'Media', help: 'Help', me: 'Me' },
   items: {
     today: { label: 'Today', description: 'Your path for today' },

@@ -27,6 +27,8 @@ export const classes: Messages<typeof de> = {
   },
   page: {
     loading: 'Loading class …',
+    loadFailed: 'The class could not be loaded.',
+    retry: 'Try again',
     back: '← Classes',
     areas: 'Class sections',
     recordings: 'Recordings',
@@ -41,7 +43,27 @@ export const classes: Messages<typeof de> = {
       grades: 'Grades',
       certificates: 'Certificates',
       members: 'Members',
+      settings: 'Settings',
     },
+  },
+  settings: {
+    palette: 'Class colour scheme',
+    paletteHint:
+      'Every learner in the class sees the app in these colours, as long as they chose “Like my class” in their settings.',
+    unlocksTitle: 'Open practice areas',
+    unlocksHint:
+      'When the practice areas open for the learners. “From unit” counts within the class’s course; what you do not change here follows the default.',
+    area: 'Area',
+    rule: 'When',
+    open: 'Open now',
+    fromUnit: 'From unit …',
+    closed: 'Closed (I open it later)',
+    unit: 'Unit',
+    unitFor: 'From unit for {{area}}',
+    ruleFor: 'When does {{area}} open?',
+    saved: 'Saved. Learners see it at their next sync.',
+    save: 'Save practice areas',
+    reset: 'Default',
   },
   join: {
     noServer: 'Classes need an account – this server does not have sign-in set up.',

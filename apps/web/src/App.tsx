@@ -23,9 +23,11 @@ import {
 } from './navigation';
 import { setUiLanguage } from './i18n';
 import { useRole } from './modules/account/useRole';
+import { accessOf, useAreaAccessMap } from './modules/classes/areaAccess';
 import { logger } from './services/logger';
 import { useTrainingScope } from './modules/units/useReachedUnits';
 import { EngagementWatcher } from './modules/engagement/EngagementWatcher';
+import { ClassContextSync } from './modules/classes/ClassContextSync';
 import { useSignInGate } from './modules/account';
 import {
   useCheckInStore,
@@ -116,6 +118,7 @@ export function App() {
   return (
     <>
       <EngagementWatcher />
+      <ClassContextSync />
       <Shell />
     </>
   );
@@ -167,7 +170,8 @@ function Shell() {
   const { t } = useTranslation(['common', 'nav']);
   const { pathname } = useLocation();
   const moreActive = isUnderMore(pathname);
-  const items = navItemsFor(useRole());
+  const access = useAreaAccessMap();
+  const items = navItemsFor(useRole()).filter((item) => accessOf(access, item.id).open);
   // Not signed in: the sign-in page comes first (it also offers "ohne Konto weiter").
   const signInFirst = useSignInGate();
   if (signInFirst) return <Navigate to={signInFirst} replace />;

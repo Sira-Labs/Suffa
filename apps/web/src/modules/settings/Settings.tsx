@@ -2,6 +2,7 @@ import { WEEKLY_GOALS } from '@suffa/engagement';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import { TashkilToggle } from '@/components';
+import { PalettePicker } from '@/components/PalettePicker';
 import i18n, { setUiLanguage, type UiLanguage } from '@/i18n';
 import { dateLocale } from '@/i18n/format';
 import { isMeaningLanguage } from '@/services/meanings';
@@ -40,6 +41,17 @@ export function Settings() {
             })}
           </button>
         </div>
+        <PalettePicker
+          name="palette"
+          label={t('display.palette')}
+          value={settings.palette ?? 'class'}
+          onChange={(palette) => void update({ palette })}
+          extra={{
+            value: 'class',
+            label: t('display.paletteClass'),
+            hint: t('display.paletteClassHint'),
+          }}
+        />
         <TashkilToggle />
         <label className="stack" style={{ gap: '0.3rem' }}>
           <span>

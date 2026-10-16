@@ -60,11 +60,15 @@ export function ClassPage() {
   const asked = params.get('tab');
   const [tab, setTab] = useState<Tab>(TABS.find((x) => x === asked) ?? 'progress');
 
+  const [loadFailed, setLoadFailed] = useState(false);
+
   const load = useCallback(async () => {
     const result = await api.list();
-    setSummary(
-      result.ok ? (result.value.classes.find((c) => c.id === id) ?? null) : null
-    );
+    setLoadFailed(!result.ok);
+    if (result.ok) setSummary(result.value.classes.find((c) => c.id === id) ?? null);
+    // A failed refresh (after a save, say) keeps the class on screen; only a failed first
+    // load has nothing to show.
+    else setSummary((current) => current ?? null);
   }, [api, id]);
 
   useEffect(() => {
@@ -74,11 +78,23 @@ export function ClassPage() {
   if (!(provider instanceof ApiSyncProvider) || auth.status !== 'signed-in') {
     return <p className="muted">{t('signInFirst')}</p>;
   }
+  const retry = loadFailed && (
+    <p
+      role="alert"
+      className="row"
+      style={{ flexWrap: 'wrap', gap: '0.5rem', margin: 0 }}
+    >
+      <span>{t('page.loadFailed')}</span>
+      <button className="btn btn-small" onClick={() => void load()}>
+        {t('page.retry')}
+      </button>
+    </p>
+  );
   if (summary === undefined) return <p className="muted">{t('page.loading')}</p>;
   if (summary === null || summary.status !== 'active') {
     return (
       <div className="stack">
-        <p className="muted">{t('notFound')}</p>
+        {retry || <p className="muted">{t('notFound')}</p>}
         <Link to="/classes">{t('toYourClasses')}</Link>
       </div>
     );
@@ -94,6 +110,7 @@ export function ClassPage() {
         <h1>{summary.name}</h1>
         {!teacher && <ClassCourseHint course={summary.course} />}
       </header>
+      {retry}
       {teacher ? (
         <>
           <div className="tab-list" role="tablist" aria-label={t('page.areas')}>

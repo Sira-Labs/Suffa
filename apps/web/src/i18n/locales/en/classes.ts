@@ -27,6 +27,8 @@ export const classes: Messages<typeof de> = {
   },
   page: {
     loading: 'Loading class …',
+    loadFailed: 'The class could not be loaded.',
+    retry: 'Try again',
     back: '← Classes',
     areas: 'Class sections',
     recordings: 'Recordings',

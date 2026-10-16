@@ -29,6 +29,8 @@ export const classes = {
   },
   page: {
     loading: 'Lade Klasse …',
+    loadFailed: 'Die Klasse ließ sich nicht laden.',
+    retry: 'Erneut laden',
     back: '← Klassen',
     areas: 'Bereiche der Klasse',
     recordings: 'Aufnahmen',

@@ -3,6 +3,7 @@
  * the current theme. Used by the teacher for the class and by learners for themselves.
  */
 import { PALETTE_IDS, type PaletteId } from '@suffa/engagement';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettingsStore } from '@/state';
 import { PALETTES } from '@/theme/palettes';
@@ -25,6 +26,13 @@ export function PalettePicker<V extends string>({
 }) {
   const { t } = useTranslation('common');
   const mode = useSettingsStore((s) => s.settings.theme);
+  // Shows the pick at once; saving it happens after the click (and may come back later).
+  const [selected, setSelected] = useState(value);
+  useEffect(() => setSelected(value), [value]);
+  const pick = (next: V | PaletteId) => {
+    setSelected(next);
+    onChange(next);
+  };
   return (
     <fieldset className="palette-picker" disabled={disabled}>
       <legend>{label}</legend>
@@ -33,8 +41,8 @@ export function PalettePicker<V extends string>({
           <input
             type="radio"
             name={name}
-            checked={value === extra.value}
-            onChange={() => onChange(extra.value)}
+            checked={selected === extra.value}
+            onChange={() => pick(extra.value)}
           />
           <span className="stack" style={{ gap: 0 }}>
             <strong>{extra.label}</strong>
@@ -49,8 +57,8 @@ export function PalettePicker<V extends string>({
             <input
               type="radio"
               name={name}
-              checked={value === id}
-              onChange={() => onChange(id)}
+              checked={selected === id}
+              onChange={() => pick(id)}
             />
             <span className="palette-swatches" aria-hidden="true">
               {[c.bg, c['bg-elev-2'], c.accent, c['accent-fill']].map((colour, i) => (

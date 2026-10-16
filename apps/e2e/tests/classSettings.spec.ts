@@ -34,12 +34,15 @@ test('the teacher sets colours and areas; the learner sees both', async ({ brows
   await expect
     .poll(() => learner.evaluate(() => document.documentElement.dataset.palette))
     .toBe('meer');
-  await expect(learner.getByRole('link', { name: /Wurzeln/ })).toBeVisible();
+  const areas = learner.getByRole('list', { name: 'Trainingsbereiche' });
+  await expect(areas.getByRole('link', { name: /Wurzeln/ })).toBeVisible();
   await expect(
     learner.getByText('Deine Lehrkraft schaltet diesen Bereich noch frei.')
   ).toBeVisible();
   await learner.goto('/exam');
-  await expect(learner.getByRole('status')).toContainText('noch frei');
+  await expect(
+    learner.getByText('Deine Lehrkraft schaltet diesen Bereich noch frei.')
+  ).toBeVisible();
 
   // The learner may pick their own colours instead.
   await learner.goto('/settings');

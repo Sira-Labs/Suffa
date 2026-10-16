@@ -1,0 +1,70 @@
+<!doctype html>
+<!--
+  The recording page of live lessons (ADR-0029): LiveKit Egress opens it and records what it
+  shows and plays. 1280×720, no app shell, no service worker.
+-->
+<html lang="de" dir="ltr" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1280, height=720" />
+    <meta name="robots" content="noindex" />
+    <!-- Egress records the window: no translation bar of its Chrome may cover the lesson. -->
+    <meta name="google" content="notranslate" />
+    <title>Suffa – Aufnahme</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #12302c;
+      }
+      .stage {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      #main {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: #000;
+      }
+      #pip {
+        position: absolute;
+        right: 24px;
+        bottom: 24px;
+        width: 22%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgb(0 0 0 / 0.5);
+        background: #000;
+      }
+      #idle {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+      }
+      #idle img {
+        width: 160px;
+        height: 160px;
+        opacity: 0.85;
+      }
+      [hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+      <video id="main" autoplay playsinline muted hidden></video>
+      <video id="pip" autoplay playsinline muted hidden></video>
+      <div id="idle"><img src="/brand/suffa-mark.svg" alt="" /></div>
+    </div>
+    <div id="audio" hidden></div>
+    <script type="module" src="/src/record/main.ts"></script>
+  </body>
+</html>

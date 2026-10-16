@@ -5,11 +5,15 @@
  * (E2E_LIVEKIT=1 and SUFFA_LIVEKIT_URL/_API_KEY/_API_SECRET); camera and microphone are
  * Chromium's fake devices. Sisters' and brothers' sessions (stage 2) reach only their section
  * and may keep the learners' cameras off.
+ *
+ * Recording (Live 3, ADR-0029) needs LiveKit Egress next to the LiveKit server, an S3 store
+ * and a worker: E2E_EGRESS=1 with the SUFFA_S3_* settings (see scripts/start-api.mjs).
  */
 import { expect, test, type Page } from '@playwright/test';
 import { classWithLearner } from './helpers';
 
 const withLiveKit = process.env.E2E_LIVEKIT === '1';
+const withEgress = withLiveKit && process.env.E2E_EGRESS === '1';
 
 test.use({
   launchOptions: {
@@ -172,6 +176,8 @@ test('the teacher’s camera with a background, small beside the shared screen',
   browser,
 }) => {
   test.skip(!withLiveKit, 'needs a LiveKit server (E2E_LIVEKIT=1)');
+  // MediaPipe's model and WASM (about 19 MB) load twice: slow on a busy test machine.
+  test.setTimeout(120_000);
   const media = { permissions: ['camera', 'microphone'] };
   const teacher = await (await browser.newContext(media)).newPage();
   const learner = await (await browser.newContext(media)).newPage();
@@ -215,4 +221,57 @@ test('the teacher’s camera with a background, small beside the shared screen',
   await expect(learner.locator('.live-pip video')).toBeVisible();
   await learner.getByRole('button', { name: 'Lehrkraft ausblenden' }).click();
   await expect(learner.locator('.live-pip')).toHaveCount(0);
+});
+
+test('records a live lesson into the class recordings, plain to see for everyone', async ({
+  browser,
+}) => {
+  test.skip(!withEgress, 'needs LiveKit Egress, S3 and a worker (E2E_EGRESS=1)');
+  test.setTimeout(180_000);
+  const media = { permissions: ['camera', 'microphone'] };
+  const teacher = await (await browser.newContext(media)).newPage();
+  const learner = await (await browser.newContext(media)).newPage();
+  const { classId } = await classWithLearner(teacher, learner, 'Live E2E Aufnahme');
+
+  await plan(teacher, classId, 'Lektion 6 live');
+  await teacher.getByRole('button', { name: 'Starten' }).click();
+  await teacher.getByRole('button', { name: 'Beitreten' }).click();
+  await teacher.getByRole('button', { name: 'Kamera an' }).click();
+  await teacher.getByRole('button', { name: 'Mikrofon an' }).click();
+  await stageIsPlaying(teacher);
+
+  // The learner is told before joining that the lesson may be recorded.
+  await learner.goto(`/classes/${classId}`);
+  await learner.getByRole('link', { name: /Live-Unterricht läuft/ }).click();
+  await expect(learner.getByText(/kann diesen Unterricht aufzeichnen/)).toBeVisible();
+  await learner.getByRole('button', { name: 'Beitreten' }).click();
+  await expect(learner.getByText('2 im Raum')).toBeVisible();
+
+  teacher.once('dialog', (dialog) => void dialog.accept());
+  await teacher.getByRole('button', { name: 'Aufnahme starten' }).click();
+  await expect(teacher.getByText('Aufnahme läuft')).toBeVisible();
+  // Everyone sees it once the server records (Egress starts its browser first).
+  await expect(learner.getByText('Aufnahme läuft')).toBeVisible({ timeout: 60_000 });
+  await expect(
+    learner.getByText('Die Lehrkraft hat die Aufnahme gestartet.')
+  ).toBeVisible();
+  // The recorder is hidden: still two in the room.
+  await expect(learner.getByText('2 im Raum')).toBeVisible();
+  await teacher.waitForTimeout(8_000);
+
+  await teacher.getByRole('button', { name: 'Aufnahme beenden' }).click();
+  await expect(teacher.getByText(/erscheint in ein paar Minuten/)).toBeVisible();
+  await expect(learner.getByText('Aufnahme läuft')).toHaveCount(0, { timeout: 60_000 });
+  await expect(learner.getByText('Die Aufnahme ist beendet.')).toBeVisible();
+
+  // Stored, transcoded and listed for the teacher, unpublished.
+  await teacher.goto(`/classes/${classId}?tab=recordings`);
+  const item = teacher
+    .locator('li')
+    .filter({ hasText: /Lektion 6 live · \d{4}-\d{2}-\d{2}/ });
+  await expect(item).toBeVisible();
+  await expect(item.getByText(/Bereit · nur für dich sichtbar/)).toBeVisible({
+    timeout: 120_000,
+  });
+  await expect(item.getByText(/^Video/)).toBeVisible();
 });

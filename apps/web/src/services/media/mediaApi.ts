@@ -1,12 +1,20 @@
 /** Client for class recordings (Sprint 7). */
 import { apiRequest, type Fetch } from '@/services/api/request';
 
-export type MediaStatus = 'uploading' | 'importing' | 'processing' | 'ready' | 'failed';
+export type MediaStatus =
+  | 'uploading'
+  | 'importing'
+  /** A live lesson is being recorded into it (ADR-0029). */
+  | 'recording'
+  | 'processing'
+  | 'ready'
+  | 'failed';
 
 export interface MediaItem {
   id: string;
   title: string;
-  source: 'upload' | 'drive';
+  /** Uploaded, imported from Google Drive, or recorded in a live lesson. */
+  source: 'upload' | 'drive' | 'live';
   status: MediaStatus;
   progress: number;
   durationSec: number | null;

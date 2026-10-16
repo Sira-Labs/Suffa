@@ -457,6 +457,12 @@ lessons are not set up. A browser test runs the whole room against a local LiveK
 (teacher's picture at the learner, raised hand, floor, chat, ending); runbook §12 sets up
 `suffa-live`.
 
+17.3, recording (done, ADR-0029): the teacher records a live lesson on our own server (LiveKit
+Egress, runbook §12a). The recording keeps the teacher's picture and the voices of everyone
+with the floor, never a learner's camera. Everyone in the room sees "Aufnahme läuft" and is
+told before joining. The file becomes an unpublished class recording, transcoded and
+transcribed like an upload (migration 0048). The push reminder before a session is still open.
+
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                               |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---------------------------------------------------------------------------------------- |
 | 17.1 | Live sessions: plan, start, join; sound and picture, screen sharing, raised hands with the teacher giving the floor, chat                                                 | 8   | Only active members of the class join, only while live; nothing of the room is stored.   |

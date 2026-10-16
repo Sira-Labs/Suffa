@@ -87,8 +87,11 @@ export function ClassRecordings({
     void load();
   }, [load]);
 
-  // While something is being processed, look again every few seconds.
-  const busy = items?.some((i) => i.status === 'processing' || i.status === 'importing');
+  // While something is being processed or recorded, look again every few seconds.
+  const busy = items?.some(
+    (i) =>
+      i.status === 'processing' || i.status === 'importing' || i.status === 'recording'
+  );
   useEffect(() => {
     if (!busy) return;
     // A slow answer is waited for, not overtaken (it would be discarded as stale).

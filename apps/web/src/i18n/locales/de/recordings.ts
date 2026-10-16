@@ -7,6 +7,7 @@ export const recordings = {
   status: {
     uploading: 'Upload läuft',
     importing: 'Import läuft',
+    recording: 'Wird im Live-Unterricht aufgenommen',
     processing: 'Wird verarbeitet',
     ready: 'Bereit',
     failed: 'Fehlgeschlagen',

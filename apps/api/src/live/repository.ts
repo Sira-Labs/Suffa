@@ -29,6 +29,8 @@ export interface LiveSession {
   audience: LiveAudience;
   /** Learners given the floor may turn on their camera; false: their voice only. */
   learnerCameras: boolean;
+  /** The session is being recorded right now (ADR-0029). */
+  recording: boolean;
 }
 
 export interface LiveActor {
@@ -86,11 +88,12 @@ interface Row {
   ended_at: Date | null;
   audience: LiveAudience;
   learner_cameras: boolean;
+  recording_media_id: string | null;
 }
 
 const COLUMNS =
   'id, class_id, title, starts_at, duration_minutes, status, started_at, ended_at, ' +
-  'audience, learner_cameras';
+  'audience, learner_cameras, recording_media_id';
 
 function toSession(row: Row): LiveSession {
   return {
@@ -104,6 +107,7 @@ function toSession(row: Row): LiveSession {
     endedAt: row.ended_at?.toISOString() ?? null,
     audience: row.audience,
     learnerCameras: row.learner_cameras,
+    recording: row.status === 'live' && row.recording_media_id !== null,
   };
 }
 

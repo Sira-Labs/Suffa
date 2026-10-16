@@ -3244,6 +3244,29 @@ button.quiz-option:disabled {
   font-size: 0.8rem;
   color: var(--text-muted);
 }
+/* Recording a live lesson (ADR-0029): plain to see for everyone in the room. */
+.live-recording {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 700;
+  color: #fff;
+  background: #b42318;
+}
+.live-recording::before {
+  content: '';
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.live-recording-notice {
+  padding: 0.6rem 0.8rem;
+  border-inline-start: 4px solid var(--bad);
+  background: var(--bg-elev-2);
+}
 .live-messages {
   max-height: 16rem;
   overflow-y: auto;

@@ -93,13 +93,21 @@ export default defineConfig({
           '**/livekit-client*.js',
           '**/track-processors-*.js',
           'live/**',
+          // The recording page is for LiveKit Egress only (ADR-0029).
+          'live-record.html',
+          '**/record-*.js',
           '**/*-{cyrillic,cyrillic-ext,greek,vietnamese}-*.woff2',
         ],
         navigateFallback: 'index.html',
         // Push notifications (story 6.3): handlers live in public/push-sw.js.
         importScripts: ['push-sw.js'],
         // Server routes are never answered with the app shell.
-        navigateFallbackDenylist: [/^\/api\//, /^\/healthz/, /^\/media\//],
+        navigateFallbackDenylist: [
+          /^\/api\//,
+          /^\/healthz/,
+          /^\/media\//,
+          /^\/live-record\.html/,
+        ],
         runtimeCaching: [
           {
             // YouTube: online only, never treat as app shell. The publisher's audio and the
@@ -137,6 +145,11 @@ export default defineConfig({
     // @fontsource subsets fall under Vite's 4 kB inline limit.
     assetsInlineLimit: (file) => (/\.(woff2?|ttf|otf)$/i.test(file) ? false : undefined),
     rollupOptions: {
+      // The app, and the page LiveKit Egress records live lessons from (ADR-0029).
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        record: fileURLToPath(new URL('./live-record.html', import.meta.url)),
+      },
       output: {
         // Heavyweight libraries in their own chunks (better caching).
         manualChunks: {

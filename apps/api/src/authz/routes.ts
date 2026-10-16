@@ -191,6 +191,16 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     path: '/api/v1/classes/:id/live/:session/floor',
     action: 'class:manage',
   },
+  {
+    method: 'POST',
+    path: '/api/v1/classes/:id/live/:session/recording',
+    action: 'class:manage',
+  },
+  {
+    method: 'DELETE',
+    path: '/api/v1/classes/:id/live/:session/recording',
+    action: 'class:manage',
+  },
   { method: 'PUT', path: '/api/v1/classes/:id/league/opt-in', action: 'class:read' },
   { method: 'GET', path: '/api/v1/classes/:id/league/settings', action: 'class:manage' },
   { method: 'PUT', path: '/api/v1/classes/:id/league/settings', action: 'class:manage' },

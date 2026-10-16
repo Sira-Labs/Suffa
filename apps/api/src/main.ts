@@ -5,7 +5,9 @@
  */
 import { PgAssignmentRepository } from './classes/assignments.js';
 import {
+  enqueueFollowRecording,
   enqueueImport,
+  FOLLOW_SECONDS,
   enqueueTranscode,
   enqueueSuggest,
   enqueueSummarize,
@@ -39,12 +41,16 @@ import { PgCertificateRepository } from './classes/certificates.js';
 import { PgLiveQuizRepository } from './classes/quizRepository.js';
 import { PgLiveSessionRepository } from './live/repository.js';
 import { LiveKitRooms } from './live/rooms.js';
+import { LiveKitRecorder } from './live/recorder.js';
+import { LiveRecordings } from './live/recording.js';
+import { PgLiveRecordingRepository } from './live/recordingRepository.js';
 import { PgClassLeagueRepository } from './classes/league.js';
 import { PgClassSpiritRepository } from './classes/spirit.js';
 import { registerEngagement, requestRecompute } from './engagement/jobs.js';
 import { PgEngagementRepository } from './engagement/repository.js';
 import { fileURLToPath } from 'node:url';
 import { serve } from '@hono/node-server';
+import type { PgBoss } from 'pg-boss';
 import pg from 'pg';
 import { pino, type Logger } from 'pino';
 import { createApp, type AuthRouteDeps } from './app.js';
@@ -226,6 +232,7 @@ async function main(): Promise<void> {
             const repo = new PgMediaRepository(pool);
             const storage = new S3ObjectStorage(config.storage);
             const drive = driveParts(config);
+            const recordings = liveRecordings(config, pool, boss, log);
             await registerMedia(
               boss,
               {
@@ -316,6 +323,11 @@ async function main(): Promise<void> {
                     },
                     mediaId
                   ),
+                followRecording: recordings
+                  ? (mediaId) => recordings.follow(mediaId)
+                  : undefined,
+                followLater: (mediaId) =>
+                  enqueueFollowRecording(boss)(mediaId, FOLLOW_SECONDS),
               },
               errors
             );
@@ -551,6 +563,7 @@ async function main(): Promise<void> {
       classes: new PgClassRepository(pool),
       sessions: new PgLiveSessionRepository(pool),
       rooms: config.live ? new LiveKitRooms(config.live) : undefined,
+      recordings: liveRecordings(config, pool, boss, log),
       auth,
       log,
     },
@@ -639,6 +652,29 @@ main().catch(async (error: unknown) => {
   await errors.flush();
   process.exit(1);
 });
+
+/**
+ * Recording live lessons (ADR-0029) needs live lessons, object storage and the recording page
+ * LiveKit Egress opens; the API starts and stops recordings, the worker follows them.
+ */
+function liveRecordings(
+  config: Config,
+  pool: pg.Pool,
+  boss: Pick<PgBoss, 'send'>,
+  log: Logger
+): LiveRecordings | undefined {
+  if (!config.live || !config.storage || !config.liveRecording) return undefined;
+  const media = new PgMediaRepository(pool);
+  return new LiveRecordings({
+    recordings: new PgLiveRecordingRepository(pool),
+    media,
+    recorder: new LiveKitRecorder(config.live, config.liveRecording),
+    storage: new S3ObjectStorage(config.storage),
+    follow: (mediaId) => enqueueFollowRecording(boss)(mediaId),
+    transcode: enqueueTranscode(boss),
+    log,
+  });
+}
 
 /**
  * Google Drive import needs Google credentials, object storage, the auth secret (seals the

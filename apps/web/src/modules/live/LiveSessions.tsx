@@ -59,6 +59,7 @@ export function SessionTags({ session }: { session: LiveSession }) {
   const { t } = useTranslation('live');
   const tags = [
     session.audience !== 'all' && t(`audience.${session.audience}`),
+    session.recording && t('session.recording'),
     !session.learnerCameras && t('session.camerasOff'),
   ].filter(Boolean);
   if (tags.length === 0) return null;

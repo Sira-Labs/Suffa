@@ -116,7 +116,11 @@ async function record(): Promise<void> {
 }
 
 record().catch((error: unknown) => {
-  console.error('recording page failed', error);
+  // Egress keeps a page's console to itself but logs its uncaught exceptions (at debug level):
+  // reported as one, the reason shows in the egress log as `chrome exception`.
+  window.reportError(
+    error instanceof Error ? error : new Error(`recording page failed: ${String(error)}`)
+  );
   // Egress ends the recording instead of recording an empty page for hours.
   signal('END_RECORDING');
 });

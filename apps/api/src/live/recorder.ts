@@ -119,9 +119,13 @@ export class LiveKitRecorder implements LiveRecorder {
    * taken it anyway: the egress writing to `key` is then adopted instead of left untracked.
    */
   async start(room: string, key: string): Promise<string> {
-    const active = await this.client.listEgress({ roomName: room, active: true });
+    // Clearing up is best effort: some LiveKit servers fail on listing a room's egresses, and
+    // that must not keep the teacher from recording.
+    const active = await this.client
+      .listEgress({ roomName: room, active: true })
+      .catch(() => []);
     for (const leftover of active.filter((info) => isRecording(info))) {
-      await this.stop(leftover.egressId);
+      await this.stop(leftover.egressId).catch(() => undefined);
     }
     try {
       const info = await this.client.startRoomCompositeEgress(

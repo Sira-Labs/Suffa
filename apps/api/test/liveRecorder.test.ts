@@ -134,6 +134,24 @@ describe('starting a recording with LiveKit Egress', () => {
     expect(calls).toEqual(['list', 'start']);
   });
 
+  it('starts even when LiveKit cannot list the room’s egresses', async () => {
+    const { fake } = client([], async () => egress('EG_1', 'k'));
+    const failing = {
+      ...fake,
+      listEgress: async () => {
+        throw new Error('Internal Server Error: Internal service panic');
+      },
+      startRoomCompositeEgress: fake.startRoomCompositeEgress,
+      stopEgress: fake.stopEgress,
+    } as unknown as EgressClient;
+    const recorder = new LiveKitRecorder(
+      live,
+      { templateUrl: 'https://x/r.html' },
+      failing
+    );
+    expect(await recorder.start('live-1', 'k')).toBe('EG_1');
+  });
+
   it('takes over the egress that started although the request timed out', async () => {
     const running: EgressInfo[] = [];
     const { fake } = client(running, async () => {

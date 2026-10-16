@@ -90,6 +90,8 @@ For deploying without GHCR, the root `captain-definition` builds the same image 
 | 3   | `suffa-worker`        | same image as api                              | `/data/tmp` (scratch for transcodes)              | no                                   | `SUFFA_ROLE=worker`. Has `ffmpeg`. Exits with code 3 until the api has migrated.       |
 | 4   | `suffa-web`           | `ghcr.io/sira-labs/suffa-web:<sha>`            | none                                              | **yes** (e.g. `suffa.<domain>`)      | Caddy + PWA; proxies `/api`, `/healthz`, `/media`. Port **80**.                        |
 | 5   | `suffa-live`          | `livekit/livekit-server:v1.9.1`                | none                                              | **yes** (e.g. `live.suffa.<domain>`) | LiveKit for live lessons (§12). Port **7880**; also TCP 7881 and UDP 7882 on the host. |
+| 6   | `suffa-redis`         | `redis:7.4-alpine`                             | none                                              | no                                   | Message bus between `suffa-live` and `suffa-egress` (§12a). Port 6379, internal only.  |
+| 7   | `suffa-egress`        | `livekit/egress:v1.15.0`                       | none                                              | no                                   | Records live lessons into the class recordings (§12a, ADR-0029).                       |
 | —   | `rustfs` (**exists**) | `rustfs/rustfs:1.0.0` (as pinned for Tabayyun) | existing                                          | no                                   | Add buckets + a Suffa-only key (below).                                                |
 
 Separate `suffa-db` rather than a second database inside `tabayyun-db`: the two apps then
@@ -172,6 +174,7 @@ Env (App Configs → Environment variables):
 | `SUFFA_LIVEKIT_URL`                                                         | optional: `wss://live.suffa.<domain>` – where browsers reach `suffa-live` (§12)                                                          | S17         |
 | `SUFFA_LIVEKIT_API_KEY`, `SUFFA_LIVEKIT_API_SECRET`                         | the key pair in `suffa-live`'s `LIVEKIT_KEYS` (`suffa: <secret>`, secret ≥ 32 characters); live lessons stay off until all three are set | S17         |
 | `SUFFA_LIVEKIT_API_URL`                                                     | optional: `http://srv-captain--suffa-live:7880` (inside the server; default: the public address)                                         | S17         |
+| `SUFFA_LIVE_RECORDING_TEMPLATE_URL`                                         | optional: `https://suffa.<domain>/live-record.html`; records live lessons (§12a); api and worker                                         | S17         |
 | `SUFFA_FCM_SERVICE_ACCOUNT`                                                 | optional: Firebase service account JSON, base64; push to the native apps (worker)                                                        | S13         |
 | `SUFFA_YOUTUBE_API_KEY`                                                     | optional: YouTube Data API v3 key (restrict it to the server IP) for the video catalog import; worker                                    | S12         |
 | `SUFFA_ANTHROPIC_API_KEY`                                                   | optional: turns on Anthropic routes (AI gateway, ADR-0010); api and worker                                                               | S9          |
@@ -673,7 +676,84 @@ join tokens; browsers connect to `suffa-live` directly.
 
 Load (§10): an SFU forwards streams and does not mix them; one class of 30 with the teacher's
 video uses roughly 1 vCPU and 5–10 Mbit/s per watching learner on the way out. Many classes at
-once, or recording (stage 3), want their own media server.
+once, or recording (§12a), want their own media server.
+
+## 12a. Recording live lessons (`suffa-egress`, ADR-0029)
+
+The teacher records a live lesson on our server; the file lands, unpublished, in the class's
+recordings and is transcoded and transcribed like an upload. LiveKit Egress runs a headless
+Chrome that opens our page `live-record.html` and records it. It records the teacher's picture
+and every voice with the floor, never a learner's camera. Nothing leaves the server.
+LiveKit and Egress find each other through Redis.
+
+1. **`suffa-redis`:** _Deploy via ImageName_ `redis:7.4-alpine`, no persistent data, no domain,
+   no port mapping (it only carries messages; nothing to back up).
+2. **`suffa-live`:** add one variable, then **Save & Update**:
+
+   | Variable     | Value                           |
+   | ------------ | ------------------------------- |
+   | `REDIS_HOST` | `srv-captain--suffa-redis:6379` |
+
+3. **RustFS key `suffa-egress`** (as in §2), only allowed to write recordings:
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Action": [
+           "s3:PutObject",
+           "s3:AbortMultipartUpload",
+           "s3:ListMultipartUploadParts"
+         ],
+         "Resource": ["arn:aws:s3:::suffa-media/recordings/*"]
+       },
+       {
+         "Effect": "Allow",
+         "Action": ["s3:GetBucketLocation"],
+         "Resource": ["arn:aws:s3:::suffa-media"]
+       }
+     ]
+   }
+   ```
+
+4. **`suffa-egress`:** _Deploy via ImageName_ `livekit/egress:v1.15.0`, no persistent data, no
+   domain, no port mapping. Under _App Configs_ set **Instance Count 1**. Its whole config is one
+   variable in YAML flow style on a single line (CapRover keeps it intact):
+
+   | Variable             | Value                                                                                                                                                                                                                                                                                                                                         |
+   | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `EGRESS_CONFIG_BODY` | `{api_key: suffa, api_secret: "<LiveKit secret>", ws_url: "wss://live.suffa.<domain>", redis: {address: "srv-captain--suffa-redis:6379"}, storage: {s3: {access_key: suffa-egress, secret: "<RustFS secret of suffa-egress>", region: us-east-1, endpoint: "http://srv-captain--rustfs:9000", bucket: suffa-media, force_path_style: true}}}` |
+   - `api_key`/`api_secret` are the pair in `suffa-live`'s `LIVEKIT_KEYS`.
+   - `ws_url` is the **public** address. Egress hands it to the recording page, and the page's
+     Content Security Policy only allows that host.
+   - `bucket` is the same as `SUFFA_S3_BUCKET_MEDIA`.
+   - The log shows `service ready`.
+   - If it shows Chrome failing to start its sandbox, add under **Service Update Override**:
+
+   ```yaml
+   TaskTemplate:
+     ContainerSpec:
+       CapabilityAdd:
+         - CAP_SYS_ADMIN
+   ```
+
+5. **`suffa-api` and `suffa-worker`:** set
+   `SUFFA_LIVE_RECORDING_TEMPLATE_URL=https://suffa.<domain>/live-record.html` on both. The api
+   starts and stops recordings; the worker follows them until the file is stored. Both also
+   need the LiveKit (§12) and S3 (§3) settings.
+6. **Check:**
+   1. In a live lesson the teacher sees _Aufnahme starten_, and learners read before joining
+      that the lesson may be recorded.
+   2. After _Aufnahme starten_, every participant sees _Aufnahme läuft_ within a few seconds.
+   3. After _Aufnahme beenden_, the class's _Aufnahmen_ shows the lesson as _Wird verarbeitet_,
+      then _Bereit · nur für dich sichtbar_.
+   4. The `suffa-egress` log shows `egress_complete`.
+
+Load: while it records, one egress uses about 2 CPU cores and 1.5 GB of memory (Chrome and the
+encoder). Two recordings at once need twice that. With more classes, move `suffa-egress` to
+its own server; it only needs to reach the public LiveKit address, Redis and RustFS.
 
 ## Troubleshooting
 
@@ -689,6 +769,9 @@ once, or recording (stage 3), want their own media server.
 | GlitchTip log `redis:6379` connection refused                                           | empty `VALKEY_URL` was dropped                                                                                | Add `VALKEY_URL` with an empty value, **Save & Update**                                                                                       |
 | Transcript stays "Wartet auf den Start" / fails with "Worker ohne SUFFA_TRANSCRIBE_URL" | the transcription settings are on `suffa-api` only                                                            | set the same `SUFFA_TRANSCRIBE_*`/`SUFFA_MISTRAL_API_KEY` on `suffa-worker`; after 10 minutes without progress the teacher can start it again |
 | API refuses to start in prod                                                            | placeholder or short secret                                                                                   | Generate secrets as above, **Save & Update**                                                                                                  |
+| Live recording fails with `Start signal not received`                                   | the egress Chrome could not open `live-record.html` or not reach LiveKit                                      | `ws_url` must be the public `wss://` address; `SUFFA_LIVE_RECORDING_TEMPLATE_URL` must open in a browser; UDP 7882/TCP 7881 open (§12)        |
+| Live recording fails with `Local upload failed`                                         | `EGRESS_CONFIG_BODY` has no (or a misspelt) `storage: {s3: …}`                                                | add the `storage` part of §12a, **Save & Update**                                                                                             |
+| Recording stays _Wird im Live-Unterricht aufgenommen_                                   | the worker lacks `SUFFA_LIVE_RECORDING_TEMPLATE_URL` (or LiveKit/S3 settings), so nobody follows it           | set them on `suffa-worker` (§12a step 5)                                                                                                      |
 
 ## Sign-in mails (magic link)
 

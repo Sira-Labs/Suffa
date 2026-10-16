@@ -42,10 +42,11 @@ jobs:
             dockerfile: infra/docker/api.Dockerfile
           - name: backup
             dockerfile: infra/docker/backup.Dockerfile
-    # Real database for the api smoke test (unused by the web job).
+    # Real database for the api smoke test (unused by the web job). Google's Docker Hub mirror:
+    # Docker Hub and ECR Public limit anonymous pulls from shared runners (see ci.yml).
     services:
       postgres:
-        image: public.ecr.aws/docker/library/postgres:17
+        image: mirror.gcr.io/library/postgres:17
         env:
           POSTGRES_USER: suffa
           POSTGRES_PASSWORD: smoke0123456789abcdef

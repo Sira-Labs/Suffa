@@ -16,7 +16,11 @@ export function useMyClasses(api?: ClassesApi) {
   const [classes, setClasses] = useState<ClassSummary[] | null>(null);
 
   useEffect(() => {
-    if (!online) return;
+    // Signed out (or offline mode): forget the classes, so the next account never sees them.
+    if (!online) {
+      setClasses(null);
+      return;
+    }
     let alive = true;
     void client.list().then((result) => {
       if (alive && result.ok) setClasses(result.value.classes);

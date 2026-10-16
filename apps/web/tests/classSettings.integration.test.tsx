@@ -6,7 +6,12 @@ import { Training } from '@/modules/more';
 import { AreaGate } from '@/modules/classes/areaAccess';
 import { ClassSettings } from '@/modules/classes/ClassSettings';
 import { ClassesApi, type ClassSummary } from '@/services/classes/classesApi';
-import { primaryClass, useClassContextStore, useEnrollmentStore } from '@/state';
+import {
+  primaryClass,
+  readStored,
+  useClassContextStore,
+  useEnrollmentStore,
+} from '@/state';
 import { PALETTES } from '@/theme/palettes';
 import { applyDocumentSettings, useSettingsStore } from '@/state/settingsStore';
 
@@ -115,6 +120,32 @@ describe('class context', () => {
     expect(primaryClass([pending])).toBeNull();
   });
 
+  it('uses only well-formed settings remembered on the device', () => {
+    const remember = (value: unknown) =>
+      localStorage.setItem('suffa.classContext', JSON.stringify(value));
+    const good = {
+      classId: 'c1',
+      course: 'madinah',
+      palette: 'sand',
+      unlocks: { roots: { mode: 'unit', unit: 2 } },
+    };
+    remember(good);
+    expect(readStored()).toEqual(good);
+    for (const bad of [
+      { ...good, course: 'klingon' },
+      { ...good, palette: 'neon' },
+      { ...good, unlocks: { roots: { mode: 'unit' } } },
+      { ...good, unlocks: { tutor: { mode: 'open' } } },
+      { ...good, unlocks: 'open' },
+    ]) {
+      remember(bad);
+      expect(readStored(), JSON.stringify(bad)).toBeNull();
+    }
+    localStorage.setItem('suffa.classContext', '{not json');
+    expect(readStored()).toBeNull();
+    localStorage.removeItem('suffa.classContext');
+  });
+
   it('styles the app with the class colours unless the learner picked their own', () => {
     const root = document.documentElement;
     useClassContextStore.getState().setClasses([summary({ palette: 'meer' })]);
@@ -168,5 +199,30 @@ describe('class settings (teacher)', () => {
     );
     await waitFor(() => expect(onChange).toHaveBeenCalled());
     expect(screen.getByRole('status').textContent).toContain('Gespeichert');
+
+    // Back to the defaults: not saved yet, so the "saved" note goes away.
+    await userEvent.click(screen.getByRole('button', { name: 'Voreinstellung' }));
+    expect(screen.queryByRole('status')).toBeNull();
+    expect(
+      screen.getByRole('spinbutton', { name: 'Ab Einheit für Wurzeln' })
+    ).toHaveValue(3);
+  });
+
+  it('saves quick colour picks in the order they were made', async () => {
+    const api = new ClassesApi();
+    const order: string[] = [];
+    let release: () => void = () => undefined;
+    vi.spyOn(api, 'updateSettings').mockImplementation(async (_id, patch) => {
+      // The first save is slow: the second must still wait for it.
+      if (patch.palette === 'meer') await new Promise<void>((done) => (release = done));
+      order.push(String(patch.palette));
+      return { ok: true, value: undefined };
+    });
+    render(<ClassSettings api={api} summary={summary()} onChange={async () => {}} />);
+    await userEvent.click(screen.getByRole('radio', { name: /Meer/ }));
+    await userEvent.click(screen.getByRole('radio', { name: /Sand/ }));
+    expect(order).toEqual([]);
+    release();
+    await waitFor(() => expect(order).toEqual(['meer', 'sand']));
   });
 });

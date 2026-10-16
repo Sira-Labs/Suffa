@@ -13,7 +13,7 @@ import {
   type AreaUnlocks,
   type PaletteId,
 } from '@suffa/engagement';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PalettePicker } from '@/components/PalettePicker';
 import type { ClassesApi, ClassSummary } from '@/services/classes/classesApi';
@@ -41,7 +41,13 @@ export function ClassSettings({
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const units = courseById(summary.course ?? 'bayna-yadayk').units.length;
 
-  const save = async (patch: { palette?: PaletteId; unlocks?: AreaUnlocks }) => {
+  // Saves run one after another, so quick clicks reach the server in the order made.
+  const queue = useRef<Promise<void>>(Promise.resolve());
+  const save = (patch: { palette?: PaletteId; unlocks?: AreaUnlocks }) => {
+    queue.current = queue.current.then(() => send(patch));
+    return queue.current;
+  };
+  const send = async (patch: { palette?: PaletteId; unlocks?: AreaUnlocks }) => {
     const result = await api.updateSettings(summary.id, patch);
     setMessage(
       result.ok
@@ -152,13 +158,16 @@ export function ClassSettings({
           </button>
           <button
             className="btn"
-            onClick={() =>
+            onClick={() => {
               setRules(
                 Object.fromEntries(
                   AREA_IDS.map((area) => [area, ruleFor(null, area)])
                 ) as Record<AreaId, AreaRule>
-              )
-            }
+              );
+              setDrafts({});
+              // The defaults are not saved yet.
+              setMessage(null);
+            }}
           >
             {t('settings.reset')}
           </button>

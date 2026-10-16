@@ -46,6 +46,27 @@ export type AreaRule =
 
 export type AreaUnlocks = Partial<Record<AreaId, AreaRule>>;
 
+/** A well-formed rule (for data read back from storage). */
+export function isAreaRule(value: unknown): value is AreaRule {
+  if (typeof value !== 'object' || value === null) return false;
+  const rule = value as { mode?: unknown; unit?: unknown };
+  if (rule.mode === 'open' || rule.mode === 'closed') return true;
+  return (
+    rule.mode === 'unit' &&
+    typeof rule.unit === 'number' &&
+    Number.isInteger(rule.unit) &&
+    rule.unit >= 1
+  );
+}
+
+/** Unlocks with known areas and well-formed rules only. */
+export function isAreaUnlocks(value: unknown): value is AreaUnlocks {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  return Object.entries(value).every(
+    ([area, rule]) => isAreaId(area) && isAreaRule(rule)
+  );
+}
+
 /** Roots need a few units of vocabulary first (teacher feedback); everything else is open. */
 export const DEFAULT_UNLOCKS: Readonly<Record<AreaId, AreaRule>> = {
   alphabet: { mode: 'open' },

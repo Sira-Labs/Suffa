@@ -4,6 +4,7 @@ import {
   DEFAULT_UNLOCKS,
   areaAccess,
   isAreaId,
+  isAreaUnlocks,
   isPaletteId,
   reachedPosition,
   ruleFor,
@@ -38,6 +39,19 @@ describe('class settings', () => {
     });
     expect(areaAccess({ mode: 'unit', unit: 3 }, 3)).toEqual({ open: true });
     expect(areaAccess({ mode: 'closed' }, 16)).toEqual({ open: false, reason: 'closed' });
+  });
+
+  it('checks unlocks read back from storage', () => {
+    expect(
+      isAreaUnlocks({ roots: { mode: 'unit', unit: 3 }, exam: { mode: 'closed' } })
+    ).toBe(true);
+    expect(isAreaUnlocks({})).toBe(true);
+    expect(isAreaUnlocks({ tutor: { mode: 'open' } })).toBe(false);
+    expect(isAreaUnlocks({ roots: { mode: 'unit' } })).toBe(false);
+    expect(isAreaUnlocks({ roots: { mode: 'unit', unit: 0 } })).toBe(false);
+    expect(isAreaUnlocks({ roots: 'open' })).toBe(false);
+    expect(isAreaUnlocks(null)).toBe(false);
+    expect(isAreaUnlocks([])).toBe(false);
   });
 
   it('knows its ids', () => {

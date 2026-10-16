@@ -6,6 +6,8 @@
  */
 import { create } from 'zustand';
 import {
+  isAreaUnlocks,
+  isCourseId,
   isPaletteId,
   type AreaUnlocks,
   type CourseId,
@@ -22,13 +24,27 @@ export interface ClassContext {
 
 const STORAGE_KEY = 'suffa.classContext';
 
-function readStored(): ClassContext | null {
+/** The remembered class settings, if well-formed. */
+export function readStored(): ClassContext | null {
   try {
     const raw = globalThis.localStorage?.getItem(STORAGE_KEY);
     if (!raw) return null;
     const value = JSON.parse(raw) as Partial<ClassContext>;
-    if (typeof value.classId !== 'string' || !isPaletteId(value.palette)) return null;
-    return value as ClassContext;
+    // Written by an older app or changed by hand: only well-formed settings are used.
+    if (
+      typeof value.classId !== 'string' ||
+      !isPaletteId(value.palette) ||
+      !isCourseId(value.course) ||
+      !isAreaUnlocks(value.unlocks)
+    ) {
+      return null;
+    }
+    return {
+      classId: value.classId,
+      course: value.course,
+      palette: value.palette,
+      unlocks: value.unlocks,
+    };
   } catch {
     // Private mode or blocked storage: start without a remembered class.
     return null;
@@ -69,7 +85,7 @@ export const useClassContextStore = create<ClassContextState>((set, get) => ({
           classId: primary.id,
           course: primary.course ?? 'bayna-yadayk',
           palette: isPaletteId(primary.palette) ? primary.palette : 'oase',
-          unlocks: primary.unlocks ?? {},
+          unlocks: isAreaUnlocks(primary.unlocks) ? primary.unlocks : {},
         }
       : null;
     if (JSON.stringify(next) === JSON.stringify(get().context)) return;

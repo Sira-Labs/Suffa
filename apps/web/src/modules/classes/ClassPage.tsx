@@ -126,7 +126,12 @@ export function ClassPage() {
               <ClassCertificates api={api} classId={summary.id} />
             )}
             {tab === 'settings' && (
-              <ClassSettings api={api} summary={summary} onChange={load} />
+              <ClassSettings
+                key={summary.id}
+                api={api}
+                summary={summary}
+                onChange={load}
+              />
             )}
             {tab === 'members' && (
               <div className="stack" style={{ gap: '1rem' }}>

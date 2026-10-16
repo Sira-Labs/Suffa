@@ -463,6 +463,25 @@ lessons are not set up. A browser test runs the whole room against a local LiveK
 | 17.2 | Sisters' and brothers' sessions: each member belongs to the sisters or the brothers; a session is for all, the sisters or the brothers; learners' cameras can be kept off | 5   | The API admits only matching members; the other group does not see the session.          |
 | 17.3 | Recording into the class's recordings (transcript, chapters), and a push reminder before a session                                                                        | 5   | Recording only when the teacher turns it on; EU-only processing as for other recordings. |
 
+### Sprint 18 — _"The teacher's class"_ (week of Oct 19)
+
+Teacher feedback from the first weeks: a fresher look the teacher can choose per class, roots
+only once learners know some words, more from the live room, and a word list that fits Muslims
+in Europe with meanings in their languages (ADR-0027).
+
+Status: 18.1 and 18.2 (done): a "Settings" tab on the class lets the teacher pick one of five
+colour schemes (Oase, Meer, Minze, Lavendel, Sand; dark and light each, WCAG AA checked in tests
+and by axe) and set when each practice area opens: now, from a unit of the class's course, or
+closed until the teacher opens it. Roots open from unit 3 by default, also for learners without
+a class. Learners follow the colours of the class they joined last unless they pick their own.
+
+| #    | Story                                                                                                                        | Pts | Acceptance                                                                      |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------- | --- | ------------------------------------------------------------------------------- |
+| 18.1 | Colour schemes: the teacher picks one per class; learners follow their class or choose their own                             | 3   | Every scheme passes WCAG AA in both themes; the choice syncs and holds offline. |
+| 18.2 | Practice areas per class: open now, from unit N, or closed; roots from unit 3 by default                                     | 3   | Locked areas say when they open; teachers always see everything; audit-logged.  |
+| 18.3 | Live room: the teacher's camera next to the shared screen, and backgrounds for the camera (blur, Muslim motifs)              | 5   | Backgrounds are processed in the browser; nothing leaves it.                    |
+| 18.4 | Bayna Yadayk word list curated for Muslims in Europe; meanings in Turkish, Italian, Bosnian and Albanian (LLM draft, review) | 8   | Every new meaning is reviewed by a teacher in the CMS before it is published.   |
+
 ---
 
 ## Shipped outside the plan

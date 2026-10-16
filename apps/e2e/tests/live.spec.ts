@@ -167,3 +167,52 @@ test('a sisters’ lesson: only the sisters join, with their voice only', async 
   await expect(learner.getByRole('button', { name: 'Mikrofon aus' })).toBeVisible();
   await expect(learner.getByRole('button', { name: 'Kamera an' })).toHaveCount(0);
 });
+
+test('the teacher’s camera with a background, small beside the shared screen', async ({
+  browser,
+}) => {
+  test.skip(!withLiveKit, 'needs a LiveKit server (E2E_LIVEKIT=1)');
+  const media = { permissions: ['camera', 'microphone'] };
+  const teacher = await (await browser.newContext(media)).newPage();
+  const learner = await (await browser.newContext(media)).newPage();
+  const { classId } = await classWithLearner(teacher, learner, 'Live E2E Hintergrund');
+
+  await plan(teacher, classId, 'Lektion 6 live');
+  await teacher.getByRole('button', { name: 'Starten' }).click();
+  await teacher.getByRole('button', { name: 'Beitreten' }).click();
+  await teacher.getByRole('button', { name: 'Kamera an' }).click();
+  await stageIsPlaying(teacher);
+
+  // The background is worked out in the teacher's browser, with files from our own server.
+  const fromElsewhere: string[] = [];
+  teacher.on('request', (request) => {
+    const url = new URL(request.url());
+    if (!['127.0.0.1', 'localhost'].includes(url.hostname)) fromElsewhere.push(url.host);
+  });
+  await teacher.getByText('Hintergrund: Keiner').click();
+  await teacher.getByText('Moschee am Abend').click();
+  await expect(teacher.getByRole('radio', { name: 'Moschee am Abend' })).toBeChecked();
+  await expect(teacher.getByRole('radio', { name: 'Moschee am Abend' })).toBeEnabled({
+    timeout: 30_000,
+  });
+  await expect(teacher.getByText(/ließ sich nicht einschalten/)).toHaveCount(0);
+  expect(fromElsewhere).toEqual([]);
+
+  // Started again with the background chosen: it is in place before the camera is published.
+  await teacher.getByRole('button', { name: 'Kamera aus' }).click();
+  await teacher.getByRole('button', { name: 'Kamera an' }).click();
+  await expect(teacher.getByText(/Kamera bleibt aus/)).toHaveCount(0);
+  await stageIsPlaying(teacher);
+
+  await learner.goto(`/classes/${classId}`);
+  await learner.getByRole('link', { name: /Live-Unterricht läuft/ }).click();
+  await learner.getByRole('button', { name: 'Beitreten' }).click();
+  await stageIsPlaying(learner);
+
+  // Sharing the screen: the camera moves to the corner, and the learner can hide it.
+  await teacher.getByRole('button', { name: 'Bildschirm teilen' }).click();
+  await expect(learner.getByLabel(/Bildschirm von/)).toBeVisible({ timeout: 20_000 });
+  await expect(learner.locator('.live-pip video')).toBeVisible();
+  await learner.getByRole('button', { name: 'Lehrkraft ausblenden' }).click();
+  await expect(learner.locator('.live-pip')).toHaveCount(0);
+});

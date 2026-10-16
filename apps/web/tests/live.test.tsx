@@ -4,7 +4,7 @@
  * and leaving. LiveKit is replaced by a fake connection.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 import {
@@ -14,6 +14,8 @@ import {
 } from '@/modules/live/LiveSessions';
 import { LiveRoom } from '@/modules/live/LiveRoom';
 import type { LiveSession } from '@/services/live/liveApi';
+import type { BackgroundId } from '@/services/live/backgrounds';
+import { BackgroundError } from '@/services/live/liveRoom';
 import type {
   LiveConnection,
   LivePerson,
@@ -136,6 +138,9 @@ class FakeConnection implements LiveConnection {
   }
   async setScreenShare(on: boolean) {
     this.calls.push(`screen:${on}`);
+  }
+  async setBackground(id: BackgroundId) {
+    this.calls.push(`background:${id}`);
   }
   async raiseHand(up: boolean) {
     this.calls.push(`hand:${up}`);
@@ -283,10 +288,14 @@ describe('the live room', () => {
   const amina = person({ identity: 'a', name: 'Amina', hand: true });
   const yusuf = person({ identity: 'y', name: 'Yusuf' });
 
-  const join = async (connection: FakeConnection, screenShare = true) => {
+  const join = async (
+    connection: FakeConnection,
+    screenShare = true,
+    backgrounds = false
+  ) => {
     const connect = vi.fn(async () => connection);
     renderAt(
-      <LiveRoom connect={connect} screenShare={screenShare} />,
+      <LiveRoom connect={connect} screenShare={screenShare} backgrounds={backgrounds} />,
       `/classes/${CLASS_ID}/live/${SESSION_ID}`,
       '/classes/:id/live/:session'
     );
@@ -324,11 +333,14 @@ describe('the live room', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Mikrofon an' }));
     expect(connection.calls).toEqual(['screen:true', 'mic:true']);
 
-    // The screen share takes the stage.
+    // The screen share takes the stage; the camera stays small in the corner.
     connection.update({
       people: [{ ...teacher, screenOn: true, screenReady: true }, amina, yusuf],
     });
-    expect(connection.attached.at(-1)).toEqual({ identity: 't', source: 'screen' });
+    expect(connection.attached.slice(-2)).toEqual([
+      { identity: 't', source: 'screen' },
+      { identity: 't', source: 'camera' },
+    ]);
   });
 
   it('lets a learner raise a hand, chat, and speak once given the floor', async () => {
@@ -390,6 +402,109 @@ describe('the live room', () => {
     expect(screen.getByText('Schwestern')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Mikrofon an' })).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Kamera an' })).toBeNull();
+  });
+
+  it('keeps the teacher’s camera small beside the shared screen, and anyone can hide it', async () => {
+    server({ enabled: true, sessions: [] }, 'learner');
+    const me = person({ identity: 'a', name: 'Amina', local: true });
+    const sharing = {
+      ...teacher,
+      local: false,
+      screenOn: true,
+      screenReady: true,
+    };
+    const connection = new FakeConnection({ people: [me, sharing] });
+    await join(connection);
+    expect(connection.attached).toEqual([
+      { identity: 't', source: 'screen' },
+      { identity: 't', source: 'camera' },
+    ]);
+    expect(screen.getByLabelText('Bildschirm von Ustadha Maryam')).toBeTruthy();
+    expect(screen.getByLabelText('Ustadha Maryam')).toBeTruthy();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Lehrkraft ausblenden' }));
+    expect(screen.queryByLabelText('Ustadha Maryam')).toBeNull();
+    await userEvent.click(screen.getByRole('button', { name: 'Lehrkraft einblenden' }));
+    expect(screen.getByLabelText('Ustadha Maryam')).toBeTruthy();
+
+    // Camera off while sharing: only the screen, and nothing to hide.
+    connection.update({ people: [me, { ...sharing, cameraOn: false }] });
+    expect(screen.queryByLabelText('Ustadha Maryam')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Lehrkraft ausblenden' })).toBeNull();
+  });
+
+  it('lets the teacher put a background behind the camera and remembers it', async () => {
+    server({ enabled: true, sessions: [] });
+    localStorage.removeItem('suffa.liveBackground');
+    const connection = new FakeConnection({ people: [teacher], canPublish: true });
+    await join(connection, true, true);
+    expect(screen.getByText('Hintergrund: Keiner')).toBeTruthy();
+    await userEvent.click(screen.getByText('Hintergrund: Keiner'));
+    await userEvent.click(screen.getByRole('radio', { name: 'Moschee am Abend' }));
+    expect(connection.calls).toContain('background:mosque');
+    expect(screen.getByRole('radio', { name: 'Moschee am Abend' })).toBeChecked();
+    expect(localStorage.getItem('suffa.liveBackground')).toBe('mosque');
+    cleanup();
+
+    // The next lesson starts with the same background.
+    const next = new FakeConnection({ people: [teacher], canPublish: true });
+    await join(next, true, true);
+    expect(next.calls).toEqual(['background:mosque']);
+    expect(screen.getByText('Hintergrund: Moschee am Abend')).toBeTruthy();
+    localStorage.removeItem('suffa.liveBackground');
+  });
+
+  it('offers no backgrounds where the browser cannot draw them, or without a camera', async () => {
+    server({ enabled: true, sessions: [] });
+    await join(new FakeConnection({ people: [teacher], canPublish: true }), true, false);
+    expect(screen.queryByText(/Hintergrund:/)).toBeNull();
+    cleanup();
+
+    server({ enabled: true, sessions: [session({ learnerCameras: false })] }, 'learner');
+    const me = person({ identity: 'a', name: 'Amina', local: true, floor: true });
+    await join(
+      new FakeConnection({
+        people: [me, { ...teacher, local: false }],
+        canPublish: true,
+      }),
+      true,
+      true
+    );
+    expect(screen.queryByText(/Hintergrund:/)).toBeNull();
+  });
+
+  it('says so when the background cannot be switched on', async () => {
+    server({ enabled: true, sessions: [] });
+    localStorage.removeItem('suffa.liveBackground');
+    const connection = new FakeConnection({ people: [teacher], canPublish: true });
+    connection.setBackground = async () => {
+      throw new Error('no webgl');
+    };
+    await join(connection, true, true);
+    await userEvent.click(screen.getByText('Hintergrund: Keiner'));
+    await userEvent.click(screen.getByRole('radio', { name: 'Weichzeichnen' }));
+    expect(
+      await screen.findByText(/Der Hintergrund ließ sich nicht einschalten/)
+    ).toBeTruthy();
+    // Not in use, so neither shown as chosen nor remembered.
+    expect(screen.getByRole('radio', { name: 'Keiner' })).toBeChecked();
+    expect(localStorage.getItem('suffa.liveBackground')).toBeNull();
+  });
+
+  it('keeps the camera off when its background cannot be loaded', async () => {
+    server({ enabled: true, sessions: [] });
+    const connection = new FakeConnection({
+      people: [{ ...teacher, cameraOn: false, cameraReady: false }],
+      canPublish: true,
+    });
+    connection.setCamera = async () => {
+      throw new BackgroundError(new Error('model did not load'));
+    };
+    await join(connection, true, true);
+    await userEvent.click(screen.getByRole('button', { name: 'Kamera an' }));
+    expect(
+      await screen.findByText(/Die Kamera bleibt aus, bis du ihn wechselst/)
+    ).toBeTruthy();
   });
 
   it('shows that the teacher ended the lesson', async () => {

@@ -474,6 +474,10 @@ colour schemes (Oase, Meer, Minze, Lavendel, Sand; dark and light each, WCAG AA 
 and by axe) and set when each practice area opens: now, from a unit of the class's course, or
 closed until the teacher opens it. Roots open from unit 3 by default, also for learners without
 a class. Learners follow the colours of the class they joined last unless they pick their own.
+18.3 (done, ADR-0028): while sharing the screen, the teacher's camera stays small in the corner,
+and each viewer can hide it. Whoever may use the camera can pick a background: blur, stars,
+arches, a mosque at dusk or a mashrabiya. All are our own drawings, cut out in the browser with
+MediaPipe served from our own origin.
 
 | #    | Story                                                                                                                        | Pts | Acceptance                                                                      |
 | ---- | ---------------------------------------------------------------------------------------------------------------------------- | --- | ------------------------------------------------------------------------------- |

@@ -50,6 +50,16 @@ export const live = {
     rejoin: 'Wieder beitreten',
     waitingForTeacher: 'Die Lehrkraft ist noch nicht da.',
     teacherCameraOff: 'Kamera der Lehrkraft ist aus',
+    screenOf: 'Bildschirm von {{name}}',
+    hideTeacherCamera: 'Lehrkraft ausblenden',
+    showTeacherCamera: 'Lehrkraft einblenden',
+    background: 'Hintergrund',
+    backgroundNote:
+      'Der Hintergrund wird auf deinem Gerät berechnet. Die anderen sehen nur das fertige Bild.',
+    cameraBlocked:
+      'Der Hintergrund ließ sich nicht laden. Die Kamera bleibt aus, bis du ihn wechselst oder „Keiner“ wählst.',
+    backgroundError:
+      'Der Hintergrund ließ sich nicht einschalten. Die Kamera läuft ohne Hintergrund weiter.',
     you: '(du)',
     controls: 'Steuerung',
     micOn: 'Mikrofon an',
@@ -80,5 +90,13 @@ export const live = {
     chatEmpty: 'Noch keine Nachrichten. Der Chat wird nicht gespeichert.',
     message: 'Nachricht',
     send: 'Senden',
+  },
+  backgrounds: {
+    none: 'Keiner',
+    blur: 'Weichzeichnen',
+    stars: 'Sterne',
+    arches: 'Bögen',
+    mosque: 'Moschee am Abend',
+    lattice: 'Maschrabiyya',
   },
 };

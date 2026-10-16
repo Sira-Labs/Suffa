@@ -1,5 +1,5 @@
 /** Client for classes and invites (story 4.3). */
-import type { CourseId } from '@suffa/engagement';
+import type { AreaUnlocks, CourseId, PaletteId } from '@suffa/engagement';
 import { apiRequest, type Fetch } from '@/services/api/request';
 
 export type ClassRole = 'teacher' | 'student';
@@ -19,6 +19,18 @@ export interface ClassSummary {
   /** A class of minors (stricter defaults); older servers send none. */
   minors?: boolean;
   createdAt: string;
+  /** When the user joined the class (older servers send none). */
+  joinedAt?: string;
+  /** Colour scheme the teacher picked (story 18.1); older servers send none. */
+  palette?: PaletteId;
+  /** When the practice areas open (story 18.2); older servers send none. */
+  unlocks?: AreaUnlocks;
+}
+
+/** What a teacher can change in the class's settings (stories 18.1/18.2). */
+export interface ClassSettingsPatch {
+  palette?: PaletteId;
+  unlocks?: AreaUnlocks;
 }
 
 export interface Member {
@@ -208,6 +220,14 @@ export class ClassesApi {
   }
 
   /** Deletes the class for everyone (teachers of the class only). */
+  /** The class's colours and when its practice areas open (teachers of the class). */
+  updateSettings(classId: string, patch: ClassSettingsPatch) {
+    return this.call<void>(`/api/v1/classes/${encodeURIComponent(classId)}/settings`, {
+      method: 'PUT',
+      body: JSON.stringify(patch),
+    });
+  }
+
   archive(classId: string) {
     return this.call<void>(`/api/v1/classes/${encodeURIComponent(classId)}`, {
       method: 'DELETE',

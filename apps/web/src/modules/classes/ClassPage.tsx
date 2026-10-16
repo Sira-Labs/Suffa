@@ -2,6 +2,7 @@
  * One class (Sprint 6). Teachers: progress (6.1), class life (6.2) and members (4.3) as tabs.
  * Learners: the class feed with the weekly challenge, shout-outs and badges.
  */
+import { ClassSettings } from './ClassSettings';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -31,7 +32,8 @@ type Tab =
   | 'shared'
   | 'grades'
   | 'certificates'
-  | 'members';
+  | 'members'
+  | 'settings';
 const TABS: Tab[] = [
   'progress',
   'life',
@@ -41,6 +43,7 @@ const TABS: Tab[] = [
   'grades',
   'certificates',
   'members',
+  'settings',
 ];
 
 export function ClassPage() {
@@ -121,6 +124,9 @@ export function ClassPage() {
             {tab === 'grades' && <ClassGrades classId={summary.id} />}
             {tab === 'certificates' && (
               <ClassCertificates api={api} classId={summary.id} />
+            )}
+            {tab === 'settings' && (
+              <ClassSettings api={api} summary={summary} onChange={load} />
             )}
             {tab === 'members' && (
               <div className="stack" style={{ gap: '1rem' }}>

@@ -6,6 +6,11 @@ export const nav = {
   trainingIntro:
     'Üben mit allem aus den Einheiten, die du schon erreicht hast – neue Einheiten kommen mit jedem bestandenen Test dazu.',
   trainingAreas: 'Trainingsbereiche',
+  locked: {
+    fromUnit: 'Öffnet sich, sobald du Einheit {{unit}} erreicht hast.',
+    byTeacher: 'Deine Lehrkraft schaltet diesen Bereich noch frei.',
+    back: 'Zurück zu Üben',
+  },
   groups: { media: 'Medien', help: 'Hilfe', me: 'Ich' },
   items: {
     today: { label: 'Heute', description: 'Dein Weg für heute' },

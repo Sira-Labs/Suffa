@@ -88,10 +88,13 @@ describe('navigation', () => {
       '/reading',
       '/writing',
       '/speaking',
-      '/roots',
       '/conjugation',
       '/exam',
     ]);
+    // Roots open from unit 3 (story 18.2): a new learner sees when, not a link.
+    expect(
+      within(list).getByText('Öffnet sich, sobald du Einheit 3 erreicht hast.')
+    ).toBeTruthy();
   });
 
   it('"Mehr" groups media, help and the learner\'s own pages', () => {

@@ -2,10 +2,16 @@
  * What Suffa makes of an egress as LiveKit reports it (ADR-0029), and the worker step that
  * follows a live recording until it is stored.
  */
-import { EgressInfo, EgressStatus } from 'livekit-server-sdk';
+import {
+  EgressInfo,
+  EgressStatus,
+  EncodedFileOutput,
+  RoomCompositeEgressRequest,
+  type EgressClient,
+} from 'livekit-server-sdk';
 import { describe, expect, it } from 'vitest';
 import { runMediaJob, type MediaJobDeps } from '../src/media/jobs.js';
-import { recordingState } from '../src/live/recorder.js';
+import { LiveKitRecorder, recordingState } from '../src/live/recorder.js';
 
 const info = (status: EgressStatus, size = 0n, error = '') =>
   new EgressInfo({ egressId: 'EG_1', status, error, fileResults: [{ size }] });
@@ -73,5 +79,80 @@ describe('the media job following a live recording', () => {
     await expect(
       runMediaJob({} as MediaJobDeps, { task: 'live-recording', mediaId })
     ).rejects.toThrow(/not configured/);
+  });
+});
+
+describe('starting a recording with LiveKit Egress', () => {
+  const live = {
+    url: 'wss://live.example.org',
+    apiUrl: 'https://live.example.org',
+    apiKey: 'suffa',
+    apiSecret: 'a-secret-from-env-that-is-long-enough',
+  };
+  const egress = (egressId: string, filepath: string) =>
+    new EgressInfo({
+      egressId,
+      roomName: 'live-1',
+      status: EgressStatus.EGRESS_ACTIVE,
+      request: {
+        case: 'roomComposite',
+        value: new RoomCompositeEgressRequest({
+          roomName: 'live-1',
+          fileOutputs: [new EncodedFileOutput({ filepath })],
+        }),
+      },
+    });
+
+  /** A fake Egress: `running` is what LiveKit lists as active in the room. */
+  function client(running: EgressInfo[], start: () => Promise<EgressInfo>) {
+    const calls: string[] = [];
+    const fake = {
+      listEgress: async () => {
+        calls.push('list');
+        return [...running];
+      },
+      stopEgress: async (id: string) => {
+        calls.push(`stop:${id}`);
+        running.splice(
+          running.findIndex((e) => e.egressId === id),
+          1
+        );
+        return new EgressInfo();
+      },
+      startRoomCompositeEgress: async () => {
+        calls.push('start');
+        return start();
+      },
+    } as unknown as EgressClient;
+    return { fake, calls };
+  }
+
+  it('starts the egress with our recording page', async () => {
+    const { fake, calls } = client([], async () => egress('EG_1', 'k'));
+    const recorder = new LiveKitRecorder(live, { templateUrl: 'https://x/r.html' }, fake);
+    expect(await recorder.start('live-1', 'k')).toBe('EG_1');
+    expect(calls).toEqual(['list', 'start']);
+  });
+
+  it('takes over the egress that started although the request timed out', async () => {
+    const running: EgressInfo[] = [];
+    const { fake } = client(running, async () => {
+      running.push(egress('EG_2', 'recordings/c/m/original.mp4'));
+      throw new Error('The operation was aborted due to timeout');
+    });
+    const recorder = new LiveKitRecorder(live, { templateUrl: 'https://x/r.html' }, fake);
+    expect(await recorder.start('live-1', 'recordings/c/m/original.mp4')).toBe('EG_2');
+  });
+
+  it('fails when nothing started, and stops an egress left over in the room first', async () => {
+    const running = [egress('EG_old', 'recordings/c/old/original.mp4')];
+    const { fake, calls } = client(running, async () => {
+      throw new Error('no egress worker available');
+    });
+    const recorder = new LiveKitRecorder(live, { templateUrl: 'https://x/r.html' }, fake);
+    await expect(recorder.start('live-1', 'recordings/c/m/original.mp4')).rejects.toThrow(
+      'no egress worker available'
+    );
+    expect(calls).toEqual(['list', 'stop:EG_old', 'start', 'list']);
   });
 });

@@ -32,6 +32,27 @@ export interface LiveRecorder {
   state(egressId: string): Promise<RecordingState>;
 }
 
+/**
+ * How long the API waits for Egress to take a request. Its first start launches Chrome on the
+ * server and can take well over the SDK's default of 10 seconds.
+ */
+export const EGRESS_TIMEOUT_SECONDS = 60;
+
+type Egress = Pick<
+  EgressClient,
+  'startRoomCompositeEgress' | 'stopEgress' | 'listEgress'
+>;
+
+/** The object key a room-composite egress writes to. */
+function keyOf(info: EgressInfo): string | undefined {
+  const request = info.request;
+  if (request.case !== 'roomComposite') return undefined;
+  const output = request.value.output;
+  return output.case === 'file'
+    ? output.value.filepath
+    : request.value.fileOutputs[0]?.filepath;
+}
+
 export interface RecorderConfig {
   /** The recording page Egress opens (https://…/live-record.html). */
   templateUrl: string;
@@ -71,25 +92,51 @@ export function recordingState(info: EgressInfo | undefined): RecordingState {
 }
 
 export class LiveKitRecorder implements LiveRecorder {
-  private readonly client: EgressClient;
+  private readonly client: Egress;
 
   constructor(
     live: LiveKitConfig,
-    private readonly config: RecorderConfig
+    private readonly config: RecorderConfig,
+    client?: Egress
   ) {
-    this.client = new EgressClient(live.apiUrl, live.apiKey, live.apiSecret);
+    this.client =
+      client ??
+      new EgressClient(live.apiUrl, live.apiKey, live.apiSecret, {
+        requestTimeout: EGRESS_TIMEOUT_SECONDS,
+      });
   }
 
+  /**
+   * Starts recording a room into `key`. A room has one recording at most: an egress still
+   * running there is left over from a start that was never confirmed, and is stopped first.
+   * If the start itself fails (often a timeout while Egress launches Chrome), Egress may have
+   * taken it anyway: the egress writing to `key` is then adopted instead of left untracked.
+   */
   async start(room: string, key: string): Promise<string> {
-    const info = await this.client.startRoomCompositeEgress(
-      room,
-      new EncodedFileOutput({ fileType: EncodedFileType.MP4, filepath: key }),
-      {
-        customBaseUrl: this.config.templateUrl,
-        encodingOptions: EncodingOptionsPreset.H264_720P_30,
-      }
-    );
-    return info.egressId;
+    for (const leftover of await this.client.listEgress({
+      roomName: room,
+      active: true,
+    })) {
+      await this.stop(leftover.egressId);
+    }
+    try {
+      const info = await this.client.startRoomCompositeEgress(
+        room,
+        new EncodedFileOutput({ fileType: EncodedFileType.MP4, filepath: key }),
+        {
+          customBaseUrl: this.config.templateUrl,
+          encodingOptions: EncodingOptionsPreset.H264_720P_30,
+        }
+      );
+      return info.egressId;
+    } catch (error) {
+      const running = await this.client
+        .listEgress({ roomName: room, active: true })
+        .catch(() => []);
+      const ours = running.find((info) => keyOf(info) === key);
+      if (ours) return ours.egressId;
+      throw error;
+    }
   }
 
   async stop(egressId: string): Promise<void> {

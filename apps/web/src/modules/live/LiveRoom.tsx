@@ -21,6 +21,7 @@ import {
   type BackgroundId,
 } from '@/services/live/backgrounds';
 import {
+  BackgroundError,
   canShareScreen,
   connectLive,
   MAX_MESSAGE_LENGTH,
@@ -327,8 +328,10 @@ function Room({
   const device = async (action: () => Promise<void>) => {
     try {
       await action();
-    } catch {
-      setNotice(t('room.deviceError'));
+    } catch (error) {
+      setNotice(
+        t(error instanceof BackgroundError ? 'room.cameraBlocked' : 'room.deviceError')
+      );
     }
   };
 
@@ -340,12 +343,15 @@ function Room({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connection]);
   const pickBackground = async (id: BackgroundId) => {
+    const previous = background;
     setBackground(id);
-    rememberBackground(id);
     setBackgroundBusy(true);
     try {
       await connection.setBackground(id);
+      // Only a background that is really in use comes back next time.
+      rememberBackground(id);
     } catch {
+      setBackground(previous);
       setNotice(t('room.backgroundError'));
     } finally {
       setBackgroundBusy(false);

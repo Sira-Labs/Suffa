@@ -15,6 +15,7 @@ import {
 import { LiveRoom } from '@/modules/live/LiveRoom';
 import type { LiveSession } from '@/services/live/liveApi';
 import type { BackgroundId } from '@/services/live/backgrounds';
+import { BackgroundError } from '@/services/live/liveRoom';
 import type {
   LiveConnection,
   LivePerson,
@@ -485,7 +486,25 @@ describe('the live room', () => {
     expect(
       await screen.findByText(/Der Hintergrund ließ sich nicht einschalten/)
     ).toBeTruthy();
-    localStorage.removeItem('suffa.liveBackground');
+    // Not in use, so neither shown as chosen nor remembered.
+    expect(screen.getByRole('radio', { name: 'Keiner' })).toBeChecked();
+    expect(localStorage.getItem('suffa.liveBackground')).toBeNull();
+  });
+
+  it('keeps the camera off when its background cannot be loaded', async () => {
+    server({ enabled: true, sessions: [] });
+    const connection = new FakeConnection({
+      people: [{ ...teacher, cameraOn: false, cameraReady: false }],
+      canPublish: true,
+    });
+    connection.setCamera = async () => {
+      throw new BackgroundError(new Error('model did not load'));
+    };
+    await join(connection, true, true);
+    await userEvent.click(screen.getByRole('button', { name: 'Kamera an' }));
+    expect(
+      await screen.findByText(/Die Kamera bleibt aus, bis du ihn wechselst/)
+    ).toBeTruthy();
   });
 
   it('shows that the teacher ended the lesson', async () => {

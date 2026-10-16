@@ -99,6 +99,14 @@ export function canShareScreen(
   return typeof devices?.getDisplayMedia === 'function';
 }
 
+/** The camera background could not be set up (no WebGL, the model did not load, …). */
+export class BackgroundError extends Error {
+  constructor(cause: unknown) {
+    super('camera background could not be set up', { cause });
+    this.name = 'BackgroundError';
+  }
+}
+
 export const MAX_MESSAGE_LENGTH = 500;
 const MAX_MESSAGES = 200;
 const CHAT_TOPIC = 'chat';
@@ -204,15 +212,37 @@ class LiveKitConnection implements LiveConnection {
     this.emit();
   }
 
+  /**
+   * Starts the camera with its background already in place, so no unprocessed frame is ever
+   * sent; turning it off unpublishes it, so every start takes this path. If the background
+   * cannot be set up, the camera stays off (BackgroundError) rather than showing the room.
+   */
   async setCamera(on: boolean): Promise<void> {
-    await this.room.localParticipant.setCameraEnabled(on);
-    if (on) await this.applyBackground();
+    const me = this.room.localParticipant;
+    const published = this.cameraTrack();
+    if (!on) {
+      if (published) await me.unpublishTrack(published, true);
+      this.emit();
+      return;
+    }
+    if (published) return;
+    const track = await this.lk.createLocalVideoTrack(
+      this.room.options.videoCaptureDefaults
+    );
+    try {
+      await this.applyBackground(track);
+      await me.publishTrack(track, { source: this.lk.Track.Source.Camera });
+    } catch (error) {
+      track.stop();
+      throw error;
+    }
     this.emit();
   }
 
   async setBackground(id: BackgroundId): Promise<void> {
     this.background = id;
-    await this.applyBackground();
+    const track = this.cameraTrack();
+    if (track) await this.applyBackground(track);
   }
 
   async setScreenShare(on: boolean): Promise<void> {
@@ -252,12 +282,13 @@ class LiveKitConnection implements LiveConnection {
     void this.room.disconnect();
   }
 
-  /** Puts the chosen background on the camera track, if the camera is on. */
-  private async applyBackground(): Promise<void> {
-    const track = this.room.localParticipant.getTrackPublication(
-      this.lk.Track.Source.Camera
-    )?.track as LocalVideoTrack | undefined;
-    if (!track) return;
+  private cameraTrack(): LocalVideoTrack | undefined {
+    return this.room.localParticipant.getTrackPublication(this.lk.Track.Source.Camera)
+      ?.track as LocalVideoTrack | undefined;
+  }
+
+  /** Puts the chosen background on a camera track. */
+  private async applyBackground(track: LocalVideoTrack): Promise<void> {
     const current = track.getProcessor() as BackgroundProcessorWrapper | undefined;
     if (this.background === 'none') {
       if (current) await track.stopProcessor();
@@ -267,14 +298,18 @@ class LiveKitConnection implements LiveConnection {
     const options = image
       ? ({ mode: 'virtual-background', imagePath: image } as const)
       : ({ mode: 'background-blur', blurRadius: BLUR_RADIUS } as const);
-    if (current && typeof current.switchTo === 'function') {
-      await current.switchTo(options);
-      return;
+    try {
+      if (current && typeof current.switchTo === 'function') {
+        await current.switchTo(options);
+        return;
+      }
+      const { BackgroundProcessor } = await import('@livekit/track-processors');
+      await track.setProcessor(
+        BackgroundProcessor({ ...options, assetPaths: MEDIAPIPE_ASSETS })
+      );
+    } catch (cause) {
+      throw new BackgroundError(cause);
     }
-    const { BackgroundProcessor } = await import('@livekit/track-processors');
-    await track.setProcessor(
-      BackgroundProcessor({ ...options, assetPaths: MEDIAPIPE_ASSETS })
-    );
   }
 
   private participant(identity: string): Participant | undefined {

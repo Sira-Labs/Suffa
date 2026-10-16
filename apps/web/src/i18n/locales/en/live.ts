@@ -58,6 +58,8 @@ export const live: Messages<typeof de> = {
     background: 'Background',
     backgroundNote:
       'The background is worked out on your device. The others only see the finished picture.',
+    cameraBlocked:
+      'The background could not be loaded. The camera stays off until you change it or pick “None”.',
     backgroundError:
       'The background could not be switched on. The camera carries on without it.',
     you: '(you)',

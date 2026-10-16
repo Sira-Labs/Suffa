@@ -56,6 +56,8 @@ export const live = {
     background: 'Hintergrund',
     backgroundNote:
       'Der Hintergrund wird auf deinem Gerät berechnet. Die anderen sehen nur das fertige Bild.',
+    cameraBlocked:
+      'Der Hintergrund ließ sich nicht laden. Die Kamera bleibt aus, bis du ihn wechselst oder „Keiner“ wählst.',
     backgroundError:
       'Der Hintergrund ließ sich nicht einschalten. Die Kamera läuft ohne Hintergrund weiter.',
     you: '(du)',

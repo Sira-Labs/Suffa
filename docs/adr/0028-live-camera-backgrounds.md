@@ -20,8 +20,12 @@ CDN should learn who joins a lesson.
 - **Backgrounds in the browser.** Whoever may use the camera can choose between none, blur, or
   one of four pictures: stars (khatam pattern), arches, a mosque at dusk, and a mashrabiya.
   The choice is kept per device. `@livekit/track-processors` (pinned at 0.8.1) cuts the person
-  out with MediaPipe's selfie segmenter, on the camera track before it is published. Only the
-  finished picture leaves the device.
+  out with MediaPipe's selfie segmenter. Only the finished picture leaves the device:
+  - The app creates the camera track itself, sets the background, and only then publishes
+    the track.
+  - Turning the camera off unpublishes it, so every start takes the same path.
+  - If the background cannot be set up, the camera stays off and the person is told, rather
+    than the room being shown unprocessed.
 - **Our own files only.** The pictures are our drawings, generated as SVG by
   `tools/live-backgrounds` and shipped as JPEG. They contain no photos, no calligraphy and no
   third-party artwork. The model (`selfie_segmenter.tflite`, Apache-2.0, 250 kB) is

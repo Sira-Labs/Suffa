@@ -198,6 +198,12 @@ test('the teacher’s camera with a background, small beside the shared screen',
   await expect(teacher.getByText(/ließ sich nicht einschalten/)).toHaveCount(0);
   expect(fromElsewhere).toEqual([]);
 
+  // Started again with the background chosen: it is in place before the camera is published.
+  await teacher.getByRole('button', { name: 'Kamera aus' }).click();
+  await teacher.getByRole('button', { name: 'Kamera an' }).click();
+  await expect(teacher.getByText(/Kamera bleibt aus/)).toHaveCount(0);
+  await stageIsPlaying(teacher);
+
   await learner.goto(`/classes/${classId}`);
   await learner.getByRole('link', { name: /Live-Unterricht läuft/ }).click();
   await learner.getByRole('button', { name: 'Beitreten' }).click();

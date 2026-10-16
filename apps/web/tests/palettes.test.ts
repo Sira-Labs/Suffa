@@ -36,6 +36,8 @@ function problems(c: PaletteColours): string[] {
   const pairs: [string, string, number][] = [
     ['on-accent', 'accent-fill', 4.5],
     ['on-accent-2', 'accent-2', 4.5],
+    ['on-paper', 'paper', 4.5],
+    ['on-paper-muted', 'paper', 4.5],
     // Focus rings and borders of controls (WCAG 1.4.11, 2.4.13): 3:1.
     ['focus', 'bg', 3],
     ['focus', 'bg-elev', 3],

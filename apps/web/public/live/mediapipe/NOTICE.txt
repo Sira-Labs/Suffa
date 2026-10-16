@@ -1,0 +1,6 @@
+selfie_segmenter.tflite: MediaPipe Selfie Segmenter (float16), by Google LLC.
+Licensed under the Apache License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0
+Source: https://ai.google.dev/edge/mediapipe/solutions/vision/image_segmenter
+
+The vision_wasm_*.js and .wasm files next to it in the build come from
+@mediapipe/tasks-vision (Apache-2.0).

@@ -53,6 +53,11 @@ function keyOf(info: EgressInfo): string | undefined {
     : request.value.fileOutputs[0]?.filepath;
 }
 
+/** One of our recordings: a room composite writing into the recordings of a class. */
+function isRecording(info: EgressInfo): boolean {
+  return keyOf(info)?.startsWith('recordings/') ?? false;
+}
+
 export interface RecorderConfig {
   /** The recording page Egress opens (https://…/live-record.html). */
   templateUrl: string;
@@ -107,16 +112,15 @@ export class LiveKitRecorder implements LiveRecorder {
   }
 
   /**
-   * Starts recording a room into `key`. A room has one recording at most: an egress still
-   * running there is left over from a start that was never confirmed, and is stopped first.
+   * Starts recording a room into `key`. A room has one recording at most: one of our
+   * recordings (a room composite writing under `recordings/`) still running there is left over
+   * from a start that was never confirmed, and is stopped first. Other egresses are left alone.
    * If the start itself fails (often a timeout while Egress launches Chrome), Egress may have
    * taken it anyway: the egress writing to `key` is then adopted instead of left untracked.
    */
   async start(room: string, key: string): Promise<string> {
-    for (const leftover of await this.client.listEgress({
-      roomName: room,
-      active: true,
-    })) {
+    const active = await this.client.listEgress({ roomName: room, active: true });
+    for (const leftover of active.filter((info) => isRecording(info))) {
       await this.stop(leftover.egressId);
     }
     try {

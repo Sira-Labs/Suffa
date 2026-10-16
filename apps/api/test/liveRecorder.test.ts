@@ -144,8 +144,11 @@ describe('starting a recording with LiveKit Egress', () => {
     expect(await recorder.start('live-1', 'recordings/c/m/original.mp4')).toBe('EG_2');
   });
 
-  it('fails when nothing started, and stops an egress left over in the room first', async () => {
-    const running = [egress('EG_old', 'recordings/c/old/original.mp4')];
+  it('fails when nothing started, and stops only a recording of ours left over in the room', async () => {
+    const running = [
+      egress('EG_old', 'recordings/c/old/original.mp4'),
+      egress('EG_other', 'exports/somewhere-else.mp4'),
+    ];
     const { fake, calls } = client(running, async () => {
       throw new Error('no egress worker available');
     });

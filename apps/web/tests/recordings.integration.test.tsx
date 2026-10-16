@@ -72,6 +72,17 @@ function stubApi() {
               progress: 40,
               publishedAt: null,
             },
+            {
+              ...item,
+              id: 'l',
+              title: 'Live-Stunde',
+              source: 'live',
+              status: 'recording',
+              progress: 0,
+              durationSec: null,
+              hasVideo: null,
+              publishedAt: null,
+            },
           ],
         });
       }
@@ -104,6 +115,10 @@ describe('Recordings (integration)', () => {
       '40'
     );
     expect(screen.getByRole('form', { name: 'Aufnahme hochladen' })).toBeInTheDocument();
+    // A live recording is neither audio nor video until the transcode has looked at it.
+    const live = screen.getByText('Live-Stunde').closest('li')!;
+    expect(live).toHaveTextContent('Wird im Live-Unterricht aufgenommen');
+    expect(live).not.toHaveTextContent('Audio');
   });
 
   it('shows the teacher who of the class has listened to a recording', async () => {

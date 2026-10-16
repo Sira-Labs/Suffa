@@ -9,6 +9,9 @@
  * - The worker follows each recording until its file is stored, then hands it to the
  *   transcode. A recording still running after its session ended (ended by time, or the room
  *   was left open) is stopped there.
+ * - A recording whose follow-up step was lost (it failed on a worker without the recording
+ *   settings, or the queue dropped it) is picked up again by `resume`, which the worker runs
+ *   every few minutes.
  */
 import { randomUUID } from 'node:crypto';
 import type { Logger } from 'pino';
@@ -23,6 +26,11 @@ import type { LiveActor, LiveSession } from './repository.js';
 export const RECORDING_RESERVE_BYTES = 2 * 1024 ** 3;
 /** A recording whose egress never reported back is given up after this long. */
 export const ATTACH_TIMEOUT_MS = 10 * 60 * 1000;
+/**
+ * A recording nobody has checked on for this long has lost its worker step: every check
+ * touches it, and checks run every 30 seconds while it records.
+ */
+export const STALE_FOLLOW_MS = 3 * 60 * 1000;
 
 export type StartRecordingResult =
   | { ok: true; mediaId: string }
@@ -130,6 +138,7 @@ export class LiveRecordings {
   async follow(mediaId: string): Promise<FollowResult> {
     const item = await this.deps.media.byId(mediaId);
     if (!item || item.status !== 'recording') return 'done';
+    await this.deps.recordings.touch(mediaId);
     if (!item.egressId) {
       // The API went away between claiming and starting; give up after a while.
       if (this.now().getTime() - Date.parse(item.createdAt) < ATTACH_TIMEOUT_MS) {
@@ -155,13 +164,9 @@ export class LiveRecordings {
       await this.fail(mediaId, 'the recording was not found in storage');
       return 'done';
     }
+    // A second check of the same recording (a resumed one) stops here.
+    if (!(await this.deps.recordings.stored(mediaId, stored.size))) return 'done';
     await this.deps.recordings.release(mediaId);
-    await this.deps.media.update(mediaId, {
-      status: 'processing',
-      originalSize: stored.size,
-      progress: 0,
-      error: null,
-    });
     try {
       await this.deps.transcode(mediaId);
     } catch (error) {
@@ -172,6 +177,20 @@ export class LiveRecordings {
     }
     this.deps.log.info({ mediaId, bytes: stored.size }, 'live.recording_stored');
     return 'done';
+  }
+
+  /** Worker step: follows again every recording that lost its check; returns how many. */
+  async resume(): Promise<number> {
+    const before = new Date(this.now().getTime() - STALE_FOLLOW_MS);
+    const stale = await this.deps.recordings.stale(before);
+    for (const mediaId of stale) {
+      await this.deps.recordings.touch(mediaId);
+      await this.deps.follow(mediaId);
+    }
+    if (stale.length > 0) {
+      this.deps.log.info({ count: stale.length }, 'live.recording_resumed');
+    }
+    return stale.length;
   }
 
   private async fail(mediaId: string, error: string): Promise<void> {

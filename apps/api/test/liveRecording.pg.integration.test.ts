@@ -372,6 +372,40 @@ describe.skipIf(!url)('Recording live lessons (Postgres)', () => {
       expect(transcoded).toEqual([mediaId]);
     });
 
+    it('hands a stored recording to the transcode once when two checks meet', async () => {
+      const session = await live();
+      await call('teacher', 'POST', `/${session.id}/recording`);
+      const mediaId = (await pointer(session.id))!;
+      recorder.states.set('EG_1', { state: 'stored', bytes: 4096 });
+      stored.set(`recordings/${classId}/${mediaId}/original.mp4`, 4096);
+      expect(
+        await Promise.all([recordings.follow(mediaId), recordings.follow(mediaId)])
+      ).toEqual(['done', 'done']);
+      expect(transcoded).toEqual([mediaId]);
+    });
+
+    it('picks up again a recording whose check was lost, and only that one', async () => {
+      // Checks are stamped by the database clock.
+      now = new Date();
+      const session = await live();
+      await call('teacher', 'POST', `/${session.id}/recording`);
+      const mediaId = (await pointer(session.id))!;
+      followed = [];
+      // Just started: its check is on its way.
+      expect(await recordings.resume()).toBe(0);
+      // Its check failed on a worker without the recording settings.
+      await pool.query(
+        `update media_items set updated_at = now() - interval '10 minutes' where id = $1`,
+        [mediaId]
+      );
+      expect(await recordings.resume()).toBe(1);
+      expect(followed).toEqual([mediaId]);
+      // Followed again: not picked up a second time while that check runs.
+      expect(await recordings.resume()).toBe(0);
+      expect(await recordings.follow(mediaId)).toBe('running');
+      expect(await recordings.resume()).toBe(0);
+    });
+
     it('keeps a stored recording to be picked up again when the transcode cannot be queued', async () => {
       const session = await live();
       await call('teacher', 'POST', `/${session.id}/recording`);

@@ -65,6 +65,10 @@ Option 2, decided with the owner ("Auf dem Server").
   - A failed egress marks the recording failed, with the reason.
   - A recording still running after its session ended (by time, or the room was left open) is
     stopped.
+  - Every check stamps the recording. Every 5 minutes the worker follows again each recording
+    nobody has checked on for 3 minutes: its check was lost, for example on a worker that
+    lacked the recording settings, or after the queue gave up on it. Moving a stored recording
+    on to the transcode is a single conditional update, so two checks meeting queue it once.
 - **Off until configured:** recording needs live lessons, object storage and
   `SUFFA_LIVE_RECORDING_TEMPLATE_URL`. Without them the room offers no recording and says
   nothing about one.

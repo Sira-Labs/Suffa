@@ -8,6 +8,7 @@
  * deletes finished ones after 30 days with their answers (story 14.4).
  * `purge-files` deletes files from object storage whose rows are gone, e.g. recordings shared
  * with a teacher when the account is deleted or the learner leaves the class (story 15.4).
+ * `resume-recordings` follows again live recordings whose worker step was lost (ADR-0029).
  */
 import type { PgBoss, Job } from 'pg-boss';
 import type { Logger } from 'pino';
@@ -17,6 +18,7 @@ import type { ErrorReporter } from '../observability/errors.js';
 import type { QueueName } from './queue.js';
 import { purgeDeletedFiles } from '../sharing/repository.js';
 import type { ObjectStorage } from '../storage/objectStorage.js';
+import type { LiveRecordings } from '../live/recording.js';
 
 export const MAINTENANCE_QUEUE: QueueName = 'maintenance';
 
@@ -30,6 +32,7 @@ export const MaintenanceJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('prune-conversations') }),
   z.object({ task: z.literal('prune-quizzes') }),
   z.object({ task: z.literal('purge-files') }),
+  z.object({ task: z.literal('resume-recordings') }),
 ]);
 export type MaintenanceJob = z.infer<typeof MaintenanceJob>;
 
@@ -41,6 +44,8 @@ export const MAINTENANCE_SCHEDULES: ReadonlyArray<{ cron: string; job: Maintenan
     { cron: '37 3 * * *', job: { task: 'prune-quizzes' } },
     // Files of deleted accounts should not outlive them by long.
     { cron: '*/10 * * * *', job: { task: 'purge-files' } },
+    // A lost recording should reach its class's recordings within minutes.
+    { cron: '*/5 * * * *', job: { task: 'resume-recordings' } },
   ];
 
 export async function pruneHeartbeats(pool: SqlPool): Promise<number> {
@@ -99,7 +104,8 @@ export async function runMaintenance(
   pool: SqlPool,
   raw: unknown,
   log: Pick<Logger, 'info'>,
-  storage?: Pick<ObjectStorage, 'delete'>
+  storage?: Pick<ObjectStorage, 'delete'>,
+  recordings?: Pick<LiveRecordings, 'resume'>
 ): Promise<void> {
   const job = MaintenanceJob.parse(raw);
   switch (job.task) {
@@ -129,6 +135,13 @@ export async function runMaintenance(
       log.info({ task: job.task, removed }, 'maintenance.done');
       return;
     }
+    case 'resume-recordings': {
+      // Without the recording settings this worker cannot follow recordings at all.
+      if (!recordings) return;
+      const resumed = await recordings.resume();
+      log.info({ task: job.task, resumed }, 'maintenance.done');
+      return;
+    }
   }
 }
 
@@ -138,7 +151,8 @@ export async function registerMaintenance(
   pool: SqlPool,
   log: Pick<Logger, 'info'>,
   errors: ErrorReporter,
-  storage?: Pick<ObjectStorage, 'delete'>
+  storage?: Pick<ObjectStorage, 'delete'>,
+  recordings?: Pick<LiveRecordings, 'resume'>
 ): Promise<void> {
   for (const { cron, job } of MAINTENANCE_SCHEDULES) {
     await boss.schedule(MAINTENANCE_QUEUE, cron, job, { key: job.task, tz: 'UTC' });
@@ -146,7 +160,7 @@ export async function registerMaintenance(
   await boss.work(MAINTENANCE_QUEUE, async (jobs: Job<unknown>[]) => {
     for (const job of jobs) {
       try {
-        await runMaintenance(pool, job.data, log, storage);
+        await runMaintenance(pool, job.data, log, storage, recordings);
       } catch (error) {
         // Reported on every attempt; pg-boss still retries and finally dead-letters it.
         errors.capture(error, { queue: MAINTENANCE_QUEUE, jobId: job.id });

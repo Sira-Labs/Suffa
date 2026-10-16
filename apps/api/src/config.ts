@@ -130,6 +130,17 @@ const RawEnvSchema = z.object({
   SUFFA_LIVEKIT_API_KEY: z.string().trim().optional(),
   SUFFA_LIVEKIT_API_SECRET: z.string().trim().optional(),
   /**
+   * Recording live lessons (ADR-0029): the recording page LiveKit Egress opens
+   * (https://<web>/live-record.html). Set it once the egress server runs; recording also
+   * needs live lessons and object storage.
+   */
+  SUFFA_LIVE_RECORDING_TEMPLATE_URL: z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => v || undefined)
+    .pipe(z.string().url().optional()),
+  /**
    * Object storage (ADR-0017): the S3 endpoint of the shared RustFS (internal, e.g.
    * http://srv-captain--rustfs:9000) and the `suffa-app` key. Recordings stay off without it.
    */
@@ -291,6 +302,8 @@ export interface Config {
   vapid: { publicKey: string; privateKey: string; subject: string } | undefined;
   /** LiveKit server for live lessons (ADR-0026); undefined turns live sessions off. */
   live: LiveKitConfig | undefined;
+  /** Recording live lessons with LiveKit Egress (ADR-0029); undefined turns it off. */
+  liveRecording: { templateUrl: string } | undefined;
 }
 
 export interface LiveKitConfig {
@@ -431,6 +444,17 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       'SUFFA_LIVEKIT_API_SECRET must be at least 32 characters (LiveKit needs it)'
     );
     liveComplete = false;
+  }
+  let recordingComplete = Boolean(raw.SUFFA_LIVE_RECORDING_TEMPLATE_URL);
+  if (recordingComplete && !(liveComplete && s3Complete)) {
+    warnings.push(
+      'SUFFA_LIVE_RECORDING_TEMPLATE_URL needs live lessons (SUFFA_LIVEKIT_*) and object storage (SUFFA_S3_*)'
+    );
+    recordingComplete = false;
+  }
+  if (recordingComplete && !/^https?:\/\//.test(raw.SUFFA_LIVE_RECORDING_TEMPLATE_URL!)) {
+    warnings.push('SUFFA_LIVE_RECORDING_TEMPLATE_URL must start with https://');
+    recordingComplete = false;
   }
   const extraOrigins = parseOrigins(raw.SUFFA_TRUSTED_ORIGINS);
   issues.push(...extraOrigins.issues);
@@ -575,6 +599,9 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
           apiKey: raw.SUFFA_LIVEKIT_API_KEY!,
           apiSecret: raw.SUFFA_LIVEKIT_API_SECRET!,
         }
+      : undefined,
+    liveRecording: recordingComplete
+      ? { templateUrl: raw.SUFFA_LIVE_RECORDING_TEMPLATE_URL! }
       : undefined,
   };
 }

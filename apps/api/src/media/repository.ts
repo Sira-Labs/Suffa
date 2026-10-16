@@ -1,13 +1,22 @@
 /** Recordings of a class (Sprint 7): rows in media_items, files in object storage. */
 import type pg from 'pg';
 
-export type MediaStatus = 'uploading' | 'importing' | 'processing' | 'ready' | 'failed';
+export type MediaStatus =
+  | 'uploading'
+  | 'importing'
+  /** A live lesson is being recorded on the server (ADR-0029). */
+  | 'recording'
+  | 'processing'
+  | 'ready'
+  | 'failed';
+/** How a recording came in: uploaded, imported from Drive, or recorded in a live lesson. */
+export type MediaSource = 'upload' | 'drive' | 'live';
 
 export interface MediaItem {
   id: string;
   classId: string;
   title: string;
-  source: 'upload' | 'drive';
+  source: MediaSource;
   status: MediaStatus;
   originalKey: string;
   originalName: string | null;
@@ -15,6 +24,8 @@ export interface MediaItem {
   contentType: string;
   uploadId: string | null;
   driveFileId: string | null;
+  /** The LiveKit egress writing a live recording. */
+  egressId: string | null;
   durationSec: number | null;
   hasVideo: boolean | null;
   renditions: { audio?: string; video?: string };
@@ -29,7 +40,7 @@ export interface NewMediaItem {
   classId: string;
   createdBy: string;
   title: string;
-  source: 'upload' | 'drive';
+  source: MediaSource;
   status: MediaStatus;
   originalKey: string;
   originalName: string | null;
@@ -37,6 +48,7 @@ export interface NewMediaItem {
   contentType: string;
   uploadId: string | null;
   driveFileId: string | null;
+  egressId?: string | null;
 }
 
 export interface MediaRepository {
@@ -61,6 +73,7 @@ export interface MediaRepository {
         | 'progress'
         | 'error'
         | 'originalSize'
+        | 'egressId'
       >
     >
   ): Promise<void>;
@@ -79,6 +92,7 @@ const COLUMNS: Record<string, string> = {
   progress: 'progress',
   error: 'error',
   originalSize: 'original_size',
+  egressId: 'egress_id',
 };
 
 function toItem(r: Record<string, unknown>): MediaItem {
@@ -94,6 +108,7 @@ function toItem(r: Record<string, unknown>): MediaItem {
     contentType: r.content_type as string,
     uploadId: (r.upload_id as string | null) ?? null,
     driveFileId: (r.drive_file_id as string | null) ?? null,
+    egressId: (r.egress_id as string | null) ?? null,
     durationSec: (r.duration_sec as number | null) ?? null,
     hasVideo: (r.has_video as boolean | null) ?? null,
     renditions: (r.renditions as MediaItem['renditions']) ?? {},
@@ -110,8 +125,9 @@ export class PgMediaRepository implements MediaRepository {
   async create(item: NewMediaItem) {
     const { rows } = await this.pool.query(
       `insert into media_items (id, class_id, created_by, title, source, status, original_key,
-                                original_name, original_size, content_type, upload_id, drive_file_id)
-       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) returning *`,
+                                original_name, original_size, content_type, upload_id, drive_file_id,
+                                egress_id)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) returning *`,
       [
         item.id,
         item.classId,
@@ -125,6 +141,7 @@ export class PgMediaRepository implements MediaRepository {
         item.contentType,
         item.uploadId,
         item.driveFileId,
+        item.egressId ?? null,
       ]
     );
     return toItem(rows[0]);

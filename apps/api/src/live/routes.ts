@@ -9,6 +9,8 @@
  *   DELETE /classes/:id/live/:session           → 204, a planned session removed   (class:manage)
  *   POST   /classes/:id/live/:session/join      → { url, token, role }             (class:read)
  *   POST   /classes/:id/live/:session/floor     { identity, allowed } → 204        (class:manage)
+ *   POST   /classes/:id/live/:session/recording → 201, the session, now recorded (class:manage)
+ *   DELETE /classes/:id/live/:session/recording → the session, recording stopped (class:manage)
  *
  * Only active members of the class get a token, and only while the session is live. The
  * teacher's token may publish and moderate; a learner's may only listen, chat and raise a
@@ -21,6 +23,10 @@
  * and join only sessions for everyone and for their own section (403 `wrong_audience`
  * otherwise); the teacher sees and leads all. With `learnerCameras` false the floor is the
  * learner's microphone only.
+ *
+ * Recording (Live 3, ADR-0029): the teacher records the room on the server into the class's
+ * recordings; the list says whether recording is set up (`recordingEnabled`), so learners are
+ * told before they join. Ending a session stops its recording.
  */
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
@@ -34,6 +40,7 @@ import {
   type LiveActionResult,
   type LiveSessionRepository,
 } from './repository.js';
+import type { LiveRecordings } from './recording.js';
 import type { LiveRooms } from './rooms.js';
 
 export interface LiveRouteDeps {
@@ -41,6 +48,8 @@ export interface LiveRouteDeps {
   sessions: LiveSessionRepository;
   /** The LiveKit server; undefined while live lessons are not set up. */
   rooms: LiveRooms | undefined;
+  /** Recording on the server; undefined while LiveKit Egress is not set up. */
+  recordings?: LiveRecordings;
   auth: AuthResolver;
   log: AuthorizeLog & { warn(obj: object, msg: string): void };
   now?: () => Date;
@@ -103,7 +112,11 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
   app.get('/classes/:id/live', read, async (c) => {
     c.header('Cache-Control', 'no-store');
     const sessions = await deps.sessions.list(c.req.param('id'), await audiences(c));
-    return c.json({ enabled: deps.rooms !== undefined, sessions });
+    return c.json({
+      enabled: deps.rooms !== undefined,
+      recordingEnabled: deps.rooms !== undefined && deps.recordings !== undefined,
+      sessions,
+    });
   });
 
   app.post('/classes/:id/live', manage, async (c) => {
@@ -136,8 +149,20 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
   app.post('/classes/:id/live/:session/end', manage, async (c) => {
     const id = sessionParam(c);
     if (!id.success) return c.json({ error: 'not_found' }, 404);
+    const before = await deps.sessions.get(c.req.param('id'), id.data);
     const result = await deps.sessions.end(c.req.param('id'), id.data, actorOf(c));
     if (!result.ok) return fail(c, result);
+    if (before?.recording) {
+      try {
+        await deps.recordings?.stop(before, actorOf(c));
+      } catch (error) {
+        // Closing the room below ends the recording too; the worker stores what was recorded.
+        deps.log.warn(
+          { err: String(error), session: id.data },
+          'live.recording_stop_failed'
+        );
+      }
+    }
     try {
       await deps.rooms?.close(roomName(id.data));
     } catch (error) {
@@ -195,6 +220,51 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
       { camera: session.learnerCameras }
     );
     return changed ? c.body(null, 204) : c.json({ error: 'not_in_room' }, 404);
+  });
+
+  /** The live session of the request, or the response to give instead. */
+  const liveSession = async (c: Context<ActorEnv>) => {
+    if (!deps.rooms || !deps.recordings) {
+      return { response: c.json({ error: 'recording_unavailable' }, 503) };
+    }
+    const id = sessionParam(c);
+    const session = id.success
+      ? await deps.sessions.get(c.req.param('id')!, id.data)
+      : null;
+    if (!session) return { response: c.json({ error: 'not_found' }, 404) };
+    if (session.status !== 'live')
+      return { response: c.json({ error: 'not_live' }, 409) };
+    return { session, recordings: deps.recordings };
+  };
+
+  app.post('/classes/:id/live/:session/recording', manage, async (c) => {
+    const found = await liveSession(c);
+    if ('response' in found) return found.response;
+    const result = await found.recordings.start(
+      found.session,
+      roomName(found.session.id),
+      actorOf(c)
+    );
+    if (!result.ok) {
+      const status = {
+        already_recording: 409,
+        quota_exceeded: 422,
+        recording_failed: 502,
+      };
+      return c.json({ error: result.reason }, status[result.reason] as 409 | 422 | 502);
+    }
+    const session = await deps.sessions.get(c.req.param('id'), found.session.id);
+    return c.json({ session }, 201);
+  });
+
+  app.delete('/classes/:id/live/:session/recording', manage, async (c) => {
+    const found = await liveSession(c);
+    if ('response' in found) return found.response;
+    if (!(await found.recordings.stop(found.session, actorOf(c)))) {
+      return c.json({ error: 'not_recording' }, 409);
+    }
+    const session = await deps.sessions.get(c.req.param('id'), found.session.id);
+    return c.json({ session });
   });
 
   return app;

@@ -1,5 +1,6 @@
 /**
- * `media` queue (ADR-0020): transcoding recordings and importing them from Google Drive.
+ * `media` queue (ADR-0020): transcoding recordings, importing them from Google Drive and
+ * following live recordings until their file is stored (ADR-0029).
  * One job at a time per worker and long expiry (a lesson of an hour takes minutes), so the
  * shared server stays responsive.
  */
@@ -22,7 +23,11 @@ export const MediaJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('transcribe'), mediaId: z.string().uuid() }),
   z.object({ task: z.literal('summarize'), mediaId: z.string().uuid() }),
   z.object({ task: z.literal('suggest'), mediaId: z.string().uuid() }),
+  z.object({ task: z.literal('live-recording'), mediaId: z.string().uuid() }),
 ]);
+
+/** How often the worker looks at a running live recording. */
+export const FOLLOW_SECONDS = 30;
 
 function enqueue(
   boss: Pick<PgBoss, 'send'>,
@@ -52,6 +57,20 @@ export const enqueueSuggest = (boss: Pick<PgBoss, 'send'>) => enqueue(boss, 'sug
 export const enqueueSummarize = (boss: Pick<PgBoss, 'send'>) =>
   enqueue(boss, 'summarize');
 
+/**
+ * Looks at a live recording after `delaySeconds`. Without a singleton key: the running check
+ * queues the next one while it is itself still active.
+ */
+export const enqueueFollowRecording =
+  (boss: Pick<PgBoss, 'send'>) =>
+  async (mediaId: string, delaySeconds = 0): Promise<void> => {
+    await boss.send(
+      MEDIA_QUEUE,
+      { task: 'live-recording', mediaId },
+      { startAfter: delaySeconds, expireInSeconds: 10 * 60 }
+    );
+  };
+
 export interface MediaJobDeps {
   repo: MediaRepository;
   storage: ObjectStorage;
@@ -67,10 +86,21 @@ export interface MediaJobDeps {
   suggest?: (mediaId: string) => Promise<void>;
   /** Summarises a lesson from its transcript. */
   summarize?: (mediaId: string) => Promise<void>;
+  /** Checks on a live recording; absent when live recording is not set up. */
+  followRecording?: (mediaId: string) => Promise<'running' | 'done'>;
+  /** Queues the next check of a live recording that is still running. */
+  followLater?: (mediaId: string) => Promise<void>;
 }
 
 export async function runMediaJob(deps: MediaJobDeps, raw: unknown): Promise<void> {
   const task = MediaJob.parse(raw);
+  if (task.task === 'live-recording') {
+    if (!deps.followRecording) throw new Error('live recording is not configured');
+    if ((await deps.followRecording(task.mediaId)) === 'running') {
+      await deps.followLater?.(task.mediaId);
+    }
+    return;
+  }
   if (task.task === 'suggest') {
     if (!deps.suggest) throw new Error('no model is configured for suggestions');
     await deps.suggest(task.mediaId);

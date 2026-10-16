@@ -7,7 +7,8 @@
  *   GET    /classes/:id/media/:mediaId/parts       → { parts } (resume)       (class:manage)
  *   POST   /classes/:id/media/:mediaId/complete    → 202                      (class:manage)
  *   POST   /classes/:id/media/:mediaId/publish { consent: true } → 204       (class:manage)
- *   DELETE /classes/:id/media/:mediaId             → 204                      (class:manage)
+ *   DELETE /classes/:id/media/:mediaId             → 204; 409 while a live lesson is
+ *                                                    still being recorded into it  (class:manage)
  *   GET    /classes/:id/media/:mediaId/play        → { audio, video, … }      (class:read)
  *   GET    /classes/:id/listening                  → { recordings }  who heard what
  *                                                    (class:progress:read: the class's teachers)
@@ -176,6 +177,8 @@ export function createMediaRoutes(deps: MediaRouteDeps): Hono<ActorEnv> {
   app.delete('/classes/:id/media/:mediaId', manage, async (c) => {
     const item = await itemOf(c);
     if (!item) return c.json({ error: 'not_found' }, 404);
+    // A live recording still being written is stopped in the room first (ADR-0029).
+    if (item.status === 'recording') return c.json({ error: 'still_recording' }, 409);
     await deps.media.remove(item);
     await audit(c, 'media.deleted', item);
     return c.body(null, 204);

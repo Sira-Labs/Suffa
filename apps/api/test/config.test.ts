@@ -252,6 +252,42 @@ describe('LiveKit for live lessons', () => {
   });
 });
 
+describe('recording live lessons', () => {
+  const base = { SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db' };
+  const live = {
+    SUFFA_LIVEKIT_URL: 'wss://live.suffa.example.org',
+    SUFFA_LIVEKIT_API_KEY: 'suffa',
+    SUFFA_LIVEKIT_API_SECRET: 'a-secret-from-env-that-is-long-enough',
+  };
+  const storage = {
+    SUFFA_S3_ENDPOINT: 'http://srv-captain--rustfs:9000',
+    SUFFA_S3_ACCESS_KEY_ID: 'suffa-app',
+    SUFFA_S3_SECRET_ACCESS_KEY: 'from-env',
+  };
+  const template = {
+    SUFFA_LIVE_RECORDING_TEMPLATE_URL: 'https://suffa.example.org/live-record.html',
+  };
+
+  it('is on with the recording page, live lessons and object storage', () => {
+    expect(loadConfig({ ...base, ...live, ...storage }).liveRecording).toBeUndefined();
+    expect(
+      loadConfig({ ...base, ...live, ...storage, ...template }).liveRecording
+    ).toEqual({
+      templateUrl: 'https://suffa.example.org/live-record.html',
+    });
+  });
+
+  it('stays off with a warning without live lessons or storage', () => {
+    for (const env of [{ ...live }, { ...storage }]) {
+      const config = loadConfig({ ...base, ...env, ...template });
+      expect(config.liveRecording).toBeUndefined();
+      expect(config.warnings).toEqual([
+        expect.stringMatching(/SUFFA_LIVE_RECORDING_TEMPLATE_URL needs/),
+      ]);
+    }
+  });
+});
+
 describe('SUFFA_TRUSTED_ORIGINS', () => {
   const base = {
     SUFFA_DATABASE_URL: 'postgres://u:p@localhost/db',

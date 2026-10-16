@@ -240,9 +240,17 @@ class LiveKitConnection implements LiveConnection {
   }
 
   async setBackground(id: BackgroundId): Promise<void> {
+    const previous = this.background;
     this.background = id;
     const track = this.cameraTrack();
-    if (track) await this.applyBackground(track);
+    if (!track) return;
+    try {
+      await this.applyBackground(track);
+    } catch (error) {
+      // The camera keeps what it had, and so does the next start.
+      this.background = previous;
+      throw error;
+    }
   }
 
   async setScreenShare(on: boolean): Promise<void> {

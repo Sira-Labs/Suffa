@@ -131,4 +131,24 @@ describe('camera with a background', () => {
       'stop-processor',
     ]);
   });
+
+  it('keeps the earlier background when a new one fails on a running camera', async () => {
+    const live = await connect();
+    await live.setBackground('stars');
+    await live.setCamera(true);
+    // The running processor cannot switch to the new picture.
+    const track = state.published as { processor: { switchTo: () => Promise<void> } };
+    track.processor.switchTo = async () => {
+      throw new Error('image did not load');
+    };
+    await expect(live.setBackground('mosque')).rejects.toBeInstanceOf(BackgroundError);
+    // A restart of the camera still uses stars, not the background that failed.
+    await live.setCamera(false);
+    steps.length = 0;
+    await live.setCamera(true);
+    const restarted = state.published as {
+      processor: { options: { imagePath?: string } };
+    };
+    expect(restarted.processor.options.imagePath).toBe('/live/backgrounds/stars.jpg');
+  });
 });

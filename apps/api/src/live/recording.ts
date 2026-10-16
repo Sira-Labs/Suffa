@@ -89,8 +89,25 @@ export class LiveRecordings {
       );
       return { ok: false, reason: 'recording_failed' };
     }
-    await this.deps.recordings.attach(mediaId, egressId);
-    await this.deps.follow(mediaId);
+    try {
+      await this.deps.recordings.attach(mediaId, egressId);
+      await this.deps.follow(mediaId);
+    } catch (error) {
+      // Without its egress id or a worker following it, nobody could stop or store this
+      // recording: stop it now and free the session.
+      await this.deps.recorder.stop(egressId).catch((stopError: unknown) => {
+        this.deps.log.warn(
+          { err: String(stopError), session: session.id },
+          'live.recording_stop_failed'
+        );
+      });
+      await this.deps.recordings.discard(mediaId);
+      this.deps.log.warn(
+        { err: String(error), session: session.id },
+        'live.recording_setup_failed'
+      );
+      return { ok: false, reason: 'recording_failed' };
+    }
     this.deps.log.info({ session: session.id, mediaId }, 'live.recording_started');
     return { ok: true, mediaId };
   }
@@ -145,7 +162,14 @@ export class LiveRecordings {
       progress: 0,
       error: null,
     });
-    await this.deps.transcode(mediaId);
+    try {
+      await this.deps.transcode(mediaId);
+    } catch (error) {
+      // Back to `recording`, so the retried check stores it again instead of leaving it
+      // "processing" with no transcode queued.
+      await this.deps.media.update(mediaId, { status: 'recording', progress: 0 });
+      throw error;
+    }
     this.deps.log.info({ mediaId, bytes: stored.size }, 'live.recording_stored');
     return 'done';
   }

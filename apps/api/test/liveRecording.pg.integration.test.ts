@@ -310,6 +310,32 @@ describe.skipIf(!url)('Recording live lessons (Postgres)', () => {
     expect((await call('teacher', 'POST', `/${session.id}/recording`)).status).toBe(201);
   });
 
+  it('stops the egress and frees the session when the worker cannot be told', async () => {
+    const session = await live();
+    let failFollow = true;
+    recordings = new LiveRecordings({
+      recordings: new PgLiveRecordingRepository(pool),
+      media: new PgMediaRepository(pool),
+      recorder,
+      storage: { head: async () => null },
+      follow: async () => {
+        if (failFollow) throw new Error('queue unavailable');
+      },
+      transcode: async () => undefined,
+      log: quiet,
+      now: () => now,
+    });
+    apps.on = build(true);
+    expect((await call('teacher', 'POST', `/${session.id}/recording`)).body).toEqual({
+      error: 'recording_failed',
+    });
+    expect(recorder.stopped).toEqual(['EG_1']);
+    expect(await pointer(session.id)).toBeNull();
+    expect((await pool.query('select 1 from media_items')).rows).toEqual([]);
+    failFollow = false;
+    expect((await call('teacher', 'POST', `/${session.id}/recording`)).status).toBe(201);
+  });
+
   it('records only while the class has room for it', async () => {
     const session = await live();
     await pool.query(
@@ -343,6 +369,38 @@ describe.skipIf(!url)('Recording live lessons (Postgres)', () => {
       expect(transcoded).toEqual([mediaId]);
       // Followed again (a duplicate job), nothing happens twice.
       expect(await recordings.follow(mediaId)).toBe('done');
+      expect(transcoded).toEqual([mediaId]);
+    });
+
+    it('keeps a stored recording to be picked up again when the transcode cannot be queued', async () => {
+      const session = await live();
+      await call('teacher', 'POST', `/${session.id}/recording`);
+      const mediaId = (await pointer(session.id))!;
+      recorder.states.set('EG_1', { state: 'stored', bytes: 4096 });
+      stored.set(`recordings/${classId}/${mediaId}/original.mp4`, 4096);
+      let failTranscode = true;
+      const retrying = new LiveRecordings({
+        recordings: new PgLiveRecordingRepository(pool),
+        media: new PgMediaRepository(pool),
+        recorder,
+        storage: {
+          head: async (_bucket, key) =>
+            stored.has(key) ? { size: stored.get(key)!, contentType: 'video/mp4' } : null,
+        },
+        follow: async () => undefined,
+        transcode: async (id) => {
+          if (failTranscode) throw new Error('queue unavailable');
+          transcoded.push(id);
+        },
+        log: quiet,
+        now: () => now,
+      });
+      await expect(retrying.follow(mediaId)).rejects.toThrow('queue unavailable');
+      expect(await item(mediaId)).toMatchObject({ status: 'recording' });
+      // The queue retries the check.
+      failTranscode = false;
+      expect(await retrying.follow(mediaId)).toBe('done');
+      expect(await item(mediaId)).toMatchObject({ status: 'processing' });
       expect(transcoded).toEqual([mediaId]);
     });
 

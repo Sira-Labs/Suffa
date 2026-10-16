@@ -143,7 +143,10 @@ export function ClassRecordings({
                     <strong>{item.title}</strong>
                   )}
                   <span className="muted" style={{ fontSize: '0.85rem' }}>
-                    {item.hasVideo ? t('video') : t('audio')}{' '}
+                    {/* Known only once the transcode has looked at the file. */}
+                    {item.hasVideo === null
+                      ? ''
+                      : `${item.hasVideo ? t('video') : t('audio')} `}
                     {formatDuration(item.durationSec)}
                     {heard?.completedAt ? ` · ${t('heard')}` : ''}
                   </span>

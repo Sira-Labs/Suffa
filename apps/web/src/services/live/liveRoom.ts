@@ -8,15 +8,25 @@
  * - Chat messages travel only through the room (data messages on the topic "chat"); nothing
  *   is stored.
  * - Remote audio plays through audio elements in `audioHost`.
+ * - A camera background (story 18.3) is a processor on the local camera track; its library
+ *   loads only when someone picks one.
  */
 import type {
   DataPacket_Kind,
   LocalParticipant,
+  LocalVideoTrack,
   Participant,
   RemoteParticipant,
   RemoteTrack,
   Room,
 } from 'livekit-client';
+import type { BackgroundProcessorWrapper } from '@livekit/track-processors';
+import {
+  BLUR_RADIUS,
+  MEDIAPIPE_ASSETS,
+  backgroundImage,
+  type BackgroundId,
+} from './backgrounds';
 
 export type LiveSource = 'camera' | 'screen';
 
@@ -63,6 +73,8 @@ export interface LiveConnection {
   setMicrophone(on: boolean): Promise<void>;
   setCamera(on: boolean): Promise<void>;
   setScreenShare(on: boolean): Promise<void>;
+  /** The background behind this person's camera picture; kept for when the camera starts. */
+  setBackground(id: BackgroundId): Promise<void>;
   raiseHand(up: boolean): Promise<void>;
   send(text: string): Promise<void>;
   /** Shows a person's camera or screen in `element`; returns the detach. */
@@ -98,6 +110,7 @@ class LiveKitConnection implements LiveConnection {
   private chat: LiveMessage[] = [];
   private status: LiveStatus = 'connected';
   private ended = false;
+  private background: BackgroundId = 'none';
   private snapshot: LiveState;
   private readonly encoder = new TextEncoder();
   private readonly decoder = new TextDecoder();
@@ -193,7 +206,13 @@ class LiveKitConnection implements LiveConnection {
 
   async setCamera(on: boolean): Promise<void> {
     await this.room.localParticipant.setCameraEnabled(on);
+    if (on) await this.applyBackground();
     this.emit();
+  }
+
+  async setBackground(id: BackgroundId): Promise<void> {
+    this.background = id;
+    await this.applyBackground();
   }
 
   async setScreenShare(on: boolean): Promise<void> {
@@ -231,6 +250,31 @@ class LiveKitConnection implements LiveConnection {
 
   disconnect(): void {
     void this.room.disconnect();
+  }
+
+  /** Puts the chosen background on the camera track, if the camera is on. */
+  private async applyBackground(): Promise<void> {
+    const track = this.room.localParticipant.getTrackPublication(
+      this.lk.Track.Source.Camera
+    )?.track as LocalVideoTrack | undefined;
+    if (!track) return;
+    const current = track.getProcessor() as BackgroundProcessorWrapper | undefined;
+    if (this.background === 'none') {
+      if (current) await track.stopProcessor();
+      return;
+    }
+    const image = backgroundImage(this.background);
+    const options = image
+      ? ({ mode: 'virtual-background', imagePath: image } as const)
+      : ({ mode: 'background-blur', blurRadius: BLUR_RADIUS } as const);
+    if (current && typeof current.switchTo === 'function') {
+      await current.switchTo(options);
+      return;
+    }
+    const { BackgroundProcessor } = await import('@livekit/track-processors');
+    await track.setProcessor(
+      BackgroundProcessor({ ...options, assetPaths: MEDIAPIPE_ASSETS })
+    );
   }
 
   private participant(identity: string): Participant | undefined {

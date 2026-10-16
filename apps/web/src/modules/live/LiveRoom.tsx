@@ -1,7 +1,9 @@
 /**
- * The live room (ADR-0026): the teacher large on the stage (screen share before camera),
- * learners who have the floor as small tiles, the people with raised hands, the chat and the
- * controls. The teacher gives and takes the floor; learners raise their hand.
+ * The live room (ADR-0026): the teacher large on the stage (screen share before camera, with
+ * the teacher's camera small in the corner while sharing, story 18.3), learners who have the
+ * floor as small tiles, the people with raised hands, the chat and the controls. The teacher
+ * gives and takes the floor; learners raise their hand. Whoever may use the camera can put a
+ * background behind it.
  *
  * Joining starts from a click so the browser lets the room's sound play.
  */
@@ -10,6 +12,14 @@ import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { LiveApi, type LiveRole, type LiveSession } from '@/services/live/liveApi';
 import { SessionTags } from './LiveSessions';
+import {
+  BACKGROUNDS,
+  backgroundImage,
+  canUseBackgrounds,
+  rememberBackground,
+  rememberedBackground,
+  type BackgroundId,
+} from '@/services/live/backgrounds';
 import {
   canShareScreen,
   connectLive,
@@ -76,6 +86,8 @@ function Stage({
   teacher: LivePerson | undefined;
 }) {
   const { t } = useTranslation('live');
+  // Everyone decides for themselves whether the teacher's camera covers a corner of the screen.
+  const [showCamera, setShowCamera] = useState(true);
   if (!teacher) {
     return (
       <div className="live-stage live-stage-empty">
@@ -88,6 +100,7 @@ function Stage({
     : teacher.cameraOn
       ? 'camera'
       : null;
+  const both = teacher.screenOn && teacher.cameraOn;
   return (
     <div className={`live-stage${teacher.speaking ? ' live-speaking' : ''}`}>
       {source ? (
@@ -95,7 +108,11 @@ function Stage({
           connection={connection}
           person={teacher}
           source={source}
-          label={teacher.name}
+          label={
+            source === 'screen'
+              ? t('room.screenOf', { name: teacher.name })
+              : teacher.name
+          }
         />
       ) : (
         <p className="live-stage-empty">
@@ -103,7 +120,70 @@ function Stage({
           <span>{t('room.teacherCameraOff')}</span>
         </p>
       )}
+      {both && showCamera && (
+        <div className="live-pip">
+          <Video
+            connection={connection}
+            person={teacher}
+            source="camera"
+            label={teacher.name}
+          />
+        </div>
+      )}
+      {both && (
+        <button
+          className="btn btn-small live-pip-toggle"
+          aria-pressed={showCamera}
+          onClick={() => setShowCamera(!showCamera)}
+        >
+          {showCamera ? t('room.hideTeacherCamera') : t('room.showTeacherCamera')}
+        </button>
+      )}
     </div>
+  );
+}
+
+/** Blur or a picture behind the camera, as a row of small previews. */
+function BackgroundPicker({
+  value,
+  busy,
+  onChange,
+}: {
+  value: BackgroundId;
+  busy: boolean;
+  onChange: (id: BackgroundId) => void;
+}) {
+  const { t } = useTranslation('live');
+  return (
+    <details className="card live-backgrounds">
+      <summary>
+        {t('room.background')}: {t(`backgrounds.${value}`)}
+      </summary>
+      <fieldset className="live-background-list" disabled={busy}>
+        <legend className="visually-hidden">{t('room.background')}</legend>
+        {BACKGROUNDS.map((id) => {
+          const image = backgroundImage(id);
+          return (
+            <label key={id} className="live-background">
+              <input
+                type="radio"
+                name="live-background"
+                value={id}
+                checked={value === id}
+                onChange={() => onChange(id)}
+              />
+              <span
+                className={`live-background-preview live-background-${id}`}
+                style={image ? { backgroundImage: `url(${image})` } : undefined}
+                aria-hidden="true"
+              />
+              <span>{t(`backgrounds.${id}`)}</span>
+            </label>
+          );
+        })}
+      </fieldset>
+      <p className="muted live-background-note">{t('room.backgroundNote')}</p>
+    </details>
   );
 }
 
@@ -211,6 +291,7 @@ function Room({
   role,
   connection,
   screenShare,
+  backgrounds,
   onLeave,
 }: {
   api: LiveApi;
@@ -219,6 +300,7 @@ function Room({
   role: LiveRole;
   connection: LiveConnection;
   screenShare: boolean;
+  backgrounds: boolean;
   onLeave: () => void;
 }) {
   const { t } = useTranslation('live');
@@ -228,6 +310,11 @@ function Room({
   const teacher = state.people.find((p) => p.role === 'teacher');
   const teacherView = role === 'teacher';
   const floorTiles = state.people.filter((p) => p.role === 'learner' && p.cameraOn);
+  const mayUseCamera = teacherView || (state.canPublish && session.learnerCameras);
+  const [background, setBackground] = useState<BackgroundId>(() =>
+    backgrounds ? rememberedBackground() : 'none'
+  );
+  const [backgroundBusy, setBackgroundBusy] = useState(false);
 
   const hadFloor = useRef(false);
   useEffect(() => {
@@ -242,6 +329,26 @@ function Room({
       await action();
     } catch {
       setNotice(t('room.deviceError'));
+    }
+  };
+
+  // The background picked last time comes back with the camera in this lesson too.
+  useEffect(() => {
+    if (background !== 'none')
+      void connection.setBackground(background).catch(() => undefined);
+    // Only once per connection: later picks go through pickBackground.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connection]);
+  const pickBackground = async (id: BackgroundId) => {
+    setBackground(id);
+    rememberBackground(id);
+    setBackgroundBusy(true);
+    try {
+      await connection.setBackground(id);
+    } catch {
+      setNotice(t('room.backgroundError'));
+    } finally {
+      setBackgroundBusy(false);
     }
   };
   const floor = async (person: LivePerson, allowed: boolean) => {
@@ -367,6 +474,13 @@ function Room({
         )}
       </div>
       <div className="live-side">
+        {backgrounds && mayUseCamera && (
+          <BackgroundPicker
+            value={background}
+            busy={backgroundBusy}
+            onChange={(id) => void pickBackground(id)}
+          />
+        )}
         <People
           people={state.people}
           teacherView={teacherView}
@@ -382,11 +496,14 @@ export function LiveRoom({
   api: givenApi,
   connect = connectLive,
   screenShare = canShareScreen(),
+  backgrounds = canUseBackgrounds(),
 }: {
   api?: LiveApi;
   connect?: ConnectLive;
   /** The browser can share the screen (not on iPhone and iPad). */
   screenShare?: boolean;
+  /** The browser can put a background behind the camera. */
+  backgrounds?: boolean;
 }) {
   const { t } = useTranslation('live');
   const { id: classId = '', session: sessionId = '' } = useParams();
@@ -448,6 +565,7 @@ export function LiveRoom({
           role={phase.role}
           connection={phase.connection}
           screenShare={screenShare}
+          backgrounds={backgrounds}
           onLeave={() => setPhase({ kind: 'left' })}
         />
       ) : (

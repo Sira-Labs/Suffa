@@ -3084,6 +3084,7 @@ button.quiz-option:disabled {
 .live-controls {
   grid-area: controls;
   flex-wrap: wrap;
+  align-content: start;
   gap: 0.5rem;
 }
 .live-side {
@@ -3095,7 +3096,9 @@ button.quiz-option:disabled {
 @media (min-width: 960px) {
   .live-room {
     grid-template-columns: minmax(0, 1fr) 320px;
-    grid-template-areas: 'header header' 'main side' 'controls side';
+    /* A tall side column (people, chat, backgrounds) stretches only the empty last row. */
+    grid-template-rows: auto auto auto 1fr;
+    grid-template-areas: 'header header' 'main side' 'controls side' '. side';
   }
 }
 
@@ -3124,6 +3127,84 @@ button.quiz-option:disabled {
   width: 100%;
   height: 100%;
   object-fit: contain;
+}
+
+.live-pip {
+  position: absolute;
+  inset-inline-end: 0.75rem;
+  inset-block-end: 0.75rem;
+  width: clamp(120px, 24%, 260px);
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.45);
+  outline: 2px solid rgb(255 255 255 / 0.7);
+}
+.live-pip .live-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.live-pip-toggle {
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  inset-block-end: 0.75rem;
+}
+
+/* Camera backgrounds (story 18.3). */
+.live-backgrounds summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.live-background-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  border: 0;
+}
+.live-background {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.live-background input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.live-background-preview {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background-color: var(--bg-elev-2);
+  background-size: cover;
+  background-position: center;
+}
+.live-background-blur {
+  background-image: radial-gradient(
+    circle at 50% 45%,
+    var(--text-muted),
+    var(--bg-elev-2)
+  );
+}
+.live-background input:checked + .live-background-preview {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.live-background input:focus-visible + .live-background-preview {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+.live-background-list:disabled {
+  opacity: 0.6;
+}
+.live-background-note {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
 }
 
 .live-tiles {

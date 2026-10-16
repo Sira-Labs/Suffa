@@ -52,6 +52,14 @@ export const live: Messages<typeof de> = {
     rejoin: 'Join again',
     waitingForTeacher: 'The teacher has not arrived yet.',
     teacherCameraOff: 'The teacher’s camera is off',
+    screenOf: 'Screen of {{name}}',
+    hideTeacherCamera: 'Hide teacher',
+    showTeacherCamera: 'Show teacher',
+    background: 'Background',
+    backgroundNote:
+      'The background is worked out on your device. The others only see the finished picture.',
+    backgroundError:
+      'The background could not be switched on. The camera carries on without it.',
     you: '(you)',
     controls: 'Controls',
     micOn: 'Microphone on',
@@ -82,5 +90,13 @@ export const live: Messages<typeof de> = {
     chatEmpty: 'No messages yet. The chat is not saved.',
     message: 'Message',
     send: 'Send',
+  },
+  backgrounds: {
+    none: 'None',
+    blur: 'Blur',
+    stars: 'Stars',
+    arches: 'Arches',
+    mosque: 'Mosque at dusk',
+    lattice: 'Mashrabiya',
   },
 };

@@ -29,6 +29,8 @@ export const classes = {
     main: 'Hauptklasse',
     makeMain: 'Als Hauptklasse',
     makeMainNamed: '{{name}} als Hauptklasse wählen',
+    mainSaveFailed:
+      'Die Hauptklasse konnte nicht gespeichert werden. Bitte versuche es noch einmal.',
     mainHint:
       'Die Hauptklasse bestimmt Kurs, Farben und Freischaltungen der App. Aufgaben, Aufnahmen und Live-Unterricht siehst du in allen deinen Klassen.',
   },

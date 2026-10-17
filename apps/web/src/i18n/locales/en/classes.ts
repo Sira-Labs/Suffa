@@ -27,6 +27,7 @@ export const classes: Messages<typeof de> = {
     main: 'Main class',
     makeMain: 'Make main class',
     makeMainNamed: 'Make {{name}} your main class',
+    mainSaveFailed: 'The main class could not be saved. Please try again.',
     mainHint:
       'Your main class sets the app’s course, colours and unlocks. You see assignments, recordings and live lessons of all your classes.',
   },

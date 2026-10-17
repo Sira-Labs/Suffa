@@ -4,6 +4,7 @@
  * several classes picks the main class here, the one whose course, colours and unlocks shape
  * the app.
  */
+import Dexie from 'dexie';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -12,6 +13,9 @@ import { ClassesApi, type ClassSummary } from '@/services/classes/classesApi';
 import { useClassContextStore, useSettingsStore, useSyncStore } from '@/state';
 import { OFFERED_COURSES } from '@/services/courses';
 import { DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
+import { logger } from '@/services/logger';
+
+const log = logger.child('classes');
 
 export function Classes() {
   const { t } = useTranslation('classes');
@@ -21,7 +25,21 @@ export function Classes() {
   const [classes, setClasses] = useState<ClassSummary[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const mainClassId = useClassContextStore((s) => s.context?.classId);
-  const chooseMain = useSettingsStore((s) => s.update);
+  const updateSettings = useSettingsStore((s) => s.update);
+
+  const chooseMain = async (classId: string) => {
+    try {
+      await updateSettings({ mainClassId: classId });
+      setMessage(null);
+    } catch (error) {
+      // Only a storage failure (quota, private mode, closed database) is expected here; the
+      // learner learns the choice did not stick. Anything else is a bug for the caller.
+      if (!(error instanceof Dexie.DexieError || error instanceof DOMException))
+        throw error;
+      log.error('main_class_save_failed', { error: error.name });
+      setMessage(t('list.mainSaveFailed'));
+    }
+  };
 
   const load = useCallback(async () => {
     const result = await api.list();
@@ -77,7 +95,7 @@ export function Classes() {
               ) : (
                 <button
                   className="btn btn-small"
-                  onClick={() => void chooseMain({ mainClassId: c.id })}
+                  onClick={() => void chooseMain(c.id)}
                   aria-label={t('list.makeMainNamed', { name: c.name })}
                 >
                   {t('list.makeMain')}

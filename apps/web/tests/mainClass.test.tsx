@@ -71,23 +71,27 @@ afterEach(() => {
   useClassContextStore.setState({ context: null });
 });
 
+function renderClasses() {
+  const router = createMemoryRouter(
+    [
+      {
+        path: '/classes',
+        element: (
+          <>
+            <ClassContextSync />
+            <Classes />
+          </>
+        ),
+      },
+    ],
+    { initialEntries: ['/classes'] }
+  );
+  render(<RouterProvider router={router} />);
+}
+
 describe('main class', () => {
   it('starts with the class joined first and lets the learner choose another', async () => {
-    const router = createMemoryRouter(
-      [
-        {
-          path: '/classes',
-          element: (
-            <>
-              <ClassContextSync />
-              <Classes />
-            </>
-          ),
-        },
-      ],
-      { initialEntries: ['/classes'] }
-    );
-    render(<RouterProvider router={router} />);
+    renderClasses();
     expect(await screen.findByText(/Die Hauptklasse bestimmt Kurs, Farben/)).toBeTruthy();
     // Joined first, so the app follows it although Medina came later.
     await waitFor(() =>
@@ -101,7 +105,9 @@ describe('main class', () => {
     await userEvent.click(
       screen.getByRole('button', { name: 'Medina 1 · Dienstag als Hauptklasse wählen' })
     );
-    expect(useSettingsStore.getState().settings.mainClassId).toBe(SECOND);
+    await waitFor(() =>
+      expect(useSettingsStore.getState().settings.mainClassId).toBe(SECOND)
+    );
     await waitFor(() =>
       expect(useClassContextStore.getState().context).toMatchObject({
         classId: SECOND,
@@ -120,5 +126,28 @@ describe('main class', () => {
     ).toBeTruthy();
     // Saved as a setting, so it reaches the learner's other devices with the next sync.
     expect((await db.settings.toArray())[0]).toMatchObject({ mainClassId: SECOND });
+  });
+
+  it('tells the learner when the choice could not be saved', async () => {
+    const update = useSettingsStore.getState().update;
+    useSettingsStore.setState({
+      update: vi.fn(async () => {
+        throw new DOMException('Storage is full', 'QuotaExceededError');
+      }),
+    });
+    try {
+      renderClasses();
+      await userEvent.click(
+        await screen.findByRole('button', {
+          name: 'Medina 1 · Dienstag als Hauptklasse wählen',
+        })
+      );
+      expect(
+        await screen.findByText(/Die Hauptklasse konnte nicht gespeichert werden/)
+      ).toBeTruthy();
+      expect(useSettingsStore.getState().settings.mainClassId).toBeUndefined();
+    } finally {
+      useSettingsStore.setState({ update });
+    }
   });
 });

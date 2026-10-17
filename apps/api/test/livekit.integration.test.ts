@@ -48,7 +48,7 @@ describe('LiveKit join tokens', () => {
     expect((c.exp as number) - (c.nbf as number)).toBe(3600);
   });
 
-  it('lets a learner listen, chat and raise a hand, but publish nothing', async () => {
+  it('lets a learner listen, chat and raise a hand, but publish nothing without cameras', async () => {
     const c = claims(
       await rooms.token(
         'live-1',
@@ -69,6 +69,19 @@ describe('LiveKit join tokens', () => {
     expect(
       (c.video as { canPublishSources?: unknown[] }).canPublishSources ?? []
     ).toEqual([]);
+  });
+
+  it('lets a learner use their own camera, but not the microphone, where cameras are allowed', async () => {
+    const c = claims(
+      await rooms.token(
+        'live-1',
+        { identity: 'u-1', name: 'Amina', role: 'learner', camera: true },
+        600
+      )
+    );
+    expect(c).toMatchObject({
+      video: { roomAdmin: false, canPublish: true, canPublishSources: ['camera'] },
+    });
   });
 });
 

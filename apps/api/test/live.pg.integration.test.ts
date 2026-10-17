@@ -241,9 +241,12 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     });
     const asLearner = await call('learner', 'POST', `/${session.id}/join`);
     expect(await asLearner.json()).toMatchObject({ role: 'learner' });
-    expect(rooms.tokens.map((t) => [t.room, t.who.name, t.who.role, t.ttl])).toEqual([
-      [`live-${session.id}`, 'teacher', 'teacher', 120 * 60],
-      [`live-${session.id}`, 'learner', 'learner', 120 * 60],
+    // The learner may turn on their own camera: the session allows learner cameras.
+    expect(
+      rooms.tokens.map((t) => [t.room, t.who.name, t.who.role, t.who.camera, t.ttl])
+    ).toEqual([
+      [`live-${session.id}`, 'teacher', 'teacher', false, 120 * 60],
+      [`live-${session.id}`, 'learner', 'learner', true, 120 * 60],
     ]);
     expect((await call('waiting', 'POST', `/${session.id}/join`)).status).toBe(403);
     expect((await call('outsider', 'POST', `/${session.id}/join`)).status).toBe(403);
@@ -321,6 +324,8 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     });
     expect(session).toMatchObject({ audience: 'sisters', learnerCameras: false });
     await call('teacher', 'POST', `/${session.id}/start`);
+    expect((await call('sister', 'POST', `/${session.id}/join`)).status).toBe(200);
+    expect(rooms.tokens.at(-1)?.who).toMatchObject({ role: 'learner', camera: false });
     rooms.present.add(users.sister!.id);
     const res = await call('teacher', 'POST', `/${session.id}/floor`, {
       identity: users.sister!.id,

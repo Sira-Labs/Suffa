@@ -5,9 +5,10 @@
  *
  * Who may do what in a room:
  * - the teacher publishes camera, microphone and screen and moderates the room;
- * - a learner joins listening; chat and raised hands go through data messages and their own
- *   attributes; the teacher gives them the floor (microphone, and the camera unless the
- *   session keeps learner cameras off) and takes it back.
+ * - a learner joins listening and may turn on their own camera unless the session keeps
+ *   learner cameras off (update 2026-10-17); chat and raised hands go through data messages
+ *   and their own attributes; the teacher gives them the floor (the microphone) and takes it
+ *   back.
  */
 import { AccessToken, RoomServiceClient, TrackSource } from 'livekit-server-sdk';
 import type { LiveKitConfig } from '../config.js';
@@ -19,6 +20,8 @@ export interface LiveParticipant {
   identity: string;
   name: string;
   role: LiveRole;
+  /** A learner may use their own camera (the session allows learner cameras). */
+  camera?: boolean;
 }
 
 export interface LiveRooms {
@@ -27,8 +30,8 @@ export interface LiveRooms {
   /** A token to join `room`, valid for `ttlSeconds`. */
   token(room: string, who: LiveParticipant, ttlSeconds: number): Promise<string>;
   /**
-   * Gives a learner the floor (microphone, and the camera when `camera`) or takes it back.
-   * False when the learner is not in the room.
+   * Gives a learner the floor (the microphone) or takes it back; the camera stays theirs
+   * when `camera`. False when the learner is not in the room.
    */
   setFloor(
     room: string,
@@ -46,9 +49,17 @@ const TEACHER_SOURCES = [
   TrackSource.SCREEN_SHARE,
   TrackSource.SCREEN_SHARE_AUDIO,
 ];
-const FLOOR_SOURCES = [TrackSource.CAMERA, TrackSource.MICROPHONE];
-// Sessions with the learners' cameras off (ADR-0026, stage 2): the floor is the voice only.
-const VOICE_SOURCES = [TrackSource.MICROPHONE];
+/**
+ * What a learner may publish: the camera whenever the session allows learner cameras, the
+ * microphone only with the floor. Sessions with the learners' cameras off (ADR-0026, stage
+ * 2) never allow the camera.
+ */
+function learnerSources(floor: boolean, camera: boolean): TrackSource[] {
+  return [
+    ...(camera ? [TrackSource.CAMERA] : []),
+    ...(floor ? [TrackSource.MICROPHONE] : []),
+  ];
+}
 
 /** LiveKit answers "not found" for a room or participant that is not (or no longer) there. */
 function isNotFound(error: unknown): boolean {
@@ -74,13 +85,16 @@ export class LiveKitRooms implements LiveRooms {
       attributes: { role: who.role },
     });
     const teacher = who.role === 'teacher';
+    const sources = teacher
+      ? TEACHER_SOURCES
+      : learnerSources(false, Boolean(who.camera));
     token.addGrant({
       room,
       roomJoin: true,
       roomAdmin: teacher,
       canSubscribe: true,
-      canPublish: teacher,
-      canPublishSources: teacher ? TEACHER_SOURCES : [],
+      canPublish: sources.length > 0,
+      canPublishSources: sources,
       canPublishData: true,
       // The raised hand is the learner's own attribute.
       canUpdateOwnMetadata: true,
@@ -94,17 +108,14 @@ export class LiveKitRooms implements LiveRooms {
     allowed: boolean,
     options: { camera: boolean }
   ): Promise<boolean> {
+    const sources = learnerSources(allowed, options.camera);
     try {
       await this.service.updateParticipant(room, identity, {
         // Permissions are replaced as a whole.
         permission: {
           canSubscribe: true,
-          canPublish: allowed,
-          canPublishSources: !allowed
-            ? []
-            : options.camera
-              ? FLOOR_SOURCES
-              : VOICE_SOURCES,
+          canPublish: sources.length > 0,
+          canPublishSources: sources,
           canPublishData: true,
           canUpdateMetadata: true,
         },

@@ -179,6 +179,19 @@ export class LiveRecordings {
     return 'done';
   }
 
+  /**
+   * Before a recording is deleted: false while its session still records into it. Otherwise
+   * an egress still running (its session overran and was never stopped) is stopped and the
+   * session let go, so nothing goes on writing into a recording that is gone.
+   */
+  async letGo(mediaId: string): Promise<boolean> {
+    if (await this.deps.recordings.sessionLive(mediaId, this.now())) return false;
+    const item = await this.deps.media.byId(mediaId);
+    if (item?.egressId) await this.deps.recorder.stop(item.egressId);
+    await this.deps.recordings.release(mediaId);
+    return true;
+  }
+
   /** Worker step: follows again every recording that lost its check; returns how many. */
   async resume(): Promise<number> {
     const before = new Date(this.now().getTime() - STALE_FOLLOW_MS);

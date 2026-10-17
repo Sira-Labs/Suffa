@@ -112,8 +112,7 @@ describe.skipIf(!url)('Recording live lessons (Postgres)', () => {
         auth,
         log: quiet,
         listening: new PgListeningRepository(pool),
-        recordingLive: (mediaId) =>
-          new PgLiveRecordingRepository(pool).sessionLive(mediaId, now),
+        letGoRecording: (mediaId) => recordings.letGo(mediaId),
       },
     });
 
@@ -331,6 +330,21 @@ describe.skipIf(!url)('Recording live lessons (Postgres)', () => {
     expect(await item(mediaId)).toBeUndefined();
     // The worker following it finds nothing left to do.
     expect(await recordings.follow(mediaId)).toBe('done');
+  });
+
+  it('stops the egress of a recording whose session overran before deleting it', async () => {
+    const session = await live();
+    await call('teacher', 'POST', `/${session.id}/recording`);
+    const mediaId = (await pointer(session.id))!;
+    // Planned 60 minutes, never ended or stopped, and no worker came by.
+    now = new Date(now.getTime() + 200 * 60_000);
+    const res = await apps.on.request(`/api/v1/classes/${classId}/media/${mediaId}`, {
+      method: 'DELETE',
+      headers: { 'x-test-user': 'teacher' },
+    });
+    expect(res.status).toBe(204);
+    expect(recorder.stopped).toEqual(['EG_1']);
+    expect(await pointer(session.id)).toBeNull();
   });
 
   it('stops the recording when the teacher ends the session', async () => {

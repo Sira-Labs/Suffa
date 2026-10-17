@@ -26,6 +26,13 @@ export const classes = {
     newNamePlaceholder: 'Name der neuen Klasse, z. B. Arabisch 1a',
     course: 'Kurs der Klasse',
     create: 'Anlegen',
+    main: 'Hauptklasse',
+    makeMain: 'Als Hauptklasse',
+    makeMainNamed: '{{name}} als Hauptklasse wählen',
+    mainSaveFailed:
+      'Die Hauptklasse konnte nicht gespeichert werden. Bitte versuche es noch einmal.',
+    mainHint:
+      'Die Hauptklasse bestimmt Kurs, Farben und Freischaltungen der App. Aufgaben, Aufnahmen und Live-Unterricht siehst du in allen deinen Klassen.',
   },
   page: {
     loading: 'Lade Klasse …',
@@ -311,6 +318,8 @@ export const classes = {
   },
   home: {
     eyebrow: 'Deine Klasse',
+    eyebrowMain: 'Deine Hauptklasse',
+    eyebrowOther: 'Weitere Klasse',
     teacher: 'bei {{teacher}}',
     toClass: 'Zur Klasse {{name}}',
     news: 'Neues aus der Klasse',

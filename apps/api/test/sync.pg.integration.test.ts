@@ -107,6 +107,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
         uiLanguage: 'en',
         meaningLanguage: 'de',
         palette: 'meer',
+        mainClassId: '11111111-1111-4111-8111-111111111111',
       },
       user_vocab: {
         id: 'uv-1',
@@ -287,13 +288,14 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
     ]);
     expect(await pullCourse()).toBe('bayna-yadayk');
     // The scheduling choice (story 15.6), the interface language (16.3), the meaning
-    // language (16.4) and the colour scheme (18.1) are kept the same way.
+    // language (16.4), the colour scheme (18.1) and the main class are kept the same way.
     await repo.upsert(BOB, 'settings', [
       settings('2026-09-23T13:00:00.000Z', {
         srsAlgorithm: 'fsrs',
         uiLanguage: 'en',
         meaningLanguage: 'en',
         palette: 'lavendel',
+        mainClassId: '22222222-2222-4222-8222-222222222222',
       }),
     ]);
     await repo.upsert(BOB, 'settings', [settings('2026-09-23T14:00:00.000Z')]);
@@ -307,6 +309,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
       uiLanguage: 'en',
       meaningLanguage: 'en',
       palette: 'lavendel',
+      mainClassId: '22222222-2222-4222-8222-222222222222',
     });
   });
 

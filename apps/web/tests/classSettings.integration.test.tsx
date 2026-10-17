@@ -110,7 +110,7 @@ describe('practice areas', () => {
 });
 
 describe('class context', () => {
-  it('takes the active class joined last', () => {
+  it('takes the chosen main class, else the active class joined first', () => {
     const older = summary({ id: 'a', joinedAt: '2026-09-01T00:00:00.000Z' });
     const newer = summary({ id: 'b', joinedAt: '2026-10-01T00:00:00.000Z' });
     const pending = summary({
@@ -118,7 +118,12 @@ describe('class context', () => {
       status: 'pending',
       joinedAt: '2026-10-09T00:00:00Z',
     });
-    expect(primaryClass([older, newer, pending])?.id).toBe('b');
+    // Joining another class does not change the app.
+    expect(primaryClass([newer, older, pending])?.id).toBe('a');
+    expect(primaryClass([older, newer, pending], 'b')?.id).toBe('b');
+    // A main class the learner is not (or no longer) active in falls back.
+    expect(primaryClass([older, newer, pending], 'c')?.id).toBe('a');
+    expect(primaryClass([older, newer], 'gone')?.id).toBe('a');
     expect(primaryClass([pending])).toBeNull();
   });
 

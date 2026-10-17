@@ -1,7 +1,9 @@
 /**
  * The class that shapes the app for this user (stories 18.1/18.2): its colour scheme and when
- * its practice areas open. It is the active class the user joined last; without one the app
- * uses its defaults. The last known class settings are kept in localStorage, so colours and
+ * its practice areas open. It is the main class the user chose (settings), else the active
+ * class they joined first, so joining another class does not change the app; without one the
+ * app uses its defaults. The other classes stay fully usable, only the app's look and locks
+ * follow this one. The last known class settings are kept in localStorage, so colours and
  * locks hold offline and right after start, before the class list arrives.
  */
 import { create } from 'zustand';
@@ -60,26 +62,31 @@ function store(context: ClassContext | null) {
   }
 }
 
-/** The active class joined last, or null. */
-export function primaryClass(classes: readonly ClassSummary[]): ClassSummary | null {
+/** The chosen main class while it is active, else the active class joined first, or null. */
+export function primaryClass(
+  classes: readonly ClassSummary[],
+  mainClassId?: string | null
+): ClassSummary | null {
   const active = classes.filter((c) => c.status === 'active');
+  const chosen = mainClassId ? active.find((c) => c.id === mainClassId) : undefined;
+  if (chosen) return chosen;
   return (
-    active.sort((a, b) =>
-      (b.joinedAt ?? b.createdAt).localeCompare(a.joinedAt ?? a.createdAt)
+    [...active].sort((a, b) =>
+      (a.joinedAt ?? a.createdAt).localeCompare(b.joinedAt ?? b.createdAt)
     )[0] ?? null
   );
 }
 
 interface ClassContextState {
   context: ClassContext | null;
-  /** Takes the user's current classes (signed in and online). */
-  setClasses(classes: readonly ClassSummary[]): void;
+  /** Takes the user's current classes (signed in and online) and their chosen main class. */
+  setClasses(classes: readonly ClassSummary[], mainClassId?: string | null): void;
 }
 
 export const useClassContextStore = create<ClassContextState>((set, get) => ({
   context: readStored(),
-  setClasses(classes) {
-    const primary = primaryClass(classes);
+  setClasses(classes, mainClassId) {
+    const primary = primaryClass(classes, mainClassId);
     const next: ClassContext | null = primary
       ? {
           classId: primary.id,

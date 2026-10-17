@@ -1,7 +1,8 @@
 /**
  * Live lessons (ADR-0026) against Postgres: the teacher plans, starts and ends sessions; only
  * active members get a join token, only while a session is live; the teacher gives the floor;
- * every change is audit-logged; sisters' and brothers' sessions reach only their section. The
+ * every change is audit-logged; sisters' and brothers' sessions reach only their section; an
+ * invite link to a session takes members to it and lets others ask to join the class. The
  * LiveKit server is a recording fake here (its own test:
  * livekit.integration.test.ts).
  * Run with SUFFA_TEST_DATABASE_URL=postgres://… ; skipped otherwise. The database is wiped.
@@ -14,6 +15,7 @@ import { createApp } from '../src/app.js';
 import type { AuthResolver } from '../src/auth/resolver.js';
 import type { Role } from '../src/authz/policies.js';
 import { PgClassRepository } from '../src/classes/repository.js';
+import { PgLiveInviteRepository } from '../src/live/invites.js';
 import { PgLiveSessionRepository, type LiveSession } from '../src/live/repository.js';
 import type { LiveParticipant, LiveRooms } from '../src/live/rooms.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
@@ -66,6 +68,10 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
         classes: new PgClassRepository(pool),
         sessions: new PgLiveSessionRepository(pool, () => now),
         rooms: withRooms ? rooms : undefined,
+        invites: {
+          repo: new PgLiveInviteRepository(pool, () => now),
+          publicUrl: 'https://suffa.example.org',
+        },
         auth: {
           actor: async (h) => users[h.get('x-test-user') ?? ''] ?? null,
         } satisfies AuthResolver,
@@ -89,6 +95,21 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
+
+  /** A request outside the class's live path, e.g. an invite link. */
+  const api = (who: string | undefined, method: string, path: string) =>
+    apps.on.request(`/api/v1${path}`, {
+      method,
+      headers: who ? { 'x-test-user': who } : {},
+    });
+
+  /** An invite link for the session, and its token. */
+  const invite = async (session: LiveSession) => {
+    const res = await call('teacher', 'POST', `/${session.id}/invite`);
+    expect(res.status).toBe(201);
+    const body = (await res.json()) as { url: string; expiresAt: string };
+    return { ...body, token: body.url.split('/').at(-1)! };
+  };
 
   const plan = async (title = 'Lektion 5', startsAt = now, extra: object = {}) => {
     const res = await call('teacher', 'POST', '', {
@@ -385,5 +406,124 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     );
     expect(start.status).toBe(503);
     expect(await start.json()).toEqual({ error: 'live_unavailable' });
+  });
+
+  describe('invite links to a session', () => {
+    it('takes members to the session and lets anyone else ask to join the class', async () => {
+      const session = await plan();
+      expect((await call('learner', 'POST', `/${session.id}/invite`)).status).toBe(403);
+      const link = await invite(session);
+      expect(link.url).toMatch(/^https:\/\/suffa\.example\.org\/live-invite\/[\w-]{32}$/);
+      // A planned session's link holds as long as the session is listed.
+      expect(link.expiresAt).toBe('2026-10-14T05:00:00.000Z');
+
+      const preview = await api('outsider', 'GET', `/live-invites/${link.token}`);
+      expect(preview.status).toBe(200);
+      expect(await preview.json()).toEqual({
+        classId,
+        className: 'Arabisch 1a',
+        teacherName: null,
+        sessionId: session.id,
+        title: 'Lektion 5',
+        startsAt: session.startsAt,
+        status: 'scheduled',
+      });
+      expect((await api(undefined, 'GET', `/live-invites/${link.token}`)).status).toBe(
+        401
+      );
+
+      const asked = await api('outsider', 'POST', `/live-invites/${link.token}/join`);
+      expect(await asked.json()).toEqual({
+        classId,
+        sessionId: session.id,
+        status: 'pending',
+      });
+      const member = await pool.query(
+        'select status, class_role from class_members where user_id = $1',
+        [users.outsider!.id]
+      );
+      expect(member.rows).toEqual([{ status: 'pending', class_role: 'student' }]);
+      // Pending, so not in the room yet.
+      expect((await call('outsider', 'POST', `/${session.id}/join`)).status).toBe(403);
+
+      // Members keep their membership as it is.
+      for (const [who, status] of [
+        ['learner', 'active'],
+        ['teacher', 'active'],
+        ['waiting', 'pending'],
+      ] as const) {
+        const res = await api(who, 'POST', `/live-invites/${link.token}/join`);
+        expect(await res.json()).toMatchObject({ status });
+      }
+      const teacherRole = await pool.query(
+        'select class_role from class_members where user_id = $1',
+        [users.teacher!.id]
+      );
+      expect(teacherRole.rows).toEqual([{ class_role: 'teacher' }]);
+
+      const audit = await pool.query(
+        `select action, details from audit_log
+          where action in ('live.invite_created', 'class.join_requested') order by id`
+      );
+      expect(audit.rows).toEqual([
+        { action: 'live.invite_created', details: { classId } },
+        {
+          action: 'class.join_requested',
+          details: { via: 'live_invite', sessionId: session.id },
+        },
+      ]);
+    });
+
+    it("replaces a session's link with a new one and leaves the class link alone", async () => {
+      const session = await plan();
+      const classLink = await pool.query(
+        `insert into class_invites (token_hash, class_id, created_by, expires_at)
+         values ('class-link', $1, $2, $3) returning token_hash`,
+        [classId, users.teacher!.id, new Date(now.getTime() + 86_400_000)]
+      );
+      const first = await invite(session);
+      const second = await invite(session);
+      expect((await api('outsider', 'GET', `/live-invites/${first.token}`)).status).toBe(
+        404
+      );
+      expect((await api('outsider', 'GET', `/live-invites/${second.token}`)).status).toBe(
+        200
+      );
+      const still = await pool.query(
+        'select revoked_at from class_invites where token_hash = $1',
+        [classLink.rows[0].token_hash]
+      );
+      expect(still.rows).toEqual([{ revoked_at: null }]);
+    });
+
+    it('stops working once the session is over', async () => {
+      const ended = await plan();
+      const endedLink = await invite(ended);
+      await call('teacher', 'POST', `/${ended.id}/start`);
+      // While live, the link holds until the end plus the hour of overrun.
+      const live = await api('learner', 'GET', `/live-invites/${endedLink.token}`);
+      expect(await live.json()).toMatchObject({ status: 'live' });
+      await call('teacher', 'POST', `/${ended.id}/end`);
+      for (const [method, path] of [
+        ['GET', `/live-invites/${endedLink.token}`],
+        ['POST', `/live-invites/${endedLink.token}/join`],
+      ] as const) {
+        const res = await api('outsider', method, path);
+        expect(res.status).toBe(404);
+        expect(await res.json()).toEqual({ error: 'invalid_invite' });
+      }
+      expect((await call('teacher', 'POST', `/${ended.id}/invite`)).status).toBe(404);
+
+      // A planned session that never started: no longer listed, no longer invited to.
+      const missed = await plan('Lektion 6', new Date(now.getTime() + 60_000));
+      const missedLink = await invite(missed);
+      now = new Date(now.getTime() + (1 + 60 + 12 * 60) * 60_000 + 60_000);
+      expect(
+        (await api('outsider', 'GET', `/live-invites/${missedLink.token}`)).status
+      ).toBe(404);
+      expect((await api('outsider', 'GET', '/live-invites/not-a-token')).status).toBe(
+        404
+      );
+    });
   });
 });

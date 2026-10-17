@@ -44,6 +44,7 @@ import { LiveKitRooms } from './live/rooms.js';
 import { LiveKitRecorder } from './live/recorder.js';
 import { LiveRecordings } from './live/recording.js';
 import { PgLiveRecordingRepository } from './live/recordingRepository.js';
+import { PgLiveInviteRepository } from './live/invites.js';
 import { PgClassLeagueRepository } from './classes/league.js';
 import { PgClassSpiritRepository } from './classes/spirit.js';
 import { registerEngagement, requestRecompute } from './engagement/jobs.js';
@@ -566,6 +567,12 @@ async function main(): Promise<void> {
       sessions: new PgLiveSessionRepository(pool),
       rooms: config.live ? new LiveKitRooms(config.live) : undefined,
       recordings: liveRecordings(config, pool, boss, log),
+      invites: config.publicUrl
+        ? {
+            repo: new PgLiveInviteRepository(pool),
+            publicUrl: new URL(config.publicUrl).origin,
+          }
+        : undefined,
       auth,
       log,
     },

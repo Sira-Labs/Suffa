@@ -96,6 +96,7 @@ describe('app links', () => {
     expect(apple.applinks.details[0]!.components.map((c) => c['/'])).toEqual([
       '/api/v1/auth/magic-link/verify',
       '/join/*',
+      '/live-invite/*',
     ]);
     const android = (await (
       await app.request('/api/v1/app-links/assetlinks.json')

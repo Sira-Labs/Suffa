@@ -21,12 +21,7 @@ import type {
   Room,
 } from 'livekit-client';
 import type { BackgroundProcessorWrapper } from '@livekit/track-processors';
-import {
-  BLUR_RADIUS,
-  MEDIAPIPE_ASSETS,
-  backgroundImage,
-  type BackgroundId,
-} from './backgrounds';
+import { BLUR_RADIUS, MEDIAPIPE_ASSETS, type CameraBackground } from './backgrounds';
 
 export type LiveSource = 'camera' | 'screen';
 
@@ -76,7 +71,7 @@ export interface LiveConnection {
   setCamera(on: boolean): Promise<void>;
   setScreenShare(on: boolean): Promise<void>;
   /** The background behind this person's camera picture; kept for when the camera starts. */
-  setBackground(id: BackgroundId): Promise<void>;
+  setBackground(background: CameraBackground): Promise<void>;
   raiseHand(up: boolean): Promise<void>;
   send(text: string): Promise<void>;
   /** Shows a person's camera or screen in `element`; returns the detach. */
@@ -120,7 +115,7 @@ class LiveKitConnection implements LiveConnection {
   private chat: LiveMessage[] = [];
   private status: LiveStatus = 'connected';
   private ended = false;
-  private background: BackgroundId = 'none';
+  private background: CameraBackground = { kind: 'none' };
   private snapshot: LiveState;
   private readonly encoder = new TextEncoder();
   private readonly decoder = new TextDecoder();
@@ -242,9 +237,9 @@ class LiveKitConnection implements LiveConnection {
     this.emit();
   }
 
-  async setBackground(id: BackgroundId): Promise<void> {
+  async setBackground(background: CameraBackground): Promise<void> {
     const previous = this.background;
-    this.background = id;
+    this.background = background;
     const track = this.cameraTrack();
     if (!track) return;
     try {
@@ -301,14 +296,15 @@ class LiveKitConnection implements LiveConnection {
   /** Puts the chosen background on a camera track. */
   private async applyBackground(track: LocalVideoTrack): Promise<void> {
     const current = track.getProcessor() as BackgroundProcessorWrapper | undefined;
-    if (this.background === 'none') {
+    const background = this.background;
+    if (background.kind === 'none') {
       if (current) await track.stopProcessor();
       return;
     }
-    const image = backgroundImage(this.background);
-    const options = image
-      ? ({ mode: 'virtual-background', imagePath: image } as const)
-      : ({ mode: 'background-blur', blurRadius: BLUR_RADIUS } as const);
+    const options =
+      background.kind === 'image'
+        ? ({ mode: 'virtual-background', imagePath: background.url } as const)
+        : ({ mode: 'background-blur', blurRadius: BLUR_RADIUS } as const);
     try {
       if (current && typeof current.switchTo === 'function') {
         await current.switchTo(options);

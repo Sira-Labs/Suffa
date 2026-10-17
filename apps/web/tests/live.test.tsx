@@ -14,7 +14,9 @@ import {
 } from '@/modules/live/LiveSessions';
 import { LiveRoom } from '@/modules/live/LiveRoom';
 import type { LiveSession } from '@/services/live/liveApi';
-import type { BackgroundId } from '@/services/live/backgrounds';
+import type { CameraBackground } from '@/services/live/backgrounds';
+import type { OwnBackground, OwnBackgroundStore } from '@/services/live/ownBackgrounds';
+import { OwnBackgroundError } from '@/services/live/ownBackgrounds';
 import { BackgroundError } from '@/services/live/liveRoom';
 import type {
   LiveConnection,
@@ -153,8 +155,10 @@ class FakeConnection implements LiveConnection {
   async setScreenShare(on: boolean) {
     this.calls.push(`screen:${on}`);
   }
-  async setBackground(id: BackgroundId) {
-    this.calls.push(`background:${id}`);
+  async setBackground(background: CameraBackground) {
+    this.calls.push(
+      `background:${background.kind === 'image' ? background.url : background.kind}`
+    );
   }
   async raiseHand(up: boolean) {
     this.calls.push(`hand:${up}`);
@@ -290,6 +294,29 @@ describe('planning live lessons', () => {
   });
 });
 
+/** Own background pictures, in memory instead of IndexedDB. */
+class FakeOwnBackgrounds implements OwnBackgroundStore {
+  pictures: OwnBackground[] = [];
+  refuse: OwnBackgroundError | null = null;
+  private next = 0;
+  async list() {
+    return [...this.pictures];
+  }
+  async add(file: File) {
+    if (this.refuse) throw this.refuse;
+    this.next += 1;
+    const picture = {
+      id: `00000000-0000-4000-8000-00000000000${this.next}`,
+      image: file,
+    };
+    this.pictures.push(picture);
+    return picture;
+  }
+  async remove(id: string) {
+    this.pictures = this.pictures.filter((p) => p.id !== id);
+  }
+}
+
 describe('the live room', () => {
   const teacher = person({
     identity: 't',
@@ -305,11 +332,17 @@ describe('the live room', () => {
   const join = async (
     connection: FakeConnection,
     screenShare = true,
-    backgrounds = false
+    backgrounds = false,
+    ownBackgrounds: OwnBackgroundStore = new FakeOwnBackgrounds()
   ) => {
     const connect = vi.fn(async () => connection);
     renderAt(
-      <LiveRoom connect={connect} screenShare={screenShare} backgrounds={backgrounds} />,
+      <LiveRoom
+        connect={connect}
+        screenShare={screenShare}
+        backgrounds={backgrounds}
+        ownBackgrounds={ownBackgrounds}
+      />,
       `/classes/${CLASS_ID}/live/${SESSION_ID}`,
       '/classes/:id/live/:session'
     );
@@ -455,7 +488,7 @@ describe('the live room', () => {
     expect(screen.getByText('Hintergrund: Keiner')).toBeTruthy();
     await userEvent.click(screen.getByText('Hintergrund: Keiner'));
     await userEvent.click(screen.getByRole('radio', { name: 'Moschee am Abend' }));
-    expect(connection.calls).toContain('background:mosque');
+    expect(connection.calls).toContain('background:/live/backgrounds/mosque.jpg');
     expect(screen.getByRole('radio', { name: 'Moschee am Abend' })).toBeChecked();
     expect(localStorage.getItem('suffa.liveBackground')).toBe('mosque');
     cleanup();
@@ -463,7 +496,7 @@ describe('the live room', () => {
     // The next lesson starts with the same background.
     const next = new FakeConnection({ people: [teacher], canPublish: true });
     await join(next, true, true);
-    expect(next.calls).toEqual(['background:mosque']);
+    expect(next.calls).toEqual(['background:/live/backgrounds/mosque.jpg']);
     expect(screen.getByText('Hintergrund: Moschee am Abend')).toBeTruthy();
     localStorage.removeItem('suffa.liveBackground');
   });
@@ -485,6 +518,107 @@ describe('the live room', () => {
       true
     );
     expect(screen.queryByText(/Hintergrund:/)).toBeNull();
+  });
+
+  describe('own background pictures', () => {
+    let made = 0;
+    const revoked: string[] = [];
+    beforeEach(() => {
+      made = 0;
+      revoked.length = 0;
+      localStorage.removeItem('suffa.liveBackground');
+      // jsdom has no object URLs.
+      URL.createObjectURL = () => `blob:picture-${++made}`;
+      URL.revokeObjectURL = (url: string) => {
+        revoked.push(url);
+      };
+    });
+    afterEach(() => {
+      // Leave the room (giving its URLs back) before object URLs go again.
+      cleanup();
+      Reflect.deleteProperty(URL, 'createObjectURL');
+      Reflect.deleteProperty(URL, 'revokeObjectURL');
+      localStorage.removeItem('suffa.liveBackground');
+    });
+    const picture = () => new File(['jpeg'], 'garten.jpg', { type: 'image/jpeg' });
+
+    it('lets the teacher add a picture of their own, use it and delete it again', async () => {
+      server({ enabled: true, sessions: [] });
+      const store = new FakeOwnBackgrounds();
+      const connection = new FakeConnection({ people: [teacher], canPublish: true });
+      await join(connection, true, true, store);
+      await userEvent.click(screen.getByText('Hintergrund: Keiner'));
+      expect(screen.getByText(/Eigene Bilder bleiben auf diesem Gerät/)).toBeTruthy();
+
+      await userEvent.upload(screen.getByLabelText('Eigenes Bild hinzufügen'), picture());
+      // In use at once, and remembered for the next lesson.
+      expect(await screen.findByRole('radio', { name: 'Eigenes Bild 1' })).toBeChecked();
+      expect(connection.calls).toContain('background:blob:picture-1');
+      expect(localStorage.getItem('suffa.liveBackground')).toBe(
+        `own:${store.pictures[0]!.id}`
+      );
+
+      await userEvent.click(
+        screen.getByRole('button', { name: 'Eigenes Bild 1 löschen' })
+      );
+      // Deleting the picture in use takes the camera back to no background first.
+      await waitFor(() => expect(store.pictures).toEqual([]));
+      expect(connection.calls.at(-1)).toBe('background:none');
+      expect(screen.queryByRole('radio', { name: 'Eigenes Bild 1' })).toBeNull();
+      expect(screen.getByRole('radio', { name: 'Keiner' })).toBeChecked();
+      expect(revoked).toEqual(['blob:picture-1']);
+      expect(localStorage.getItem('suffa.liveBackground')).toBe('none');
+    });
+
+    it('brings back a picture of their own in the next lesson, unless it was deleted', async () => {
+      server({ enabled: true, sessions: [] });
+      const store = new FakeOwnBackgrounds();
+      await store.add(picture());
+      localStorage.setItem('suffa.liveBackground', `own:${store.pictures[0]!.id}`);
+      const connection = new FakeConnection({ people: [teacher], canPublish: true });
+      await join(connection, true, true, store);
+      await waitFor(() =>
+        expect(connection.calls).toEqual(['background:blob:picture-1'])
+      );
+      expect(screen.getByText('Hintergrund: Eigenes Bild 1')).toBeTruthy();
+      cleanup();
+
+      await store.remove(store.pictures[0]!.id);
+      const next = new FakeConnection({ people: [teacher], canPublish: true });
+      await join(next, true, true, store);
+      expect(await screen.findByText('Hintergrund: Keiner')).toBeTruthy();
+      expect(next.calls).toEqual([]);
+    });
+
+    it('says why a picture cannot become a background', async () => {
+      server({ enabled: true, sessions: [] });
+      const store = new FakeOwnBackgrounds();
+      store.refuse = new OwnBackgroundError('size');
+      const connection = new FakeConnection({ people: [teacher], canPublish: true });
+      await join(connection, true, true, store);
+      await userEvent.click(screen.getByText('Hintergrund: Keiner'));
+      await userEvent.upload(screen.getByLabelText('Eigenes Bild hinzufügen'), picture());
+      expect(
+        await screen.findByText('Das Bild ist zu groß (höchstens 15 MB).')
+      ).toBeTruthy();
+      expect(connection.calls).toEqual([]);
+    });
+
+    it('offers no more uploads once six pictures are kept', async () => {
+      server({ enabled: true, sessions: [] });
+      const store = new FakeOwnBackgrounds();
+      for (let i = 0; i < 6; i += 1) await store.add(picture());
+      await join(
+        new FakeConnection({ people: [teacher], canPublish: true }),
+        true,
+        true,
+        store
+      );
+      await userEvent.click(screen.getByText('Hintergrund: Keiner'));
+      expect(await screen.findByRole('radio', { name: 'Eigenes Bild 6' })).toBeTruthy();
+      expect(screen.queryByLabelText('Eigenes Bild hinzufügen')).toBeNull();
+      expect(screen.getByText(/Du hast schon 6 eigene Bilder/)).toBeTruthy();
+    });
   });
 
   it('says so when the background cannot be switched on', async () => {

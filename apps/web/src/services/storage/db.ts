@@ -8,6 +8,7 @@
  * change to syncable tables until it has been pushed.
  */
 import Dexie, { type Table } from 'dexie';
+import type { OwnBackgroundRecord } from '@/services/live/ownBackgrounds';
 import type {
   DailyCheckIn,
   DiscoverProgress,
@@ -53,6 +54,8 @@ export class AppDatabase extends Dexie {
   unit_enrollments!: Table<UnitEnrollment, string>;
   daily_checkins!: Table<DailyCheckIn, string>;
   discover_progress!: Table<DiscoverProgress, string>;
+  /** Own camera backgrounds of the live room; device only, never synced (story 18.3). */
+  live_backgrounds!: Table<OwnBackgroundRecord, string>;
 
   constructor(name = 'bayna-yadayk') {
     super(name);
@@ -99,6 +102,10 @@ export class AppDatabase extends Dexie {
             .bulkAdd(ids.map((recordId) => ({ table, recordId, queuedAt })));
         }
       });
+    // v8: own camera backgrounds of the live room (device only, not synced).
+    this.version(8).stores({
+      live_backgrounds: 'id, createdAt',
+    });
   }
 }
 

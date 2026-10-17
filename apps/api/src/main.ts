@@ -486,6 +486,8 @@ async function main(): Promise<void> {
           auth,
           log,
           listening: new PgListeningRepository(pool),
+          recordingLive: (mediaId) =>
+            new PgLiveRecordingRepository(pool).sessionLive(mediaId, new Date()),
         }
       : undefined,
     assignments: {

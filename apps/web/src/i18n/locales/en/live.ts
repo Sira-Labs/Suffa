@@ -106,7 +106,7 @@ export const live: Messages<typeof de> = {
     cameraOn: 'Camera on',
     cameraOff: 'Camera off',
     cameraHint:
-      'The teacher sees your camera, and everyone in the room while you have the floor. Your picture is never recorded.',
+      'Your camera goes to everyone in the room. It is shown to the teacher, and to the others while you have the floor. Your picture is never recorded.',
     shareScreen: 'Share screen',
     stopShare: 'Stop sharing',
     noScreenShare:

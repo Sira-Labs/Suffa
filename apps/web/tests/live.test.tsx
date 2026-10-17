@@ -458,7 +458,7 @@ describe('the live room', () => {
     await join(connection);
     expect(screen.queryByRole('button', { name: 'Mikrofon an' })).toBeNull();
     expect(screen.getByRole('button', { name: /Melden/ })).toBeTruthy();
-    expect(screen.getByText(/Deine Kamera sieht die Lehrkraft/)).toBeTruthy();
+    expect(screen.getByText(/Deine Kamera geht an alle im Raum/)).toBeTruthy();
     await userEvent.click(screen.getByRole('button', { name: 'Kamera an' }));
     expect(connection.calls).toEqual(['camera:true']);
 
@@ -496,7 +496,7 @@ describe('the live room', () => {
     expect(connection.attached).toContainEqual({ identity: 'y', source: 'camera' });
     const people = screen.getByRole('region', { name: /im Raum/ });
     expect(within(people).getByText('Kamera an')).toBeTruthy();
-    expect(screen.queryByText(/Deine Kamera sieht die Lehrkraft/)).toBeNull();
+    expect(screen.queryByText(/Deine Kamera geht an alle im Raum/)).toBeNull();
   });
 
   it('lets anyone show the teacher full screen and come back', async () => {

@@ -104,7 +104,7 @@ export const live = {
     cameraOn: 'Kamera an',
     cameraOff: 'Kamera aus',
     cameraHint:
-      'Deine Kamera sieht die Lehrkraft, und solange du das Wort hast, alle im Raum. Dein Bild wird nie aufgenommen.',
+      'Deine Kamera geht an alle im Raum. Gezeigt wird sie der Lehrkraft und, solange du das Wort hast, auch den anderen. Dein Bild wird nie aufgenommen.',
     shareScreen: 'Bildschirm teilen',
     stopShare: 'Teilen beenden',
     noScreenShare:

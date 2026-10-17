@@ -31,7 +31,7 @@ Option 2, decided with the owner ("Auf dem Server").
   - The picture is the teacher's stage as in the room: the shared screen with the teacher's
     camera small in the corner, else the camera.
   - The sound is every voice that may speak: the teacher, the screen's sound, and learners
-    while they have the floor. Listeners publish nothing, so they are not in it.
+    while they have the floor. Listeners publish no sound, so they are not in it.
   - A learner's camera is never recorded, also when the session allows learner cameras.
   - Names and the chat are not in the picture.
 - **Our recording page:** Egress opens `live-record.html` (a small page of the web app, no app

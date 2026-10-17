@@ -160,20 +160,32 @@ export function LiveSessionsTeacher({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [invites, setInvites] = useState<Record<string, ShownInvite>>({});
+  // Sessions whose link is being made: a second click would replace the first link.
+  const [inviting, setInviting] = useState<ReadonlySet<string>>(new Set());
 
   const toggleInvite = async (session: LiveSession) => {
     if (invites[session.id]) {
       setInvites(({ [session.id]: _hidden, ...rest }) => rest);
       return;
     }
+    if (inviting.has(session.id)) return;
+    setInviting((busy) => new Set(busy).add(session.id));
     setError(null);
-    const result = await api.invite(classId, session.id);
-    if (!result.ok) {
-      setError(result.message);
-      return;
+    try {
+      const result = await api.invite(classId, session.id);
+      if (!result.ok) {
+        setError(result.message);
+        return;
+      }
+      const qr = await QRCode.toDataURL(result.value.url, { margin: 1, width: 200 });
+      setInvites((shown) => ({ ...shown, [session.id]: { ...result.value, qr } }));
+    } finally {
+      setInviting((busy) => {
+        const next = new Set(busy);
+        next.delete(session.id);
+        return next;
+      });
     }
-    const qr = await QRCode.toDataURL(result.value.url, { margin: 1, width: 200 });
-    setInvites((shown) => ({ ...shown, [session.id]: { ...result.value, qr } }));
   };
 
   const run = async (action: () => Promise<{ ok: boolean; message?: string }>) => {
@@ -279,6 +291,7 @@ export function LiveSessionsTeacher({
                     )}
                     <button
                       className="btn"
+                      disabled={inviting.has(s.id)}
                       aria-expanded={Boolean(invites[s.id])}
                       onClick={() => void toggleInvite(s)}
                     >

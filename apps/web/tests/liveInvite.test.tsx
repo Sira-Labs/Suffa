@@ -116,7 +116,8 @@ describe('inviting to a live session', () => {
     );
     render(<RouterProvider router={router} />);
     const item = (await screen.findByText('Lektion 5')).closest('li') as HTMLElement;
-    await userEvent.click(within(item).getByRole('button', { name: 'Einladen' }));
+    // A double click makes one link, not two that replace each other.
+    await userEvent.dblClick(within(item).getByRole('button', { name: 'Einladen' }));
 
     const qr = await within(item).findByAltText(
       'QR-Code zum Live-Unterricht „Lektion 5“'
@@ -129,9 +130,11 @@ describe('inviting to a live session', () => {
       within(item).getByText(/Gilt bis .*nur für diesen Live-Unterricht/)
     ).toBeTruthy();
     expect(within(item).getByText(/du gibst ihn unter Mitglieder frei/)).toBeTruthy();
-    expect(requests).toContain(
-      `POST /api/v1/classes/${CLASS_ID}/live/${SESSION_ID}/invite`
-    );
+    expect(
+      requests.filter(
+        (r) => r === `POST /api/v1/classes/${CLASS_ID}/live/${SESSION_ID}/invite`
+      )
+    ).toHaveLength(1);
 
     await userEvent.click(within(item).getByRole('button', { name: 'Link kopieren' }));
     expect(writeText).toHaveBeenCalledWith(

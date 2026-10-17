@@ -20,8 +20,12 @@ offline, like the rest of the app (ADR-0006).
   _Meer_, _Minze_, _Lavendel_, _Sand_. They set the same design tokens as `global.css`; Oase is
   the stylesheet itself, the others are inline custom properties on `<html>`. A test checks
   WCAG AA contrast for every token pair, and the axe browser test audits pages in each scheme.
-- **Learners follow their class** — the active class they joined last — unless they pick a
-  scheme themselves (`settings.palette`, synced; `class` or none follows the class).
+- **Learners follow their class** unless they pick a scheme themselves (`settings.palette`,
+  synced; `class` or none follows the class). In several classes that is the **main class**
+  (update 2026-10-17): the one the learner picks on "Klassen" (`settings.mainClassId`, synced),
+  else the active class they joined first, so joining another class never changes the app.
+  Course, colours and unlocks follow the main class only; "Heute" shows a card for every class,
+  the main class first, and assignments, recordings and live lessons stay there in each.
 - **Practice areas** (alphabet, vocabulary, reading, writing, speaking, roots, conjugation,
   exam) are open now, from a unit of the class's course, or closed until the teacher opens
   them. "From unit N" counts within the course (Medina lesson 3 is unit 103). The default holds

@@ -84,8 +84,20 @@ export class PgLiveInviteRepository implements LiveInviteRepository {
     });
   }
 
-  async preview(token: string): Promise<LiveInvitePreview | null> {
-    const { rows } = await this.pool.query<{
+  preview(token: string): Promise<LiveInvitePreview | null> {
+    return this.find(this.pool, token);
+  }
+
+  /**
+   * The valid invite of a token. `lock` holds its invite and session rows until the end of
+   * the transaction, so neither a new link nor the session's end can slip in between.
+   */
+  private async find(
+    db: Pick<pg.Pool, 'query'>,
+    token: string,
+    lock = false
+  ): Promise<LiveInvitePreview | null> {
+    const { rows } = await db.query<{
       class_id: string;
       class_name: string;
       teacher_name: string | null;
@@ -102,7 +114,8 @@ export class PgLiveInviteRepository implements LiveInviteRepository {
          join live_sessions s on s.id = i.session_id
          join classes c on c.id = s.class_id
         where i.token_hash = $1 and s.status in ('scheduled', 'live')
-          and c.archived_at is null and ${EXPIRES} > $2`,
+          and c.archived_at is null and ${EXPIRES} > $2
+        ${lock ? 'for share of i, s' : ''}`,
       [hashToken(token), this.now()]
     );
     const r = rows[0];
@@ -120,9 +133,9 @@ export class PgLiveInviteRepository implements LiveInviteRepository {
   }
 
   async join(actor: LiveActor, token: string): Promise<LiveInviteJoin> {
-    const invite = await this.preview(token);
-    if (!invite) return { ok: false, reason: 'invalid_invite' };
     return inTransaction(this.pool, async (db) => {
+      const invite = await this.find(db, token, true);
+      if (!invite) return { ok: false, reason: 'invalid_invite' };
       // As with the class's link: an existing membership (or teacher role) stays as it is.
       const { rows } = await db.query<{ status: MemberStatus; inserted: boolean }>(
         `insert into class_members (class_id, user_id, class_role, status)

@@ -109,7 +109,13 @@ export class LocalOwnBackgrounds implements OwnBackgroundStore {
       type: image.type || 'image/jpeg',
       createdAt: this.now().toISOString(),
     };
-    await this.table.add(record);
+    // Counted again where it is written: another tab may have added one meanwhile.
+    await this.table.db.transaction('rw', this.table, async () => {
+      if ((await this.table.count()) >= MAX_OWN_BACKGROUNDS) {
+        throw new OwnBackgroundError('full');
+      }
+      await this.table.add(record);
+    });
     return { id: record.id, image };
   }
 

@@ -58,6 +58,15 @@ Constraints that already hold in Suffa:
    learners' cameras off: the floor then grants the microphone only, enforced by LiveKit.
 3. Recording into the class's recordings (transcript, chapters, "ask about this minute"), and
    a push reminder before a session starts.
+4. Invite links to one session (update 2026-10-17): the teacher shows a link with its QR code
+   for a planned or live session. It holds while the session is listed (a planned one until
+   its end plus 12 hours, a live one until its end plus the hour of overrun); a new link
+   replaces the session's old one, and the class's own invite link stays as it is. Opening
+   it, a member of the class goes to the session; anyone else asks to join the class (pending,
+   as with the class link) and comes in through the same link once the teacher approves. It
+   grants no guest access: only members get a room token, and sisters' or brothers' sessions
+   still check the learner's section. Only the token's SHA-256 is stored, and error reports
+   name the page without it.
 
 ## Consequences
 

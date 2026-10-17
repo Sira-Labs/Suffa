@@ -12,7 +12,7 @@ build machine does.
 | Sign-in     | Magic link as for the web; the link opens the app (Universal / App Links), the app verifies it and keeps the session as a bearer token in the Keychain / Keystore (`capacitor-secure-storage-plugin`). |
 | API         | `/api/…` and `/media/…` go to `VITE_SUFFA_API_ORIGIN` (`apps/web/src/native/`); the server answers CORS only for `SUFFA_APP_ORIGINS`.                                                                  |
 | Reminders   | With `SUFFA_FCM_SERVICE_ACCOUNT` on the server: FCM push like web push. Without: the daily reminder is planned on the device (`@capacitor/local-notifications`), a week ahead, quiet hours respected.  |
-| Invitations | `https://<host>/join/<code>` opens the app on the invitation page.                                                                                                                                     |
+| Invitations | `https://<host>/join/<code>` (a class) and `https://<host>/live-invite/<code>` (a live lesson) open the app on the invitation page.                                                                    |
 
 The web code reaches plugins through `window.Capacitor.Plugins` at run time, so the web
 bundle has no native dependency and behaves as the PWA in a browser.
@@ -74,10 +74,10 @@ extra. Lock-screen controls come from the Media Session API in the web code.
 
 ## App links
 
-| Platform | In the app project                                                                                                          | On the server                                                                                              |
-| -------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| iOS      | Capability _Associated Domains_: `applinks:<host>`                                                                          | `SUFFA_IOS_APP_IDS=<TEAMID>.org.siralabs.suffa` → `/.well-known/apple-app-site-association`                |
-| Android  | Intent filter with `android:autoVerify="true"` for `https://<host>` and the paths `/api/v1/auth/magic-link/verify`, `/join` | `SUFFA_ANDROID_APP_LINKS=org.siralabs.suffa:<SHA-256 of the signing key>` → `/.well-known/assetlinks.json` |
+| Platform | In the app project                                                                                                                          | On the server                                                                                              |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| iOS      | Capability _Associated Domains_: `applinks:<host>`                                                                                          | `SUFFA_IOS_APP_IDS=<TEAMID>.org.siralabs.suffa` → `/.well-known/apple-app-site-association`                |
+| Android  | Intent filter with `android:autoVerify="true"` for `https://<host>` and the paths `/api/v1/auth/magic-link/verify`, `/join`, `/live-invite` | `SUFFA_ANDROID_APP_LINKS=org.siralabs.suffa:<SHA-256 of the signing key>` → `/.well-known/assetlinks.json` |
 
 Android intent filter (in `android/app/src/main/AndroidManifest.xml`, inside the main
 activity):
@@ -89,6 +89,7 @@ activity):
   <category android:name="android.intent.category.BROWSABLE" />
   <data android:scheme="https" android:host="suffa.example.org" android:path="/api/v1/auth/magic-link/verify" />
   <data android:scheme="https" android:host="suffa.example.org" android:pathPrefix="/join/" />
+  <data android:scheme="https" android:host="suffa.example.org" android:pathPrefix="/live-invite/" />
 </intent-filter>
 ```
 

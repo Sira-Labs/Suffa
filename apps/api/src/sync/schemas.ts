@@ -86,6 +86,8 @@ export const SYNC_SCHEMAS = {
     meaningLanguage: z.enum(['de', 'en']).nullish(),
     // Colour scheme (story 18.1): 'class' or none follows the class, else one of the palettes.
     palette: z.enum(['class', ...PALETTE_IDS]).nullish(),
+    // The class that shapes the app for a learner in several (none: the first joined).
+    mainClassId: z.string().uuid().nullish(),
   }),
   user_vocab: z.object({
     ...base,
@@ -182,6 +184,7 @@ export const PRESERVED_WHEN_MISSING: Partial<Record<SyncTableName, ReadonlySet<s
       'uiLanguage',
       'meaningLanguage',
       'palette',
+      'mainClassId',
     ]),
     srs_cards: new Set(['stability', 'difficulty']),
   };

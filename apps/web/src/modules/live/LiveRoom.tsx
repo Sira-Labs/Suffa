@@ -544,7 +544,15 @@ function Room({
   };
   const removeBackground = async (id: string) => {
     if (background === ownChoice(id) && !(await pickBackground('none'))) return;
-    await own.remove(id).catch(() => setNotice(t('room.ownBackgroundError.remove')));
+    // Busy throughout, so the picture cannot be picked while its URL goes.
+    setBackgroundBusy(true);
+    try {
+      await own.remove(id);
+    } catch {
+      setNotice(t('room.ownBackgroundError.remove'));
+    } finally {
+      setBackgroundBusy(false);
+    }
   };
   const floor = async (person: LivePerson, allowed: boolean) => {
     const result = await api.floor(classId, session.id, person.identity, allowed);

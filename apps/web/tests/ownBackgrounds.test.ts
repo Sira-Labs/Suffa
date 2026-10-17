@@ -76,6 +76,14 @@ describe('own camera backgrounds', () => {
     expect(fitted).toHaveLength(MAX_OWN_BACKGROUNDS);
   });
 
+  it('keeps to six pictures when two adds meet, as from two tabs', async () => {
+    const own = store();
+    for (let i = 0; i < MAX_OWN_BACKGROUNDS - 1; i += 1) await own.add(picture());
+    const results = await Promise.allSettled([own.add(picture()), own.add(picture())]);
+    expect(results.map((r) => r.status).sort()).toEqual(['fulfilled', 'rejected']);
+    expect(await own.list()).toHaveLength(MAX_OWN_BACKGROUNDS);
+  });
+
   it('says a picture is unreadable when the browser cannot decode it', async () => {
     const own = store(async () => {
       throw new Error('InvalidStateError');

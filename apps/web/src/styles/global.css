@@ -3064,6 +3064,14 @@ button.quiz-option:disabled {
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+.live-invite {
+  border-top: 1px solid var(--border);
+  padding-top: 0.75rem;
+}
+.live-invite img {
+  border-radius: var(--radius-sm);
+  background: #fff;
+}
 
 .live-room {
   display: grid;

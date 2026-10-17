@@ -11,6 +11,9 @@
  *   POST   /classes/:id/live/:session/floor     { identity, allowed } → 204        (class:manage)
  *   POST   /classes/:id/live/:session/recording → 201, the session, now recorded (class:manage)
  *   DELETE /classes/:id/live/:session/recording → the session, recording stopped (class:manage)
+ *   POST   /classes/:id/live/:session/invite    → 201 { url, expiresAt }          (class:manage)
+ *   GET    /live-invites/:token                 → class, teacher and session       (class:join)
+ *   POST   /live-invites/:token/join            → { classId, sessionId, status }   (class:join)
  *
  * Only active members of the class get a token, and only while the session is live. The
  * teacher's token may publish and moderate; a learner's may only listen, chat and raise a
@@ -27,6 +30,9 @@
  * Recording (Live 3, ADR-0029): the teacher records the room on the server into the class's
  * recordings; the list says whether recording is set up (`recordingEnabled`), so learners are
  * told before they join. Ending a session stops its recording.
+ *
+ * Invite links (see invites.ts): one link per session, for its time; opening it, a member goes
+ * to the session and anyone else asks to join the class (pending until the teacher approves).
  */
 import { Hono, type Context } from 'hono';
 import { z } from 'zod';
@@ -40,6 +46,7 @@ import {
   type LiveActionResult,
   type LiveSessionRepository,
 } from './repository.js';
+import type { LiveInviteRepository } from './invites.js';
 import type { LiveRecordings } from './recording.js';
 import type { LiveRooms } from './rooms.js';
 
@@ -50,6 +57,8 @@ export interface LiveRouteDeps {
   rooms: LiveRooms | undefined;
   /** Recording on the server; undefined while LiveKit Egress is not set up. */
   recordings?: LiveRecordings;
+  /** Invite links to a session; undefined without a public URL to point them at. */
+  invites?: { repo: LiveInviteRepository; publicUrl: string };
   auth: AuthResolver;
   log: AuthorizeLog & { warn(obj: object, msg: string): void };
   now?: () => Date;
@@ -68,6 +77,7 @@ const CreateBody = z
   })
   .strict();
 const FloorBody = z.object({ identity: Uuid, allowed: z.boolean() }).strict();
+const Token = z.string().regex(/^[A-Za-z0-9_-]{20,64}$/);
 
 const STATUS: Record<Exclude<LiveActionResult, { ok: true }>['reason'], 404 | 409> = {
   not_found: 404,
@@ -87,6 +97,7 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
   };
   const manage = authorize(deps.auth, 'class:manage', deps.log, classScope);
   const read = authorize(deps.auth, 'class:read', deps.log, classScope);
+  const join = authorize(deps.auth, 'class:join', deps.log);
 
   const actorOf = (c: Context<ActorEnv>) => ({
     id: c.get('actor').id,
@@ -265,6 +276,43 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
     }
     const session = await deps.sessions.get(c.req.param('id'), found.session.id);
     return c.json({ session });
+  });
+
+  app.post('/classes/:id/live/:session/invite', manage, async (c) => {
+    if (!deps.invites) return c.json({ error: 'invites_unavailable' }, 503);
+    const id = sessionParam(c);
+    if (!id.success) return c.json({ error: 'not_found' }, 404);
+    const invite = await deps.invites.repo.create(actorOf(c), c.req.param('id'), id.data);
+    if (!invite) return c.json({ error: 'not_found' }, 404);
+    c.header('Cache-Control', 'no-store');
+    return c.json(
+      {
+        url: `${deps.invites.publicUrl}/live-invite/${invite.token}`,
+        expiresAt: invite.expiresAt,
+      },
+      201
+    );
+  });
+
+  app.get('/live-invites/:token', join, async (c) => {
+    const token = Token.safeParse(c.req.param('token'));
+    const preview =
+      token.success && deps.invites ? await deps.invites.repo.preview(token.data) : null;
+    if (!preview) return c.json({ error: 'invalid_invite' }, 404);
+    c.header('Cache-Control', 'no-store');
+    return c.json(preview);
+  });
+
+  app.post('/live-invites/:token/join', join, async (c) => {
+    const token = Token.safeParse(c.req.param('token'));
+    if (!token.success || !deps.invites) return c.json({ error: 'invalid_invite' }, 404);
+    const result = await deps.invites.repo.join(actorOf(c), token.data);
+    if (!result.ok) return c.json({ error: result.reason }, 404);
+    return c.json({
+      classId: result.classId,
+      sessionId: result.sessionId,
+      status: result.status,
+    });
   });
 
   return app;

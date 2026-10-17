@@ -11,7 +11,11 @@ export interface AppLinks {
 }
 
 /** Paths the app opens: magic-link sign-in and class invitations. */
-export const APP_LINK_PATHS = ['/api/v1/auth/magic-link/verify', '/join/*'];
+export const APP_LINK_PATHS = [
+  '/api/v1/auth/magic-link/verify',
+  '/join/*',
+  '/live-invite/*',
+];
 
 export function createAppLinkRoutes(links: AppLinks): Hono {
   const app = new Hono();

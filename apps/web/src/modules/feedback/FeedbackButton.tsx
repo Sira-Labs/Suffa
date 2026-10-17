@@ -187,6 +187,8 @@ function FeedbackForm({ api, onClose }: { api: FeedbackApi; onClose: () => void 
  * a sign-in link its code in the query, so both are cut off.
  */
 export function reportedPage(pathname: string, search: string): string {
+  // Invite tokens are secrets: the report names the page, not the link.
   if (/^\/join\//.test(pathname)) return '/join/…';
+  if (/^\/live-invite\//.test(pathname)) return '/live-invite/…';
   return /^\/login(\/|$)/.test(pathname) ? pathname : pathname + search;
 }

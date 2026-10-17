@@ -31,6 +31,26 @@ export const live = {
     join: 'Beitreten',
     recording: 'Wird aufgezeichnet',
     camerasOff: 'Kameras der Lernenden aus',
+    invite: 'Einladen',
+    hideInvite: 'Einladung ausblenden',
+  },
+  invite: {
+    qrAlt: 'QR-Code zum Live-Unterricht „{{title}}“',
+    copy: 'Link kopieren',
+    copied: 'Kopiert',
+    share: 'Teilen',
+    validUntil: 'Gilt bis {{date}}, nur für diesen Live-Unterricht.',
+    note: 'Wer schon in der Klasse ist, kommt damit direkt zum Unterricht. Wer neu ist, fragt damit den Beitritt zur Klasse an; du gibst ihn unter Mitglieder frei.',
+    title: 'Einladung zum Live-Unterricht',
+    invited:
+      '{{teacher}} lädt dich zum Live-Unterricht <1>{{title}}</1> der Klasse {{name}} ein.',
+    invitedNoTeacher:
+      'Du bist zum Live-Unterricht <1>{{title}}</1> der Klasse {{name}} eingeladen.',
+    liveNow: 'Läuft gerade.',
+    take: 'Teilnehmen',
+    pending:
+      'Deine Anfrage zur Klasse {{name}} ist bei der Lehrkraft. Sobald sie dich freigibt, kommst du über diesen Link in den Unterricht.',
+    tryAgain: 'Noch einmal versuchen',
   },
   banner: {
     live: 'Live-Unterricht läuft: {{title}}',

@@ -129,6 +129,9 @@ export const errors: Messages<typeof de> = {
     quota_exceeded:
       'This class does not have enough storage left for a recording (50 GB). Delete old recordings.',
     recording_failed: 'The recording could not start. Please try again in a moment.',
+    invalid_invite:
+      'This invite link no longer works. Please ask the teacher for a new one.',
+    invites_unavailable: 'Invite links are not set up on this server yet.',
   },
   quiz: {
     running: 'A quiz is already running in this class.',

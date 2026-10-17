@@ -204,6 +204,8 @@ describe('app links', () => {
     const deps = { fetch: fakeBase().base, navigate, signedIn: async () => undefined };
     expect(await openDeepLink(`${API}/join/K7X`, deps)).toBe('navigated');
     expect(navigate).toHaveBeenCalledWith('/join/K7X');
+    expect(await openDeepLink(`${API}/live-invite/L1V3`, deps)).toBe('navigated');
+    expect(navigate).toHaveBeenCalledWith('/live-invite/L1V3');
     expect(await openDeepLink(`${API}/admin`, deps)).toBe('ignored');
     expect(await openDeepLink('not a url', deps)).toBe('ignored');
   });

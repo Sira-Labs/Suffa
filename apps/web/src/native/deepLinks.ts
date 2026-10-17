@@ -68,7 +68,7 @@ export async function openDeepLink(
     return 'signed-in';
   }
 
-  if (url.pathname.startsWith('/join/')) {
+  if (url.pathname.startsWith('/join/') || url.pathname.startsWith('/live-invite/')) {
     deps.navigate(url.pathname + url.search);
     return 'navigated';
   }

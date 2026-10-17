@@ -3,7 +3,7 @@
  * the teacher's camera small in the corner while sharing, story 18.3), learners who have the
  * floor as small tiles, the people with raised hands, the chat and the controls. The teacher
  * gives and takes the floor; learners raise their hand. Whoever may use the camera can put a
- * background behind it.
+ * background behind it: one of ours, or a picture of their own kept on this device.
  *
  * Recording (ADR-0029): the teacher starts and stops it; everyone in the room sees
  * „Aufnahme läuft“ while it runs and is told before joining that the lesson may be recorded.
@@ -18,11 +18,21 @@ import { SessionTags } from './LiveSessions';
 import {
   BACKGROUNDS,
   backgroundImage,
+  cameraBackground,
   canUseBackgrounds,
+  isOwnChoice,
+  ownChoice,
+  ownIdOf,
   rememberBackground,
   rememberedBackground,
-  type BackgroundId,
+  type BackgroundChoice,
 } from '@/services/live/backgrounds';
+import {
+  deviceBackgrounds,
+  MAX_OWN_BACKGROUNDS,
+  OwnBackgroundError,
+  type OwnBackgroundStore,
+} from '@/services/live/ownBackgrounds';
 import {
   BackgroundError,
   canShareScreen,
@@ -147,21 +157,84 @@ function Stage({
   );
 }
 
-/** Blur or a picture behind the camera, as a row of small previews. */
+interface OwnPicture {
+  id: string;
+  /** An object URL of the picture, for the preview and the camera. */
+  url: string;
+}
+
+/**
+ * The person's own background pictures, each with an object URL; null while loading. The URLs
+ * are given back when a picture is deleted or the room is left.
+ */
+function useOwnBackgrounds(store: OwnBackgroundStore) {
+  const [pictures, setPictures] = useState<OwnPicture[] | null>(null);
+  const urls = useRef(new Map<string, string>());
+  useEffect(() => {
+    let active = true;
+    const known = urls.current;
+    store
+      .list()
+      .then((list) => {
+        if (!active) return;
+        const loaded = list.map((b) => ({ id: b.id, url: URL.createObjectURL(b.image) }));
+        for (const picture of loaded) known.set(picture.id, picture.url);
+        setPictures(loaded);
+      })
+      // Storage unavailable (private mode): only our backgrounds.
+      .catch(() => active && setPictures([]));
+    return () => {
+      active = false;
+      for (const url of known.values()) URL.revokeObjectURL(url);
+      known.clear();
+    };
+  }, [store]);
+  const add = async (file: File): Promise<OwnPicture> => {
+    const added = await store.add(file);
+    const picture = { id: added.id, url: URL.createObjectURL(added.image) };
+    urls.current.set(picture.id, picture.url);
+    setPictures((current) => [...(current ?? []), picture]);
+    return picture;
+  };
+  const remove = async (id: string): Promise<void> => {
+    await store.remove(id);
+    const url = urls.current.get(id);
+    if (url) URL.revokeObjectURL(url);
+    urls.current.delete(id);
+    setPictures((current) => current?.filter((p) => p.id !== id) ?? current);
+  };
+  const urlOf = (id: string) => urls.current.get(id);
+  return { pictures, add, remove, urlOf };
+}
+
+/**
+ * Blur or a picture behind the camera, as a row of small previews: ours, then the person's
+ * own, each of those with a button to delete it, and a way to add one.
+ */
 function BackgroundPicker({
   value,
   busy,
+  own,
   onChange,
+  onAdd,
+  onRemove,
 }: {
-  value: BackgroundId;
+  value: BackgroundChoice;
   busy: boolean;
-  onChange: (id: BackgroundId) => void;
+  own: OwnPicture[];
+  onChange: (choice: BackgroundChoice) => void;
+  onAdd: (file: File) => void;
+  onRemove: (id: string) => void;
 }) {
   const { t } = useTranslation('live');
+  const ownName = (id: string) =>
+    t('backgrounds.own', { n: own.findIndex((p) => p.id === id) + 1 });
+  const label = isOwnChoice(value) ? ownName(ownIdOf(value)) : t(`backgrounds.${value}`);
+  const full = own.length >= MAX_OWN_BACKGROUNDS;
   return (
     <details className="card live-backgrounds">
       <summary>
-        {t('room.background')}: {t(`backgrounds.${value}`)}
+        {t('room.background')}: {label}
       </summary>
       <fieldset className="live-background-list" disabled={busy}>
         <legend className="visually-hidden">{t('room.background')}</legend>
@@ -185,8 +258,63 @@ function BackgroundPicker({
             </label>
           );
         })}
+        {own.map((picture) => {
+          const choice = ownChoice(picture.id);
+          const name = ownName(picture.id);
+          return (
+            <div key={picture.id} className="live-background-own">
+              <label className="live-background">
+                <input
+                  type="radio"
+                  name="live-background"
+                  value={choice}
+                  checked={value === choice}
+                  onChange={() => onChange(choice)}
+                />
+                <span
+                  className="live-background-preview"
+                  style={{ backgroundImage: `url(${picture.url})` }}
+                  aria-hidden="true"
+                />
+                <span>{name}</span>
+              </label>
+              <button
+                type="button"
+                className="btn btn-small live-background-remove"
+                aria-label={t('room.removeBackground', { name })}
+                onClick={() => onRemove(picture.id)}
+              >
+                ×
+              </button>
+            </div>
+          );
+        })}
       </fieldset>
-      <p className="muted live-background-note">{t('room.backgroundNote')}</p>
+      {full ? (
+        <p className="muted live-background-note">
+          {t('room.ownBackgroundsFull', { max: MAX_OWN_BACKGROUNDS })}
+        </p>
+      ) : (
+        <label className="btn btn-small live-background-add">
+          {t('room.addBackground')}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="visually-hidden"
+            disabled={busy}
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              // The same file can be chosen again after an error.
+              event.target.value = '';
+              if (file) onAdd(file);
+            }}
+          />
+        </label>
+      )}
+      <p className="muted live-background-note">
+        {t('room.backgroundNote')}{' '}
+        {t('room.ownBackgroundsNote', { max: MAX_OWN_BACKGROUNDS })}
+      </p>
     </details>
   );
 }
@@ -296,6 +424,7 @@ function Room({
   connection,
   screenShare,
   backgrounds,
+  ownBackgrounds,
   recordingEnabled,
   onLeave,
 }: {
@@ -306,6 +435,7 @@ function Room({
   connection: LiveConnection;
   screenShare: boolean;
   backgrounds: boolean;
+  ownBackgrounds: OwnBackgroundStore;
   /** The teacher can record the lesson on the server. */
   recordingEnabled: boolean;
   onLeave: () => void;
@@ -318,9 +448,10 @@ function Room({
   const teacherView = role === 'teacher';
   const floorTiles = state.people.filter((p) => p.role === 'learner' && p.cameraOn);
   const mayUseCamera = teacherView || (state.canPublish && session.learnerCameras);
-  const [background, setBackground] = useState<BackgroundId>(() =>
+  const [background, setBackground] = useState<BackgroundChoice>(() =>
     backgrounds ? rememberedBackground() : 'none'
   );
+  const own = useOwnBackgrounds(ownBackgrounds);
   const [backgroundBusy, setBackgroundBusy] = useState(false);
   // What the teacher asked the server for; the room reports the egress a moment later.
   const [recordingWanted, setRecordingWanted] = useState(session.recording);
@@ -355,27 +486,65 @@ function Room({
     }
   };
 
-  // The background picked last time comes back with the camera in this lesson too.
+  // The background picked last time comes back with the camera in this lesson too, once the
+  // own pictures are loaded (it may be one of them).
+  const restored = useRef(false);
   useEffect(() => {
-    if (background !== 'none')
-      void connection.setBackground(background).catch(() => undefined);
+    if (restored.current || own.pictures === null) return;
+    restored.current = true;
+    if (background === 'none') return;
+    const camera = cameraBackground(background, own.urlOf);
+    if (!camera) {
+      // That picture was deleted on this device.
+      setBackground('none');
+      return;
+    }
+    void connection.setBackground(camera).catch(() => undefined);
     // Only once per connection: later picks go through pickBackground.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connection]);
-  const pickBackground = async (id: BackgroundId) => {
+  }, [connection, own.pictures]);
+  const pickBackground = async (choice: BackgroundChoice, urlOf = own.urlOf) => {
     const previous = background;
-    setBackground(id);
+    setBackground(choice);
     setBackgroundBusy(true);
     try {
-      await connection.setBackground(id);
+      await connection.setBackground(cameraBackground(choice, urlOf) ?? { kind: 'none' });
       // Only a background that is really in use comes back next time.
-      rememberBackground(id);
+      rememberBackground(choice);
+      return true;
     } catch {
       setBackground(previous);
       setNotice(t('room.backgroundError'));
+      return false;
     } finally {
       setBackgroundBusy(false);
     }
+  };
+  const addBackground = async (file: File) => {
+    setBackgroundBusy(true);
+    let picture: OwnPicture;
+    try {
+      picture = await own.add(file);
+    } catch (error) {
+      setNotice(
+        t(
+          error instanceof OwnBackgroundError
+            ? `room.ownBackgroundError.${error.problem}`
+            : 'room.ownBackgroundError.unreadable',
+          { max: MAX_OWN_BACKGROUNDS }
+        )
+      );
+      setBackgroundBusy(false);
+      return;
+    }
+    // A new picture is put to use at once; its URL is not in state yet.
+    await pickBackground(ownChoice(picture.id), (id) =>
+      id === picture.id ? picture.url : own.urlOf(id)
+    );
+  };
+  const removeBackground = async (id: string) => {
+    if (background === ownChoice(id) && !(await pickBackground('none'))) return;
+    await own.remove(id).catch(() => setNotice(t('room.ownBackgroundError.remove')));
   };
   const floor = async (person: LivePerson, allowed: boolean) => {
     const result = await api.floor(classId, session.id, person.identity, allowed);
@@ -532,8 +701,11 @@ function Room({
         {backgrounds && mayUseCamera && (
           <BackgroundPicker
             value={background}
-            busy={backgroundBusy}
-            onChange={(id) => void pickBackground(id)}
+            busy={backgroundBusy || own.pictures === null}
+            own={own.pictures ?? []}
+            onChange={(choice) => void pickBackground(choice)}
+            onAdd={(file) => void addBackground(file)}
+            onRemove={(id) => void removeBackground(id)}
           />
         )}
         <People
@@ -552,6 +724,7 @@ export function LiveRoom({
   connect = connectLive,
   screenShare = canShareScreen(),
   backgrounds = canUseBackgrounds(),
+  ownBackgrounds: givenOwnBackgrounds,
 }: {
   api?: LiveApi;
   connect?: ConnectLive;
@@ -559,10 +732,16 @@ export function LiveRoom({
   screenShare?: boolean;
   /** The browser can put a background behind the camera. */
   backgrounds?: boolean;
+  /** Where the person's own background pictures are kept (this device by default). */
+  ownBackgrounds?: OwnBackgroundStore;
 }) {
   const { t } = useTranslation('live');
   const { id: classId = '', session: sessionId = '' } = useParams();
   const api = useMemo(() => givenApi ?? new LiveApi(), [givenApi]);
+  const ownBackgrounds = useMemo(
+    () => givenOwnBackgrounds ?? deviceBackgrounds(),
+    [givenOwnBackgrounds]
+  );
   const audioHost = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<Phase>({ kind: 'ready' });
   // The class page tells the room when the teacher comes in (only for the hint below).
@@ -640,6 +819,7 @@ export function LiveRoom({
           connection={phase.connection}
           screenShare={screenShare}
           backgrounds={backgrounds}
+          ownBackgrounds={ownBackgrounds}
           recordingEnabled={Boolean(recordingInfo?.enabled)}
           onLeave={() => setPhase({ kind: 'left' })}
         />

@@ -63,6 +63,19 @@ export const live: Messages<typeof de> = {
       'The background could not be loaded. The camera stays off until you change it or pick “None”.',
     backgroundError:
       'The background could not be switched on. The camera carries on without it.',
+    addBackground: 'Add your own picture',
+    removeBackground: 'Delete {{name}}',
+    ownBackgroundsNote:
+      'Your own pictures stay on this device: up to {{max}}, as JPEG, PNG or WebP of up to 15 MB.',
+    ownBackgroundsFull:
+      'You already have {{max}} pictures of your own. Delete one to add a new one.',
+    ownBackgroundError: {
+      type: 'Please choose a JPEG, PNG or WebP picture.',
+      size: 'The picture is too large (15 MB at most).',
+      full: 'You already have {{max}} pictures of your own. Delete one to add a new one.',
+      unreadable: 'This picture could not be opened. Please choose another one.',
+      remove: 'The picture could not be deleted. Please try again.',
+    },
     you: '(you)',
     controls: 'Controls',
     micOn: 'Microphone on',
@@ -115,5 +128,6 @@ export const live: Messages<typeof de> = {
     arches: 'Arches',
     mosque: 'Mosque at dusk',
     lattice: 'Mashrabiya',
+    own: 'Own picture {{n}}',
   },
 };

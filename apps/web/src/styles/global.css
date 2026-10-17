@@ -3206,6 +3206,28 @@ button.quiz-option:disabled {
   margin: 0.5rem 0 0;
   font-size: 0.8rem;
 }
+.live-background-own {
+  position: relative;
+}
+.live-background-remove {
+  position: absolute;
+  inset-block-start: 0.25rem;
+  inset-inline-end: 0.25rem;
+  min-width: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  line-height: 1;
+}
+.live-background-add {
+  margin-top: 0.75rem;
+  cursor: pointer;
+}
+.live-background-add:focus-within {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
 
 .live-tiles {
   display: grid;

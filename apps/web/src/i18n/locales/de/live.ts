@@ -61,6 +61,19 @@ export const live = {
       'Der Hintergrund ließ sich nicht laden. Die Kamera bleibt aus, bis du ihn wechselst oder „Keiner“ wählst.',
     backgroundError:
       'Der Hintergrund ließ sich nicht einschalten. Die Kamera läuft ohne Hintergrund weiter.',
+    addBackground: 'Eigenes Bild hinzufügen',
+    removeBackground: '{{name}} löschen',
+    ownBackgroundsNote:
+      'Eigene Bilder bleiben auf diesem Gerät: höchstens {{max}}, als JPEG, PNG oder WebP bis 15 MB.',
+    ownBackgroundsFull:
+      'Du hast schon {{max}} eigene Bilder. Lösche eines, um ein neues hinzuzufügen.',
+    ownBackgroundError: {
+      type: 'Bitte ein Bild als JPEG, PNG oder WebP wählen.',
+      size: 'Das Bild ist zu groß (höchstens 15 MB).',
+      full: 'Du hast schon {{max}} eigene Bilder. Lösche eines, um ein neues hinzuzufügen.',
+      unreadable: 'Dieses Bild ließ sich nicht öffnen. Bitte ein anderes wählen.',
+      remove: 'Das Bild ließ sich nicht löschen. Bitte noch einmal versuchen.',
+    },
     you: '(du)',
     controls: 'Steuerung',
     micOn: 'Mikrofon an',
@@ -113,5 +126,6 @@ export const live = {
     arches: 'Bögen',
     mosque: 'Moschee am Abend',
     lattice: 'Maschrabiyya',
+    own: 'Eigenes Bild {{n}}',
   },
 };

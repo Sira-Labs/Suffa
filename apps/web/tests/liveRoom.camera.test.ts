@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BackgroundError, connectLive } from '@/services/live/liveRoom';
+import { builtInBackground } from '@/services/live/backgrounds';
 
 /**
  * Story 18.3: with a background chosen, the camera is published only once the background is
@@ -94,7 +95,7 @@ beforeEach(() => {
 describe('camera with a background', () => {
   it('puts the background on before the camera is published', async () => {
     const live = await connect();
-    await live.setBackground('mosque');
+    await live.setBackground(builtInBackground('mosque'));
     expect(steps).toEqual([]);
     await live.setCamera(true);
     expect(steps).toEqual(['create', 'processor', 'publish']);
@@ -102,7 +103,7 @@ describe('camera with a background', () => {
 
   it('keeps the camera off when the background cannot be set up', async () => {
     const live = await connect();
-    await live.setBackground('blur');
+    await live.setBackground(builtInBackground('blur'));
     state.failProcessor = true;
     await expect(live.setCamera(true)).rejects.toBeInstanceOf(BackgroundError);
     expect(steps).toEqual(['create', 'stop-track']);
@@ -119,10 +120,10 @@ describe('camera with a background', () => {
 
   it('switches or removes the background on a running camera', async () => {
     const live = await connect();
-    await live.setBackground('stars');
+    await live.setBackground(builtInBackground('stars'));
     await live.setCamera(true);
-    await live.setBackground('blur');
-    await live.setBackground('none');
+    await live.setBackground(builtInBackground('blur'));
+    await live.setBackground(builtInBackground('none'));
     expect(steps).toEqual([
       'create',
       'processor',
@@ -134,14 +135,16 @@ describe('camera with a background', () => {
 
   it('keeps the earlier background when a new one fails on a running camera', async () => {
     const live = await connect();
-    await live.setBackground('stars');
+    await live.setBackground(builtInBackground('stars'));
     await live.setCamera(true);
     // The running processor cannot switch to the new picture.
     const track = state.published as { processor: { switchTo: () => Promise<void> } };
     track.processor.switchTo = async () => {
       throw new Error('image did not load');
     };
-    await expect(live.setBackground('mosque')).rejects.toBeInstanceOf(BackgroundError);
+    await expect(live.setBackground(builtInBackground('mosque'))).rejects.toBeInstanceOf(
+      BackgroundError
+    );
     // A restart of the camera still uses stars, not the background that failed.
     await live.setCamera(false);
     steps.length = 0;

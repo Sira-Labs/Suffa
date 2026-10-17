@@ -486,6 +486,7 @@ async function main(): Promise<void> {
           auth,
           log,
           listening: new PgListeningRepository(pool),
+          letGoRecording: deleteRecording(liveRecordings(config, pool, boss, log)),
         }
       : undefined,
     assignments: {
@@ -675,6 +676,11 @@ function liveRecordings(
     transcode: enqueueTranscode(boss),
     log,
   });
+}
+
+/** Lets go of live recordings before they are deleted; absent when recording is off. */
+function deleteRecording(recordings: LiveRecordings | undefined) {
+  return recordings ? (mediaId: string) => recordings.letGo(mediaId) : undefined;
 }
 
 /**

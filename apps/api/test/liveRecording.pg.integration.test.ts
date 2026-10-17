@@ -13,8 +13,10 @@ import { createApp } from '../src/app.js';
 import type { AuthResolver } from '../src/auth/resolver.js';
 import type { Role } from '../src/authz/policies.js';
 import { PgClassRepository } from '../src/classes/repository.js';
+import { PgListeningRepository } from '../src/media/listening.js';
 import { PgMediaRepository } from '../src/media/repository.js';
-import { CLASS_QUOTA_BYTES } from '../src/media/service.js';
+import { CLASS_QUOTA_BYTES, MediaService } from '../src/media/service.js';
+import type { ObjectStorage } from '../src/storage/objectStorage.js';
 import type { LiveRecorder, RecordingState } from '../src/live/recorder.js';
 import { LiveRecordings } from '../src/live/recording.js';
 import { PgLiveRecordingRepository } from '../src/live/recordingRepository.js';
@@ -72,6 +74,15 @@ describe.skipIf(!url)('Recording live lessons (Postgres)', () => {
   const users: Record<string, { id: string; role: Role }> = {};
   const apps: Record<'on' | 'off', ReturnType<typeof createApp>> = {} as never;
 
+  const auth: AuthResolver = {
+    actor: async (h) => users[h.get('x-test-user') ?? ''] ?? null,
+  };
+  /** The object store of the class recordings; nothing is ever written to it here. */
+  const noFiles = {
+    delete: async () => undefined,
+    abortMultipartUpload: async () => undefined,
+  } as unknown as ObjectStorage;
+
   const build = (withRecorder: boolean) =>
     createApp({
       version: 'test',
@@ -85,11 +96,23 @@ describe.skipIf(!url)('Recording live lessons (Postgres)', () => {
         sessions: new PgLiveSessionRepository(pool, () => now),
         rooms,
         recordings: withRecorder ? recordings : undefined,
-        auth: {
-          actor: async (h) => users[h.get('x-test-user') ?? ''] ?? null,
-        } satisfies AuthResolver,
+        auth,
         log: quiet,
         now: () => now,
+      },
+      media: {
+        classes: new PgClassRepository(pool),
+        repo: new PgMediaRepository(pool),
+        media: new MediaService(
+          new PgMediaRepository(pool),
+          noFiles,
+          async () => undefined
+        ),
+        audit: pool,
+        auth,
+        log: quiet,
+        listening: new PgListeningRepository(pool),
+        letGoRecording: (mediaId) => recordings.letGo(mediaId),
       },
     });
 
@@ -286,6 +309,42 @@ describe.skipIf(!url)('Recording live lessons (Postgres)', () => {
       'live.recording_stopped',
       'live.recording_started',
     ]);
+  });
+
+  it('keeps a running recording, and lets the teacher delete one that is over', async () => {
+    const session = await live();
+    await call('teacher', 'POST', `/${session.id}/recording`);
+    const mediaId = (await pointer(session.id))!;
+    const remove = async () =>
+      (
+        await apps.on.request(`/api/v1/classes/${classId}/media/${mediaId}`, {
+          method: 'DELETE',
+          headers: { 'x-test-user': 'teacher' },
+        })
+      ).status;
+    expect(await remove()).toBe(409);
+    // Stopped, but the worker has not seen it yet (or never will): the test run can go.
+    await call('teacher', 'DELETE', `/${session.id}/recording`);
+    expect(await item(mediaId)).toMatchObject({ status: 'recording' });
+    expect(await remove()).toBe(204);
+    expect(await item(mediaId)).toBeUndefined();
+    // The worker following it finds nothing left to do.
+    expect(await recordings.follow(mediaId)).toBe('done');
+  });
+
+  it('stops the egress of a recording whose session overran before deleting it', async () => {
+    const session = await live();
+    await call('teacher', 'POST', `/${session.id}/recording`);
+    const mediaId = (await pointer(session.id))!;
+    // Planned 60 minutes, never ended or stopped, and no worker came by.
+    now = new Date(now.getTime() + 200 * 60_000);
+    const res = await apps.on.request(`/api/v1/classes/${classId}/media/${mediaId}`, {
+      method: 'DELETE',
+      headers: { 'x-test-user': 'teacher' },
+    });
+    expect(res.status).toBe(204);
+    expect(recorder.stopped).toEqual(['EG_1']);
+    expect(await pointer(session.id)).toBeNull();
   });
 
   it('stops the recording when the teacher ends the session', async () => {

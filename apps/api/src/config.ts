@@ -447,9 +447,16 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
   }
   let recordingComplete = Boolean(raw.SUFFA_LIVE_RECORDING_TEMPLATE_URL);
   if (recordingComplete && !(liveComplete && s3Complete)) {
-    warnings.push(
-      'SUFFA_LIVE_RECORDING_TEMPLATE_URL needs live lessons (SUFFA_LIVEKIT_*) and object storage (SUFFA_S3_*)'
-    );
+    // Names what is missing: the worker is often set up apart from the api and lacks a group.
+    const missing = [
+      ...(liveComplete
+        ? []
+        : ['live lessons (SUFFA_LIVEKIT_URL, _API_KEY, _API_SECRET)']),
+      ...(s3Complete
+        ? []
+        : ['object storage (SUFFA_S3_ENDPOINT, _ACCESS_KEY_ID, _SECRET_ACCESS_KEY)']),
+    ];
+    warnings.push(`SUFFA_LIVE_RECORDING_TEMPLATE_URL needs ${missing.join(' and ')}`);
     recordingComplete = false;
   }
   if (recordingComplete && !/^https?:\/\//.test(raw.SUFFA_LIVE_RECORDING_TEMPLATE_URL!)) {

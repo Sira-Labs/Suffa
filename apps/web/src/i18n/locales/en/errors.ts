@@ -65,6 +65,8 @@ export const errors: Messages<typeof de> = {
     consent_required: 'Please confirm that everyone recorded has agreed.',
     still_recording:
       'This recording is still running in the live lesson. Stop it there, then you can delete it.',
+    stop_failed:
+      'The recording could not be stopped just now. Please try deleting it again.',
     upload_interrupted: 'The connection dropped. Choose the file again to continue.',
   },
   interactive: {

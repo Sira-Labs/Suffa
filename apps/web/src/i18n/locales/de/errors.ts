@@ -74,6 +74,8 @@ export const errors = {
     consent_required: 'Bitte bestätige, dass alle Aufgenommenen einverstanden sind.',
     still_recording:
       'Diese Aufnahme läuft noch im Live-Unterricht. Beende sie dort, dann kannst du sie löschen.',
+    stop_failed:
+      'Die Aufnahme ließ sich gerade nicht beenden. Bitte gleich noch einmal löschen.',
     /** Not an API code: the upload gave up after several tries. */
     upload_interrupted:
       'Die Verbindung ist abgebrochen. Wähle die Datei erneut, um fortzusetzen.',

@@ -32,6 +32,11 @@ export interface MediaRouteDeps {
   log: AuthorizeLog;
   /** Who listened to the class's recordings (teachers only). */
   listening: ListeningRepository;
+  /**
+   * Lets go of a live recording about to be deleted (ADR-0029): false while its session still
+   * records into it, otherwise its egress is stopped. Absent when live recording is off.
+   */
+  letGoRecording?: (mediaId: string) => Promise<boolean>;
 }
 
 const Uuid = z.string().uuid();
@@ -177,8 +182,21 @@ export function createMediaRoutes(deps: MediaRouteDeps): Hono<ActorEnv> {
   app.delete('/classes/:id/media/:mediaId', manage, async (c) => {
     const item = await itemOf(c);
     if (!item) return c.json({ error: 'not_found' }, 404);
-    // A live recording still being written is stopped in the room first (ADR-0029).
-    if (item.status === 'recording') return c.json({ error: 'still_recording' }, 409);
+    // A live recording still being written is stopped in the room first (ADR-0029). One
+    // already stopped, or whose session is over, can go even before the worker has seen it.
+    if (item.status === 'recording' && deps.letGoRecording) {
+      let free: boolean;
+      try {
+        free = await deps.letGoRecording(item.id);
+      } catch (error) {
+        deps.log.warn(
+          { err: String(error), mediaId: item.id },
+          'media.recording_stop_failed'
+        );
+        return c.json({ error: 'stop_failed' }, 502);
+      }
+      if (!free) return c.json({ error: 'still_recording' }, 409);
+    }
     await deps.media.remove(item);
     await audit(c, 'media.deleted', item);
     return c.body(null, 204);

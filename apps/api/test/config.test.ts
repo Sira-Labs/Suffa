@@ -277,13 +277,18 @@ describe('recording live lessons', () => {
     });
   });
 
-  it('stays off with a warning without live lessons or storage', () => {
-    for (const env of [{ ...live }, { ...storage }]) {
+  it('stays off with a warning naming what is missing', () => {
+    for (const [env, missing] of [
+      [live, /needs object storage \(SUFFA_S3_ENDPOINT/],
+      [storage, /needs live lessons \(SUFFA_LIVEKIT_URL/],
+      [{}, /needs live lessons .* and object storage/],
+    ] as const) {
       const config = loadConfig({ ...base, ...env, ...template });
       expect(config.liveRecording).toBeUndefined();
       expect(config.warnings).toEqual([
-        expect.stringMatching(/SUFFA_LIVE_RECORDING_TEMPLATE_URL needs/),
+        expect.stringMatching(/^SUFFA_LIVE_RECORDING_TEMPLATE_URL needs/),
       ]);
+      expect(config.warnings[0]).toMatch(missing);
     }
   });
 });

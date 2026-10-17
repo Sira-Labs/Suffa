@@ -1,8 +1,9 @@
 /**
- * The learner's class on "Heute" (tester feedback R6): always there, at the top. In a class:
- * open assignments, recordings not heard yet and the weekly challenge, with the next things
- * to do and the newest shout-out. Waiting for approval: says so. Without a class: how to
- * join one. Offline or without an account it shows nothing.
+ * The learner's classes on "Heute" (tester feedback R6): always there, at the top, one card
+ * per class, the main class first. In a class: open assignments, recordings not heard yet and
+ * the weekly challenge, with the next things to do and the newest shout-out. Waiting for
+ * approval: says so. Without a class: how to join one. Offline or without an account it shows
+ * nothing.
  */
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +17,7 @@ import {
 } from '@/services/classes/classesApi';
 import { InteractiveApi, type Assignment } from '@/services/media/interactiveApi';
 import { MediaApi, type MediaItem } from '@/services/media/mediaApi';
-import { useListenStore, useSyncStore } from '@/state';
+import { useClassContextStore, useListenStore, useSyncStore } from '@/state';
 import { assignmentLink, formatDue } from './Assignments';
 import { formatDuration } from './ClassRecordings';
 import { useMyClasses } from './useMyClasses';
@@ -24,13 +25,30 @@ import { useMyClasses } from './useMyClasses';
 export function HomeClassCard({ api }: { api?: ClassesApi }) {
   const client = useMemo(() => api ?? new ClassesApi(), [api]);
   const { online, classes } = useMyClasses(client);
+  const mainClassId = useClassContextStore((s) => s.context?.classId);
   if (!online || !classes) return null;
   const mine = classes.filter((c) => c.classRole === 'student');
-  const active = mine.find((c) => c.status === 'active');
-  if (active) return <LearnerClass api={client} summary={active} />;
-  const waiting = mine.find((c) => c.status === 'pending');
-  if (waiting) return <WaitingClass summary={waiting} />;
-  return <JoinClass />;
+  const active = mine
+    .filter((c) => c.status === 'active')
+    .sort((a, b) => Number(b.id === mainClassId) - Number(a.id === mainClassId));
+  const waiting = mine.filter((c) => c.status === 'pending');
+  if (active.length === 0 && waiting.length === 0) return <JoinClass />;
+  const several = active.length > 1;
+  return (
+    <>
+      {active.map((c) => (
+        <LearnerClass
+          key={c.id}
+          api={client}
+          summary={c}
+          eyebrow={several ? (c.id === mainClassId ? 'main' : 'other') : 'only'}
+        />
+      ))}
+      {waiting.map((c) => (
+        <WaitingClass key={c.id} summary={c} />
+      ))}
+    </>
+  );
 }
 
 interface ClassNews {
@@ -39,7 +57,22 @@ interface ClassNews {
   recordings: MediaItem[];
 }
 
-function LearnerClass({ api, summary }: { api: ClassesApi; summary: ClassSummary }) {
+const EYEBROWS = {
+  only: 'home.eyebrow',
+  main: 'home.eyebrowMain',
+  other: 'home.eyebrowOther',
+} as const;
+
+function LearnerClass({
+  api,
+  summary,
+  eyebrow,
+}: {
+  api: ClassesApi;
+  summary: ClassSummary;
+  /** Which of the learner's classes this is: the only one, the main one or another. */
+  eyebrow: keyof typeof EYEBROWS;
+}) {
   const { t } = useTranslation('classes');
   const lastSyncAt = useSyncStore((s) => s.lastSyncAt);
   const heard = useListenStore((s) => s.progress);
@@ -80,11 +113,14 @@ function LearnerClass({ api, summary }: { api: ClassesApi; summary: ClassSummary
   const shout = news?.feed?.shoutouts.find((s) => s.toYou);
 
   return (
-    <section className="card stack home-class" aria-labelledby="home-class-title">
+    <section
+      className="card stack home-class"
+      aria-labelledby={`home-class-title-${summary.id}`}
+    >
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <div className="stack" style={{ gap: 2 }}>
-          <span className="eyebrow home-class-eyebrow">{t('home.eyebrow')}</span>
-          <h2 id="home-class-title" style={{ margin: 0 }}>
+          <span className="eyebrow home-class-eyebrow">{t(EYEBROWS[eyebrow])}</span>
+          <h2 id={`home-class-title-${summary.id}`} style={{ margin: 0 }}>
             {summary.name}
           </h2>
           {summary.teacherName && (
@@ -178,9 +214,12 @@ function LearnerClass({ api, summary }: { api: ClassesApi; summary: ClassSummary
 function WaitingClass({ summary }: { summary: ClassSummary }) {
   const { t } = useTranslation('classes');
   return (
-    <section className="card stack home-class" aria-labelledby="home-class-title">
+    <section
+      className="card stack home-class"
+      aria-labelledby={`home-class-title-${summary.id}`}
+    >
       <span className="eyebrow home-class-eyebrow">{t('home.eyebrow')}</span>
-      <h2 id="home-class-title" style={{ margin: 0 }}>
+      <h2 id={`home-class-title-${summary.id}`} style={{ margin: 0 }}>
         {summary.name}
       </h2>
       <p className="muted" style={{ margin: 0 }}>

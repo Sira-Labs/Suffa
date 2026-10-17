@@ -24,6 +24,11 @@ export const classes: Messages<typeof de> = {
     newNamePlaceholder: 'Name of the new class, e.g. Arabic 1a',
     course: 'Course of the class',
     create: 'Create',
+    main: 'Main class',
+    makeMain: 'Make main class',
+    makeMainNamed: 'Make {{name}} your main class',
+    mainHint:
+      'Your main class sets the app’s course, colours and unlocks. You see assignments, recordings and live lessons of all your classes.',
   },
   page: {
     loading: 'Loading class …',
@@ -304,6 +309,8 @@ export const classes: Messages<typeof de> = {
   },
   home: {
     eyebrow: 'Your class',
+    eyebrowMain: 'Your main class',
+    eyebrowOther: 'Another class',
     teacher: 'with {{teacher}}',
     toClass: 'To the class {{name}}',
     news: 'News from the class',

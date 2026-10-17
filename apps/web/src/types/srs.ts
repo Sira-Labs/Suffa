@@ -137,6 +137,11 @@ export interface SettingsRecord extends Syncable {
    * the palettes.
    */
   palette?: PaletteId | 'class' | null;
+  /**
+   * For a learner in several classes: the class whose course, colours and unlocks shape the
+   * app. None or null (or a class no longer active) means the class joined first.
+   */
+  mainClassId?: string | null;
 }
 
 export type TashkilLevel = 'full' | 'partial' | 'none';

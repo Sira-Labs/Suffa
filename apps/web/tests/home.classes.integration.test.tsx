@@ -12,7 +12,7 @@ import { pickAssignment, TeacherHome } from '@/modules/classes/TeacherHome';
 import type { Assignment } from '@/services/media/interactiveApi';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { db } from '@/services/storage';
-import { useListenStore, useSyncStore } from '@/state';
+import { useClassContextStore, useListenStore, useSyncStore } from '@/state';
 
 const CLASS_ID = '11111111-1111-4111-8111-111111111111';
 const REC = '33333333-3333-4333-8333-333333333333';
@@ -220,6 +220,36 @@ describe('Classes on "Heute" (integration)', () => {
     expect(
       within(card).getByRole('link', { name: 'Zur Klasse Medina 1 · Dienstag' })
     ).toHaveAttribute('href', `/classes/${CLASS_ID}`);
+  });
+
+  it('shows each class of a learner in several, the main class first', async () => {
+    const SECOND = '55555555-5555-4555-8555-555555555555';
+    useClassContextStore.setState({
+      context: { classId: SECOND, course: 'bayna-yadayk', palette: 'oase', unlocks: {} },
+    });
+    await signIn({
+      role: 'learner',
+      classes: [
+        summary({}),
+        summary({ id: SECOND, name: 'Bayna Yadayk · Samstag', course: 'bayna-yadayk' }),
+        summary({ id: 'p', name: 'Tajwid', status: 'pending' }),
+      ],
+    });
+    renderAt(<HomeClassCard />);
+    const main = await screen.findByRole('region', { name: 'Bayna Yadayk · Samstag' });
+    const other = screen.getByRole('region', { name: 'Medina 1 · Dienstag' });
+    expect(within(main).getByText('Deine Hauptklasse')).toBeTruthy();
+    expect(within(other).getByText('Weitere Klasse')).toBeTruthy();
+    // The main class comes first, then the others, then those still waiting.
+    const regions = screen
+      .getAllByRole('region')
+      .map((r) => r.getAttribute('aria-labelledby'));
+    expect(regions).toEqual([
+      `home-class-title-${SECOND}`,
+      `home-class-title-${CLASS_ID}`,
+      'home-class-title-p',
+    ]);
+    useClassContextStore.setState({ context: null });
   });
 
   it('tells a learner who waits for approval', async () => {

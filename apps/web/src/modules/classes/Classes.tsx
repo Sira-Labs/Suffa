@@ -1,13 +1,15 @@
 /**
  * Classes (story 4.3): learners see their classes and whether they are approved; teachers
- * create classes. Each class has its own page (members, progress, class life).
+ * create classes. Each class has its own page (members, progress, class life). Someone in
+ * several classes picks the main class here, the one whose course, colours and unlocks shape
+ * the app.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ApiSyncProvider } from '@/services/sync/ApiSyncProvider';
 import { ClassesApi, type ClassSummary } from '@/services/classes/classesApi';
-import { useSyncStore } from '@/state';
+import { useClassContextStore, useSettingsStore, useSyncStore } from '@/state';
 import { OFFERED_COURSES } from '@/services/courses';
 import { DEFAULT_COURSE, type CourseId } from '@suffa/engagement';
 
@@ -18,6 +20,8 @@ export function Classes() {
   const api = useMemo(() => new ClassesApi(), []);
   const [classes, setClasses] = useState<ClassSummary[] | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const mainClassId = useClassContextStore((s) => s.context?.classId);
+  const chooseMain = useSettingsStore((s) => s.update);
 
   const load = useCallback(async () => {
     const result = await api.list();
@@ -39,12 +43,14 @@ export function Classes() {
   }
   const role = provider.currentUser()?.role;
   const canCreate = role === 'teacher' || role === 'admin';
+  const several = (classes?.filter((c) => c.status === 'active').length ?? 0) > 1;
 
   return (
     <div className="stack">
       <h1>{t('title')}</h1>
       {message && <span className="feedback-bad">{message}</span>}
       {canCreate && <CreateClass api={api} onCreated={load} />}
+      {several && <p className="muted">{t('list.mainHint')}</p>}
       {classes?.length === 0 && (
         <p className="muted">
           {canCreate ? t('list.emptyTeacher') : t('list.emptyLearner')}
@@ -52,19 +58,32 @@ export function Classes() {
       )}
       {classes?.map((c) =>
         c.status === 'active' ? (
-          <Link
-            key={c.id}
-            to={`/classes/${c.id}`}
-            className="card row class-link"
-            style={{ justifyContent: 'space-between' }}
-          >
-            <strong>{c.name}</strong>
-            <span className="muted">
-              {c.classRole === 'teacher'
-                ? `${t('learners', { count: c.studentCount })}${c.pendingCount > 0 ? ` · ${t('waiting', { count: c.pendingCount })}` : ''}`
-                : t('list.member')}
-            </span>
-          </Link>
+          <div key={c.id} className="card row class-row">
+            <Link
+              to={`/classes/${c.id}`}
+              className="row class-link"
+              style={{ justifyContent: 'space-between', flex: 1 }}
+            >
+              <strong>{c.name}</strong>
+              <span className="muted">
+                {c.classRole === 'teacher'
+                  ? `${t('learners', { count: c.studentCount })}${c.pendingCount > 0 ? ` · ${t('waiting', { count: c.pendingCount })}` : ''}`
+                  : t('list.member')}
+              </span>
+            </Link>
+            {several &&
+              (c.id === mainClassId ? (
+                <span className="badge">{t('list.main')}</span>
+              ) : (
+                <button
+                  className="btn btn-small"
+                  onClick={() => void chooseMain({ mainClassId: c.id })}
+                  aria-label={t('list.makeMainNamed', { name: c.name })}
+                >
+                  {t('list.makeMain')}
+                </button>
+              ))}
+          </div>
         ) : (
           <div
             key={c.id}

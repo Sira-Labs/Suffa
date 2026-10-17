@@ -130,7 +130,8 @@ class FakeConnection implements LiveConnection {
       ended: false,
       people: [],
       chat: [],
-      canPublish: false,
+      canSpeak: false,
+      canCamera: false,
       recording: false,
       ...state,
     };
@@ -174,6 +175,10 @@ class FakeConnection implements LiveConnection {
     this.calls.push('disconnect');
   }
 }
+
+/** The names under the camera tiles. */
+const tileNames = () =>
+  [...document.querySelectorAll('.live-tile figcaption')].map((c) => c.textContent);
 
 function renderAt(element: React.ReactElement, path: string, route: string) {
   const router = createMemoryRouter(
@@ -333,7 +338,8 @@ describe('the live room', () => {
     connection: FakeConnection,
     screenShare = true,
     backgrounds = false,
-    ownBackgrounds: OwnBackgroundStore = new FakeOwnBackgrounds()
+    ownBackgrounds: OwnBackgroundStore = new FakeOwnBackgrounds(),
+    fullscreen = false
   ) => {
     const connect = vi.fn(async () => connection);
     renderAt(
@@ -341,6 +347,7 @@ describe('the live room', () => {
         connect={connect}
         screenShare={screenShare}
         backgrounds={backgrounds}
+        fullscreen={fullscreen}
         ownBackgrounds={ownBackgrounds}
       />,
       `/classes/${CLASS_ID}/live/${SESSION_ID}`,
@@ -355,7 +362,7 @@ describe('the live room', () => {
     const { requests } = server({ enabled: true, sessions: [] });
     const connection = new FakeConnection({
       people: [teacher, amina, yusuf],
-      canPublish: true,
+      canSpeak: true,
     });
     const connect = await join(connection);
     expect(connect).toHaveBeenCalledWith(
@@ -395,7 +402,8 @@ describe('the live room', () => {
     const me = person({ identity: 'a', name: 'Amina', local: true });
     const connection = new FakeConnection({
       people: [me, { ...teacher, local: false, cameraReady: false }],
-      canPublish: false,
+      canSpeak: false,
+      canCamera: false,
     });
     await join(connection);
     // The teacher's camera is announced before its picture arrives: shown once it is here.
@@ -413,7 +421,7 @@ describe('the live room', () => {
     expect(connection.calls).toEqual(['hand:true', 'send:سلام عليكم']);
 
     connection.update({
-      canPublish: true,
+      canSpeak: true,
       people: [
         { ...me, floor: true, micOn: true },
         { ...teacher, local: false },
@@ -426,12 +434,121 @@ describe('the live room', () => {
 
   it('explains on iPhone and iPad that the screen cannot be shared', async () => {
     server({ enabled: true, sessions: [] });
-    await join(new FakeConnection({ people: [teacher], canPublish: true }), false);
+    await join(new FakeConnection({ people: [teacher], canSpeak: true }), false);
     expect(screen.queryByRole('button', { name: 'Bildschirm teilen' })).toBeNull();
     expect(
       screen.getByText(/Bildschirm teilen geht auf iPhone und iPad nicht/)
     ).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Kamera aus' })).toBeTruthy();
+  });
+
+  it('lets a learner turn on the camera without the floor; the teacher sees it', async () => {
+    server({ enabled: true, sessions: [] }, 'learner');
+    const me = person({ identity: 'a', name: 'Amina', local: true });
+    const other = person({
+      identity: 'y',
+      name: 'Yusuf',
+      cameraOn: true,
+      cameraReady: true,
+    });
+    const connection = new FakeConnection({
+      people: [me, other, { ...teacher, local: false }],
+      canCamera: true,
+    });
+    await join(connection);
+    expect(screen.queryByRole('button', { name: 'Mikrofon an' })).toBeNull();
+    expect(screen.getByRole('button', { name: /Melden/ })).toBeTruthy();
+    expect(screen.getByText(/Deine Kamera sieht die Lehrkraft/)).toBeTruthy();
+    await userEvent.click(screen.getByRole('button', { name: 'Kamera an' }));
+    expect(connection.calls).toEqual(['camera:true']);
+
+    // Learners see their own camera, but not another learner's without the floor.
+    connection.update({
+      people: [
+        { ...me, cameraOn: true, cameraReady: true },
+        other,
+        { ...teacher, local: false },
+      ],
+    });
+    expect(tileNames()).toContain('Amina');
+    expect(tileNames()).not.toContain('Yusuf');
+    connection.update({
+      people: [
+        { ...me, cameraOn: true, cameraReady: true },
+        { ...other, floor: true },
+        { ...teacher, local: false },
+      ],
+    });
+    expect(tileNames()).toContain('Yusuf');
+  });
+
+  it('shows the teacher every learner camera, also without the floor', async () => {
+    server({ enabled: true, sessions: [] });
+    const watching = { ...yusuf, cameraOn: true, cameraReady: true };
+    const connection = new FakeConnection({
+      people: [teacher, watching, amina],
+      canSpeak: true,
+      canCamera: true,
+    });
+    await join(connection);
+    expect(tileNames()).toContain('Yusuf');
+    expect(tileNames()).not.toContain('Amina');
+    expect(connection.attached).toContainEqual({ identity: 'y', source: 'camera' });
+    const people = screen.getByRole('region', { name: /im Raum/ });
+    expect(within(people).getByText('Kamera an')).toBeTruthy();
+    expect(screen.queryByText(/Deine Kamera sieht die Lehrkraft/)).toBeNull();
+  });
+
+  it('lets anyone show the teacher full screen and come back', async () => {
+    server({ enabled: true, sessions: [] }, 'learner');
+    const me = person({ identity: 'a', name: 'Amina', local: true });
+    const requestFullscreen = vi.fn(async function (this: HTMLElement) {
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        value: this,
+      });
+      document.dispatchEvent(new Event('fullscreenchange'));
+    });
+    const exitFullscreen = vi.fn(async () => {
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        value: null,
+      });
+      document.dispatchEvent(new Event('fullscreenchange'));
+    });
+    Object.defineProperty(HTMLElement.prototype, 'requestFullscreen', {
+      configurable: true,
+      value: requestFullscreen,
+    });
+    Object.defineProperty(document, 'exitFullscreen', {
+      configurable: true,
+      value: exitFullscreen,
+    });
+    try {
+      await join(
+        new FakeConnection({ people: [me, { ...teacher, local: false }] }),
+        true,
+        false,
+        new FakeOwnBackgrounds(),
+        true
+      );
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: 'Bild der Lehrkraft auf ganzem Bildschirm zeigen',
+        })
+      );
+      expect(requestFullscreen).toHaveBeenCalledOnce();
+      expect(requestFullscreen.mock.contexts[0]).toHaveClass('live-stage');
+      await userEvent.click(await screen.findByRole('button', { name: 'Verkleinern' }));
+      expect(exitFullscreen).toHaveBeenCalledOnce();
+      expect(
+        await screen.findByRole('button', { name: /ganzem Bildschirm/ })
+      ).toBeTruthy();
+    } finally {
+      delete (HTMLElement.prototype as { requestFullscreen?: unknown }).requestFullscreen;
+      delete (document as { exitFullscreen?: unknown }).exitFullscreen;
+      delete (document as { fullscreenElement?: unknown }).fullscreenElement;
+    }
   });
 
   it('gives a learner only the microphone when the cameras stay off', async () => {
@@ -444,7 +561,7 @@ describe('the live room', () => {
     );
     const me = person({ identity: 'a', name: 'Amina', local: true, floor: true });
     await join(
-      new FakeConnection({ people: [me, { ...teacher, local: false }], canPublish: true })
+      new FakeConnection({ people: [me, { ...teacher, local: false }], canSpeak: true })
     );
     expect(screen.getByText('Schwestern')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Mikrofon an' })).toBeTruthy();
@@ -483,7 +600,7 @@ describe('the live room', () => {
   it('lets the teacher put a background behind the camera and remembers it', async () => {
     server({ enabled: true, sessions: [] });
     localStorage.removeItem('suffa.liveBackground');
-    const connection = new FakeConnection({ people: [teacher], canPublish: true });
+    const connection = new FakeConnection({ people: [teacher], canSpeak: true });
     await join(connection, true, true);
     expect(screen.getByText('Hintergrund: Keiner')).toBeTruthy();
     await userEvent.click(screen.getByText('Hintergrund: Keiner'));
@@ -494,7 +611,7 @@ describe('the live room', () => {
     cleanup();
 
     // The next lesson starts with the same background.
-    const next = new FakeConnection({ people: [teacher], canPublish: true });
+    const next = new FakeConnection({ people: [teacher], canSpeak: true });
     await join(next, true, true);
     expect(next.calls).toEqual(['background:/live/backgrounds/mosque.jpg']);
     expect(screen.getByText('Hintergrund: Moschee am Abend')).toBeTruthy();
@@ -503,7 +620,7 @@ describe('the live room', () => {
 
   it('offers no backgrounds where the browser cannot draw them, or without a camera', async () => {
     server({ enabled: true, sessions: [] });
-    await join(new FakeConnection({ people: [teacher], canPublish: true }), true, false);
+    await join(new FakeConnection({ people: [teacher], canSpeak: true }), true, false);
     expect(screen.queryByText(/Hintergrund:/)).toBeNull();
     cleanup();
 
@@ -512,7 +629,7 @@ describe('the live room', () => {
     await join(
       new FakeConnection({
         people: [me, { ...teacher, local: false }],
-        canPublish: true,
+        canSpeak: true,
       }),
       true,
       true
@@ -545,7 +662,7 @@ describe('the live room', () => {
     it('lets the teacher add a picture of their own, use it and delete it again', async () => {
       server({ enabled: true, sessions: [] });
       const store = new FakeOwnBackgrounds();
-      const connection = new FakeConnection({ people: [teacher], canPublish: true });
+      const connection = new FakeConnection({ people: [teacher], canSpeak: true });
       await join(connection, true, true, store);
       await userEvent.click(screen.getByText('Hintergrund: Keiner'));
       expect(screen.getByText(/Eigene Bilder bleiben auf diesem Gerät/)).toBeTruthy();
@@ -575,7 +692,7 @@ describe('the live room', () => {
       const store = new FakeOwnBackgrounds();
       await store.add(picture());
       localStorage.setItem('suffa.liveBackground', `own:${store.pictures[0]!.id}`);
-      const connection = new FakeConnection({ people: [teacher], canPublish: true });
+      const connection = new FakeConnection({ people: [teacher], canSpeak: true });
       await join(connection, true, true, store);
       await waitFor(() =>
         expect(connection.calls).toEqual(['background:blob:picture-1'])
@@ -584,7 +701,7 @@ describe('the live room', () => {
       cleanup();
 
       await store.remove(store.pictures[0]!.id);
-      const next = new FakeConnection({ people: [teacher], canPublish: true });
+      const next = new FakeConnection({ people: [teacher], canSpeak: true });
       await join(next, true, true, store);
       expect(await screen.findByText('Hintergrund: Keiner')).toBeTruthy();
       expect(next.calls).toEqual([]);
@@ -594,7 +711,7 @@ describe('the live room', () => {
       server({ enabled: true, sessions: [] });
       const store = new FakeOwnBackgrounds();
       store.refuse = new OwnBackgroundError('size');
-      const connection = new FakeConnection({ people: [teacher], canPublish: true });
+      const connection = new FakeConnection({ people: [teacher], canSpeak: true });
       await join(connection, true, true, store);
       await userEvent.click(screen.getByText('Hintergrund: Keiner'));
       await userEvent.upload(screen.getByLabelText('Eigenes Bild hinzufügen'), picture());
@@ -609,7 +726,7 @@ describe('the live room', () => {
       const store = new FakeOwnBackgrounds();
       for (let i = 0; i < 6; i += 1) await store.add(picture());
       await join(
-        new FakeConnection({ people: [teacher], canPublish: true }),
+        new FakeConnection({ people: [teacher], canSpeak: true }),
         true,
         true,
         store
@@ -624,7 +741,7 @@ describe('the live room', () => {
   it('says so when the background cannot be switched on', async () => {
     server({ enabled: true, sessions: [] });
     localStorage.removeItem('suffa.liveBackground');
-    const connection = new FakeConnection({ people: [teacher], canPublish: true });
+    const connection = new FakeConnection({ people: [teacher], canSpeak: true });
     connection.setBackground = async () => {
       throw new Error('no webgl');
     };
@@ -643,7 +760,7 @@ describe('the live room', () => {
     server({ enabled: true, sessions: [] });
     const connection = new FakeConnection({
       people: [{ ...teacher, cameraOn: false, cameraReady: false }],
-      canPublish: true,
+      canSpeak: true,
     });
     connection.setCamera = async () => {
       throw new BackgroundError(new Error('model did not load'));
@@ -665,7 +782,7 @@ describe('the live room', () => {
 
   it('ends the lesson for everyone from the teacher’s controls', async () => {
     const { requests } = server({ enabled: true, sessions: [] });
-    const connection = new FakeConnection({ people: [teacher], canPublish: true });
+    const connection = new FakeConnection({ people: [teacher], canSpeak: true });
     await join(connection);
     await userEvent.click(screen.getByRole('button', { name: 'Für alle beenden' }));
     expect(requests.some((r) => r.path.endsWith('/end'))).toBe(true);
@@ -680,7 +797,7 @@ describe('the live room', () => {
       sessions: [session({ status: 'live' })],
     });
     vi.spyOn(window, 'confirm').mockReturnValue(true);
-    const connection = new FakeConnection({ people: [teacher], canPublish: true });
+    const connection = new FakeConnection({ people: [teacher], canSpeak: true });
     renderAt(
       <LiveRoom connect={vi.fn(async () => connection)} />,
       `/classes/${CLASS_ID}/live/${SESSION_ID}`,
@@ -721,7 +838,7 @@ describe('the live room', () => {
     renderAt(
       <LiveRoom
         connect={vi.fn(
-          async () => new FakeConnection({ people: [teacher], canPublish: true })
+          async () => new FakeConnection({ people: [teacher], canSpeak: true })
         )}
       />,
       `/classes/${CLASS_ID}/live/${SESSION_ID}`,
@@ -767,7 +884,7 @@ describe('the live room', () => {
     ).toBeTruthy();
     expect(screen.getByText('Aufnahme läuft')).toBeTruthy();
 
-    connection.update({ canPublish: true, people: [{ ...me, floor: true }, teacher] });
+    connection.update({ canSpeak: true, people: [{ ...me, floor: true }, teacher] });
     expect(await screen.findByText(/dein Ton wird mit aufgezeichnet/i)).toBeTruthy();
 
     connection.update({ recording: false });
@@ -777,14 +894,14 @@ describe('the live room', () => {
 
   it('offers no recording where the server cannot record', async () => {
     server({ enabled: true, sessions: [session({ status: 'live' })] });
-    await join(new FakeConnection({ people: [teacher], canPublish: true }));
+    await join(new FakeConnection({ people: [teacher], canSpeak: true }));
     expect(screen.queryByRole('button', { name: 'Aufnahme starten' })).toBeNull();
     expect(screen.queryByText(/kann diesen Unterricht aufzeichnen/)).toBeNull();
   });
 
   it('leaves a room that connects after the page was left', async () => {
     server({ enabled: true, sessions: [] });
-    const connection = new FakeConnection({ people: [teacher], canPublish: true });
+    const connection = new FakeConnection({ people: [teacher], canSpeak: true });
     let resolve: (c: LiveConnection) => void = () => undefined;
     const connect = vi.fn(() => new Promise<LiveConnection>((done) => (resolve = done)));
     const { unmount } = renderAt(

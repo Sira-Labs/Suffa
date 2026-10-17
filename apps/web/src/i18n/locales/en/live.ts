@@ -64,7 +64,7 @@ export const live: Messages<typeof de> = {
     preJoinTeacher:
       'You lead the lesson. After joining you can turn on your microphone, camera and screen sharing.',
     preJoinLearner:
-      'You listen and watch, can write in the chat and raise your hand. The teacher gives you the floor.',
+      'You listen and watch, can write in the chat and raise your hand. Where the teacher allows it, you can also turn on your camera. To speak, the teacher gives you the floor.',
     join: 'Join',
     joining: 'Connecting …',
     reconnecting: 'Reconnecting …',
@@ -76,6 +76,9 @@ export const live: Messages<typeof de> = {
     screenOf: 'Screen of {{name}}',
     hideTeacherCamera: 'Hide teacher',
     showTeacherCamera: 'Show teacher',
+    enlarge: 'Enlarge',
+    shrink: 'Shrink',
+    enlargeLabel: 'Show the teacher full screen',
     background: 'Background',
     backgroundNote:
       'The background is worked out on your device. The others only see the finished picture.',
@@ -102,6 +105,8 @@ export const live: Messages<typeof de> = {
     micOff: 'Microphone off',
     cameraOn: 'Camera on',
     cameraOff: 'Camera off',
+    cameraHint:
+      'The teacher sees your camera, and everyone in the room while you have the floor. Your picture is never recorded.',
     shareScreen: 'Share screen',
     stopShare: 'Stop sharing',
     noScreenShare:
@@ -136,6 +141,7 @@ export const live: Messages<typeof de> = {
     takeFloor: 'Take the floor back',
     handRaised: 'raised a hand',
     speaking: 'speaking',
+    cameraTag: 'camera on',
     chat: 'Chat',
     chatEmpty: 'No messages yet. The chat is not saved.',
     message: 'Message',

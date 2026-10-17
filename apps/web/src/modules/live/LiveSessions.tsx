@@ -1,10 +1,12 @@
 /**
  * Live lessons on the class page (ADR-0026): the teacher plans, starts, ends and cancels
- * sessions; learners see a banner while one is live, else the next planned one.
+ * sessions and invites to one by link or QR code; learners see a banner while one is live,
+ * else the next planned one.
  */
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
+import QRCode from 'qrcode';
 import {
   LiveApi,
   type LiveAudience,
@@ -54,6 +56,69 @@ const roomPath = (classId: string, sessionId: string) =>
 
 const AUDIENCES: LiveAudience[] = ['all', 'sisters', 'brothers'];
 
+interface ShownInvite {
+  url: string;
+  expiresAt: string;
+  /** The QR code as a data URL, made in the browser. */
+  qr: string;
+}
+
+/** The invite link of one session: its QR code, the link to copy or share, how long it holds. */
+function InvitePanel({ session, invite }: { session: LiveSession; invite: ShownInvite }) {
+  const { t, i18n } = useTranslation('live');
+  const [copied, setCopied] = useState(false);
+  const canShare = typeof navigator.share === 'function';
+  return (
+    <div className="stack live-invite" style={{ alignItems: 'flex-start' }}>
+      <img
+        src={invite.qr}
+        alt={t('invite.qrAlt', { title: session.title })}
+        width={200}
+        height={200}
+      />
+      <span style={{ wordBreak: 'break-all' }}>
+        <code>{invite.url}</code>
+      </span>
+      <span className="row" style={{ gap: '0.5rem' }}>
+        <button
+          className="btn"
+          onClick={async () => {
+            await navigator.clipboard?.writeText(invite.url);
+            setCopied(true);
+          }}
+        >
+          {copied ? t('invite.copied') : t('invite.copy')}
+        </button>
+        {canShare && (
+          <button
+            className="btn"
+            onClick={() =>
+              void navigator
+                .share({ title: session.title, url: invite.url })
+                .catch(() => {
+                  // Closed without sharing.
+                })
+            }
+          >
+            {t('invite.share')}
+          </button>
+        )}
+      </span>
+      <span className="muted" style={{ fontSize: '0.85rem' }}>
+        {t('invite.validUntil', {
+          date: new Date(invite.expiresAt).toLocaleString(i18n.language, {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }),
+        })}
+      </span>
+      <span className="muted" style={{ fontSize: '0.85rem' }}>
+        {t('invite.note')}
+      </span>
+    </div>
+  );
+}
+
 /** Who a session is for and whether learners' cameras stay off; nothing for a plain one. */
 export function SessionTags({ session }: { session: LiveSession }) {
   const { t } = useTranslation('live');
@@ -94,6 +159,22 @@ export function LiveSessionsTeacher({
   const [camerasOff, setCamerasOff] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [invites, setInvites] = useState<Record<string, ShownInvite>>({});
+
+  const toggleInvite = async (session: LiveSession) => {
+    if (invites[session.id]) {
+      setInvites(({ [session.id]: _hidden, ...rest }) => rest);
+      return;
+    }
+    setError(null);
+    const result = await api.invite(classId, session.id);
+    if (!result.ok) {
+      setError(result.message);
+      return;
+    }
+    const qr = await QRCode.toDataURL(result.value.url, { margin: 1, width: 200 });
+    setInvites((shown) => ({ ...shown, [session.id]: { ...result.value, qr } }));
+  };
 
   const run = async (action: () => Promise<{ ok: boolean; message?: string }>) => {
     setBusy(true);
@@ -137,63 +218,75 @@ export function LiveSessionsTeacher({
         ) : (
           <ul className="stack live-sessions" style={{ listStyle: 'none', padding: 0 }}>
             {data.sessions.map((s) => (
-              <li key={s.id} className="card row live-session">
-                <span className="stack" style={{ gap: 0 }}>
-                  <strong>{s.title}</strong>
-                  <span className="muted" style={{ fontSize: '0.85rem' }}>
-                    {s.status === 'live' ? t('session.live') : when(s)}
+              <li key={s.id} className="card stack live-session-item">
+                <div className="row live-session">
+                  <span className="stack" style={{ gap: 0 }}>
+                    <strong>{s.title}</strong>
+                    <span className="muted" style={{ fontSize: '0.85rem' }}>
+                      {s.status === 'live' ? t('session.live') : when(s)}
+                    </span>
+                    <SessionTags session={s} />
                   </span>
-                  <SessionTags session={s} />
-                </span>
-                <span className="row" style={{ gap: '0.5rem' }}>
-                  {s.status === 'live' ? (
-                    <>
-                      <Link
-                        className="btn btn-primary"
-                        to={roomPath(classId, s.id)}
-                        state={{ teacher: true }}
-                      >
-                        {t('session.join')}
-                      </Link>
-                      <button
-                        className="btn"
-                        disabled={busy}
-                        onClick={() => void run(() => api.end(classId, s.id))}
-                      >
-                        {t('session.end')}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        className="btn btn-primary"
-                        disabled={busy || !data.enabled}
-                        onClick={async () => {
-                          if (await run(() => api.start(classId, s.id))) {
-                            navigate(roomPath(classId, s.id), {
-                              state: { teacher: true },
-                            });
-                          }
-                        }}
-                      >
-                        {t('session.start')}
-                      </button>
-                      <button
-                        className="btn"
-                        disabled={busy}
-                        onClick={() => {
-                          if (
-                            window.confirm(t('session.confirmCancel', { title: s.title }))
-                          ) {
-                            void run(() => api.cancel(classId, s.id));
-                          }
-                        }}
-                      >
-                        {t('session.cancel')}
-                      </button>
-                    </>
-                  )}
-                </span>
+                  <span className="row" style={{ gap: '0.5rem' }}>
+                    {s.status === 'live' ? (
+                      <>
+                        <Link
+                          className="btn btn-primary"
+                          to={roomPath(classId, s.id)}
+                          state={{ teacher: true }}
+                        >
+                          {t('session.join')}
+                        </Link>
+                        <button
+                          className="btn"
+                          disabled={busy}
+                          onClick={() => void run(() => api.end(classId, s.id))}
+                        >
+                          {t('session.end')}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          className="btn btn-primary"
+                          disabled={busy || !data.enabled}
+                          onClick={async () => {
+                            if (await run(() => api.start(classId, s.id))) {
+                              navigate(roomPath(classId, s.id), {
+                                state: { teacher: true },
+                              });
+                            }
+                          }}
+                        >
+                          {t('session.start')}
+                        </button>
+                        <button
+                          className="btn"
+                          disabled={busy}
+                          onClick={() => {
+                            if (
+                              window.confirm(
+                                t('session.confirmCancel', { title: s.title })
+                              )
+                            ) {
+                              void run(() => api.cancel(classId, s.id));
+                            }
+                          }}
+                        >
+                          {t('session.cancel')}
+                        </button>
+                      </>
+                    )}
+                    <button
+                      className="btn"
+                      aria-expanded={Boolean(invites[s.id])}
+                      onClick={() => void toggleInvite(s)}
+                    >
+                      {invites[s.id] ? t('session.hideInvite') : t('session.invite')}
+                    </button>
+                  </span>
+                </div>
+                {invites[s.id] && <InvitePanel session={s} invite={invites[s.id]!} />}
               </li>
             ))}
           </ul>

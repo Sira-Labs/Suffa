@@ -1,6 +1,7 @@
 import { RecordingPlayer } from './modules/classes/RecordingPlayer';
 import { LiveQuiz } from './modules/classes/LiveQuiz';
 import { LiveRoom } from './modules/live/LiveRoom';
+import { LiveInvite } from './modules/live/LiveInvite';
 import { ClassPage } from './modules/classes/ClassPage';
 import { Badges } from './modules/engagement/Badges';
 import { createBrowserRouter } from 'react-router-dom';
@@ -78,6 +79,7 @@ export const router = createBrowserRouter([
       { path: 'badges', element: <Badges /> },
       { path: 'progress', element: <Progress /> },
       { path: 'join/:token', element: <Join /> },
+      { path: 'live-invite/:token', element: <LiveInvite /> },
       { path: 'more', element: <More /> },
       { path: 'training', element: <Training /> },
       { path: 'discover', element: <Discover /> },

@@ -80,7 +80,8 @@ export function Join() {
   );
 }
 
-function SignInHere({
+/** Asks for the email address and sends a sign-in link that leads back to `returnTo`. */
+export function SignInHere({
   provider,
   returnTo,
 }: {

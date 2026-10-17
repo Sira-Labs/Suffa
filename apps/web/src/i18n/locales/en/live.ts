@@ -33,6 +33,26 @@ export const live: Messages<typeof de> = {
     join: 'Join',
     recording: 'Being recorded',
     camerasOff: 'Learners’ cameras off',
+    invite: 'Invite',
+    hideInvite: 'Hide invite',
+  },
+  invite: {
+    qrAlt: 'QR code for the live lesson “{{title}}”',
+    copy: 'Copy link',
+    copied: 'Copied',
+    share: 'Share',
+    validUntil: 'Valid until {{date}}, for this live lesson only.',
+    note: 'Anyone already in the class goes straight to the lesson. Anyone new asks to join the class; you approve them under Members.',
+    title: 'Invitation to a live lesson',
+    invited:
+      '{{teacher}} invites you to the live lesson <1>{{title}}</1> of the class {{name}}.',
+    invitedNoTeacher:
+      'You are invited to the live lesson <1>{{title}}</1> of the class {{name}}.',
+    liveNow: 'On now.',
+    take: 'Take part',
+    pending:
+      'Your request to join {{name}} is with the teacher. Once they approve you, this link takes you to the lesson.',
+    tryAgain: 'Try again',
   },
   banner: {
     live: 'Live lesson in progress: {{title}}',

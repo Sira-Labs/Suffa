@@ -225,6 +225,9 @@ describe('Feedback while testing', () => {
 
   it('never sends an invite token or sign-in code with the page', () => {
     expect(reportedPage('/join/abcdefghijklmnopqrstuvwxyz', '')).toBe('/join/…');
+    expect(reportedPage('/live-invite/abcdefghijklmnopqrstuvwxyz', '?x=1')).toBe(
+      '/live-invite/…'
+    );
     expect(reportedPage('/login', '?code=123456')).toBe('/login');
     expect(reportedPage('/units/3', '?section=2')).toBe('/units/3?section=2');
   });

@@ -40,6 +40,30 @@ export interface LiveJoin {
   session: LiveSession;
 }
 
+/** A link (with its QR code made in the browser) inviting to one session. */
+export interface LiveInvite {
+  url: string;
+  expiresAt: string;
+}
+
+/** What an invite link shows before joining. */
+export interface LiveInvitePreview {
+  classId: string;
+  className: string;
+  teacherName: string | null;
+  sessionId: string;
+  title: string;
+  startsAt: string;
+  status: 'scheduled' | 'live';
+}
+
+export interface LiveInviteJoin {
+  classId: string;
+  sessionId: string;
+  /** `pending` until the teacher approves someone new to the class. */
+  status: 'pending' | 'active';
+}
+
 export interface NewLiveSession {
   title: string;
   startsAt: string;
@@ -110,6 +134,26 @@ export class LiveApi {
     return this.call<{ session: LiveSession }>(
       `${this.base(classId)}/${sessionId}/recording`,
       { method: 'DELETE' }
+    );
+  }
+
+  /** A new invite link to the session (the session's older link stops working). */
+  invite(classId: string, sessionId: string) {
+    return this.call<LiveInvite>(`${this.base(classId)}/${sessionId}/invite`, {
+      method: 'POST',
+    });
+  }
+
+  previewInvite(token: string) {
+    return this.call<LiveInvitePreview>(
+      `/api/v1/live-invites/${encodeURIComponent(token)}`
+    );
+  }
+
+  joinInvite(token: string) {
+    return this.call<LiveInviteJoin>(
+      `/api/v1/live-invites/${encodeURIComponent(token)}/join`,
+      { method: 'POST' }
     );
   }
 

@@ -144,6 +144,10 @@ export const errors = {
       'Der Speicher dieser Klasse reicht nicht für eine Aufnahme (50 GB). Lösche alte Aufnahmen.',
     recording_failed:
       'Die Aufnahme ließ sich nicht starten. Bitte gleich noch einmal versuchen.',
+    invalid_invite:
+      'Dieser Einladungslink gilt nicht mehr. Bitte die Lehrkraft um einen neuen.',
+    invites_unavailable:
+      'Einladungslinks sind auf diesem Server noch nicht eingerichtet.',
   },
   quiz: {
     running: 'In dieser Klasse läuft schon ein Quiz.',

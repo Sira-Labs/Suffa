@@ -4,7 +4,9 @@
  * `livekit-client` is loaded only when someone joins a room.
  *
  * - People carry their role, raised hand and floor as LiveKit attributes: the role and the
- *   floor are set by the server, the hand by the learner.
+ *   floor are set by the server, the hand by the learner. What this person may publish comes
+ *   from their LiveKit permissions: learners may use their camera whenever the session allows
+ *   learner cameras, and speak once they have the floor.
  * - Chat messages travel only through the room (data messages on the topic "chat"); nothing
  *   is stored.
  * - Remote audio plays through audio elements in `audioHost`.
@@ -58,8 +60,10 @@ export interface LiveState {
   ended: boolean;
   people: LivePerson[];
   chat: LiveMessage[];
-  /** This person may publish (teacher, or a learner with the floor). */
-  canPublish: boolean;
+  /** This person may use the microphone (teacher, or a learner with the floor). */
+  canSpeak: boolean;
+  /** This person may use the camera (teacher, or a learner where the session allows it). */
+  canCamera: boolean;
   /** The room is being recorded (ADR-0029); everyone in it sees this. */
   recording: boolean;
 }
@@ -110,6 +114,18 @@ const CHAT_TOPIC = 'chat';
 
 type LiveKit = typeof import('livekit-client');
 
+// LiveKit's TrackSource values in a participant's permissions (livekit-protocol); the client
+// library does not export the enum.
+const SOURCE_CAMERA = 1;
+const SOURCE_MICROPHONE = 2;
+
+/** Whether `permissions` let this person publish `source` (no list means every source). */
+function allows(permissions: Participant['permissions'], source: number): boolean {
+  if (!permissions?.canPublish) return false;
+  const sources = (permissions.canPublishSources ?? []) as number[];
+  return sources.length === 0 || sources.includes(source);
+}
+
 class LiveKitConnection implements LiveConnection {
   private listeners = new Set<(state: LiveState) => void>();
   private chat: LiveMessage[] = [];
@@ -155,8 +171,8 @@ class LiveKitConnection implements LiveConnection {
     room.on(E.ParticipantPermissionsChanged, (previous, participant) => {
       // A learner given the floor speaks right away; their raised hand is answered.
       if (participant === room.localParticipant) {
-        const now = room.localParticipant.permissions?.canPublish ?? false;
-        if (now && !previous?.canPublish) {
+        const now = allows(room.localParticipant.permissions, SOURCE_MICROPHONE);
+        if (now && !allows(previous, SOURCE_MICROPHONE)) {
           void this.raiseHand(false);
           void this.setMicrophone(true).catch(() => undefined);
         }
@@ -369,7 +385,8 @@ class LiveKitConnection implements LiveConnection {
         ...[...this.room.remoteParticipants.values()].map((p) => this.person(p, false)),
       ],
       chat: this.chat,
-      canPublish: me.permissions?.canPublish ?? false,
+      canSpeak: allows(me.permissions, SOURCE_MICROPHONE),
+      canCamera: allows(me.permissions, SOURCE_CAMERA),
       recording: this.room.isRecording,
     };
   }

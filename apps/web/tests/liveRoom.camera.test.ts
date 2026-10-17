@@ -7,7 +7,14 @@ import { builtInBackground } from '@/services/live/backgrounds';
  * in place, so no unprocessed frame of the room ever leaves the device.
  */
 const steps: string[] = [];
-const state = { failProcessor: false, published: undefined as unknown };
+const state = {
+  failProcessor: false,
+  published: undefined as unknown,
+  permissions: { canPublish: true } as {
+    canPublish: boolean;
+    canPublishSources?: number[];
+  },
+};
 
 function fakeTrack() {
   return {
@@ -46,7 +53,9 @@ vi.mock('livekit-client', () => {
       identity: 'me',
       name: 'Ustadha Maryam',
       attributes: {},
-      permissions: { canPublish: true },
+      get permissions() {
+        return state.permissions;
+      },
       isSpeaking: false,
       isMicrophoneEnabled: false,
       isCameraEnabled: false,
@@ -90,6 +99,22 @@ beforeEach(() => {
   steps.length = 0;
   state.failProcessor = false;
   state.published = undefined;
+  state.permissions = { canPublish: true };
+});
+
+describe('what this person may publish', () => {
+  // LiveKit's TrackSource values: 1 camera, 2 microphone, 3 screen share.
+  it.each([
+    [{ canPublish: true }, true, true],
+    [{ canPublish: true, canPublishSources: [1, 2, 3] }, true, true],
+    [{ canPublish: true, canPublishSources: [1] }, false, true],
+    [{ canPublish: true, canPublishSources: [2] }, true, false],
+    [{ canPublish: false, canPublishSources: [] }, false, false],
+  ])('reads %j as speak %s, camera %s', async (permissions, canSpeak, canCamera) => {
+    state.permissions = permissions;
+    const live = await connect();
+    expect(live.state()).toMatchObject({ canSpeak, canCamera });
+  });
 });
 
 describe('camera with a background', () => {

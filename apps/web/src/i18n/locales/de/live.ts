@@ -62,7 +62,7 @@ export const live = {
     preJoinTeacher:
       'Du leitest den Unterricht. Nach dem Beitreten kannst du Mikrofon, Kamera und Bildschirm freigeben.',
     preJoinLearner:
-      'Du hörst und siehst zu, kannst im Chat schreiben und dich melden. Die Lehrkraft gibt dir das Wort.',
+      'Du hörst und siehst zu, kannst im Chat schreiben und dich melden. Wo die Lehrkraft es erlaubt, kannst du auch deine Kamera einschalten. Zum Sprechen gibt dir die Lehrkraft das Wort.',
     join: 'Beitreten',
     joining: 'Verbinde …',
     reconnecting: 'Verbindung wird wiederhergestellt …',
@@ -74,6 +74,9 @@ export const live = {
     screenOf: 'Bildschirm von {{name}}',
     hideTeacherCamera: 'Lehrkraft ausblenden',
     showTeacherCamera: 'Lehrkraft einblenden',
+    enlarge: 'Vergrößern',
+    shrink: 'Verkleinern',
+    enlargeLabel: 'Bild der Lehrkraft auf ganzem Bildschirm zeigen',
     background: 'Hintergrund',
     backgroundNote:
       'Der Hintergrund wird auf deinem Gerät berechnet. Die anderen sehen nur das fertige Bild.',
@@ -100,6 +103,8 @@ export const live = {
     micOff: 'Mikrofon aus',
     cameraOn: 'Kamera an',
     cameraOff: 'Kamera aus',
+    cameraHint:
+      'Deine Kamera geht an alle im Raum. Gezeigt wird sie der Lehrkraft und, solange du das Wort hast, auch den anderen. Dein Bild wird nie aufgenommen.',
     shareScreen: 'Bildschirm teilen',
     stopShare: 'Teilen beenden',
     noScreenShare:
@@ -134,6 +139,7 @@ export const live = {
     takeFloor: 'Wort entziehen',
     handRaised: 'meldet sich',
     speaking: 'spricht',
+    cameraTag: 'Kamera an',
     chat: 'Chat',
     chatEmpty: 'Noch keine Nachrichten. Der Chat wird nicht gespeichert.',
     message: 'Nachricht',

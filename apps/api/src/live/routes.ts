@@ -16,16 +16,16 @@
  *   POST   /live-invites/:token/join            → { classId, sessionId, status }   (class:join)
  *
  * Only active members of the class get a token, and only while the session is live. The
- * teacher's token may publish and moderate; a learner's may only listen, chat and raise a
- * hand until the teacher gives them the floor; only active learners of the class can be given
+ * teacher's token may publish and moderate; a learner's may listen, chat, raise a hand and use
+ * their own camera, and speak once the teacher gives them the floor; only active learners of the class can be given
  * the floor (`not_in_room` for anyone else, so a teacher's own rights are never replaced).
  * Without a LiveKit server (`rooms` undefined) sessions are listed as disabled and nobody can
  * start or join one.
  *
  * Sisters and brothers (stage 2): a session is for everyone or for one section. Learners see
  * and join only sessions for everyone and for their own section (403 `wrong_audience`
- * otherwise); the teacher sees and leads all. With `learnerCameras` false the floor is the
- * learner's microphone only.
+ * otherwise); the teacher sees and leads all. With `learnerCameras` false learners never use
+ * their camera.
  *
  * Recording (Live 3, ADR-0029): the teacher records the room on the server into the class's
  * recordings; the list says whether recording is set up (`recordingEnabled`), so learners are
@@ -205,7 +205,12 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
     const role = allowed ? 'learner' : 'teacher';
     const token = await deps.rooms.token(
       roomName(session.id),
-      { identity: actor.id, name: await deps.sessions.displayName(actor.id), role },
+      {
+        identity: actor.id,
+        name: await deps.sessions.displayName(actor.id),
+        role,
+        camera: role === 'learner' && session.learnerCameras,
+      },
       (session.durationMinutes + OVERRUN_MINUTES) * 60
     );
     c.header('Cache-Control', 'no-store');

@@ -34,8 +34,9 @@ Constraints that already hold in Suffa:
   only while the session is live:
   - the class teacher (or an admin) may publish camera, microphone and screen, and moderate;
   - learners join listening and may write in the chat and raise a hand; the teacher gives
-    them the floor (microphone, camera) through the API, which updates their permission on
-    the LiveKit server, and takes it back the same way.
+    them the floor (the microphone) through the API, which updates their permission on the
+    LiveKit server, and takes it back the same way. Learners may turn on their own camera
+    whenever the session allows learner cameras (update 2026-10-17, below).
 - **Live sessions are planned in the class** (`live_sessions`): title, start, length; the
   teacher starts and ends them. At most one session per audience of a class is live at a time
   (everyone, the sisters, the brothers; stage 2), so the two groups can meet in parallel.
@@ -67,6 +68,21 @@ Constraints that already hold in Suffa:
    grants no guest access: only members get a room token, and sisters' or brothers' sessions
    still check the learner's section. Only the token's SHA-256 is stored, and error reports
    name the page without it.
+
+5. Learner cameras and a larger teacher (update 2026-10-17, from the first lessons on
+   staging: the teacher could not see a learner, and a learner wanted the teacher larger).
+   - Where the session allows learner cameras, a learner's token lets them publish their
+     camera from the start; the floor adds the microphone and taking it back leaves the
+     camera. Sessions with the cameras off never allow it, enforced by LiveKit as before.
+   - The teacher sees every learner camera as a tile and who has it on in the list; the
+     others see their own camera and those of learners with the floor. This split is in the
+     room UI, not in LiveKit's subscription rights: everyone in the room is an approved
+     member of the class (and of its section), and per-track rights would also have to
+     admit the recorder.
+   - A learner's camera is still never recorded (ADR-0029): the recording page shows only
+     the teacher's picture.
+   - Everyone can show the stage full screen (button or double click); on the iPhone, where
+     pages cannot go full screen, the teacher's video does.
 
 ## Consequences
 

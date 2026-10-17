@@ -1,9 +1,12 @@
 /**
  * The live room (ADR-0026): the teacher large on the stage (screen share before camera, with
- * the teacher's camera small in the corner while sharing, story 18.3), learners who have the
- * floor as small tiles, the people with raised hands, the chat and the controls. The teacher
- * gives and takes the floor; learners raise their hand. Whoever may use the camera can put a
- * background behind it: one of ours, or a picture of their own kept on this device.
+ * the teacher's camera small in the corner while sharing, story 18.3), which anyone can show
+ * full screen; learners' cameras as small tiles, the people with raised hands, the chat and
+ * the controls. Learners may turn on their camera where the session allows it; the teacher
+ * sees every learner's camera, the others only those of learners with the floor (and their
+ * own). The teacher gives and takes the floor; learners raise their hand. Whoever may use the
+ * camera can put a background behind it: one of ours, or a picture of their own kept on this
+ * device.
  *
  * Recording (ADR-0029): the teacher starts and stops it; everyone in the room sees
  * „Aufnahme läuft“ while it runs and is told before joining that the lesson may be recorded.
@@ -92,16 +95,55 @@ function Video({
   );
 }
 
+/** A video element that iOS can play full screen on its own (Safari has no element full screen). */
+type IosVideo = HTMLVideoElement & { webkitEnterFullscreen?: () => void };
+
+/**
+ * Shows `stage` full screen, or leaves full screen. Where the browser cannot show an element
+ * full screen (iPhone), the stage's main video goes full screen instead.
+ */
+function toggleFullscreen(stage: HTMLElement) {
+  if (document.fullscreenElement) {
+    void document.exitFullscreen().catch(() => undefined);
+    return;
+  }
+  if (typeof stage.requestFullscreen === 'function') {
+    void stage.requestFullscreen().catch(() => undefined);
+    return;
+  }
+  (stage.querySelector('video') as IosVideo | null)?.webkitEnterFullscreen?.();
+}
+
+/** Whether the stage can go full screen in this browser. */
+function canFullscreen(): boolean {
+  if (typeof document === 'undefined') return false;
+  return (
+    typeof document.documentElement.requestFullscreen === 'function' ||
+    typeof (document.createElement('video') as IosVideo).webkitEnterFullscreen ===
+      'function'
+  );
+}
+
 function Stage({
   connection,
   teacher,
+  fullscreen,
 }: {
   connection: LiveConnection;
   teacher: LivePerson | undefined;
+  fullscreen: boolean;
 }) {
   const { t } = useTranslation('live');
   // Everyone decides for themselves whether the teacher's camera covers a corner of the screen.
   const [showCamera, setShowCamera] = useState(true);
+  const stage = useRef<HTMLDivElement>(null);
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    const changed = () =>
+      setFull(Boolean(stage.current) && document.fullscreenElement === stage.current);
+    document.addEventListener('fullscreenchange', changed);
+    return () => document.removeEventListener('fullscreenchange', changed);
+  }, []);
   if (!teacher) {
     return (
       <div className="live-stage live-stage-empty">
@@ -116,7 +158,13 @@ function Stage({
       : null;
   const both = teacher.screenOn && teacher.cameraOn;
   return (
-    <div className={`live-stage${teacher.speaking ? ' live-speaking' : ''}`}>
+    <div
+      ref={stage}
+      className={`live-stage${teacher.speaking ? ' live-speaking' : ''}`}
+      onDoubleClick={() =>
+        fullscreen && source && stage.current && toggleFullscreen(stage.current)
+      }
+    >
       {source ? (
         <Video
           connection={connection}
@@ -151,6 +199,16 @@ function Stage({
           onClick={() => setShowCamera(!showCamera)}
         >
           {showCamera ? t('room.hideTeacherCamera') : t('room.showTeacherCamera')}
+        </button>
+      )}
+      {fullscreen && source && (
+        <button
+          className="btn btn-small live-fullscreen-toggle"
+          aria-pressed={full}
+          aria-label={full ? t('room.shrink') : t('room.enlargeLabel')}
+          onClick={() => stage.current && toggleFullscreen(stage.current)}
+        >
+          {full ? t('room.shrink') : t('room.enlarge')}
         </button>
       )}
     </div>
@@ -338,6 +396,9 @@ function People({
         {p.name} {p.local && <span className="muted">{t('room.you')}</span>}
         {p.hand && <span className="live-tag">✋ {t('room.handRaised')}</span>}
         {p.speaking && <span className="live-tag">{t('room.speaking')}</span>}
+        {teacherView && p.cameraOn && (
+          <span className="live-tag">{t('room.cameraTag')}</span>
+        )}
       </span>
       {teacherView && !p.local && (
         <button className="btn btn-small" onClick={() => onFloor(p, !p.floor)}>
@@ -424,6 +485,7 @@ function Room({
   connection,
   screenShare,
   backgrounds,
+  fullscreen,
   ownBackgrounds,
   recordingEnabled,
   onLeave,
@@ -435,6 +497,8 @@ function Room({
   connection: LiveConnection;
   screenShare: boolean;
   backgrounds: boolean;
+  /** The stage can go full screen. */
+  fullscreen: boolean;
   ownBackgrounds: OwnBackgroundStore;
   /** The teacher can record the lesson on the server. */
   recordingEnabled: boolean;
@@ -446,8 +510,12 @@ function Room({
   const me = state.people.find((p) => p.local);
   const teacher = state.people.find((p) => p.role === 'teacher');
   const teacherView = role === 'teacher';
-  const floorTiles = state.people.filter((p) => p.role === 'learner' && p.cameraOn);
-  const mayUseCamera = teacherView || (state.canPublish && session.learnerCameras);
+  // The teacher sees every learner's camera; learners see their own and those of learners
+  // with the floor. LiveKit lets the camera only where the session allows learner cameras.
+  const tiles = state.people.filter(
+    (p) => p.role === 'learner' && p.cameraOn && (teacherView || p.local || p.floor)
+  );
+  const mayUseCamera = teacherView || state.canCamera;
   const [background, setBackground] = useState<BackgroundChoice>(() =>
     backgrounds ? rememberedBackground() : 'none'
   );
@@ -461,11 +529,11 @@ function Room({
 
   const hadFloor = useRef(false);
   useEffect(() => {
-    if (!teacherView && state.canPublish && !hadFloor.current) {
+    if (!teacherView && state.canSpeak && !hadFloor.current) {
       setNotice(t(state.recording ? 'room.floorGivenRecording' : 'room.floorGiven'));
     }
-    hadFloor.current = state.canPublish;
-  }, [state.canPublish, state.recording, teacherView, t]);
+    hadFloor.current = state.canSpeak;
+  }, [state.canSpeak, state.recording, teacherView, t]);
 
   // Learners are told when the recording starts or stops while they are in the room.
   const wasRecording = useRef(state.recording);
@@ -619,10 +687,10 @@ function Room({
             {notice}
           </p>
         )}
-        <Stage connection={connection} teacher={teacher} />
-        {floorTiles.length > 0 && (
+        <Stage connection={connection} teacher={teacher} fullscreen={fullscreen} />
+        {tiles.length > 0 && (
           <div className="live-tiles">
-            {floorTiles.map((p) => (
+            {tiles.map((p) => (
               <figure key={p.identity} className="live-tile">
                 <Video
                   connection={connection}
@@ -637,25 +705,23 @@ function Room({
         )}
       </div>
       <div className="live-controls row" role="toolbar" aria-label={t('room.controls')}>
-        {state.canPublish && me && (
-          <>
-            <button
-              className="btn"
-              aria-pressed={me.micOn}
-              onClick={() => void device(() => connection.setMicrophone(!me.micOn))}
-            >
-              {me.micOn ? t('room.micOff') : t('room.micOn')}
-            </button>
-            {(teacherView || session.learnerCameras) && (
-              <button
-                className="btn"
-                aria-pressed={me.cameraOn}
-                onClick={() => void device(() => connection.setCamera(!me.cameraOn))}
-              >
-                {me.cameraOn ? t('room.cameraOff') : t('room.cameraOn')}
-              </button>
-            )}
-          </>
+        {state.canSpeak && me && (
+          <button
+            className="btn"
+            aria-pressed={me.micOn}
+            onClick={() => void device(() => connection.setMicrophone(!me.micOn))}
+          >
+            {me.micOn ? t('room.micOff') : t('room.micOn')}
+          </button>
+        )}
+        {mayUseCamera && me && (
+          <button
+            className="btn"
+            aria-pressed={me.cameraOn}
+            onClick={() => void device(() => connection.setCamera(!me.cameraOn))}
+          >
+            {me.cameraOn ? t('room.cameraOff') : t('room.cameraOn')}
+          </button>
         )}
         {teacherView && me && screenShare && (
           <button
@@ -671,7 +737,7 @@ function Room({
             {t('room.noScreenShare')}
           </span>
         )}
-        {!teacherView && me && !state.canPublish && (
+        {!teacherView && me && !state.canSpeak && (
           <button
             className="btn"
             aria-pressed={me.hand}
@@ -706,6 +772,9 @@ function Room({
         )}
       </div>
       <div className="live-side">
+        {!teacherView && mayUseCamera && (
+          <p className="muted live-camera-hint">{t('room.cameraHint')}</p>
+        )}
         {backgrounds && mayUseCamera && (
           <BackgroundPicker
             value={background}
@@ -732,6 +801,7 @@ export function LiveRoom({
   connect = connectLive,
   screenShare = canShareScreen(),
   backgrounds = canUseBackgrounds(),
+  fullscreen = canFullscreen(),
   ownBackgrounds: givenOwnBackgrounds,
 }: {
   api?: LiveApi;
@@ -740,6 +810,8 @@ export function LiveRoom({
   screenShare?: boolean;
   /** The browser can put a background behind the camera. */
   backgrounds?: boolean;
+  /** The browser can show the stage full screen. */
+  fullscreen?: boolean;
   /** Where the person's own background pictures are kept (this device by default). */
   ownBackgrounds?: OwnBackgroundStore;
 }) {
@@ -827,6 +899,7 @@ export function LiveRoom({
           connection={phase.connection}
           screenShare={screenShare}
           backgrounds={backgrounds}
+          fullscreen={fullscreen}
           ownBackgrounds={ownBackgrounds}
           recordingEnabled={Boolean(recordingInfo?.enabled)}
           onLeave={() => setPhase({ kind: 'left' })}

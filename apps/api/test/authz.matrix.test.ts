@@ -237,6 +237,7 @@ function buildApp() {
           quietStart: '22:00',
           quietEnd: '07:00',
           weeklyRecap: true,
+          liveReminder: true,
           devices: 0,
         }),
         savePrefs: async () => {},

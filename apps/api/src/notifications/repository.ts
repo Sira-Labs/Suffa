@@ -9,7 +9,14 @@ export interface NotificationPrefs {
   quietStart: string;
   quietEnd: string;
   weeklyRecap: boolean;
+  /** A push shortly before a live lesson of one of the learner's classes (ADR-0026). */
+  liveReminder: boolean;
 }
+
+/** What a client saves; one from before live reminders leaves that choice as it is. */
+export type NotificationPrefsInput = Omit<NotificationPrefs, 'liveReminder'> & {
+  liveReminder?: boolean;
+};
 
 export const DEFAULT_PREFS: NotificationPrefs = {
   reminderEnabled: false,
@@ -17,6 +24,7 @@ export const DEFAULT_PREFS: NotificationPrefs = {
   quietStart: '22:00',
   quietEnd: '07:00',
   weeklyRecap: true,
+  liveReminder: true,
 };
 
 export interface Recipient {
@@ -30,7 +38,7 @@ export interface NotificationRepository {
   subscribe(userId: string, target: PushTarget, userAgent: string | null): Promise<void>;
   unsubscribe(userId: string, endpoint: string): Promise<boolean>;
   prefs(userId: string): Promise<NotificationPrefs & { devices: number }>;
-  savePrefs(userId: string, prefs: NotificationPrefs): Promise<void>;
+  savePrefs(userId: string, prefs: NotificationPrefsInput): Promise<void>;
   /** Learners with at least one device; `reminders` = only those with reminders on. */
   recipients(filter: 'reminders' | 'recaps'): Promise<Recipient[]>;
   targets(userId: string): Promise<PushTarget[]>;
@@ -52,6 +60,7 @@ const prefsOf = (r: Record<string, unknown> | undefined): NotificationPrefs =>
         quietStart: r.quiet_start as string,
         quietEnd: r.quiet_end as string,
         weeklyRecap: r.weekly_recap as boolean,
+        liveReminder: r.live_reminder as boolean,
       }
     : DEFAULT_PREFS;
 
@@ -89,14 +98,16 @@ export class PgNotificationRepository implements NotificationRepository {
     return { ...prefsOf(prefs.rows[0]), devices: devices.rows[0].n as number };
   }
 
-  async savePrefs(userId: string, prefs: NotificationPrefs) {
+  async savePrefs(userId: string, prefs: NotificationPrefsInput) {
     await this.pool.query(
       `insert into notification_prefs
-         (user_id, reminder_enabled, reminder_time, quiet_start, quiet_end, weekly_recap, updated_at)
-       values ($1, $2, $3, $4, $5, $6, now())
+         (user_id, reminder_enabled, reminder_time, quiet_start, quiet_end, weekly_recap,
+          live_reminder, updated_at)
+       values ($1, $2, $3, $4, $5, $6, coalesce($7, true), now())
        on conflict (user_id) do update set reminder_enabled = excluded.reminder_enabled,
          reminder_time = excluded.reminder_time, quiet_start = excluded.quiet_start,
          quiet_end = excluded.quiet_end, weekly_recap = excluded.weekly_recap,
+         live_reminder = coalesce($7, notification_prefs.live_reminder),
          updated_at = now()`,
       [
         userId,
@@ -105,6 +116,7 @@ export class PgNotificationRepository implements NotificationRepository {
         prefs.quietStart,
         prefs.quietEnd,
         prefs.weeklyRecap,
+        prefs.liveReminder ?? null,
       ]
     );
   }

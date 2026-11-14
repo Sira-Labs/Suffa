@@ -9,7 +9,19 @@ import {
 } from '../src/notifications/schedule.js';
 import { WebPushNotifier } from '../src/notifications/notifier.js';
 import { recapWeekDue } from '../src/notifications/recap.js';
-import { NotificationJob, runNotificationJob } from '../src/notifications/jobs.js';
+import {
+  NOTIFICATION_SCHEDULES,
+  NotificationJob,
+  runNotificationJob,
+} from '../src/notifications/jobs.js';
+import {
+  LIVE_REMINDER_LEAD_MINUTES,
+  liveReminderMessage,
+  runLiveReminders,
+  type DueLiveSession,
+  type LiveReminderRecipient,
+} from '../src/live/reminders.js';
+import type { PushMessage } from '../src/notifications/notifier.js';
 
 const prefs = { reminderTime: '18:00', quietStart: '22:00', quietEnd: '07:00' };
 
@@ -94,11 +106,93 @@ describe('notification jobs', () => {
         {
           notifications: {} as never,
           recaps: {} as never,
+          liveReminders: {} as never,
           notifier: { enabled: false, send: vi.fn() },
           log: { info: () => undefined },
         },
         { task: 'reminders' }
       )
     ).resolves.toBeUndefined();
+  });
+
+  it('looks for live lessons about to start every five minutes', () => {
+    expect(NOTIFICATION_SCHEDULES).toContainEqual({
+      cron: '*/5 * * * *',
+      job: { task: 'live-reminders' },
+    });
+  });
+});
+
+describe('live lesson reminders', () => {
+  // 16:50 UTC = 18:50 in Zurich = 19:50 in Riyadh; the lesson starts ten minutes later.
+  const now = new Date('2026-11-16T16:50:00Z');
+  const session: DueLiveSession = {
+    id: 'session-1',
+    classId: 'class-1',
+    className: 'Bayna Yadayk 1',
+    title: 'Lektion 4',
+    startsAt: new Date('2026-11-16T17:00:00Z'),
+  };
+  const member = (userId: string, over: Partial<LiveReminderRecipient> = {}) => ({
+    userId,
+    timeZone: 'Europe/Zurich',
+    quietStart: '22:00',
+    quietEnd: '07:00',
+    ...over,
+  });
+  const quiet = { info: () => undefined };
+
+  function setup(recipients: LiveReminderRecipient[], enabled = true) {
+    const sent: { userId: string; message: PushMessage }[] = [];
+    const repo = {
+      claimDue: vi.fn(async () => [session]),
+      recipients: vi.fn(async () => recipients),
+    };
+    const notifications = {
+      targets: async (userId: string) => [{ endpoint: userId, p256dh: '', auth: '' }],
+      delivered: async () => undefined,
+    };
+    const notifier = {
+      enabled,
+      send: async (target: { endpoint: string }, message: PushMessage) => {
+        sent.push({ userId: target.endpoint, message });
+        return 'sent' as const;
+      },
+    };
+    return { sent, repo, notifications, notifier };
+  }
+
+  it('names the lesson, the class and the start in the member time zone', () => {
+    expect(liveReminderMessage(session, 'Europe/Zurich')).toEqual({
+      title: 'Gleich live: Lektion 4',
+      body: 'Bayna Yadayk 1 · Beginn um 18:00 Uhr',
+      url: '/classes/class-1',
+      tag: 'live-session-1',
+    });
+    expect(liveReminderMessage(session, 'Asia/Riyadh').body).toContain('20:00 Uhr');
+  });
+
+  it('reaches every member it is for, but nobody in their quiet hours', async () => {
+    const t = setup([
+      member('amina'),
+      member('bilal', {
+        timeZone: 'Asia/Riyadh',
+        quietStart: '19:30',
+        quietEnd: '06:00',
+      }),
+    ]);
+    expect(
+      await runLiveReminders(t.repo, t.notifications, t.notifier, quiet, now)
+    ).toEqual({ sessions: 1, sent: 1, quiet: 1 });
+    expect(t.repo.claimDue).toHaveBeenCalledWith(now, LIVE_REMINDER_LEAD_MINUTES);
+    expect(t.sent.map((s) => s.userId)).toEqual(['amina']);
+  });
+
+  it('claims nothing while push is not set up', async () => {
+    const t = setup([member('amina')], false);
+    expect(
+      await runLiveReminders(t.repo, t.notifications, t.notifier, quiet, now)
+    ).toEqual({ sessions: 0, sent: 0, quiet: 0 });
+    expect(t.repo.claimDue).not.toHaveBeenCalled();
   });
 });

@@ -9,9 +9,10 @@ const prefs = {
   quietStart: '22:00',
   quietEnd: '07:00',
   weeklyRecap: false,
+  liveReminder: false,
 };
 
-function fakeServer(publicKey: string | null) {
+function fakeServer(publicKey: string | null, stored: typeof prefs = prefs) {
   const saved: unknown[] = [];
   vi.stubGlobal(
     'fetch',
@@ -21,7 +22,7 @@ function fakeServer(publicKey: string | null) {
         return new Response(null, { status: 204 });
       }
       if (String(input) === '/api/v1/notifications') {
-        return Response.json({ publicKey, prefs, devices: 0 });
+        return Response.json({ publicKey, prefs: stored, devices: 0 });
       }
       return new Response(null, { status: 404 });
     })
@@ -56,5 +57,16 @@ describe('Reminders card (integration)', () => {
       await screen.findByText(/Home-Bildschirm/, { selector: '.feedback-bad' })
     ).toBeInTheDocument();
     expect(saved).toHaveLength(1);
+  });
+
+  it('shows the live lesson reminder as stored and saves switching it off', async () => {
+    const saved = fakeServer('BPublicKey', { ...prefs, liveReminder: true });
+    render(<RemindersCard />);
+    const live = await screen.findByRole('checkbox', { name: /Live-Unterricht/ });
+    expect(live).toBeChecked();
+    await userEvent.click(live);
+    await userEvent.click(screen.getByRole('button', { name: 'Speichern' }));
+    expect(await screen.findByText('Gespeichert.')).toBeInTheDocument();
+    expect(saved).toEqual([{ ...prefs, liveReminder: false }]);
   });
 });

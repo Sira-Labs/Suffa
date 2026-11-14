@@ -89,6 +89,8 @@ export const settings = {
     until: 'bis',
     recap: 'Wochenrückblick',
     recapHint: 'Sonntagabend: deine Woche in Zahlen',
+    live: 'Live-Unterricht',
+    liveHint: 'Kurz bevor eine Live-Stunde deiner Klasse beginnt',
     noDevice: 'Noch kein Gerät angemeldet',
     devices_one: '{{count}} Gerät bekommt Mitteilungen',
     devices_other: '{{count}} Geräte bekommen Mitteilungen',

@@ -332,6 +332,7 @@ describe('reminder channel in the app', () => {
       quietStart: '22:00',
       quietEnd: '07:00',
       weeklyRecap: false,
+      liveReminder: false,
     },
     devices: 0,
     appPush: false,

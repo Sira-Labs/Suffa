@@ -285,6 +285,7 @@ function buildApp() {
         url: 'wss://live.example.org',
         token: async () => 'token',
         setFloor: async () => false,
+        setHand: async () => false,
         close: async () => undefined,
       },
       auth: resolver,

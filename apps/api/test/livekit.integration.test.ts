@@ -63,7 +63,8 @@ describe('LiveKit join tokens', () => {
         canPublish: false,
         canSubscribe: true,
         canPublishData: true,
-        canUpdateOwnMetadata: true,
+        // Role, floor and hand are attributes the room trusts: a learner cannot write them.
+        canUpdateOwnMetadata: false,
       },
     });
     expect(

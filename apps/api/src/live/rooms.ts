@@ -6,9 +6,14 @@
  * Who may do what in a room:
  * - the teacher publishes camera, microphone and screen and moderates the room;
  * - a learner joins listening and may turn on their own camera unless the session keeps
- *   learner cameras off (update 2026-10-17); chat and raised hands go through data messages
- *   and their own attributes; the teacher gives them the floor (the microphone) and takes it
- *   back.
+ *   learner cameras off (update 2026-10-17); chat goes through data messages; the teacher
+ *   gives them the floor (the microphone) and takes it back.
+ *
+ * Role, floor and raised hand are participant attributes that only this server writes
+ * (update 2026-11-15). The room and the recorder decide by them who is the teacher and who
+ * has the floor, so a learner's token must not carry `canUpdateOwnMetadata`: with it a
+ * tampered client could name itself the teacher, take the stage and enter the recording, or
+ * change the name it is shown under. A learner raises a hand through the API instead.
  */
 import { AccessToken, RoomServiceClient, TrackSource } from 'livekit-server-sdk';
 import type { LiveKitConfig } from '../config.js';
@@ -39,6 +44,8 @@ export interface LiveRooms {
     allowed: boolean,
     options: { camera: boolean }
   ): Promise<boolean>;
+  /** Raises or lowers a learner's hand. False when the learner is not in the room. */
+  setHand(room: string, identity: string, up: boolean): Promise<boolean>;
   /** Ends the room for everyone in it (no error when it is already gone). */
   close(room: string): Promise<void>;
 }
@@ -96,8 +103,8 @@ export class LiveKitRooms implements LiveRooms {
       canPublish: sources.length > 0,
       canPublishSources: sources,
       canPublishData: true,
-      // The raised hand is the learner's own attribute.
-      canUpdateOwnMetadata: true,
+      // Never for a learner: role, floor and hand are attributes the room trusts.
+      canUpdateOwnMetadata: false,
     });
     return token.toJwt();
   }
@@ -117,9 +124,22 @@ export class LiveKitRooms implements LiveRooms {
           canPublish: sources.length > 0,
           canPublishSources: sources,
           canPublishData: true,
-          canUpdateMetadata: true,
+          canUpdateMetadata: false,
         },
-        attributes: { floor: allowed ? 'yes' : '' },
+        // A raised hand is answered by the floor.
+        attributes: allowed ? { floor: 'yes', hand: '' } : { floor: '' },
+      });
+      return true;
+    } catch (error) {
+      if (isNotFound(error)) return false;
+      throw error;
+    }
+  }
+
+  async setHand(room: string, identity: string, up: boolean): Promise<boolean> {
+    try {
+      await this.service.updateParticipant(room, identity, {
+        attributes: { hand: up ? 'up' : '' },
       });
       return true;
     } catch (error) {

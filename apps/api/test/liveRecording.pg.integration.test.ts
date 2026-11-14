@@ -33,6 +33,9 @@ class FakeRooms implements LiveRooms {
   async token() {
     return 'token';
   }
+  async setHand() {
+    return false;
+  }
   async setFloor() {
     return true;
   }

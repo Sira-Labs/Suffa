@@ -478,6 +478,31 @@ live lesson, the class's teachers and the learners it is for get one push that o
 - The text is German only, like the daily reminder and the recap; server-side languages for
   notifications are a story of their own.
 
+Live room hardening (2026-11-15, ADR-0026 update), taken before 18.4 because it concerns the
+site learners use: role, floor and raised hand are attributes only the server writes; learner
+tokens no longer carry `canUpdateOwnMetadata`; a hand is raised through the API. Found by two
+independent reviews of earlier live-lesson changes on 14 Nov. Decisions:
+
+- Fixed by taking the grant away, not by signing the attributes: the room and the recorder keep
+  reading attributes, and LiveKit enforces who may write them.
+- An app from before this change cannot raise a hand until it has updated (the old call is
+  refused); everything else in the room keeps working.
+- Not run against a LiveKit server here (the test server could not be started in the run's
+  environment): the grants are checked on the token, the route against Postgres, the room in
+  the web tests. The floor already sets attributes the same way in production.
+
+Still open from those reviews, in this order, each a small story:
+
+1. Join tokens live for the session's length plus an hour from the moment of joining, and the
+   runbook does not switch off `auto_create`: a token can outlive the lesson and re-open its
+   room. Shorten the tokens and set `room.auto_create: false`.
+2. A session that overran is marked ended without closing its room, and "end for everyone"
+   then answers 409: close the room when a session ends by itself.
+3. Full screen hides "Aufnahme läuft", "you have the floor" and the microphone button while
+   the microphone can switch on: show them inside the full-screen stage.
+4. Giving the floor switches the learner's microphone on without their doing. Default until
+   the teacher pilot says otherwise: the floor enables the button and the learner unmutes.
+
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                               |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---------------------------------------------------------------------------------------- |
 | 17.1 | Live sessions: plan, start, join; sound and picture, screen sharing, raised hands with the teacher giving the floor, chat                                                 | 8   | Only active members of the class join, only while live; nothing of the room is stored.   |
@@ -554,10 +579,11 @@ MediaPipe served from our own origin.
 Kept by the nightly runs (ADR-0030). One line per item: what is needed, what it blocks, and
 what the runs assume until then.
 
-- Owner: confirm where `https://suffa.siralabs.org` runs. On 14 Nov 2026 it reported the
-  version the **staging** job deployed, the production job of release run 187 skipped without
-  an approval, and stories 2.7–2.9 are open. Blocks: every merge by a nightly run. Until then:
-  runs open pull requests ready for review and do not merge (merge guard, ADR-0030).
+- Owner: say whether nightly runs may merge by themselves. There is no separate production:
+  a merge to `main` deploys to `https://suffa.siralabs.org`. On 14 Nov 2026 the owner had
+  #76–#79 merged in a conversation; a standing permission was not given. Blocks: every merge
+  by a nightly run. Until then: runs open pull requests ready for review, keep them green and
+  stack the next story on them (merge guard, ADR-0030).
 - Owner: production server, its secrets, the `production` reviewer and the backup location
   (2.7–2.9). Blocks: Sprint 2b and the release `v2.2` (16.6). Until then: nothing is promoted.
 - Owner: pilot kick-off interview with the teacher (4.5). Blocks: the class profile and the

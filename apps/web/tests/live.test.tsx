@@ -46,7 +46,8 @@ const session = (over: Partial<LiveSession> = {}): LiveSession => ({
 /** A fake API server: sessions in memory, every request recorded. */
 function server(
   initial: { enabled: boolean; recordingEnabled?: boolean; sessions: LiveSession[] },
-  role: 'teacher' | 'learner' = 'teacher'
+  role: 'teacher' | 'learner' = 'teacher',
+  { handFails = false }: { handFails?: boolean } = {}
 ) {
   const state = {
     recordingEnabled: false,
@@ -83,6 +84,8 @@ function server(
           },
         });
       }
+      if (path === `${base}/${SESSION_ID}/hand` && handFails)
+        return Response.json({ error: 'not_in_room' }, { status: 404 });
       if (path === `${base}/${SESSION_ID}/floor` || path === `${base}/${SESSION_ID}/hand`)
         return new Response(null, { status: 204 });
       if (path === `${base}/${SESSION_ID}/recording`) {
@@ -392,6 +395,16 @@ describe('the live room', () => {
       { identity: 't', source: 'screen' },
       { identity: 't', source: 'camera' },
     ]);
+  });
+
+  it('says so in plain words when raising a hand does not work', async () => {
+    server({ enabled: true, sessions: [] }, 'learner', { handFails: true });
+    const me = person({ identity: 'a', name: 'Amina', local: true });
+    await join(
+      new FakeConnection({ people: [me, teacher], canSpeak: false, canCamera: false })
+    );
+    await userEvent.click(screen.getByRole('button', { name: /Melden/ }));
+    expect(await screen.findByText(/Das Melden hat gerade nicht geklappt/)).toBeTruthy();
   });
 
   it('lets a learner raise a hand, chat, and speak once given the floor', async () => {

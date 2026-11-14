@@ -75,13 +75,20 @@ function isNotFound(error: unknown): boolean {
   return status === 404 || code === 'not_found';
 }
 
+/** The room-service calls this adapter makes (injected in tests). */
+export type RoomService = Pick<RoomServiceClient, 'updateParticipant' | 'deleteRoom'>;
+
 export class LiveKitRooms implements LiveRooms {
   readonly url: string;
-  private readonly service: RoomServiceClient;
+  private readonly service: RoomService;
 
-  constructor(private readonly config: LiveKitConfig) {
+  constructor(
+    private readonly config: LiveKitConfig,
+    service?: RoomService
+  ) {
     this.url = config.url;
-    this.service = new RoomServiceClient(config.apiUrl, config.apiKey, config.apiSecret);
+    this.service =
+      service ?? new RoomServiceClient(config.apiUrl, config.apiKey, config.apiSecret);
   }
 
   async token(room: string, who: LiveParticipant, ttlSeconds: number): Promise<string> {
@@ -126,8 +133,9 @@ export class LiveKitRooms implements LiveRooms {
           canPublishData: true,
           canUpdateMetadata: false,
         },
-        // A raised hand is answered by the floor.
-        attributes: allowed ? { floor: 'yes', hand: '' } : { floor: '' },
+        // A raised hand is answered by the floor, and none is left over when it is taken
+        // back (one raised while the floor was being given would otherwise stay up).
+        attributes: { floor: allowed ? 'yes' : '', hand: '' },
       });
       return true;
     } catch (error) {

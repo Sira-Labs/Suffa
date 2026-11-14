@@ -486,7 +486,13 @@ independent reviews of earlier live-lesson changes on 14 Nov. Decisions:
 - Fixed by taking the grant away, not by signing the attributes: the room and the recorder keep
   reading attributes, and LiveKit enforces who may write them.
 - An app from before this change cannot raise a hand until it has updated (the old call is
-  refused); everything else in the room keeps working.
+  refused); everything else in the room keeps working. The PWA updates on its next load. A
+  native app ships its own copy of the web app, so test builds (13.4) must be built from this
+  version or later.
+- A learner who joined before the deploy keeps the old token until it runs out or the floor
+  replaces their rights: a lesson running during the deploy is covered only from its next one.
+- Taking the floor back lowers the hand too, so one raised while the floor was being given
+  does not stay up.
 - Not run against a LiveKit server here (the test server could not be started in the run's
   environment): the grants are checked on the token, the route against Postgres, the room in
   the web tests. The floor already sets attributes the same way in production.
@@ -502,6 +508,8 @@ Still open from those reviews, in this order, each a small story:
    the microphone can switch on: show them inside the full-screen stage.
 4. Giving the floor switches the learner's microphone on without their doing. Default until
    the teacher pilot says otherwise: the floor enables the button and the learner unmutes.
+5. The hand route has no limit per learner: each call is a room-service call and an update to
+   everyone in the room. Throttle it per person.
 
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                               |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---------------------------------------------------------------------------------------- |

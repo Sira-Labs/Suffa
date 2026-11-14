@@ -452,6 +452,14 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     );
     expect(start.status).toBe(503);
     expect(await start.json()).toEqual({ error: 'live_unavailable' });
+    const hand = await call(
+      'learner',
+      'POST',
+      `/${session.id}/hand`,
+      { up: true },
+      apps.off
+    );
+    expect(hand.status).toBe(503);
   });
 
   describe('invite links to a session', () => {

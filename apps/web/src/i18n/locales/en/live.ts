@@ -133,6 +133,7 @@ export const live: Messages<typeof de> = {
       'The recording has stopped. It appears in the class’s recordings in a few minutes, still unpublished.',
     deviceError:
       'The microphone or camera could not start. Please check the browser’s permission.',
+    handError: 'Raising your hand did not work just now. Please try again.',
     people_one: '{{count}} in the room',
     people_other: '{{count}} in the room',
     hands: 'Raised hands',

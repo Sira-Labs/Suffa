@@ -302,7 +302,8 @@ describe.skipIf(!dbUrl || !s3)(
     });
 
     it('sets assignments and derives who is done', async () => {
-      const due = '2026-10-10T20:00:00.000Z';
+      // Relative to today: assignments long past their due date are no longer listed.
+      const due = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
       const add = (body: unknown) => call('teacher', 'POST', '/assignments', body);
       expect(
         (

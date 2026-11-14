@@ -122,6 +122,17 @@ export class LiveApi {
     });
   }
 
+  /**
+   * Raises or lowers my own hand in the room. It goes through the server because the room
+   * trusts what people carry as attributes: nobody writes their own.
+   */
+  hand(classId: string, sessionId: string, up: boolean) {
+    return this.call<void>(`${this.base(classId)}/${sessionId}/hand`, {
+      method: 'POST',
+      body: JSON.stringify({ up }),
+    });
+  }
+
   /** Starts recording the session into the class's recordings (ADR-0029). */
   startRecording(classId: string, sessionId: string) {
     return this.call<{ session: LiveSession }>(

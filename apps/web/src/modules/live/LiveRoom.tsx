@@ -626,6 +626,10 @@ function Room({
     const result = await api.floor(classId, session.id, person.identity, allowed);
     if (!result.ok) setNotice(result.message);
   };
+  const raiseHand = async (up: boolean) => {
+    const result = await api.hand(classId, session.id, up);
+    if (!result.ok) setNotice(result.message);
+  };
   const toggleRecording = async () => {
     if (!recordingWanted && !window.confirm(t('room.confirmRecording'))) return;
     setRecordingBusy(true);
@@ -741,7 +745,7 @@ function Room({
           <button
             className="btn"
             aria-pressed={me.hand}
-            onClick={() => void connection.raiseHand(!me.hand)}
+            onClick={() => void raiseHand(!me.hand)}
           >
             {me.hand ? t('room.lowerHand') : `✋ ${t('room.raiseHand')}`}
           </button>

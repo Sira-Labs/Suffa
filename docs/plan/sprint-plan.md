@@ -461,7 +461,22 @@ lessons are not set up. A browser test runs the whole room against a local LiveK
 Egress, runbook §12a). The recording keeps the teacher's picture and the voices of everyone
 with the floor, never a learner's camera. Everyone in the room sees "Aufnahme läuft" and is
 told before joining. The file becomes an unpublished class recording, transcoded and
-transcribed like an upload (migration 0048). The push reminder before a session is still open.
+transcribed like an upload (migration 0048).
+
+17.3, push reminder (done 2026-11-14, ADR-0026 stage 3): 10 to 15 minutes before a planned
+live lesson, the class's teachers and the learners it is for get one push that opens the class
+(worker job every five minutes, migration 0052). Decisions:
+
+- On by default for everyone who has a device registered for push, with a switch
+  "Live-Unterricht" under "Erinnerungen": registering a device is the consent to push, and a
+  reminder nobody has switched on would reach nobody.
+- Quiet hours win over the reminder: it is not sent to someone while it is their quiet hours.
+- One member's failed delivery does not cost the others theirs; the job fails afterwards so the
+  error is reported (found in the independent review of the pull request).
+- A session is claimed before sending: a crash may lose a reminder, never send two.
+- Apps from before the switch save their settings without it and leave the stored choice.
+- The text is German only, like the daily reminder and the recap; server-side languages for
+  notifications are a story of their own.
 
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                               |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---------------------------------------------------------------------------------------- |

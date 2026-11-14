@@ -91,6 +91,8 @@ export const settings: Messages<typeof de> = {
     until: 'to',
     recap: 'Weekly recap',
     recapHint: 'Sunday evening: your week in numbers',
+    live: 'Live lessons',
+    liveHint: 'Shortly before a live lesson of your class starts',
     noDevice: 'No device registered yet',
     devices_one: '{{count}} device gets notifications',
     devices_other: '{{count}} devices get notifications',

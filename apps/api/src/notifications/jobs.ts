@@ -1,11 +1,13 @@
 /**
  * `notifications` queue (ADR-0020): reminders every 15 minutes, weekly recaps hourly. Both
- * decide per learner in their own time zone, so one schedule serves every zone.
+ * decide per learner in their own time zone, so one schedule serves every zone. Reminders
+ * before a live lesson are looked for every 5 minutes (ADR-0026).
  */
 import type { Job, PgBoss } from 'pg-boss';
 import type { Logger } from 'pino';
 import { z } from 'zod';
 import type { QueueName } from '../jobs/queue.js';
+import { runLiveReminders, type LiveReminderRepository } from '../live/reminders.js';
 import type { ErrorReporter } from '../observability/errors.js';
 import type { Notifier } from './notifier.js';
 import { runWeeklyRecaps, type RecapRepository } from './recap.js';
@@ -17,6 +19,7 @@ export const NOTIFICATIONS_QUEUE: QueueName = 'notifications';
 export const NotificationJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('reminders') }),
   z.object({ task: z.literal('weekly-recaps') }),
+  z.object({ task: z.literal('live-reminders') }),
 ]);
 export type NotificationJob = z.infer<typeof NotificationJob>;
 
@@ -26,11 +29,14 @@ export const NOTIFICATION_SCHEDULES: ReadonlyArray<{
 }> = [
   { cron: '*/15 * * * *', job: { task: 'reminders' } },
   { cron: '5 * * * *', job: { task: 'weekly-recaps' } },
+  // Often enough that a lesson is announced 10 to 15 minutes before it starts.
+  { cron: '*/5 * * * *', job: { task: 'live-reminders' } },
 ];
 
 export interface NotificationJobDeps {
   notifications: NotificationRepository;
   recaps: RecapRepository;
+  liveReminders: LiveReminderRepository;
   notifier: Notifier;
   log: Pick<Logger, 'info'>;
 }
@@ -48,6 +54,15 @@ export async function runNotificationJob(
     case 'weekly-recaps':
       await runWeeklyRecaps(
         deps.recaps,
+        deps.notifications,
+        deps.notifier,
+        deps.log,
+        now
+      );
+      return;
+    case 'live-reminders':
+      await runLiveReminders(
+        deps.liveReminders,
         deps.notifications,
         deps.notifier,
         deps.log,

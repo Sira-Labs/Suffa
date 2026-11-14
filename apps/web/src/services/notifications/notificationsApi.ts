@@ -10,6 +10,8 @@ export interface NotificationPrefs {
   quietStart: string;
   quietEnd: string;
   weeklyRecap: boolean;
+  /** A push shortly before a live lesson of one of my classes (ADR-0026). */
+  liveReminder: boolean;
 }
 
 export interface NotificationConfig {

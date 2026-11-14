@@ -139,7 +139,7 @@ export class PgPrivacyRepository implements PrivacyRepository {
           (
             await q(
               `select reminder_enabled, reminder_time, quiet_start, quiet_end, weekly_recap,
-                      updated_at
+                      live_reminder, updated_at
                  from notification_prefs where user_id = $1`
             )
           )[0] ?? null,

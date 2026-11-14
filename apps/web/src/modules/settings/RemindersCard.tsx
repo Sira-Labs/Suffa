@@ -1,7 +1,8 @@
 /**
  * Reminders (story 6.3): one push a day at the chosen time, never in quiet hours, skipped
- * when today's learning is done; plus the weekly recap on Sunday evening (6.4). Settings
- * live on the server so every device follows the same plan.
+ * when today's learning is done; plus the weekly recap on Sunday evening (6.4) and a push
+ * shortly before a live lesson of one's class (ADR-0026). Settings live on the server so
+ * every device follows the same plan.
  */
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -48,12 +49,20 @@ export function RemindersCard() {
   const save = async (next: NotificationPrefs) => {
     setBusy(true);
     try {
-      // Turning reminders or recaps on needs this device's permission and subscription.
-      const wantsPush = next.reminderEnabled || next.weeklyRecap;
-      if (
-        wantsPush &&
-        (next.reminderEnabled !== prefs.reminderEnabled || config.devices === 0)
-      ) {
+      // Any of the three needs this device's permission and subscription. It is asked for
+      // when one of them is switched on (against what the server has stored), or when the
+      // daily reminder or the recap is on and no device is registered. The live reminder is
+      // on by default, so on its own it must not prompt someone who turned push off and only
+      // changes the quiet hours.
+      const stored = config.prefs;
+      const wantsPush = next.reminderEnabled || next.weeklyRecap || next.liveReminder;
+      const switchedOn =
+        (next.reminderEnabled && !stored.reminderEnabled) ||
+        (next.weeklyRecap && !stored.weeklyRecap) ||
+        (next.liveReminder && !stored.liveReminder);
+      const missingDevice =
+        (next.reminderEnabled || next.weeklyRecap) && config.devices === 0;
+      if (switchedOn || missingDevice) {
         const push = await channel.enable(api, config);
         if (!push.ok) return setMessage({ text: push.message, good: false });
       }
@@ -147,6 +156,19 @@ export function RemindersCard() {
           type="checkbox"
           checked={prefs.weeklyRecap}
           onChange={(e) => setPrefs({ ...prefs, weeklyRecap: e.target.checked })}
+        />
+      </label>
+      <label className="row" style={{ justifyContent: 'space-between' }}>
+        <span className="stack" style={{ gap: 0 }}>
+          <span>{t('reminders.live')}</span>
+          <span className="muted" style={{ fontSize: '0.85rem' }}>
+            {t('reminders.liveHint')}
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          checked={prefs.liveReminder}
+          onChange={(e) => setPrefs({ ...prefs, liveReminder: e.target.checked })}
         />
       </label>
       <div className="row">

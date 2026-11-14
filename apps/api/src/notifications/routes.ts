@@ -2,7 +2,7 @@
  * Notifications of the signed-in user (stories 6.3, 6.4), mounted at /api/v1:
  *
  *   GET    /notifications              → { publicKey | null, prefs, devices, appPush } (profile:read)
- *   PUT    /notifications/preferences  { reminderEnabled, reminderTime, … }    (profile:write)
+ *   PUT    /notifications/preferences  { reminderEnabled, …, liveReminder? }   (profile:write)
  *   POST   /notifications/subscriptions { endpoint, keys: { p256dh, auth } } (profile:write)
  *   DELETE /notifications/subscriptions { endpoint }                        (profile:write)
  *   POST   /notifications/devices   { token, platform } (the native app, FCM) (profile:write)
@@ -36,6 +36,8 @@ const Prefs = z
     quietStart: Time,
     quietEnd: Time,
     weeklyRecap: z.boolean(),
+    // Optional: an app version from before live reminders keeps the stored choice.
+    liveReminder: z.boolean().optional(),
   })
   .strict();
 // Push services are https endpoints; keys are base64url.

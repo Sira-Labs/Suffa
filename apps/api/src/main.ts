@@ -31,6 +31,7 @@ import {
 } from './media/summary.js';
 import { ffmpegTranscoder, MediaService } from './media/service.js';
 import { S3ObjectStorage } from './storage/s3Storage.js';
+import { PgLiveReminderRepository } from './live/reminders.js';
 import { registerNotifications } from './notifications/jobs.js';
 import { FcmNotifier, RoutingNotifier } from './notifications/fcm.js';
 import { disabledNotifier, WebPushNotifier } from './notifications/notifier.js';
@@ -339,6 +340,7 @@ async function main(): Promise<void> {
             {
               notifications: new PgNotificationRepository(pool),
               recaps: new PgRecapRepository(pool),
+              liveReminders: new PgLiveReminderRepository(pool),
               // Web push for browsers, FCM for the native apps (ADR-0019).
               notifier: new RoutingNotifier(
                 config.vapid ? new WebPushNotifier(config.vapid) : disabledNotifier,

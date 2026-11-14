@@ -10,7 +10,7 @@ import { localClock, reminderDue, reminderMessage } from './schedule.js';
 
 /** Sends `message` to every device of a learner; returns how many received it. */
 export async function deliver(
-  repo: NotificationRepository,
+  repo: Pick<NotificationRepository, 'targets' | 'delivered'>,
   notifier: Notifier,
   userId: string,
   message: PushMessage

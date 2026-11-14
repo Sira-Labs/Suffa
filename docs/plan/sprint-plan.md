@@ -549,6 +549,27 @@ MediaPipe served from our own origin.
   extra XP); before, only the first time ever counted, so the quests got stuck once a unit's
   dialogues were done (ADR-0016).
 
+## Waiting on the owner
+
+Kept by the nightly runs (ADR-0030). One line per item: what is needed, what it blocks, and
+what the runs assume until then.
+
+- Owner: confirm where `https://suffa.siralabs.org` runs. On 14 Nov 2026 it reported the
+  version the **staging** job deployed, the production job of release run 187 skipped without
+  an approval, and stories 2.7–2.9 are open. Blocks: every merge by a nightly run. Until then:
+  runs open pull requests ready for review and do not merge (merge guard, ADR-0030).
+- Owner: production server, its secrets, the `production` reviewer and the backup location
+  (2.7–2.9). Blocks: Sprint 2b and the release `v2.2` (16.6). Until then: nothing is promoted.
+- Owner: pilot kick-off interview with the teacher (4.5). Blocks: the class profile and the
+  consent approach on record. Until then: defaults from `docs/pilot/kickoff-interview.md`.
+- Owner: contact Muhammad al-Andalusi and record the answer (12.4). Blocks: transcripts and
+  tap-to-gloss on his videos. Until then: they stay hidden (`permission_status`).
+- Owner: Apple, Google Play and Firebase accounts, signing keys, `cap add` on a Mac (13.4,
+  13.5, 14.1). Blocks: test builds and the store release. Until then: the PWA only.
+- Owner: a teacher to review meanings in Turkish, Italian, Bosnian and Albanian, and the
+  curated word list (18.4). Blocks: publishing them. Until then: the runs build the languages
+  and the LLM drafts; nothing unreviewed reaches learners.
+
 ## Backlog (unscheduled)
 
 Arabic UI (RTL chrome) · Book 2 · SSO via Tabayyun's Keycloak/Zitadel (shared IdP) ·

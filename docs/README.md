@@ -43,3 +43,8 @@
 | [0023](adr/0023-content-sources-licensing-and-packs.md)           | Content sources, licensing and content packs                  | proposed                                   |
 | [0024](adr/0024-separate-production-server.md)                    | Separate production server; this host is staging and tools    | accepted                                   |
 | [0025](adr/0025-courses.md)                                       | Courses: parallel textbook streams, one per class             | accepted                                   |
+| [0026](adr/0026-live-lessons-livekit.md)                          | Live lessons on our own LiveKit server                        | accepted                                   |
+| [0027](adr/0027-class-settings.md)                                | Class settings: colours, practice areas, main class           | accepted                                   |
+| [0028](adr/0028-live-camera-backgrounds.md)                       | Camera backgrounds in the live room                           | accepted                                   |
+| [0029](adr/0029-live-recording-egress.md)                         | Recording live lessons on our own server                      | accepted                                   |
+| [0030](adr/0030-autonomous-nightly-development.md)                | Nightly development without the owner in the loop             | accepted; merge guard proposed             |

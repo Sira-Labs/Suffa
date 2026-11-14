@@ -184,7 +184,7 @@ describe('live lesson reminders', () => {
     ]);
     expect(
       await runLiveReminders(t.repo, t.notifications, t.notifier, quiet, now)
-    ).toEqual({ sessions: 1, sent: 1, quiet: 1, failed: 0 });
+    ).toEqual({ sessions: 1, sent: 1, quiet: 1, failed: 0, sessionsFailed: 0 });
     expect(t.repo.claimDue).toHaveBeenCalledWith(now, LIVE_REMINDER_LEAD_MINUTES);
     expect(t.sent.map((s) => s.userId)).toEqual(['amina']);
   });
@@ -193,8 +193,20 @@ describe('live lesson reminders', () => {
     const t = setup([member('amina')], false);
     expect(
       await runLiveReminders(t.repo, t.notifications, t.notifier, quiet, now)
-    ).toEqual({ sessions: 0, sent: 0, quiet: 0, failed: 0 });
+    ).toEqual({ sessions: 0, sent: 0, quiet: 0, failed: 0, sessionsFailed: 0 });
     expect(t.repo.claimDue).not.toHaveBeenCalled();
+  });
+
+  it('goes on with the next lesson when the members of one cannot be read', async () => {
+    const t = setup([member('amina')]);
+    const second = { ...session, id: 'session-2' };
+    t.repo.claimDue.mockResolvedValue([session, second]);
+    t.repo.recipients.mockRejectedValueOnce(new Error('connection terminated'));
+    const run = runLiveReminders(t.repo, t.notifications, t.notifier, quiet, now);
+    await expect(run).rejects.toMatchObject({
+      result: { sessions: 2, sent: 1, quiet: 0, failed: 0, sessionsFailed: 1 },
+    });
+    expect(t.sent.map((s) => s.message.tag)).toEqual(['live-session-2']);
   });
 
   it('goes on after a delivery that throws and fails the job at the end', async () => {
@@ -207,7 +219,7 @@ describe('live lesson reminders', () => {
     const run = runLiveReminders(t.repo, t.notifications, t.notifier, quiet, now);
     await expect(run).rejects.toBeInstanceOf(LiveReminderDeliveryError);
     await expect(run).rejects.toMatchObject({
-      result: { sessions: 1, sent: 2, quiet: 0, failed: 1 },
+      result: { sessions: 1, sent: 2, quiet: 0, failed: 1, sessionsFailed: 0 },
     });
     expect(t.sent.map((s) => s.userId)).toEqual(['amina', 'chadija']);
   });

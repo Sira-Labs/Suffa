@@ -139,15 +139,20 @@ export interface LiveReminderResult {
   quiet: number;
   /** Members whose delivery threw (push service or database unreachable). */
   failed: number;
+  /** Sessions whose members could not be read, so nobody was told. */
+  sessionsFailed: number;
 }
 
-/** Deliveries that threw in a run; thrown once every claimed session was worked through. */
+/** Deliveries and member look-ups that threw in a run; thrown once every claimed session was worked through. */
 export class LiveReminderDeliveryError extends AggregateError {
   constructor(
     errors: unknown[],
     readonly result: LiveReminderResult
   ) {
-    super(errors, `live reminders: ${errors.length} deliveries failed`);
+    super(
+      errors,
+      `live reminders: ${errors.length} failures (deliveries or member look-ups)`
+    );
     this.name = 'LiveReminderDeliveryError';
   }
 }
@@ -159,13 +164,28 @@ export async function runLiveReminders(
   log: Pick<Logger, 'info'>,
   now: Date = new Date()
 ): Promise<LiveReminderResult> {
-  const result: LiveReminderResult = { sessions: 0, sent: 0, quiet: 0, failed: 0 };
+  const result: LiveReminderResult = {
+    sessions: 0,
+    sent: 0,
+    quiet: 0,
+    failed: 0,
+    sessionsFailed: 0,
+  };
   const failures: unknown[] = [];
   // Without push nothing is claimed, so reminders start with the first session after set-up.
   if (!notifier.enabled) return result;
   for (const session of await repo.claimDue(now, LIVE_REMINDER_LEAD_MINUTES)) {
     result.sessions++;
-    for (const r of await repo.recipients(session.id)) {
+    let recipients: LiveReminderRecipient[];
+    try {
+      recipients = await repo.recipients(session.id);
+    } catch (error) {
+      // As below: this session is lost, the ones after it are not.
+      result.sessionsFailed++;
+      failures.push(error);
+      continue;
+    }
+    for (const r of recipients) {
       const { minutes } = localClock(now, r.timeZone);
       if (inQuietHours(minutes, r.quietStart, r.quietEnd)) {
         result.quiet++;

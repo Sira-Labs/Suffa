@@ -119,7 +119,13 @@ describe.skipIf(!url)('Live lesson reminders (Postgres)', () => {
 
   it('announces a lesson for everyone once, to the active members only', async () => {
     await plan();
-    expect(await run()).toEqual({ sessions: 1, sent: 4, quiet: 0, failed: 0 });
+    expect(await run()).toEqual({
+      sessions: 1,
+      sent: 4,
+      quiet: 0,
+      failed: 0,
+      sessionsFailed: 0,
+    });
     expect(notifier.users()).toEqual([TEACHER, SISTER, BROTHER, UNASSIGNED].sort());
     expect(notifier.sent[0]!.message).toEqual({
       title: 'Gleich live: Lektion 4',
@@ -133,6 +139,7 @@ describe.skipIf(!url)('Live lesson reminders (Postgres)', () => {
       sent: 0,
       quiet: 0,
       failed: 0,
+      sessionsFailed: 0,
     });
     expect(notifier.sent).toHaveLength(4);
   });
@@ -146,7 +153,13 @@ describe.skipIf(!url)('Live lesson reminders (Postgres)', () => {
   it("keeps a brothers' lesson from the sisters, and two lessons at once apart", async () => {
     await plan({ audience: 'brothers' });
     await plan({ id: id(203), audience: 'sisters' });
-    expect(await run()).toEqual({ sessions: 2, sent: 4, quiet: 0, failed: 0 });
+    expect(await run()).toEqual({
+      sessions: 2,
+      sent: 4,
+      quiet: 0,
+      failed: 0,
+      sessionsFailed: 0,
+    });
     const reached = (session: string) =>
       notifier.sent
         .filter((s) => s.message.tag === `live-${session}`)
@@ -183,7 +196,13 @@ describe.skipIf(!url)('Live lesson reminders (Postgres)', () => {
       quietEnd: '19:00',
       weeklyRecap: true,
     });
-    expect(await run()).toEqual({ sessions: 1, sent: 1, quiet: 1, failed: 0 });
+    expect(await run()).toEqual({
+      sessions: 1,
+      sent: 1,
+      quiet: 1,
+      failed: 0,
+      sessionsFailed: 0,
+    });
     expect(notifier.users()).toEqual([TEACHER]);
   });
 

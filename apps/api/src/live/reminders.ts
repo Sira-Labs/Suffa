@@ -4,8 +4,10 @@
  * once: to the class's teachers and to the learners the session is for (everyone, the sisters
  * or the brothers), on the devices they registered for push.
  *
- * Not sent to a learner who switched live reminders off, nor in their quiet hours. A session
- * is claimed before anything is sent: a crash may lose a reminder but never sends two.
+ * Not sent to a learner who switched live reminders off, nor while it is their quiet hours
+ * when the reminder would arrive. A session is claimed before anything is sent: a crash may
+ * lose a reminder but never sends two. One member's failed delivery does not cost the others
+ * theirs: the run goes on and reports the failures at its end.
  */
 import type pg from 'pg';
 import type { Logger } from 'pino';
@@ -135,6 +137,19 @@ export interface LiveReminderResult {
   sent: number;
   /** Members left alone because of their quiet hours. */
   quiet: number;
+  /** Members whose delivery threw (push service or database unreachable). */
+  failed: number;
+}
+
+/** Deliveries that threw in a run; thrown once every claimed session was worked through. */
+export class LiveReminderDeliveryError extends AggregateError {
+  constructor(
+    errors: unknown[],
+    readonly result: LiveReminderResult
+  ) {
+    super(errors, `live reminders: ${errors.length} deliveries failed`);
+    this.name = 'LiveReminderDeliveryError';
+  }
 }
 
 export async function runLiveReminders(
@@ -144,7 +159,8 @@ export async function runLiveReminders(
   log: Pick<Logger, 'info'>,
   now: Date = new Date()
 ): Promise<LiveReminderResult> {
-  const result: LiveReminderResult = { sessions: 0, sent: 0, quiet: 0 };
+  const result: LiveReminderResult = { sessions: 0, sent: 0, quiet: 0, failed: 0 };
+  const failures: unknown[] = [];
   // Without push nothing is claimed, so reminders start with the first session after set-up.
   if (!notifier.enabled) return result;
   for (const session of await repo.claimDue(now, LIVE_REMINDER_LEAD_MINUTES)) {
@@ -156,9 +172,18 @@ export async function runLiveReminders(
         continue;
       }
       const message = liveReminderMessage(session, r.timeZone);
-      if ((await deliver(notifications, notifier, r.userId, message)) > 0) result.sent++;
+      try {
+        if ((await deliver(notifications, notifier, r.userId, message)) > 0)
+          result.sent++;
+      } catch (error) {
+        // The sessions are claimed already, so a retry would send nothing: carry on with the
+        // other members and sessions, and fail the job afterwards so the error is reported.
+        result.failed++;
+        failures.push(error);
+      }
     }
   }
   log.info({ ...result }, 'notifications.live_reminders');
+  if (failures.length > 0) throw new LiveReminderDeliveryError(failures, result);
   return result;
 }

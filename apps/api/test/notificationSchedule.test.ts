@@ -16,6 +16,7 @@ import {
 } from '../src/notifications/jobs.js';
 import {
   LIVE_REMINDER_LEAD_MINUTES,
+  LiveReminderDeliveryError,
   liveReminderMessage,
   runLiveReminders,
   type DueLiveSession,
@@ -183,7 +184,7 @@ describe('live lesson reminders', () => {
     ]);
     expect(
       await runLiveReminders(t.repo, t.notifications, t.notifier, quiet, now)
-    ).toEqual({ sessions: 1, sent: 1, quiet: 1 });
+    ).toEqual({ sessions: 1, sent: 1, quiet: 1, failed: 0 });
     expect(t.repo.claimDue).toHaveBeenCalledWith(now, LIVE_REMINDER_LEAD_MINUTES);
     expect(t.sent.map((s) => s.userId)).toEqual(['amina']);
   });
@@ -192,7 +193,22 @@ describe('live lesson reminders', () => {
     const t = setup([member('amina')], false);
     expect(
       await runLiveReminders(t.repo, t.notifications, t.notifier, quiet, now)
-    ).toEqual({ sessions: 0, sent: 0, quiet: 0 });
+    ).toEqual({ sessions: 0, sent: 0, quiet: 0, failed: 0 });
     expect(t.repo.claimDue).not.toHaveBeenCalled();
+  });
+
+  it('goes on after a delivery that throws and fails the job at the end', async () => {
+    const t = setup([member('amina'), member('bilal'), member('chadija')]);
+    const send = t.notifier.send;
+    t.notifier.send = async (target, message) => {
+      if (target.endpoint === 'bilal') throw new TypeError('fetch failed');
+      return send(target, message);
+    };
+    const run = runLiveReminders(t.repo, t.notifications, t.notifier, quiet, now);
+    await expect(run).rejects.toBeInstanceOf(LiveReminderDeliveryError);
+    await expect(run).rejects.toMatchObject({
+      result: { sessions: 1, sent: 2, quiet: 0, failed: 1 },
+    });
+    expect(t.sent.map((s) => s.userId)).toEqual(['amina', 'chadija']);
   });
 });

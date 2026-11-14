@@ -470,7 +470,9 @@ live lesson, the class's teachers and the learners it is for get one push that o
 - On by default for everyone who has a device registered for push, with a switch
   "Live-Unterricht" under "Erinnerungen": registering a device is the consent to push, and a
   reminder nobody has switched on would reach nobody.
-- Quiet hours win over the reminder; a lesson in someone's quiet hours is not announced to them.
+- Quiet hours win over the reminder: it is not sent to someone while it is their quiet hours.
+- One member's failed delivery does not cost the others theirs; the job fails afterwards so the
+  error is reported (found in the independent review of the pull request).
 - A session is claimed before sending: a crash may lose a reminder, never send two.
 - Apps from before the switch save their settings without it and leave the stored choice.
 - The text is German only, like the daily reminder and the recap; server-side languages for

@@ -69,4 +69,16 @@ describe('Reminders card (integration)', () => {
     expect(await screen.findByText('Gespeichert.')).toBeInTheDocument();
     expect(saved).toEqual([{ ...prefs, liveReminder: false }]);
   });
+
+  it('saves quiet hours without asking for push when only the live default is on', async () => {
+    // Someone who turned push off: no device, daily and recap off, live on by default.
+    const saved = fakeServer('BPublicKey', { ...prefs, liveReminder: true });
+    render(<RemindersCard />);
+    const quietTo = await screen.findByLabelText('Ruhezeit bis');
+    await userEvent.clear(quietTo);
+    await userEvent.type(quietTo, '06:30');
+    await userEvent.click(screen.getByRole('button', { name: 'Speichern' }));
+    expect(await screen.findByText('Gespeichert.')).toBeInTheDocument();
+    expect(saved).toEqual([{ ...prefs, liveReminder: true, quietEnd: '06:30' }]);
+  });
 });

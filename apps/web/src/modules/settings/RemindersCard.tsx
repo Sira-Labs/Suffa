@@ -49,12 +49,20 @@ export function RemindersCard() {
   const save = async (next: NotificationPrefs) => {
     setBusy(true);
     try {
-      // Any of the three needs this device's permission and subscription.
+      // Any of the three needs this device's permission and subscription. It is asked for
+      // when one of them is switched on (against what the server has stored), or when the
+      // daily reminder or the recap is on and no device is registered. The live reminder is
+      // on by default, so on its own it must not prompt someone who turned push off and only
+      // changes the quiet hours.
+      const stored = config.prefs;
       const wantsPush = next.reminderEnabled || next.weeklyRecap || next.liveReminder;
-      if (
-        wantsPush &&
-        (next.reminderEnabled !== prefs.reminderEnabled || config.devices === 0)
-      ) {
+      const switchedOn =
+        (next.reminderEnabled && !stored.reminderEnabled) ||
+        (next.weeklyRecap && !stored.weeklyRecap) ||
+        (next.liveReminder && !stored.liveReminder);
+      const missingDevice =
+        (next.reminderEnabled || next.weeklyRecap) && config.devices === 0;
+      if (switchedOn || missingDevice) {
         const push = await channel.enable(api, config);
         if (!push.ok) return setMessage({ text: push.message, good: false });
       }

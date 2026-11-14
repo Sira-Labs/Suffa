@@ -3,8 +3,9 @@
  * that the room UI subscribes to, so the UI never touches LiveKit and tests use a fake.
  * `livekit-client` is loaded only when someone joins a room.
  *
- * - People carry their role, raised hand and floor as LiveKit attributes: the role and the
- *   floor are set by the server, the hand by the learner. What this person may publish comes
+ * - People carry their role, raised hand and floor as LiveKit attributes. All three are
+ *   written by the server only (a hand is raised through the API), because the room decides
+ *   by them who is the teacher and who has the floor. What this person may publish comes
  *   from their LiveKit permissions: learners may use their camera whenever the session allows
  *   learner cameras, and speak once they have the floor.
  * - Chat messages travel only through the room (data messages on the topic "chat"); nothing
@@ -76,7 +77,6 @@ export interface LiveConnection {
   setScreenShare(on: boolean): Promise<void>;
   /** The background behind this person's camera picture; kept for when the camera starts. */
   setBackground(background: CameraBackground): Promise<void>;
-  raiseHand(up: boolean): Promise<void>;
   send(text: string): Promise<void>;
   /** Shows a person's camera or screen in `element`; returns the detach. */
   attach(identity: string, source: LiveSource, element: HTMLVideoElement): () => void;
@@ -169,11 +169,10 @@ class LiveKitConnection implements LiveConnection {
       this.emit();
     });
     room.on(E.ParticipantPermissionsChanged, (previous, participant) => {
-      // A learner given the floor speaks right away; their raised hand is answered.
+      // A learner given the floor speaks right away (the server lowers their raised hand).
       if (participant === room.localParticipant) {
         const now = allows(room.localParticipant.permissions, SOURCE_MICROPHONE);
         if (now && !allows(previous, SOURCE_MICROPHONE)) {
-          void this.raiseHand(false);
           void this.setMicrophone(true).catch(() => undefined);
         }
       }
@@ -269,11 +268,6 @@ class LiveKitConnection implements LiveConnection {
 
   async setScreenShare(on: boolean): Promise<void> {
     await this.room.localParticipant.setScreenShareEnabled(on);
-    this.emit();
-  }
-
-  async raiseHand(up: boolean): Promise<void> {
-    await this.room.localParticipant.setAttributes({ hand: up ? 'up' : '' });
     this.emit();
   }
 

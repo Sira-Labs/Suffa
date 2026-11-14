@@ -524,6 +524,9 @@ function Room({
   // What the teacher asked the server for; the room reports the egress a moment later.
   const [recordingWanted, setRecordingWanted] = useState(session.recording);
   const [recordingBusy, setRecordingBusy] = useState(false);
+  // One hand request at a time: a late answer must not undo the click after it.
+  const handPending = useRef(false);
+  const [handBusy, setHandBusy] = useState(false);
   // Shown while the egress runs, and for the teacher from the moment it was asked for.
   const recording = state.recording || (teacherView && recordingWanted);
 
@@ -625,6 +628,19 @@ function Room({
   const floor = async (person: LivePerson, allowed: boolean) => {
     const result = await api.floor(classId, session.id, person.identity, allowed);
     if (!result.ok) setNotice(result.message);
+  };
+  const raiseHand = async (up: boolean) => {
+    if (handPending.current) return;
+    handPending.current = true;
+    setHandBusy(true);
+    try {
+      const result = await api.hand(classId, session.id, up);
+      // One plain sentence: the server's reasons are worded for the teacher's view of others.
+      if (!result.ok) setNotice(t('room.handError'));
+    } finally {
+      handPending.current = false;
+      setHandBusy(false);
+    }
   };
   const toggleRecording = async () => {
     if (!recordingWanted && !window.confirm(t('room.confirmRecording'))) return;
@@ -741,7 +757,8 @@ function Room({
           <button
             className="btn"
             aria-pressed={me.hand}
-            onClick={() => void connection.raiseHand(!me.hand)}
+            disabled={handBusy}
+            onClick={() => void raiseHand(!me.hand)}
           >
             {me.hand ? t('room.lowerHand') : `✋ ${t('room.raiseHand')}`}
           </button>

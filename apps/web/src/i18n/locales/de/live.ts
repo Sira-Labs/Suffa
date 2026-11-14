@@ -131,6 +131,7 @@ export const live = {
       'Die Aufnahme ist beendet. Sie erscheint in ein paar Minuten in den Aufnahmen der Klasse, noch unveröffentlicht.',
     deviceError:
       'Mikrofon oder Kamera ließ sich nicht starten. Bitte die Freigabe im Browser prüfen.',
+    handError: 'Das Melden hat gerade nicht geklappt. Bitte versuch es noch einmal.',
     people_one: '{{count}} im Raum',
     people_other: '{{count}} im Raum',
     hands: 'Meldungen',

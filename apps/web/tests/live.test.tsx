@@ -46,7 +46,8 @@ const session = (over: Partial<LiveSession> = {}): LiveSession => ({
 /** A fake API server: sessions in memory, every request recorded. */
 function server(
   initial: { enabled: boolean; recordingEnabled?: boolean; sessions: LiveSession[] },
-  role: 'teacher' | 'learner' = 'teacher'
+  role: 'teacher' | 'learner' = 'teacher',
+  { handFails = false }: { handFails?: boolean } = {}
 ) {
   const state = {
     recordingEnabled: false,
@@ -83,7 +84,9 @@ function server(
           },
         });
       }
-      if (path === `${base}/${SESSION_ID}/floor`)
+      if (path === `${base}/${SESSION_ID}/hand` && handFails)
+        return Response.json({ error: 'not_in_room' }, { status: 404 });
+      if (path === `${base}/${SESSION_ID}/floor` || path === `${base}/${SESSION_ID}/hand`)
         return new Response(null, { status: 204 });
       if (path === `${base}/${SESSION_ID}/recording`) {
         const recording = method === 'POST';
@@ -160,9 +163,6 @@ class FakeConnection implements LiveConnection {
     this.calls.push(
       `background:${background.kind === 'image' ? background.url : background.kind}`
     );
-  }
-  async raiseHand(up: boolean) {
-    this.calls.push(`hand:${up}`);
   }
   async send(text: string) {
     this.calls.push(`send:${text}`);
@@ -397,8 +397,18 @@ describe('the live room', () => {
     ]);
   });
 
+  it('says so in plain words when raising a hand does not work', async () => {
+    server({ enabled: true, sessions: [] }, 'learner', { handFails: true });
+    const me = person({ identity: 'a', name: 'Amina', local: true });
+    await join(
+      new FakeConnection({ people: [me, teacher], canSpeak: false, canCamera: false })
+    );
+    await userEvent.click(screen.getByRole('button', { name: /Melden/ }));
+    expect(await screen.findByText(/Das Melden hat gerade nicht geklappt/)).toBeTruthy();
+  });
+
   it('lets a learner raise a hand, chat, and speak once given the floor', async () => {
-    server({ enabled: true, sessions: [] }, 'learner');
+    const { requests } = server({ enabled: true, sessions: [] }, 'learner');
     const me = person({ identity: 'a', name: 'Amina', local: true });
     const connection = new FakeConnection({
       people: [me, { ...teacher, local: false, cameraReady: false }],
@@ -418,7 +428,10 @@ describe('the live room', () => {
     await userEvent.click(screen.getByRole('button', { name: /Melden/ }));
     await userEvent.type(screen.getByLabelText('Nachricht'), 'سلام عليكم');
     await userEvent.click(screen.getByRole('button', { name: 'Senden' }));
-    expect(connection.calls).toEqual(['hand:true', 'send:سلام عليكم']);
+    // The hand goes through the server (nobody writes their own attributes); chat through
+    // the room.
+    expect(requests.find((r) => r.path.endsWith('/hand'))?.body).toEqual({ up: true });
+    expect(connection.calls).toEqual(['send:سلام عليكم']);
 
     connection.update({
       canSpeak: true,

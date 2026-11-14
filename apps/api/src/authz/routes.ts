@@ -193,6 +193,11 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
   },
   {
     method: 'POST',
+    path: '/api/v1/classes/:id/live/:session/hand',
+    action: 'class:read',
+  },
+  {
+    method: 'POST',
     path: '/api/v1/classes/:id/live/:session/recording',
     action: 'class:manage',
   },

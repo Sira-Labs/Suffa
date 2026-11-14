@@ -37,6 +37,16 @@ Constraints that already hold in Suffa:
     them the floor (the microphone) through the API, which updates their permission on the
     LiveKit server, and takes it back the same way. Learners may turn on their own camera
     whenever the session allows learner cameras (update 2026-10-17, below).
+  - **Role, floor and raised hand are written by the server only** (update 2026-11-15). They
+    are LiveKit participant attributes, and the room and the recorder decide by them who is
+    the teacher (the stage, the recording) and who has the floor. Learner tokens therefore
+    carry no `canUpdateOwnMetadata`: LiveKit's own guidance is that a participant must not
+    hold it where attributes stand for rights. Before this, learners held it for the raised
+    hand, so a tampered client could name itself the teacher, take the stage and enter the
+    recording, give itself the floor in the others' view, or change its shown name. A
+    learner now raises a hand through the API (`POST …/live/:session/hand`), which sets the
+    attribute for the caller only; giving the floor lowers the hand on the server. What a
+    participant may publish was and stays enforced by LiveKit permissions.
 - **Live sessions are planned in the class** (`live_sessions`): title, start, length; the
   teacher starts and ends them. At most one session per audience of a class is live at a time
   (everyone, the sisters, the brothers; stage 2), so the two groups can meet in parallel.

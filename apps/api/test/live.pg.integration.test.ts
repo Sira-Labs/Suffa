@@ -27,6 +27,7 @@ class FakeRooms implements LiveRooms {
   readonly url = 'wss://live.example.org';
   tokens: { room: string; who: LiveParticipant; ttl: number }[] = [];
   floor: { room: string; identity: string; allowed: boolean; camera: boolean }[] = [];
+  hands: { room: string; identity: string; up: boolean }[] = [];
   closed: string[] = [];
   present = new Set<string>();
   async token(room: string, who: LiveParticipant, ttl: number) {
@@ -41,6 +42,11 @@ class FakeRooms implements LiveRooms {
   ) {
     if (!this.present.has(identity)) return false;
     this.floor.push({ room, identity, allowed, camera });
+    return true;
+  }
+  async setHand(room: string, identity: string, up: boolean) {
+    if (!this.present.has(identity)) return false;
+    this.hands.push({ room, identity, up });
     return true;
   }
   async close(room: string) {
@@ -281,6 +287,36 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     expect(rooms.floor).toHaveLength(2);
   });
 
+  it('lets a learner in the room raise and lower their own hand, nobody else', async () => {
+    const session = await plan();
+    const hand = (who: string, body: unknown = { up: true }, id = session.id) =>
+      call(who, 'POST', `/${id}/hand`, body);
+    expect(await (await hand('learner')).json()).toEqual({ error: 'not_live' });
+    await call('teacher', 'POST', `/${session.id}/start`);
+
+    const learner = users.learner!.id;
+    expect(await (await hand('learner')).json()).toEqual({ error: 'not_in_room' });
+    rooms.present.add(learner);
+    expect((await hand('learner')).status).toBe(204);
+    expect((await hand('learner', { up: false })).status).toBe(204);
+    expect(rooms.hands.filter((h) => h.room === `live-${session.id}`)).toEqual([
+      { room: `live-${session.id}`, identity: learner, up: true },
+      { room: `live-${session.id}`, identity: learner, up: false },
+    ]);
+
+    // The hand is always the caller's own: there is no identity to name another person.
+    expect(
+      (await hand('learner', { up: true, identity: users.teacher!.id })).status
+    ).toBe(400);
+    expect((await hand('learner', { up: 'yes' })).status).toBe(400);
+    // Teachers do not raise hands; pending members and outsiders are not in the class.
+    rooms.present.add(users.teacher!.id);
+    expect(await (await hand('teacher')).json()).toEqual({ error: 'not_in_room' });
+    expect((await hand('waiting')).status).toBe(403);
+    expect((await hand('outsider')).status).toBe(403);
+    expect(rooms.hands.filter((h) => h.room === `live-${session.id}`)).toHaveLength(2);
+  });
+
   it('shows sisters and brothers only their own sessions and those for everyone', async () => {
     const all = await plan('Alle');
     const sisters = await plan('Schwestern', now, { audience: 'sisters' });
@@ -307,6 +343,11 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     const wrong = await call('brother', 'POST', `/${sisters.id}/join`);
     expect(wrong.status).toBe(403);
     expect(await wrong.json()).toEqual({ error: 'wrong_audience' });
+    // Nor can a brother raise a hand in the sisters' room.
+    rooms.present.add(users.brother!.id);
+    const hand = await call('brother', 'POST', `/${sisters.id}/hand`, { up: true });
+    expect(await hand.json()).toEqual({ error: 'wrong_audience' });
+    expect(rooms.hands.filter((h) => h.room === `live-${sisters.id}`)).toEqual([]);
     expect((await call('learner', 'POST', `/${brothers.id}/join`)).status).toBe(403);
     expect(
       await (await call('teacher', 'POST', `/${brothers.id}/join`)).json()
@@ -411,6 +452,14 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     );
     expect(start.status).toBe(503);
     expect(await start.json()).toEqual({ error: 'live_unavailable' });
+    const hand = await call(
+      'learner',
+      'POST',
+      `/${session.id}/hand`,
+      { up: true },
+      apps.off
+    );
+    expect(hand.status).toBe(503);
   });
 
   describe('invite links to a session', () => {

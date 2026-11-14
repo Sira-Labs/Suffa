@@ -9,6 +9,7 @@
  *   DELETE /classes/:id/live/:session           → 204, a planned session removed   (class:manage)
  *   POST   /classes/:id/live/:session/join      → { url, token, role }             (class:read)
  *   POST   /classes/:id/live/:session/floor     { identity, allowed } → 204        (class:manage)
+ *   POST   /classes/:id/live/:session/hand      { up } → 204, a learner's own hand (class:read)
  *   POST   /classes/:id/live/:session/recording → 201, the session, now recorded (class:manage)
  *   DELETE /classes/:id/live/:session/recording → the session, recording stopped (class:manage)
  *   POST   /classes/:id/live/:session/invite    → 201 { url, expiresAt }          (class:manage)
@@ -16,8 +17,10 @@
  *   POST   /live-invites/:token/join            → { classId, sessionId, status }   (class:join)
  *
  * Only active members of the class get a token, and only while the session is live. The
- * teacher's token may publish and moderate; a learner's may listen, chat, raise a hand and use
- * their own camera, and speak once the teacher gives them the floor; only active learners of the class can be given
+ * teacher's token may publish and moderate; a learner's may listen, chat and use their own
+ * camera, and speak once the teacher gives them the floor. A learner raises a hand through
+ * `/hand`: role, floor and hand are attributes only the server writes, because the room
+ * decides by them who is the teacher and who has the floor; only active learners of the class can be given
  * the floor (`not_in_room` for anyone else, so a teacher's own rights are never replaced).
  * Without a LiveKit server (`rooms` undefined) sessions are listed as disabled and nobody can
  * start or join one.
@@ -77,6 +80,7 @@ const CreateBody = z
   })
   .strict();
 const FloorBody = z.object({ identity: Uuid, allowed: z.boolean() }).strict();
+const HandBody = z.object({ up: z.boolean() }).strict();
 const Token = z.string().regex(/^[A-Za-z0-9_-]{20,64}$/);
 
 const STATUS: Record<Exclude<LiveActionResult, { ok: true }>['reason'], 404 | 409> = {
@@ -234,6 +238,29 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
       parsed.data.identity,
       parsed.data.allowed,
       { camera: session.learnerCameras }
+    );
+    return changed ? c.body(null, 204) : c.json({ error: 'not_in_room' }, 404);
+  });
+
+  app.post('/classes/:id/live/:session/hand', read, async (c) => {
+    if (!deps.rooms) return unavailable(c);
+    const id = sessionParam(c);
+    if (!id.success) return c.json({ error: 'not_found' }, 404);
+    const parsed = HandBody.safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.json({ error: 'invalid_body' }, 400);
+    const session = await deps.sessions.get(c.req.param('id'), id.data);
+    if (!session) return c.json({ error: 'not_found' }, 404);
+    if (session.status !== 'live') return c.json({ error: 'not_live' }, 409);
+    // Only a learner the session is for, and only their own hand.
+    const allowed = await audiences(c);
+    if (!allowed) return c.json({ error: 'not_in_room' }, 404);
+    if (!allowed.includes(session.audience)) {
+      return c.json({ error: 'wrong_audience' }, 403);
+    }
+    const changed = await deps.rooms.setHand(
+      roomName(session.id),
+      c.get('actor').id,
+      parsed.data.up
     );
     return changed ? c.body(null, 204) : c.json({ error: 'not_in_room' }, 404);
   });

@@ -84,4 +84,4 @@ Option 2, decided with the owner ("Auf dem Server").
   quota.
 - The browser test (`E2E_EGRESS=1`) runs the whole path against a local LiveKit, Egress, S3
   and worker: start, the badge for the learner, stop, stored, transcoded and listed.
-- The push reminder before a session (stage 3 of ADR-0026) is still to come.
+- The push reminder before a session (stage 3 of ADR-0026) followed on 14 Nov 2026.

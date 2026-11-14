@@ -59,6 +59,16 @@ Constraints that already hold in Suffa:
    learners' cameras off: the floor then grants the microphone only, enforced by LiveKit.
 3. Recording into the class's recordings (transcript, chapters, "ask about this minute"), and
    a push reminder before a session starts.
+   - The reminder (update 2026-11-14): the worker looks every five minutes for planned
+     sessions that start within a quarter of an hour and announces each once, 10 to 15
+     minutes ahead. It goes to the class's teachers and to the learners the session is for
+     (everyone, the sisters or the brothers), on the devices they registered for push.
+   - It is on for everyone with a device and can be switched off in the settings; it is not
+     sent in a member's quiet hours. A session of an archived class, or one already started
+     or missed, is not announced.
+   - The session is marked before anything is sent (`live_sessions.reminded_at`), so a
+     retried job or a second worker never announces it twice. The text is German, like the
+     other notifications the server sends.
 4. Invite links to one session (update 2026-10-17): the teacher shows a link with its QR code
    for a planned or live session. It holds while the session is listed (a planned one until
    its end plus 12 hours, a live one until its end plus the hour of overrun); a new link

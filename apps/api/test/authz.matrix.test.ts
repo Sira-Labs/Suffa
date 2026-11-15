@@ -286,6 +286,7 @@ function buildApp() {
         token: async () => 'token',
         setFloor: async () => false,
         setHand: async () => false,
+        list: async () => [],
         close: async () => undefined,
       },
       auth: resolver,

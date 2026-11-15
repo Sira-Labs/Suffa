@@ -46,6 +46,8 @@ export interface LiveRooms {
   ): Promise<boolean>;
   /** Raises or lowers a learner's hand. False when the learner is not in the room. */
   setHand(room: string, identity: string, up: boolean): Promise<boolean>;
+  /** The names of the rooms that exist on the server right now. */
+  list(): Promise<string[]>;
   /** Ends the room for everyone in it (no error when it is already gone). */
   close(room: string): Promise<void>;
 }
@@ -76,7 +78,10 @@ function isNotFound(error: unknown): boolean {
 }
 
 /** The room-service calls this adapter makes (injected in tests). */
-export type RoomService = Pick<RoomServiceClient, 'updateParticipant' | 'deleteRoom'>;
+export type RoomService = Pick<
+  RoomServiceClient,
+  'updateParticipant' | 'deleteRoom' | 'listRooms'
+>;
 
 export class LiveKitRooms implements LiveRooms {
   readonly url: string;
@@ -154,6 +159,10 @@ export class LiveKitRooms implements LiveRooms {
       if (isNotFound(error)) return false;
       throw error;
     }
+  }
+
+  async list(): Promise<string[]> {
+    return (await this.service.listRooms()).map((room) => room.name);
   }
 
   async close(room: string): Promise<void> {

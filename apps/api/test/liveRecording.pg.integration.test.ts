@@ -36,6 +36,9 @@ class FakeRooms implements LiveRooms {
   async setHand() {
     return false;
   }
+  async list() {
+    return [];
+  }
   async setFloor() {
     return true;
   }

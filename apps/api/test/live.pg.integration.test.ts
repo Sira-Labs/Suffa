@@ -17,6 +17,11 @@ import type { Role } from '../src/authz/policies.js';
 import { PgClassRepository } from '../src/classes/repository.js';
 import { PgLiveInviteRepository } from '../src/live/invites.js';
 import { PgLiveSessionRepository, type LiveSession } from '../src/live/repository.js';
+import {
+  liveRoomSweep,
+  MIN_TOKEN_SECONDS,
+  PgLiveRoomSweepRepository,
+} from '../src/live/lifetime.js';
 import type { LiveParticipant, LiveRooms } from '../src/live/rooms.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
 
@@ -28,6 +33,8 @@ class FakeRooms implements LiveRooms {
   tokens: { room: string; who: LiveParticipant; ttl: number }[] = [];
   floor: { room: string; identity: string; allowed: boolean; camera: boolean }[] = [];
   hands: { room: string; identity: string; up: boolean }[] = [];
+  /** Rooms the server reports as existing. */
+  existing: string[] = [];
   closed: string[] = [];
   present = new Set<string>();
   async token(room: string, who: LiveParticipant, ttl: number) {
@@ -48,6 +55,9 @@ class FakeRooms implements LiveRooms {
     if (!this.present.has(identity)) return false;
     this.hands.push({ room, identity, up });
     return true;
+  }
+  async list() {
+    return this.existing;
   }
   async close(room: string) {
     this.closed.push(room);
@@ -426,11 +436,66 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     expect((await call('teacher', 'DELETE', `/${other.id}`)).status).toBe(409);
   });
 
+  it('sweeps: ends sessions left live and closes every room whose session is not live', async () => {
+    const sweep = liveRoomSweep(new PgLiveRoomSweepRepository(pool), rooms);
+    const forgotten = await plan('Vergessen');
+    const ended = await plan('Beendet', now, { audience: 'sisters' });
+    const planned = await plan('Geplant', new Date(now.getTime() + 3_600_000), {
+      audience: 'brothers',
+    });
+    await call('teacher', 'POST', `/${forgotten.id}/start`);
+    await call('teacher', 'POST', `/${ended.id}/start`);
+    await call('teacher', 'POST', `/${ended.id}/end`);
+    const room = (s: LiveSession) => `live-${s.id}`;
+    const closedNow = () => [...rooms.closed].sort();
+
+    // The room of the ended session is back (a late token), the forgotten one is in use,
+    // one belongs to a session that never started, and two are not ours at all.
+    rooms.existing = [
+      room(forgotten),
+      room(ended),
+      room(planned),
+      'live-not-a-session',
+      'someone-elses-room',
+    ];
+    rooms.closed = [];
+    expect(await sweep.run(now)).toEqual({ ended: 0, closed: 2 });
+    expect(closedNow()).toEqual([room(ended), room(planned)].sort());
+
+    // Two hours and a minute later nobody has looked at the class: the forgotten session is
+    // ended and its room closed in the same sweep.
+    const later = new Date(now.getTime() + 121 * 60_000);
+    rooms.existing = [room(forgotten), 'someone-elses-room'];
+    rooms.closed = [];
+    expect(await sweep.run(later)).toEqual({ ended: 1, closed: 1 });
+    expect(closedNow()).toEqual([room(forgotten)]);
+    const { rows } = await pool.query(
+      'select status from live_sessions where id = any($1)',
+      [[forgotten.id, ended.id, planned.id]]
+    );
+    expect(rows.map((r) => r.status).sort()).toEqual(['ended', 'ended', 'scheduled']);
+
+    // However much later a room of an ended session turns up, it is closed; with no rooms
+    // there is nothing to do.
+    rooms.existing = [room(ended)];
+    rooms.closed = [];
+    const muchLater = new Date(now.getTime() + 48 * 3_600_000);
+    expect(await sweep.run(muchLater)).toEqual({ ended: 0, closed: 1 });
+    rooms.existing = [];
+    expect(await sweep.run(muchLater)).toEqual({ ended: 0, closed: 0 });
+  });
+
   it('ends a session left live an hour past its planned length', async () => {
     const session = await plan();
     await call('teacher', 'POST', `/${session.id}/start`);
-    now = new Date(now.getTime() + 119 * 60_000);
+    // A token lasts until the session is over at the latest, whenever someone joins.
+    now = new Date(now.getTime() + 30 * 60_000);
     expect((await call('learner', 'POST', `/${session.id}/join`)).status).toBe(200);
+    expect(rooms.tokens.at(-1)!.ttl).toBe(90 * 60);
+    now = new Date(now.getTime() + 89 * 60_000);
+    expect((await call('learner', 'POST', `/${session.id}/join`)).status).toBe(200);
+    // One minute is left: long enough to connect, never shorter.
+    expect(rooms.tokens.at(-1)!.ttl).toBe(MIN_TOKEN_SECONDS);
     now = new Date(now.getTime() + 2 * 60_000);
     expect((await call('learner', 'POST', `/${session.id}/join`)).status).toBe(409);
     const list = (await (await call('learner', 'GET', '')).json()) as {

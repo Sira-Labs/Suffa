@@ -41,6 +41,7 @@ import { PgClassProgressRepository } from './classes/progress.js';
 import { PgCertificateRepository } from './classes/certificates.js';
 import { PgLiveQuizRepository } from './classes/quizRepository.js';
 import { PgLiveSessionRepository } from './live/repository.js';
+import { liveRoomSweep, PgLiveRoomSweepRepository } from './live/lifetime.js';
 import { LiveKitRooms } from './live/rooms.js';
 import { LiveKitRecorder } from './live/recorder.js';
 import { LiveRecordings } from './live/recording.js';
@@ -201,7 +202,13 @@ async function main(): Promise<void> {
             log,
             errors,
             config.storage ? new S3ObjectStorage(config.storage) : undefined,
-            liveRecordings(config, pool, boss, log)
+            liveRecordings(config, pool, boss, log),
+            config.live
+              ? liveRoomSweep(
+                  new PgLiveRoomSweepRepository(pool),
+                  new LiveKitRooms(config.live)
+                )
+              : undefined
           );
           if (config.youtubeApiKey) {
             await registerImports(

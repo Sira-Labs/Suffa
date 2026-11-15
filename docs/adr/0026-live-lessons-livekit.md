@@ -47,6 +47,24 @@ Constraints that already hold in Suffa:
     learner now raises a hand through the API (`POST …/live/:session/hand`), which sets the
     attribute for the caller only; giving the floor lowers the hand on the server. What a
     participant may publish was and stays enforced by LiveKit permissions.
+  - **A room lasts as long as its session** (update 2026-11-16):
+    - A join token is valid until the session is over at the latest (its start plus its
+      length plus the hour of overrun), whenever someone joins, and never shorter than two
+      minutes. Before, every token lasted the length plus an hour from the moment of
+      joining, so one from the end of a four-hour lesson was good for five more hours.
+    - That bounds only the token the API signs: LiveKit hands the people in a room fresh
+      tokens of its own while they are connected. So the worker sweeps every five minutes: it
+      ends sessions left live past the overrun, also when nobody looks at the class, asks
+      LiveKit which rooms exist, and closes every room named after a session that is not
+      live. A room that stayed open when a session ended by itself, or that a late token
+      brought back, lasts minutes, however late it turns up.
+    - A lesson that runs more than an hour past its planned length is therefore closed for
+      everyone within five minutes (before, it was only marked ended while the room went on,
+      with nobody able to join, end it or give the floor).
+    - LiveKit keeps creating rooms on join (`auto_create`). Turning that off would need the
+      server's settings as a YAML file, which the runbook avoids on CapRover on purpose, and
+      could not be tried against a server from the run's environment; the sweep reaches the
+      same end without touching the server.
 - **Live sessions are planned in the class** (`live_sessions`): title, start, length; the
   teacher starts and ends them. At most one session per audience of a class is live at a time
   (everyone, the sisters, the brothers; stage 2), so the two groups can meet in parallel.

@@ -133,7 +133,14 @@ function toggleFullscreen(stage: HTMLElement) {
  */
 function leaveVideoFullscreen(stage: HTMLElement | null) {
   const video = stage?.querySelector('video') as IosVideo | null | undefined;
-  if (video?.webkitDisplayingFullscreen) video.webkitExitFullscreen?.();
+  if (!video?.webkitDisplayingFullscreen) return;
+  // iOS pauses a video whose full screen ends; the lesson goes on.
+  video.addEventListener(
+    'webkitendfullscreen',
+    () => void video.play().catch(() => undefined),
+    { once: true }
+  );
+  video.webkitExitFullscreen?.();
 }
 
 /** Whether `stage` is the element the browser shows full screen right now. */
@@ -181,28 +188,25 @@ function Stage({
   const { t } = useTranslation('live');
   // Everyone decides for themselves whether the teacher's camera covers a corner of the screen.
   const [showCamera, setShowCamera] = useState(true);
-  if (!teacher) {
-    return (
-      <div className="live-stage live-stage-empty">
-        <p>{t('room.waitingForTeacher')}</p>
-      </div>
-    );
-  }
-  const source: LiveSource | null = teacher.screenOn
+  const source: LiveSource | null = teacher?.screenOn
     ? 'screen'
-    : teacher.cameraOn
+    : teacher?.cameraOn
       ? 'camera'
       : null;
-  const both = teacher.screenOn && teacher.cameraOn;
+  const both = Boolean(teacher?.screenOn && teacher.cameraOn);
+  // Full screen is offered while there is a picture, and the way back for as long as it lasts.
+  const toggles = fullscreen && (Boolean(source) || full);
+  // One element whatever it shows: the browser keeps the same element full screen when the
+  // teacher's picture or the teacher goes, and the overlay and the way back must stay in it.
   return (
     <div
       ref={stage}
-      className={`live-stage${teacher.speaking ? ' live-speaking' : ''}`}
-      onDoubleClick={() =>
-        fullscreen && source && stage.current && toggleFullscreen(stage.current)
-      }
+      className={`live-stage${teacher?.speaking ? ' live-speaking' : ''}`}
+      onDoubleClick={() => toggles && stage.current && toggleFullscreen(stage.current)}
     >
-      {source ? (
+      {!teacher ? (
+        <p className="live-stage-empty">{t('room.waitingForTeacher')}</p>
+      ) : source ? (
         <Video
           connection={connection}
           person={teacher}
@@ -219,7 +223,7 @@ function Stage({
           <span>{t('room.teacherCameraOff')}</span>
         </p>
       )}
-      {both && showCamera && (
+      {teacher && both && showCamera && (
         <div className="live-pip">
           <Video
             connection={connection}
@@ -239,7 +243,7 @@ function Stage({
         </button>
       )}
       {full && <div className="live-stage-overlay">{overlay}</div>}
-      {fullscreen && source && (
+      {toggles && (
         <button
           className="btn btn-small live-fullscreen-toggle"
           aria-pressed={full}
@@ -570,6 +574,13 @@ function Room({
 
   const stage = useRef<HTMLDivElement>(null);
   const full = useFullscreenOf(stage);
+  // The microphone button is drawn in another place in full screen: the focus goes with it.
+  // A button taken off the page gets no blur event, so the flag still tells it had the focus.
+  const micRef = useRef<HTMLButtonElement>(null);
+  const micFocused = useRef(false);
+  useEffect(() => {
+    if (micFocused.current) micRef.current?.focus();
+  }, [full]);
 
   const hadFloor = useRef(false);
   useEffect(() => {
@@ -732,6 +743,9 @@ function Room({
   );
   const micButton = state.canSpeak && me && (
     <button
+      ref={micRef}
+      onFocus={() => (micFocused.current = true)}
+      onBlur={() => (micFocused.current = false)}
       className="btn"
       aria-pressed={me.micOn}
       onClick={() => void device(() => connection.setMicrophone(!me.micOn))}

@@ -609,6 +609,26 @@ describe('the live room', () => {
       expect(screen.getAllByText('Aufnahme läuft')).toHaveLength(1);
       expect(screen.getAllByRole('button', { name: 'Mikrofon aus' })).toHaveLength(1);
 
+      // The teacher's picture going, or the teacher, leaves the same element full screen:
+      // the overlay and the way back stay in it.
+      connection.update({
+        people: [
+          { ...me, floor: true, micOn: true },
+          { ...teacher, local: false, cameraOn: false, cameraReady: false },
+        ],
+      });
+      expect(within(stage).getByText('Aufnahme läuft')).toBeTruthy();
+      expect(within(stage).getByRole('button', { name: 'Verkleinern' })).toBeTruthy();
+      connection.update({ people: [{ ...me, floor: true, micOn: true }] });
+      expect(document.fullscreenElement).toBe(stage);
+      expect(stage.isConnected).toBe(true);
+      expect(within(stage).getByText('Aufnahme läuft')).toBeTruthy();
+      expect(within(stage).getByRole('button', { name: 'Mikrofon aus' })).toBeTruthy();
+      expect(within(stage).getByRole('button', { name: 'Verkleinern' })).toBeTruthy();
+
+      // The focus goes with the microphone button.
+      within(stage).getByRole('button', { name: 'Mikrofon aus' }).focus();
+
       // Back on the page they are where they were.
       Object.defineProperty(document, 'fullscreenElement', {
         configurable: true,
@@ -619,7 +639,9 @@ describe('the live room', () => {
       expect(screen.getByText('Aufnahme läuft')).toBeTruthy();
       expect(
         within(screen.getByRole('toolbar')).getByRole('button', { name: 'Mikrofon aus' })
-      ).toBeTruthy();
+      ).toHaveFocus();
+      // Without a picture there is nothing to show full screen again.
+      expect(screen.queryByRole('button', { name: /ganzem Bildschirm/ })).toBeNull();
     } finally {
       delete (HTMLElement.prototype as { requestFullscreen?: unknown }).requestFullscreen;
       delete (document as { fullscreenElement?: unknown }).fullscreenElement;
@@ -635,8 +657,10 @@ describe('the live room', () => {
       webkitDisplayingFullscreen?: boolean;
       webkitExitFullscreen?: () => void;
     };
+    const play = vi.spyOn(video, 'play').mockResolvedValue();
     const exit = vi.fn(() => {
       video.webkitDisplayingFullscreen = false;
+      video.dispatchEvent(new Event('webkitendfullscreen'));
     });
     video.webkitExitFullscreen = exit;
 
@@ -653,6 +677,8 @@ describe('the live room', () => {
     video.webkitDisplayingFullscreen = true;
     connection.update({ canSpeak: true });
     expect(exit).toHaveBeenCalledTimes(2);
+    // iOS pauses a video whose full screen ends.
+    expect(play).toHaveBeenCalledTimes(2);
   });
 
   it('gives a learner only the microphone when the cameras stay off', async () => {

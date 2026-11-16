@@ -519,7 +519,11 @@ Full screen (2026-11-17; step 3 of that list): "Aufnahme läuft", the notice lin
 das Wort", recording started or stopped) and the microphone button are drawn inside the stage
 while it is full screen. Decisions:
 
-- They move into the stage instead of being shown twice: a screen reader hears each once.
+- They move into the stage instead of being shown twice; the focus goes with the microphone
+  button. A screen reader may read the badge again when it moves.
+- The stage is one element whatever it shows, and the way back stays while it is full screen:
+  before, a teacher leaving or stopping the picture left a full screen with nothing in it and,
+  on a touch screen, no way out (found in the independent review).
 - An iPhone shows the video by itself and nothing of the page can be drawn over it: there the
   full screen ends when the recording starts or the learner gets the floor. A recording that
   was already running when the learner went full screen is not repeated; they saw the badge
@@ -527,6 +531,8 @@ while it is full screen. Decisions:
 - The camera button, the hand and the chat stay on the page: none of them can switch a
   microphone on or record without the person seeing it.
 - Checked in the web tests only; not looked at on a phone or against a LiveKit server here.
+  On the iPhone the video is started again when its full screen ends, which iOS is known to
+  pause; whether the picture really goes on there is to be looked at on a device.
 
 Still open from those reviews, in this order, each a small story:
 

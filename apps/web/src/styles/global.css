@@ -3172,6 +3172,24 @@ button.quiz-option:disabled {
   height: 100%;
   border-radius: 0;
 }
+/* Recording, the floor and the microphone stay in sight while the stage covers the page.
+   Top start: the bottom corners hold the teacher's camera and its switch, the top end the
+   full-screen button. */
+.live-stage-overlay {
+  position: absolute;
+  inset-block-start: 0.75rem;
+  inset-inline: 0.75rem 9rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+.live-stage-overlay > *,
+.live-stage-overlay > .live-tag {
+  margin: 0;
+  pointer-events: auto;
+}
 .live-fullscreen-toggle {
   position: absolute;
   inset-inline-end: 0.75rem;

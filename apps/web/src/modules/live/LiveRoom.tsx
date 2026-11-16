@@ -13,7 +13,15 @@
  *
  * Joining starts from a click so the browser lets the room's sound play.
  */
-import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { LiveApi, type LiveRole, type LiveSession } from '@/services/live/liveApi';
@@ -96,7 +104,11 @@ function Video({
 }
 
 /** A video element that iOS can play full screen on its own (Safari has no element full screen). */
-type IosVideo = HTMLVideoElement & { webkitEnterFullscreen?: () => void };
+type IosVideo = HTMLVideoElement & {
+  webkitEnterFullscreen?: () => void;
+  webkitExitFullscreen?: () => void;
+  webkitDisplayingFullscreen?: boolean;
+};
 
 /**
  * Shows `stage` full screen, or leaves full screen. Where the browser cannot show an element
@@ -114,6 +126,35 @@ function toggleFullscreen(stage: HTMLElement) {
   (stage.querySelector('video') as IosVideo | null)?.webkitEnterFullscreen?.();
 }
 
+/**
+ * Ends the full screen of the stage's video where the phone shows the video by itself
+ * (iPhone): nothing of the page can be drawn over it, so what the person must see (the
+ * recording, the floor) is only visible once the page is back.
+ */
+function leaveVideoFullscreen(stage: HTMLElement | null) {
+  const video = stage?.querySelector('video') as IosVideo | null | undefined;
+  if (!video?.webkitDisplayingFullscreen) return;
+  // iOS pauses a video whose full screen ends; the lesson goes on.
+  video.addEventListener(
+    'webkitendfullscreen',
+    () => void video.play().catch(() => undefined),
+    { once: true }
+  );
+  video.webkitExitFullscreen?.();
+}
+
+/** Whether `stage` is the element the browser shows full screen right now. */
+function useFullscreenOf(stage: RefObject<HTMLElement>): boolean {
+  const [full, setFull] = useState(false);
+  useEffect(() => {
+    const changed = () =>
+      setFull(Boolean(stage.current) && document.fullscreenElement === stage.current);
+    document.addEventListener('fullscreenchange', changed);
+    return () => document.removeEventListener('fullscreenchange', changed);
+  }, [stage]);
+  return full;
+}
+
 /** Whether the stage can go full screen in this browser. */
 function canFullscreen(): boolean {
   if (typeof document === 'undefined') return false;
@@ -128,44 +169,44 @@ function Stage({
   connection,
   teacher,
   fullscreen,
+  stage,
+  full,
+  overlay,
 }: {
   connection: LiveConnection;
   teacher: LivePerson | undefined;
   fullscreen: boolean;
+  stage: RefObject<HTMLDivElement>;
+  /** Whether the stage is shown full screen right now. */
+  full: boolean;
+  /**
+   * What must stay in sight while the stage covers the page: only what is inside the
+   * full-screen element is drawn.
+   */
+  overlay: ReactNode;
 }) {
   const { t } = useTranslation('live');
   // Everyone decides for themselves whether the teacher's camera covers a corner of the screen.
   const [showCamera, setShowCamera] = useState(true);
-  const stage = useRef<HTMLDivElement>(null);
-  const [full, setFull] = useState(false);
-  useEffect(() => {
-    const changed = () =>
-      setFull(Boolean(stage.current) && document.fullscreenElement === stage.current);
-    document.addEventListener('fullscreenchange', changed);
-    return () => document.removeEventListener('fullscreenchange', changed);
-  }, []);
-  if (!teacher) {
-    return (
-      <div className="live-stage live-stage-empty">
-        <p>{t('room.waitingForTeacher')}</p>
-      </div>
-    );
-  }
-  const source: LiveSource | null = teacher.screenOn
+  const source: LiveSource | null = teacher?.screenOn
     ? 'screen'
-    : teacher.cameraOn
+    : teacher?.cameraOn
       ? 'camera'
       : null;
-  const both = teacher.screenOn && teacher.cameraOn;
+  const both = Boolean(teacher?.screenOn && teacher.cameraOn);
+  // Full screen is offered while there is a picture, and the way back for as long as it lasts.
+  const toggles = fullscreen && (Boolean(source) || full);
+  // One element whatever it shows: the browser keeps the same element full screen when the
+  // teacher's picture or the teacher goes, and the overlay and the way back must stay in it.
   return (
     <div
       ref={stage}
-      className={`live-stage${teacher.speaking ? ' live-speaking' : ''}`}
-      onDoubleClick={() =>
-        fullscreen && source && stage.current && toggleFullscreen(stage.current)
-      }
+      className={`live-stage${teacher?.speaking ? ' live-speaking' : ''}`}
+      onDoubleClick={() => toggles && stage.current && toggleFullscreen(stage.current)}
     >
-      {source ? (
+      {!teacher ? (
+        <p className="live-stage-empty">{t('room.waitingForTeacher')}</p>
+      ) : source ? (
         <Video
           connection={connection}
           person={teacher}
@@ -182,7 +223,7 @@ function Stage({
           <span>{t('room.teacherCameraOff')}</span>
         </p>
       )}
-      {both && showCamera && (
+      {teacher && both && showCamera && (
         <div className="live-pip">
           <Video
             connection={connection}
@@ -201,7 +242,8 @@ function Stage({
           {showCamera ? t('room.hideTeacherCamera') : t('room.showTeacherCamera')}
         </button>
       )}
-      {fullscreen && source && (
+      {full && <div className="live-stage-overlay">{overlay}</div>}
+      {toggles && (
         <button
           className="btn btn-small live-fullscreen-toggle"
           aria-pressed={full}
@@ -530,9 +572,20 @@ function Room({
   // Shown while the egress runs, and for the teacher from the moment it was asked for.
   const recording = state.recording || (teacherView && recordingWanted);
 
+  const stage = useRef<HTMLDivElement>(null);
+  const full = useFullscreenOf(stage);
+  // The microphone button is drawn in another place in full screen: the focus goes with it.
+  // A button taken off the page gets no blur event, so the flag still tells it had the focus.
+  const micRef = useRef<HTMLButtonElement>(null);
+  const micFocused = useRef(false);
+  useEffect(() => {
+    if (micFocused.current) micRef.current?.focus();
+  }, [full]);
+
   const hadFloor = useRef(false);
   useEffect(() => {
     if (!teacherView && state.canSpeak && !hadFloor.current) {
+      leaveVideoFullscreen(stage.current);
       setNotice(t(state.recording ? 'room.floorGivenRecording' : 'room.floorGiven'));
     }
     hadFloor.current = state.canSpeak;
@@ -542,6 +595,7 @@ function Room({
   const wasRecording = useRef(state.recording);
   useEffect(() => {
     if (state.recording !== wasRecording.current && !teacherView) {
+      if (state.recording) leaveVideoFullscreen(stage.current);
       setNotice(t(state.recording ? 'room.recordingStarted' : 'room.recordingStopped'));
     }
     wasRecording.current = state.recording;
@@ -676,6 +730,30 @@ function Room({
     );
   }
 
+  // Each of these is drawn once: on the page, or inside the stage while it is full screen.
+  const recordingBadge = (
+    <p className="live-tag live-recording" role="status">
+      {t('room.recordingBadge')}
+    </p>
+  );
+  const noticeLine = notice && (
+    <p className="card live-notice" role="status">
+      {notice}
+    </p>
+  );
+  const micButton = state.canSpeak && me && (
+    <button
+      ref={micRef}
+      onFocus={() => (micFocused.current = true)}
+      onBlur={() => (micFocused.current = false)}
+      className="btn"
+      aria-pressed={me.micOn}
+      onClick={() => void device(() => connection.setMicrophone(!me.micOn))}
+    >
+      {me.micOn ? t('room.micOff') : t('room.micOn')}
+    </button>
+  );
+
   return (
     <div className="live-room">
       <header className="row live-header">
@@ -686,11 +764,7 @@ function Room({
           <h1>{session.title}</h1>
           <SessionTags session={session} />
         </span>
-        {recording && (
-          <p className="live-tag live-recording" role="status">
-            {t('room.recordingBadge')}
-          </p>
-        )}
+        {recording && !full && recordingBadge}
         {state.status === 'reconnecting' && (
           <p className="live-tag" role="status">
             {t('room.reconnecting')}
@@ -698,12 +772,21 @@ function Room({
         )}
       </header>
       <div className="live-main">
-        {notice && (
-          <p className="card live-notice" role="status">
-            {notice}
-          </p>
-        )}
-        <Stage connection={connection} teacher={teacher} fullscreen={fullscreen} />
+        {!full && noticeLine}
+        <Stage
+          connection={connection}
+          teacher={teacher}
+          fullscreen={fullscreen}
+          stage={stage}
+          full={full}
+          overlay={
+            <>
+              {recording && recordingBadge}
+              {noticeLine}
+              {micButton}
+            </>
+          }
+        />
         {tiles.length > 0 && (
           <div className="live-tiles">
             {tiles.map((p) => (
@@ -721,15 +804,7 @@ function Room({
         )}
       </div>
       <div className="live-controls row" role="toolbar" aria-label={t('room.controls')}>
-        {state.canSpeak && me && (
-          <button
-            className="btn"
-            aria-pressed={me.micOn}
-            onClick={() => void device(() => connection.setMicrophone(!me.micOn))}
-          >
-            {me.micOn ? t('room.micOff') : t('room.micOn')}
-          </button>
-        )}
+        {!full && micButton}
         {mayUseCamera && me && (
           <button
             className="btn"

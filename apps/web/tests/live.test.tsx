@@ -564,6 +564,124 @@ describe('the live room', () => {
     }
   });
 
+  it('keeps the recording, the floor and the microphone in sight in full screen', async () => {
+    server({ enabled: true, sessions: [] }, 'learner');
+    const me = person({ identity: 'a', name: 'Amina', local: true });
+    Object.defineProperty(HTMLElement.prototype, 'requestFullscreen', {
+      configurable: true,
+      value: async function (this: HTMLElement) {
+        Object.defineProperty(document, 'fullscreenElement', {
+          configurable: true,
+          value: this,
+        });
+        document.dispatchEvent(new Event('fullscreenchange'));
+      },
+    });
+    try {
+      const connection = new FakeConnection({
+        people: [me, { ...teacher, local: false }],
+      });
+      await join(connection, true, false, new FakeOwnBackgrounds(), true);
+      await userEvent.click(
+        screen.getByRole('button', {
+          name: 'Bild der Lehrkraft auf ganzem Bildschirm zeigen',
+        })
+      );
+      const stage = (await screen.findByRole('button', { name: 'Verkleinern' })).closest(
+        '.live-stage'
+      ) as HTMLElement;
+
+      // Only what is inside the full-screen element is drawn: everything must be in the stage.
+      connection.update({ recording: true });
+      expect(within(stage).getByText(/Aufnahme gestartet/)).toBeTruthy();
+      connection.update({
+        canSpeak: true,
+        people: [
+          { ...me, floor: true, micOn: true },
+          { ...teacher, local: false },
+        ],
+      });
+      expect(within(stage).getByText('Aufnahme läuft')).toBeTruthy();
+      expect(within(stage).getByText(/Du hast das Wort/)).toBeTruthy();
+      await userEvent.click(within(stage).getByRole('button', { name: 'Mikrofon aus' }));
+      expect(connection.calls).toContain('mic:false');
+      // Each once, not a second copy behind the stage.
+      expect(screen.getAllByText('Aufnahme läuft')).toHaveLength(1);
+      expect(screen.getAllByRole('button', { name: 'Mikrofon aus' })).toHaveLength(1);
+
+      // The teacher's picture going, or the teacher, leaves the same element full screen:
+      // the overlay and the way back stay in it.
+      connection.update({
+        people: [
+          { ...me, floor: true, micOn: true },
+          { ...teacher, local: false, cameraOn: false, cameraReady: false },
+        ],
+      });
+      expect(within(stage).getByText('Aufnahme läuft')).toBeTruthy();
+      expect(within(stage).getByRole('button', { name: 'Verkleinern' })).toBeTruthy();
+      connection.update({ people: [{ ...me, floor: true, micOn: true }] });
+      expect(document.fullscreenElement).toBe(stage);
+      expect(stage.isConnected).toBe(true);
+      expect(within(stage).getByText('Aufnahme läuft')).toBeTruthy();
+      expect(within(stage).getByText(/Du hast das Wort/)).toBeTruthy();
+      expect(within(stage).getByRole('button', { name: 'Mikrofon aus' })).toBeTruthy();
+      expect(within(stage).getByRole('button', { name: 'Verkleinern' })).toBeTruthy();
+
+      // The focus goes with the microphone button.
+      within(stage).getByRole('button', { name: 'Mikrofon aus' }).focus();
+
+      // Back on the page they are where they were.
+      Object.defineProperty(document, 'fullscreenElement', {
+        configurable: true,
+        value: null,
+      });
+      act(() => void document.dispatchEvent(new Event('fullscreenchange')));
+      expect(within(stage).queryByText('Aufnahme läuft')).toBeNull();
+      expect(screen.getByText('Aufnahme läuft')).toBeTruthy();
+      expect(
+        within(screen.getByRole('toolbar')).getByRole('button', { name: 'Mikrofon aus' })
+      ).toHaveFocus();
+      // Without a picture there is nothing to show full screen again.
+      expect(screen.queryByRole('button', { name: /ganzem Bildschirm/ })).toBeNull();
+    } finally {
+      delete (HTMLElement.prototype as { requestFullscreen?: unknown }).requestFullscreen;
+      delete (document as { fullscreenElement?: unknown }).fullscreenElement;
+    }
+  });
+
+  it('brings the page back where the phone shows the video by itself (iPhone)', async () => {
+    server({ enabled: true, sessions: [] }, 'learner');
+    const me = person({ identity: 'a', name: 'Amina', local: true });
+    const connection = new FakeConnection({ people: [me, { ...teacher, local: false }] });
+    await join(connection);
+    const video = screen.getByLabelText('Ustadha Maryam') as HTMLVideoElement & {
+      webkitDisplayingFullscreen?: boolean;
+      webkitExitFullscreen?: () => void;
+    };
+    const play = vi.spyOn(video, 'play').mockResolvedValue();
+    const exit = vi.fn(() => {
+      video.webkitDisplayingFullscreen = false;
+      video.dispatchEvent(new Event('webkitendfullscreen'));
+    });
+    video.webkitExitFullscreen = exit;
+
+    // Not full screen: nothing to leave.
+    connection.update({ recording: true });
+    expect(exit).not.toHaveBeenCalled();
+    // The recording stopping hides nothing the person must see.
+    video.webkitDisplayingFullscreen = true;
+    connection.update({ recording: false });
+    expect(exit).not.toHaveBeenCalled();
+
+    connection.update({ recording: true });
+    expect(exit).toHaveBeenCalledOnce();
+    video.webkitDisplayingFullscreen = true;
+    connection.update({ canSpeak: true });
+    expect(exit).toHaveBeenCalledTimes(2);
+    // iOS pauses a video whose full screen ends.
+    expect(play).toHaveBeenCalledTimes(2);
+  });
+
   it('gives a learner only the microphone when the cameras stay off', async () => {
     server(
       {

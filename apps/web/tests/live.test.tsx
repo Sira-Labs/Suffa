@@ -623,6 +623,7 @@ describe('the live room', () => {
       expect(document.fullscreenElement).toBe(stage);
       expect(stage.isConnected).toBe(true);
       expect(within(stage).getByText('Aufnahme läuft')).toBeTruthy();
+      expect(within(stage).getByText(/Du hast das Wort/)).toBeTruthy();
       expect(within(stage).getByRole('button', { name: 'Mikrofon aus' })).toBeTruthy();
       expect(within(stage).getByRole('button', { name: 'Verkleinern' })).toBeTruthy();
 

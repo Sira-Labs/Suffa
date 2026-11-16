@@ -515,10 +515,21 @@ closes the rooms of ended ones every five minutes. Decisions:
 - Not run against a LiveKit server here. Closing a room is the call "end for everyone" already
   makes in production; listing rooms is new.
 
+Full screen (2026-11-17; step 3 of that list): "Aufnahme läuft", the notice line ("Du hast
+das Wort", recording started or stopped) and the microphone button are drawn inside the stage
+while it is full screen. Decisions:
+
+- They move into the stage instead of being shown twice: a screen reader hears each once.
+- An iPhone shows the video by itself and nothing of the page can be drawn over it: there the
+  full screen ends when the recording starts or the learner gets the floor. A recording that
+  was already running when the learner went full screen is not repeated; they saw the badge
+  on the page before.
+- The camera button, the hand and the chat stay on the page: none of them can switch a
+  microphone on or record without the person seeing it.
+- Checked in the web tests only; not looked at on a phone or against a LiveKit server here.
+
 Still open from those reviews, in this order, each a small story:
 
-3. Full screen hides "Aufnahme läuft", "you have the floor" and the microphone button while
-   the microphone can switch on: show them inside the full-screen stage.
 4. Giving the floor switches the learner's microphone on without their doing. Default until
    the teacher pilot says otherwise: the floor enables the button and the learner unmutes.
 5. The hand route has no limit per learner: each call is a room-service call and an update to

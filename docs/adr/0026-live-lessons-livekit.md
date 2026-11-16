@@ -129,6 +129,9 @@ Constraints that already hold in Suffa:
      the teacher's picture.
    - Everyone can show the stage full screen (button or double click); on the iPhone, where
      pages cannot go full screen, the teacher's video does.
+     In full screen the recording badge, the notices and the microphone button are drawn
+     inside the stage; on the iPhone the full screen ends when a recording starts or the
+     learner gets the floor (update 2026-11-17).
 
 ## Consequences
 

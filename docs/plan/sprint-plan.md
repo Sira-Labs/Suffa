@@ -497,13 +497,26 @@ independent reviews of earlier live-lesson changes on 14 Nov. Decisions:
   environment): the grants are checked on the token, the route against Postgres, the room in
   the web tests. The floor already sets attributes the same way in production.
 
+Room lifetime (2026-11-16, ADR-0026 update; steps 1 and 2 of the list from those reviews): a
+join token ends with its session at the latest, and the worker ends sessions left running and
+closes the rooms of ended ones every five minutes. Decisions:
+
+- `auto_create` stays on at the LiveKit server: switching it off needs the server's settings
+  as YAML, which the runbook avoids on CapRover, and could not be tried here. The sweep closes
+  a room brought back by an old token within minutes instead.
+- The sweep goes by the rooms that exist on the LiveKit server, not by a time window: LiveKit
+  renews the tokens of connected people itself, so a window would be outlasted (found in the
+  independent review). Every room named after a session that is not live is closed.
+- A lesson running more than an hour past its planned length is now closed for everyone
+  within five minutes, as ADR-0026 always said it ends; before, the room went on in a state
+  nobody could join or end. A warning to the teacher before that is a story to come.
+- The sweep is a maintenance task of the worker: rolling back to a release without it leaves
+  its schedule (`close-live-rooms`, queue `maintenance`) to be removed, as for `live-reminders`.
+- Not run against a LiveKit server here. Closing a room is the call "end for everyone" already
+  makes in production; listing rooms is new.
+
 Still open from those reviews, in this order, each a small story:
 
-1. Join tokens live for the session's length plus an hour from the moment of joining, and the
-   runbook does not switch off `auto_create`: a token can outlive the lesson and re-open its
-   room. Shorten the tokens and set `room.auto_create: false`.
-2. A session that overran is marked ended without closing its room, and "end for everyone"
-   then answers 409: close the room when a session ends by itself.
 3. Full screen hides "Aufnahme läuft", "you have the floor" and the microphone button while
    the microphone can switch on: show them inside the full-screen stage.
 4. Giving the floor switches the learner's microphone on without their doing. Default until

@@ -99,6 +99,7 @@ describe('what the adapter sends to the room service', () => {
         return undefined as never;
       },
       deleteRoom: async () => undefined,
+      listRooms: async () => [{ name: 'live-1' }, { name: 'live-2' }] as never,
     };
     return { calls, rooms: new LiveKitRooms(config, service) };
   }
@@ -139,6 +140,10 @@ describe('what the adapter sends to the room service', () => {
     ]);
   });
 
+  it('lists the rooms that exist by name', async () => {
+    expect(await setup().rooms.list()).toEqual(['live-1', 'live-2']);
+  });
+
   it('sets a hand as an attribute only, leaving the permissions alone', async () => {
     const { calls, rooms } = setup();
     expect(await rooms.setHand('live-1', 'u-1', true)).toBe(true);
@@ -155,6 +160,7 @@ describe('what the adapter sends to the room service', () => {
         throw Object.assign(new Error('participant does not exist'), { status: 404 });
       },
       deleteRoom: async () => undefined,
+      listRooms: async () => [],
     };
     const rooms = new LiveKitRooms(config, service);
     expect(await rooms.setHand('live-1', 'u-gone', true)).toBe(false);

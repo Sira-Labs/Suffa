@@ -44,13 +44,13 @@ import { authorize, type ActorEnv, type AuthorizeLog } from '../authz/middleware
 import type { Actor as PolicyActor } from '../authz/policies.js';
 import type { ClassRepository } from '../classes/repository.js';
 import {
-  OVERRUN_MINUTES,
   audiencesOf,
   type LiveActionResult,
   type LiveSessionRepository,
 } from './repository.js';
 import type { LiveInviteRepository } from './invites.js';
 import type { LiveRecordings } from './recording.js';
+import { roomName, tokenSeconds } from './lifetime.js';
 import type { LiveRooms } from './rooms.js';
 
 export interface LiveRouteDeps {
@@ -89,8 +89,7 @@ const STATUS: Record<Exclude<LiveActionResult, { ok: true }>['reason'], 404 | 40
   already_live: 409,
 };
 
-/** The LiveKit room of a session. */
-export const roomName = (sessionId: string) => `live-${sessionId}`;
+export { roomName };
 
 export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
   const app = new Hono<ActorEnv>();
@@ -215,7 +214,8 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
         role,
         camera: role === 'learner' && session.learnerCameras,
       },
-      (session.durationMinutes + OVERRUN_MINUTES) * 60
+      // Until the session is over at the latest, whenever someone joins.
+      tokenSeconds(new Date(session.startedAt ?? now()), session.durationMinutes, now())
     );
     c.header('Cache-Control', 'no-store');
     return c.json({ url: deps.rooms.url, token, role, session });

@@ -677,7 +677,10 @@ join tokens; browsers connect to `suffa-live` directly.
 
 5. **`suffa-api`:** `SUFFA_LIVEKIT_URL=wss://live.suffa.<domain>`,
    `SUFFA_LIVEKIT_API_KEY=suffa`, `SUFFA_LIVEKIT_API_SECRET=<secret>`,
-   `SUFFA_LIVEKIT_API_URL=http://srv-captain--suffa-live:7880`.
+   `SUFFA_LIVEKIT_API_URL=http://srv-captain--suffa-live:7880`. `suffa-worker` has the same
+   settings (§4): every five minutes it ends live sessions left running and closes rooms
+   whose session is not live (`maintenance.done` with `task: close-live-rooms` in its log
+   when it did).
 6. **`suffa-web`:** `SUFFA_LIVEKIT_HOST=live.suffa.<domain>`.
 7. **Check:** `https://live.suffa.<domain>` answers `OK`; in a class, _Live → Planen → Starten_
    opens the room; a second browser (learner) joins, hears the teacher, chats and raises a hand;

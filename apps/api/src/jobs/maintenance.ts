@@ -9,6 +9,8 @@
  * `purge-files` deletes files from object storage whose rows are gone, e.g. recordings shared
  * with a teacher when the account is deleted or the learner leaves the class (story 15.4).
  * `resume-recordings` follows again live recordings whose worker step was lost (ADR-0029).
+ * `close-live-rooms` ends live sessions left running and closes the rooms of ended ones
+ * (ADR-0026, live/lifetime.ts).
  */
 import type { PgBoss, Job } from 'pg-boss';
 import type { Logger } from 'pino';
@@ -18,6 +20,7 @@ import type { ErrorReporter } from '../observability/errors.js';
 import type { QueueName } from './queue.js';
 import { purgeDeletedFiles } from '../sharing/repository.js';
 import type { ObjectStorage } from '../storage/objectStorage.js';
+import type { LiveRoomSweep } from '../live/lifetime.js';
 import type { LiveRecordings } from '../live/recording.js';
 
 export const MAINTENANCE_QUEUE: QueueName = 'maintenance';
@@ -33,6 +36,7 @@ export const MaintenanceJob = z.discriminatedUnion('task', [
   z.object({ task: z.literal('prune-quizzes') }),
   z.object({ task: z.literal('purge-files') }),
   z.object({ task: z.literal('resume-recordings') }),
+  z.object({ task: z.literal('close-live-rooms') }),
 ]);
 export type MaintenanceJob = z.infer<typeof MaintenanceJob>;
 
@@ -46,6 +50,8 @@ export const MAINTENANCE_SCHEDULES: ReadonlyArray<{ cron: string; job: Maintenan
     { cron: '*/10 * * * *', job: { task: 'purge-files' } },
     // A lost recording should reach its class's recordings within minutes.
     { cron: '*/5 * * * *', job: { task: 'resume-recordings' } },
+    // A room left behind, or brought back with an old token, lasts minutes.
+    { cron: '*/5 * * * *', job: { task: 'close-live-rooms' } },
   ];
 
 export async function pruneHeartbeats(pool: SqlPool): Promise<number> {
@@ -105,7 +111,8 @@ export async function runMaintenance(
   raw: unknown,
   log: Pick<Logger, 'info'>,
   storage?: Pick<ObjectStorage, 'delete'>,
-  recordings?: Pick<LiveRecordings, 'resume'>
+  recordings?: Pick<LiveRecordings, 'resume'>,
+  liveRooms?: LiveRoomSweep
 ): Promise<void> {
   const job = MaintenanceJob.parse(raw);
   switch (job.task) {
@@ -142,6 +149,16 @@ export async function runMaintenance(
       log.info({ task: job.task, resumed }, 'maintenance.done');
       return;
     }
+    case 'close-live-rooms': {
+      // Without the LiveKit settings this worker cannot reach any room.
+      if (!liveRooms) return;
+      const result = await liveRooms.run();
+      // Every five minutes: only worth a line when something was ended or closed.
+      if (result.ended > 0 || result.closed > 0) {
+        log.info({ task: job.task, ...result }, 'maintenance.done');
+      }
+      return;
+    }
   }
 }
 
@@ -152,7 +169,8 @@ export async function registerMaintenance(
   log: Pick<Logger, 'info'>,
   errors: ErrorReporter,
   storage?: Pick<ObjectStorage, 'delete'>,
-  recordings?: Pick<LiveRecordings, 'resume'>
+  recordings?: Pick<LiveRecordings, 'resume'>,
+  liveRooms?: LiveRoomSweep
 ): Promise<void> {
   for (const { cron, job } of MAINTENANCE_SCHEDULES) {
     await boss.schedule(MAINTENANCE_QUEUE, cron, job, { key: job.task, tz: 'UTC' });
@@ -160,7 +178,7 @@ export async function registerMaintenance(
   await boss.work(MAINTENANCE_QUEUE, async (jobs: Job<unknown>[]) => {
     for (const job of jobs) {
       try {
-        await runMaintenance(pool, job.data, log, storage, recordings);
+        await runMaintenance(pool, job.data, log, storage, recordings, liveRooms);
       } catch (error) {
         // Reported on every attempt; pg-boss still retries and finally dead-letters it.
         errors.capture(error, { queue: MAINTENANCE_QUEUE, jobId: job.id });

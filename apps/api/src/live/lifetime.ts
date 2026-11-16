@@ -15,6 +15,8 @@
  *   failed sweep left behind, with no time window to fall out of.
  */
 import type pg from 'pg';
+import { writeAudit } from '../audit/log.js';
+import { inTransaction } from '../db/transaction.js';
 import { OVERRUN_MINUTES } from './repository.js';
 import type { LiveRooms } from './rooms.js';
 
@@ -64,14 +66,39 @@ export class PgLiveRoomSweepRepository implements LiveRoomSweepRepository {
   constructor(private readonly pool: pg.Pool) {}
 
   async endOverrun(now: Date): Promise<number> {
-    const { rowCount } = await this.pool.query(
-      `update live_sessions
-          set status = 'ended', ended_at = $1
-        where status = 'live'
-          and started_at + make_interval(mins => duration_minutes + $2) < $1`,
-      [now, OVERRUN_MINUTES]
-    );
-    return rowCount ?? 0;
+    // The sweep closes these rooms for everyone, so the end goes on record like the
+    // teacher's own, with no person as its actor.
+    return inTransaction(this.pool, async (db) => {
+      const { rows } = await db.query<{
+        id: string;
+        class_id: string;
+        title: string;
+        starts_at: Date;
+        audience: string;
+      }>(
+        `update live_sessions
+            set status = 'ended', ended_at = $1
+          where status = 'live'
+            and started_at + make_interval(mins => duration_minutes + $2) < $1
+          returning id, class_id, title, starts_at, audience`,
+        [now, OVERRUN_MINUTES]
+      );
+      for (const row of rows) {
+        await writeAudit(db, {
+          actorId: null,
+          action: 'live.session_overrun_ended',
+          targetType: 'live_session',
+          targetId: row.id,
+          details: {
+            classId: row.class_id,
+            title: row.title,
+            startsAt: row.starts_at.toISOString(),
+            audience: row.audience,
+          },
+        });
+      }
+      return rows.length;
+    });
   }
 
   async liveAmong(sessionIds: string[]): Promise<Set<string>> {

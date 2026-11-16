@@ -474,6 +474,23 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
       [[forgotten.id, ended.id, planned.id]]
     );
     expect(rows.map((r) => r.status).sort()).toEqual(['ended', 'ended', 'scheduled']);
+    // The end is on record, with no person as its actor.
+    const audit = await pool.query(
+      `select actor_id, target_id, details from audit_log
+        where action = 'live.session_overrun_ended'`
+    );
+    expect(audit.rows).toEqual([
+      {
+        actor_id: null,
+        target_id: forgotten.id,
+        details: {
+          classId,
+          title: 'Vergessen',
+          startsAt: forgotten.startsAt,
+          audience: 'all',
+        },
+      },
+    ]);
 
     // However much later a room of an ended session turns up, it is closed; with no rooms
     // there is nothing to do.

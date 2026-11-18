@@ -14,6 +14,8 @@ const room = {
   permissions: WITHOUT_FLOOR,
   handlers: new Map<string, (...args: unknown[]) => void>(),
   setMicrophoneEnabled: vi.fn(async (_on: boolean) => undefined),
+  /** The room's local participant, as LiveKit passes it to the handler. */
+  local: undefined as unknown,
 };
 
 vi.mock('livekit-client', () => {
@@ -33,6 +35,9 @@ vi.mock('livekit-client', () => {
       getTrackPublication: () => undefined,
       setMicrophoneEnabled: (on: boolean) => room.setMicrophoneEnabled(on),
     };
+    constructor() {
+      room.local = this.localParticipant;
+    }
     on(event: string, handler: (...args: unknown[]) => void) {
       room.handlers.set(event, handler);
       return this;
@@ -70,7 +75,8 @@ describe('a learner given the floor', () => {
     connection.subscribe((state) => states.push(state.canSpeak));
 
     room.permissions = WITH_FLOOR;
-    room.handlers.get('ParticipantPermissionsChanged')!(WITHOUT_FLOOR);
+    // As LiveKit calls it: the permissions before, and whose they are.
+    room.handlers.get('ParticipantPermissionsChanged')!(WITHOUT_FLOOR, room.local);
 
     expect(states.at(-1)).toBe(true);
     expect(room.setMicrophoneEnabled).not.toHaveBeenCalled();

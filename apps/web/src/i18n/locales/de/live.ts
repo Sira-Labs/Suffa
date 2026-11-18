@@ -114,9 +114,9 @@ export const live = {
     leave: 'Verlassen',
     endForAll: 'Für alle beenden',
     confirmEnd: 'Den Live-Unterricht für alle beenden?',
-    floorGiven: 'Du hast das Wort.',
+    floorGiven: 'Du hast das Wort. Schalte dein Mikrofon ein, um zu sprechen.',
     floorGivenRecording:
-      'Du hast das Wort. Die Aufnahme läuft: Dein Ton wird mit aufgezeichnet.',
+      'Du hast das Wort. Schalte dein Mikrofon ein, um zu sprechen. Die Aufnahme läuft: Dein Ton wird dann mit aufgezeichnet.',
     recordingNotice:
       'Die Lehrkraft kann diesen Unterricht aufzeichnen: Bild und Ton der Lehrkraft und den Ton aller, denen sie das Wort gibt. Dein Bild wird nie aufgenommen. Solange aufgezeichnet wird, steht oben „Aufnahme läuft“.',
     recordingNow: 'Die Aufnahme läuft gerade.',

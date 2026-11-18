@@ -433,16 +433,23 @@ describe('the live room', () => {
     expect(requests.find((r) => r.path.endsWith('/hand'))?.body).toEqual({ up: true });
     expect(connection.calls).toEqual(['send:سلام عليكم']);
 
+    // The floor offers the microphone, off: the learner switches it on themselves.
     connection.update({
       canSpeak: true,
       people: [
-        { ...me, floor: true, micOn: true },
+        { ...me, floor: true },
         { ...teacher, local: false },
       ],
     });
-    expect(await screen.findByText('Du hast das Wort.')).toBeTruthy();
-    expect(screen.getByRole('button', { name: 'Mikrofon aus' })).toBeTruthy();
+    expect(
+      await screen.findByText(
+        'Du hast das Wort. Schalte dein Mikrofon ein, um zu sprechen.'
+      )
+    ).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Melden/ })).toBeNull();
+    expect(connection.calls).not.toContain('mic:true');
+    await userEvent.click(screen.getByRole('button', { name: 'Mikrofon an' }));
+    expect(connection.calls).toContain('mic:true');
   });
 
   it('explains on iPhone and iPad that the screen cannot be shared', async () => {
@@ -1016,7 +1023,7 @@ describe('the live room', () => {
     expect(screen.getByText('Aufnahme läuft')).toBeTruthy();
 
     connection.update({ canSpeak: true, people: [{ ...me, floor: true }, teacher] });
-    expect(await screen.findByText(/dein Ton wird mit aufgezeichnet/i)).toBeTruthy();
+    expect(await screen.findByText(/dein Ton wird dann mit aufgezeichnet/i)).toBeTruthy();
 
     connection.update({ recording: false });
     expect(await screen.findByText('Die Aufnahme ist beendet.')).toBeTruthy();

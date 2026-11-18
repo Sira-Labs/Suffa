@@ -540,7 +540,8 @@ it on to speak. Decisions:
 
 - The default named in the list, until the teacher pilot says otherwise: one more tap for the
   learner, and nobody is heard or recorded without their own doing.
-- A change in the app only: the server already grants the microphone and nothing else. An
+- A change in the app only: with the floor the server grants the right to use the microphone
+  and switches nothing on (the camera goes by the session's setting, not by the floor). An
   app from before this change still switches the microphone on until it has updated.
 - The teacher sees no "microphone is off" mark beside a learner with the floor; whether one
   is needed is for the pilot to show.

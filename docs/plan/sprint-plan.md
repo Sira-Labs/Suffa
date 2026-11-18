@@ -534,10 +534,20 @@ while it is full screen. Decisions:
   On the iPhone the video is started again when its full screen ends, which iOS is known to
   pause; whether the picture really goes on there is to be looked at on a device.
 
-Still open from those reviews, in this order, each a small story:
+The floor and the microphone (2026-11-19; step 4 of that list): giving the floor no longer
+switches the learner's microphone on. The button appears, off, and the notice says to switch
+it on to speak. Decisions:
 
-4. Giving the floor switches the learner's microphone on without their doing. Default until
-   the teacher pilot says otherwise: the floor enables the button and the learner unmutes.
+- The default named in the list, until the teacher pilot says otherwise: one more tap for the
+  learner, and nobody is heard or recorded without their own doing.
+- A change in the app only: with the floor the server grants the right to use the microphone
+  and switches nothing on (the camera goes by the session's setting, not by the floor). An
+  app from before this change still switches the microphone on until it has updated.
+- The teacher sees no "microphone is off" mark beside a learner with the floor; whether one
+  is needed is for the pilot to show.
+
+Still open from those reviews, each a small story:
+
 5. The hand route has no limit per learner: each call is a room-service call and an update to
    everyone in the room. Throttle it per person.
 

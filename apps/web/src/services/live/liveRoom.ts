@@ -168,16 +168,9 @@ class LiveKitConnection implements LiveConnection {
       track.detach().forEach((element) => element.remove());
       this.emit();
     });
-    room.on(E.ParticipantPermissionsChanged, (previous, participant) => {
-      // A learner given the floor speaks right away (the server lowers their raised hand).
-      if (participant === room.localParticipant) {
-        const now = allows(room.localParticipant.permissions, SOURCE_MICROPHONE);
-        if (now && !allows(previous, SOURCE_MICROPHONE)) {
-          void this.setMicrophone(true).catch(() => undefined);
-        }
-      }
-      this.emit();
-    });
+    // The floor only allows the microphone: the learner switches it on themselves, so nobody
+    // is heard (or recorded) without their own doing. `refresh` shows them the button.
+    room.on(E.ParticipantPermissionsChanged, refresh);
     room.on(
       E.DataReceived,
       (

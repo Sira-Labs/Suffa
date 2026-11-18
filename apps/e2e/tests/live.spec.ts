@@ -111,11 +111,12 @@ test('teaches a live lesson: picture, raised hand, floor, chat, end', async ({
   await stageIsPlaying(learner);
   await expect(learner.getByRole('button', { name: 'Mikrofon an' })).toHaveCount(0);
 
-  // Raised hand → the teacher gives the floor → the learner's microphone is on.
+  // Raised hand → the teacher gives the floor → the learner switches the microphone on.
   await learner.getByRole('button', { name: /Melden/ }).click();
   const hands = teacher.getByRole('region', { name: '2 im Raum' });
   await hands.getByRole('button', { name: 'Wort geben' }).click();
-  await expect(learner.getByText('Du hast das Wort.')).toBeVisible();
+  await expect(learner.getByText(/Du hast das Wort\./)).toBeVisible();
+  await learner.getByRole('button', { name: 'Mikrofon an' }).click();
   await expect(learner.getByRole('button', { name: 'Mikrofon aus' })).toBeVisible();
 
   // Chat in both directions, Arabic included.
@@ -167,7 +168,8 @@ test('a sisters’ lesson: only the sisters join, with their voice only', async 
     .getByRole('region', { name: '2 im Raum' })
     .getByRole('button', { name: 'Wort geben' })
     .click();
-  await expect(learner.getByText('Du hast das Wort.')).toBeVisible();
+  await expect(learner.getByText(/Du hast das Wort\./)).toBeVisible();
+  await learner.getByRole('button', { name: 'Mikrofon an' }).click();
   await expect(learner.getByRole('button', { name: 'Mikrofon aus' })).toBeVisible();
   await expect(learner.getByRole('button', { name: 'Kamera an' })).toHaveCount(0);
 });

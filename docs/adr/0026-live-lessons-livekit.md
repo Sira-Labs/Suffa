@@ -132,6 +132,9 @@ Constraints that already hold in Suffa:
      In full screen the recording badge, the notices and the microphone button are drawn
      inside the stage; on the iPhone the full screen ends when a recording starts or the
      learner gets the floor (update 2026-11-17).
+   - The floor allows a learner's microphone and never switches it on: the learner does
+     that with the microphone button, so nobody is heard or recorded without their own
+     doing (update 2026-11-19; before, the app switched it on with the floor).
 
 ## Consequences
 

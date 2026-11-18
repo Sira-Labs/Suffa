@@ -116,9 +116,9 @@ export const live: Messages<typeof de> = {
     leave: 'Leave',
     endForAll: 'End for everyone',
     confirmEnd: 'End the live lesson for everyone?',
-    floorGiven: 'You have the floor.',
+    floorGiven: 'You have the floor. Switch your microphone on to speak.',
     floorGivenRecording:
-      'You have the floor. The recording is running: your voice is recorded too.',
+      'You have the floor. Switch your microphone on to speak. The recording is running: your voice is then recorded too.',
     recordingNotice:
       'The teacher can record this lesson: the teacher’s picture and voice, and the voice of everyone given the floor. Your picture is never recorded. While it records, “Recording” shows at the top.',
     recordingNow: 'The recording is running right now.',

@@ -684,7 +684,8 @@ join tokens; browsers connect to `suffa-live` directly.
 6. **`suffa-web`:** `SUFFA_LIVEKIT_HOST=live.suffa.<domain>`.
 7. **Check:** `https://live.suffa.<domain>` answers `OK`; in a class, _Live → Planen → Starten_
    opens the room; a second browser (learner) joins, hears the teacher, chats and raises a hand;
-   the teacher gives the floor and hears the learner.
+   the teacher gives the floor, the learner switches the microphone on and the teacher hears
+   them.
 
 Load (§10): an SFU forwards streams and does not mix them; one class of 30 with the teacher's
 video uses roughly 1 vCPU and 5–10 Mbit/s per watching learner on the way out. Many classes at

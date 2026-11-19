@@ -22,9 +22,9 @@ import {
   MIN_TOKEN_SECONDS,
   PgLiveRoomSweepRepository,
 } from '../src/live/lifetime.js';
+import { PerPersonLimiter } from '../src/live/handLimit.js';
 import type { LiveParticipant, LiveRooms } from '../src/live/rooms.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
-import { RateLimiter } from '../src/observability/tunnel.js';
 
 const url = process.env.SUFFA_TEST_DATABASE_URL;
 const quiet = { info: () => undefined, warn: () => undefined, error: () => undefined };
@@ -97,7 +97,11 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
         } satisfies AuthResolver,
         log: quiet,
         now: () => now,
-        handLimiter: () => new RateLimiter(HAND_LIMIT, 60_000, () => handClock),
+        handLimiter: new PerPersonLimiter({
+          limit: HAND_LIMIT,
+          windowMs: 60_000,
+          now: () => handClock,
+        }),
       },
     });
 

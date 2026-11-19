@@ -53,7 +53,7 @@ import type { LiveInviteRepository } from './invites.js';
 import type { LiveRecordings } from './recording.js';
 import { roomName, tokenSeconds } from './lifetime.js';
 import type { LiveRooms } from './rooms.js';
-import { RateLimiter } from '../observability/tunnel.js';
+import { PerPersonLimiter } from './handLimit.js';
 
 export interface LiveRouteDeps {
   classes: Pick<ClassRepository, 'scope'>;
@@ -67,8 +67,8 @@ export interface LiveRouteDeps {
   auth: AuthResolver;
   log: AuthorizeLog & { warn(obj: object, msg: string): void };
   now?: () => Date;
-  /** A person's limit for raising and lowering their hand; injected for tests. */
-  handLimiter?: () => RateLimiter;
+  /** The limit on raising and lowering one's hand; injected for tests. */
+  handLimiter?: PerPersonLimiter;
 }
 
 /**
@@ -76,8 +76,6 @@ export interface LiveRouteDeps {
  * update sent to everyone in the room; a lesson needs a few, a script could send thousands.
  */
 export const HAND_CHANGES_PER_MINUTE = 20;
-/** People whose hand limit is kept; beyond it, limits whose minute is over are dropped. */
-const HAND_LIMITERS_KEPT = 5000;
 
 const Uuid = z.string().uuid();
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -105,26 +103,9 @@ export { roomName };
 
 export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
   const app = new Hono<ActorEnv>();
-  const newHandLimiter =
-    deps.handLimiter ?? (() => new RateLimiter(HAND_CHANGES_PER_MINUTE, 60_000));
-  // In this process's memory, like the other limits: with several API instances a person
-  // gets the limit on each, which still bounds what reaches the room.
-  const handLimiters = new Map<string, { limiter: RateLimiter; usedAt: number }>();
-  const handLimiterFor = (userId: string): RateLimiter => {
-    const at = Date.now();
-    let entry = handLimiters.get(userId);
-    if (!entry) {
-      if (handLimiters.size >= HAND_LIMITERS_KEPT) {
-        for (const [id, kept] of handLimiters) {
-          if (at - kept.usedAt > 60_000) handLimiters.delete(id);
-        }
-      }
-      entry = { limiter: newHandLimiter(), usedAt: at };
-      handLimiters.set(userId, entry);
-    }
-    entry.usedAt = at;
-    return entry.limiter;
-  };
+  const handLimiter =
+    deps.handLimiter ??
+    new PerPersonLimiter({ limit: HAND_CHANGES_PER_MINUTE, windowMs: 60_000 });
   const now = deps.now ?? (() => new Date());
   const classScope = async (c: Context, actor: PolicyActor) => {
     const id = Uuid.safeParse(c.req.param('id'));
@@ -290,7 +271,7 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
       return c.json({ error: 'wrong_audience' }, 403);
     }
     // Counted last, right before the room is told: only calls that would reach it count.
-    if (!handLimiterFor(c.get('actor').id).tryTake()) {
+    if (!handLimiter.tryTake(c.get('actor').id)) {
       return c.json({ error: 'rate_limited' }, 429);
     }
     const changed = await deps.rooms.setHand(

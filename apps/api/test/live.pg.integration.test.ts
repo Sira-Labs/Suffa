@@ -24,6 +24,7 @@ import {
 } from '../src/live/lifetime.js';
 import type { LiveParticipant, LiveRooms } from '../src/live/rooms.js';
 import { loadMigrations, migrate } from '../src/migrate.js';
+import { RateLimiter } from '../src/observability/tunnel.js';
 
 const url = process.env.SUFFA_TEST_DATABASE_URL;
 const quiet = { info: () => undefined, warn: () => undefined, error: () => undefined };
@@ -68,6 +69,9 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
   let pool: pg.Pool;
   let rooms: FakeRooms;
   let now = new Date('2026-10-13T16:00:00.000Z');
+  /** Hand changes per person and minute in these tests, and the limiter's clock. */
+  const HAND_LIMIT = 4;
+  let handClock = 0;
   let classId: string;
   const users: Record<string, { id: string; role: Role }> = {};
   const apps: Record<'on' | 'off', ReturnType<typeof createApp>> = {} as never;
@@ -93,6 +97,7 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
         } satisfies AuthResolver,
         log: quiet,
         now: () => now,
+        handLimiter: () => new RateLimiter(HAND_LIMIT, 60_000, () => handClock),
       },
     });
 
@@ -325,6 +330,35 @@ describe.skipIf(!url)('Live lessons (Postgres)', () => {
     expect((await hand('waiting')).status).toBe(403);
     expect((await hand('outsider')).status).toBe(403);
     expect(rooms.hands.filter((h) => h.room === `live-${session.id}`)).toHaveLength(2);
+  });
+
+  it('limits how often one person changes their hand, each person by themselves', async () => {
+    const session = await plan();
+    await call('teacher', 'POST', `/${session.id}/start`);
+    const learner = users.learner!.id;
+    rooms.present.add(learner);
+    const hand = (who: string, up: boolean) =>
+      call(who, 'POST', `/${session.id}/hand`, { up });
+    const reached = () => rooms.hands.filter((h) => h.room === `live-${session.id}`);
+
+    // Calls that never reach the room do not use the limit up.
+    expect((await call('learner', 'POST', `/${session.id}/hand`, {})).status).toBe(400);
+    for (let i = 0; i < HAND_LIMIT; i += 1) {
+      expect((await hand('learner', i % 2 === 0)).status).toBe(204);
+    }
+    const refused = await hand('learner', true);
+    expect(refused.status).toBe(429);
+    expect(await refused.json()).toEqual({ error: 'rate_limited' });
+    expect(reached()).toHaveLength(HAND_LIMIT);
+
+    // Another learner in the room is not held back by it.
+    rooms.present.add(users.sister!.id);
+    expect((await hand('sister', true)).status).toBe(204);
+
+    // A minute later the first one may again.
+    handClock += 60_000;
+    expect((await hand('learner', true)).status).toBe(204);
+    expect(reached()).toHaveLength(HAND_LIMIT + 2);
   });
 
   it('shows sisters and brothers only their own sessions and those for everyone', async () => {

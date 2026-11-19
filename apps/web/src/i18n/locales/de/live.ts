@@ -132,6 +132,7 @@ export const live = {
     deviceError:
       'Mikrofon oder Kamera ließ sich nicht starten. Bitte die Freigabe im Browser prüfen.',
     handError: 'Das Melden hat gerade nicht geklappt. Bitte versuch es noch einmal.',
+    handTooOften: 'Das war zu oft hintereinander. Warte bitte einen Moment.',
     people_one: '{{count}} im Raum',
     people_other: '{{count}} im Raum',
     hands: 'Meldungen',

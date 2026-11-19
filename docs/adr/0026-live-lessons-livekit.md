@@ -135,6 +135,9 @@ Constraints that already hold in Suffa:
    - The floor allows a learner's microphone and never switches it on: the learner does
      that with the microphone button, so nobody is heard or recorded without their own
      doing (update 2026-11-19; before, the app switched it on with the floor).
+   - A person changes their hand at most 20 times a minute (429 `rate_limited` beyond):
+     each change is a call to the room service and an update to everyone in the room
+     (update 2026-11-20).
 
 ## Consequences
 

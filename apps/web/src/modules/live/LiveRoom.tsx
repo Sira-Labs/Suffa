@@ -690,7 +690,9 @@ function Room({
     try {
       const result = await api.hand(classId, session.id, up);
       // One plain sentence: the server's reasons are worded for the teacher's view of others.
-      if (!result.ok) setNotice(t('room.handError'));
+      if (!result.ok) {
+        setNotice(t(result.status === 429 ? 'room.handTooOften' : 'room.handError'));
+      }
     } finally {
       handPending.current = false;
       setHandBusy(false);

@@ -47,7 +47,7 @@ const session = (over: Partial<LiveSession> = {}): LiveSession => ({
 function server(
   initial: { enabled: boolean; recordingEnabled?: boolean; sessions: LiveSession[] },
   role: 'teacher' | 'learner' = 'teacher',
-  { handFails = false }: { handFails?: boolean } = {}
+  { handFails = false }: { handFails?: false | 'not_in_room' | 'rate_limited' } = {}
 ) {
   const state = {
     recordingEnabled: false,
@@ -85,7 +85,10 @@ function server(
         });
       }
       if (path === `${base}/${SESSION_ID}/hand` && handFails)
-        return Response.json({ error: 'not_in_room' }, { status: 404 });
+        return Response.json(
+          { error: handFails },
+          { status: handFails === 'rate_limited' ? 429 : 404 }
+        );
       if (path === `${base}/${SESSION_ID}/floor` || path === `${base}/${SESSION_ID}/hand`)
         return new Response(null, { status: 204 });
       if (path === `${base}/${SESSION_ID}/recording`) {
@@ -398,13 +401,24 @@ describe('the live room', () => {
   });
 
   it('says so in plain words when raising a hand does not work', async () => {
-    server({ enabled: true, sessions: [] }, 'learner', { handFails: true });
+    server({ enabled: true, sessions: [] }, 'learner', { handFails: 'not_in_room' });
     const me = person({ identity: 'a', name: 'Amina', local: true });
     await join(
       new FakeConnection({ people: [me, teacher], canSpeak: false, canCamera: false })
     );
     await userEvent.click(screen.getByRole('button', { name: /Melden/ }));
     expect(await screen.findByText(/Das Melden hat gerade nicht geklappt/)).toBeTruthy();
+  });
+
+  it('asks to wait when the hand was changed too often', async () => {
+    server({ enabled: true, sessions: [] }, 'learner', { handFails: 'rate_limited' });
+    const me = person({ identity: 'a', name: 'Amina', local: true });
+    await join(
+      new FakeConnection({ people: [me, teacher], canSpeak: false, canCamera: false })
+    );
+    await userEvent.click(screen.getByRole('button', { name: /Melden/ }));
+    expect(await screen.findByText(/zu oft hintereinander/)).toBeTruthy();
+    expect(screen.queryByText(/nicht geklappt/)).toBeNull();
   });
 
   it('lets a learner raise a hand, chat, and speak once given the floor', async () => {

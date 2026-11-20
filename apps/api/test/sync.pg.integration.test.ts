@@ -396,6 +396,22 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
     expect(bob.records.map((r) => r.reps)).toEqual([7]);
   });
 
+  /**
+   * Waits until the server's clock is past `watermark`. The server's time has milliseconds,
+   * and a pull returns what is strictly after the watermark: a write in the same millisecond
+   * is covered by the devices' overlap (ADR-0002), not by the repository, so a test of "after
+   * the watermark" must not write in that millisecond.
+   */
+  const afterWatermark = async (watermark: string) => {
+    for (;;) {
+      const { rows } = await pool.query<{ past: boolean }>(
+        `select date_trunc('milliseconds', clock_timestamp()) > $1::timestamptz as past`,
+        [watermark]
+      );
+      if (rows[0]!.past) return;
+    }
+  };
+
   it('paginates without skipping records that share a timestamp', async () => {
     const same = '2026-09-23T10:00:00.000Z';
     await repo.upsert(ALICE, 'srs_cards', [
@@ -425,6 +441,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
       limit: 10,
     });
     expect(first.watermark).not.toBeNull();
+    await afterWatermark(first.watermark!);
     await repo.upsert(ALICE, 'srs_cards', [
       { ...card('gone', '2026-09-23T12:00:00.000Z'), deleted: true },
     ]);
@@ -446,6 +463,7 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
       afterId: null,
       limit: 10,
     });
+    await afterWatermark(phone.watermark!);
     // Desktop uploads what it practised last week, for the first time.
     await repo.upsert(ALICE, 'practice_progress', [
       practice('d-last-week', '2026-09-17T09:00:00.000Z'),

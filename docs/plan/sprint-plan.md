@@ -546,10 +546,15 @@ it on to speak. Decisions:
 - The teacher sees no "microphone is off" mark beside a learner with the floor; whether one
   is needed is for the pilot to show.
 
-Still open from those reviews, each a small story:
+Hand limit (2026-11-20; step 5, the last of that list): a person changes their hand at most
+20 times a minute; beyond that the API answers 429 and the app asks to wait. Decisions:
 
-5. The hand route has no limit per learner: each call is a room-service call and an update to
-   everyone in the room. Throttle it per person.
+- The limit is kept in the API's memory, per person, like the limits on speech and sharing:
+  no table and no migration. With several API instances a person gets it on each, which
+  still bounds what reaches the room; a restart forgets it.
+- 20 a minute: far above what a lesson needs (the app sends one call per tap and waits for
+  the answer), far below what a script could send.
+- Counted after every other check, so only calls that would reach the room use it up.
 
 | #    | Story                                                                                                                                                                     | Pts | Acceptance                                                                               |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---------------------------------------------------------------------------------------- |

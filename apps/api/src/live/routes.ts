@@ -10,6 +10,7 @@
  *   POST   /classes/:id/live/:session/join      → { url, token, role }             (class:read)
  *   POST   /classes/:id/live/:session/floor     { identity, allowed } → 204        (class:manage)
  *   POST   /classes/:id/live/:session/hand      { up } → 204, a learner's own hand (class:read)
+ *                                                 429 `rate_limited` beyond HAND_CHANGES_PER_MINUTE
  *   POST   /classes/:id/live/:session/recording → 201, the session, now recorded (class:manage)
  *   DELETE /classes/:id/live/:session/recording → the session, recording stopped (class:manage)
  *   POST   /classes/:id/live/:session/invite    → 201 { url, expiresAt }          (class:manage)
@@ -52,6 +53,7 @@ import type { LiveInviteRepository } from './invites.js';
 import type { LiveRecordings } from './recording.js';
 import { roomName, tokenSeconds } from './lifetime.js';
 import type { LiveRooms } from './rooms.js';
+import { PerPersonLimiter } from './handLimit.js';
 
 export interface LiveRouteDeps {
   classes: Pick<ClassRepository, 'scope'>;
@@ -65,7 +67,15 @@ export interface LiveRouteDeps {
   auth: AuthResolver;
   log: AuthorizeLog & { warn(obj: object, msg: string): void };
   now?: () => Date;
+  /** The limit on raising and lowering one's hand; injected for tests. */
+  handLimiter?: PerPersonLimiter;
 }
+
+/**
+ * Hand changes one person may make per minute. Each is a call to the room service and an
+ * update sent to everyone in the room; a lesson needs a few, a script could send thousands.
+ */
+export const HAND_CHANGES_PER_MINUTE = 20;
 
 const Uuid = z.string().uuid();
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -93,6 +103,9 @@ export { roomName };
 
 export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
   const app = new Hono<ActorEnv>();
+  const handLimiter =
+    deps.handLimiter ??
+    new PerPersonLimiter({ limit: HAND_CHANGES_PER_MINUTE, windowMs: 60_000 });
   const now = deps.now ?? (() => new Date());
   const classScope = async (c: Context, actor: PolicyActor) => {
     const id = Uuid.safeParse(c.req.param('id'));
@@ -256,6 +269,10 @@ export function createLiveRoutes(deps: LiveRouteDeps): Hono<ActorEnv> {
     if (!allowed) return c.json({ error: 'not_in_room' }, 404);
     if (!allowed.includes(session.audience)) {
       return c.json({ error: 'wrong_audience' }, 403);
+    }
+    // Counted last, right before the room is told: only calls that would reach it count.
+    if (!handLimiter.tryTake(c.get('actor').id)) {
+      return c.json({ error: 'rate_limited' }, 429);
     }
     const changed = await deps.rooms.setHand(
       roomName(session.id),

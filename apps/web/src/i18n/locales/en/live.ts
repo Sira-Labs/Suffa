@@ -134,6 +134,7 @@ export const live: Messages<typeof de> = {
     deviceError:
       'The microphone or camera could not start. Please check the browser’s permission.',
     handError: 'Raising your hand did not work just now. Please try again.',
+    handTooOften: 'That was too often in a row. Please wait a moment.',
     people_one: '{{count}} in the room',
     people_other: '{{count}} in the room',
     hands: 'Raised hands',

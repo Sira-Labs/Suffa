@@ -36,8 +36,10 @@ export class PerPersonLimiter {
       };
       this.people.set(personId, entry);
     }
-    entry.usedAt = at;
-    return entry.limiter.tryTake();
+    const allowed = entry.limiter.tryTake();
+    // Read after the limiter read the clock: never earlier than the start of its window.
+    entry.usedAt = this.now();
+    return allowed;
   }
 
   /** How many people's limits are held right now. */

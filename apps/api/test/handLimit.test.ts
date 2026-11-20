@@ -41,6 +41,32 @@ describe('PerPersonLimiter', () => {
     expect(limiter.tryTake('new')).toBe(false);
   });
 
+  it('never forgets a window that is still running, whenever the clock is read', () => {
+    // The real clock moves on between two readings: here by 10 ms during the first call.
+    let now = start;
+    let step = 10;
+    const limiter = new PerPersonLimiter({
+      limit: 1,
+      windowMs: minute,
+      kept: 1,
+      now: () => {
+        const read = now;
+        now += step;
+        return read;
+      },
+    });
+    // The first reading is `start`; a's window starts at the second, 10 ms later.
+    expect(limiter.tryTake('a')).toBe(true);
+    step = 0;
+
+    // A whole window after the first reading, another person comes: a's window still has
+    // 10 ms to run and must not be forgotten.
+    now = start + minute;
+    expect(limiter.tryTake('b')).toBe(true);
+    now = start + minute + 5;
+    expect(limiter.tryTake('a')).toBe(false);
+  });
+
   it('keeps everyone while all of them are within their window', () => {
     const limiter = new PerPersonLimiter({
       limit: 1,

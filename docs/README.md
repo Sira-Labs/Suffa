@@ -48,3 +48,4 @@
 | [0028](adr/0028-live-camera-backgrounds.md)                       | Camera backgrounds in the live room                           | accepted                                   |
 | [0029](adr/0029-live-recording-egress.md)                         | Recording live lessons on our own server                      | accepted                                   |
 | [0030](adr/0030-autonomous-nightly-development.md)                | Nightly development without the owner in the loop             | accepted; merge guard proposed             |
+| [0031](adr/0031-meaning-drafts-in-further-languages.md)           | Meanings in further languages: drafted and reviewed apart     | accepted                                   |

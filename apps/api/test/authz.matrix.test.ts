@@ -349,6 +349,16 @@ function buildApp() {
       log: quiet,
       enabled: true,
     },
+    meanings: {
+      content: { get: async () => null },
+      drafts: {
+        list: async () => [],
+        saveDrafts: async () => 0,
+        review: async () => ({ ok: false, reason: 'not_found' }),
+      },
+      auth: resolver,
+      log: quiet,
+    },
     content: {
       repo: {
         seed: async () => ({ inserted: 0, refreshed: 0 }),

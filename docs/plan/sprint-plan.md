@@ -585,6 +585,29 @@ MediaPipe served from our own origin.
 | 18.3 | Live room: the teacher's camera next to the shared screen, and backgrounds for the camera (blur, Muslim motifs)              | 5   | Backgrounds are processed in the browser; nothing leaves it.                    |
 | 18.4 | Bayna Yadayk word list curated for Muslims in Europe; meanings in Turkish, Italian, Bosnian and Albanian (LLM draft, review) | 8   | Every new meaning is reviewed by a teacher in the CMS before it is published.   |
 
+18.4, step 1 of 5 (2026-11-21, ADR-0031): the API drafts the meanings of a unit's words in
+Turkish, Italian, Bosnian or Albanian and takes a reviewer's decision on each one. Nothing of
+it reaches learners. Decisions:
+
+- The drafts are kept in a table of their own, not in the unit's draft: publishing copies a
+  unit's whole draft into the bundle, and one check approves a whole revision.
+- Each meaning is approved, corrected or rejected by itself, and never by the person who
+  ordered the draft.
+- A meaning belongs to the German it was drafted from: when the German changes it cannot be
+  approved and is drafted again.
+- No drafts were made by the run itself: that calls the model on the live site and costs
+  money. An admin orders them per unit and language once the review page exists.
+
+Still open for 18.4, in this order:
+
+2. The review page in the CMS: Arabic, German and the draft side by side, per unit and
+   language, with what is waiting.
+3. Merging approved meanings into the units and the bundle, under a field that is not `tr`
+   (taken by the transliteration), and showing them in the app with the German fallback.
+4. The four languages in the meaning-language setting and in the answer rules, once step 3 has
+   published meanings.
+5. The curated word list for Muslims in Europe.
+
 ---
 
 ## Shipped outside the plan

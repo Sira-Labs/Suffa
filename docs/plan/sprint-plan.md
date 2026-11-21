@@ -598,10 +598,21 @@ it reaches learners. Decisions:
 - No drafts were made by the run itself: that calls the model on the live site and costs
   money. An admin orders them per unit and language once the review page exists.
 
+  18.4, step 2 of 5 (2026-11-22): "Inhalte prüfen" shows, per unit and language, the Arabic, the
+  German and the draft side by side. A teacher approves a draft as it is or with their own
+  wording, or rejects it; an admin orders the drafts there. Decisions:
+
+- On the unit's page under "Inhalte prüfen", not a page of its own: the reviewer has the
+  unit's words and dialogues above it, and teachers already know the way.
+- Nothing is loaded until a language is chosen: most visits are for the German check.
+- A draft whose German changed counts as missing and cannot be approved; the admin's button
+  names how many words it will draft.
+- After every decision, also a refused one, the list is loaded again: a refusal means the row
+  on screen was out of date.
+- Looked at in the web tests only, not in a browser against a server with real drafts.
+
 Still open for 18.4, in this order:
 
-2. The review page in the CMS: Arabic, German and the draft side by side, per unit and
-   language, with what is waiting.
 3. Merging approved meanings into the units and the bundle, under a field that is not `tr`
    (taken by the transliteration), and showing them in the app with the German fallback.
 4. The four languages in the meaning-language setting and in the answer rules, once step 3 has

@@ -45,6 +45,18 @@ export const errors: Messages<typeof de> = {
     ai_quota: "Today's AI quota is used up.",
     ai_failed: 'The AI returned no usable translation. Please try again.',
   },
+  meanings: {
+    second_factor_required: 'Please confirm the code from your authenticator app first.',
+    own_draft: 'You ordered this draft yourself. Someone else does the review.',
+    draft_changed:
+      'The draft has been made again meanwhile. The list is up to date now: please check the new text.',
+    source_changed:
+      'The German of this word has changed. The draft has to be made again first.',
+    nothing_to_translate: 'No draft is missing for this language in this unit.',
+    ai_unavailable: 'No AI model is set up for translations on this server.',
+    ai_quota: 'The AI allowance for today is used up.',
+    ai_failed: 'The AI did not return a usable translation. Please try again.',
+  },
   bookSync: {
     stale_revision:
       'Someone changed the timings in the meantime. Reload the page and tap along again.',

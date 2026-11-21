@@ -66,6 +66,8 @@ interface WordWithDraft {
     | (Pick<MeaningDraft, 'id' | 'text' | 'status' | 'model' | 'reviewedAt'> & {
         /** The German changed since the draft: it must be drafted again before approval. */
         stale: boolean;
+        /** The caller ordered this draft, so someone else decides on it. */
+        own: boolean;
       })
     | null;
 }
@@ -94,6 +96,7 @@ export function createMeaningRoutes(deps: MeaningRouteDeps): Hono<ActorEnv> {
       const drafts = new Map(
         (await deps.drafts.list(id, p.data.language)).map((d) => [d.wordId, d])
       );
+      const actor = c.get('actor').id;
       const words: WordWithDraft[] = unit.draft.vokabeln.map((word) => {
         const draft = drafts.get(word.id);
         return {
@@ -108,6 +111,7 @@ export function createMeaningRoutes(deps: MeaningRouteDeps): Hono<ActorEnv> {
                 model: draft.model,
                 reviewedAt: draft.reviewedAt,
                 stale: draft.sourceDe !== word.de,
+                own: draft.draftedBy === actor,
               }
             : null,
         };

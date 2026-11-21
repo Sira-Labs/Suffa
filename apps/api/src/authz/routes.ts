@@ -368,6 +368,22 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     path: '/api/v1/content/units/:course/:unit/translate',
     action: 'content:write',
   },
+  // Meanings in further languages, drafted by the LLM and reviewed one by one (story 18.4).
+  {
+    method: 'GET',
+    path: '/api/v1/content/units/:course/:unit/meanings/:language',
+    action: 'content:review',
+  },
+  {
+    method: 'POST',
+    path: '/api/v1/content/units/:course/:unit/meanings/:language/draft',
+    action: 'content:write',
+  },
+  {
+    method: 'POST',
+    path: '/api/v1/content/meaning-drafts/:id/review',
+    action: 'content:review',
+  },
   {
     method: 'PUT',
     path: '/api/v1/book-sync/:course/:book/:lesson',

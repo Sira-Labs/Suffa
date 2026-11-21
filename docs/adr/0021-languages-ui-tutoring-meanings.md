@@ -3,6 +3,8 @@
 - Status: accepted (tutoring language implemented in Sprint 10; UI language implemented in story 16.3, see `docs/i18n.md`; meaning language implemented in story 16.4)
 - Date: 2026-09-23
 - Related: ADR-0011 (al-Muʿallim), ADR-0014 (content CMS)
+- Amended by: ADR-0031 (meanings in further languages are drafted and reviewed apart from
+  the units)
 
 ## Context
 

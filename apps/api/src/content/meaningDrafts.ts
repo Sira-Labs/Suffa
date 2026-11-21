@@ -67,7 +67,9 @@ export interface MeaningDraftRepository {
   list(unitId: string, language: MeaningDraftLanguage): Promise<MeaningDraft[]>;
   /**
    * Stores drafts for words that have none, whose draft was rejected or whose German changed
-   * since. A draft waiting for review and an approved meaning of the same German stay.
+   * since. A draft waiting for review and an approved meaning of the same German stay. A
+   * draft made from German the word no longer has is dropped: the model may answer long
+   * after the unit was edited, and must not replace what was drafted and approved since.
    */
   saveDrafts(
     unitId: string,
@@ -141,8 +143,18 @@ export class PgMeaningDraftRepository implements MeaningDraftRepository {
   ): Promise<number> {
     if (drafts.length === 0) return 0;
     return inTransaction(this.pool, async (db) => {
+      // The unit stays locked while the drafts are stored, so "the German now" holds.
+      const words = await db.query<{ id: string; de: string }>(
+        `select word->>'id' as id, word->>'de' as de
+           from content_units, jsonb_array_elements(draft->'vokabeln') as word
+          where content_units.id = $1
+            for share of content_units`,
+        [unitId]
+      );
+      const german = new Map(words.rows.map((word) => [word.id, word.de]));
       let saved = 0;
       for (const draft of drafts) {
+        if (german.get(draft.wordId) !== draft.sourceDe) continue;
         const result = await db.query(
           `insert into content_meaning_drafts
              (unit_id, word_id, language, source_de, text, model, drafted_by)
@@ -369,5 +381,10 @@ export async function draftMeanings(
     model,
     actor
   );
-  return { ok: true, drafted, remaining: missing.length - drafts.size, model };
+  // Counted from what is stored now: the unit may have been edited while the model answered.
+  const now = await deps.content.get(unitId);
+  const remaining = now
+    ? wordsToDraft(now.draft.vokabeln, await deps.drafts.list(unitId, language)).length
+    : 0;
+  return { ok: true, drafted, remaining, model };
 }

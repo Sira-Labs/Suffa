@@ -40,7 +40,8 @@ That does not carry over to four more languages:
 4. **A meaning belongs to the German it was drafted from.** When the word's German changes,
    the row is stale: it cannot be approved (`409 source_changed`) and the next draft run
    replaces it, also when it was approved before. Rejected rows are drafted again; a draft
-   waiting for review and an approval of the current German are never overwritten.
+   waiting for review and an approval of the current German are never overwritten. A model
+   answer that arrives after the German changed is dropped.
 5. **Words first.** This step drafts the meanings of words. Dialogue lines and grammar
    examples follow once words have been through a real review.
 6. **The same model route as English** (`content.translate`, Mistral in the EU, changed in

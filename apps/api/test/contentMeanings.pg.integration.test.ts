@@ -4,7 +4,7 @@
  */
 import { join } from 'node:path';
 import pg from 'pg';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
 import type { AuthResolver } from '../src/auth/resolver.js';
 import {
@@ -33,8 +33,11 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
   let content: PgContentRepository;
   let app: ReturnType<typeof createApp>;
   /** What the fake model answers per word; changed by the tests. */
-  let translate = (item: { place: string; de: string }, language: string) =>
-    `${language} ${item.de}`;
+  type Translate = (item: { place: string; de: string }, language: string) => string;
+  const plain: Translate = (item, language) => `${language} ${item.de}`;
+  let translate = plain;
+  /** Runs while the model "thinks", before its answer is used. */
+  let whileTheModelAnswers: (() => Promise<void>) | null = null;
   const prompts: string[] = [];
 
   beforeAll(async () => {
@@ -75,6 +78,7 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
         const { items } = JSON.parse(input.messages[0]!.content) as {
           items: { place: string; de: string }[];
         };
+        await whileTheModelAnswers?.();
         return {
           text: JSON.stringify({
             translations: [
@@ -112,6 +116,16 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
     await pool?.end();
   });
 
+  // Every test starts without drafts and with the plain fake model; the unit itself keeps
+  // the edits of earlier tests, which no test relies on.
+  beforeEach(async () => {
+    translate = plain;
+    whileTheModelAnswers = null;
+    prompts.length = 0;
+    await pool.query('truncate content_meaning_drafts');
+    await pool.query(`delete from audit_log where action like 'content.meaning%'`);
+  });
+
   const call = (method: string, path: string, user?: string, body?: unknown) =>
     app.request(path, {
       method,
@@ -132,6 +146,30 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
   /** A decision on the draft as the list shows it now. */
   const decide = (draft: { id: string; text: string }, user: string, body: object) =>
     review(draft.id, user, { ...body, seen: draft.text });
+
+  /** Orders drafts in the language and returns the words with them. */
+  const drafted = async (language = 'tr'): Promise<WordRow[]> => {
+    const res = await call('POST', `${UNIT}/meanings/${language}/draft`, 'admin');
+    expect(res.status).toBe(200);
+    return words(language);
+  };
+  const unitNow = async () =>
+    (await (await call('GET', UNIT, 'teacher')).json()) as UnitDetail;
+  /** Saves the unit with its words changed, as an admin does in the CMS. */
+  const editWords = async (
+    change: (list: UnitDetail['draft']['vokabeln']) => UnitDetail['draft']['vokabeln']
+  ) => {
+    const unit = await unitNow();
+    const res = await call('PUT', `${UNIT}/draft`, 'admin', {
+      revision: unit.revision,
+      content: { ...unit.draft, vokabeln: change(unit.draft.vokabeln) },
+    });
+    expect(res.status).toBe(200);
+  };
+  const setGerman = (wordId: string, de: string) =>
+    editWords((list) =>
+      list.map((word) => (word.id === wordId ? { ...word, de } : word))
+    );
 
   it('drafts a unit’s words in the language asked for, for review only', async () => {
     const before = await words('tr');
@@ -176,7 +214,7 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
   });
 
   it('lets a teacher approve, correct or reject each one, never the person who ordered it', async () => {
-    const [first, second, third] = await words('tr');
+    const [first, second, third] = await drafted();
     // The admin ordered these drafts: four eyes.
     const own = await decide(first!.draft!, 'admin', { decision: 'approved' });
     expect(own.status).toBe(403);
@@ -241,32 +279,17 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
   });
 
   it('drafts again what was rejected or whose German changed, and keeps the rest', async () => {
-    const before = await words('tr');
-    const [approved, corrected, rejected, waiting] = before;
+    const [approved, corrected, rejected, waiting] = await drafted();
+    await decide(approved!.draft!, 'teacher', { decision: 'approved' });
+    await decide(corrected!.draft!, 'teacher', { decision: 'approved', text: 'merhaba' });
+    await decide(rejected!.draft!, 'teacher', { decision: 'rejected' });
 
-    // The German of an approved word changes in the CMS.
-    const unit = (await (await call('GET', UNIT, 'teacher')).json()) as UnitDetail;
-    const changed = {
-      ...unit.draft,
-      vokabeln: unit.draft.vokabeln.map((word) =>
-        word.id === approved!.wordId ? { ...word, de: `${word.de} (neu)` } : word
-      ),
-    };
-    const saved = await call('PUT', `${UNIT}/draft`, 'admin', {
-      revision: unit.revision,
-      content: changed,
+    // The German of an approved word changes in the CMS: its meaning is stale.
+    await setGerman(approved!.wordId, `${approved!.de} (neu)`);
+    expect((await words('tr'))[0]!.draft).toMatchObject({
+      status: 'approved',
+      stale: true,
     });
-    expect(saved.status).toBe(200);
-    const stale = (await words('tr'))[0]!;
-    expect(stale.draft).toMatchObject({ status: 'approved', stale: true });
-
-    // A draft of other German cannot be approved any more.
-    await pool.query(`update content_meaning_drafts set status = 'draft' where id = $1`, [
-      stale.draft!.id,
-    ]);
-    const late = await decide(stale.draft!, 'teacher', { decision: 'approved' });
-    expect(late.status).toBe(409);
-    expect(await late.json()).toEqual({ error: 'source_changed' });
 
     translate = (item) => `yeni ${item.de}`;
     const res = await call('POST', `${UNIT}/meanings/tr/draft`, 'admin');
@@ -281,32 +304,80 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
       text: `yeni ${rejected!.de}`,
       status: 'draft',
     });
-    // A page loaded before the new draft still shows the old text: a decision made there
-    // is refused, the reviewer never saw what is stored now.
-    const unseen = await decide(rejected!.draft!, 'teacher', { decision: 'approved' });
+    // The corrected approval and the draft still waiting were not asked for again.
+    expect(after[1]!.draft).toMatchObject({
+      id: corrected!.draft!.id,
+      text: 'merhaba',
+      status: 'approved',
+    });
+    expect(after[3]!.draft).toEqual(waiting!.draft);
+  });
+
+  it('takes a decision only for the text the reviewer saw and the German it was made from', async () => {
+    const [redrafted, edited, removed] = await drafted();
+
+    // Drafted again after a rejection: a page loaded before still shows the old text.
+    await decide(redrafted!.draft!, 'teacher', { decision: 'rejected' });
+    translate = (item) => `yeni ${item.de}`;
+    await call('POST', `${UNIT}/meanings/tr/draft`, 'admin');
+    const unseen = await decide(redrafted!.draft!, 'teacher', { decision: 'approved' });
     expect(unseen.status).toBe(409);
     expect(await unseen.json()).toEqual({ error: 'draft_changed' });
-    expect((await words('tr'))[2]!.draft!.status).toBe('draft');
+    expect((await words('tr'))[0]!.draft!.status).toBe('draft');
 
-    // The corrected approval and the draft still waiting were not asked for again.
-    expect(after[1]!.draft).toMatchObject({ text: 'merhaba', status: 'approved' });
-    expect(after[3]!.draft).toEqual(waiting!.draft);
-    expect(corrected!.draft!.id).toBe(after[1]!.draft!.id);
-
-    // A word taken out of the unit has no German to be a meaning of.
-    const now = (await (await call('GET', UNIT, 'teacher')).json()) as UnitDetail;
-    const without = {
-      ...now.draft,
-      vokabeln: now.draft.vokabeln.filter((word) => word.id !== waiting!.wordId),
-    };
-    const removed = await call('PUT', `${UNIT}/draft`, 'admin', {
-      revision: now.revision,
-      content: without,
-    });
-    expect(removed.status).toBe(200);
-    const gone = await decide(waiting!.draft!, 'teacher', { decision: 'approved' });
+    // The German changed since the draft, or the word left the unit.
+    await setGerman(edited!.wordId, `${edited!.de} (anders)`);
+    const late = await decide(edited!.draft!, 'teacher', { decision: 'approved' });
+    expect(late.status).toBe(409);
+    expect(await late.json()).toEqual({ error: 'source_changed' });
+    await editWords((list) => list.filter((word) => word.id !== removed!.wordId));
+    const gone = await decide(removed!.draft!, 'teacher', { decision: 'approved' });
     expect(gone.status).toBe(409);
     expect(await gone.json()).toEqual({ error: 'source_changed' });
+    // Rejecting is always possible.
+    expect(
+      (await decide(edited!.draft!, 'teacher', { decision: 'rejected' })).status
+    ).toBe(200);
+  });
+
+  it('drops a model answer made from German the word no longer has', async () => {
+    const [slow] = await drafted();
+    await decide(slow!.draft!, 'teacher', { decision: 'rejected' });
+
+    // The first request is slow. Meanwhile the German changes, a second request drafts the
+    // new German and the teacher approves it.
+    const newGerman = `${slow!.de} (spät)`;
+    whileTheModelAnswers = async () => {
+      whileTheModelAnswers = null;
+      await setGerman(slow!.wordId, newGerman);
+      translate = (item) => `ikinci ${item.de}`;
+      const second = await call('POST', `${UNIT}/meanings/tr/draft`, 'admin');
+      expect(await second.json()).toEqual({ drafted: 1, remaining: 0 });
+      const fresh = (await words('tr'))[0]!.draft!;
+      expect((await decide(fresh, 'teacher', { decision: 'approved' })).status).toBe(200);
+      translate = (item) => `eski ${item.de}`;
+    };
+    const first = await call('POST', `${UNIT}/meanings/tr/draft`, 'admin');
+    // The old answer is for German that is gone: nothing is stored, the approval stays.
+    expect(await first.json()).toEqual({ drafted: 0, remaining: 0 });
+    expect((await words('tr'))[0]!.draft).toMatchObject({
+      text: `ikinci ${newGerman}`,
+      status: 'approved',
+      stale: false,
+    });
+  });
+
+  it('counts what is still missing after the unit changed under a draft run', async () => {
+    const all = await words('sq');
+    const target = all[0]!;
+    whileTheModelAnswers = async () => {
+      whileTheModelAnswers = null;
+      await setGerman(target.wordId, `${target.de} (inzwischen)`);
+    };
+    const res = await call('POST', `${UNIT}/meanings/sq/draft`, 'admin');
+    // The answer for the edited word is dropped, so that word is still to be drafted.
+    expect(await res.json()).toEqual({ drafted: all.length - 1, remaining: 1 });
+    expect((await words('sq'))[0]!.draft).toBeNull();
   });
 
   it('ignores answers that are empty or too long, and says so when nothing is left', async () => {
@@ -318,28 +389,28 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
   });
 
   it('keeps every draft away from learners: no bundle and no unit carries one', async () => {
-    const unit = (await (await call('GET', UNIT, 'teacher')).json()) as UnitDetail;
+    const [first, second] = await drafted();
+    await decide(first!.draft!, 'teacher', { decision: 'approved', text: 'merhaba' });
+    await decide(second!.draft!, 'teacher', { decision: 'approved' });
+
+    const unit = await unitNow();
     expect(JSON.stringify(unit.draft)).not.toContain('merhaba');
 
     // Publish the unit with approved Turkish meanings in the table: the bundle has none.
-    const submitted = await call('POST', `${UNIT}/submit`, 'admin', {
-      revision: unit.revision,
-    });
-    expect(submitted.status).toBe(200);
-    const checked = await call('POST', `${UNIT}/check`, 'teacher', {
-      revision: unit.revision,
-    });
-    expect(checked.status).toBe(200);
-    const published = await call('POST', `${UNIT}/publish`, 'admin', {
-      revision: unit.revision,
-    });
-    expect(published.status).toBe(200);
+    for (const [step, who] of [
+      ['submit', 'admin'],
+      ['check', 'teacher'],
+      ['publish', 'admin'],
+    ] as const) {
+      const res = await call('POST', `${UNIT}/${step}`, who, { revision: unit.revision });
+      expect(res.status).toBe(200);
+    }
     const manifest = (await (await call('GET', '/api/v1/content/manifest')).json()) as {
       url: string;
     };
     const bundle = await (await call('GET', manifest.url)).text();
+    expect(bundle).toContain(second!.de);
     expect(bundle).not.toContain('merhaba');
-    expect(bundle).not.toContain('yeni ');
     expect(bundle).not.toContain('Turkish ');
   });
 });

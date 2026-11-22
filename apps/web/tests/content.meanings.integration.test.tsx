@@ -264,6 +264,27 @@ describe('MeaningReview', () => {
     expect(approve).toBeEnabled();
   });
 
+  it('takes no new wording while a decision is on its way', async () => {
+    let release: (() => void) | undefined;
+    const words = [word('v-ism', 'Name', {})];
+    const api = new MeaningsApi(async (_input, init) => {
+      if (init?.method !== 'POST') return Response.json({ words });
+      await new Promise<void>((resolve) => (release = resolve));
+      return Response.json({
+        draft: { id: 'd-v-ism', text: 'isim', status: 'approved' },
+      });
+    });
+    await open(api);
+    const field = within(await rowOf('Name')).getByLabelText('Bedeutung von „Name“');
+    await userEvent.clear(field);
+    await userEvent.type(field, 'isim');
+    await userEvent.click(screen.getByRole('button', { name: '„Name“ freigeben' }));
+    expect(field).toBeDisabled();
+    await act(async () => release!());
+    await screen.findByText('Freigegeben.');
+    expect(screen.getByLabelText('Bedeutung von „Name“')).toBeEnabled();
+  });
+
   it('never shows one language’s drafts under another, however the answers arrive', async () => {
     // Turkish answers late, after Italian was chosen and answered.
     let releaseTurkish: (() => void) | undefined;

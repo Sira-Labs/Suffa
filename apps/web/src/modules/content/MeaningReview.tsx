@@ -207,7 +207,8 @@ function DraftRow({
           aria-label={label}
           value={text}
           maxLength={MAX_MEANING_LENGTH}
-          disabled={draft.stale || draft.own}
+          // The answer brings a new row: wording typed while it is on its way would be lost.
+          disabled={busy || draft.stale || draft.own}
           onChange={(e) => setText(e.target.value)}
         />
       </td>

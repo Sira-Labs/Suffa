@@ -113,7 +113,11 @@ describe('MeaningReview', () => {
       word('v-bab', 'Tür', null),
     ]);
     render(<MeaningReview unitId={UNIT} canDraft={false} api={api} />);
-    expect(screen.getByText(/Lernende sehen davon nichts/)).toBeTruthy();
+    expect(
+      screen.getByText(
+        /Was du freigibst, bekommen Lernende mit dem nächsten Inhaltsstand/
+      )
+    ).toBeTruthy();
     expect(sent).toEqual([]);
 
     await userEvent.selectOptions(screen.getByLabelText('Sprache'), 'Albanisch');
@@ -124,9 +128,10 @@ describe('MeaningReview', () => {
     expect(
       screen.getByText('Zu prüfen: 1 · freigegeben: 1 · abgelehnt: 0 · ohne Entwurf: 1')
     ).toBeTruthy();
-    // A word without a draft has no row, and a teacher cannot order drafts.
+    // A word without a draft has no row, and a teacher can neither order nor publish.
     expect(screen.queryByRole('rowheader', { name: 'Tür' })).toBeNull();
     expect(screen.queryByRole('button', { name: /erstellen \(KI\)/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /veröffentlichen/ })).toBeNull();
   });
 
   it('approves a draft as it is, with the text the teacher saw', async () => {
@@ -211,6 +216,33 @@ describe('MeaningReview', () => {
     );
     // Nothing left to order.
     expect(screen.queryByRole('button', { name: /erstellen \(KI\)/ })).toBeNull();
+  });
+
+  it('lets an admin publish what is approved, and says when nothing was new', async () => {
+    const versions: (number | null)[] = [7, null];
+    const sent: string[] = [];
+    const api = new MeaningsApi(async (input, init) => {
+      sent.push(`${init?.method ?? 'GET'} ${String(input)}`);
+      if (init?.method === 'POST') return Response.json({ version: versions.shift() });
+      return Response.json({ words: [word('v-new', 'neu', { status: 'approved' })] });
+    });
+    await open(api, true);
+    await rowOf('neu');
+    const publish = screen.getByRole('button', {
+      name: 'Freigegebene Bedeutungen veröffentlichen',
+    });
+    await userEvent.click(publish);
+    expect(await screen.findByText(/^Veröffentlicht \(Inhaltsstand 7\)/)).toBeTruthy();
+    expect(sent[1]).toBe('POST /api/v1/content/meanings/publish');
+    await userEvent.click(publish);
+    expect(await screen.findByText(/^Nichts Neues/)).toBeTruthy();
+  });
+
+  it('offers nothing to publish while no meaning is approved', async () => {
+    const { api } = fakeApi([word('v-ism', 'Name', {}), word('v-bab', 'Tür', null)]);
+    await open(api, true);
+    await rowOf('Name');
+    expect(screen.queryByRole('button', { name: /veröffentlichen/ })).toBeNull();
   });
 
   it('shows the server’s reason when a draft run fails', async () => {

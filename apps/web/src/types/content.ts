@@ -23,6 +23,12 @@ export interface Quelle {
   dialog?: number;
 }
 
+/**
+ * Meanings in further languages, each approved by a reviewer in the CMS (story 18.4,
+ * ADR-0032). Not flat like `en`: `tr` is the transliteration.
+ */
+export type WeitereBedeutungen = Partial<Record<'tr' | 'it' | 'bs' | 'sq', string>>;
+
 export interface Vokabel {
   /** Stable domain ID, derived from root + lemma (for SRS references). */
   id: string;
@@ -31,6 +37,8 @@ export interface Vokabel {
   de: string;
   /** English gloss, once reviewed in the CMS and published (story 16.4). */
   en?: string;
+  /** Turkish, Italian, Bosnian and Albanian glosses; present only once published. */
+  bedeutungen?: WeitereBedeutungen;
   /** Root, e.g. "ك-ت-ب"; empty for pronouns and particles (no root cards for them). */
   wurzel: string;
   wazn?: string;

@@ -34,6 +34,30 @@ describe('meaning language (story 16.4)', () => {
     });
   });
 
+  it('finds the further languages of a word, and German where one is missing (18.4)', () => {
+    const name = { de: 'Name', en: 'name', bedeutungen: { tr: 'isim', sq: ' ' } };
+    expect(meaningOf(name, 'tr')).toEqual({ text: 'isim', lang: 'tr', missing: false });
+    expect(meaningOf(name, 'sq')).toEqual({ text: 'Name', lang: 'de', missing: true });
+    expect(meaningOf(name, 'it')).toEqual({ text: 'Name', lang: 'de', missing: true });
+    expect(meaningOf({ de: 'Name', bedeutungen: null }, 'bs').missing).toBe(true);
+    // The transliteration is no Turkish gloss.
+    expect(meaningOf({ ...word, bedeutungen: undefined }, 'tr')).toEqual({
+      text: word.de,
+      lang: 'de',
+      missing: true,
+    });
+    expect(
+      consistentMeanings([name, { de: 'Buch', bedeutungen: { tr: 'kitap' } }], 'tr')
+    ).toEqual({ texts: ['isim', 'kitap'], lang: 'tr', missing: false });
+    expect(consistentMeanings([name, { de: 'Buch' }], 'tr')).toEqual({
+      texts: ['Name', 'Buch'],
+      lang: 'de',
+      missing: true,
+    });
+    // No learner can choose them yet.
+    expect(resolveMeaningLanguage('tr', 'de')).toBe('de');
+  });
+
   it('follows the interface language unless the learner chose one', () => {
     expect(resolveMeaningLanguage(null, 'en')).toBe('en');
     expect(resolveMeaningLanguage(undefined, 'de')).toBe('de');

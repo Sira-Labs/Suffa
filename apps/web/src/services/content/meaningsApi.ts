@@ -1,7 +1,8 @@
 /**
  * Meanings in further languages (story 18.4, ADR-0031): an admin has the LLM draft the
  * meanings of a unit's words in Turkish, Italian, Bosnian or Albanian; a teacher approves,
- * corrects or rejects each one. Nothing of it is part of what learners get.
+ * corrects or rejects each one. Learners get approved meanings with the next content
+ * bundle, which an admin can have made at once (ADR-0032).
  */
 import { apiRequest, type ApiResult, type Fetch } from '@/services/api/request';
 
@@ -69,6 +70,19 @@ export class MeaningsApi {
       this.fetchImpl,
       `/api/v1/content/meaning-drafts/${encodeURIComponent(draftId)}/review`,
       { method: 'POST', body: JSON.stringify(decision) },
+      'meanings'
+    );
+  }
+
+  /**
+   * Gives learners every approved meaning now, with a new content bundle (admins).
+   * `version` is null when the newest bundle has them all already.
+   */
+  publish(): Promise<ApiResult<{ version: number | null }>> {
+    return apiRequest(
+      this.fetchImpl,
+      '/api/v1/content/meanings/publish',
+      { method: 'POST' },
       'meanings'
     );
   }

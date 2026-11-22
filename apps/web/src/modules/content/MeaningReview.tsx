@@ -2,7 +2,8 @@
  * Meanings in further languages (story 18.4, ADR-0031), inside "Inhalte prüfen": per unit and
  * language, the Arabic, the German and the LLM's draft side by side. A teacher approves a
  * draft as it is or with their own wording, or rejects it; an admin orders the drafts.
- * Nothing shown here is part of what learners get.
+ * What is approved goes to learners with the next content bundle (ADR-0032), which an admin
+ * can have made here.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +24,7 @@ export function MeaningReview({
   api,
 }: {
   unitId: string;
-  /** Admins order drafts; teachers only review them. */
+  /** Admins order drafts and publish approved meanings; teachers only review. */
   canDraft: boolean;
   api?: MeaningsApi;
 }) {
@@ -90,6 +91,20 @@ export function MeaningReview({
         : { text: result.message };
     });
 
+  const publish = (chosen: MeaningDraftLanguage) =>
+    change(chosen, async () => {
+      const result = await client.publish();
+      if (!result.ok) return { text: result.message };
+      const { version } = result.value;
+      return {
+        text:
+          version === null
+            ? t('meanings.nothingToPublish')
+            : t('meanings.published', { version }),
+        good: true,
+      };
+    });
+
   const decide = async (draft: WordDraft, decision: MeaningDecision) => {
     if (!language) return;
     await change(language, async () => {
@@ -140,6 +155,17 @@ export function MeaningReview({
           onClick={() => void orderDrafts(language)}
         >
           {t('meanings.order', { count: counts.missing + counts.rejected })}
+        </button>
+      )}
+      {language && canDraft && counts && counts.approved > 0 && (
+        <button
+          type="button"
+          className="btn"
+          style={{ alignSelf: 'flex-start' }}
+          disabled={busy}
+          onClick={() => void publish(language)}
+        >
+          {t('meanings.publish')}
         </button>
       )}
       {language && words && words.some((word) => word.draft) && (

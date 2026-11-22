@@ -1,6 +1,7 @@
 /**
  * Content bundles (story 16.2, ADR-0014): all published units frozen into one immutable JSON
- * document with a version and a sha256 checksum. Clients keep the newest one offline.
+ * document with a version and a sha256 checksum. Clients keep the newest one offline. Words
+ * carry the meanings in further languages a reviewer approved (ADR-0032).
  *
  * Removed items are tombstoned: an item that was in the previous bundle and is gone now stays
  * in `tombstones` with its last published content, so SRS cards that point at it still show
@@ -8,6 +9,13 @@
  */
 import { createHash } from 'node:crypto';
 import type pg from 'pg';
+import {
+  approvedByWord,
+  approvedMeanings,
+  withApprovedMeanings,
+  type BundleUnit,
+  type BundleWord,
+} from './bundleMeanings.js';
 import type { UnitFile } from './schema.js';
 
 export const BUNDLE_FORMAT = 1;
@@ -29,7 +37,7 @@ export interface ContentBundle {
   version: number;
   createdAt: string;
   course: string;
-  units: UnitFile[];
+  units: BundleUnit[];
   tombstones: Tombstone[];
 }
 
@@ -41,7 +49,7 @@ export interface BundleInfo {
 }
 
 /** Items with an ID, by kind (quiz questions travel inside their grammar point). */
-function itemsOf(units: readonly UnitFile[]): Tombstone[] {
+function itemsOf(units: readonly BundleUnit[]): Tombstone[] {
   return units.flatMap((u) => [
     ...u.vokabeln.map((item) => ({
       id: item.id,
@@ -66,7 +74,7 @@ function itemsOf(units: readonly UnitFile[]): Tombstone[] {
 
 /** The tombstones of the next bundle: what was published before and is gone now. */
 export function nextTombstones(
-  units: readonly UnitFile[],
+  units: readonly BundleUnit[],
   previous: Pick<ContentBundle, 'units' | 'tombstones'> | null
 ): Tombstone[] {
   if (!previous) return [];
@@ -101,12 +109,23 @@ export async function createBundleIfChanged(
       order by unit`,
     [BUNDLE_COURSE]
   );
-  const units = unitRows.map((r) => r.published);
+  // Approved meanings in further languages travel with the words (ADR-0032).
+  const approved = await approvedMeanings(client, BUNDLE_COURSE);
+  const units = withApprovedMeanings(
+    unitRows.map((r) => r.published),
+    approved
+  );
   const { rows: latest } = await client.query<{ version: number; body: string }>(
     `select version, body from content_bundles order by version desc limit 1`
   );
   const previous = latest[0] ? (JSON.parse(latest[0].body) as ContentBundle) : null;
-  const tombstones = nextTombstones(units, previous);
+  // A removed word keeps its last content, but only the meanings that are still approved.
+  const meaningsOf = approvedByWord(approved);
+  const tombstones = nextTombstones(units, previous).map((stone) =>
+    stone.kind === 'vocab'
+      ? { ...stone, item: meaningsOf(stone.unit, stone.item as BundleWord) }
+      : stone
+  );
   if (
     previous &&
     sameJson(previous.units, units) &&

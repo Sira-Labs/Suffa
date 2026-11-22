@@ -106,8 +106,11 @@ export interface ContentRepository {
   ): Promise<TransitionResult>;
   /** Publishes the revision under review and freezes a new content bundle (story 16.2). */
   publish(id: string, actor: ContentActor, revision: number): Promise<TransitionResult>;
-  /** Creates a bundle when the published units differ from the newest one (start-up). */
-  ensureBundle(): Promise<number | null>;
+  /**
+   * Creates a bundle when what learners should get differs from the newest one: at start-up,
+   * and when an admin publishes approved meanings (then with the actor).
+   */
+  ensureBundle(actor?: ContentActor): Promise<number | null>;
   latestBundle(): Promise<BundleInfo | null>;
   /** The bundle exactly as stored, or null. */
   bundle(version: number): Promise<{ body: string; checksum: string } | null>;
@@ -383,16 +386,17 @@ export class PgContentRepository implements ContentRepository {
     });
   }
 
-  ensureBundle(): Promise<number | null> {
+  ensureBundle(actor?: ContentActor): Promise<number | null> {
     return inTransaction(this.pool, async (client) => {
-      const version = await createBundleIfChanged(client, null);
+      const version = await createBundleIfChanged(client, actor?.id ?? null);
       if (version !== null) {
         await writeAudit(client, {
-          actorId: null,
+          actorId: actor?.id ?? null,
           action: 'content.bundle_created',
           targetType: 'content_bundle',
           targetId: String(version),
           details: { version },
+          ipAddress: actor?.ipAddress ?? null,
         });
       }
       return version;

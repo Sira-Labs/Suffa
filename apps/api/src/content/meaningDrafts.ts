@@ -1,8 +1,9 @@
 /**
  * Meanings in further languages (story 18.4, ADR-0031). The LLM drafts the meaning of each
  * word of a unit in Turkish, Italian, Bosnian or Albanian; a teacher approves, corrects or
- * rejects every single one. The drafts are kept apart from the unit's draft and nothing here
- * feeds a content bundle: no learner sees a meaning from this table.
+ * rejects every single one. The drafts are kept apart from the unit's draft. Only approved
+ * meanings leave this table, joined to their words when a content bundle is frozen
+ * (bundleMeanings.ts, ADR-0032).
  */
 import { LlmError, RouteUnavailableError } from '@suffa/llm';
 import type pg from 'pg';
@@ -10,6 +11,7 @@ import { z } from 'zod';
 import { AiQuotaError, type AiGateway } from '../ai/gateway.js';
 import { writeAudit } from '../audit/log.js';
 import { inTransaction } from '../db/transaction.js';
+import { createBundleIfChanged } from './bundles.js';
 import type { ContentActor, ContentRepository } from './repository.js';
 import { TRANSLATE_TASK } from './translate.js';
 
@@ -82,7 +84,8 @@ export interface MeaningDraftRepository {
    * A reviewer's decision on one draft. Nobody decides on a draft they ordered themselves
    * (`own_draft`), nor on text other than the one they saw (`draft_changed`: it was drafted
    * again meanwhile). A meaning drafted from German the word no longer has cannot be
-   * approved (`source_changed`).
+   * approved (`source_changed`). Rejecting a meaning that was approved before freezes a
+   * content bundle without it at once (ADR-0032).
    */
   review(
     id: string,
@@ -236,6 +239,20 @@ export class PgMeaningDraftRepository implements MeaningDraftRepository {
         },
         ipAddress: actor.ipAddress,
       });
+      if (row.status === 'approved' && decision.decision === 'rejected') {
+        // Learners may have it already: taking it back does not wait for an admin.
+        const version = await createBundleIfChanged(db, actor.id);
+        if (version !== null) {
+          await writeAudit(db, {
+            actorId: actor.id,
+            action: 'content.bundle_created',
+            targetType: 'content_bundle',
+            targetId: String(version),
+            details: { version },
+            ipAddress: actor.ipAddress,
+          });
+        }
+      }
       return { ok: true, draft: toDraft(updated.rows[0]!) };
     });
   }

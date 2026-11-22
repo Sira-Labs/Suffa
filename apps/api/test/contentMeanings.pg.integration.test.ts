@@ -1,6 +1,6 @@
 /**
- * Meanings in further languages (story 18.4, ADR-0031): drafted by the LLM, reviewed one by
- * one, and never part of what learners get.
+ * Meanings in further languages (story 18.4, ADR-0031, ADR-0032): drafted by the LLM,
+ * reviewed one by one, and part of what learners get only once approved.
  */
 import { join } from 'node:path';
 import pg from 'pg';
@@ -130,6 +130,7 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
     prompts.length = 0;
     await pool.query('truncate content_meaning_drafts');
     await pool.query(`delete from audit_log where action like 'content.meaning%'`);
+    await pool.query(`delete from audit_log where action = 'content.bundle_created'`);
   });
 
   const call = (method: string, path: string, user?: string, body?: unknown) =>
@@ -401,29 +402,167 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
     expect((await words('it')).every((word) => word.draft === null)).toBe(true);
   });
 
-  it('keeps every draft away from learners: no bundle and no unit carries one', async () => {
-    const [first, second] = await drafted();
-    await decide(first!.draft!, 'teacher', { decision: 'approved', text: 'merhaba' });
-    await decide(second!.draft!, 'teacher', { decision: 'approved' });
-
+  /** The newest bundle as learners download it. */
+  const bundleNow = async () => {
+    const manifest = (await (await call('GET', '/api/v1/content/manifest')).json()) as {
+      url: string;
+      version: number;
+    };
+    const text = await (await call('GET', manifest.url)).text();
+    const bundle = JSON.parse(text) as {
+      units: {
+        einheit: number;
+        vokabeln: { id: string; de: string; bedeutungen?: Record<string, string> }[];
+      }[];
+    };
+    const word = (id: string) =>
+      bundle.units.find((u) => u.einheit === 1)!.vokabeln.find((w) => w.id === id)!;
+    return { version: manifest.version, text, word };
+  };
+  const publishMeanings = async (user = 'admin') => {
+    const res = await call('POST', '/api/v1/content/meanings/publish', user);
+    return {
+      status: res.status,
+      body: (await res.json()) as { version?: number | null },
+    };
+  };
+  /** Publishes the unit's draft, if it is not what learners have already. */
+  const publishUnit = async () => {
     const unit = await unitNow();
-    expect(JSON.stringify(unit.draft)).not.toContain('merhaba');
-
-    // Publish the unit with approved Turkish meanings in the table: the bundle has none.
-    for (const [step, who] of [
+    const steps = [
       ['submit', 'admin'],
       ['check', 'teacher'],
       ['publish', 'admin'],
-    ] as const) {
+    ] as const;
+    const from = { draft: 0, review: 1, published: steps.length }[unit.state];
+    for (const [step, who] of steps.slice(from)) {
       const res = await call('POST', `${UNIT}/${step}`, who, { revision: unit.revision });
       expect(res.status).toBe(200);
     }
-    const manifest = (await (await call('GET', '/api/v1/content/manifest')).json()) as {
-      url: string;
-    };
-    const bundle = await (await call('GET', manifest.url)).text();
-    expect(bundle).toContain(second!.de);
-    expect(bundle).not.toContain('merhaba');
-    expect(bundle).not.toContain('Turkish ');
+  };
+
+  it('gives learners approved meanings only, under a field that is not the transliteration', async () => {
+    // Learners have the German the drafts are made from.
+    await publishUnit();
+    const [first, second, third, fourth] = await drafted();
+    await decide(first!.draft!, 'teacher', { decision: 'approved', text: 'merhaba' });
+    await decide(second!.draft!, 'teacher', { decision: 'approved' });
+    await decide(third!.draft!, 'teacher', { decision: 'rejected' });
+    const [italian] = await drafted('it');
+    await decide(italian!.draft!, 'teacher', { decision: 'approved', text: 'ciao' });
+
+    // Approving alone publishes nothing, and only an admin publishes.
+    const before = await bundleNow();
+    expect(before.text).not.toContain('merhaba');
+    expect((await publishMeanings('teacher')).status).toBe(403);
+    expect((await publishMeanings('student')).status).toBe(403);
+
+    const published = await publishMeanings();
+    expect(published).toEqual({ status: 200, body: { version: before.version + 1 } });
+    const after = await bundleNow();
+    expect(after.version).toBe(before.version + 1);
+    expect(after.word(first!.wordId).bedeutungen).toEqual({ it: 'ciao', tr: 'merhaba' });
+    expect(after.word(second!.wordId).bedeutungen).toEqual({ tr: second!.draft!.text });
+    // Rejected and still waiting: nothing, and the word is otherwise as published.
+    expect(after.word(third!.wordId)).toEqual(before.word(third!.wordId));
+    expect(after.word(fourth!.wordId)).toEqual(before.word(fourth!.wordId));
+    expect(after.text).not.toContain(third!.draft!.text);
+    expect(after.text).not.toContain(fourth!.draft!.text);
+    // The unit in the CMS stays as the editors wrote it.
+    expect(JSON.stringify(await unitNow())).not.toContain('merhaba');
+
+    const audit = await pool.query<{ actor_id: string; details: { version: number } }>(
+      `select actor_id, details from audit_log where action = 'content.bundle_created'`
+    );
+    expect(audit.rows).toEqual([
+      { actor_id: ADMIN, details: { version: after.version } },
+    ]);
+
+    // Nothing new: no further bundle.
+    expect((await publishMeanings()).body).toEqual({ version: null });
+    expect((await bundleNow()).version).toBe(after.version);
+  });
+
+  it('takes a meaning back from learners when it is rejected after all', async () => {
+    // Learners have the German the drafts are made from.
+    await publishUnit();
+    const [first] = await drafted();
+    await decide(first!.draft!, 'teacher', { decision: 'approved' });
+    await publishMeanings();
+    expect((await bundleNow()).word(first!.wordId).bedeutungen).toEqual({
+      tr: first!.draft!.text,
+    });
+    // No admin needed, and no wait: the rejection itself takes it back.
+    const before = (await bundleNow()).version;
+    await decide(first!.draft!, 'teacher', { decision: 'rejected' });
+    const after = await bundleNow();
+    expect(after.version).toBe(before + 1);
+    expect(after.word(first!.wordId).bedeutungen).toBeUndefined();
+    const audit = await pool.query<{ actor_id: string }>(
+      `select actor_id from audit_log where action = 'content.bundle_created'
+        order by created_at desc limit 1`
+    );
+    expect(audit.rows[0]!.actor_id).toBe(TEACHER);
+
+    // Rejecting what never was approved freezes nothing.
+    const [, second] = await words('tr');
+    await decide(second!.draft!, 'teacher', { decision: 'rejected' });
+    expect((await bundleNow()).version).toBe(after.version);
+  });
+
+  it('keeps a removed word’s card free of a meaning rejected afterwards', async () => {
+    await publishUnit();
+    const [first] = await drafted();
+    await decide(first!.draft!, 'teacher', { decision: 'approved', text: 'merhaba' });
+    await publishMeanings();
+    const whole = (await unitNow()).draft.vokabeln;
+    try {
+      // The word leaves the unit: its tombstone keeps the approved meaning …
+      await editWords((list) => list.filter((word) => word.id !== first!.wordId));
+      await publishUnit();
+      const stone = async () =>
+        (
+          JSON.parse((await bundleNow()).text) as {
+            tombstones: { id: string; item: { bedeutungen?: Record<string, string> } }[];
+          }
+        ).tombstones.find((t) => t.id === first!.wordId)!;
+      expect((await stone()).item.bedeutungen).toEqual({ tr: 'merhaba' });
+      // … until it is rejected.
+      const res = await review(first!.draft!.id, 'teacher', {
+        decision: 'rejected',
+        seen: 'merhaba',
+      });
+      expect(res.status).toBe(200);
+      expect((await stone()).item.bedeutungen).toBeUndefined();
+    } finally {
+      await editWords(() => whole);
+      await publishUnit();
+    }
+  });
+
+  it('publishes a meaning only for the German it was approved for', async () => {
+    // Learners have the German the drafts are made from.
+    await publishUnit();
+    const [first] = await drafted();
+    const before = first!.de;
+    try {
+      // Approved for German that is not published yet: learners keep the old word, bare.
+      await setGerman(first!.wordId, `${before} (neu)`);
+      const [again] = await drafted();
+      await decide(again!.draft!, 'teacher', { decision: 'approved', text: 'yeni' });
+      expect((await publishMeanings()).body).toEqual({ version: null });
+      expect((await bundleNow()).word(first!.wordId).bedeutungen).toBeUndefined();
+
+      // Publishing the unit brings the German and its meaning together.
+      await publishUnit();
+      const now = (await bundleNow()).word(first!.wordId);
+      expect(now.de).toBe(`${before} (neu)`);
+      expect(now.bedeutungen).toEqual({ tr: 'yeni' });
+    } finally {
+      await setGerman(first!.wordId, before);
+      await publishUnit();
+    }
+    // The German moved on: the meaning approved for the other wording is gone.
+    expect((await bundleNow()).word(first!.wordId).bedeutungen).toBeUndefined();
   });
 });

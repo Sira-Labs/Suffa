@@ -25,7 +25,13 @@ const UNIT = '/api/v1/content/units/bayna-yadayk/1';
 interface WordRow {
   wordId: string;
   de: string;
-  draft: { id: string; text: string; status: string; stale: boolean } | null;
+  draft: {
+    id: string;
+    text: string;
+    status: string;
+    stale: boolean;
+    own: boolean;
+  } | null;
 }
 
 describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
@@ -215,7 +221,14 @@ describe.skipIf(!url)('Meaning drafts (Postgres)', () => {
 
   it('lets a teacher approve, correct or reject each one, never the person who ordered it', async () => {
     const [first, second, third] = await drafted();
-    // The admin ordered these drafts: four eyes.
+    // The admin ordered these drafts: four eyes. The list tells each reader whose they are.
+    expect(first!.draft!.own).toBe(false);
+    const asAdmin = (await (
+      await call('GET', `${UNIT}/meanings/tr`, 'admin')
+    ).json()) as {
+      words: WordRow[];
+    };
+    expect(asAdmin.words[0]!.draft!.own).toBe(true);
     const own = await decide(first!.draft!, 'admin', { decision: 'approved' });
     expect(own.status).toBe(403);
     expect(await own.json()).toEqual({ error: 'own_draft' });

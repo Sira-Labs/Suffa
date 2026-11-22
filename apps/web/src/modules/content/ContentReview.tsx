@@ -13,6 +13,7 @@ import {
   type UnitDetail,
   type UnitSummary,
 } from '@/services/content/contentApi';
+import { MeaningReview } from './MeaningReview';
 import { UnitReviewView, UnitStatus } from './UnitReviewView';
 
 export function ContentReview({ api }: { api?: ContentApi }) {
@@ -133,6 +134,7 @@ function UnitPanel({
   onChanged: () => Promise<void>;
 }) {
   const { t } = useTranslation('content');
+  const role = useRole();
   const [unit, setUnit] = useState<UnitDetail | null>(null);
   const [message, setMessage] = useState<{ text: string; good?: boolean } | null>(null);
   const [note, setNote] = useState('');
@@ -231,6 +233,7 @@ function UnitPanel({
             </section>
           )}
           <UnitReviewView content={unit.draft} changes={unit.changes} />
+          <MeaningReview unitId={unit.id} canDraft={role === 'admin'} />
         </>
       )}
     </div>

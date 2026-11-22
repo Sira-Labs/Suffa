@@ -27,6 +27,43 @@ export const content = {
     return: 'Zurückgeben',
     returned: 'Zurückgegeben.',
   },
+  meanings: {
+    title: 'Bedeutungen in weiteren Sprachen',
+    intro:
+      'Entwürfe einer KI, Wort für Wort zu prüfen. Lernende sehen davon nichts, auch nicht nach deiner Freigabe: Veröffentlicht wird erst in einem späteren Schritt.',
+    language: 'Sprache',
+    chooseLanguage: 'Sprache wählen …',
+    languages: {
+      tr: 'Türkisch',
+      it: 'Italienisch',
+      bs: 'Bosnisch',
+      sq: 'Albanisch',
+    },
+    counts:
+      'Zu prüfen: {{waiting}} · freigegeben: {{approved}} · abgelehnt: {{rejected}} · ohne Entwurf: {{missing}}',
+    order_one: 'Entwurf für {{count}} Wort erstellen (KI)',
+    order_other: 'Entwürfe für {{count}} Wörter erstellen (KI)',
+    drafted_one: '{{count}} Entwurf erstellt.',
+    drafted_other: '{{count}} Entwürfe erstellt.',
+    state: 'Stand',
+    status: {
+      draft: 'zu prüfen',
+      approved: 'freigegeben',
+      rejected: 'abgelehnt',
+    },
+    stale: 'Deutsch geändert – neu entwerfen',
+    own: 'von dir bestellt, prüft jemand anderes',
+    decision: 'Entscheidung',
+    wordingOf: 'Bedeutung von „{{word}}“',
+    approve: 'Freigeben',
+    approveOf: '„{{word}}“ freigeben',
+    reject: 'Ablehnen',
+    rejectOf: '„{{word}}“ ablehnen',
+    done: {
+      approved: 'Freigegeben.',
+      rejected: 'Abgelehnt.',
+    },
+  },
   status: {
     checked: 'Geprüft',
     unchecked: 'Nicht geprüft',

@@ -52,6 +52,22 @@ export const errors = {
     ai_failed:
       'Die KI hat keine brauchbare Übersetzung geliefert. Versuche es noch einmal.',
   },
+  meanings: {
+    second_factor_required:
+      'Bitte bestätige zuerst den Code aus deiner Authenticator-App.',
+    own_draft:
+      'Diesen Entwurf hast du selbst erstellen lassen. Die Prüfung macht eine andere Person.',
+    draft_changed:
+      'Der Entwurf wurde inzwischen neu erstellt. Die Liste ist jetzt aktuell: Bitte prüfe den neuen Text.',
+    source_changed:
+      'Das Deutsch dieses Wortes wurde geändert. Der Entwurf muss erst neu erstellt werden.',
+    nothing_to_translate: 'Für diese Sprache fehlt in dieser Einheit kein Entwurf.',
+    ai_unavailable:
+      'Für Übersetzungen ist auf diesem Server kein KI-Modell eingerichtet.',
+    ai_quota: 'Das KI-Kontingent für heute ist aufgebraucht.',
+    ai_failed:
+      'Die KI hat keine brauchbare Übersetzung geliefert. Versuche es noch einmal.',
+  },
   bookSync: {
     stale_revision:
       'Die Abgleichsdaten wurden inzwischen geändert. Lade die Seite neu und tippe dann erneut mit.',

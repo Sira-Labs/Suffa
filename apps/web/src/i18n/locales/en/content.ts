@@ -26,6 +26,43 @@ export const content: Messages<typeof de> = {
     return: 'Send back',
     returned: 'Sent back.',
   },
+  meanings: {
+    title: 'Meanings in further languages',
+    intro:
+      'Drafts by an AI, to be checked word by word. Learners see none of this, not even after your approval: publishing is a later step.',
+    language: 'Language',
+    chooseLanguage: 'Choose a language …',
+    languages: {
+      tr: 'Turkish',
+      it: 'Italian',
+      bs: 'Bosnian',
+      sq: 'Albanian',
+    },
+    counts:
+      'To check: {{waiting}} · approved: {{approved}} · rejected: {{rejected}} · no draft: {{missing}}',
+    order_one: 'Draft {{count}} word (AI)',
+    order_other: 'Draft {{count}} words (AI)',
+    drafted_one: '{{count}} draft made.',
+    drafted_other: '{{count}} drafts made.',
+    state: 'State',
+    status: {
+      draft: 'to check',
+      approved: 'approved',
+      rejected: 'rejected',
+    },
+    stale: 'German changed – draft again',
+    own: 'ordered by you, someone else reviews it',
+    decision: 'Decision',
+    wordingOf: 'Meaning of “{{word}}”',
+    approve: 'Approve',
+    approveOf: 'Approve “{{word}}”',
+    reject: 'Reject',
+    rejectOf: 'Reject “{{word}}”',
+    done: {
+      approved: 'Approved.',
+      rejected: 'Rejected.',
+    },
+  },
   status: {
     checked: 'Checked',
     unchecked: 'Not checked',

@@ -58,18 +58,22 @@ export function MeaningReview({
     if (language) void load(language);
   }, [language, load]);
 
-  const languageNow = useRef(language);
-  languageNow.current = language;
+  // What the section shows now: the unit can change under it (browser history).
+  const shown = (chosen: string) => `${unitId}:${chosen}`;
+  const shownNow = useRef('');
+  shownNow.current = shown(language);
   /** Runs a change and shows the list as it is afterwards; busy until that list is there. */
   const change = async (
     chosen: MeaningDraftLanguage,
     run: () => Promise<{ text: string; good?: boolean }>
   ) => {
+    const asked = shown(chosen);
     setBusy(true);
     try {
       const outcome = await run();
-      // Another language was chosen meanwhile: this outcome is not about what is shown.
-      if (chosen !== languageNow.current) return;
+      // Another language or unit meanwhile: this outcome is not about what is shown, and
+      // loading the list again would put the old unit's words under the new one.
+      if (asked !== shownNow.current) return;
       setMessage(outcome);
       // Also after a refusal: the row shown may be out of date (drafted again, German changed).
       await load(chosen);

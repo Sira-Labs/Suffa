@@ -285,6 +285,31 @@ describe('MeaningReview', () => {
     expect(screen.getByLabelText('Bedeutung von „Name“')).toBeEnabled();
   });
 
+  it('never shows one unit’s drafts under another when a decision answers late', async () => {
+    let release: (() => void) | undefined;
+    const api = new MeaningsApi(async (input, init) => {
+      const path = String(input);
+      if (init?.method === 'POST') {
+        await new Promise<void>((resolve) => (release = resolve));
+        return Response.json({
+          draft: { id: 'd-v-ism', text: 'isim', status: 'approved' },
+        });
+      }
+      const text = path.startsWith(BASE) ? 'isim' : 'kitap';
+      return Response.json({ words: [word('v-ism', 'Name', { text })] });
+    });
+    const view = render(<MeaningReview unitId={UNIT} canDraft={false} api={api} />);
+    await userEvent.selectOptions(screen.getByLabelText('Sprache'), 'Türkisch');
+    await rowOf('Name');
+    await userEvent.click(screen.getByRole('button', { name: '„Name“ freigeben' }));
+    view.rerender(<MeaningReview unitId="bayna-yadayk/2" canDraft={false} api={api} />);
+    await screen.findByDisplayValue('kitap');
+    await act(async () => release!());
+    expect(screen.getByLabelText('Bedeutung von „Name“')).toHaveValue('kitap');
+    expect(screen.queryByText('Freigegeben.')).toBeNull();
+    expect(screen.getByLabelText('Bedeutung von „Name“')).toBeEnabled();
+  });
+
   it('never shows one language’s drafts under another, however the answers arrive', async () => {
     // Turkish answers late, after Italian was chosen and answered.
     let releaseTurkish: (() => void) | undefined;

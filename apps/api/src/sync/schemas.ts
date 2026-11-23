@@ -83,7 +83,8 @@ export const SYNC_SCHEMAS = {
     srsAlgorithm: z.enum(['sm2', 'fsrs']).nullish(),
     // Interface language (story 16.3); kept when an older app does not send it.
     uiLanguage: z.enum(['de', 'en']).nullish(),
-    meaningLanguage: z.enum(['de', 'en']).nullish(),
+    // German, English, or a language words have reviewed meanings in (story 18.4, ADR-0033).
+    meaningLanguage: z.enum(['de', 'en', 'tr', 'it', 'bs', 'sq']).nullish(),
     // Colour scheme (story 18.1): 'class' or none follows the class, else one of the palettes.
     palette: z.enum(['class', ...PALETTE_IDS]).nullish(),
     // The class that shapes the app for a learner in several (none: the first joined).

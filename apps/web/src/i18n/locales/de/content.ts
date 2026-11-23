@@ -65,7 +65,7 @@ export const content = {
     },
     publish: 'Freigegebene Bedeutungen veröffentlichen',
     published:
-      'Veröffentlicht (Inhaltsstand {{version}}): alle freigegebenen Bedeutungen, in jeder Einheit und Sprache.',
+      'Veröffentlicht (Inhaltsstand {{version}}): die freigegebenen Bedeutungen aller Einheiten und Sprachen, soweit ihr Deutsch schon veröffentlicht ist.',
     nothingToPublish:
       'Nichts Neues. Eine Freigabe zu geändertem Deutsch wartet, bis die Einheit selbst veröffentlicht ist.',
   },

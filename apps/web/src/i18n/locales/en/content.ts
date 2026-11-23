@@ -64,7 +64,7 @@ export const content: Messages<typeof de> = {
     },
     publish: 'Publish approved meanings',
     published:
-      'Published (content version {{version}}): all approved meanings, in every unit and language.',
+      'Published (content version {{version}}): the approved meanings of all units and languages, as far as their German is published already.',
     nothingToPublish:
       'Nothing new. An approval for changed German waits until the unit itself is published.',
   },

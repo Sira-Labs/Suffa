@@ -3,7 +3,12 @@ import { content } from '@/content';
 import { generateExam } from '@/modules/exam/examEngine';
 import { gradeRecall, resolveCard } from '@/services/srs';
 import type { UserVocab } from '@/types';
-import { consistentMeanings, meaningOf, resolveMeaningLanguage } from './meanings';
+import {
+  consistentMeanings,
+  meaningOf,
+  offeredMeaningLanguages,
+  resolveMeaningLanguage,
+} from './meanings';
 
 // Static content has no English yet (it arrives reviewed through the CMS); tests add some.
 const word = content.vokabeln[0]!;
@@ -54,8 +59,22 @@ describe('meaning language (story 16.4)', () => {
       lang: 'de',
       missing: true,
     });
-    // No learner can choose them yet.
-    expect(resolveMeaningLanguage('tr', 'de')).toBe('de');
+  });
+
+  it('offers a further language once a word has a meaning in it, and keeps the choice', () => {
+    const words = [
+      { de: 'Name', bedeutungen: { tr: 'isim', it: '  ' } },
+      { de: 'Buch', bedeutungen: null },
+      { de: 'Tür' },
+    ];
+    expect(offeredMeaningLanguages([{ de: 'Name' }])).toEqual(['de', 'en']);
+    expect(offeredMeaningLanguages(words)).toEqual(['de', 'en', 'tr']);
+    // Chosen on another device, the content not here yet: still in the list.
+    expect(offeredMeaningLanguages(words, 'sq')).toEqual(['de', 'en', 'tr', 'sq']);
+    expect(offeredMeaningLanguages(words, 'en')).toEqual(['de', 'en', 'tr']);
+    // A chosen further language is the learner's, whatever the interface is in.
+    expect(resolveMeaningLanguage('tr', 'de')).toBe('tr');
+    expect(resolveMeaningLanguage('bs', 'en')).toBe('bs');
   });
 
   it('follows the interface language unless the learner chose one', () => {

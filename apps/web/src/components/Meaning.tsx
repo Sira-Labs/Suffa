@@ -2,7 +2,7 @@ import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Meaning } from '@/services/meanings';
 
-/** Marks a German meaning shown because the English one is missing (story 16.4). */
+/** Marks a German meaning shown because the chosen language has none yet (story 16.4). */
 export function NotTranslated() {
   const { t } = useTranslation('components');
   return (

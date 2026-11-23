@@ -26,6 +26,8 @@ export const settings: Messages<typeof de> = {
     meaningLanguage: 'Language of meanings',
     meaningLanguageHint:
       'Word meanings and translations, including your answers in reviews. What is not translated yet stays in German.',
+    meaningLanguageWordsOnly:
+      'In this language only word meanings are reviewed so far; dialogues and examples stay in German.',
     meaningFollowsUi: 'Same as the interface',
     design: 'Theme',
     palette: 'Colour scheme',

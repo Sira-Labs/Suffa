@@ -627,11 +627,23 @@ it reaches learners. Decisions:
 - The runs ordered and approved nothing; as long as nobody approves a meaning, bundles are
   what they were.
 
-Still open for 18.4, in this order:
+  18.4, step 4 of 5 (2026-11-24, ADR-0033): learners can choose Turkish, Italian, Bosnian or
+  Albanian as the language of meanings, and typed answers are graded in it. Decisions:
 
-4. The four languages in the meaning-language setting and in the answer rules (grading typed
-   answers, multiple-choice options, the "not yet translated" badge on real screens).
-5. The curated word list for Muslims in Europe.
+- A language is offered only once a word on the device has a reviewed meaning in it, so the
+  settings look as before until meanings are published; a choice made on another device
+  stays visible.
+- The settings say that only words are covered so far; everything else shows German with
+  the existing badge.
+- Grading rules per language are as tolerant as the German ones: letters without their marks,
+  `ı`/`i`, `đ`/`dj`/`d`, a leading article. Albanian linking articles are not ignored
+  ("e hënë" is Monday, "hënë" the moon). Written without a teacher of these languages: to
+  be looked at with the review of the meanings.
+- A learner's own words are graded with the German rules when a further language is chosen:
+  most were typed in German.
+- The interface stays German or English; "like the interface" never picks a further language.
+
+Still open for 18.4: step 5, the curated word list for Muslims in Europe.
 
 ---
 

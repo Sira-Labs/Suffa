@@ -350,7 +350,7 @@ function buildApp() {
       enabled: true,
     },
     meanings: {
-      content: { get: async () => null },
+      content: { get: async () => null, ensureBundle: async () => null },
       drafts: {
         list: async () => [],
         saveDrafts: async () => 0,

@@ -67,6 +67,39 @@ describe('content loader with a stored bundle', () => {
     });
   });
 
+  it('finds a word’s approved meanings in further languages in the bundle (18.4)', async () => {
+    const builtIn = await freshContent();
+    const [first, ...rest] = builtIn.content.vokabeln.filter((v) => v.einheit === 1);
+    const stored: ContentBundle = {
+      format: 1,
+      version: 8,
+      createdAt: '2026-11-23T00:00:00.000Z',
+      course: 'bayna-yadayk',
+      units: [
+        {
+          einheit: 1,
+          titel: 'Aus dem CMS',
+          vokabeln: [{ ...first!, bedeutungen: { tr: 'merhaba' } }, ...rest],
+          dialoge: [],
+        },
+      ],
+      tombstones: [],
+    };
+    localStorage.setItem(BUNDLE_STORAGE_KEY, JSON.stringify(stored));
+
+    const next = await freshContent();
+    const { meaningOf } = await import('@/services/meanings');
+    const word = next.content.vokabeln.find((v) => v.id === first!.id)!;
+    expect(meaningOf(word, 'tr')).toEqual({
+      text: 'merhaba',
+      lang: 'tr',
+      missing: false,
+    });
+    expect(meaningOf(word, 'it')).toMatchObject({ text: first!.de, missing: true });
+    // The transliteration is untouched.
+    expect(word.tr).toBe(first!.tr);
+  });
+
   it('falls back to the bundled unit files when the store is broken', async () => {
     localStorage.setItem(BUNDLE_STORAGE_KEY, '{ not json');
     const { CONTENT_BUNDLE_VERSION, unitInfos } = await freshContent();

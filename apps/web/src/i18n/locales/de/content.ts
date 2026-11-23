@@ -30,7 +30,7 @@ export const content = {
   meanings: {
     title: 'Bedeutungen in weiteren Sprachen',
     intro:
-      'Entwürfe einer KI, Wort für Wort zu prüfen. Lernende sehen davon nichts, auch nicht nach deiner Freigabe: Veröffentlicht wird erst in einem späteren Schritt.',
+      'Entwürfe einer KI, Wort für Wort zu prüfen. Was du freigibst, bekommen Lernende mit dem nächsten Inhaltsstand; was du danach ablehnst, wird sofort zurückgenommen. Wählen können sie diese Sprachen noch nicht.',
     language: 'Sprache',
     chooseLanguage: 'Sprache wählen …',
     languages: {
@@ -63,6 +63,11 @@ export const content = {
       approved: 'Freigegeben.',
       rejected: 'Abgelehnt.',
     },
+    publish: 'Freigegebene Bedeutungen veröffentlichen',
+    published:
+      'Veröffentlicht (Inhaltsstand {{version}}): die freigegebenen Bedeutungen aller Einheiten und Sprachen, soweit ihr Deutsch schon veröffentlicht ist.',
+    nothingToPublish:
+      'Nichts Neues. Eine Freigabe zu geändertem Deutsch wartet, bis die Einheit selbst veröffentlicht ist.',
   },
   status: {
     checked: 'Geprüft',

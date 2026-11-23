@@ -6,12 +6,16 @@
  *                                                                               (content:write)
  *   POST /content/meaning-drafts/:id/review { decision, seen, text? } → { draft }
  *                                                                               (content:review)
+ *   POST /content/meanings/publish                              → { version }   (content:write)
  *
  * An admin has the LLM draft the meanings of a unit's words; a teacher approves (as drafted
  * or corrected) or rejects each one, and never one they had drafted themselves
  * (403 `own_draft`). A decision names the text the reviewer saw (`seen`): 409 `draft_changed`
- * when it was drafted again meanwhile, 409 `source_changed` when the word's German changed. Approved meanings stay here: no route publishes them yet, and no content
- * bundle reads them.
+ * when it was drafted again meanwhile, 409 `source_changed` when the word's German changed.
+ *
+ * Approved meanings reach learners with the next content bundle (ADR-0032): when a unit is
+ * published, at start-up, or when an admin publishes them here (`version` is null when the
+ * newest bundle already has them all).
  */
 import { Hono, type Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
@@ -30,7 +34,7 @@ import {
 import { unitId, type ContentActor, type ContentRepository } from './repository.js';
 
 export interface MeaningRouteDeps {
-  content: Pick<ContentRepository, 'get'>;
+  content: Pick<ContentRepository, 'get' | 'ensureBundle'>;
   drafts: MeaningDraftRepository;
   /** Without the LLM gateway the draft route answers 503. */
   gateway?: DraftMeaningsDeps['gateway'];
@@ -171,6 +175,10 @@ export function createMeaningRoutes(deps: MeaningRouteDeps): Hono<ActorEnv> {
       } as const;
       return c.json({ error: result.reason }, status[result.reason]);
     }
+  );
+
+  app.post('/content/meanings/publish', guard('content:write'), async (c) =>
+    c.json({ version: await deps.content.ensureBundle(actorOf(c)) })
   );
 
   return app;

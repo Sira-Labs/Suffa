@@ -29,7 +29,7 @@ export const content: Messages<typeof de> = {
   meanings: {
     title: 'Meanings in further languages',
     intro:
-      'Drafts by an AI, to be checked word by word. Learners see none of this, not even after your approval: publishing is a later step.',
+      'Drafts by an AI, to be checked word by word. What you approve goes to learners with the next content version; what you reject afterwards is taken back at once. They cannot choose these languages yet.',
     language: 'Language',
     chooseLanguage: 'Choose a language …',
     languages: {
@@ -62,6 +62,11 @@ export const content: Messages<typeof de> = {
       approved: 'Approved.',
       rejected: 'Rejected.',
     },
+    publish: 'Publish approved meanings',
+    published:
+      'Published (content version {{version}}): the approved meanings of all units and languages, as far as their German is published already.',
+    nothingToPublish:
+      'Nothing new. An approval for changed German waits until the unit itself is published.',
   },
   status: {
     checked: 'Checked',

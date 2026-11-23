@@ -385,6 +385,11 @@ export const PROTECTED_ROUTES: readonly RoutePolicy[] = [
     action: 'content:review',
   },
   {
+    method: 'POST',
+    path: '/api/v1/content/meanings/publish',
+    action: 'content:write',
+  },
+  {
     method: 'PUT',
     path: '/api/v1/book-sync/:course/:book/:lesson',
     action: 'content:write',

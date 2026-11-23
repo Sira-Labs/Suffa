@@ -4,6 +4,7 @@
 - Date: 2026-11-21
 - Amends: ADR-0021 (how a meaning in a language other than German is drafted, reviewed and
   stored)
+- Amended by: ADR-0032 (decisions 1 and 7: the bundle reads approved meanings from the table)
 
 ## Context
 

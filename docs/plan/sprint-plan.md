@@ -611,12 +611,26 @@ it reaches learners. Decisions:
   on screen was out of date.
 - Looked at in the web tests only, not in a browser against a server with real drafts.
 
+  18.4, step 3 of 5 (2026-11-23, ADR-0032): approved meanings reach learners with the content
+  bundle, as `bedeutungen` on the word, and the app finds them with the German fallback.
+  Decisions:
+
+- Joined in when a bundle is frozen, not written into the units: a unit has one check and one
+  publish step for everything, and an editor could otherwise publish a meaning past its review.
+- A meaning is published only while the published word has the German it was approved for.
+- Approving freezes no bundle (one bundle per word otherwise). The next one carries what is
+  approved: on a unit's publish, at start, or when an admin presses "Freigegebene Bedeutungen
+  veröffentlichen".
+- Rejecting a meaning that was approved freezes a bundle at once, also for a removed word
+  that old cards still show: a wrong meaning does not wait for an admin.
+- Learners cannot choose the languages yet; that comes with the answer rules (step 4).
+- The runs ordered and approved nothing; as long as nobody approves a meaning, bundles are
+  what they were.
+
 Still open for 18.4, in this order:
 
-3. Merging approved meanings into the units and the bundle, under a field that is not `tr`
-   (taken by the transliteration), and showing them in the app with the German fallback.
-4. The four languages in the meaning-language setting and in the answer rules, once step 3 has
-   published meanings.
+4. The four languages in the meaning-language setting and in the answer rules (grading typed
+   answers, multiple-choice options, the "not yet translated" badge on real screens).
 5. The curated word list for Muslims in Europe.
 
 ---

@@ -4,7 +4,8 @@
 - Date: 2026-09-23
 - Related: ADR-0011 (al-Muʿallim), ADR-0014 (content CMS)
 - Amended by: ADR-0031 (meanings in further languages are drafted and reviewed apart from
-  the units)
+  the units), ADR-0033 (the meaning language can also be Turkish, Italian, Bosnian or
+  Albanian)
 
 ## Context
 

@@ -313,6 +313,47 @@ describe.skipIf(!url)('PgSyncRepository (Postgres)', () => {
     });
   });
 
+  it('takes Turkish, Italian, Bosnian and Albanian as a meaning language, nothing else (18.4)', async () => {
+    const settings = (meaningLanguage: unknown): SyncRecord => ({
+      id: 'user-settings',
+      updated_at: '2026-11-01T09:00:00.000Z',
+      deleted: false,
+      key: 'user-settings',
+      tashkilLevel: 'full',
+      theme: 'dark',
+      arabicFontScale: 1,
+      dailyGoal: 20,
+      weeklyGoal: 5,
+      showTransliteration: true,
+      dialectNotes: false,
+      meaningLanguage,
+    });
+    for (const language of ['de', 'en', 'tr', 'it', 'bs', 'sq', null]) {
+      expect(
+        SYNC_SCHEMAS.settings.safeParse(settings(language)).success,
+        String(language)
+      ).toBe(true);
+    }
+    expect(SYNC_SCHEMAS.settings.safeParse(settings('fr')).success).toBe(false);
+
+    // The database takes them too (migration 0054), and gives them back.
+    for (const [minute, language] of ['tr', 'it', 'bs', 'sq'].entries()) {
+      await repo.upsert(BOB, 'settings', [
+        { ...settings(language), updated_at: `2026-11-01T10:0${minute}:00.000Z` },
+      ]);
+      const { records } = await repo.pull(BOB, 'settings', {
+        since: null,
+        afterId: null,
+        limit: 10,
+      });
+      expect(records[0]).toMatchObject({ meaningLanguage: language });
+    }
+    // The database itself refuses any other value, whoever writes it.
+    await expect(
+      pool.query(`update settings set "meaningLanguage" = 'fr' where user_id = $1`, [BOB])
+    ).rejects.toThrow(/settings_meaning_language_check/);
+  });
+
   it('never lets a merely created card replace a reviewed one', async () => {
     const reviewed = {
       ...card('c2', '2026-09-23T10:00:00.000Z', 5),

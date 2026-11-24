@@ -28,7 +28,7 @@ export const components: Messages<typeof de> = {
   meaning: {
     notTranslated: 'not yet translated',
     notTranslatedHint:
-      'This meaning has no reviewed English version yet; the German one stands in for it.',
+      'This meaning has no reviewed version in your language yet; the German one stands in for it.',
   },
   feedback: {
     correct: '✓ Correct',

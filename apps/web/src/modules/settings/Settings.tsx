@@ -5,7 +5,13 @@ import { TashkilToggle } from '@/components';
 import { PalettePicker } from '@/components/PalettePicker';
 import i18n, { setUiLanguage, type UiLanguage } from '@/i18n';
 import { dateLocale } from '@/i18n/format';
-import { isMeaningLanguage } from '@/services/meanings';
+import { content } from '@/content';
+import {
+  FURTHER_MEANING_LANGUAGES,
+  isMeaningLanguage,
+  MEANING_LANGUAGE_NAMES,
+  offeredMeaningLanguages,
+} from '@/services/meanings';
 import { ApiSyncProvider, SIGN_IN_RETURN_PATH } from '@/services/sync/ApiSyncProvider';
 import { PasskeySignIn } from '@/modules/account/PasskeySignIn';
 import { SignInForm } from '@/modules/account/SignInForm';
@@ -181,17 +187,26 @@ function LanguageSetting() {
   );
 }
 
-/** Meaning language (story 16.4): glosses and translation answers; by default as the UI. */
+/**
+ * Meaning language (story 16.4): glosses and translation answers; by default as the UI.
+ * Turkish, Italian, Bosnian and Albanian are offered once words have reviewed meanings in
+ * them (story 18.4, ADR-0033).
+ */
 function MeaningLanguageSetting() {
   const { t } = useTranslation(['settings', 'common']);
-  const choice = useSettingsStore((s) => s.settings.meaningLanguage ?? null);
+  const stored = useSettingsStore((s) => s.settings.meaningLanguage ?? null);
+  const choice = isMeaningLanguage(stored) ? stored : null;
   const update = useSettingsStore((s) => s.update);
+  const offered = offeredMeaningLanguages(content.vokabeln, choice);
+  const wordsOnly =
+    choice !== null && (FURTHER_MEANING_LANGUAGES as readonly string[]).includes(choice);
   return (
     <label className="row" style={{ justifyContent: 'space-between' }}>
       <span className="stack" style={{ gap: 0 }}>
         <span>{t('display.meaningLanguage')}</span>
         <span className="muted" style={{ fontSize: '0.85rem' }}>
           {t('display.meaningLanguageHint')}
+          {wordsOnly && ` ${t('display.meaningLanguageWordsOnly')}`}
         </span>
       </span>
       <select
@@ -205,12 +220,11 @@ function MeaningLanguageSetting() {
         style={{ width: 160, flexShrink: 0 }}
       >
         <option value="">{t('display.meaningFollowsUi')}</option>
-        <option value="de" lang="de">
-          Deutsch
-        </option>
-        <option value="en" lang="en">
-          English
-        </option>
+        {offered.map((language) => (
+          <option key={language} value={language} lang={language}>
+            {MEANING_LANGUAGE_NAMES[language]}
+          </option>
+        ))}
       </select>
     </label>
   );

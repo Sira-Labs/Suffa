@@ -26,7 +26,7 @@ export const components = {
   meaning: {
     notTranslated: 'noch nicht übersetzt',
     notTranslatedHint:
-      'Für diese Bedeutung gibt es noch keine geprüfte englische Fassung; die deutsche steht an ihrer Stelle.',
+      'Für diese Bedeutung gibt es in deiner Sprache noch keine geprüfte Fassung; die deutsche steht an ihrer Stelle.',
   },
   feedback: {
     correct: '✓ Richtig',

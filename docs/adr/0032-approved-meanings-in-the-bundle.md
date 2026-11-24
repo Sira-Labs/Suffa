@@ -4,6 +4,7 @@
 - Date: 2026-11-23
 - Amends: ADR-0031 (decision 1, "nothing that builds a content bundle reads this table", and
   decision 7, "a later step merges them into published units")
+- Amended by: ADR-0033 (decision 6: learners can choose the languages)
 
 ## Context
 

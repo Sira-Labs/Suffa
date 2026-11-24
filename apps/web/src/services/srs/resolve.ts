@@ -65,10 +65,15 @@ export function resolveCard(
 ): ResolvedCard | null {
   const vocab = vokabelLookup(userVocab);
   const own = new Set(userVocab.map((v) => v.id));
-  // A learner's own word keeps the meaning they typed, whatever its language.
+  // A learner's own word keeps the meaning they typed, whatever its language. With a
+  // further language chosen it is graded as before that choice existed (German rules, which
+  // also ignore English articles): most own words were typed in German, and the rules of
+  // Turkish or Albanian would count „das Haus“ for „Haus“ as wrong.
+  const ownLanguage: MeaningLanguage =
+    language === 'de' || language === 'en' ? language : 'de';
   const gloss = (v: Vokabel | UserVocab) =>
     own.has(v.id)
-      ? { text: v.de, lang: language, missing: false }
+      ? { text: v.de, lang: ownLanguage, missing: false }
       : meaningOf(v, language);
 
   switch (kind) {

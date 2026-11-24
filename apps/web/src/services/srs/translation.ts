@@ -1,6 +1,6 @@
 /**
- * Tolerant grading of translations typed in the learner's meaning language, German or
- * English (story 16.4, ADR-0021).
+ * Tolerant grading of translations typed in the learner's meaning language: German or
+ * English (story 16.4, ADR-0021), Turkish, Italian, Bosnian or Albanian (18.4, ADR-0033).
  *
  * Content glosses list several meanings in one string, e.g. „Land, Ort“,
  * „Friede; Begrüßung“, „Ägypten / Ägypter(in)“ or „das Gute; (mir geht es) gut“.
@@ -22,19 +22,37 @@ export interface TranslationGrade {
   meanings: string[];
 }
 
-/** The language a gloss and the typed answer are in (story 16.4). */
-export type TranslationLocale = 'de' | 'en';
+/** The language a gloss and the typed answer are in (stories 16.4 and 18.4). */
+export type TranslationLocale = 'de' | 'en' | 'tr' | 'it' | 'bs' | 'sq';
 
 /**
  * Per-locale normalisation (ADR-0021): leading words ignored when comparing (articles,
  * reflexive and infinitive markers) and spelling variants folded to one form. Both the
  * gloss and the answer pass the same rules, so a broad rule only merges spellings.
+ *
+ * Leading words are compared after folding (lower case, no diacritics), so they are listed
+ * in that form. Letters with diacritics need no rule: ş, ç, ğ, č, ć, š, ž, ë, à, è fold to
+ * their base letter for every locale, so an answer typed on another keyboard matches. Only
+ * letters that are no base letter plus a mark get a spelling rule.
  */
-const LOCALE_RULES: Record<
-  TranslationLocale,
-  { leading: ReadonlySet<string>; spelling: readonly [RegExp, string][] }
-> = {
+interface LocaleRules {
+  leading: ReadonlySet<string>;
+  /**
+   * Pattern, its replacement, and optionally a looser replacement used for the second,
+   * mark-less comparison (`umlautAsBase`): a letter typed the plainest way.
+   */
+  spelling: readonly (readonly [RegExp, string, string?])[];
+  /**
+   * ä, ö, ü are written ae, oe, ue where the keyboard lacks them (German). Elsewhere they
+   * fold to a, o, u like any letter with a mark: Turkish „göz“ is three letters, and
+   * „gozluk“ is „gözlük“ without a typo.
+   */
+  umlautDigraphs: boolean;
+}
+
+const LOCALE_RULES: Record<TranslationLocale, LocaleRules> = {
   de: {
+    umlautDigraphs: true,
     // English articles stay ignored too: German glosses were matched like this before 16.4.
     leading: new Set([
       'der',
@@ -59,6 +77,8 @@ const LOCALE_RULES: Record<
     spelling: [],
   },
   en: {
+    // As before 18.4: English glosses were always folded like German ones.
+    umlautDigraphs: true,
     leading: new Set(['the', 'a', 'an', 'to']),
     // British and American spellings: colour/color, centre/center, organise/organize,
     // travelling/traveling, grey/gray.
@@ -69,6 +89,33 @@ const LOCALE_RULES: Record<
       [/\b(\p{L}{2,}[aeiou])ll(ed|ing|er)\b/gu, '$1l$2'],
       [/\bgrey\b/gu, 'gray'],
     ],
+  },
+  tr: {
+    umlautDigraphs: false,
+    // No articles; "bir" (a, one) before a noun is left out by most learners.
+    leading: new Set(['bir']),
+    // The dotless ı is its own letter: typed as i on keyboards without it. (A capital İ
+    // becomes i plus a mark when lower-cased and folds like any diacritic.)
+    spelling: [[/ı/gu, 'i']],
+  },
+  it: {
+    umlautDigraphs: false,
+    // Articles, also the elided ones: "l'amico" reaches here as "l amico".
+    leading: new Set(['il', 'lo', 'la', 'l', 'i', 'gli', 'le', 'un', 'uno', 'una']),
+    spelling: [],
+  },
+  bs: {
+    umlautDigraphs: false,
+    // No articles. đ is its own letter: written dj where the keyboard lacks it, or just d.
+    leading: new Set([]),
+    spelling: [[/đ/gu, 'dj', 'd']],
+  },
+  sq: {
+    umlautDigraphs: false,
+    // Only "një" (a). The linking articles (i, e, të, së) are not ignored: "e hënë" is
+    // Monday and "hënë" the moon. A gloss that allows both writes "(i) mirë".
+    leading: new Set(['nje']),
+    spelling: [],
   },
 };
 
@@ -90,19 +137,19 @@ export function normalizeTranslation(
   locale: TranslationLocale = 'de'
 ): string {
   const rules = LOCALE_RULES[locale];
-  let folded = (
-    umlautAsBase
-      ? input.toLowerCase()
-      : input.toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
-  )
+  let folded = input.toLowerCase();
+  if (rules.umlautDigraphs && !umlautAsBase) {
+    folded = folded.replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue');
+  }
+  folded = folded
     .replace(/ß/g, 'ss')
     .normalize('NFKD')
     .replace(/\p{M}/gu, '') // remaining combining marks (ī → i, é → e)
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  for (const [pattern, replacement] of rules.spelling) {
-    folded = folded.replace(pattern, replacement);
+  for (const [pattern, replacement, loose] of rules.spelling) {
+    folded = folded.replace(pattern, umlautAsBase ? (loose ?? replacement) : replacement);
   }
   const words = folded.split(' ');
   while (words.length > 1 && rules.leading.has(words[0]!)) words.shift();

@@ -5,21 +5,40 @@
  * back to German, flagged so the screen can show a "not yet translated" badge.
  *
  * Words may also carry Turkish, Italian, Bosnian and Albanian (`bedeutungen`, story 18.4,
- * ADR-0032). The lookup knows them; learners cannot choose them as their meaning language
- * until translation answers are graded in them too.
+ * ADR-0032). A learner can choose one of them once the content on the device has meanings
+ * in it (ADR-0033); dialogue lines and examples stay German there, flagged like any fallback.
  */
 import i18n from '@/i18n';
 import { useSettingsStore } from '@/state/settingsStore';
 import type { WeitereBedeutungen } from '@/types';
 
-export type MeaningLanguage = 'de' | 'en';
-
-export const MEANING_LANGUAGES: readonly MeaningLanguage[] = ['de', 'en'];
-
-/** The languages only words have a gloss in so far, and no learner can choose yet. */
+/** The languages only words have a gloss in so far. */
 export type FurtherMeaningLanguage = keyof WeitereBedeutungen;
+export type MeaningLanguage = 'de' | 'en' | FurtherMeaningLanguage;
 /** Every language a gloss can be in. */
-export type GlossLanguage = MeaningLanguage | FurtherMeaningLanguage;
+export type GlossLanguage = MeaningLanguage;
+
+export const FURTHER_MEANING_LANGUAGES: readonly FurtherMeaningLanguage[] = [
+  'tr',
+  'it',
+  'bs',
+  'sq',
+];
+export const MEANING_LANGUAGES: readonly MeaningLanguage[] = [
+  'de',
+  'en',
+  ...FURTHER_MEANING_LANGUAGES,
+];
+
+/** Each language in its own words, as the settings offer it. */
+export const MEANING_LANGUAGE_NAMES: Record<MeaningLanguage, string> = {
+  de: 'Deutsch',
+  en: 'English',
+  tr: 'Türkçe',
+  it: 'Italiano',
+  bs: 'Bosanski',
+  sq: 'Shqip',
+};
 
 /** Anything with a German gloss and maybe others (words, dialogue lines, examples). */
 export interface Glossed {
@@ -37,7 +56,32 @@ export interface Meaning<L extends GlossLanguage = MeaningLanguage> {
 }
 
 export function isMeaningLanguage(value: unknown): value is MeaningLanguage {
-  return value === 'de' || value === 'en';
+  return (MEANING_LANGUAGES as readonly unknown[]).includes(value);
+}
+
+/**
+ * The languages a learner is offered: German and English always, a further one once at least
+ * one word on this device has a reviewed meaning in it. The language chosen already stays in
+ * the list, so a device that has not downloaded the content yet does not lose the choice.
+ */
+export function offeredMeaningLanguages(
+  words: readonly Glossed[],
+  chosen: MeaningLanguage | null = null
+): MeaningLanguage[] {
+  const withContent = new Set<string>();
+  for (const word of words) {
+    for (const [language, text] of Object.entries(word.bedeutungen ?? {})) {
+      // A stored bundle is not checked word by word: anything but text counts as none.
+      if (typeof text === 'string' && text.trim()) withContent.add(language);
+    }
+  }
+  return [
+    'de',
+    'en',
+    ...FURTHER_MEANING_LANGUAGES.filter(
+      (language) => withContent.has(language) || language === chosen
+    ),
+  ];
 }
 
 /** The gloss of `item` in `language`, German when that one is missing. */

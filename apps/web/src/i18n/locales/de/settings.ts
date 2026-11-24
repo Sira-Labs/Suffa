@@ -24,6 +24,8 @@ export const settings = {
     meaningLanguage: 'Sprache der Bedeutungen',
     meaningLanguageHint:
       'Wortbedeutungen und Übersetzungen, auch deine Antworten in der Wiederholung. Was noch nicht übersetzt ist, steht auf Deutsch.',
+    meaningLanguageWordsOnly:
+      'In dieser Sprache gibt es bisher nur geprüfte Wortbedeutungen; Dialoge und Beispiele bleiben deutsch.',
     meaningFollowsUi: 'Wie die Oberfläche',
     design: 'Design',
     palette: 'Farbschema',

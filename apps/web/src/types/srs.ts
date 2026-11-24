@@ -7,6 +7,7 @@
  *   - deleted:    soft-delete flag (tombstone) so deletions can be synced
  */
 import type { CourseId, PaletteId } from '@suffa/engagement';
+import type { WeitereBedeutungen } from './content';
 
 export interface Syncable {
   id: string;
@@ -131,7 +132,7 @@ export interface SettingsRecord extends Syncable {
    * Language of glosses and translation answers (story 16.4); none or null follows the
    * interface language.
    */
-  meaningLanguage?: 'de' | 'en' | null;
+  meaningLanguage?: 'de' | 'en' | keyof WeitereBedeutungen | null;
   /**
    * Colour scheme (story 18.1): 'class', none or null follows the learner's class, else one of
    * the palettes.

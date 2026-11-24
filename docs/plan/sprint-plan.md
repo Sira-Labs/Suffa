@@ -643,7 +643,22 @@ it reaches learners. Decisions:
   most were typed in German.
 - The interface stays German or English; "like the interface" never picks a further language.
 
-Still open for 18.4: step 5, the curated word list for Muslims in Europe.
+  18.4, step 5 of 6 (2026-11-25, ADR-0034): the API has the LLM suggest words from the life of
+  Muslims in Europe for a unit, and takes a reviewer's decision on each one. An accepted word
+  goes into the unit's draft; nothing else of it reaches a unit. Decisions:
+
+- "Curated" is read as adding such words to the units they fit, not as removing textbook
+  words (see "Waiting on the owner").
+- Suggestions wait in a table of their own and are decided one by one, never by whoever
+  ordered them; the unit's own check and publish follow as for any edit.
+- A word the course has, in any unit and whatever its vowel signs, is not suggested; a
+  rejected one is not suggested again.
+- The existing admin task `content.author-assist` is used, not the small translation model:
+  vocalised Arabic and roots need the better one.
+- The run ordered no suggestions: that costs money on the live site.
+
+Still open for 18.4: step 6, the page under "Inhalte prüfen" to order, correct, accept and
+reject suggested words.
 
 ---
 
@@ -705,9 +720,12 @@ what the runs assume until then.
   tap-to-gloss on his videos. Until then: they stay hidden (`permission_status`).
 - Owner: Apple, Google Play and Firebase accounts, signing keys, `cap add` on a Mac (13.4,
   13.5, 14.1). Blocks: test builds and the store release. Until then: the PWA only.
-- Owner: a teacher to review meanings in Turkish, Italian, Bosnian and Albanian, and the
-  curated word list (18.4). Blocks: publishing them. Until then: the runs build the languages
-  and the LLM drafts; nothing unreviewed reaches learners.
+- Owner: a teacher to review meanings in Turkish, Italian, Bosnian and Albanian, the grading
+  rules for these languages, and the curated word list (18.4). Blocks: publishing them. Until
+  then: the runs build the languages and the LLM drafts; nothing unreviewed reaches learners.
+- Owner: say what "word list curated for Muslims in Europe" should mean (18.4). Blocks:
+  nothing built so far. Until then: words from Muslim daily life in Europe are suggested per
+  unit for a reviewer to accept; no textbook word is removed (ADR-0034).
 
 ## Backlog (unscheduled)
 

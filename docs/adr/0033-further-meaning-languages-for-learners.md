@@ -22,8 +22,8 @@ Two things stood in the way of simply adding four options:
 ## Decision
 
 1. **The setting takes six values**: `de`, `en`, `tr`, `it`, `bs`, `sq` (sync schema and the
-   check on `settings."meaningLanguage"`, migration 0054). Null still follows the interface
-   language, which stays German or English.
+   check on `settings."meaningLanguage"`, migrations 0054 and 0055). Null still follows the
+   interface language, which stays German or English.
 2. **A further language is offered once it has content on the device**: at least one word
    of the Bayna Yadayk units with a meaning in it (the Medina lessons have no meanings in
    other languages, as for English). This comes from the content the app has (built-in

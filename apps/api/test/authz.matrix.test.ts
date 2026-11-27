@@ -367,8 +367,10 @@ function buildApp() {
       },
       suggestions: {
         list: async () => [],
+        get: async () => null,
         save: async () => 0,
-        decide: async () => ({ ok: false, reason: 'not_found' }),
+        record: async () => ({ ok: false, reason: 'not_found' }),
+        idsStartingWith: async () => [],
       },
       auth: resolver,
       log: quiet,

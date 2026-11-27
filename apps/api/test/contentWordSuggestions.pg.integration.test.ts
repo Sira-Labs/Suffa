@@ -118,6 +118,8 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
     answer = [iftar, suhur];
     asked.length = 0;
     await pool.query('truncate content_word_suggestions');
+    // Ids are never given twice: each test starts as if no suggested word ever had one.
+    await pool.query(`delete from content_ids where id ~ '^v-(iftar|sahur)'`);
     await pool.query(`delete from audit_log where action like 'content.word%'`);
   });
 
@@ -199,7 +201,7 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
     const again = await order();
     expect(again.status).toBe(409);
     expect(await again.json()).toEqual({ error: 'nothing_new' });
-    expect(asked[1]!.courseWords).toContain('افطار');
+    expect(asked[1]!.courseWords).toContain('اِفطار');
   });
 
   it('writes an accepted word into the unit’s draft, as the reviewer corrected it', async () => {
@@ -207,11 +209,23 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
     const [first, second] = await list();
     const before = await unitNow();
 
-    // Whoever ordered the suggestions does not decide on them.
-    expect((await decide(first!.id, 'admin', { decision: 'accepted' })).status).toBe(403);
+    // Whoever ordered the suggestions does not decide on them, though they may review.
+    const own = await decide(first!.id, 'admin', { decision: 'accepted' });
+    expect([own.status, await own.json()]).toEqual([403, { error: 'own_suggestion' }]);
+    const rejectOwn = await decide(first!.id, 'admin', { decision: 'rejected' });
+    expect(await rejectOwn.json()).toEqual({ error: 'own_suggestion' });
     expect((await decide(first!.id, 'student', { decision: 'accepted' })).status).toBe(
       403
     );
+    // A correction must still be an Arabic word of the unit's shape.
+    const latin = await decide(first!.id, 'teacher', {
+      decision: 'accepted',
+      word: { ar: 'iftar' },
+    });
+    expect([latin.status, ((await latin.json()) as { error: string }).error]).toEqual([
+      400,
+      'invalid_word',
+    ]);
     expect(
       (await decide(first!.id, 'teacher', { decision: 'accepted', word: { ar: '' } }))
         .status
@@ -275,8 +289,20 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
           },
         },
       ]);
+      // Taken out of the unit and accepted again later, the word gets a new id: review
+      // cards made for the first one must never show another word.
+      await removeWord('v-iftar');
+      await pool.query('truncate content_word_suggestions');
+      answer = [iftar];
+      await order();
+      const [again] = await list();
+      const later = await decide(again!.id, 'teacher', { decision: 'accepted' });
+      expect(((await later.json()) as { suggestion: Suggested }).suggestion.wordId).toBe(
+        'v-iftar-2'
+      );
     } finally {
       await removeWord('v-iftar');
+      await removeWord('v-iftar-2');
     }
   });
 
@@ -296,22 +322,23 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
     expect((await list()).filter((s) => s.ar === iftar.ar)).toHaveLength(1);
   });
 
-  it('refuses a word the course got in the meantime, and gives each word an id of its own', async () => {
+  it('refuses a word another unit got in the meantime, and gives each word an id of its own', async () => {
     await order();
     const [first, second] = await list();
-    // An editor adds the first word by hand, under the id the second would get.
-    const unit = await unitNow();
+    // An editor adds the first word to unit 2 by hand, under the id the second would get.
+    const OTHER = '/api/v1/content/units/bayna-yadayk/2';
+    const other = (await (await call('GET', OTHER, 'teacher')).json()) as UnitDetail;
     const byHand = {
       id: 'v-sahur',
       ar: 'الإِفْطار',
       tr: 'al-ifṭār',
       de: 'das Fastenbrechen',
       wurzel: 'ف-ط-ر',
-      einheit: 1,
+      einheit: 2,
     };
-    const saved = await call('PUT', `${UNIT}/draft`, 'admin', {
-      revision: unit.revision,
-      content: { ...unit.draft, vokabeln: [...unit.draft.vokabeln, byHand] },
+    const saved = await call('PUT', `${OTHER}/draft`, 'admin', {
+      revision: other.revision,
+      content: { ...other.draft, vokabeln: [...other.draft.vokabeln, byHand] },
     });
     expect(saved.status).toBe(200);
     try {
@@ -320,18 +347,117 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
       expect(await refused.json()).toEqual({ error: 'duplicate_word' });
       expect((await list()).find((s) => s.id === first!.id)!.status).toBe('suggested');
 
-      // "saḥūr" would be v-sahur, which the word added by hand has.
+      // "saḥūr" would be v-sahur, which the word in unit 2 has.
       const res = await decide(second!.id, 'teacher', { decision: 'accepted' });
       expect(res.status).toBe(200);
       expect(((await res.json()) as { suggestion: Suggested }).suggestion.wordId).toBe(
         'v-sahur-2'
       );
-      const ids = (await unitNow()).draft.vokabeln.map((w) => w.id);
-      expect(ids).toContain('v-sahur');
-      expect(ids).toContain('v-sahur-2');
+      expect((await unitNow()).draft.vokabeln.map((w) => w.id)).toContain('v-sahur-2');
     } finally {
       await removeWord('v-sahur-2');
-      await removeWord('v-sahur');
+      const now = (await (await call('GET', OTHER, 'teacher')).json()) as UnitDetail;
+      const res = await call('PUT', `${OTHER}/draft`, 'admin', {
+        revision: now.revision,
+        content: {
+          ...now.draft,
+          vokabeln: now.draft.vokabeln.filter((w) => w.id !== 'v-sahur'),
+        },
+      });
+      expect(res.status).toBe(200);
+    }
+  });
+
+  it('records the decision when the word is in the unit already', async () => {
+    await order();
+    const [first] = await list();
+    // As after an accept whose decision was not stored: the word is there, the
+    // suggestion still open.
+    const unit = await unitNow();
+    const saved = await call('PUT', `${UNIT}/draft`, 'admin', {
+      revision: unit.revision,
+      content: {
+        ...unit.draft,
+        vokabeln: [
+          ...unit.draft.vokabeln,
+          { id: 'v-iftar', ...iftar, reason: undefined, de: 'Iftar', einheit: 1 },
+        ],
+      },
+    });
+    expect(saved.status).toBe(200);
+    try {
+      const res = await decide(first!.id, 'teacher', {
+        decision: 'accepted',
+        word: { de: 'etwas anderes' },
+      });
+      expect(res.status).toBe(200);
+      expect(((await res.json()) as { suggestion: Suggested }).suggestion).toMatchObject({
+        status: 'accepted',
+        wordId: 'v-iftar',
+        de: 'Iftar',
+      });
+      const now = await unitNow();
+      expect(now.revision).toBe(unit.revision + 1);
+      expect(now.draft.vokabeln.filter((w) => w.id.startsWith('v-iftar'))).toHaveLength(
+        1
+      );
+    } finally {
+      await removeWord('v-iftar');
+    }
+  });
+
+  it('takes many decisions at once without waiting on itself, and each word once', async () => {
+    answer = Array.from({ length: 12 }, (_, i) => ({
+      ...iftar,
+      ar: `${iftar.ar}${'ة'.repeat(i + 1)}`,
+      tr: `iftar ${i}`,
+    }));
+    expect(await (await order()).json()).toEqual({ suggested: 12 });
+    // More requests than the pool has connections, twice for each suggestion.
+    const all = await list();
+    const results = await Promise.all(
+      [...all, ...all].map((s) => decide(s.id, 'teacher', { decision: 'accepted' }))
+    );
+    const statuses = results.map((r) => r.status);
+    expect(statuses.every((code) => code === 200 || code === 409)).toBe(true);
+    expect(statuses).toContain(200);
+    try {
+      const added = (await unitNow()).draft.vokabeln.filter((w) =>
+        w.tr.startsWith('iftar ')
+      );
+      const accepted = (await list()).filter((s) => s.status === 'accepted');
+      // Every word that got into the unit is there once.
+      expect(new Set(added.map((w) => w.ar)).size).toBe(added.length);
+      for (const s of accepted) expect(added.map((w) => w.id)).toContain(s.wordId);
+      // Whoever lost to another save decides again and gets through.
+      for (const open of (await list()).filter((s) => s.status === 'suggested')) {
+        expect((await decide(open.id, 'teacher', { decision: 'accepted' })).status).toBe(
+          200
+        );
+      }
+      expect((await list()).every((s) => s.status === 'accepted')).toBe(true);
+      const words = (await unitNow()).draft.vokabeln.filter((w) =>
+        w.tr.startsWith('iftar ')
+      );
+      expect(words).toHaveLength(12);
+      expect(new Set(words.map((w) => w.id)).size).toBe(12);
+
+      // With twelve undecided suggestions the model is not asked for more.
+      await pool.query(`update content_word_suggestions set status = 'suggested'`);
+      const calls = asked.length;
+      const more = await order();
+      expect([more.status, await more.json()]).toEqual([409, { error: 'decide_first' }]);
+      expect(asked).toHaveLength(calls);
+    } finally {
+      const now = await unitNow();
+      const res = await call('PUT', `${UNIT}/draft`, 'admin', {
+        revision: now.revision,
+        content: {
+          ...now.draft,
+          vokabeln: now.draft.vokabeln.filter((w) => !w.tr.startsWith('iftar ')),
+        },
+      });
+      expect(res.status).toBe(200);
     }
   });
 

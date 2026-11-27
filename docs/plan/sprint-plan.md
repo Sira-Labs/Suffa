@@ -651,8 +651,12 @@ it reaches learners. Decisions:
   words (see "Waiting on the owner").
 - Suggestions wait in a table of their own and are decided one by one, never by whoever
   ordered them; the unit's own check and publish follow as for any edit.
-- A word the course has, in any unit and whatever its vowel signs, is not suggested; a
-  rejected one is not suggested again.
+- A word the course has, in any unit, is not suggested, with or without article and case
+  ending; words that differ in a vowel or a doubled letter are different words. A rejected
+  word is not suggested again.
+- A unit with twelve undecided suggestions gets no more, before the model is paid.
+- An accepted word gets an id no word ever had, also not one the unit dropped: review cards
+  point at ids.
 - The existing admin task `content.author-assist` is used, not the small translation model:
   vocalised Arabic and roots need the better one.
 - The run ordered no suggestions: that costs money on the live site.

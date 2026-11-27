@@ -14,9 +14,10 @@ create table if not exists content_word_suggestions (
   plural       text check (plural is null or length(plural) between 1 and 300),
   -- Why the word fits the unit and its learners, in German, for the reviewer.
   reason       text check (reason is null or length(reason) between 1 and 500),
-  -- The Arabic without vowel signs and article: one suggestion per word and unit, also
-  -- after a rejection, so a rejected word is not suggested again.
-  ar_plain     text not null,
+  -- The Arabic as suggested, without article, case ending and sukun (`arabicKey`): one
+  -- suggestion per word and unit, also after a rejection, so a rejected word is not
+  -- suggested again. A reviewer's correction of the Arabic does not change it.
+  ar_key       text not null,
   model        text not null,
   status       text not null default 'suggested'
                  check (status in ('suggested', 'accepted', 'rejected')),
@@ -26,7 +27,7 @@ create table if not exists content_word_suggestions (
   decided_at   timestamptz,
   -- The id the word got in the unit when it was accepted.
   word_id      text,
-  unique (unit_id, ar_plain)
+  unique (unit_id, ar_key)
 );
 
 create index if not exists content_word_suggestions_queue_idx

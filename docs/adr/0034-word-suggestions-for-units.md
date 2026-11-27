@@ -33,17 +33,29 @@ removing textbook words; an editor can still do that in the unit.
    authoring route in the technical spec): vocalised Arabic and roots are where a small
    model fails.
 3. **Only what has the shape of a word is kept**: the fields of a unit word, Arabic script,
-   and not a word the course has or that was suggested for the unit before. Words are
-   compared without vowel signs, article and hamza carriers. One suggestion per word and
-   unit also after a rejection, so a rejected word does not come back.
-4. **A reviewer decides on each one** (`content:review`), and never on one they ordered
+   and not a word the course has or that was suggested for the unit before. One suggestion
+   per word and unit also after a rejection, so a rejected word does not come back.
+4. **Two spellings of one word share a key**: without article, sukun, case ending and
+   tatweel, a long vowel with or without its short vowel, hamza on alif folded. The vowels
+   inside a word and the shadda count: رَجُل and رِجْل, دَرَسَ and دَرَّسَ are different words. A word
+   written without vowel signs is not recognised as its vocalised spelling; that duplicate
+   is left to the reviewer, which is better than refusing a word that only looks alike.
+5. **A unit with twelve undecided suggestions gets no more** (`decide_first`), before the
+   model is asked: a pile nobody decided on does not grow, and a click costs nothing then.
+6. **A reviewer decides on each one** (`content:review`), and never on one they ordered
    themselves. Accepting takes the word as suggested or with the reviewer's corrections
-   and writes it into the unit's draft as its next revision, with an id made from the
-   transliteration (`v-iftar`). From there it is an edit like any other: the unit is a
-   draft again and reaches learners when it is published.
-5. **Accepting is refused** when the course got the word in the meantime
-   (`duplicate_word`) or the unit was saved by someone else just then (`unit_changed`).
-6. **Every decision is in the audit log**, with the word and whether it was corrected.
+   (still an Arabic word of a unit word's shape) and writes it into the unit's draft as its
+   next revision. From there it is an edit like any other: the unit is a draft again, a
+   check of the revision before no longer counts, and it reaches learners when it is
+   published.
+7. **The word gets an id nobody had**, made from the transliteration (`v-iftar`, then
+   `v-iftar-2`): not one of another unit, and not one this unit had and dropped. Review
+   cards and meanings in further languages point at ids.
+8. **Accepting is refused** when another unit got the word in the meantime
+   (`duplicate_word`) or the unit was saved by someone else just then (`unit_changed`:
+   decide again). When the word is in this unit already, the suggestion is settled by it
+   and only the decision is recorded.
+9. **Every decision is in the audit log**, with the word and whether it was corrected.
 
 ## Alternatives
 
@@ -58,8 +70,14 @@ removing textbook words; an editor can still do that in the unit.
 ## Consequences
 
 - Nothing changes for learners until a reviewer accepts a word and the unit is published.
-- The word and the decision are saved one after the other. If the second fails, the word is
-  in the draft and the suggestion still open; accepting it again only records the decision.
+- The word and the decision are saved one after the other, each in a transaction of its
+  own and never one inside the other (a request holds one database connection at a time).
+  If the second fails, the word is in the draft and the suggestion still open; accepting it
+  again finds the word there and records the decision.
+- Two units can get the same word when it is accepted for both at the same moment; one after
+  the other, the second is refused.
+- Ignoring case endings merges a few forms the course lists apart (أَنْتَ and أَنْتِ, مَساء and
+  مَساءً, يَوْم and اليَوْمَ): the second form of such a pair is not suggested.
 - A teacher's accept writes to a unit's draft, which otherwise takes `content:write`. It can
   add one word of the reviewed shape and nothing else.
 - Running the task costs money on the admin's premium route; the runs order nothing.

@@ -110,6 +110,7 @@ export function createWordSuggestionRoutes(
       if (result.ok) return c.json({ suggested: result.suggested });
       const status = {
         not_found: 404,
+        decide_first: 409,
         nothing_new: 409,
         ai_unavailable: 503,
         ai_quota: 429,

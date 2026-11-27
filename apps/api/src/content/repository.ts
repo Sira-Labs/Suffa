@@ -277,56 +277,75 @@ export class PgContentRepository implements ContentRepository {
     revision: number,
     content: UnitContent
   ): Promise<SaveResult> {
-    return inTransaction(this.pool, async (client) => {
-      const current = await lockUnit(client, id);
-      if (!current) return { ok: false, reason: 'not_found' };
-      if (current.revision !== revision) return { ok: false, reason: 'stale_revision' };
+    return inTransaction(this.pool, (client) =>
+      this.saveDraftWith(client, id, actor, revision, content)
+    );
+  }
 
-      // Content IDs are never reused: one that ever belonged to another unit stays theirs.
-      const ids = contentIds(content).map((i) => i.id);
-      const { rows: taken } = await client.query<{ id: string; unit_id: string }>(
-        `select id, unit_id from content_ids where id = any($1::text[]) and unit_id <> $2`,
-        [ids, id]
-      );
-      if (taken.length > 0) {
-        return {
-          ok: false,
-          reason: 'id_taken',
-          issues: taken.map((t) => `id ${t.id} belongs to ${t.unit_id}`),
-        };
-      }
+  /**
+   * `saveDraft` inside the caller's transaction, for a save that must commit together with
+   * something else (an accepted word suggestion). Writes nothing when it does not succeed.
+   */
+  async saveDraftWith(
+    client: pg.PoolClient,
+    id: string,
+    actor: ContentActor,
+    revision: number,
+    content: UnitContent
+  ): Promise<SaveResult> {
+    const current = await lockUnit(client, id);
+    if (!current) return { ok: false, reason: 'not_found' };
+    if (current.revision !== revision) return { ok: false, reason: 'stale_revision' };
 
-      const changes = diffUnits(current.draft, content);
-      const next = revision + 1;
-      await client.query(
-        `update content_units
+    // Content IDs are never reused: one that ever belonged to another unit stays theirs.
+    // The ids are registered first and checked after: a save of another unit that claims
+    // the same new id at the same moment waits here, and the loser sees the winner's row.
+    const ids = contentIds(content).map((i) => i.id);
+    await client.query('savepoint content_ids_claim');
+    await registerIds(client, id, content);
+    const { rows: taken } = await client.query<{ id: string; unit_id: string }>(
+      `select id, unit_id from content_ids where id = any($1::text[]) and unit_id <> $2`,
+      [ids, id]
+    );
+    if (taken.length > 0) {
+      await client.query('rollback to savepoint content_ids_claim');
+      return {
+        ok: false,
+        reason: 'id_taken',
+        issues: taken.map((t) => `id ${t.id} belongs to ${t.unit_id}`),
+      };
+    }
+    await client.query('release savepoint content_ids_claim');
+
+    const changes = diffUnits(current.draft, content);
+    const next = revision + 1;
+    await client.query(
+      `update content_units
             set draft = $2::jsonb, title = $3, revision = $4, state = 'draft',
                 updated_by = $5, updated_at = now()
           where id = $1`,
-        [id, JSON.stringify(content), content.titel, next, actor.id]
-      );
-      await registerIds(client, id, content);
-      await writeAudit(client, {
-        actorId: actor.id,
-        action: 'content.unit_saved',
-        targetType: 'content_unit',
-        targetId: id,
-        ipAddress: actor.ipAddress,
-        details: {
-          revision: next,
-          added: changes.added.slice(0, AUDIT_ID_LIMIT),
-          removed: changes.removed.slice(0, AUDIT_ID_LIMIT),
-          changed: changes.changed.slice(0, AUDIT_ID_LIMIT),
-          counts: {
-            added: changes.added.length,
-            removed: changes.removed.length,
-            changed: changes.changed.length,
-          },
-          textChanged: changes.textChanged,
+      [id, JSON.stringify(content), content.titel, next, actor.id]
+    );
+    await writeAudit(client, {
+      actorId: actor.id,
+      action: 'content.unit_saved',
+      targetType: 'content_unit',
+      targetId: id,
+      ipAddress: actor.ipAddress,
+      details: {
+        revision: next,
+        added: changes.added.slice(0, AUDIT_ID_LIMIT),
+        removed: changes.removed.slice(0, AUDIT_ID_LIMIT),
+        changed: changes.changed.slice(0, AUDIT_ID_LIMIT),
+        counts: {
+          added: changes.added.length,
+          removed: changes.removed.length,
+          changed: changes.changed.length,
         },
-      });
-      return { ok: true, revision: next };
+        textChanged: changes.textChanged,
+      },
     });
+    return { ok: true, revision: next };
   }
 
   submit(id: string, actor: ContentActor, revision: number): Promise<TransitionResult> {

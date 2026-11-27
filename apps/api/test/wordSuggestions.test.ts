@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_SEED_DIR } from '../src/content/seed.js';
-import { arabicKey, wordIdFor } from '../src/content/wordSuggestions.js';
+import { arabicKey, isArabicWord, wordIdFor } from '../src/content/wordSuggestions.js';
 
 describe('arabicKey', () => {
   it('gives two spellings of one word the same key', () => {
@@ -12,6 +12,10 @@ describe('arabicKey', () => {
     expect(arabicKey('كِتابٌ')).toBe(arabicKey('كِتاب'));
     expect(arabicKey('  صَلاة ')).toBe(arabicKey('صَلَاة'));
     expect(arabicKey('دَرَسَ')).toBe(arabicKey('دَرَس'));
+    // The ending of a doubled last letter goes, its shadda stays.
+    expect(arabicKey('حَقُّ')).toBe(arabicKey('حَقّ'));
+    expect(arabicKey('حَقٌّ')).toBe(arabicKey('حَقّ'));
+    expect(arabicKey('حَقّ')).not.toBe(arabicKey('حَق'));
     // A long vowel with or without its short vowel, hamza on alif.
     expect(arabicKey('إِفْطار')).toBe(arabicKey('اِفْطَار'));
     expect(arabicKey('سَحُور')).toBe(arabicKey('سَحور'));
@@ -37,7 +41,7 @@ describe('arabicKey', () => {
 
   it('takes "ال" off only where it is the article', () => {
     expect(arabicKey('الله')).toBe('الله');
-    expect(arabicKey('الآن')).toBe(arabicKey('الآن'));
+    expect(arabicKey('الآن')).toBe('الان');
     expect(arabicKey('الآن')).not.toBe(arabicKey('أَنْ'));
     expect(arabicKey('أَلْمانِيا')).not.toBe(arabicKey('مانِيا'));
     expect(arabicKey('أَلْوان')).not.toBe(arabicKey('وان'));
@@ -68,6 +72,19 @@ describe('arabicKey', () => {
         ['يَوْم', 'اليَوْمَ'].sort(),
       ].sort()
     );
+  });
+});
+
+describe('isArabicWord', () => {
+  it('takes Arabic words and phrases, and nothing with another script in it', () => {
+    expect(isArabicWord('مَسْجِد')).toBe(true);
+    expect(isArabicWord('صَلاة الجُمُعة')).toBe(true);
+    expect(isArabicWord('كَيْفَ حالُكَ؟')).toBe(true);
+    expect(isArabicWord('sahurس')).toBe(false);
+    expect(isArabicWord('iftar')).toBe(false);
+    expect(isArabicWord('مسجد (Moschee)')).toBe(false);
+    expect(isArabicWord('ًَُ')).toBe(false);
+    expect(isArabicWord('123 ؟')).toBe(false);
   });
 });
 

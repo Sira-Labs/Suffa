@@ -53,6 +53,8 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
   let app: ReturnType<typeof createApp>;
   /** What the fake model answers; changed by the tests. */
   let answer: unknown[] = [];
+  /** Answers for the next calls, one each, before `answer` is used again. */
+  const nextAnswers: unknown[][] = [];
   const asked: { unit: number; courseWords: string[]; words: unknown[] }[] = [];
 
   beforeAll(async () => {
@@ -89,7 +91,10 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
       ) => {
         expect(task).toBe('content.author-assist');
         asked.push(JSON.parse(input.messages[0]!.content) as (typeof asked)[number]);
-        return { text: JSON.stringify({ words: answer }), model: 'fake-model' };
+        const words = nextAnswers.shift() ?? answer;
+        // The answer comes a moment later, as from a model: calls made together overlap.
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        return { text: JSON.stringify({ words }), model: 'fake-model' };
       },
     };
     app = createApp({
@@ -102,7 +107,7 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
       content: { repo: content, auth, log: quiet },
       wordSuggestions: {
         content,
-        suggestions: new PgWordSuggestionRepository(pool),
+        suggestions: new PgWordSuggestionRepository(pool, content),
         gateway: gateway as never,
         auth,
         log: quiet,
@@ -116,6 +121,7 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
 
   beforeEach(async () => {
     answer = [iftar, suhur];
+    nextAnswers.length = 0;
     asked.length = 0;
     await pool.query('truncate content_word_suggestions');
     // Ids are never given twice: each test starts as if no suggested word ever had one.
@@ -132,6 +138,17 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
+  /** The newest bundle as learners download it; fails when there is none. */
+  const bundleNow = async () => {
+    const manifest = await call('GET', '/api/v1/content/manifest');
+    expect(manifest.status).toBe(200);
+    const bundle = await call('GET', ((await manifest.json()) as { url: string }).url);
+    expect(bundle.status).toBe(200);
+    const text = await bundle.text();
+    // A bundle with the course in it: "not in it" below means something.
+    expect(text).toContain('v-ism');
+    return text;
+  };
   const order = (user = 'admin') => call('POST', `${UNIT}/word-suggestions/draft`, user);
   const list = async (user = 'teacher'): Promise<Suggested[]> =>
     (
@@ -192,10 +209,7 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
 
     // Nothing of it is in the unit or in what learners download.
     expect(JSON.stringify(await unitNow())).not.toContain('إِفْطار');
-    const manifest = (await (await call('GET', '/api/v1/content/manifest')).json()) as {
-      url: string;
-    };
-    expect(await (await call('GET', manifest.url)).text()).not.toContain('إِفْطار');
+    expect(await bundleNow()).not.toContain('إِفْطار');
 
     // Asked again, the model is told what was suggested, and the same words are not new.
     const again = await order();
@@ -220,7 +234,7 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
     // A correction must still be an Arabic word of the unit's shape.
     const latin = await decide(first!.id, 'teacher', {
       decision: 'accepted',
-      word: { ar: 'iftar' },
+      word: { ar: 'iftarس' },
     });
     expect([latin.status, ((await latin.json()) as { error: string }).error]).toEqual([
       400,
@@ -236,18 +250,18 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
     ).toBe(400);
     expect((await unitNow()).revision).toBe(before.revision);
 
-    const res = await decide(first!.id, 'teacher', {
-      decision: 'accepted',
-      word: { de: 'Fastenbrechen, Iftar' },
-    });
-    expect(res.status).toBe(200);
-    const { suggestion } = (await res.json()) as { suggestion: Suggested };
-    expect(suggestion).toMatchObject({
-      status: 'accepted',
-      wordId: 'v-iftar',
-      de: 'Fastenbrechen, Iftar',
-    });
     try {
+      const res = await decide(first!.id, 'teacher', {
+        decision: 'accepted',
+        word: { de: 'Fastenbrechen, Iftar' },
+      });
+      expect(res.status).toBe(200);
+      const { suggestion } = (await res.json()) as { suggestion: Suggested };
+      expect(suggestion).toMatchObject({
+        status: 'accepted',
+        wordId: 'v-iftar',
+        de: 'Fastenbrechen, Iftar',
+      });
       const after = await unitNow();
       expect(after.revision).toBe(before.revision + 1);
       expect(after.state).toBe('draft');
@@ -261,10 +275,7 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
         einheit: 1,
       });
       // Learners get it only when the unit is published.
-      const manifest = (await (await call('GET', '/api/v1/content/manifest')).json()) as {
-        url: string;
-      };
-      expect(await (await call('GET', manifest.url)).text()).not.toContain('v-iftar');
+      expect(await bundleNow()).not.toContain('v-iftar');
 
       // Decided is decided, and the other suggestion is untouched.
       expect((await decide(first!.id, 'teacher', { decision: 'rejected' })).status).toBe(
@@ -458,6 +469,96 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
         },
       });
       expect(res.status).toBe(200);
+    }
+  });
+
+  it('never leaves a rejected suggestion with its word in the unit', async () => {
+    // Accept and reject arrive together, many times over: whichever wins, the unit and
+    // the suggestion agree.
+    for (let round = 0; round < 6; round++) {
+      await pool.query('truncate content_word_suggestions');
+      await pool.query(`delete from content_ids where id ~ '^v-(iftar|sahur)'`);
+      answer = [iftar];
+      await order();
+      const [only] = await list();
+      const [accept, reject] = await Promise.all([
+        decide(only!.id, 'teacher', { decision: 'accepted' }),
+        decide(only!.id, 'teacher', { decision: 'rejected' }),
+      ]);
+      try {
+        expect([accept.status, reject.status].sort()).toEqual([200, 409]);
+        const status = (await list())[0]!.status;
+        const inUnit = (await unitNow()).draft.vokabeln.some((w) => w.id === 'v-iftar');
+        expect(status).toBe(accept.status === 200 ? 'accepted' : 'rejected');
+        expect(inUnit).toBe(status === 'accepted');
+      } finally {
+        await removeWord('v-iftar');
+      }
+    }
+  });
+
+  it('keeps a unit at twelve open suggestions when two runs answer together', async () => {
+    const words = (prefix: string) =>
+      Array.from({ length: 12 }, (_, i) => ({
+        ...iftar,
+        ar: `${prefix}${'ة'.repeat(i + 1)}`,
+        // A NUL in what the model wrote must not cost the whole batch.
+        reason: `Grund\u0000 ${i}`,
+      }));
+    nextAnswers.push(words('إِفْطار'), words('سَحُور'));
+    const [a, b] = await Promise.all([order(), order()]);
+    expect([a.status, b.status]).toEqual([200, 200]);
+    const stored = await list();
+    expect(stored).toHaveLength(12);
+    expect(stored.every((s) => s.reason?.startsWith('Grund ') === true)).toBe(true);
+    const counts = [
+      ((await a.json()) as { suggested: number }).suggested,
+      ((await b.json()) as { suggested: number }).suggested,
+    ];
+    expect(counts.reduce((sum, n) => sum + n, 0)).toBe(12);
+  });
+
+  it('gives a new id to one unit only when two units are saved with it together', async () => {
+    const OTHER = '/api/v1/content/units/bayna-yadayk/2';
+    const save = async (path: string, einheit: number) => {
+      const unit = (await (await call('GET', path, 'teacher')).json()) as UnitDetail;
+      return call('PUT', `${path}/draft`, 'admin', {
+        revision: unit.revision,
+        content: {
+          ...unit.draft,
+          vokabeln: [
+            ...unit.draft.vokabeln,
+            { id: 'v-sahur', ...suhur, reason: undefined, einheit },
+          ],
+        },
+      });
+    };
+    const results = await Promise.all([save(UNIT, 1), save(OTHER, 2)]);
+    try {
+      expect(results.map((r) => r.status).sort()).toEqual([200, 422]);
+      const refused = results.find((r) => r.status === 422)!;
+      expect(((await refused.json()) as { error: string }).error).toBe('id_taken');
+      const owners = await pool.query(
+        `select unit_id from content_ids where id = 'v-sahur'`
+      );
+      expect(owners.rows).toHaveLength(1);
+      const has = async (path: string) =>
+        (
+          (await (await call('GET', path, 'teacher')).json()) as UnitDetail
+        ).draft.vokabeln.some((w) => w.id === 'v-sahur');
+      expect([await has(UNIT), await has(OTHER)].filter(Boolean)).toHaveLength(1);
+    } finally {
+      for (const path of [UNIT, OTHER]) {
+        const unit = (await (await call('GET', path, 'teacher')).json()) as UnitDetail;
+        const res = await call('PUT', `${path}/draft`, 'admin', {
+          revision: unit.revision,
+          content: {
+            ...unit.draft,
+            vokabeln: unit.draft.vokabeln.filter((w) => w.id !== 'v-sahur'),
+          },
+        });
+        expect(res.status).toBe(200);
+      }
     }
   });
 

@@ -42,9 +42,11 @@ removing textbook words; an editor can still do that in the unit.
    is left to the reviewer, which is better than refusing a word that only looks alike.
 5. **A unit with twelve undecided suggestions gets no more** (`decide_first`), before the
    model is asked: a pile nobody decided on does not grow, and a click costs nothing then.
+   The limit also holds when two runs answer at the same time: the later one stores only
+   what still fits.
 6. **A reviewer decides on each one** (`content:review`), and never on one they ordered
    themselves. Accepting takes the word as suggested or with the reviewer's corrections
-   (still an Arabic word of a unit word's shape) and writes it into the unit's draft as its
+   (still Arabic, with no letter of another script, in a unit word's shape) and writes it into the unit's draft as its
    next revision. From there it is an edit like any other: the unit is a draft again, a
    check of the revision before no longer counts, and it reaches learners when it is
    published.
@@ -70,10 +72,12 @@ removing textbook words; an editor can still do that in the unit.
 ## Consequences
 
 - Nothing changes for learners until a reviewer accepts a word and the unit is published.
-- The word and the decision are saved one after the other, each in a transaction of its
-  own and never one inside the other (a request holds one database connection at a time).
-  If the second fails, the word is in the draft and the suggestion still open; accepting it
-  again finds the word there and records the decision.
+- The unit's draft and the decision are saved in one transaction on one connection: both or
+  neither. What to write is worked out before, from plain reads, and refused if the unit was
+  saved or the suggestion decided in between. A request never holds one database connection
+  while it waits for another.
+- Saving a unit now claims its new ids before it checks them: two units saved with the same
+  new id at the same moment no longer both keep it (this was possible before, for any save).
 - Two units can get the same word when it is accepted for both at the same moment; one after
   the other, the second is refused.
 - Ignoring case endings merges a few forms the course lists apart (أَنْتَ and أَنْتِ, مَساء and

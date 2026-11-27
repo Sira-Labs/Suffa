@@ -11,8 +11,13 @@ import { z } from 'zod';
 import { AiQuotaError, type AiGateway } from '../ai/gateway.js';
 import { writeAudit } from '../audit/log.js';
 import { inTransaction } from '../db/transaction.js';
-import type { ContentActor, ContentRepository } from './repository.js';
-import { validateUnitContent, VocabSchema, type Vocab } from './schema.js';
+import type { ContentActor, ContentRepository, SaveResult } from './repository.js';
+import {
+  validateUnitContent,
+  VocabSchema,
+  type UnitContent,
+  type Vocab,
+} from './schema.js';
 
 /** The admin's quality-critical authoring task (technical spec, model routing). */
 export const SUGGEST_TASK = 'content.author-assist';
@@ -73,7 +78,7 @@ export type DecisionResult =
  * duplicate is left to the reviewer rather than refusing a word that only looks alike.
  */
 export function arabicKey(text: string): string {
-  let key = text
+  const key = text
     .normalize('NFC')
     .trim()
     .replace(/\u0640/g, '')
@@ -86,9 +91,11 @@ export function arabicKey(text: string): string {
     .replace(/\u064E(?=[اى])/g, '')
     .replace(/\u0650(?=ي)/g, '')
     .replace(/\u064F(?=و)/g, '');
-  // The ending of the last letter (كِتابُ, دَرَسَ), not a shadda.
-  key = key.replace(/[\u064E-\u0650]+$/u, '');
-  return key;
+  // The ending of the last letter (كِتابُ, دَرَسَ, حَقُّ), not its shadda: in NFC the vowel
+  // stands before the shadda.
+  return key.replace(/[\u064E-\u0651]+$/u, (marks) =>
+    marks.includes('\u0651') ? '\u0651' : ''
+  );
 }
 
 const ARTICLE = /^(?:al|ath|adh|ash|at|ad|ar|az|as|an)-(?=[a-z0-9])/;
@@ -158,13 +165,34 @@ const toSuggestion = (row: Row): WordSuggestion => ({
   arKey: row.ar_key,
 });
 
-/** What is stored for a decision: the word as it is in the unit now, or the rejection. */
-export type Outcome = { status: 'accepted'; word: Vocab } | { status: 'rejected' };
+/** A word to append to a unit, worked out from the draft at `revision`. */
+export interface AcceptPlan {
+  unitId: string;
+  /** The unit's revision the plan was made for; another revision by now refuses it. */
+  revision: number;
+  /** The whole draft with the word in it, or null when the word is in the draft already. */
+  content: UnitContent | null;
+  word: Vocab;
+}
+
+/** Saves a unit's draft inside a transaction that is already open (PgContentRepository). */
+export interface DraftSaver {
+  saveDraftWith(
+    client: pg.PoolClient,
+    id: string,
+    actor: ContentActor,
+    revision: number,
+    content: UnitContent
+  ): Promise<SaveResult>;
+}
 
 export interface WordSuggestionRepository {
   list(unitId: string): Promise<WordSuggestion[]>;
   get(id: string): Promise<WordSuggestion | null>;
-  /** Stores suggestions the unit does not have yet (by key); returns how many. */
+  /**
+   * Stores suggestions the unit does not have yet (by key), no more than keep it at
+   * `MAX_OPEN_SUGGESTIONS` undecided ones; returns how many were stored.
+   */
   save(
     unitId: string,
     suggestions: NewSuggestion[],
@@ -172,16 +200,22 @@ export interface WordSuggestionRepository {
     actor: ContentActor
   ): Promise<number>;
   /**
-   * Stores a decision, once: nobody decides on a suggestion they ordered themselves
-   * (`own_suggestion`), and a decided one stays as it is (`already_decided`).
+   * Accepts a suggestion: the unit's draft and the decision are saved in one transaction,
+   * or neither. Nobody decides on a suggestion they ordered themselves (`own_suggestion`),
+   * a decided one stays as it is (`already_decided`), and a unit that is no longer at the
+   * plan's revision refuses it (`unit_changed`).
    */
-  record(id: string, actor: ContentActor, outcome: Outcome): Promise<DecisionResult>;
+  accept(id: string, actor: ContentActor, plan: AcceptPlan): Promise<DecisionResult>;
+  reject(id: string, actor: ContentActor): Promise<DecisionResult>;
   /** Every content id that starts with `base`, in any unit, also ids no longer in use. */
   idsStartingWith(base: string): Promise<string[]>;
 }
 
 export class PgWordSuggestionRepository implements WordSuggestionRepository {
-  constructor(private readonly pool: pg.Pool) {}
+  constructor(
+    private readonly pool: pg.Pool,
+    private readonly drafts: DraftSaver
+  ) {}
 
   async list(unitId: string): Promise<WordSuggestion[]> {
     const { rows } = await this.pool.query<Row>(
@@ -208,8 +242,18 @@ export class PgWordSuggestionRepository implements WordSuggestionRepository {
   ): Promise<number> {
     if (suggestions.length === 0) return 0;
     return inTransaction(this.pool, async (db) => {
+      // One save per unit at a time, so that two runs that both started below the limit
+      // cannot together go past it.
+      await db.query(`select 1 from content_units where id = $1 for update`, [unitId]);
+      const open = await db.query<{ n: number }>(
+        `select count(*)::int as n from content_word_suggestions
+          where unit_id = $1 and status = 'suggested'`,
+        [unitId]
+      );
+      let room = MAX_OPEN_SUGGESTIONS - open.rows[0]!.n;
       let saved = 0;
       for (const s of suggestions) {
+        if (room <= 0) break;
         const result = await db.query(
           `insert into content_word_suggestions
              (unit_id, ar, tr, de, wurzel, plural, reason, ar_key, model, suggested_by)
@@ -229,6 +273,7 @@ export class PgWordSuggestionRepository implements WordSuggestionRepository {
           ]
         );
         saved += result.rowCount ?? 0;
+        room -= result.rowCount ?? 0;
       }
       if (saved > 0) {
         await writeAudit(db, {
@@ -244,64 +289,112 @@ export class PgWordSuggestionRepository implements WordSuggestionRepository {
     });
   }
 
-  async record(
-    id: string,
-    actor: ContentActor,
-    outcome: Outcome
-  ): Promise<DecisionResult> {
-    // One connection, one short transaction: nothing else is awaited while the row is locked.
+  accept(id: string, actor: ContentActor, plan: AcceptPlan): Promise<DecisionResult> {
+    // One connection for all of it: the suggestion is locked first, then the unit.
     return inTransaction(this.pool, async (db) => {
-      const found = await db.query<Row>(
-        `select ${COLUMNS} from content_word_suggestions where id = $1 for update`,
-        [id]
-      );
-      const row = found.rows[0];
-      if (!row) return { ok: false, reason: 'not_found' };
-      if (row.suggested_by === actor.id) return { ok: false, reason: 'own_suggestion' };
-      if (row.status !== 'suggested') return { ok: false, reason: 'already_decided' };
-
-      const word = outcome.status === 'accepted' ? outcome.word : null;
-      const updated = await db.query<Row>(
-        `update content_word_suggestions
-            set status = $2, decided_by = $3, decided_at = now(), word_id = $4,
-                ar = coalesce($5, ar), tr = coalesce($6, tr), de = coalesce($7, de),
-                wurzel = coalesce($8, wurzel), plural = $9
-          where id = $1 returning ${COLUMNS}`,
-        [
-          id,
-          outcome.status,
-          actor.id,
-          word?.id ?? null,
-          word?.ar ?? null,
-          word?.tr ?? null,
-          word?.de ?? null,
-          word?.wurzel ?? null,
-          word ? (word.plural ?? null) : row.plural,
-        ]
-      );
-      await writeAudit(db, {
-        actorId: actor.id,
-        action: 'content.word_suggestion_decided',
-        targetType: 'content_word_suggestion',
-        targetId: id,
-        details: {
-          unitId: row.unit_id,
-          decision: outcome.status,
-          wordId: word?.id ?? null,
-          ar: word?.ar ?? row.ar,
-          de: word?.de ?? row.de,
-          corrected: word
-            ? word.ar !== row.ar ||
-              word.tr !== row.tr ||
-              word.de !== row.de ||
-              word.wurzel !== row.wurzel ||
-              (word.plural ?? null) !== row.plural
-            : false,
-        },
-        ipAddress: actor.ipAddress,
-      });
-      return { ok: true, suggestion: toSuggestion(updated.rows[0]!) };
+      const open = await this.lockOpen(db, id, actor);
+      if (!open.ok) return open;
+      if (plan.content) {
+        const saved = await this.drafts.saveDraftWith(
+          db,
+          plan.unitId,
+          actor,
+          plan.revision,
+          plan.content
+        );
+        if (!saved.ok) {
+          // Nothing was written: saved by someone else meanwhile, or the id was given away.
+          return {
+            ok: false,
+            reason: saved.reason === 'not_found' ? 'not_found' : 'unit_changed',
+          };
+        }
+      } else {
+        // The word was found in the draft: only if that draft is still the one.
+        const unit = await db.query<{ revision: number }>(
+          `select revision from content_units where id = $1 for share`,
+          [plan.unitId]
+        );
+        if (unit.rows[0]?.revision !== plan.revision) {
+          return { ok: false, reason: 'unit_changed' };
+        }
+      }
+      return this.store(db, open.row, actor, plan.word);
     });
+  }
+
+  reject(id: string, actor: ContentActor): Promise<DecisionResult> {
+    return inTransaction(this.pool, async (db) => {
+      const open = await this.lockOpen(db, id, actor);
+      return open.ok ? this.store(db, open.row, actor, null) : open;
+    });
+  }
+
+  /** Locks the suggestion and says whether this reviewer may still decide on it. */
+  private async lockOpen(
+    db: pg.PoolClient,
+    id: string,
+    actor: ContentActor
+  ): Promise<{ ok: true; row: Row } | Extract<DecisionResult, { ok: false }>> {
+    const found = await db.query<Row>(
+      `select ${COLUMNS} from content_word_suggestions where id = $1 for update`,
+      [id]
+    );
+    const row = found.rows[0];
+    if (!row) return { ok: false, reason: 'not_found' };
+    if (row.suggested_by === actor.id) return { ok: false, reason: 'own_suggestion' };
+    if (row.status !== 'suggested') return { ok: false, reason: 'already_decided' };
+    return { ok: true, row };
+  }
+
+  /** Stores the decision: accepted with `word` as it is in the unit, or rejected. */
+  private async store(
+    db: pg.PoolClient,
+    row: Row,
+    actor: ContentActor,
+    word: Vocab | null
+  ): Promise<DecisionResult> {
+    const status: SuggestionStatus = word ? 'accepted' : 'rejected';
+    const updated = await db.query<Row>(
+      `update content_word_suggestions
+          set status = $2, decided_by = $3, decided_at = now(), word_id = $4,
+              ar = coalesce($5, ar), tr = coalesce($6, tr), de = coalesce($7, de),
+              wurzel = coalesce($8, wurzel), plural = $9
+        where id = $1 returning ${COLUMNS}`,
+      [
+        row.id,
+        status,
+        actor.id,
+        word?.id ?? null,
+        word?.ar ?? null,
+        word?.tr ?? null,
+        word?.de ?? null,
+        word?.wurzel ?? null,
+        word ? (word.plural ?? null) : row.plural,
+      ]
+    );
+    await writeAudit(db, {
+      actorId: actor.id,
+      action: 'content.word_suggestion_decided',
+      targetType: 'content_word_suggestion',
+      targetId: row.id,
+      details: {
+        unitId: row.unit_id,
+        decision: status,
+        wordId: word?.id ?? null,
+        ar: word?.ar ?? row.ar,
+        de: word?.de ?? row.de,
+        corrected: word
+          ? word.ar !== row.ar ||
+            word.tr !== row.tr ||
+            word.de !== row.de ||
+            word.wurzel !== row.wurzel ||
+            (word.plural ?? null) !== row.plural
+          : false,
+      },
+      ipAddress: actor.ipAddress,
+    });
+    return { ok: true, suggestion: toSuggestion(updated.rows[0]!) };
   }
 
   async idsStartingWith(base: string): Promise<string[]> {
@@ -314,7 +407,7 @@ export class PgWordSuggestionRepository implements WordSuggestionRepository {
 }
 
 export interface WordSuggestionDeps {
-  content: Pick<ContentRepository, 'get' | 'list' | 'saveDraft'>;
+  content: Pick<ContentRepository, 'get' | 'list'>;
   suggestions: WordSuggestionRepository;
 }
 
@@ -332,18 +425,30 @@ async function courseWords(
   return words;
 }
 
-const ARABIC = /\p{Script=Arabic}/u;
+const ARABIC_LETTER = /\p{Script=Arabic}/u;
+const LETTER = /\p{L}/u;
+
+/** Arabic, and nothing written in another script: no "sahurس" from a model or a slip. */
+export function isArabicWord(text: string): boolean {
+  let arabic = 0;
+  for (const char of text) {
+    if (!LETTER.test(char)) continue;
+    if (!ARABIC_LETTER.test(char)) return false;
+    arabic += 1;
+  }
+  return arabic > 0;
+}
 
 /**
  * A reviewer's decision. Accepting writes the word (as suggested, or with the reviewer's
  * corrections) into the unit's draft as its next revision: the unit is a draft again, a
  * check of the revision before no longer counts, and it reaches learners when it is
- * published. A word the course has meanwhile is refused (`duplicate_word`), and so is an
+ * published. A word another unit has meanwhile is refused (`duplicate_word`), and so is an
  * accept while someone else saved the unit (`unit_changed`: decide again).
  *
- * The word is saved first and the decision after it, each in a transaction of its own and
- * never one inside the other. If the decision is not stored, the word is in the unit and the
- * suggestion still open; accepting it again finds the word there and only records it.
+ * What to write is worked out first, from plain reads; the unit and the decision are then
+ * saved in one transaction (`accept`), which refuses the plan if the unit moved on or the
+ * suggestion was decided meanwhile. No connection is held while another is asked for.
  */
 export async function decideSuggestion(
   deps: WordSuggestionDeps,
@@ -351,14 +456,13 @@ export async function decideSuggestion(
   id: string,
   decision: Decision
 ): Promise<DecisionResult> {
+  if (decision.decision === 'rejected') return deps.suggestions.reject(id, actor);
+
   const suggestion = await deps.suggestions.get(id);
   if (!suggestion) return { ok: false, reason: 'not_found' };
-  // Checked again when the decision is stored; here so that nothing is written first.
+  // Checked again under lock when the decision is stored; here to answer without work.
   if (suggestion.suggestedBy === actor.id) return { ok: false, reason: 'own_suggestion' };
   if (suggestion.status !== 'suggested') return { ok: false, reason: 'already_decided' };
-  if (decision.decision === 'rejected') {
-    return deps.suggestions.record(id, actor, { status: 'rejected' });
-  }
 
   const unit = await deps.content.get(suggestion.unitId);
   if (!unit) return { ok: false, reason: 'not_found' };
@@ -378,18 +482,20 @@ export async function decideSuggestion(
     };
   }
   const key = arabicKey(fields.data.ar);
-  if (!ARABIC.test(fields.data.ar) || !key) {
+  if (!isArabicWord(fields.data.ar) || !key) {
     return { ok: false, reason: 'invalid_word', issues: ['ar: must be an Arabic word'] };
   }
+  const plan = { unitId: unit.id, revision: unit.revision };
 
-  // In this unit already, as corrected now or as first suggested: an earlier accept whose
-  // decision was not stored, or an editor was faster. The suggestion is settled by it.
+  // In this unit already, as corrected now or as first suggested (an editor was faster):
+  // the suggestion is settled by that word, and the unit is not written.
   const there = unit.draft.vokabeln.find((word) => {
     const k = arabicKey(word.ar);
     return k === key || k === suggestion.arKey;
   });
-  if (there)
-    return deps.suggestions.record(id, actor, { status: 'accepted', word: there });
+  if (there) {
+    return deps.suggestions.accept(id, actor, { ...plan, content: null, word: there });
+  }
   if ((await courseWords(deps.content, unit.course)).has(key)) {
     return { ok: false, reason: 'duplicate_word' };
   }
@@ -410,15 +516,7 @@ export async function decideSuggestion(
     vokabeln: [...unit.draft.vokabeln, word],
   });
   if (!next.ok) return { ok: false, reason: 'invalid_word', issues: next.issues };
-  const saved = await deps.content.saveDraft(unit.id, actor, unit.revision, next.content);
-  if (!saved.ok) {
-    // Saved by someone else meanwhile, or the id was given away this very moment.
-    return {
-      ok: false,
-      reason: saved.reason === 'not_found' ? 'not_found' : 'unit_changed',
-    };
-  }
-  return deps.suggestions.record(id, actor, { status: 'accepted', word });
+  return deps.suggestions.accept(id, actor, { ...plan, content: next.content, word });
 }
 
 const systemPrompt = `You help the editors of an Arabic course (Modern Standard Arabic, textbook "al-ʿArabiyya bayna yadayk") whose learners are Muslims living in Europe and speak German.
@@ -552,14 +650,16 @@ export async function suggestWords(
   const usable: NewSuggestion[] = [];
   let knownAlready = 0;
   for (const raw of answer.words) {
+    // A NUL from the model would make the database refuse the whole batch.
+    const text = (value: string) => value.replaceAll('\u0000', '');
     const word = SuggestedWordSchema.safeParse({
-      ar: raw.ar,
-      tr: raw.tr,
-      de: raw.de,
-      wurzel: raw.wurzel,
-      plural: raw.plural?.trim() ? raw.plural : null,
+      ar: text(raw.ar),
+      tr: text(raw.tr),
+      de: text(raw.de),
+      wurzel: text(raw.wurzel),
+      plural: raw.plural && text(raw.plural).trim() ? text(raw.plural) : null,
     });
-    if (!word.success || !ARABIC.test(word.data.ar)) continue;
+    if (!word.success || !isArabicWord(word.data.ar)) continue;
     const key = arabicKey(word.data.ar);
     if (!key) continue;
     if (known.has(key)) {
@@ -567,7 +667,7 @@ export async function suggestWords(
       continue;
     }
     known.add(key);
-    const reason = raw.reason.trim().slice(0, 500) || null;
+    const reason = text(raw.reason).trim().slice(0, 500) || null;
     usable.push({ ...word.data, reason });
     if (usable.length === WORDS_PER_RUN) break;
   }

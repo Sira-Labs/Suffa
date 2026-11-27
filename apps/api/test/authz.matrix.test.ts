@@ -360,16 +360,13 @@ function buildApp() {
       log: quiet,
     },
     wordSuggestions: {
-      content: {
-        get: async () => null,
-        list: async () => [],
-        saveDraft: async () => ({ ok: false, reason: 'not_found' }),
-      },
+      content: { get: async () => null, list: async () => [] },
       suggestions: {
         list: async () => [],
         get: async () => null,
         save: async () => 0,
-        record: async () => ({ ok: false, reason: 'not_found' }),
+        accept: async () => ({ ok: false, reason: 'not_found' }),
+        reject: async () => ({ ok: false, reason: 'not_found' }),
         idsStartingWith: async () => [],
       },
       auth: resolver,

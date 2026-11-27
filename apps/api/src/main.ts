@@ -612,7 +612,7 @@ async function main(): Promise<void> {
     },
     wordSuggestions: {
       content,
-      suggestions: new PgWordSuggestionRepository(pool),
+      suggestions: new PgWordSuggestionRepository(pool, content),
       gateway: ai.gateway,
       auth,
       log,

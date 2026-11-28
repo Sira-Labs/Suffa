@@ -51,3 +51,4 @@
 | [0031](adr/0031-meaning-drafts-in-further-languages.md)           | Meanings in further languages: drafted and reviewed apart     | accepted                                   |
 | [0032](adr/0032-approved-meanings-in-the-bundle.md)               | Approved meanings reach learners through the content bundle   | accepted                                   |
 | [0033](adr/0033-further-meaning-languages-for-learners.md)        | Learners choose a further meaning language once it has words  | accepted                                   |
+| [0034](adr/0034-word-suggestions-for-units.md)                    | Words for Muslims in Europe: suggested per unit, accepted     | accepted                                   |

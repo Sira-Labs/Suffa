@@ -74,6 +74,7 @@ import { PgBookSyncRepository } from './booksync/repository.js';
 import { DEFAULT_SYNC_SEED, seedBookSync } from './booksync/seed.js';
 import { PgContentRepository } from './content/repository.js';
 import { PgMeaningDraftRepository } from './content/meaningDrafts.js';
+import { PgWordSuggestionRepository } from './content/wordSuggestions.js';
 import { DEFAULT_SEED_DIR, seedContent } from './content/seed.js';
 import { PgSpeechRepository } from './speech/repository.js';
 import { PgSharingRepository, purgeDeletedFiles } from './sharing/repository.js';
@@ -605,6 +606,13 @@ async function main(): Promise<void> {
     meanings: {
       content,
       drafts: new PgMeaningDraftRepository(pool),
+      gateway: ai.gateway,
+      auth,
+      log,
+    },
+    wordSuggestions: {
+      content,
+      suggestions: new PgWordSuggestionRepository(pool, content),
       gateway: ai.gateway,
       auth,
       log,

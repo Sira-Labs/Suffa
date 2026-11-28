@@ -359,6 +359,19 @@ function buildApp() {
       auth: resolver,
       log: quiet,
     },
+    wordSuggestions: {
+      content: { get: async () => null, list: async () => [] },
+      suggestions: {
+        list: async () => [],
+        get: async () => null,
+        save: async () => 0,
+        accept: async () => ({ ok: false, reason: 'not_found' }),
+        reject: async () => ({ ok: false, reason: 'not_found' }),
+        idsStartingWith: async () => [],
+      },
+      auth: resolver,
+      log: quiet,
+    },
     content: {
       repo: {
         seed: async () => ({ inserted: 0, refreshed: 0 }),

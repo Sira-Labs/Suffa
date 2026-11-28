@@ -48,6 +48,10 @@ import { createFeedbackRoutes, type FeedbackRouteDeps } from './feedback/routes.
 import { createBookSyncRoutes, type BookSyncRouteDeps } from './booksync/routes.js';
 import { createContentRoutes, type ContentRouteDeps } from './content/routes.js';
 import { createMeaningRoutes, type MeaningRouteDeps } from './content/meaningRoutes.js';
+import {
+  createWordSuggestionRoutes,
+  type WordSuggestionRouteDeps,
+} from './content/wordSuggestionRoutes.js';
 import { createSpeechRoutes, type SpeechRouteDeps } from './speech/routes.js';
 import { createSharingRoutes, type SharingRouteDeps } from './sharing/routes.js';
 import { createAiAdminRoutes, type AiAdminDeps } from './ai/adminRoutes.js';
@@ -131,6 +135,8 @@ export interface AppDeps {
   content?: ContentRouteDeps;
   /** Meanings in further languages, drafted and reviewed apart from the units (18.4). */
   meanings?: MeaningRouteDeps;
+  /** Words suggested for a unit, accepted one by one into its draft (18.4, ADR-0034). */
+  wordSuggestions?: WordSuggestionRouteDeps;
   /** The Medina book follows the author's recording: page and line timings per lesson. */
   bookSync?: BookSyncRouteDeps;
   /** Pronunciation feedback from the learner's own recording (story 15.2). */
@@ -264,6 +270,9 @@ export function createApp(deps: AppDeps): Hono {
   if (deps.feedback) app.route('/api/v1', createFeedbackRoutes(deps.feedback));
   if (deps.content) app.route('/api/v1', createContentRoutes(deps.content));
   if (deps.meanings) app.route('/api/v1', createMeaningRoutes(deps.meanings));
+  if (deps.wordSuggestions) {
+    app.route('/api/v1', createWordSuggestionRoutes(deps.wordSuggestions));
+  }
   if (deps.bookSync) app.route('/api/v1', createBookSyncRoutes(deps.bookSync));
   if (deps.speech) app.route('/api/v1', createSpeechRoutes(deps.speech));
   if (deps.sharing) app.route('/api/v1', createSharingRoutes(deps.sharing));

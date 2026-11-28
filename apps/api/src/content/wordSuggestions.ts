@@ -170,6 +170,11 @@ export interface AcceptPlan {
   unitId: string;
   /** The unit's revision the plan was made for; another revision by now refuses it. */
   revision: number;
+  /**
+   * The draft the plan was made from. A changed seed file replaces the draft of a unit
+   * nobody touched without a new revision, so the revision alone does not say it is the same.
+   */
+  draft: UnitContent;
   /** The whole draft with the word in it, or null when the word is in the draft already. */
   content: UnitContent | null;
   word: Vocab;
@@ -294,6 +299,13 @@ export class PgWordSuggestionRepository implements WordSuggestionRepository {
     return inTransaction(this.pool, async (db) => {
       const open = await this.lockOpen(db, id, actor);
       if (!open.ok) return open;
+      const unit = await db.query<{ same: boolean }>(
+        `select (revision = $2 and draft = $3::jsonb) as same
+           from content_units where id = $1 for update`,
+        [plan.unitId, plan.revision, JSON.stringify(plan.draft)]
+      );
+      if (!unit.rows[0]) return { ok: false, reason: 'not_found' };
+      if (!unit.rows[0].same) return { ok: false, reason: 'unit_changed' };
       if (plan.content) {
         const saved = await this.drafts.saveDraftWith(
           db,
@@ -308,15 +320,6 @@ export class PgWordSuggestionRepository implements WordSuggestionRepository {
             ok: false,
             reason: saved.reason === 'not_found' ? 'not_found' : 'unit_changed',
           };
-        }
-      } else {
-        // The word was found in the draft: only if that draft is still the one.
-        const unit = await db.query<{ revision: number }>(
-          `select revision from content_units where id = $1 for share`,
-          [plan.unitId]
-        );
-        if (unit.rows[0]?.revision !== plan.revision) {
-          return { ok: false, reason: 'unit_changed' };
         }
       }
       return this.store(db, open.row, actor, plan.word);
@@ -427,12 +430,14 @@ async function courseWords(
 
 const ARABIC_LETTER = /\p{Script=Arabic}/u;
 const LETTER = /\p{L}/u;
+const TATWEEL = '\u0640';
 
 /** Arabic, and nothing written in another script: no "sahurس" from a model or a slip. */
 export function isArabicWord(text: string): boolean {
   let arabic = 0;
   for (const char of text) {
-    if (!LETTER.test(char)) continue;
+    // The lengthening stroke is a letter of no script to Unicode; `arabicKey` drops it.
+    if (char === TATWEEL || !LETTER.test(char)) continue;
     if (!ARABIC_LETTER.test(char)) return false;
     arabic += 1;
   }
@@ -464,6 +469,12 @@ export async function decideSuggestion(
   if (suggestion.suggestedBy === actor.id) return { ok: false, reason: 'own_suggestion' };
   if (suggestion.status !== 'suggested') return { ok: false, reason: 'already_decided' };
 
+  // The database stores no NUL: said as a field's fault, not found out by the write.
+  const nul = Object.entries(decision.word ?? {})
+    .filter(([, value]) => typeof value === 'string' && value.includes('\u0000'))
+    .map(([field]) => `${field}: must not contain a NUL character`);
+  if (nul.length > 0) return { ok: false, reason: 'invalid_word', issues: nul };
+
   const unit = await deps.content.get(suggestion.unitId);
   if (!unit) return { ok: false, reason: 'not_found' };
   const fields = SuggestedWordSchema.safeParse({
@@ -485,7 +496,7 @@ export async function decideSuggestion(
   if (!isArabicWord(fields.data.ar) || !key) {
     return { ok: false, reason: 'invalid_word', issues: ['ar: must be an Arabic word'] };
   }
-  const plan = { unitId: unit.id, revision: unit.revision };
+  const plan = { unitId: unit.id, revision: unit.revision, draft: unit.draft };
 
   // In this unit already, as corrected now or as first suggested (an editor was faster):
   // the suggestion is settled by that word, and the unit is not written.
@@ -645,6 +656,9 @@ export async function suggestWords(
     }
     throw error;
   }
+
+  // The model took its time: a word an editor added to the course meanwhile is not new.
+  for (const key of await courseWords(deps.content, unit.course)) known.add(key);
 
   // Only words that have the shape of a word of the unit, are Arabic, and are new.
   const usable: NewSuggestion[] = [];

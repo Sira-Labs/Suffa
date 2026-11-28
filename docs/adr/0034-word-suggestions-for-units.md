@@ -55,7 +55,9 @@ removing textbook words; an editor can still do that in the unit.
    cards and meanings in further languages point at ids.
 8. **Accepting is refused** when another unit got the word in the meantime
    (`duplicate_word`) or the unit was saved by someone else just then (`unit_changed`:
-   decide again). When the word is in this unit already, the suggestion is settled by it
+   decide again). "Saved by someone else" is checked on the revision and on the draft
+   itself, because a changed seed file replaces an untouched unit's draft without a new
+   revision. When the word is in this unit already, the suggestion is settled by it
    and only the decision is recorded.
 9. **Every decision is in the audit log**, with the word and whether it was corrected.
 

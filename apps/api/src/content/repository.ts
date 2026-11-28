@@ -518,7 +518,11 @@ async function registerIds(
   id: string,
   content: UnitContent
 ): Promise<void> {
-  const ids = contentIds(content);
+  // Always in the same order: two saves that claim the same new ids wait for each other
+  // in one direction only, and never in a circle.
+  const ids = [...contentIds(content)].sort((a, b) =>
+    a.id < b.id ? -1 : a.id > b.id ? 1 : 0
+  );
   if (ids.length === 0) return;
   await client.query(
     `insert into content_ids (id, unit_id, kind)

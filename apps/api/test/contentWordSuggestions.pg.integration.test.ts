@@ -51,6 +51,9 @@ const suhur = {
 describe.skipIf(!url)('Word suggestions (Postgres)', () => {
   let pool: pg.Pool;
   let app: ReturnType<typeof createApp>;
+  let suggestions: PgWordSuggestionRepository;
+  /** Runs while the fake model is answering, once. */
+  let whileAnswering: (() => Promise<void>) | null = null;
   /** What the fake model answers; changed by the tests. */
   let answer: unknown[] = [];
   /** Answers for the next calls, one each, before `answer` is used again. */
@@ -94,9 +97,13 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
         const words = nextAnswers.shift() ?? answer;
         // The answer comes a moment later, as from a model: calls made together overlap.
         await new Promise((resolve) => setTimeout(resolve, 20));
+        const meanwhile = whileAnswering;
+        whileAnswering = null;
+        await meanwhile?.();
         return { text: JSON.stringify({ words }), model: 'fake-model' };
       },
     };
+    suggestions = new PgWordSuggestionRepository(pool, content);
     app = createApp({
       version: 'test',
       expectedRevision: null,
@@ -107,7 +114,7 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
       content: { repo: content, auth, log: quiet },
       wordSuggestions: {
         content,
-        suggestions: new PgWordSuggestionRepository(pool, content),
+        suggestions,
         gateway: gateway as never,
         auth,
         log: quiet,
@@ -122,6 +129,7 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
   beforeEach(async () => {
     answer = [iftar, suhur];
     nextAnswers.length = 0;
+    whileAnswering = null;
     asked.length = 0;
     await pool.query('truncate content_word_suggestions');
     // Ids are never given twice: each test starts as if no suggested word ever had one.
@@ -244,6 +252,15 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
       (await decide(first!.id, 'teacher', { decision: 'accepted', word: { ar: '' } }))
         .status
     ).toBe(400);
+    // A NUL is a fault of the field, not an error of the database.
+    const nul = await decide(first!.id, 'teacher', {
+      decision: 'accepted',
+      word: { de: 'Fasten\u0000brechen' },
+    });
+    expect([nul.status, await nul.json()]).toEqual([
+      400,
+      { error: 'invalid_word', issues: ['de: must not contain a NUL character'] },
+    ]);
     expect(
       (await decide(first!.id, 'teacher', { decision: 'accepted', word: { id: 'x' } }))
         .status
@@ -559,6 +576,85 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
         });
         expect(res.status).toBe(200);
       }
+    }
+  });
+
+  it('refuses a plan made from a draft that a changed seed file replaced', async () => {
+    await order();
+    const [first] = await list();
+    const unit = await unitNow();
+    const word = {
+      id: 'v-iftar',
+      ar: iftar.ar,
+      tr: iftar.tr,
+      de: iftar.de,
+      wurzel: iftar.wurzel,
+      plural: null,
+      einheit: 1,
+    };
+    const plan = { unitId: unit.id, revision: unit.revision, draft: unit.draft, word };
+    const reviewer = { id: TEACHER, ipAddress: null };
+    // As a changed seed file does it for an untouched unit: another draft, the same revision.
+    await pool.query(
+      `update content_units set draft = jsonb_set(draft, '{titel}', '"Neu"') where id = $1`,
+      [unit.id]
+    );
+    try {
+      const append = await suggestions.accept(first!.id, reviewer, {
+        ...plan,
+        content: { ...unit.draft, vokabeln: [...unit.draft.vokabeln, word] },
+      });
+      expect(append).toEqual({ ok: false, reason: 'unit_changed' });
+      const there = await suggestions.accept(first!.id, reviewer, {
+        ...plan,
+        content: null,
+      });
+      expect(there).toEqual({ ok: false, reason: 'unit_changed' });
+      const now = await unitNow();
+      expect(now.revision).toBe(unit.revision);
+      expect(now.draft.titel).toBe('Neu');
+      expect(now.draft.vokabeln).toEqual(unit.draft.vokabeln);
+      expect((await list())[0]!.status).toBe('suggested');
+    } finally {
+      await pool.query(`update content_units set draft = $2::jsonb where id = $1`, [
+        unit.id,
+        JSON.stringify(unit.draft),
+      ]);
+    }
+    // The same plan on the draft it was made from goes through.
+    const again = await suggestions.accept(first!.id, reviewer, {
+      ...plan,
+      content: null,
+    });
+    expect(again.ok).toBe(true);
+  });
+
+  it('does not store a word an editor added to the course while the model answered', async () => {
+    const other = await pool.query<{ id: string; draft: UnitDetail['draft'] }>(
+      `select id, draft from content_units where id = 'bayna-yadayk/2'`
+    );
+    const { id, draft } = other.rows[0]!;
+    whileAnswering = async () => {
+      await pool.query(`update content_units set draft = $2::jsonb where id = $1`, [
+        id,
+        JSON.stringify({
+          ...draft,
+          vokabeln: [
+            ...draft.vokabeln,
+            { id: 'v-sahur', ...suhur, reason: undefined, einheit: 2 },
+          ],
+        }),
+      ]);
+    };
+    try {
+      const res = await order();
+      expect(res.status).toBe(200);
+      expect((await list()).map((s) => s.ar)).toEqual([iftar.ar]);
+    } finally {
+      await pool.query(`update content_units set draft = $2::jsonb where id = $1`, [
+        id,
+        JSON.stringify(draft),
+      ]);
     }
   });
 

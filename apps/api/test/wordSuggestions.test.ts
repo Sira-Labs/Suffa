@@ -80,6 +80,9 @@ describe('isArabicWord', () => {
     expect(isArabicWord('مَسْجِد')).toBe(true);
     expect(isArabicWord('صَلاة الجُمُعة')).toBe(true);
     expect(isArabicWord('كَيْفَ حالُكَ؟')).toBe(true);
+    // The lengthening stroke belongs to no script; alone it is no word.
+    expect(isArabicWord('مَسْـجِد')).toBe(true);
+    expect(isArabicWord('ـ')).toBe(false);
     expect(isArabicWord('sahurس')).toBe(false);
     expect(isArabicWord('iftar')).toBe(false);
     expect(isArabicWord('مسجد (Moschee)')).toBe(false);

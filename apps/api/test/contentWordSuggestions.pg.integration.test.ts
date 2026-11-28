@@ -649,9 +649,14 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
     // The same plan on the draft it was made from goes through.
     const again = await suggestions.accept(first!.id, reviewer, {
       ...plan,
-      content: null,
+      content: { ...unit.draft, vokabeln: [...unit.draft.vokabeln, word] },
     });
-    expect(again.ok).toBe(true);
+    try {
+      expect(again.ok).toBe(true);
+      expect((await unitNow()).draft.vokabeln.at(-1)).toEqual(word);
+    } finally {
+      if (again.ok) await removeWord('v-iftar');
+    }
   });
 
   it('does not store a word an editor added to the course while the model answered', async () => {

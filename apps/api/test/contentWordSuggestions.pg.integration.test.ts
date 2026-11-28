@@ -54,6 +54,13 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
   let suggestions: PgWordSuggestionRepository;
   /** Runs while the fake model is answering, once. */
   let whileAnswering: (() => Promise<void>) | null = null;
+  /** Holds the fake model's answers back until so many calls have reached it. */
+  let meeting: { missing: number; met: Promise<void>; meet: () => void } | null = null;
+  const meetAt = (calls: number) => {
+    let meet = () => undefined as void;
+    const met = new Promise<void>((resolve) => (meet = resolve));
+    meeting = { missing: calls, met, meet };
+  };
   /** What the fake model answers; changed by the tests. */
   let answer: unknown[] = [];
   /** Answers for the next calls, one each, before `answer` is used again. */
@@ -97,6 +104,21 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
         const words = nextAnswers.shift() ?? answer;
         // The answer comes a moment later, as from a model: calls made together overlap.
         await new Promise((resolve) => setTimeout(resolve, 20));
+        if (meeting) {
+          const { met, meet } = meeting;
+          meeting.missing -= 1;
+          if (meeting.missing <= 0) meet();
+          let late: NodeJS.Timeout | undefined;
+          await Promise.race([
+            met,
+            new Promise((_, reject) => {
+              late = setTimeout(
+                () => reject(new Error('the other call never reached the model')),
+                5000
+              );
+            }),
+          ]).finally(() => clearTimeout(late));
+        }
         const meanwhile = whileAnswering;
         whileAnswering = null;
         await meanwhile?.();
@@ -130,6 +152,7 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
     answer = [iftar, suhur];
     nextAnswers.length = 0;
     whileAnswering = null;
+    meeting = null;
     asked.length = 0;
     await pool.query('truncate content_word_suggestions');
     // Ids are never given twice: each test starts as if no suggested word ever had one.
@@ -523,6 +546,8 @@ describe.skipIf(!url)('Word suggestions (Postgres)', () => {
         reason: `Grund\u0000 ${i}`,
       }));
     nextAnswers.push(words('إِفْطار'), words('سَحُور'));
+    // Both runs are past the check of the open count before either gets its answer.
+    meetAt(2);
     const [a, b] = await Promise.all([order(), order()]);
     expect([a.status, b.status]).toEqual([200, 200]);
     const stored = await list();
